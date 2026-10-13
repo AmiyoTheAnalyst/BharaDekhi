@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Plan trips across Dhaka with map-based pickup and destination routing, estimated fares, and links to Uber, Pathao, and inDrive. Compare bike, CNG, and car fares.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CommuteHub Dhaka | Route Planner & Fare Estimator">
+  <meta property="og:description" content="Plan Dhaka routes, compare estimated ride fares, and open your trip with Uber, Pathao, or inDrive.">
+  <meta name="twitter:card" content="summary">
+  <title>CommuteHub Dhaka | Route Planner & Fare Estimator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="bg-blue-600 text-white p-2 rounded-lg">
+          <i data-lucide="navigation" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">CommuteHub Dhaka</h1>
+          <p class="text-xs text-slate-500">Route Resolver & Fare Launcher</p>
+        </div>
+      </div>
+      
+      <!-- Surge Indicator & Toggle -->
+      <div class="flex items-center gap-3">
+        <label class="flex items-center gap-2 text-xs font-medium cursor-pointer bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+          <span>Simulate Surge</span>
+          <input type="checkbox" id="surgeToggle" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer" onchange="toggleSurgeSimulation()">
+        </label>
+        <div id="surgeBadge" class="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="surgeStatusText">Standard Hours</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav id="amiyoModeNav" class="hidden bg-white border-b border-slate-200" aria-label="Amiyo account mode">
+    <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+      <span class="text-sm font-semibold text-slate-700">Amiyo Hasan</span>
+      <div class="flex items-center rounded-lg border border-slate-200 p-1" role="group" aria-label="Choose account mode">
+        <button id="chooseUserModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">User</button>
+        <button id="chooseAdminModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">Admin</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Auth Landing -->
+  <section id="authView" class="max-w-4xl mx-auto px-4 pt-10 pb-6">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2">
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white">
+          <p class="text-sm uppercase tracking-[0.2em] text-blue-100">CommuteHub</p>
+          <h2 class="mt-4 text-3xl font-black">Your Dhaka commute starts here.</h2>
+          <p class="mt-4 text-blue-100 leading-relaxed">
+            Sign up as a rider, log in, and access your route planner. Admin access is kept separate for system management.
+          </p>
+          <div class="mt-8 space-y-3 text-sm text-blue-50">
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Live pickup and destination selection</div>
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Fare comparison across services</div>
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Separate admin control dashboard</div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-xl font-bold text-slate-900">Access Portal</h3>
+            <button type="button" id="adminAccessBtn" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-full px-3 py-1.5 hover:bg-slate-100 transition">
+              Admin Access
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 bg-slate-100 rounded-xl p-1 mb-5">
+            <button type="button" data-auth-tab="login" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition bg-white text-blue-600 shadow-sm">Login</button>
+            <button type="button" data-auth-tab="signup" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition text-slate-600">Sign Up</button>
+          </div>
+
+          <form id="loginForm" class="auth-form space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition">Login</button>
+          </form>
+
+          <form id="signupForm" class="auth-form hidden space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
+              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+              <input type="password" placeholder="Create password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Confirm Password</label>
+              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            </div>
+            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">Create Account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Role Selection -->
+  <section id="roleSelectionView" class="panel-section hidden max-w-xl mx-auto px-4 pt-10 pb-6">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 text-center">
+      <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Amiyo Hasan</p>
+      <h3 class="mt-3 text-2xl font-black text-slate-900">Choose a mode from the navigation bar</h3>
+    </div>
+  </section>
+
+  <!-- User Dashboard -->
+  <main id="userDashboardView" class="panel-section hidden max-w-4xl mx-auto px-4 pt-6 space-y-6">
+    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
+      <div>
+        <p class="text-xs uppercase tracking-wide text-slate-500">Welcome back</p>
+        <h3 id="userGreeting" class="text-lg font-bold text-slate-900">User</h3>
+      </div>
+      <button id="logoutBtn" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl transition">
+        Logout
+      </button>
+    </div>
+
+    <!-- Location Selector & Route Card -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Pickup Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Pickup Point
+          </label>
+          <select id="pickupSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="onLocationChange()">
+          </select>
+        </div>
+
+        <!-- Destination Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Destination
+          </label>
+          <select id="dropoffSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="onLocationChange()">
+          </select>
+        </div>
+      </div>
+
+      <!-- Vehicle Mode Tabs -->
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Vehicle:</span>
+        <button onclick="setVehicle('Bike')" id="btnBike" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-blue-600 text-white shadow-sm">
+          <i data-lucide="bike" class="w-4 h-4"></i> Bike
+        </button>
+        <button onclick="setVehicle('CNG')" id="btnCNG" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+          <i data-lucide="zap" class="w-4 h-4"></i> CNG
+        </button>
+        <button onclick="setVehicle('Car')" id="btnCar" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200">
+          <i data-lucide="car" class="w-4 h-4"></i> Car
+        </button>
+      </div>
+
+      <!-- Interactive Map -->
+      <div class="relative">
+        <div id="map"></div>
+        <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex items-center justify-center rounded-xl">
+          <div class="flex items-center gap-2 text-sm font-semibold text-blue-600 bg-white px-4 py-2 rounded-lg shadow-md border border-slate-200">
+            <span class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+            Calculating Road Distance via OSRM...
+          </div>
+        </div>
+      </div>
+
+      <!-- Distance & Estimated Time Tiles -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <span class="text-xs text-slate-500 font-medium block">Road Distance</span>
+          <span id="routeDistance" class="text-lg font-bold text-slate-900">10.2 km</span>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <span class="text-xs text-slate-500 font-medium block">Est. Travel Time</span>
+          <span id="routeDuration" class="text-lg font-bold text-slate-900">32 mins</span>
+        </div>
+        <div class="col-span-2 sm:col-span-1 bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col justify-center">
+          <span class="text-xs text-slate-500 font-medium block">Surge Multiplier</span>
+          <span id="surgeMultiplierText" class="text-lg font-bold text-emerald-600">1.0x (Off-Peak)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARISON & LAUNCH SECTION -->
+    <div>
+      <h2 class="text-base font-bold text-slate-900 mb-3 flex items-center justify-between">
+        <span>Available Services & Fares</span>
+        <span class="text-xs font-normal text-slate-500">Click to compare & launch</span>
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- UBER CARD -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <span class="w-7 h-7 bg-black text-white rounded-lg flex items-center justify-center text-xs font-black">U</span>
+                Uber
+              </span>
+              <span class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded">Deep-Link</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Direct link with pickup & drop-off pinned automatically in Uber.</p>
+            <div class="bg-slate-50 rounded-xl p-3 mb-4">
+              <span class="text-xs text-slate-500 block">Baseline Estimate</span>
+              <span id="uberFare" class="text-2xl font-black text-slate-900">৳145 - ৳175</span>
+            </div>
+          </div>
+          <button onclick="handleUberClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-black text-white hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-sm">
+            <i data-lucide="external-link" class="w-4 h-4"></i> Open in Uber
+          </button>
+        </div>
+
+        <!-- PATHAO CARD -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <span class="w-7 h-7 bg-red-600 text-white rounded-lg flex items-center justify-center text-xs font-black">P</span>
+                Pathao
+              </span>
+              <span class="text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 px-2 py-0.5 rounded">Clipboard</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Copies destination to clipboard and opens the Pathao portal.</p>
+            <div class="bg-slate-50 rounded-xl p-3 mb-4">
+              <span class="text-xs text-slate-500 block">Baseline Estimate</span>
+              <span id="pathaoFare" class="text-2xl font-black text-slate-900">৳140 - ৳170</span>
+            </div>
+          </div>
+          <button onclick="handlePathaoClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-sm">
+            <i data-lucide="copy" class="w-4 h-4"></i> Copy & Open Pathao
+          </button>
+        </div>
+
+        <!-- INDRIVE CARD -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <span class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-xs font-black">in</span>
+                inDrive
+              </span>
+              <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">Suggested Bid</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Suggested passenger bid amount based on distance and route traffic.</p>
+            <div class="bg-slate-50 rounded-xl p-3 mb-4">
+              <span class="text-xs text-slate-500 block">Optimal Bid Offer</span>
+              <span id="indriveFare" class="text-2xl font-black text-emerald-700">৳130</span>
+            </div>
+          </div>
+          <button onclick="handleInDriveClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm">
+            <i data-lucide="copy" class="w-4 h-4"></i> Copy Bid & Open
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 z-50">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+      <span id="toastMessage">Action successful</span>
+    </div>
+
+    <!-- Legal Disclaimer -->
+    <footer class="pt-2 text-center">
+      <p class="text-xs text-slate-500 max-w-xl mx-auto leading-relaxed">
+        * Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber, Pathao, and inDrive.
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- Admin Dashboard -->
+  <section id="adminPanel" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 pb-12 space-y-6">
+    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
+      <div>
+        <p class="text-xs uppercase tracking-wide text-slate-500">Admin access</p>
+        <h3 class="text-lg font-bold text-slate-900">Control Center</h3>
+      </div>
+      <button id="adminLogoutBtn" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl transition">
+        Logout Admin
+      </button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Registered Users</p>
+        <h3 id="adminRegisteredUsers" class="mt-2 text-3xl font-black text-slate-900">0</h3>
+        <p class="mt-1 text-xs text-slate-500">Accounts saved in this browser</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Users Ever Logged In</p>
+        <h3 id="adminUsersLoggedIn" class="mt-2 text-3xl font-black text-slate-900">0</h3>
+        <p class="mt-1 text-xs text-slate-500">Unique accounts, saved here</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Active Users Now</p>
+        <h3 id="adminActiveUsers" class="mt-2 text-3xl font-black text-slate-900">0</h3>
+        <p class="mt-1 text-xs text-slate-500">Signed in from this browser</p>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500">These demo counts are stored in this browser only and do not include other devices or browsers.</p>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-slate-900">Recent Ride Activity</h3>
+          <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">Live</span>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <div>
+              <p class="font-semibold text-slate-800">Mirpur → Dhanmondi</p>
+              <p class="text-xs text-slate-500">Rider: S. Rahman • 15 mins ago</p>
+            </div>
+            <span class="text-sm font-bold text-emerald-600">৳420</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <div>
+              <p class="font-semibold text-slate-800">Banani → Motijheel</p>
+              <p class="text-xs text-slate-500">Rider: A. Islam • 31 mins ago</p>
+            </div>
+            <span class="text-sm font-bold text-emerald-600">৳610</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <div>
+              <p class="font-semibold text-slate-800">Uttara → Gulshan</p>
+              <p class="text-xs text-slate-500">Rider: N. Akter • 52 mins ago</p>
+            </div>
+            <span class="text-sm font-bold text-emerald-600">৳550</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <div>
+              <p class="font-semibold text-slate-800">Azimpur → BRAC U</p>
+              <p class="text-xs text-slate-500">Rider: M. Hassan • 1 hr ago</p>
+            </div>
+            <span class="text-sm font-bold text-emerald-600">৳470</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Quick Admin Actions</h3>
+        <div class="space-y-3">
+          <button class="w-full text-left bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-4 py-3 rounded-xl border border-blue-200 transition">Manage Drivers</button>
+          <button class="w-full text-left bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold px-4 py-3 rounded-xl border border-emerald-200 transition">View Earnings</button>
+          <button class="w-full text-left bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold px-4 py-3 rounded-xl border border-amber-200 transition">Route Pricing</button>
+          <button class="w-full text-left bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-4 py-3 rounded-xl border border-rose-200 transition">Issue Reports</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">System Health</h3>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Vehicle availability</span>
+              <span class="font-semibold text-slate-800">86%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+              <div class="bg-emerald-500 h-2.5 rounded-full" style="width: 86%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Route accuracy</span>
+              <span class="font-semibold text-slate-800">94%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+              <div class="bg-blue-500 h-2.5 rounded-full" style="width: 94%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">Support response</span>
+              <span class="font-semibold text-slate-800">91%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+              <div class="bg-violet-500 h-2.5 rounded-full" style="width: 91%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-4">Zone Performance</h3>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <span class="font-medium text-slate-700">Uttara</span>
+            <span class="text-emerald-600 font-bold">High</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <span class="font-medium text-slate-700">Gulshan</span>
+            <span class="text-blue-600 font-bold">Stable</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <span class="font-medium text-slate-700">Motijheel</span>
+            <span class="text-amber-600 font-bold">Medium</span>
+          </div>
+          <div class="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+            <span class="font-medium text-slate-700">Savar</span>
+            <span class="text-rose-600 font-bold">Watch</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const ADMIN_EMAIL = 'amiyohasan23@gmail.com';
+    const USER_ACCOUNTS_KEY = 'commuteHubUsers';
+    const ACTIVE_USER_SESSIONS_KEY = 'commuteHubActiveUserSessions';
+    const USER_TAB_SESSION_KEY = 'commuteHubUserTabSession';
+
+    function getRegisteredUsers() {
+      const storedUsers = JSON.parse(localStorage.getItem(USER_ACCOUNTS_KEY) || 'null');
+      if (Array.isArray(storedUsers)) {
+        return storedUsers.filter(user => user.email?.toLowerCase() !== ADMIN_EMAIL);
+      }
+
+      const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
+      if (legacyUser && legacyUser.email?.toLowerCase() !== ADMIN_EMAIL) {
+        const migratedUsers = [legacyUser];
+        localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(migratedUsers));
+        return migratedUsers;
+      }
+
+      return [];
+    }
+
+    function getActiveUserCount() {
+      const sessions = JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]');
+      const cutoff = Date.now() - 30000;
+      const activeSessions = sessions.filter(session => cutoff < session.lastSeen);
+      if (activeSessions.length !== sessions.length) {
+        localStorage.setItem(ACTIVE_USER_SESSIONS_KEY, JSON.stringify(activeSessions));
+      }
+      return new Set(activeSessions.map(session => session.email)).size;
+    }
+
+    function updateAdminUserMetrics() {
+      const users = getRegisteredUsers();
+      document.getElementById('adminRegisteredUsers').textContent = users.length;
+      document.getElementById('adminUsersLoggedIn').textContent = users.filter(user => user.lastLoginAt).length;
+      document.getElementById('adminActiveUsers').textContent = getActiveUserCount();
+    }
+
+    function refreshCurrentUserPresence() {
+      const currentSession = JSON.parse(sessionStorage.getItem(USER_TAB_SESSION_KEY) || 'null');
+      let sessions = JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]');
+      const cutoff = Date.now() - 30000;
+      sessions = sessions.filter(session => cutoff < session.lastSeen && session.id !== currentSession?.id);
+      if (currentSession) {
+        sessions.push({ ...currentSession, lastSeen: Date.now() });
+      }
+      localStorage.setItem(ACTIVE_USER_SESSIONS_KEY, JSON.stringify(sessions));
+      updateAdminUserMetrics();
+    }
+
+    function startCurrentUserPresence(email) {
+      const previousSession = JSON.parse(sessionStorage.getItem(USER_TAB_SESSION_KEY) || 'null');
+      const session = previousSession?.email === email
+        ? previousSession
+        : { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, email };
+      sessionStorage.setItem(USER_TAB_SESSION_KEY, JSON.stringify(session));
+      refreshCurrentUserPresence();
+    }
+
+    function stopCurrentUserPresence() {
+      const currentSession = JSON.parse(sessionStorage.getItem(USER_TAB_SESSION_KEY) || 'null');
+      if (currentSession) {
+        const sessions = JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]')
+          .filter(session => session.id !== currentSession.id);
+        localStorage.setItem(ACTIVE_USER_SESSIONS_KEY, JSON.stringify(sessions));
+        sessionStorage.removeItem(USER_TAB_SESSION_KEY);
+      }
+      updateAdminUserMetrics();
+    }
+
+    function populateLocationSelectors() {
+      const pickupSelect = document.getElementById('pickupSelect');
+      const dropoffSelect = document.getElementById('dropoffSelect');
+
+      Object.entries(LOCATIONS).forEach(([key, location]) => {
+        const pickupOption = document.createElement('option');
+        pickupOption.value = key;
+        pickupOption.textContent = location.name;
+
+        const dropoffOption = document.createElement('option');
+        dropoffOption.value = key;
+        dropoffOption.textContent = location.name;
+
+        pickupSelect.appendChild(pickupOption);
+        dropoffSelect.appendChild(dropoffOption);
+      });
+
+      pickupSelect.value = 'azimpur';
+      dropoffSelect.value = 'brac';
+    }
+
+    // 1. Coordinates Database for Dhaka Hubs
+    const LOCATIONS = {
+      azimpur: { name: "Azimpur Bus Stand", lat: 23.7270, lng: 90.3854 },
+      uttara: { name: "Uttara", lat: 23.8761, lng: 90.3795 },
+      banani: { name: "Banani", lat: 23.7937, lng: 90.4043 },
+      baridhara: { name: "Baridhara", lat: 23.7995, lng: 90.4238 },
+      bashundhara: { name: "Bashundhara Residential Area", lat: 23.8228, lng: 90.4299 },
+      brac: { name: "BRAC University (Merul Badda)", lat: 23.7744, lng: 90.4258 },
+      dhanmondi: { name: "Dhanmondi 27", lat: 23.7533, lng: 90.3768 },
+      gulshan: { name: "Gulshan 1 Circle", lat: 23.7788, lng: 90.4172 },
+      khilgaon: { name: "Khilgaon", lat: 23.7579, lng: 90.4250 },
+      mirpur: { name: "Mirpur 10 Circle", lat: 23.8069, lng: 90.3687 },
+      mohakhali: { name: "Mohakhali", lat: 23.7804, lng: 90.4090 },
+      motijheel: { name: "Motijheel Shapla Chattar", lat: 23.7297, lng: 90.4208 },
+      rampura: { name: "Rampura", lat: 23.7607, lng: 90.4206 },
+      shantinagar: { name: "Shantinagar", lat: 23.7426, lng: 90.4048 },
+      tejgaon: { name: "Tejgaon", lat: 23.7608, lng: 90.3912 },
+      malibagh: { name: "Malibagh", lat: 23.7523, lng: 90.4155 },
+      kadamtali: { name: "Kadamtali", lat: 23.7398, lng: 90.4350 },
+      jatrabari: { name: "Jatrabari", lat: 23.7086, lng: 90.4304 },
+      demra: { name: "Demra", lat: 23.7042, lng: 90.4977 },
+      olddhaka: { name: "Old Dhaka", lat: 23.7104, lng: 90.4125 },
+      sabujbagh: { name: "Sabujbagh", lat: 23.7543, lng: 90.4030 },
+      kakrail: { name: "Kakrail", lat: 23.7363, lng: 90.4057 },
+      panthapath: { name: "Panthapath", lat: 23.7515, lng: 90.3882 },
+      rajarbagh: { name: "Rajarbagh", lat: 23.7356, lng: 90.3870 },
+      fatullah: { name: "Fatullah", lat: 23.6465, lng: 90.4511 },
+      savar: { name: "Savar", lat: 23.8601, lng: 90.2714 },
+      chashara: { name: "Chashara", lat: 23.6478, lng: 90.4748 },
+      narayanganj: { name: "Narayanganj", lat: 23.6236, lng: 90.5004 },
+      natunbazar: { name: "Natun Bazar", lat: 23.7598, lng: 90.3875 }
+    };
+
+    let selectedVehicle = 'Bike';
+    let currentDistanceKm = 10.2;
+    let currentDurationMins = 32;
+    let isSimulatedSurge = false;
+
+    // Leaflet map objects
+    let map, pickupMarker, dropMarker, routePolyline;
+
+    // 2. Initialize Leaflet Map
+    function initMap() {
+      map = L.map('map', { zoomControl: false }).setView([23.7500, 90.4050], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      pickupMarker = L.marker([LOCATIONS.azimpur.lat, LOCATIONS.azimpur.lng]).addTo(map).bindPopup('Pickup');
+      dropMarker = L.marker([LOCATIONS.brac.lat, LOCATIONS.brac.lng]).addTo(map).bindPopup('Destination');
+    }
+
+    // 3. Peak Hour Checker (Dhaka BST: 8:30-10:30 AM & 5:30-8:30 PM)
+    function isPeakHourDhaka() {
+      if (isSimulatedSurge) return true;
+      const now = new Date();
+      const currentDecimal = now.getHours() + (now.getMinutes() / 60);
+      return (currentDecimal >= 8.5 && currentDecimal <= 10.5) || (currentDecimal >= 17.5 && currentDecimal <= 20.5);
+    }
+
+    // 4. Update Route, Markers & Fetch OSRM Road Distance
+    async function updateRoute() {
+      const pKey = document.getElementById('pickupSelect').value;
+      const dKey = document.getElementById('dropoffSelect').value;
+
+      if (pKey === dKey) {
+        showToast("Pickup and Destination cannot be the same!");
+        return;
+      }
+
+      const pLoc = LOCATIONS[pKey];
+      const dLoc = LOCATIONS[dKey];
+
+      pickupMarker.setLatLng([pLoc.lat, pLoc.lng]).setPopupContent('Pickup: ' + pLoc.name);
+      dropMarker.setLatLng([dLoc.lat, dLoc.lng]).setPopupContent('Destination: ' + dLoc.name);
+
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+
+      try {
+        // Public OSRM Road Routing API
+        const url = `https://router.project-osrm.org/route/v1/driving/${pLoc.lng},${pLoc.lat};${dLoc.lng},${dLoc.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          currentDistanceKm = route.distance / 1000;
+          currentDurationMins = Math.round(route.duration / 60);
+
+          // Draw the road path on Leaflet
+          const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+          if (routePolyline) map.removeLayer(routePolyline);
+          routePolyline = L.polyline(coords, { color: '#2563eb', weight: 5, opacity: 0.8 }).addTo(map);
+          map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+        }
+      } catch (err) {
+        // Fallback calculation (approximate Haversine distance)
+        currentDistanceKm = calculateDirectDistance(pLoc, dLoc) * 1.35;
+        currentDurationMins = Math.round(currentDistanceKm * 3.2);
+        if (routePolyline) map.removeLayer(routePolyline);
+        routePolyline = L.polyline([[pLoc.lat, pLoc.lng], [dLoc.lat, dLoc.lng]], { color: '#2563eb', dashArray: '5, 10' }).addTo(map);
+      } finally {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+        renderMetricsAndFares();
+      }
+    }
+
+    function calculateDirectDistance(loc1, loc2) {
+      const R = 6371;
+      const dLat = (loc2.lat - loc1.lat) * Math.PI / 180;
+      const dLon = (loc2.lng - loc1.lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(loc1.lat * Math.PI / 180) * Math.cos(loc2.lat * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    // 5. Calculate Rates and Update UI
+    function renderMetricsAndFares() {
+      document.getElementById('routeDistance').innerText = currentDistanceKm.toFixed(1) + ' km';
+      document.getElementById('routeDuration').innerText = currentDurationMins + ' mins';
+
+      const isPeak = isPeakHourDhaka();
+      const badge = document.getElementById('surgeBadge');
+      const badgeText = document.getElementById('surgeStatusText');
+      const multText = document.getElementById('surgeMultiplierText');
+
+      if (isPeak) {
+        badge.className = "flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
+        badgeText.innerText = "Peak Surge Active";
+        multText.innerText = "1.35x - 1.55x (Surge)";
+        multText.className = "text-lg font-bold text-rose-600";
+      } else {
+        badge.className = "flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
+        badgeText.innerText = "Standard Hours";
+        multText.innerText = "1.0x (Off-Peak)";
+        multText.className = "text-lg font-bold text-emerald-600";
+      }
+
+      // Rates configuration (Base, Per Km, Per Min)
+      let base = 30, perKm = 14, perMin = 0.5;
+      if (selectedVehicle === 'CNG') { base = 50; perKm = 18; perMin = 0.7; }
+      if (selectedVehicle === 'Car') { base = 80; perKm = 24; perMin = 1.0; }
+
+      const standardFare = base + (currentDistanceKm * perKm) + (currentDurationMins * perMin);
+      const lowMult = isPeak ? 1.25 : 0.95;
+      const highMult = isPeak ? 1.55 : 1.15;
+
+      const uberMin = Math.round(standardFare * lowMult);
+      const uberMax = Math.round(standardFare * highMult);
+
+      const pathaoMin = Math.round(uberMin * 0.97);
+      const pathaoMax = Math.round(uberMax * 0.97);
+
+      const indriveBid = Math.round(uberMin * 0.88);
+
+      document.getElementById('uberFare').innerText = `৳${uberMin} - ৳${uberMax}`;
+      document.getElementById('pathaoFare').innerText = `৳${pathaoMin} - ৳${pathaoMax}`;
+      document.getElementById('indriveFare').innerText = `৳${indriveBid}`;
+    }
+
+    // 6. Action Button Handlers
+    function handleUberClick() {
+      const pKey = document.getElementById('pickupSelect').value;
+      const dKey = document.getElementById('dropoffSelect').value;
+      const pLoc = LOCATIONS[pKey];
+      const dLoc = LOCATIONS[dKey];
+
+      // Official Universal Link format
+      const uberLink = `https://m.uber.com/ul/?action=setPickup` +
+        `&pickup[latitude]=${pLoc.lat}&pickup[longitude]=${pLoc.lng}&pickup[nickname]=${encodeURIComponent(pLoc.name)}` +
+        `&dropoff[latitude]=${dLoc.lat}&dropoff[longitude]=${dLoc.lng}&dropoff[nickname]=${encodeURIComponent(dLoc.name)}`;
+
+      showToast("Launching Uber with coordinates pre-filled...");
+      window.open(uberLink, '_blank');
+    }
+
+    function handlePathaoClick() {
+      const dKey = document.getElementById('dropoffSelect').value;
+      const dName = LOCATIONS[dKey].name;
+
+      navigator.clipboard.writeText(dName).then(() => {
+        showToast(`Copied "${dName}" to clipboard! Opening Pathao...`);
+        setTimeout(() => {
+          window.open('https://pathao.com/', '_blank');
+        }, 600);
+      });
+    }
+
+    function handleInDriveClick() {
+      const dKey = document.getElementById('dropoffSelect').value;
+      const dName = LOCATIONS[dKey].name;
+      const bid = document.getElementById('indriveFare').innerText;
+
+      const message = `${dName} (Offer: ${bid})`;
+      navigator.clipboard.writeText(message).then(() => {
+        showToast(`Copied destination and suggested bid: ${bid}!`);
+        setTimeout(() => {
+          window.open('https://indrive.com/', '_blank');
+        }, 600);
+      });
+    }
+
+    // 7. Helpers
+    function setVehicle(type) {
+      selectedVehicle = type;
+      document.querySelectorAll('.vehicle-btn').forEach(b => {
+        b.className = "vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200";
+      });
+      const activeBtn = document.getElementById('btn' + type);
+      activeBtn.className = "vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-blue-600 text-white shadow-sm";
+      renderMetricsAndFares();
+    }
+
+    function onLocationChange() {
+      updateRoute();
+    }
+
+    function toggleSurgeSimulation() {
+      isSimulatedSurge = document.getElementById('surgeToggle').checked;
+      renderMetricsAndFares();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3500);
+    }
+
+    function setAuthTab(type) {
+      const tabs = document.querySelectorAll('.auth-tab');
+      const forms = document.querySelectorAll('.auth-form');
+
+      tabs.forEach(tab => {
+        const active = tab.dataset.authTab === type;
+        tab.classList.toggle('bg-white', active);
+        tab.classList.toggle('text-blue-600', active);
+        tab.classList.toggle('shadow-sm', active);
+        tab.classList.toggle('text-slate-600', !active);
+        tab.classList.toggle('hover:text-slate-900', !active);
+      });
+
+      forms.forEach(form => {
+        const show = form.id === (type === 'login' ? 'loginForm' : 'signupForm');
+        form.classList.toggle('hidden', !show);
+      });
+    }
+
+    function showView(view) {
+      const authView = document.getElementById('authView');
+      const roleSelectionView = document.getElementById('roleSelectionView');
+      const userDashboardView = document.getElementById('userDashboardView');
+      const adminPanel = document.getElementById('adminPanel');
+
+      authView.classList.toggle('hidden', view !== 'auth');
+      roleSelectionView.classList.toggle('hidden', view !== 'role');
+      userDashboardView.classList.toggle('hidden', view !== 'user');
+      adminPanel.classList.toggle('hidden', view !== 'admin');
+      updateAdminModeNavigation();
+      if (view === 'admin') updateAdminUserMetrics();
+
+      if (view === 'user' && map) {
+        requestAnimationFrame(() => {
+          map.invalidateSize({ pan: false });
+          if (routePolyline) map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+        });
+      }
+    }
+
+    function updateUserGreeting() {
+      const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
+      const userGreeting = document.getElementById('userGreeting');
+      if (currentUser && userGreeting) {
+        userGreeting.textContent = currentUser.name;
+      }
+    }
+
+    function updateAdminModeNavigation() {
+      const nav = document.getElementById('amiyoModeNav');
+      const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
+      const isAmiyoLoggedIn = localStorage.getItem('commuteHubLoggedIn') === 'true' &&
+        currentUser?.email?.toLowerCase() === 'amiyohasan23@gmail.com';
+      const role = localStorage.getItem('commuteHubRole');
+
+      nav.classList.toggle('hidden', !isAmiyoLoggedIn);
+      [['chooseUserModeBtn', 'user'], ['chooseAdminModeBtn', 'admin']].forEach(([id, mode]) => {
+        const button = document.getElementById(id);
+        const active = role === mode;
+        button.setAttribute('aria-pressed', String(active));
+        button.className = `px-4 py-2 text-sm font-semibold rounded-md transition ${active ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`;
+      });
+    }
+
+    function handleSignup(event) {
+      event.preventDefault();
+      const form = event.target;
+      const name = form.querySelector('input[type="text"]').value.trim();
+      const email = form.querySelectorAll('input[type="email"]')[0].value.trim();
+      const password = form.querySelectorAll('input[type="password"]')[0].value;
+      const confirmPassword = form.querySelectorAll('input[type="password"]')[1].value;
+      const normalizedEmail = email.toLowerCase();
+
+      if (!name || !email || !password) {
+        showToast('Please fill in all sign-up fields.');
+        return;
+      }
+
+      if (normalizedEmail === ADMIN_EMAIL) {
+        showToast('This email is reserved for admin access.');
+        return;
+      }
+
+      const users = getRegisteredUsers();
+      if (users.some(user => user.email.toLowerCase() === normalizedEmail)) {
+        showToast('An account with this email already exists.');
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match.');
+        return;
+      }
+
+      users.push({ name, email: normalizedEmail, password, lastLoginAt: null });
+      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
+      updateAdminUserMetrics();
+      form.reset();
+      setAuthTab('login');
+      showToast('Sign up successful. Please log in.');
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const form = event.target;
+      const email = form.querySelector('input[type="email"]').value.trim().toLowerCase();
+      const password = form.querySelector('input[type="password"]').value;
+      const adminPassword = 'admin123';
+
+      if (email === ADMIN_EMAIL) {
+        const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
+        const isAdminPassword = password === adminPassword;
+        const isLegacyAmiyoAccount = legacyUser?.email?.toLowerCase() === ADMIN_EMAIL && legacyUser.password === password;
+        if (!isAdminPassword && !isLegacyAmiyoAccount) {
+          showToast('Invalid email or password.');
+          return;
+        }
+
+        stopCurrentUserPresence();
+        localStorage.setItem('commuteHubLoggedIn', 'true');
+        localStorage.setItem('commuteHubRole', 'admin-pending');
+        localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Amiyo Hasan', email: ADMIN_EMAIL }));
+        form.reset();
+        updateUserGreeting();
+        showToast('Welcome, Amiyo Hasan! Choose a role.');
+        showView('role');
+        return;
+      }
+
+      const users = getRegisteredUsers();
+      const user = users.find(account => account.email.toLowerCase() === email);
+
+      if (!user) {
+        showToast('No account found. Please sign up first.');
+        setAuthTab('signup');
+        return;
+      }
+
+      if (user.email.toLowerCase() !== email || user.password !== password) {
+        showToast('Invalid email or password.');
+        return;
+      }
+
+      user.lastLoginAt = Date.now();
+      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
+      localStorage.setItem('commuteHubLoggedIn', 'true');
+      localStorage.setItem('commuteHubRole', 'user');
+      localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: user.name, email: user.email }));
+      startCurrentUserPresence(user.email);
+      form.reset();
+      updateUserGreeting();
+      showToast(`Welcome, ${user.name}!`);
+      showView('user');
+    }
+
+    function chooseRole(role) {
+      const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
+      if (localStorage.getItem('commuteHubLoggedIn') !== 'true' ||
+          currentUser?.email?.toLowerCase() !== 'amiyohasan23@gmail.com') return;
+
+      if (role === 'user') {
+        localStorage.setItem('commuteHubRole', 'user');
+        startCurrentUserPresence(currentUser.email.toLowerCase());
+        updateUserGreeting();
+        showToast('You are now using the User mode.');
+        showView('user');
+        return;
+      }
+
+      if (role === 'admin') {
+        stopCurrentUserPresence();
+        localStorage.setItem('commuteHubRole', 'admin');
+        showToast('You are now using the Admin mode.');
+        showView('admin');
+      }
+    }
+
+    function logoutUser() {
+      stopCurrentUserPresence();
+      localStorage.removeItem('commuteHubLoggedIn');
+      localStorage.removeItem('commuteHubRole');
+      localStorage.removeItem('commuteHubCurrentUser');
+      showToast('Logged out successfully.');
+      showView('auth');
+      setAuthTab('login');
+    }
+
+    function logoutAdmin() {
+      stopCurrentUserPresence();
+      localStorage.removeItem('commuteHubLoggedIn');
+      localStorage.removeItem('commuteHubRole');
+      localStorage.removeItem('commuteHubCurrentUser');
+      showToast('Admin logged out.');
+      showView('auth');
+      setAuthTab('login');
+    }
+
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => setAuthTab(tab.dataset.authTab));
+    });
+
+    document.getElementById('adminAccessBtn').addEventListener('click', () => {
+      setAuthTab('login');
+      showView('auth');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+    document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
+    document.getElementById('chooseUserModeBtn').addEventListener('click', () => chooseRole('user'));
+    document.getElementById('chooseAdminModeBtn').addEventListener('click', () => chooseRole('admin'));
+
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    document.getElementById('signupForm').addEventListener('submit', handleSignup);
+
+    window.addEventListener('storage', event => {
+      if ([USER_ACCOUNTS_KEY, ACTIVE_USER_SESSIONS_KEY].includes(event.key)) updateAdminUserMetrics();
+    });
+    window.addEventListener('pagehide', stopCurrentUserPresence);
+    window.setInterval(refreshCurrentUserPresence, 10000);
+
+    // Boot
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      populateLocationSelectors();
+      initMap();
+      updateRoute();
+      setAuthTab('login');
+
+      const loggedIn = localStorage.getItem('commuteHubLoggedIn') === 'true';
+      const role = localStorage.getItem('commuteHubRole');
+
+      if (loggedIn && role === 'admin-pending') {
+        stopCurrentUserPresence();
+        updateUserGreeting();
+        showView('role');
+      } else if (loggedIn && role === 'user') {
+        updateUserGreeting();
+        const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
+        if (currentUser?.email) startCurrentUserPresence(currentUser.email.toLowerCase());
+        showView('user');
+      } else if (loggedIn && role === 'admin') {
+        stopCurrentUserPresence();
+        showView('admin');
+      } else {
+        stopCurrentUserPresence();
+        showView('auth');
+      }
+    });
+  </script>
+</body>
+</html>
