@@ -15,8 +15,8 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
   * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
 * **Unified Ride-Sharing Bridge:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
-  * **Pathao:** Copies destination coordinates directly to system clipboard and dispatches the Pathao client.
-  * **inDrive:** Calculates an optimal peer-to-peer suggested bid discount (~12% below standard baseline) and copies the offer for quick bidding.
+  * **Pathao:** Opens the Pathao app with an app deep link and copies the destination to the clipboard.
+  * **inDrive:** Opens the inDrive app with an app deep link and copies the destination and suggested bid for quick bidding.
 
 ---
 

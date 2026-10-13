@@ -253,16 +253,16 @@
                 <span class="w-7 h-7 bg-red-600 text-white rounded-lg flex items-center justify-center text-xs font-black">P</span>
                 Pathao
               </span>
-              <span class="text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 px-2 py-0.5 rounded">Clipboard</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 px-2 py-0.5 rounded">App Deep-Link</span>
             </div>
-            <p class="text-xs text-slate-500 mb-3">Copies destination to clipboard and opens the Pathao portal.</p>
+            <p class="text-xs text-slate-500 mb-3">Opens the Pathao app and copies your destination.</p>
             <div class="bg-slate-50 rounded-xl p-3 mb-4">
               <span class="text-xs text-slate-500 block">Baseline Estimate</span>
               <span id="pathaoFare" class="text-2xl font-black text-slate-900">৳140 - ৳170</span>
             </div>
           </div>
           <button onclick="handlePathaoClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-sm">
-            <i data-lucide="copy" class="w-4 h-4"></i> Copy & Open Pathao
+            <i data-lucide="external-link" class="w-4 h-4"></i> Open in Pathao
           </button>
         </div>
 
@@ -274,16 +274,16 @@
                 <span class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-xs font-black">in</span>
                 inDrive
               </span>
-              <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">Suggested Bid</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">App Deep-Link</span>
             </div>
-            <p class="text-xs text-slate-500 mb-3">Suggested passenger bid amount based on distance and route traffic.</p>
+            <p class="text-xs text-slate-500 mb-3">Opens the inDrive app and copies your destination and suggested bid.</p>
             <div class="bg-slate-50 rounded-xl p-3 mb-4">
               <span class="text-xs text-slate-500 block">Optimal Bid Offer</span>
               <span id="indriveFare" class="text-2xl font-black text-emerald-700">৳130</span>
             </div>
           </div>
           <button onclick="handleInDriveClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm">
-            <i data-lucide="copy" class="w-4 h-4"></i> Copy Bid & Open
+            <i data-lucide="external-link" class="w-4 h-4"></i> Open in inDrive
           </button>
         </div>
 
@@ -697,6 +697,22 @@
     }
 
     // 6. Action Button Handlers
+    function openRideAppAndCopy(appLink, clipboardText, successMessage) {
+      window.open(appLink, '_blank');
+
+      if (!navigator.clipboard?.writeText) {
+        showToast('Could not access the clipboard. The app is opening.');
+        return;
+      }
+
+      navigator.clipboard.writeText(clipboardText)
+        .then(() => showToast(successMessage))
+        .catch(error => {
+          console.error('Failed to copy ride details to the clipboard:', error);
+          showToast('Could not copy ride details. The app is opening.');
+        });
+    }
+
     function handleUberClick() {
       const pKey = document.getElementById('pickupSelect').value;
       const dKey = document.getElementById('dropoffSelect').value;
@@ -716,12 +732,7 @@
       const dKey = document.getElementById('dropoffSelect').value;
       const dName = LOCATIONS[dKey].name;
 
-      navigator.clipboard.writeText(dName).then(() => {
-        showToast(`Copied "${dName}" to clipboard! Opening Pathao...`);
-        setTimeout(() => {
-          window.open('https://pathao.com/', '_blank');
-        }, 600);
-      });
+      openRideAppAndCopy('pathao://', dName, `Copied "${dName}"! Opening Pathao...`);
     }
 
     function handleInDriveClick() {
@@ -730,12 +741,7 @@
       const bid = document.getElementById('indriveFare').innerText;
 
       const message = `${dName} (Offer: ${bid})`;
-      navigator.clipboard.writeText(message).then(() => {
-        showToast(`Copied destination and suggested bid: ${bid}!`);
-        setTimeout(() => {
-          window.open('https://indrive.com/', '_blank');
-        }, 600);
-      });
+      openRideAppAndCopy('indrive://', message, `Copied destination and suggested bid: ${bid}! Opening inDrive...`);
     }
 
     // 7. Helpers
