@@ -316,6 +316,11 @@
         Logout Admin
       </button>
     </div>
+    <nav class="flex gap-2 rounded-xl bg-slate-100 p-1" aria-label="Admin sections">
+      <button type="button" class="admin-section-tab rounded-lg px-4 py-2 text-sm font-semibold transition" data-admin-section="overview" aria-current="page">Overview</button>
+      <button type="button" class="admin-section-tab rounded-lg px-4 py-2 text-sm font-semibold transition" data-admin-section="accounts">Registered Accounts</button>
+    </nav>
+    <div id="adminOverviewView" class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-slate-500">Registered Users</p>
@@ -440,6 +445,32 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <section id="adminAccountsView" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-sm" aria-labelledby="adminAccountsHeading">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div>
+          <h3 id="adminAccountsHeading" class="text-lg font-bold text-slate-900">Registered Accounts</h3>
+          <p class="text-sm text-slate-500">Account details saved in this browser. Passwords are not shown.</p>
+        </div>
+        <span class="text-sm font-semibold text-slate-600"><span id="adminAccountsCount">0</span> accounts</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[640px] text-left text-sm">
+          <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              <th scope="col" class="px-3 py-3 font-semibold">Name</th>
+              <th scope="col" class="px-3 py-3 font-semibold">Email</th>
+              <th scope="col" class="px-3 py-3 font-semibold">Account created</th>
+              <th scope="col" class="px-3 py-3 font-semibold">Last login</th>
+              <th scope="col" class="px-3 py-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody id="adminAccountsList" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <p id="adminAccountsEmpty" class="hidden py-8 text-center text-sm text-slate-500">No user accounts have been created yet.</p>
+    </section>
   </section>
 
   <script>
@@ -451,11 +482,18 @@
     function getRegisteredUsers() {
       const storedUsers = JSON.parse(localStorage.getItem(USER_ACCOUNTS_KEY) || 'null');
       if (Array.isArray(storedUsers)) {
-        return storedUsers.filter(user => typeof user.password === 'string' && user.email?.toLowerCase() !== ADMIN_EMAIL);
+        return storedUsers.filter(user =>
+          typeof user.password === 'string' &&
+          typeof user.email === 'string' &&
+          user.email.toLowerCase() !== ADMIN_EMAIL
+        );
       }
 
       const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
-      if (legacyUser && typeof legacyUser.password === 'string' && legacyUser.email?.toLowerCase() !== ADMIN_EMAIL) {
+      if (legacyUser &&
+          typeof legacyUser.password === 'string' &&
+          typeof legacyUser.email === 'string' &&
+          legacyUser.email.toLowerCase() !== ADMIN_EMAIL) {
         const migratedUsers = [legacyUser];
         localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(migratedUsers));
         return migratedUsers;
@@ -479,6 +517,55 @@
       document.getElementById('adminRegisteredUsers').textContent = users.length;
       document.getElementById('adminUsersLoggedIn').textContent = users.filter(user => user.lastLoginAt).length;
       document.getElementById('adminActiveUsers').textContent = getActiveUserCount();
+      renderAdminAccounts(users);
+    }
+
+    function formatAccountDate(timestamp) {
+      if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) return 'Not recorded';
+      return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(timestamp);
+    }
+
+    function renderAdminAccounts(users) {
+      const accountList = document.getElementById('adminAccountsList');
+      const activeEmails = new Set(
+        JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]')
+          .map(session => session.email?.toLowerCase())
+      );
+      const sortedUsers = [...users].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      accountList.replaceChildren();
+      document.getElementById('adminAccountsCount').textContent = users.length;
+      document.getElementById('adminAccountsEmpty').classList.toggle('hidden', users.length !== 0);
+
+      sortedUsers.forEach(user => {
+        const row = document.createElement('tr');
+        const cells = [
+          user.name || 'Name unavailable',
+          user.email,
+          formatAccountDate(user.createdAt),
+          formatAccountDate(user.lastLoginAt),
+          activeEmails.has(user.email.toLowerCase()) ? 'Active' : 'Inactive'
+        ];
+
+        cells.forEach((value, index) => {
+          const cell = document.createElement('td');
+          cell.className = `px-3 py-3 ${index === 0 ? 'font-medium text-slate-900' : 'text-slate-600'}`;
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
+        accountList.appendChild(row);
+      });
+    }
+
+    function showAdminSection(section) {
+      const showingAccounts = section === 'accounts';
+      document.getElementById('adminOverviewView').classList.toggle('hidden', showingAccounts);
+      document.getElementById('adminAccountsView').classList.toggle('hidden', !showingAccounts);
+
+      document.querySelectorAll('.admin-section-tab').forEach(button => {
+        const active = button.dataset.adminSection === section;
+        button.setAttribute('aria-current', active ? 'page' : 'false');
+        button.className = `admin-section-tab rounded-lg px-4 py-2 text-sm font-semibold transition ${active ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
+      });
     }
 
     function refreshCurrentUserPresence() {
@@ -870,7 +957,7 @@
         return;
       }
 
-      users.push({ name, email, password, lastLoginAt: null });
+      users.push({ name, email, password, createdAt: Date.now(), lastLoginAt: null });
       localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
       updateAdminUserMetrics();
       form.reset();
@@ -984,6 +1071,9 @@
     document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
     document.getElementById('chooseUserModeBtn').addEventListener('click', () => chooseRole('user'));
     document.getElementById('chooseAdminModeBtn').addEventListener('click', () => chooseRole('admin'));
+    document.querySelectorAll('.admin-section-tab').forEach(button => {
+      button.addEventListener('click', () => showAdminSection(button.dataset.adminSection));
+    });
 
     window.addEventListener('storage', event => {
       if ([USER_ACCOUNTS_KEY, ACTIVE_USER_SESSIONS_KEY].includes(event.key)) updateAdminUserMetrics();
