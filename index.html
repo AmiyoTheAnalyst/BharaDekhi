@@ -21,6 +21,7 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
@@ -89,6 +90,8 @@
               Admin Access
             </button>
           </div>
+
+          <p id="authSetupNotice" class="hidden mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"></p>
 
           <div class="grid grid-cols-2 bg-slate-100 rounded-xl p-1 mb-5">
             <button type="button" data-auth-tab="login" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition bg-white text-blue-600 shadow-sm">Login</button>
@@ -333,12 +336,12 @@
         <p class="mt-1 text-xs text-slate-500">Unique accounts, saved here</p>
       </div>
       <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-        <p class="text-xs uppercase tracking-wide text-slate-500">Active Users Now</p>
+        <p class="text-xs uppercase tracking-wide text-slate-500">Not Yet Logged In</p>
         <h3 id="adminActiveUsers" class="mt-2 text-3xl font-black text-slate-900">0</h3>
-        <p class="mt-1 text-xs text-slate-500">Signed in from this browser</p>
+        <p class="mt-1 text-xs text-slate-500">Registered accounts with no login yet</p>
       </div>
     </div>
-    <p class="text-xs text-slate-500">These demo counts are stored in this browser only and do not include other devices or browsers.</p>
+    <p class="text-xs text-slate-500">Account totals are shared across all users of this website.</p>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
@@ -451,10 +454,14 @@
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div>
           <h3 id="adminAccountsHeading" class="text-lg font-bold text-slate-900">Registered Accounts</h3>
-          <p class="text-sm text-slate-500">Account details saved in this browser. Passwords are not shown.</p>
+          <p class="text-sm text-slate-500">Shared account details. Passwords are never shown.</p>
         </div>
-        <span class="text-sm font-semibold text-slate-600"><span id="adminAccountsCount">0</span> accounts</span>
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-semibold text-slate-600"><span id="adminAccountsCount">0</span> accounts</span>
+          <button id="refreshAdminAccountsBtn" type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Refresh</button>
+        </div>
       </div>
+      <p id="adminAccountsError" class="hidden mb-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert"></p>
       <div class="overflow-x-auto">
         <table class="w-full min-w-[640px] text-left text-sm">
           <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
@@ -475,85 +482,101 @@
 
   <script>
     const ADMIN_EMAIL = 'amiyohasan23@gmail.com';
-    const USER_ACCOUNTS_KEY = 'commuteHubUsers';
-    const ACTIVE_USER_SESSIONS_KEY = 'commuteHubActiveUserSessions';
-    const USER_TAB_SESSION_KEY = 'commuteHubUserTabSession';
+    const SUPABASE_URL = 'https://lzyhjgqcsuvgzmatkjfi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_FFidJiEqploFKoozx0EkFw_lqLrOR5i';
+    let supabaseClient = null;
 
-    function getRegisteredUsers() {
-      const storedUsers = JSON.parse(localStorage.getItem(USER_ACCOUNTS_KEY) || 'null');
-      if (Array.isArray(storedUsers)) {
-        return storedUsers.filter(user =>
-          typeof user.password === 'string' &&
-          typeof user.email === 'string' &&
-          user.email.toLowerCase() !== ADMIN_EMAIL
-        );
-      }
-
-      const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
-      if (legacyUser &&
-          typeof legacyUser.password === 'string' &&
-          typeof legacyUser.email === 'string' &&
-          legacyUser.email.toLowerCase() !== ADMIN_EMAIL) {
-        const migratedUsers = [legacyUser];
-        localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(migratedUsers));
-        return migratedUsers;
-      }
-
-      return [];
+    function clearLocalAuthState() {
+      localStorage.removeItem('commuteHubLoggedIn');
+      localStorage.removeItem('commuteHubRole');
+      localStorage.removeItem('commuteHubCurrentUser');
     }
 
-    function getActiveUserCount() {
-      const sessions = JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]');
-      const cutoff = Date.now() - 30000;
-      const activeSessions = sessions.filter(session => cutoff < session.lastSeen);
-      if (activeSessions.length !== sessions.length) {
-        localStorage.setItem(ACTIVE_USER_SESSIONS_KEY, JSON.stringify(activeSessions));
+    function initializeSupabase() {
+      const configured = SUPABASE_URL.startsWith('https://') &&
+        !SUPABASE_URL.includes('YOUR_PROJECT_REF') &&
+        SUPABASE_ANON_KEY.length > 20 &&
+        !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_PUBLISHABLE_KEY') &&
+        window.supabase?.createClient;
+
+      const notice = document.getElementById('authSetupNotice');
+      if (!configured) {
+        notice.textContent = 'Shared sign-in is not configured yet. Follow the Supabase setup instructions in README.md, then add your project URL and publishable key to index.html.';
+        notice.classList.remove('hidden');
+        return false;
       }
-      return new Set(activeSessions.map(session => session.email)).size;
+
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      notice.classList.add('hidden');
+      return true;
     }
 
-    function updateAdminUserMetrics() {
-      const users = getRegisteredUsers();
+    function isAdminUser(user) {
+      return user?.email?.toLowerCase() === ADMIN_EMAIL &&
+        Boolean(user.email_confirmed_at);
+    }
+
+    function updateAdminUserMetrics(users) {
       document.getElementById('adminRegisteredUsers').textContent = users.length;
-      document.getElementById('adminUsersLoggedIn').textContent = users.filter(user => user.lastLoginAt).length;
-      document.getElementById('adminActiveUsers').textContent = getActiveUserCount();
-      renderAdminAccounts(users);
+      document.getElementById('adminUsersLoggedIn').textContent = users.filter(user => user.last_login_at).length;
+      document.getElementById('adminActiveUsers').textContent = users.filter(user => !user.last_login_at).length;
     }
 
-    function formatAccountDate(timestamp) {
-      if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) return 'Not recorded';
-      return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(timestamp);
+    function formatAccountDate(value) {
+      if (!value) return 'Not recorded';
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return 'Not recorded';
+      return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     }
 
-    function renderAdminAccounts(users) {
+    async function loadAdminAccounts() {
+      const errorNotice = document.getElementById('adminAccountsError');
       const accountList = document.getElementById('adminAccountsList');
-      const activeEmails = new Set(
-        JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]')
-          .map(session => session.email?.toLowerCase())
-      );
-      const sortedUsers = [...users].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-      accountList.replaceChildren();
-      document.getElementById('adminAccountsCount').textContent = users.length;
-      document.getElementById('adminAccountsEmpty').classList.toggle('hidden', users.length !== 0);
+      const emptyNotice = document.getElementById('adminAccountsEmpty');
+      errorNotice.classList.add('hidden');
+      emptyNotice.classList.add('hidden');
 
-      sortedUsers.forEach(user => {
-        const row = document.createElement('tr');
-        const cells = [
-          user.name || 'Name unavailable',
-          user.email,
-          formatAccountDate(user.createdAt),
-          formatAccountDate(user.lastLoginAt),
-          activeEmails.has(user.email.toLowerCase()) ? 'Active' : 'Inactive'
-        ];
+      try {
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+        if (authError) throw authError;
+        if (!isAdminUser(user)) throw new Error('Only the verified admin account can view registered accounts.');
 
-        cells.forEach((value, index) => {
-          const cell = document.createElement('td');
-          cell.className = `px-3 py-3 ${index === 0 ? 'font-medium text-slate-900' : 'text-slate-600'}`;
-          cell.textContent = value;
-          row.appendChild(cell);
+        const { data: users, error } = await supabaseClient
+          .from('profiles')
+          .select('id, display_name, email, created_at, last_login_at')
+          .neq('email', ADMIN_EMAIL)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+
+        updateAdminUserMetrics(users);
+        accountList.replaceChildren();
+        document.getElementById('adminAccountsCount').textContent = users.length;
+        emptyNotice.classList.toggle('hidden', users.length !== 0);
+
+        users.forEach(user => {
+          const row = document.createElement('tr');
+          const cells = [
+            user.display_name || 'Name unavailable',
+            user.email,
+            formatAccountDate(user.created_at),
+            formatAccountDate(user.last_login_at),
+            user.last_login_at ? 'Logged in' : 'Never logged in'
+          ];
+
+          cells.forEach((value, index) => {
+            const cell = document.createElement('td');
+            cell.className = `px-3 py-3 ${index === 0 ? 'font-medium text-slate-900' : 'text-slate-600'}`;
+            cell.textContent = value;
+            row.appendChild(cell);
+          });
+          accountList.appendChild(row);
         });
-        accountList.appendChild(row);
-      });
+      } catch (error) {
+        console.error('Could not load registered accounts:', error);
+        errorNotice.textContent = `Could not load registered accounts: ${error.message}`;
+        errorNotice.classList.remove('hidden');
+        accountList.replaceChildren();
+      }
     }
 
     function showAdminSection(section) {
@@ -566,38 +589,7 @@
         button.setAttribute('aria-current', active ? 'page' : 'false');
         button.className = `admin-section-tab rounded-lg px-4 py-2 text-sm font-semibold transition ${active ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
       });
-    }
-
-    function refreshCurrentUserPresence() {
-      const currentSession = JSON.parse(sessionStorage.getItem(USER_TAB_SESSION_KEY) || 'null');
-      let sessions = JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]');
-      const cutoff = Date.now() - 30000;
-      sessions = sessions.filter(session => cutoff < session.lastSeen && session.id !== currentSession?.id);
-      if (currentSession) {
-        sessions.push({ ...currentSession, lastSeen: Date.now() });
-      }
-      localStorage.setItem(ACTIVE_USER_SESSIONS_KEY, JSON.stringify(sessions));
-      updateAdminUserMetrics();
-    }
-
-    function startCurrentUserPresence(email) {
-      const previousSession = JSON.parse(sessionStorage.getItem(USER_TAB_SESSION_KEY) || 'null');
-      const session = previousSession?.email === email
-        ? previousSession
-        : { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, email };
-      sessionStorage.setItem(USER_TAB_SESSION_KEY, JSON.stringify(session));
-      refreshCurrentUserPresence();
-    }
-
-    function stopCurrentUserPresence() {
-      const currentSession = JSON.parse(sessionStorage.getItem(USER_TAB_SESSION_KEY) || 'null');
-      if (currentSession) {
-        const sessions = JSON.parse(localStorage.getItem(ACTIVE_USER_SESSIONS_KEY) || '[]')
-          .filter(session => session.id !== currentSession.id);
-        localStorage.setItem(ACTIVE_USER_SESSIONS_KEY, JSON.stringify(sessions));
-        sessionStorage.removeItem(USER_TAB_SESSION_KEY);
-      }
-      updateAdminUserMetrics();
+      if (showingAccounts) loadAdminAccounts();
     }
 
     function populateLocationSelectors() {
@@ -892,7 +884,7 @@
       userDashboardView.classList.toggle('hidden', view !== 'user');
       adminPanel.classList.toggle('hidden', view !== 'admin');
       updateAdminModeNavigation();
-      if (view === 'admin') updateAdminUserMetrics();
+      if (view === 'admin') loadAdminAccounts();
 
       if (view === 'user' && map) {
         requestAnimationFrame(() => {
@@ -926,7 +918,7 @@
       });
     }
 
-    function handleSignup(event) {
+    async function handleSignup(event) {
       event.preventDefault();
       const form = event.target;
       const name = form.querySelector('input[type="text"]').value.trim();
@@ -934,6 +926,10 @@
       const password = form.querySelectorAll('input[type="password"]')[0].value;
       const confirmPassword = form.querySelectorAll('input[type="password"]')[1].value;
 
+      if (!supabaseClient) {
+        showToast('Shared authentication is not configured yet.');
+        return;
+      }
       if (!name || !email || !password) {
         showToast('Please fill in all sign-up fields.');
         return;
@@ -943,11 +939,6 @@
         return;
       }
 
-      const users = getRegisteredUsers();
-      if (users.some(user => user.email.toLowerCase() === email)) {
-        showToast('An account with this email already exists.');
-        return;
-      }
       if (password.length < 6) {
         showToast('Password must be at least 6 characters.');
         return;
@@ -957,66 +948,90 @@
         return;
       }
 
-      users.push({ name, email, password, createdAt: Date.now(), lastLoginAt: null });
-      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
-      updateAdminUserMetrics();
-      form.reset();
-      setAuthTab('login');
-      showToast('Sign up successful. Please log in.');
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { data: { display_name: name } }
+        });
+        if (error) throw error;
+
+        form.reset();
+        if (data.session && data.user) {
+          await completeLogin(data.user);
+        } else {
+          setAuthTab('login');
+          showToast('Account created. Check your email to confirm the account, then log in.');
+        }
+      } catch (error) {
+        console.error('Account registration failed:', error);
+        showToast(error.message || 'Could not create your account. Please try again.');
+      }
     }
 
-    function handleLogin(event) {
+    async function completeLogin(user) {
+      const displayName = user.user_metadata?.display_name || user.email;
+      const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (error || !profile) {
+        await supabaseClient.auth.signOut();
+        throw new Error(`Signed in, but the shared account profile could not be loaded. Check the Supabase setup${error ? `: ${error.message}` : '.'}`);
+      }
+
+      localStorage.setItem('commuteHubLoggedIn', 'true');
+      localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: displayName, email: user.email }));
+      updateUserGreeting();
+
+      if (isAdminUser(user)) {
+        localStorage.setItem('commuteHubRole', 'admin-pending');
+        showToast('Welcome, Amiyo Hasan! Choose a role.');
+        showView('role');
+      } else {
+        localStorage.setItem('commuteHubRole', 'user');
+        showToast(`Welcome, ${displayName}!`);
+        showView('user');
+      }
+    }
+
+    async function handleLogin(event) {
       event.preventDefault();
       const form = event.target;
       const email = form.querySelector('input[type="email"]').value.trim().toLowerCase();
       const password = form.querySelector('input[type="password"]').value;
 
-      if (email === ADMIN_EMAIL) {
-        const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
-        const isAdminPassword = password === 'admin123';
-        const isLegacyAmiyoAccount = legacyUser?.email?.toLowerCase() === ADMIN_EMAIL && legacyUser.password === password;
-        if (!isAdminPassword && !isLegacyAmiyoAccount) {
-          showToast('Invalid email or password.');
-          return;
+      if (!supabaseClient) {
+        showToast('Shared authentication is not configured yet.');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        if (!data.user) throw new Error('Authentication succeeded without returning a user account.');
+        if (email === ADMIN_EMAIL && !isAdminUser(data.user)) {
+          await supabaseClient.auth.signOut();
+          throw new Error('The admin account must have a confirmed email address.');
         }
-
-        stopCurrentUserPresence();
-        localStorage.setItem('commuteHubLoggedIn', 'true');
-        localStorage.setItem('commuteHubRole', 'admin-pending');
-        localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Amiyo Hasan', email: ADMIN_EMAIL }));
         form.reset();
-        updateUserGreeting();
-        showToast('Welcome, Amiyo Hasan! Choose a role.');
-        showView('role');
-        return;
+        await completeLogin(data.user);
+      } catch (error) {
+        console.error('Sign-in failed:', error);
+        showToast(error.message || 'Could not sign in. Please try again.');
       }
-
-      const users = getRegisteredUsers();
-      const user = users.find(account => account.email.toLowerCase() === email);
-      if (!user) {
-        showToast('No account found. Please sign up first.');
-        setAuthTab('signup');
-        return;
-      }
-      if (user.password !== password) {
-        showToast('Invalid email or password.');
-        return;
-      }
-
-      user.lastLoginAt = Date.now();
-      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
-      localStorage.setItem('commuteHubLoggedIn', 'true');
-      localStorage.setItem('commuteHubRole', 'user');
-      localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: user.name, email: user.email }));
-      startCurrentUserPresence(user.email);
-      form.reset();
-      updateUserGreeting();
-      showToast(`Welcome, ${user.name}!`);
-      showView('user');
     }
 
-    function logoutUser() {
-      stopCurrentUserPresence();
+    async function logoutUser() {
+      if (supabaseClient) {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          console.error('Sign-out failed:', error);
+          showToast(`Could not sign out: ${error.message}`);
+          return;
+        }
+      }
       localStorage.removeItem('commuteHubLoggedIn');
       localStorage.removeItem('commuteHubRole');
       localStorage.removeItem('commuteHubCurrentUser');
@@ -1025,8 +1040,15 @@
       setAuthTab('login');
     }
 
-    function logoutAdmin() {
-      stopCurrentUserPresence();
+    async function logoutAdmin() {
+      if (supabaseClient) {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          console.error('Admin sign-out failed:', error);
+          showToast(`Could not sign out: ${error.message}`);
+          return;
+        }
+      }
       localStorage.removeItem('commuteHubLoggedIn');
       localStorage.removeItem('commuteHubRole');
       localStorage.removeItem('commuteHubCurrentUser');
@@ -1042,7 +1064,6 @@
 
       if (role === 'user') {
         localStorage.setItem('commuteHubRole', 'user');
-        startCurrentUserPresence(currentUser.email.toLowerCase());
         updateUserGreeting();
         showToast('You are now using the User mode.');
         showView('user');
@@ -1050,7 +1071,7 @@
       }
 
       if (role === 'admin') {
-        stopCurrentUserPresence();
+        if (currentUser?.email?.toLowerCase() !== ADMIN_EMAIL) return;
         localStorage.setItem('commuteHubRole', 'admin');
         showToast('You are now using the Admin mode.');
         showView('admin');
@@ -1071,44 +1092,57 @@
     document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
     document.getElementById('chooseUserModeBtn').addEventListener('click', () => chooseRole('user'));
     document.getElementById('chooseAdminModeBtn').addEventListener('click', () => chooseRole('admin'));
+    document.getElementById('refreshAdminAccountsBtn').addEventListener('click', loadAdminAccounts);
     document.querySelectorAll('.admin-section-tab').forEach(button => {
       button.addEventListener('click', () => showAdminSection(button.dataset.adminSection));
     });
 
-    window.addEventListener('storage', event => {
-      if ([USER_ACCOUNTS_KEY, ACTIVE_USER_SESSIONS_KEY].includes(event.key)) updateAdminUserMetrics();
-    });
-    window.addEventListener('pagehide', stopCurrentUserPresence);
-    window.setInterval(refreshCurrentUserPresence, 10000);
-
     // Boot
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       populateLocationSelectors();
       initMap();
       updateRoute();
 
-      if (localStorage.getItem('commuteHubAuthProvider') === 'firebase-google') {
-        localStorage.removeItem('commuteHubLoggedIn');
-        localStorage.removeItem('commuteHubRole');
-        localStorage.removeItem('commuteHubCurrentUser');
-        localStorage.removeItem('commuteHubAuthProvider');
+      if (!initializeSupabase()) {
+        clearLocalAuthState();
+        showView('auth');
+        return;
       }
 
-      const loggedIn = localStorage.getItem('commuteHubLoggedIn') === 'true';
-      const role = localStorage.getItem('commuteHubRole');
-      if (loggedIn && role === 'admin-pending') {
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (!session?.user) {
+          clearLocalAuthState();
+          showView('auth');
+          return;
+        }
+
+        const user = session.user;
+        localStorage.setItem('commuteHubLoggedIn', 'true');
+        localStorage.setItem('commuteHubCurrentUser', JSON.stringify({
+          name: user.user_metadata?.display_name || user.email,
+          email: user.email
+        }));
         updateUserGreeting();
-        showView('role');
-      } else if (loggedIn && role === 'user') {
-        updateUserGreeting();
-        const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
-        if (currentUser?.email) startCurrentUserPresence(currentUser.email.toLowerCase());
-        showView('user');
-      } else if (loggedIn && role === 'admin') {
-        showView('admin');
-      } else {
-        stopCurrentUserPresence();
+
+        if (isAdminUser(user)) {
+          const role = localStorage.getItem('commuteHubRole');
+          if (role === 'admin') showView('admin');
+          else if (role === 'user') showView('user');
+          else {
+            localStorage.setItem('commuteHubRole', 'admin-pending');
+            showView('role');
+          }
+        } else {
+          localStorage.setItem('commuteHubRole', 'user');
+          showView('user');
+        }
+      } catch (error) {
+        console.error('Could not restore the signed-in session:', error);
+        clearLocalAuthState();
+        showToast(`Could not restore your session: ${error.message}`);
         showView('auth');
       }
     });
