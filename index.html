@@ -90,42 +90,13 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-2 bg-slate-100 rounded-xl p-1 mb-5">
-            <button type="button" data-auth-tab="login" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition bg-white text-blue-600 shadow-sm">Login</button>
-            <button type="button" data-auth-tab="signup" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition text-slate-600">Sign Up</button>
+          <div class="space-y-4">
+            <p class="text-sm text-slate-600">Use a Google account to sign up or log in. New accounts are created by Google sign-in.</p>
+            <button id="googleSignInBtn" type="button" disabled class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition">
+              Continue with Google
+            </button>
+            <p id="googleAuthStatus" role="status" class="text-xs text-amber-700">Google sign-in needs Firebase configuration before it can be used.</p>
           </div>
-
-          <form id="loginForm" class="auth-form space-y-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition">Login</button>
-          </form>
-
-          <form id="signupForm" class="auth-form hidden space-y-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
-              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-              <input type="password" placeholder="Create password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Confirm Password</label>
-              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-            </div>
-            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">Create Account</button>
-          </form>
         </div>
       </div>
     </div>
@@ -444,24 +415,27 @@
 
   <script>
     const ADMIN_EMAIL = 'amiyohasan23@gmail.com';
+    window.COMMUTEHUB_ADMIN_EMAIL = ADMIN_EMAIL;
     const USER_ACCOUNTS_KEY = 'commuteHubUsers';
     const ACTIVE_USER_SESSIONS_KEY = 'commuteHubActiveUserSessions';
     const USER_TAB_SESSION_KEY = 'commuteHubUserTabSession';
 
     function getRegisteredUsers() {
       const storedUsers = JSON.parse(localStorage.getItem(USER_ACCOUNTS_KEY) || 'null');
-      if (Array.isArray(storedUsers)) {
-        return storedUsers.filter(user => user.email?.toLowerCase() !== ADMIN_EMAIL);
-      }
+      if (!Array.isArray(storedUsers)) return [];
+      return storedUsers
+        .filter(user => user.email?.toLowerCase() !== ADMIN_EMAIL)
+        .map(user => ({ name: user.name, email: user.email, lastLoginAt: user.lastLoginAt }));
+    }
 
-      const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
-      if (legacyUser && legacyUser.email?.toLowerCase() !== ADMIN_EMAIL) {
-        const migratedUsers = [legacyUser];
-        localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(migratedUsers));
-        return migratedUsers;
-      }
-
-      return [];
+    function clearLegacyAuthData() {
+      if (localStorage.getItem('commuteHubAuthProvider') === 'firebase-google') return;
+      localStorage.removeItem('commuteHubLoggedIn');
+      localStorage.removeItem('commuteHubRole');
+      localStorage.removeItem('commuteHubCurrentUser');
+      localStorage.removeItem('commuteHubUser');
+      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(getRegisteredUsers()));
+      localStorage.setItem('commuteHubAuthProvider', 'firebase-google');
     }
 
     function getActiveUserCount() {
@@ -479,6 +453,21 @@
       document.getElementById('adminRegisteredUsers').textContent = users.length;
       document.getElementById('adminUsersLoggedIn').textContent = users.filter(user => user.lastLoginAt).length;
       document.getElementById('adminActiveUsers').textContent = getActiveUserCount();
+    }
+
+    function recordAuthenticatedUser(user) {
+      if (!user.email || user.email.toLowerCase() === ADMIN_EMAIL) return;
+      const users = getRegisteredUsers();
+      const email = user.email.toLowerCase();
+      const existingUser = users.find(account => account.email.toLowerCase() === email);
+      if (existingUser) {
+        existingUser.name = user.name;
+        existingUser.lastLoginAt = Date.now();
+      } else {
+        users.push({ name: user.name, email, lastLoginAt: Date.now() });
+      }
+      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
+      updateAdminUserMetrics();
     }
 
     function refreshCurrentUserPresence() {
@@ -769,25 +758,6 @@
       }, 3500);
     }
 
-    function setAuthTab(type) {
-      const tabs = document.querySelectorAll('.auth-tab');
-      const forms = document.querySelectorAll('.auth-form');
-
-      tabs.forEach(tab => {
-        const active = tab.dataset.authTab === type;
-        tab.classList.toggle('bg-white', active);
-        tab.classList.toggle('text-blue-600', active);
-        tab.classList.toggle('shadow-sm', active);
-        tab.classList.toggle('text-slate-600', !active);
-        tab.classList.toggle('hover:text-slate-900', !active);
-      });
-
-      forms.forEach(form => {
-        const show = form.id === (type === 'login' ? 'loginForm' : 'signupForm');
-        form.classList.toggle('hidden', !show);
-      });
-    }
-
     function showView(view) {
       const authView = document.getElementById('authView');
       const roleSelectionView = document.getElementById('roleSelectionView');
@@ -833,102 +803,6 @@
       });
     }
 
-    function handleSignup(event) {
-      event.preventDefault();
-      const form = event.target;
-      const name = form.querySelector('input[type="text"]').value.trim();
-      const email = form.querySelectorAll('input[type="email"]')[0].value.trim();
-      const password = form.querySelectorAll('input[type="password"]')[0].value;
-      const confirmPassword = form.querySelectorAll('input[type="password"]')[1].value;
-      const normalizedEmail = email.toLowerCase();
-
-      if (!name || !email || !password) {
-        showToast('Please fill in all sign-up fields.');
-        return;
-      }
-
-      if (normalizedEmail === ADMIN_EMAIL) {
-        showToast('This email is reserved for admin access.');
-        return;
-      }
-
-      const users = getRegisteredUsers();
-      if (users.some(user => user.email.toLowerCase() === normalizedEmail)) {
-        showToast('An account with this email already exists.');
-        return;
-      }
-
-      if (password.length < 6) {
-        showToast('Password must be at least 6 characters.');
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        showToast('Passwords do not match.');
-        return;
-      }
-
-      users.push({ name, email: normalizedEmail, password, lastLoginAt: null });
-      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
-      updateAdminUserMetrics();
-      form.reset();
-      setAuthTab('login');
-      showToast('Sign up successful. Please log in.');
-    }
-
-    function handleLogin(event) {
-      event.preventDefault();
-      const form = event.target;
-      const email = form.querySelector('input[type="email"]').value.trim().toLowerCase();
-      const password = form.querySelector('input[type="password"]').value;
-      const adminPassword = 'admin123';
-
-      if (email === ADMIN_EMAIL) {
-        const legacyUser = JSON.parse(localStorage.getItem('commuteHubUser') || 'null');
-        const isAdminPassword = password === adminPassword;
-        const isLegacyAmiyoAccount = legacyUser?.email?.toLowerCase() === ADMIN_EMAIL && legacyUser.password === password;
-        if (!isAdminPassword && !isLegacyAmiyoAccount) {
-          showToast('Invalid email or password.');
-          return;
-        }
-
-        stopCurrentUserPresence();
-        localStorage.setItem('commuteHubLoggedIn', 'true');
-        localStorage.setItem('commuteHubRole', 'admin-pending');
-        localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Amiyo Hasan', email: ADMIN_EMAIL }));
-        form.reset();
-        updateUserGreeting();
-        showToast('Welcome, Amiyo Hasan! Choose a role.');
-        showView('role');
-        return;
-      }
-
-      const users = getRegisteredUsers();
-      const user = users.find(account => account.email.toLowerCase() === email);
-
-      if (!user) {
-        showToast('No account found. Please sign up first.');
-        setAuthTab('signup');
-        return;
-      }
-
-      if (user.email.toLowerCase() !== email || user.password !== password) {
-        showToast('Invalid email or password.');
-        return;
-      }
-
-      user.lastLoginAt = Date.now();
-      localStorage.setItem(USER_ACCOUNTS_KEY, JSON.stringify(users));
-      localStorage.setItem('commuteHubLoggedIn', 'true');
-      localStorage.setItem('commuteHubRole', 'user');
-      localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: user.name, email: user.email }));
-      startCurrentUserPresence(user.email);
-      form.reset();
-      updateUserGreeting();
-      showToast(`Welcome, ${user.name}!`);
-      showView('user');
-    }
-
     function chooseRole(role) {
       const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
       if (localStorage.getItem('commuteHubLoggedIn') !== 'true' ||
@@ -951,42 +825,12 @@
       }
     }
 
-    function logoutUser() {
-      stopCurrentUserPresence();
-      localStorage.removeItem('commuteHubLoggedIn');
-      localStorage.removeItem('commuteHubRole');
-      localStorage.removeItem('commuteHubCurrentUser');
-      showToast('Logged out successfully.');
-      showView('auth');
-      setAuthTab('login');
-    }
-
-    function logoutAdmin() {
-      stopCurrentUserPresence();
-      localStorage.removeItem('commuteHubLoggedIn');
-      localStorage.removeItem('commuteHubRole');
-      localStorage.removeItem('commuteHubCurrentUser');
-      showToast('Admin logged out.');
-      showView('auth');
-      setAuthTab('login');
-    }
-
-    document.querySelectorAll('.auth-tab').forEach(tab => {
-      tab.addEventListener('click', () => setAuthTab(tab.dataset.authTab));
-    });
-
     document.getElementById('adminAccessBtn').addEventListener('click', () => {
-      setAuthTab('login');
       showView('auth');
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', logoutUser);
-    document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
     document.getElementById('chooseUserModeBtn').addEventListener('click', () => chooseRole('user'));
     document.getElementById('chooseAdminModeBtn').addEventListener('click', () => chooseRole('admin'));
-
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    document.getElementById('signupForm').addEventListener('submit', handleSignup);
 
     window.addEventListener('storage', event => {
       if ([USER_ACCOUNTS_KEY, ACTIVE_USER_SESSIONS_KEY].includes(event.key)) updateAdminUserMetrics();
@@ -1000,28 +844,11 @@
       populateLocationSelectors();
       initMap();
       updateRoute();
-      setAuthTab('login');
-
-      const loggedIn = localStorage.getItem('commuteHubLoggedIn') === 'true';
-      const role = localStorage.getItem('commuteHubRole');
-
-      if (loggedIn && role === 'admin-pending') {
-        stopCurrentUserPresence();
-        updateUserGreeting();
-        showView('role');
-      } else if (loggedIn && role === 'user') {
-        updateUserGreeting();
-        const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
-        if (currentUser?.email) startCurrentUserPresence(currentUser.email.toLowerCase());
-        showView('user');
-      } else if (loggedIn && role === 'admin') {
-        stopCurrentUserPresence();
-        showView('admin');
-      } else {
-        stopCurrentUserPresence();
-        showView('auth');
-      }
+      clearLegacyAuthData();
+      stopCurrentUserPresence();
+      showView('auth');
     });
   </script>
+  <script type="module" src="./google-auth.js"></script>
 </body>
 </html>
