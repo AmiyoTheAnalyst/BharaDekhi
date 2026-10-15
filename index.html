@@ -63,9 +63,12 @@
           <span>Simulate Surge</span>
           <input type="checkbox" id="surgeToggle" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer" onchange="toggleSurgeSimulation()">
         </label>
-        <div id="surgeBadge" class="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="surgeStatusText">Standard Hours</span>
+        <div id="surgeBadge" class="flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200" aria-live="polite">
+          <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="flex flex-col">
+            <span id="surgeStatusText">Non-Peak</span>
+            <span id="dhakaTimeText" class="font-normal">Dhaka time --:--</span>
+          </span>
         </div>
       </div>
     </div>
@@ -285,7 +288,7 @@
           </article>
         </div>
         <p class="mt-3 text-xs leading-relaxed text-slate-500">
-          Estimates are for comparison only, not live quotes. Travel time starts from the OSRM driving estimate and uses rough mode adjustments (Bike 0.85x, CNG 1.15x, Car 1.0x); actual fares and times may differ.
+          Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:30–8:30 PM); actual traffic, fares, and times may differ. Travel time starts from the OSRM driving estimate and uses rough mode adjustments (Bike 0.85x, CNG 1.15x, Car 1.0x).
         </p>
       </section>
     </div>
@@ -738,12 +741,25 @@
       dropMarker = L.marker([LOCATIONS.brac.lat, LOCATIONS.brac.lng]).addTo(map).bindPopup('Destination');
     }
 
-    // 3. Peak Hour Checker (Dhaka BST: 8:30-10:30 AM & 5:30-8:30 PM)
-    function isPeakHourDhaka() {
-      if (isSimulatedSurge) return true;
-      const now = new Date();
-      const currentDecimal = now.getHours() + (now.getMinutes() / 60);
-      return (currentDecimal >= 8.5 && currentDecimal <= 10.5) || (currentDecimal >= 17.5 && currentDecimal <= 20.5);
+    // Peak windows are estimates in Dhaka local time: 8:30-10:30 AM and 5:30-8:30 PM.
+    function getDhakaTimeInfo(now = new Date()) {
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Dhaka',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      const parts = Object.fromEntries(formatter.formatToParts(now).map(part => [part.type, part.value]));
+      let hour = Number(parts.hour);
+      const minute = Number(parts.minute);
+      if (parts.dayPeriod === 'PM' && hour !== 12) hour += 12;
+      if (parts.dayPeriod === 'AM' && hour === 12) hour = 0;
+      const currentTime = hour + minute / 60;
+      let peakPeriod = null;
+      if (currentTime >= 8.5 && currentTime < 10.5) peakPeriod = 'Morning Peak';
+      else if (currentTime >= 17.5 && currentTime < 20.5) peakPeriod = 'Evening Peak';
+
+      return { formattedTime: formatter.format(now), peakPeriod };
     }
 
     // 4. Update Route, Markers & Fetch OSRM Road Distance
@@ -862,20 +878,26 @@
       document.getElementById('routeDistance').innerText = currentDistanceKm.toFixed(1) + ' km';
       document.getElementById('routeDuration').innerText = currentDurationMins + ' mins';
 
-      const isPeak = isPeakHourDhaka();
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       const badge = document.getElementById('surgeBadge');
       const badgeText = document.getElementById('surgeStatusText');
+      const dhakaTimeText = document.getElementById('dhakaTimeText');
+      const badgeDot = document.getElementById('surgeStatusDot');
       const multText = document.getElementById('surgeMultiplierText');
+      dhakaTimeText.innerText = `Dhaka time ${dhakaTime.formattedTime}`;
 
       if (isPeak) {
-        badge.className = "flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
-        badgeText.innerText = "Peak Surge Active";
-        multText.innerText = "1.35x - 1.55x (Surge)";
+        badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
+        badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
+        badgeText.innerText = isSimulatedSurge ? "Simulated Peak" : dhakaTime.peakPeriod;
+        multText.innerText = "1.25x - 1.55x (Peak estimate)";
         multText.className = "text-lg font-bold text-rose-600";
       } else {
-        badge.className = "flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
-        badgeText.innerText = "Standard Hours";
-        multText.innerText = "1.0x (Off-Peak)";
+        badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
+        badgeDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+        badgeText.innerText = "Non-Peak";
+        multText.innerText = "0.95x - 1.15x (Non-Peak estimate)";
         multText.className = "text-lg font-bold text-emerald-600";
       }
 
@@ -1224,6 +1246,11 @@
       populateLocationSelectors();
       initMap();
       updateRoute();
+      renderMetricsAndFares();
+      setInterval(renderMetricsAndFares, 30000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) renderMetricsAndFares();
+      });
 
       if (!initializeSupabase()) {
         clearLocalAuthState();
