@@ -333,6 +333,12 @@
 
       <!-- Interactive Map -->
       <div class="relative">
+        <div class="mb-2 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-slate-600">Tap map to set:</span>
+          <button id="mapSetPickupBtn" type="button" aria-pressed="false" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">Set pickup</button>
+          <button id="mapSetDestinationBtn" type="button" aria-pressed="false" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Set destination</button>
+          <span id="mapSelectionStatus" class="text-xs text-slate-500" aria-live="polite">Choose pickup or destination, then tap the map.</span>
+        </div>
         <div id="map"></div>
         <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex items-center justify-center rounded-xl">
           <div class="flex items-center gap-2 text-sm font-semibold text-blue-600 bg-white px-4 py-2 rounded-lg shadow-md border border-slate-200">
@@ -687,6 +693,18 @@
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
       'Switch to light mode': 'লাইট মোড চালু করুন',
       'Could not save theme preference.': 'থিম পছন্দ সংরক্ষণ করা যায়নি।',
+      'Tap map to set:': 'মানচিত্রে ট্যাপ করে নির্ধারণ করুন:',
+      'Set pickup': 'পিকআপ নির্ধারণ',
+      'Set destination': 'গন্তব্য নির্ধারণ',
+      'Choose pickup or destination, then tap the map.': 'পিকআপ বা গন্তব্য বেছে নিয়ে মানচিত্রে ট্যাপ করুন।',
+      'Tap the map to choose a pickup point.': 'পিকআপ পয়েন্ট বেছে নিতে মানচিত্রে ট্যাপ করুন।',
+      'Tap the map to choose a destination.': 'গন্তব্য বেছে নিতে মানচিত্রে ট্যাপ করুন।',
+      'Pickup point selected.': 'পিকআপ পয়েন্ট নির্বাচন করা হয়েছে।',
+      'Destination selected.': 'গন্তব্য নির্বাচন করা হয়েছে।',
+      'Selected map point': 'নির্বাচিত মানচিত্রের স্থান',
+      'Finding a nearby place name for your map pin…': 'মানচিত্রের পিনের কাছাকাছি স্থানের নাম খোঁজা হচ্ছে…',
+      'Map pin set to:': 'মানচিত্রের পিন নির্ধারণ করা হয়েছে:',
+      'You selected the same point for pickup and destination. Choose a different point.': 'পিকআপ ও গন্তব্যের জন্য একই স্থান নির্বাচন করেছেন। অন্য স্থান বেছে নিন।',
       'Simulate Surge': 'পিক আওয়ার অনুকরণ',
       'Morning Peak': 'সকাল পিক আওয়ার',
       'Evening Peak': 'সন্ধ্যা পিক আওয়ার',
@@ -990,6 +1008,7 @@
       if (typeof updateLocationLabels === 'function') updateLocationLabels();
       if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
       if (typeof renderCurrentLocationStatus === 'function') renderCurrentLocationStatus();
+      if (typeof renderMapSelectionControls === 'function') renderMapSelectionControls();
       if (typeof applyTheme === 'function') applyTheme();
     }
 
@@ -1170,7 +1189,142 @@
 
     function getLocationForKey(key) {
       if (key === CURRENT_LOCATION_KEY) return currentLocation;
+      if (key === MAP_PICKUP_KEY) return mapPickedLocations.pickup;
+      if (key === MAP_DESTINATION_KEY) return mapPickedLocations.destination;
       return LOCATIONS[key] || null;
+    }
+
+    function renderMapSelectionControls() {
+      const config = [
+        ['pickup', 'mapSetPickupBtn', 'Set pickup', 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100', 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'],
+        ['destination', 'mapSetDestinationBtn', 'Set destination', 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100', 'bg-rose-600 text-white border-rose-600 hover:bg-rose-700']
+      ];
+      config.forEach(([target, id, label, idleClasses, activeClasses]) => {
+        const button = document.getElementById(id);
+        const active = mapSelectionTarget === target;
+        button.setAttribute('aria-pressed', String(active));
+        button.textContent = getLocalizedText(label);
+        button.className = `rounded-lg border px-3 py-2 text-xs font-semibold transition ${active ? activeClasses : idleClasses}`;
+      });
+
+      const statusKey = mapSelectionTarget === 'pickup'
+        ? 'Tap the map to choose a pickup point.'
+        : mapSelectionTarget === 'destination'
+          ? 'Tap the map to choose a destination.'
+          : mapSelectionStatusKey;
+      const status = document.getElementById('mapSelectionStatus');
+      const message = getLocalizedText(statusKey);
+      status.textContent = mapSelectionStatusName
+        ? `${message} ${getLocalizedLocationName(mapSelectionStatusName)}`
+        : message;
+    }
+
+    function setMapSelectionStatus(messageKey, placeName = '') {
+      mapSelectionStatusKey = messageKey;
+      mapSelectionStatusName = placeName;
+      renderMapSelectionControls();
+    }
+
+    function setMapSelectionTarget(target) {
+      if (mapSelectionTarget === target) {
+        mapSelectionTarget = null;
+        mapSelectionStatusKey = 'Choose pickup or destination, then tap the map.';
+        mapSelectionStatusName = '';
+      } else {
+        mapSelectionTarget = target;
+      }
+      renderMapSelectionControls();
+    }
+
+    function addMapLocationOption(target, location) {
+      const select = document.getElementById(target === 'pickup' ? 'pickupSelect' : 'dropoffSelect');
+      const key = target === 'pickup' ? MAP_PICKUP_KEY : MAP_DESTINATION_KEY;
+      let option = Array.from(select.options).find(item => item.value === key);
+      if (!option) {
+        option = document.createElement('option');
+        option.value = key;
+        select.appendChild(option);
+      }
+      option.dataset.englishName = location.name;
+      option.textContent = getLocalizedLocationName(location.name);
+      select.value = key;
+    }
+
+    function handleMapClick(event) {
+      if (!mapSelectionTarget) return;
+      const target = mapSelectionTarget;
+      const otherKey = target === 'pickup'
+        ? document.getElementById('dropoffSelect').value
+        : document.getElementById('pickupSelect').value;
+      const point = { lat: event.latlng.lat, lng: event.latlng.lng };
+      const otherLocation = getLocationForKey(otherKey);
+      if (otherLocation && calculateDirectDistance(point, otherLocation) < 0.01) {
+        showToast('You selected the same point for pickup and destination. Choose a different point.');
+        return;
+      }
+
+      const location = {
+        name: getLocalizedText('Selected map point'),
+        lat: point.lat,
+        lng: point.lng
+      };
+      mapPickedLocations[target] = location;
+      addMapLocationOption(target, location);
+      mapSelectionTarget = null;
+      updateLocationLabels();
+      onLocationChange();
+
+      const lookupId = ++mapPinLookupIds[target];
+      setMapSelectionStatus(target === 'pickup' ? 'Pickup point selected.' : 'Destination selected.');
+      resolveMapLocationName(location, target, lookupId);
+    }
+
+    async function fetchNearbyPlaceName(location) {
+      const now = Date.now();
+      const requestTime = Math.max(now, nextReverseGeocodeTime);
+      nextReverseGeocodeTime = requestTime + 1100;
+      if (requestTime > now) {
+        await new Promise(resolve => setTimeout(resolve, requestTime - now));
+      }
+      const params = new URLSearchParams({
+        format: 'jsonv2',
+        lat: String(location.lat),
+        lon: String(location.lng),
+        zoom: '18',
+        addressdetails: '1',
+        'accept-language': 'en'
+      });
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`);
+      if (!response.ok) throw new Error(`Reverse geocoding returned ${response.status}.`);
+      const result = await response.json();
+      const placeName = getReverseGeocodedPlaceName(result);
+      if (!placeName) throw new Error('Reverse geocoding returned no nearby place name.');
+      return placeName;
+    }
+
+    async function resolveMapLocationName(location, target, lookupId) {
+      try {
+        if (document.getElementById(target === 'pickup' ? 'pickupSelect' : 'dropoffSelect').value ===
+            (target === 'pickup' ? MAP_PICKUP_KEY : MAP_DESTINATION_KEY)) {
+          setMapSelectionStatus('Finding a nearby place name for your map pin…');
+        }
+        const placeName = await fetchNearbyPlaceName(location);
+        if (lookupId !== mapPinLookupIds[target] || mapPickedLocations[target] !== location) return;
+        location.name = placeName;
+        addMapLocationOption(target, location);
+        updateLocationLabels();
+        if (document.getElementById(target === 'pickup' ? 'pickupSelect' : 'dropoffSelect').value ===
+            (target === 'pickup' ? MAP_PICKUP_KEY : MAP_DESTINATION_KEY)) {
+          setMapSelectionStatus('Map pin set to:', placeName);
+        }
+      } catch (error) {
+        console.warn('Could not find a place name for the selected map point:', error);
+        if (lookupId === mapPinLookupIds[target] && mapPickedLocations[target] === location &&
+            document.getElementById(target === 'pickup' ? 'pickupSelect' : 'dropoffSelect').value ===
+            (target === 'pickup' ? MAP_PICKUP_KEY : MAP_DESTINATION_KEY)) {
+          setMapSelectionStatus(target === 'pickup' ? 'Pickup point selected.' : 'Destination selected.');
+        }
+      }
     }
 
     function useCurrentLocation() {
@@ -1245,19 +1399,7 @@
 
     async function resolveCurrentLocationName(location, lookupId) {
       try {
-        const params = new URLSearchParams({
-          format: 'jsonv2',
-          lat: String(location.lat),
-          lon: String(location.lng),
-          zoom: '18',
-          addressdetails: '1',
-          'accept-language': 'en'
-        });
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`);
-        if (!response.ok) throw new Error(`Reverse geocoding returned ${response.status}.`);
-        const result = await response.json();
-        const placeName = getReverseGeocodedPlaceName(result);
-        if (!placeName) throw new Error('Reverse geocoding returned no nearby place name.');
+        const placeName = await fetchNearbyPlaceName(location);
         if (lookupId !== currentLocationLookupId ||
             document.getElementById('pickupSelect').value !== CURRENT_LOCATION_KEY ||
             currentLocation !== location) return;
@@ -1429,8 +1571,9 @@
       if (!getTravelDataKey()) return;
       const pickupKey = document.getElementById('pickupSelect').value;
       const dropoffKey = document.getElementById('dropoffSelect').value;
-      if (pickupKey === CURRENT_LOCATION_KEY) return;
-      if (!pickupKey || !dropoffKey || pickupKey === dropoffKey) return;
+      if (!Object.prototype.hasOwnProperty.call(LOCATIONS, pickupKey) ||
+          !Object.prototype.hasOwnProperty.call(LOCATIONS, dropoffKey) ||
+          pickupKey === dropoffKey) return;
 
       const data = readTravelData();
       data.trips = [
@@ -1557,6 +1700,15 @@
     let currentLocationLookupId = 0;
     let currentLocationStatusKey = 'Your browser will ask permission before sharing your location.';
     let currentLocationStatusName = '';
+    const MAP_PICKUP_KEY = 'bharadekhi-map-pickup';
+    const MAP_DESTINATION_KEY = 'bharadekhi-map-destination';
+    const mapPickedLocations = { pickup: null, destination: null };
+    const mapPinLookupIds = { pickup: 0, destination: 0 };
+    let mapSelectionTarget = null;
+    let mapSelectionStatusKey = 'Choose pickup or destination, then tap the map.';
+    let mapSelectionStatusName = '';
+    let nextReverseGeocodeTime = 0;
+    let routeUpdateId = 0;
 
     // Leaflet map objects
     let map, pickupMarker, dropMarker, routePolyline;
@@ -1571,6 +1723,7 @@
 
       pickupMarker = L.marker([LOCATIONS.azimpur.lat, LOCATIONS.azimpur.lng]).addTo(map).bindPopup('Pickup');
       dropMarker = L.marker([LOCATIONS.brac.lat, LOCATIONS.brac.lng]).addTo(map).bindPopup('Destination');
+      map.on('click', handleMapClick);
     }
 
     // Peak windows are estimates in Dhaka local time: 8:30-10:30 AM and 5:30-8:30 PM.
@@ -1602,12 +1755,14 @@
 
     // 4. Update Route, Markers & Fetch OSRM Road Distance
     async function updateRoute() {
+      const requestId = ++routeUpdateId;
       const pKey = document.getElementById('pickupSelect').value;
       const dKey = document.getElementById('dropoffSelect').value;
       const pLoc = getLocationForKey(pKey);
       const dLoc = getLocationForKey(dKey);
       if (!pLoc || !dLoc) return;
       if (pKey === dKey || calculateDirectDistance(pLoc, dLoc) < 0.01) {
+        document.getElementById('loadingOverlay').classList.add('hidden');
         showToast("Pickup and Destination cannot be the same!");
         return;
       }
@@ -1625,6 +1780,7 @@
         const data = await res.json();
 
         if (data.routes && data.routes.length > 0) {
+          if (requestId !== routeUpdateId) return;
           const route = data.routes[0];
           currentDistanceKm = route.distance / 1000;
           currentDurationMins = Math.round(route.duration / 60);
@@ -1638,6 +1794,7 @@
           throw new Error('No route found for the selected locations.');
         }
       } catch (err) {
+        if (requestId !== routeUpdateId) return;
         console.warn('Using approximate distance because road routing failed:', err);
         // Fallback calculation (approximate Haversine distance)
         currentDistanceKm = calculateDirectDistance(pLoc, dLoc) * 1.35;
@@ -1645,6 +1802,7 @@
         if (routePolyline) map.removeLayer(routePolyline);
         routePolyline = L.polyline([[pLoc.lat, pLoc.lng], [dLoc.lat, dLoc.lng]], { color: '#2563eb', dashArray: '5, 10' }).addTo(map);
       } finally {
+        if (requestId !== routeUpdateId) return;
         document.getElementById('loadingOverlay').classList.add('hidden');
         renderMetricsAndFares();
         recordRecentTrip();
@@ -1866,6 +2024,12 @@
 
     function onLocationChange() {
       const pickupSelect = document.getElementById('pickupSelect');
+      if (mapSelectionTarget) {
+        mapSelectionTarget = null;
+        mapSelectionStatusKey = 'Choose pickup or destination, then tap the map.';
+        mapSelectionStatusName = '';
+        renderMapSelectionControls();
+      }
       if (pickupSelect.value !== CURRENT_LOCATION_KEY && currentLocation) {
         currentLocationLookupId += 1;
         currentLocation = null;
@@ -2135,6 +2299,8 @@
     document.getElementById('logoutBtn').addEventListener('click', logoutUser);
     document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
     document.getElementById('useCurrentLocationBtn').addEventListener('click', useCurrentLocation);
+    document.getElementById('mapSetPickupBtn').addEventListener('click', () => setMapSelectionTarget('pickup'));
+    document.getElementById('mapSetDestinationBtn').addEventListener('click', () => setMapSelectionTarget('destination'));
     document.getElementById('savePlaceForm').addEventListener('submit', handleSavePlace);
     document.getElementById('savedPlacesList').addEventListener('click', handleSavedPlacesClick);
     document.getElementById('recentTripsList').addEventListener('click', handleRecentTripsClick);
