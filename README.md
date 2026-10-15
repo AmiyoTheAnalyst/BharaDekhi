@@ -15,6 +15,7 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
   * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
 * **Side-by-Side Ride Comparison:** Compares estimated fares and approximate travel times for bike, CNG, and car, highlighting the lowest fare and shortest trip estimate.
 * **English/Bangla Language Toggle:** Switches the app interface and Dhaka location names between English and Bangla, saving the choice in the browser.
+* **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices.
 * **Public FAQ:** Answers common questions about estimated fares, peak-hour periods, provider pricing, and account requirements before sign-in.
 * **Unified Ride-Sharing Bridge:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.

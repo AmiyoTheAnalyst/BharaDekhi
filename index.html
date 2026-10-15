@@ -219,6 +219,37 @@
         </div>
       </div>
 
+      <section aria-labelledby="travelShortcutsHeading" class="border-t border-slate-100 pt-4">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="travelShortcutsHeading" class="text-base font-bold text-slate-900">Saved places &amp; recent trips</h2>
+          <p class="text-xs text-slate-500">Saved on this device for your account. Recent trips are routes you estimated, not completed rides.</p>
+        </div>
+        <form id="savePlaceForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
+          <label class="sr-only" for="savedPlaceName">Place name</label>
+          <input id="savedPlaceName" type="text" maxlength="30" required placeholder="e.g. Home" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="sr-only" for="savedPlaceLocation">Choose a location</label>
+          <select id="savedPlaceLocation" required class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Choose a location</option>
+          </select>
+          <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">Save place</button>
+        </form>
+        <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <h3 class="mb-2 text-sm font-bold text-slate-800">Saved places</h3>
+            <p id="savedPlacesEmpty" class="rounded-xl bg-slate-50 px-3 py-4 text-sm text-slate-500">No saved places yet.</p>
+            <div id="savedPlacesList" class="space-y-2"></div>
+          </div>
+          <div>
+            <div class="mb-2 flex items-center justify-between gap-2">
+              <h3 class="text-sm font-bold text-slate-800">Recent trips</h3>
+              <button id="clearRecentTripsBtn" type="button" class="hidden text-xs font-semibold text-slate-500 hover:text-rose-700">Clear history</button>
+            </div>
+            <p id="recentTripsEmpty" class="rounded-xl bg-slate-50 px-3 py-4 text-sm text-slate-500">No recent trips yet.</p>
+            <div id="recentTripsList" class="space-y-2"></div>
+          </div>
+        </div>
+      </section>
+
       <!-- Vehicle Mode Tabs -->
       <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Vehicle:</span>
@@ -609,6 +640,31 @@
       'The current estimate uses Dhaka local time and treats 8:30–10:30 AM and 5:30–8:30 PM as approximate weekday-style peak windows. Actual traffic and provider surge pricing can differ.': 'বর্তমান হিসাব ঢাকার স্থানীয় সময় ব্যবহার করে এবং সকাল ৮:৩০–১০:৩০ ও বিকেল ৫:৩০–রাত ৮:৩০-কে আনুমানিক কর্মদিবসের পিক সময় ধরে। প্রকৃত যানজট ও সেবাদাতার পিক চার্জ ভিন্ন হতে পারে।',
       'Do I need an account to use the route planner?': 'রুট পরিকল্পনা ব্যবহার করতে কি অ্যাকাউন্ট দরকার?',
       'Yes. Sign in or create an account to open the route planner, compare ride options, and use the links to ride services.': 'হ্যাঁ। রুট পরিকল্পনা খুলতে, যাত্রার বিকল্প তুলনা করতে এবং রাইড সেবার লিংক ব্যবহার করতে লগ ইন করুন অথবা অ্যাকাউন্ট তৈরি করুন।',
+      'Saved places & recent trips': 'সংরক্ষিত স্থান ও সাম্প্রতিক যাত্রা',
+      'Saved on this device for your account. Recent trips are routes you estimated, not completed rides.': 'আপনার অ্যাকাউন্টের জন্য এই ডিভাইসে সংরক্ষিত। সাম্প্রতিক যাত্রাগুলো আনুমানিক রুট, সম্পন্ন রাইড নয়।',
+      'Place name': 'স্থানের নাম',
+      'e.g. Home': 'যেমন: বাসা',
+      'Choose a location': 'একটি স্থান বেছে নিন',
+      'Save place': 'স্থান সংরক্ষণ',
+      'Saved places': 'সংরক্ষিত স্থান',
+      'Recent trips': 'সাম্প্রতিক যাত্রা',
+      'No saved places yet.': 'এখনও কোনো স্থান সংরক্ষণ করা হয়নি।',
+      'No recent trips yet.': 'এখনও কোনো সাম্প্রতিক যাত্রা নেই।',
+      'Use as pickup': 'শুরুর স্থান হিসেবে নিন',
+      'Use as destination': 'গন্তব্য হিসেবে নিন',
+      'Remove': 'মুছুন',
+      'Plan this trip': 'এই যাত্রার পরিকল্পনা করুন',
+      'Clear history': 'ইতিহাস মুছুন',
+      'Saved place.': 'স্থান সংরক্ষিত হয়েছে।',
+      'Saved place updated.': 'সংরক্ষিত স্থান হালনাগাদ হয়েছে।',
+      'Removed saved place.': 'সংরক্ষিত স্থান মুছে ফেলা হয়েছে।',
+      'Recent trip removed.': 'সাম্প্রতিক যাত্রা মুছে ফেলা হয়েছে।',
+      'Recent trips cleared.': 'সাম্প্রতিক যাত্রার ইতিহাস মুছে ফেলা হয়েছে।',
+      'Could not load saved travel data.': 'সংরক্ষিত যাত্রার তথ্য লোড করা যায়নি।',
+      'Could not save travel data. Please check your browser storage.': 'যাত্রার তথ্য সংরক্ষণ করা যায়নি। ব্রাউজারের স্টোরেজ পরীক্ষা করুন।',
+      'Please enter a place name and choose a location.': 'স্থানের নাম লিখুন এবং একটি স্থান বেছে নিন।',
+      'Pickup and destination cannot be the same.': 'শুরুর স্থান ও গন্তব্য একই হতে পারে না।',
+      'You can save up to 8 places.': 'সর্বোচ্চ ৮টি স্থান সংরক্ষণ করতে পারবেন।',
       'Sign up as a rider, log in, and access your route planner. Admin access is kept separate for system management.': 'যাত্রী হিসেবে নিবন্ধন করুন বা লগ ইন করে রুট পরিকল্পনা ব্যবহার করুন। সিস্টেম পরিচালনার জন্য অ্যাডমিন প্রবেশ আলাদা।',
       'Live pickup and destination selection': 'পিকআপ ও গন্তব্য নির্বাচন',
       'Fare comparison across services': 'বিভিন্ন সেবার ভাড়া তুলনা',
@@ -791,11 +847,15 @@
     }
 
     function updateLocationLabels() {
-      ['pickupSelect', 'dropoffSelect'].forEach(id => {
+      ['pickupSelect', 'dropoffSelect', 'savedPlaceLocation'].forEach(id => {
         const select = document.getElementById(id);
         if (!select) return;
         Array.from(select.options).forEach(option => {
-          option.textContent = getLocalizedLocationName(option.dataset.englishName);
+          if (option.dataset.englishName) {
+            option.textContent = getLocalizedLocationName(option.dataset.englishName);
+          } else {
+            option.textContent = getLocalizedText(option.textContent);
+          }
         });
       });
 
@@ -836,6 +896,7 @@
 
       if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
       if (typeof updateLocationLabels === 'function') updateLocationLabels();
+      if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
     }
 
     function toggleLanguage() {
@@ -959,6 +1020,7 @@
     function populateLocationSelectors() {
       const pickupSelect = document.getElementById('pickupSelect');
       const dropoffSelect = document.getElementById('dropoffSelect');
+      const savedPlaceLocation = document.getElementById('savedPlaceLocation');
 
       Object.entries(LOCATIONS).forEach(([key, location]) => {
         const pickupOption = document.createElement('option');
@@ -971,12 +1033,231 @@
         dropoffOption.dataset.englishName = location.name;
         dropoffOption.textContent = getLocalizedLocationName(location.name);
 
+        const savedPlaceOption = document.createElement('option');
+        savedPlaceOption.value = key;
+        savedPlaceOption.dataset.englishName = location.name;
+        savedPlaceOption.textContent = getLocalizedLocationName(location.name);
+
         pickupSelect.appendChild(pickupOption);
         dropoffSelect.appendChild(dropoffOption);
+        savedPlaceLocation.appendChild(savedPlaceOption);
       });
 
       pickupSelect.value = 'azimpur';
       dropoffSelect.value = 'brac';
+    }
+
+    const MAX_SAVED_PLACES = 8;
+    const MAX_RECENT_TRIPS = 8;
+
+    function getTravelDataKey() {
+      const currentUser = JSON.parse(localStorage.getItem('commuteHubCurrentUser') || 'null');
+      const email = currentUser?.email?.trim().toLowerCase();
+      return email ? `bharadekhiTravelData:${encodeURIComponent(email)}` : null;
+    }
+
+    function readTravelData() {
+      const key = getTravelDataKey();
+      if (!key) return { places: [], trips: [] };
+
+      let storedData;
+      try {
+        storedData = localStorage.getItem(key);
+      } catch (error) {
+        console.error('Could not read saved travel data:', error);
+        showToast('Could not load saved travel data.');
+        return { places: [], trips: [] };
+      }
+      if (!storedData) return { places: [], trips: [] };
+
+      let data;
+      try {
+        data = JSON.parse(storedData);
+      } catch (error) {
+        console.error('Could not parse saved travel data:', error);
+        showToast('Could not load saved travel data.');
+        return { places: [], trips: [] };
+      }
+
+      if (!data || !Array.isArray(data.places) || !Array.isArray(data.trips)) {
+        console.error('Saved travel data has an invalid format.');
+        showToast('Could not load saved travel data.');
+        return { places: [], trips: [] };
+      }
+
+      return {
+        places: data.places.filter(place =>
+          place && typeof place.name === 'string' &&
+          Object.prototype.hasOwnProperty.call(LOCATIONS, place.locationKey)
+        ).slice(0, MAX_SAVED_PLACES),
+        trips: data.trips.filter(trip =>
+          trip && Object.prototype.hasOwnProperty.call(LOCATIONS, trip.pickupKey) &&
+          Object.prototype.hasOwnProperty.call(LOCATIONS, trip.dropoffKey) &&
+          trip.pickupKey !== trip.dropoffKey
+        ).slice(0, MAX_RECENT_TRIPS)
+      };
+    }
+
+    function saveTravelData(data, successMessage = '') {
+      const key = getTravelDataKey();
+      if (!key) return false;
+
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+        renderTravelShortcuts();
+        if (successMessage) showToast(successMessage);
+        return true;
+      } catch (error) {
+        console.error('Could not save travel data:', error);
+        showToast('Could not save travel data. Please check your browser storage.');
+        return false;
+      }
+    }
+
+    function createTravelAction(label, action, index, className) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.action = action;
+      button.dataset.index = String(index);
+      button.className = className;
+      button.textContent = getLocalizedText(label);
+      return button;
+    }
+
+    function renderTravelShortcuts() {
+      const data = readTravelData();
+      const savedPlacesList = document.getElementById('savedPlacesList');
+      const recentTripsList = document.getElementById('recentTripsList');
+      savedPlacesList.replaceChildren();
+      recentTripsList.replaceChildren();
+      document.getElementById('savedPlacesEmpty').classList.toggle('hidden', data.places.length > 0);
+      document.getElementById('recentTripsEmpty').classList.toggle('hidden', data.trips.length > 0);
+      document.getElementById('clearRecentTripsBtn').classList.toggle('hidden', data.trips.length === 0);
+
+      data.places.forEach((place, index) => {
+        const card = document.createElement('div');
+        card.className = 'rounded-xl border border-slate-200 bg-slate-50 p-3';
+        const heading = document.createElement('p');
+        heading.className = 'text-sm font-semibold text-slate-900';
+        heading.textContent = place.name;
+        const location = document.createElement('p');
+        location.className = 'mt-0.5 text-xs text-slate-500';
+        location.textContent = getLocalizedLocationName(LOCATIONS[place.locationKey].name);
+        const actions = document.createElement('div');
+        actions.className = 'mt-2 flex flex-wrap gap-2';
+        actions.append(
+          createTravelAction('Use as pickup', 'use-pickup', index, 'rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 ring-1 ring-slate-200 hover:bg-blue-50'),
+          createTravelAction('Use as destination', 'use-destination', index, 'rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 ring-1 ring-slate-200 hover:bg-blue-50'),
+          createTravelAction('Remove', 'remove-place', index, 'rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-700')
+        );
+        card.append(heading, location, actions);
+        savedPlacesList.appendChild(card);
+      });
+
+      data.trips.forEach((trip, index) => {
+        const card = document.createElement('div');
+        card.className = 'flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3';
+        const route = document.createElement('p');
+        route.className = 'text-sm font-semibold text-slate-800';
+        route.textContent = `${getLocalizedLocationName(LOCATIONS[trip.pickupKey].name)} → ${getLocalizedLocationName(LOCATIONS[trip.dropoffKey].name)}`;
+        const actions = document.createElement('div');
+        actions.className = 'flex shrink-0 gap-2';
+        actions.append(
+          createTravelAction('Plan this trip', 'plan-trip', index, 'rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 ring-1 ring-slate-200 hover:bg-blue-50'),
+          createTravelAction('Remove', 'remove-trip', index, 'rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-700')
+        );
+        card.append(route, actions);
+        recentTripsList.appendChild(card);
+      });
+    }
+
+    function recordRecentTrip() {
+      if (!getTravelDataKey()) return;
+      const pickupKey = document.getElementById('pickupSelect').value;
+      const dropoffKey = document.getElementById('dropoffSelect').value;
+      if (!pickupKey || !dropoffKey || pickupKey === dropoffKey) return;
+
+      const data = readTravelData();
+      data.trips = [
+        { pickupKey, dropoffKey },
+        ...data.trips.filter(trip => trip.pickupKey !== pickupKey || trip.dropoffKey !== dropoffKey)
+      ].slice(0, MAX_RECENT_TRIPS);
+      saveTravelData(data);
+    }
+
+    function useSavedLocation(locationKey, target) {
+      const pickupSelect = document.getElementById('pickupSelect');
+      const dropoffSelect = document.getElementById('dropoffSelect');
+      const otherLocation = target === 'pickup' ? dropoffSelect.value : pickupSelect.value;
+      if (locationKey === otherLocation) {
+        showToast('Pickup and destination cannot be the same.');
+        return;
+      }
+
+      (target === 'pickup' ? pickupSelect : dropoffSelect).value = locationKey;
+      onLocationChange();
+    }
+
+    function handleSavedPlacesClick(event) {
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const index = Number(button.dataset.index);
+      const data = readTravelData();
+      const place = data.places[index];
+      if (!place) return;
+
+      if (button.dataset.action === 'use-pickup') useSavedLocation(place.locationKey, 'pickup');
+      else if (button.dataset.action === 'use-destination') useSavedLocation(place.locationKey, 'destination');
+      else if (button.dataset.action === 'remove-place') {
+        data.places.splice(index, 1);
+        saveTravelData(data, 'Removed saved place.');
+      }
+    }
+
+    function handleRecentTripsClick(event) {
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const index = Number(button.dataset.index);
+      const data = readTravelData();
+      const trip = data.trips[index];
+      if (!trip) return;
+
+      if (button.dataset.action === 'plan-trip') {
+        document.getElementById('pickupSelect').value = trip.pickupKey;
+        document.getElementById('dropoffSelect').value = trip.dropoffKey;
+        onLocationChange();
+      } else if (button.dataset.action === 'remove-trip') {
+        data.trips.splice(index, 1);
+        saveTravelData(data, 'Recent trip removed.');
+      }
+    }
+
+    function handleSavePlace(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('savedPlaceName');
+      const locationKey = document.getElementById('savedPlaceLocation').value;
+      const name = nameInput.value.trim();
+      if (!name || !Object.prototype.hasOwnProperty.call(LOCATIONS, locationKey)) {
+        showToast('Please enter a place name and choose a location.');
+        return;
+      }
+
+      const data = readTravelData();
+      const existingPlace = data.places.find(place => place.name.toLowerCase() === name.toLowerCase());
+      if (existingPlace) {
+        existingPlace.locationKey = locationKey;
+        if (saveTravelData(data, 'Saved place updated.')) event.target.reset();
+        return;
+      }
+      if (data.places.length >= MAX_SAVED_PLACES) {
+        showToast('You can save up to 8 places.');
+        return;
+      }
+
+      data.places.push({ name, locationKey });
+      if (saveTravelData(data, 'Saved place.')) event.target.reset();
     }
 
     // 1. Coordinates Database for Dhaka Hubs
@@ -1103,6 +1384,7 @@
       } finally {
         document.getElementById('loadingOverlay').classList.add('hidden');
         renderMetricsAndFares();
+        recordRecentTrip();
       }
     }
 
@@ -1352,6 +1634,7 @@
       adminPanel.classList.toggle('hidden', view !== 'admin');
       updateAdminModeNavigation();
       if (view === 'admin') loadAdminAccounts();
+      if (view === 'user') renderTravelShortcuts();
 
       if (view === 'user' && map) {
         requestAnimationFrame(() => {
@@ -1561,6 +1844,14 @@
     document.getElementById('signupForm').addEventListener('submit', handleSignup);
     document.getElementById('logoutBtn').addEventListener('click', logoutUser);
     document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
+    document.getElementById('savePlaceForm').addEventListener('submit', handleSavePlace);
+    document.getElementById('savedPlacesList').addEventListener('click', handleSavedPlacesClick);
+    document.getElementById('recentTripsList').addEventListener('click', handleRecentTripsClick);
+    document.getElementById('clearRecentTripsBtn').addEventListener('click', () => {
+      const data = readTravelData();
+      data.trips = [];
+      saveTravelData(data, 'Recent trips cleared.');
+    });
     document.getElementById('chooseUserModeBtn').addEventListener('click', () => chooseRole('user'));
     document.getElementById('chooseAdminModeBtn').addEventListener('click', () => chooseRole('admin'));
     document.getElementById('refreshAdminAccountsBtn').addEventListener('click', loadAdminAccounts);
