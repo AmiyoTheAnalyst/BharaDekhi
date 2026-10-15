@@ -7,6 +7,7 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
 ## 🌟 Features
 
 * **Interactive Dhaka Map:** Leaflet.js map layer powered by OpenStreetMap, mapping high-traffic hubs across Dhaka (Azimpur, BRAC University Merul Badda, Dhanmondi 27, Gulshan 1, Mirpur 10, Motijheel).
+* **Current-Location Pickup:** Request browser geolocation to use the device's current coordinates as the pickup for the route, fare estimate, and map. Requires location permission and a secure context (HTTPS or localhost). Uber's universal link receives the pickup coordinates; Pathao and inDrive open normally and copy pickup coordinates with the ride details because their app links do not prefill those fields here. Current GPS trips are not saved in recent-trip history.
 * **Live Road Distance & Travel Duration:** Calculates driving distances and trip duration using the public Open Source Routing Machine (OSRM) API, backed by an algorithmic Haversine fallback engine.
 * **Dhaka Rush-Hour Surge Engine:** Uses Dhaka local time (Asia/Dhaka) to automatically estimate morning (8:30 AM – 10:30 AM) and evening (5:30 PM – 8:30 PM) peak periods. The corner indicator and fares refresh automatically, with an optional manual simulation toggle.
 * **Multi-Modal Fare Estimation:** Calibrated baseline rate heuristics for:
@@ -15,12 +16,12 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
   * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
 * **Side-by-Side Ride Comparison:** Compares estimated fares and approximate travel times for bike, CNG, and car, highlighting the lowest fare and shortest trip estimate.
 * **English/Bangla Language Toggle:** Switches the app interface and Dhaka location names between English and Bangla, saving the choice in the browser.
-* **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices.
+* **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices. Routes using precise current-location coordinates are excluded from history.
 * **Public FAQ:** Answers common questions about estimated fares, peak-hour periods, provider pricing, and account requirements before sign-in.
 * **Unified Ride-Sharing Bridge:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
-  * **Pathao:** Opens the Pathao app with an app deep link and copies the destination to the clipboard.
-  * **inDrive:** Opens the inDrive app with an app deep link and copies the destination and suggested bid for quick bidding.
+  * **Pathao:** Opens the Pathao app with an app deep link and copies pickup, destination, vehicle, and the BharaDekhi estimate to the clipboard.
+  * **inDrive:** Opens the inDrive app with an app deep link and copies pickup, destination, vehicle, and the suggested bid for quick bidding.
 
 ---
 

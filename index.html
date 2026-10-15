@@ -207,6 +207,11 @@
           </label>
           <select id="pickupSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="onLocationChange()">
           </select>
+          <button id="useCurrentLocationBtn" type="button" class="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">
+            <i data-lucide="locate-fixed" class="h-4 w-4"></i>
+            <span>Use my current location</span>
+          </button>
+          <p id="currentLocationStatus" class="mt-1 text-xs text-slate-500" aria-live="polite">Your browser will ask permission before sharing your location.</p>
         </div>
 
         <!-- Destination Selector -->
@@ -224,6 +229,7 @@
           <h2 id="travelShortcutsHeading" class="text-base font-bold text-slate-900">Saved places &amp; recent trips</h2>
           <p class="text-xs text-slate-500">Saved on this device for your account. Recent trips are routes you estimated, not completed rides.</p>
         </div>
+        <p class="mt-1 text-xs text-slate-500">Current-location trips are not saved in history to protect your precise location.</p>
         <form id="savePlaceForm" class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
           <label class="sr-only" for="savedPlaceName">Place name</label>
           <input id="savedPlaceName" type="text" maxlength="30" required placeholder="e.g. Home" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -665,6 +671,18 @@
       'Please enter a place name and choose a location.': 'স্থানের নাম লিখুন এবং একটি স্থান বেছে নিন।',
       'Pickup and destination cannot be the same.': 'শুরুর স্থান ও গন্তব্য একই হতে পারে না।',
       'You can save up to 8 places.': 'সর্বোচ্চ ৮টি স্থান সংরক্ষণ করতে পারবেন।',
+      'Current location': 'বর্তমান অবস্থান',
+      'Use my current location': 'আমার বর্তমান অবস্থান ব্যবহার করুন',
+      'Your browser will ask permission before sharing your location.': 'আপনার অবস্থান শেয়ার করার আগে ব্রাউজার অনুমতি চাইবে।',
+      'Getting your current location…': 'আপনার বর্তমান অবস্থান খোঁজা হচ্ছে…',
+      'Current location is being used as your pickup.': 'আপনার বর্তমান অবস্থান যাত্রা শুরুর স্থান হিসেবে ব্যবহৃত হচ্ছে।',
+      'Current location requires HTTPS. Open the deployed site or use localhost.': 'বর্তমান অবস্থান ব্যবহারে HTTPS প্রয়োজন। ওয়েবসাইটটি খুলুন অথবা localhost ব্যবহার করুন।',
+      'Location access was denied. Allow location access in your browser settings and try again.': 'অবস্থানের অনুমতি দেওয়া হয়নি। ব্রাউজার সেটিংসে অবস্থানের অনুমতি দিয়ে আবার চেষ্টা করুন।',
+      'Your location could not be determined. Check your device location settings and try again.': 'আপনার অবস্থান নির্ধারণ করা যায়নি। ডিভাইসের অবস্থান সেটিংস পরীক্ষা করে আবার চেষ্টা করুন।',
+      'Getting your location took too long. Please try again.': 'অবস্থান পেতে বেশি সময় লেগেছে। আবার চেষ্টা করুন।',
+      'Your browser does not support location access.': 'আপনার ব্রাউজারে অবস্থান ব্যবহারের সুবিধা নেই।',
+      'Current-location trips are not saved in history to protect your precise location.': 'আপনার সুনির্দিষ্ট অবস্থানের গোপনীয়তা রক্ষায় বর্তমান অবস্থানের যাত্রা ইতিহাসে সংরক্ষণ করা হয় না।',
+      'Could not find a route for these locations.': 'এই স্থানগুলোর জন্য রুট খুঁজে পাওয়া যায়নি।',
       'Sign up as a rider, log in, and access your route planner. Admin access is kept separate for system management.': 'যাত্রী হিসেবে নিবন্ধন করুন বা লগ ইন করে রুট পরিকল্পনা ব্যবহার করুন। সিস্টেম পরিচালনার জন্য অ্যাডমিন প্রবেশ আলাদা।',
       'Live pickup and destination selection': 'পিকআপ ও গন্তব্য নির্বাচন',
       'Fare comparison across services': 'বিভিন্ন সেবার ভাড়া তুলনা',
@@ -843,7 +861,9 @@
     }
 
     function getLocalizedLocationName(name) {
-      return currentLanguage === 'bn' ? BENGALI_LOCATION_NAMES[name] || name : name;
+      return currentLanguage === 'bn'
+        ? BENGALI_LOCATION_NAMES[name] || BENGALI_TRANSLATIONS[name] || name
+        : name;
     }
 
     function updateLocationLabels() {
@@ -860,8 +880,9 @@
       });
 
       if (pickupMarker && dropMarker) {
-        const pickup = LOCATIONS[document.getElementById('pickupSelect').value];
-        const destination = LOCATIONS[document.getElementById('dropoffSelect').value];
+        const pickup = getLocationForKey(document.getElementById('pickupSelect').value);
+        const destination = getLocationForKey(document.getElementById('dropoffSelect').value);
+        if (!pickup || !destination) return;
         pickupMarker.setPopupContent(`${getLocalizedText('Pickup')}: ${getLocalizedLocationName(pickup.name)}`);
         dropMarker.setPopupContent(`${getLocalizedText('Destination')}: ${getLocalizedLocationName(destination.name)}`);
       }
@@ -1047,6 +1068,64 @@
       dropoffSelect.value = 'brac';
     }
 
+    function getLocationForKey(key) {
+      if (key === CURRENT_LOCATION_KEY) return currentLocation;
+      return LOCATIONS[key] || null;
+    }
+
+    function useCurrentLocation() {
+      if (!navigator.geolocation) {
+        showToast('Your browser does not support location access.');
+        return;
+      }
+      if (!window.isSecureContext) {
+        showToast('Current location requires HTTPS. Open the deployed site or use localhost.');
+        return;
+      }
+
+      const button = document.getElementById('useCurrentLocationBtn');
+      const status = document.getElementById('currentLocationStatus');
+      button.disabled = true;
+      status.textContent = getLocalizedText('Getting your current location…');
+
+      navigator.geolocation.getCurrentPosition(position => {
+        currentLocation = {
+          name: 'Current location',
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+
+        const pickupSelect = document.getElementById('pickupSelect');
+        let currentOption = Array.from(pickupSelect.options)
+          .find(option => option.value === CURRENT_LOCATION_KEY);
+        if (!currentOption) {
+          currentOption = document.createElement('option');
+          currentOption.value = CURRENT_LOCATION_KEY;
+          currentOption.dataset.englishName = 'Current location';
+          pickupSelect.appendChild(currentOption);
+        }
+        pickupSelect.value = CURRENT_LOCATION_KEY;
+        updateLocationLabels();
+        status.textContent = getLocalizedText('Current location is being used as your pickup.');
+        button.disabled = false;
+        onLocationChange();
+      }, error => {
+        button.disabled = false;
+        status.textContent = getLocalizedText('Your browser will ask permission before sharing your location.');
+        if (error.code === 1) {
+          showToast('Location access was denied. Allow location access in your browser settings and try again.');
+        } else if (error.code === 2) {
+          showToast('Your location could not be determined. Check your device location settings and try again.');
+        } else {
+          showToast('Getting your location took too long. Please try again.');
+        }
+      }, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      });
+    }
+
     const MAX_SAVED_PLACES = 8;
     const MAX_RECENT_TRIPS = 8;
 
@@ -1175,6 +1254,7 @@
       if (!getTravelDataKey()) return;
       const pickupKey = document.getElementById('pickupSelect').value;
       const dropoffKey = document.getElementById('dropoffSelect').value;
+      if (pickupKey === CURRENT_LOCATION_KEY) return;
       if (!pickupKey || !dropoffKey || pickupKey === dropoffKey) return;
 
       const data = readTravelData();
@@ -1297,6 +1377,8 @@
     let currentDistanceKm = 10.2;
     let currentDurationMins = 32;
     let isSimulatedSurge = false;
+    const CURRENT_LOCATION_KEY = 'bharadekhi-current-location';
+    let currentLocation = null;
 
     // Leaflet map objects
     let map, pickupMarker, dropMarker, routePolyline;
@@ -1344,14 +1426,13 @@
     async function updateRoute() {
       const pKey = document.getElementById('pickupSelect').value;
       const dKey = document.getElementById('dropoffSelect').value;
-
-      if (pKey === dKey) {
+      const pLoc = getLocationForKey(pKey);
+      const dLoc = getLocationForKey(dKey);
+      if (!pLoc || !dLoc) return;
+      if (pKey === dKey || calculateDirectDistance(pLoc, dLoc) < 0.01) {
         showToast("Pickup and Destination cannot be the same!");
         return;
       }
-
-      const pLoc = LOCATIONS[pKey];
-      const dLoc = LOCATIONS[dKey];
 
       pickupMarker.setLatLng([pLoc.lat, pLoc.lng]).setPopupContent(`${getLocalizedText('Pickup')}: ${getLocalizedLocationName(pLoc.name)}`);
       dropMarker.setLatLng([dLoc.lat, dLoc.lng]).setPopupContent(`${getLocalizedText('Destination')}: ${getLocalizedLocationName(dLoc.name)}`);
@@ -1362,6 +1443,7 @@
         // Public OSRM Road Routing API
         const url = `https://router.project-osrm.org/route/v1/driving/${pLoc.lng},${pLoc.lat};${dLoc.lng},${dLoc.lat}?overview=full&geometries=geojson`;
         const res = await fetch(url);
+        if (!res.ok) throw new Error(`Routing service returned ${res.status}.`);
         const data = await res.json();
 
         if (data.routes && data.routes.length > 0) {
@@ -1374,8 +1456,11 @@
           if (routePolyline) map.removeLayer(routePolyline);
           routePolyline = L.polyline(coords, { color: '#2563eb', weight: 5, opacity: 0.8 }).addTo(map);
           map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+        } else {
+          throw new Error('No route found for the selected locations.');
         }
       } catch (err) {
+        console.warn('Using approximate distance because road routing failed:', err);
         // Fallback calculation (approximate Haversine distance)
         currentDistanceKm = calculateDirectDistance(pLoc, dLoc) * 1.35;
         currentDurationMins = Math.round(currentDistanceKm * 3.2);
@@ -1521,8 +1606,9 @@
     function handleUberClick() {
       const pKey = document.getElementById('pickupSelect').value;
       const dKey = document.getElementById('dropoffSelect').value;
-      const pLoc = LOCATIONS[pKey];
-      const dLoc = LOCATIONS[dKey];
+      const pLoc = getLocationForKey(pKey);
+      const dLoc = getLocationForKey(dKey);
+      if (!pLoc || !dLoc) return;
 
       // Official Universal Link format
       const uberLink = `https://m.uber.com/ul/?action=setPickup` +
@@ -1536,36 +1622,53 @@
 
     function handlePathaoClick() {
       const dKey = document.getElementById('dropoffSelect').value;
-      const dName = LOCATIONS[dKey].name;
+      const pKey = document.getElementById('pickupSelect').value;
+      const pLoc = getLocationForKey(pKey);
+      const dLoc = getLocationForKey(dKey);
+      if (!pLoc || !dLoc) return;
+      const pName = formatRideAppLocation(pLoc, pKey);
+      const dName = formatRideAppLocation(dLoc, dKey);
       const fare = document.getElementById('pathaoFare').innerText;
       const rideDetails = currentLanguage === 'bn'
-        ? `গন্তব্য: ${getLocalizedLocationName(dName)} | যানবাহন: ${getLocalizedText(selectedVehicle)} | BharaDekhi-এর Pathao আনুমানিক ভাড়া: ${fare}`
-        : `Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
+        ? `শুরুর স্থান: ${pName} | গন্তব্য: ${dName} | যানবাহন: ${getLocalizedText(selectedVehicle)} | BharaDekhi-এর Pathao আনুমানিক ভাড়া: ${fare}`
+        : `Pickup: ${pName} | Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
 
       openRideAppAndCopy(
         'pathao://',
         rideDetails,
         currentLanguage === 'bn'
-          ? `${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া ও গন্তব্য কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
-          : `Copied ${selectedVehicle} estimate and destination. Opening Pathao...`
+          ? `শুরুর স্থান, গন্তব্য ও ${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
+          : `Copied pickup, destination, and ${selectedVehicle} estimate. Opening Pathao...`
       );
     }
 
     function handleInDriveClick() {
       const dKey = document.getElementById('dropoffSelect').value;
-      const dName = LOCATIONS[dKey].name;
+      const pKey = document.getElementById('pickupSelect').value;
+      const pLoc = getLocationForKey(pKey);
+      const dLoc = getLocationForKey(dKey);
+      if (!pLoc || !dLoc) return;
+      const pName = formatRideAppLocation(pLoc, pKey);
+      const dName = formatRideAppLocation(dLoc, dKey);
       const bid = document.getElementById('indriveFare').innerText;
 
       const message = currentLanguage === 'bn'
-        ? `গন্তব্য: ${getLocalizedLocationName(dName)} | যানবাহন: ${getLocalizedText(selectedVehicle)} | প্রস্তাবিত দর: ${bid}`
-        : `Destination: ${dName} | Ride: ${selectedVehicle} | Suggested offer: ${bid}`;
+        ? `শুরুর স্থান: ${pName} | গন্তব্য: ${dName} | যানবাহন: ${getLocalizedText(selectedVehicle)} | প্রস্তাবিত দর: ${bid}`
+        : `Pickup: ${pName} | Destination: ${dName} | Ride: ${selectedVehicle} | Suggested offer: ${bid}`;
       openRideAppAndCopy(
         'indrive://',
         message,
         currentLanguage === 'bn'
-          ? `${getLocalizedText(selectedVehicle)}-এর গন্তব্য ও প্রস্তাবিত দর ${bid} কপি করা হয়েছে। inDrive খোলা হচ্ছে...`
-          : `Copied ${selectedVehicle} destination and suggested offer: ${bid}. Opening inDrive...`
+          ? `শুরুর স্থান, গন্তব্য ও প্রস্তাবিত দর ${bid} কপি করা হয়েছে। inDrive খোলা হচ্ছে...`
+          : `Copied pickup, destination, and suggested offer: ${bid}. Opening inDrive...`
       );
+    }
+
+    function formatRideAppLocation(location, key) {
+      const name = getLocalizedLocationName(location.name);
+      return key === CURRENT_LOCATION_KEY
+        ? `${name} (${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})`
+        : name;
     }
 
     // 7. Helpers
@@ -1584,6 +1687,13 @@
     }
 
     function onLocationChange() {
+      const pickupSelect = document.getElementById('pickupSelect');
+      if (pickupSelect.value !== CURRENT_LOCATION_KEY && currentLocation) {
+        currentLocation = null;
+        pickupSelect.querySelector(`option[value="${CURRENT_LOCATION_KEY}"]`)?.remove();
+        document.getElementById('currentLocationStatus').textContent =
+          getLocalizedText('Your browser will ask permission before sharing your location.');
+      }
       updateRoute();
     }
 
@@ -1844,6 +1954,7 @@
     document.getElementById('signupForm').addEventListener('submit', handleSignup);
     document.getElementById('logoutBtn').addEventListener('click', logoutUser);
     document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
+    document.getElementById('useCurrentLocationBtn').addEventListener('click', useCurrentLocation);
     document.getElementById('savePlaceForm').addEventListener('submit', handleSavePlace);
     document.getElementById('savedPlacesList').addEventListener('click', handleSavedPlacesClick);
     document.getElementById('recentTripsList').addEventListener('click', handleRecentTripsClick);
