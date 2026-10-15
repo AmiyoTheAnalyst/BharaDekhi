@@ -33,6 +33,17 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
 
 ---
 
+## ▲ Deploying on Vercel
+
+1. Import this GitHub repository into Vercel and select the repository root as the project root.
+2. Choose **Other** as the framework preset. This is a static HTML site; no build command is required, and `index.html` at the root is the homepage.
+3. Deploy the project and assign `bharadekhi.vercel.app` as its production domain.
+4. Keep `robots.txt` and `sitemap.xml` in the repository root. The sitemap and canonical URL already point to the production domain.
+
+Vercel can deploy subsequent pushes to the connected production branch automatically.
+
+---
+
 ## 🔐 Shared account setup
 
 The application uses Supabase Auth for shared email/password accounts and a protected `profiles` table for the admin account list. Set up a Supabase project before enabling sign-up:
@@ -53,7 +64,7 @@ Accounts previously stored in individual browsers are not automatically imported
 
 ## 🚀 Running Locally
 
-1.1. **Clone the repository:**
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/AmiyoTheAnalyst/BharaDekhi.git
-   cd BharaDekhi
+   git clone https://github.com/AmiyoTheAnalyst/commute-dhaka-web.git
+   cd commute-dhaka-web
