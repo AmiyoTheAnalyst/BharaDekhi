@@ -13,6 +13,7 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
   * 🏍️ **Bike** (Base: ৳30 | ৳14/km)
   * 🛺 **CNG Auto-Rickshaw** (Base: ৳50 | ৳18/km)
   * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
+* **Side-by-Side Ride Comparison:** Compares estimated fares and approximate travel times for bike, CNG, and car, highlighting the lowest fare and shortest trip estimate.
 * **Unified Ride-Sharing Bridge:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
   * **Pathao:** Opens the Pathao app with an app deep link and copies the destination to the clipboard.
@@ -56,4 +57,3 @@ Accounts previously stored in individual browsers are not automatically imported
    ```bash
    git clone https://github.com/AmiyoTheAnalyst/BharaDekhi.git
    cd BharaDekhi
-
