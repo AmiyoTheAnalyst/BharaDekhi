@@ -47,7 +47,7 @@
 
   <!-- Header -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <div class="bg-blue-600 text-white p-2 rounded-lg">
           <i data-lucide="navigation" class="w-5 h-5"></i>
@@ -59,7 +59,8 @@
       </div>
       
       <!-- Surge Indicator & Toggle -->
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch language">বাংলা</button>
         <label class="flex items-center gap-2 text-xs font-medium cursor-pointer bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
           <span>Simulate Surge</span>
           <input type="checkbox" id="surgeToggle" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer" onchange="toggleSurgeSimulation()">
@@ -557,6 +558,259 @@
   </section>
 
   <script>
+    const BENGALI_TRANSLATIONS = {
+      'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
+      'Switch language': 'ভাষা পরিবর্তন করুন',
+      'Simulate Surge': 'পিক আওয়ার অনুকরণ',
+      'Morning Peak': 'সকাল পিক আওয়ার',
+      'Evening Peak': 'সন্ধ্যা পিক আওয়ার',
+      'Simulated Peak': 'অনুকৃত পিক আওয়ার',
+      'Non-Peak': 'নন-পিক আওয়ার',
+      'Simulated Peak': 'অনুকৃত পিক আওয়ার',
+      'Peak estimate': 'পিক আওয়ারের আনুমানিক ভাড়া',
+      'Non-Peak estimate': 'নন-পিকের আনুমানিক ভাড়া',
+      '1.25x - 1.55x (Peak estimate)': '১.২৫x - ১.৫৫x (পিক আওয়ারের আনুমানিক)',
+      '0.95x - 1.15x (Non-Peak estimate)': '০.৯৫x - ১.১৫x (নন-পিকের আনুমানিক)',
+      'Dhaka time': 'ঢাকার সময়',
+      'Choose account mode': 'অ্যাকাউন্টের ধরন বেছে নিন',
+      'User': 'ব্যবহারকারী',
+      'Admin': 'অ্যাডমিন',
+      'Your Dhaka commute starts here.': 'আপনার ঢাকার যাত্রা শুরু হোক এখানে।',
+      'Sign up as a rider, log in, and access your route planner. Admin access is kept separate for system management.': 'যাত্রী হিসেবে নিবন্ধন করুন বা লগ ইন করে রুট পরিকল্পনা ব্যবহার করুন। সিস্টেম পরিচালনার জন্য অ্যাডমিন প্রবেশ আলাদা।',
+      'Live pickup and destination selection': 'পিকআপ ও গন্তব্য নির্বাচন',
+      'Fare comparison across services': 'বিভিন্ন সেবার ভাড়া তুলনা',
+      'Separate admin control dashboard': 'আলাদা অ্যাডমিন নিয়ন্ত্রণ প্যানেল',
+      'Access Portal': 'প্রবেশ পোর্টাল',
+      'Admin Access': 'অ্যাডমিন প্রবেশ',
+      'Login': 'লগ ইন',
+      'Sign Up': 'নিবন্ধন',
+      'Email': 'ইমেইল',
+      'Password': 'পাসওয়ার্ড',
+      'Full Name': 'পুরো নাম',
+      'Confirm Password': 'পাসওয়ার্ড নিশ্চিত করুন',
+      'Enter your password': 'আপনার পাসওয়ার্ড লিখুন',
+      'Create password': 'পাসওয়ার্ড তৈরি করুন',
+      'Confirm password': 'পাসওয়ার্ড নিশ্চিত করুন',
+      'Create Account': 'অ্যাকাউন্ট তৈরি করুন',
+      'Choose a mode from the navigation bar': 'নেভিগেশন বার থেকে একটি ধরন বেছে নিন',
+      'Welcome back': 'আবার স্বাগতম',
+      'Logout': 'লগ আউট',
+      'Logout Admin': 'অ্যাডমিন লগ আউট',
+      'Pickup Point': 'যাত্রা শুরুর স্থান',
+      'Destination': 'গন্তব্য',
+      'Pickup': 'পিকআপ',
+      'Pickup:': 'পিকআপ:',
+      'Destination:': 'গন্তব্য:',
+      'Vehicle:': 'যানবাহন:',
+      'Bike': 'বাইক',
+      'CNG': 'সিএনজি',
+      'Car': 'গাড়ি',
+      'Calculating Road Distance via OSRM...': 'OSRM দিয়ে সড়ক দূরত্ব হিসাব করা হচ্ছে...',
+      'Road Distance': 'সড়ক দূরত্ব',
+      'km': 'কিমি',
+      'Est. Travel Time': 'আনুমানিক যাত্রার সময়',
+      'mins': 'মিনিট',
+      'About': 'প্রায়',
+      'Surge Multiplier': 'পিক আওয়ার গুণক',
+      'Compare ride options': 'যাত্রার বিকল্প তুলনা করুন',
+      'Choose a ride to update provider estimates and ride details': 'সেবার ভাড়া ও যাত্রার তথ্য দেখতে যানবাহন বেছে নিন',
+      'Cheapest': 'সবচেয়ে কম ভাড়া',
+      'Fastest': 'সবচেয়ে দ্রুত',
+      'Selected': 'নির্বাচিত',
+      'Estimated fare': 'আনুমানিক ভাড়া',
+      'Estimated travel time': 'আনুমানিক যাত্রার সময়',
+      'Choose Bike': 'বাইক বেছে নিন',
+      'Choose CNG': 'সিএনজি বেছে নিন',
+      'Choose Car': 'গাড়ি বেছে নিন',
+      'Selected Bike': 'বাইক নির্বাচিত',
+      'Selected CNG': 'সিএনজি নির্বাচিত',
+      'Selected Car': 'গাড়ি নির্বাচিত',
+      'Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:30–8:30 PM); actual traffic, fares, and times may differ. Travel time starts from the OSRM driving estimate and uses rough mode adjustments (Bike 0.85x, CNG 1.15x, Car 1.0x).': 'এগুলো তুলনার জন্য আনুমানিক হিসাব, সরাসরি ভাড়া নয়। ঢাকার পিক সময় আনুমানিক সকাল ৮:৩০–১০:৩০ এবং বিকেল ৫:৩০–রাত ৮:৩০। প্রকৃত যানজট, ভাড়া ও সময় ভিন্ন হতে পারে। যাত্রার সময় OSRM-এর গাড়ির সময়ের ভিত্তিতে আনুমানিকভাবে হিসাব করা হয়।',
+      'Available Services & Fares': 'উপলভ্য সেবা ও ভাড়া',
+      'Click to compare & launch': 'তুলনা করতে ও অ্যাপ খুলতে চাপ দিন',
+      'Deep-Link': 'অ্যাপ লিংক',
+      'App Deep-Link': 'অ্যাপ লিংক',
+      'Opens Uber with pickup and drop-off pinned. Uber provides its own live quote; this estimate is for guidance.': 'পিকআপ ও গন্তব্য নির্ধারণ করে Uber খুলবে। Uber-এর সরাসরি ভাড়া আলাদা; এই হিসাবটি শুধু ধারণার জন্য।',
+      'Opens the Pathao app and copies your destination.': 'Pathao অ্যাপ খুলবে এবং গন্তব্য কপি করবে।',
+      'Opens the inDrive app and copies your destination and suggested bid.': 'inDrive অ্যাপ খুলবে এবং গন্তব্য ও প্রস্তাবিত দর কপি করবে।',
+      'Bike estimate': 'বাইকের আনুমানিক ভাড়া',
+      'CNG estimate': 'সিএনজির আনুমানিক ভাড়া',
+      'Car estimate': 'গাড়ির আনুমানিক ভাড়া',
+      'Bike suggested bid': 'বাইকের প্রস্তাবিত দর',
+      'CNG suggested bid': 'সিএনজির প্রস্তাবিত দর',
+      'Car suggested bid': 'গাড়ির প্রস্তাবিত দর',
+      'Open in Uber': 'Uber-এ খুলুন',
+      'Open in Pathao': 'Pathao-তে খুলুন',
+      'Open in inDrive': 'inDrive-এ খুলুন',
+      '* Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber, Pathao, and inDrive.': '* দেখানো ভাড়া OSRM দূরত্ব ও ঢাকার সাধারণ ভাড়ার ভিত্তিতে আনুমানিক হিসাব। Uber, Pathao ও inDrive-এর প্রকৃত ভাড়া ও পিক চার্জ আলাদা হতে পারে।',
+      'Admin access': 'অ্যাডমিন প্রবেশ',
+      'Control Center': 'নিয়ন্ত্রণ কেন্দ্র',
+      'Admin sections': 'অ্যাডমিন বিভাগ',
+      'Overview': 'সারসংক্ষেপ',
+      'Registered Accounts': 'নিবন্ধিত অ্যাকাউন্ট',
+      'Registered Users': 'নিবন্ধিত ব্যবহারকারী',
+      'Accounts saved in this browser': 'এই ব্রাউজারে সংরক্ষিত অ্যাকাউন্ট',
+      'Users Ever Logged In': 'একবার হলেও লগ ইন করেছেন',
+      'Unique accounts, saved here': 'এখানে সংরক্ষিত স্বতন্ত্র অ্যাকাউন্ট',
+      'Not Yet Logged In': 'এখনও লগ ইন করেননি',
+      'Registered accounts with no login yet': 'নিবন্ধিত, কিন্তু এখনও লগ ইন করেননি',
+      'Account totals are shared across all users of this website.': 'এই ওয়েবসাইটের সব ব্যবহারকারীর অ্যাকাউন্টের মোট সংখ্যা।',
+      'Recent Ride Activity': 'সাম্প্রতিক যাত্রার কার্যকলাপ',
+      'Live': 'লাইভ',
+      'Quick Admin Actions': 'অ্যাডমিনের দ্রুত কাজ',
+      'Manage Drivers': 'চালক পরিচালনা',
+      'View Earnings': 'আয় দেখুন',
+      'Route Pricing': 'রুটের ভাড়া',
+      'Issue Reports': 'সমস্যার প্রতিবেদন',
+      'System Health': 'সিস্টেমের অবস্থা',
+      'Vehicle availability': 'যানবাহনের প্রাপ্যতা',
+      'Route accuracy': 'রুটের নির্ভুলতা',
+      'Support response': 'সহায়তার সাড়া',
+      'Zone Performance': 'এলাকার অবস্থা',
+      'High': 'উচ্চ',
+      'Stable': 'স্থিতিশীল',
+      'Medium': 'মাঝারি',
+      'Watch': 'নজরদারি',
+      'Shared account details. Passwords are never shown.': 'শেয়ার করা অ্যাকাউন্টের তথ্য। পাসওয়ার্ড দেখানো হয় না।',
+      'accounts': 'টি অ্যাকাউন্ট',
+      'Refresh': 'রিফ্রেশ',
+      'Name': 'নাম',
+      'Account created': 'অ্যাকাউন্ট তৈরির সময়',
+      'Last login': 'সর্বশেষ লগ ইন',
+      'Status': 'অবস্থা',
+      'No user accounts have been created yet.': 'এখনও কোনো ব্যবহারকারী অ্যাকাউন্ট তৈরি হয়নি।',
+      'Not recorded': 'রেকর্ড করা নেই',
+      'Name unavailable': 'নাম পাওয়া যায়নি',
+      'Logged in': 'লগ ইন করেছেন',
+      'Never logged in': 'কখনও লগ ইন করেননি',
+      'Action successful': 'কাজটি সফল হয়েছে',
+      'Shared authentication is not configured yet.': 'শেয়ার করা লগইন ব্যবস্থা এখনো সেটআপ করা হয়নি।',
+      'Please fill in all sign-up fields.': 'নিবন্ধনের সব ঘর পূরণ করুন।',
+      'This email is reserved for admin access.': 'এই ইমেইলটি অ্যাডমিন ব্যবহারের জন্য সংরক্ষিত।',
+      'Password must be at least 6 characters.': 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
+      'Passwords do not match.': 'পাসওয়ার্ড দুটি মেলেনি।',
+      'Email or password is incorrect. Please check your details and try again.': 'ইমেইল বা পাসওয়ার্ড সঠিক নয়। তথ্য যাচাই করে আবার চেষ্টা করুন।',
+      'The admin account must have a confirmed email address.': 'অ্যাডমিন অ্যাকাউন্টের ইমেইল নিশ্চিত করা থাকতে হবে।',
+      'Pickup and Destination cannot be the same!': 'যাত্রা শুরুর স্থান ও গন্তব্য একই হতে পারে না!',
+      'Could not sign in. Please try again.': 'লগ ইন করা যায়নি। আবার চেষ্টা করুন।',
+      'Account created. Check your email to confirm the account, then log in.': 'অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল নিশ্চিত করে লগ ইন করুন।',
+      'Logged out successfully.': 'সফলভাবে লগ আউট হয়েছে।',
+      'Admin logged out.': 'অ্যাডমিন লগ আউট হয়েছে।',
+      'Shared sign-in is not configured yet. Follow the Supabase setup instructions in README.md, then add your project URL and publishable key to index.html.': 'শেয়ার করা লগ ইন এখনো সেটআপ করা হয়নি। README.md-এর Supabase নির্দেশনা অনুসরণ করে প্রজেক্ট URL ও পাবলিক কী index.html-এ যোগ করুন।'
+    };
+
+    const BENGALI_LOCATION_NAMES = {
+      'Azimpur Bus Stand': 'আজিমপুর বাস স্ট্যান্ড',
+      'Uttara': 'উত্তরা',
+      'Banani': 'বনানী',
+      'Baridhara': 'বারিধারা',
+      'Bashundhara Residential Area': 'বসুন্ধরা আবাসিক এলাকা',
+      'BRAC University (Merul Badda)': 'ব্র্যাক ইউনিভার্সিটি (মেরুল বাড্ডা)',
+      'Dhanmondi 27': 'ধানমন্ডি ২৭',
+      'Gulshan 1 Circle': 'গুলশান ১ সার্কেল',
+      'Khilgaon': 'খিলগাঁও',
+      'Mirpur 10 Circle': 'মিরপুর ১০ সার্কেল',
+      'Mohakhali': 'মহাখালী',
+      'Motijheel Shapla Chattar': 'মতিঝিল শাপলা চত্বর',
+      'Rampura': 'রামপুরা',
+      'Shantinagar': 'শান্তিনগর',
+      'Tejgaon': 'তেজগাঁও',
+      'Malibagh': 'মালিবাগ',
+      'Kadamtali': 'কদমতলী',
+      'Jatrabari': 'যাত্রাবাড়ী',
+      'Demra': 'ডেমরা',
+      'Old Dhaka': 'পুরান ঢাকা',
+      'Sabujbagh': 'সবুজবাগ',
+      'Kakrail': 'কাকরাইল',
+      'Panthapath': 'পান্থপথ',
+      'Rajarbagh': 'রাজাবাগ',
+      'Fatullah': 'ফতুল্লা',
+      'Savar': 'সাভার',
+      'Chashara': 'চাষাঢ়া',
+      'Narayanganj': 'নারায়ণগঞ্জ',
+      'Natun Bazar': 'নতুন বাজার'
+    };
+    const ENGLISH_TRANSLATIONS = Object.fromEntries(
+      Object.entries({ ...BENGALI_TRANSLATIONS, ...BENGALI_LOCATION_NAMES })
+        .map(([english, bengali]) => [bengali, english])
+    );
+
+    let currentLanguage = localStorage.getItem('bharadekhiLanguage') === 'bn' ? 'bn' : 'en';
+
+    function getLocalizedText(text) {
+      if (currentLanguage === 'en') {
+        return ENGLISH_TRANSLATIONS[text] || text;
+      }
+      return BENGALI_TRANSLATIONS[text] || BENGALI_LOCATION_NAMES[text] || text;
+    }
+
+    function formatLocalizedNumber(value, maximumFractionDigits = 0) {
+      const locale = currentLanguage === 'bn' ? 'bn-BD' : 'en';
+      return new Intl.NumberFormat(locale, { maximumFractionDigits }).format(value);
+    }
+
+    function formatLocalizedFare(amount) {
+      return `৳${formatLocalizedNumber(amount)}`;
+    }
+
+    function getLocalizedLocationName(name) {
+      return currentLanguage === 'bn' ? BENGALI_LOCATION_NAMES[name] || name : name;
+    }
+
+    function updateLocationLabels() {
+      ['pickupSelect', 'dropoffSelect'].forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        Array.from(select.options).forEach(option => {
+          option.textContent = getLocalizedLocationName(option.dataset.englishName);
+        });
+      });
+
+      if (pickupMarker && dropMarker) {
+        const pickup = LOCATIONS[document.getElementById('pickupSelect').value];
+        const destination = LOCATIONS[document.getElementById('dropoffSelect').value];
+        pickupMarker.setPopupContent(`${getLocalizedText('Pickup')}: ${getLocalizedLocationName(pickup.name)}`);
+        dropMarker.setPopupContent(`${getLocalizedText('Destination')}: ${getLocalizedLocationName(destination.name)}`);
+      }
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLanguage === 'bn' ? 'bn' : 'en';
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        const original = node.nodeValue;
+        const trimmed = original.trim();
+        if (!trimmed) continue;
+        const normalized = trimmed.replace(/\s+/g, ' ');
+        const localized = getLocalizedText(normalized);
+        if (localized !== normalized) {
+          const leadingWhitespace = original.match(/^\s*/)[0];
+          const trailingWhitespace = original.match(/\s*$/)[0];
+          node.nodeValue = `${leadingWhitespace}${localized}${trailingWhitespace}`;
+        }
+      }
+
+      document.querySelectorAll('input[placeholder]').forEach(input => {
+        input.placeholder = getLocalizedText(input.placeholder);
+      });
+      document.querySelectorAll('[aria-label]').forEach(element => {
+        element.setAttribute('aria-label', getLocalizedText(element.getAttribute('aria-label')));
+      });
+      const languageToggle = document.getElementById('languageToggle');
+      languageToggle.textContent = currentLanguage === 'en' ? 'বাংলা' : 'English';
+      languageToggle.setAttribute('aria-label', currentLanguage === 'en' ? 'Switch to Bangla' : 'ইংরেজিতে পরিবর্তন করুন');
+
+      if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
+      if (typeof updateLocationLabels === 'function') updateLocationLabels();
+    }
+
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'en' ? 'bn' : 'en';
+      localStorage.setItem('bharadekhiLanguage', currentLanguage);
+      applyLanguage();
+    }
+
     const ADMIN_EMAIL = 'amiyohasan23@gmail.com';
     const SUPABASE_URL = 'https://lzyhjgqcsuvgzmatkjfi.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_FFidJiEqploFKoozx0EkFw_lqLrOR5i';
@@ -577,7 +831,7 @@
 
       const notice = document.getElementById('authSetupNotice');
       if (!configured) {
-        notice.textContent = 'Shared sign-in is not configured yet. Follow the Supabase setup instructions in README.md, then add your project URL and publishable key to index.html.';
+        notice.textContent = getLocalizedText('Shared sign-in is not configured yet. Follow the Supabase setup instructions in README.md, then add your project URL and publishable key to index.html.');
         notice.classList.remove('hidden');
         return false;
       }
@@ -602,7 +856,8 @@
       if (!value) return 'Not recorded';
       const date = new Date(value);
       if (!Number.isFinite(date.getTime())) return 'Not recorded';
-      return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+      const locale = currentLanguage === 'bn' ? 'bn-BD' : undefined;
+      return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
     }
 
     async function loadAdminAccounts() {
@@ -642,7 +897,7 @@
           cells.forEach((value, index) => {
             const cell = document.createElement('td');
             cell.className = `px-3 py-3 ${index === 0 ? 'font-medium text-slate-900' : 'text-slate-600'}`;
-            cell.textContent = value;
+            cell.textContent = getLocalizedText(value);
             row.appendChild(cell);
           });
           accountList.appendChild(row);
@@ -675,11 +930,13 @@
       Object.entries(LOCATIONS).forEach(([key, location]) => {
         const pickupOption = document.createElement('option');
         pickupOption.value = key;
-        pickupOption.textContent = location.name;
+        pickupOption.dataset.englishName = location.name;
+        pickupOption.textContent = getLocalizedLocationName(location.name);
 
         const dropoffOption = document.createElement('option');
         dropoffOption.value = key;
-        dropoffOption.textContent = location.name;
+        dropoffOption.dataset.englishName = location.name;
+        dropoffOption.textContent = getLocalizedLocationName(location.name);
 
         pickupSelect.appendChild(pickupOption);
         dropoffSelect.appendChild(dropoffOption);
@@ -760,7 +1017,13 @@
       if (currentTime >= 8.5 && currentTime < 10.5) peakPeriod = 'Morning Peak';
       else if (currentTime >= 17.5 && currentTime < 20.5) peakPeriod = 'Evening Peak';
 
-      return { formattedTime: formatter.format(now), peakPeriod };
+      const displayFormatter = new Intl.DateTimeFormat(currentLanguage === 'bn' ? 'bn-BD' : 'en-US', {
+        timeZone: 'Asia/Dhaka',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return { formattedTime: displayFormatter.format(now), peakPeriod };
     }
 
     // 4. Update Route, Markers & Fetch OSRM Road Distance
@@ -776,8 +1039,8 @@
       const pLoc = LOCATIONS[pKey];
       const dLoc = LOCATIONS[dKey];
 
-      pickupMarker.setLatLng([pLoc.lat, pLoc.lng]).setPopupContent('Pickup: ' + pLoc.name);
-      dropMarker.setLatLng([dLoc.lat, dLoc.lng]).setPopupContent('Destination: ' + dLoc.name);
+      pickupMarker.setLatLng([pLoc.lat, pLoc.lng]).setPopupContent(`${getLocalizedText('Pickup')}: ${getLocalizedLocationName(pLoc.name)}`);
+      dropMarker.setLatLng([dLoc.lat, dLoc.lng]).setPopupContent(`${getLocalizedText('Destination')}: ${getLocalizedLocationName(dLoc.name)}`);
 
       document.getElementById('loadingOverlay').classList.remove('hidden');
 
@@ -859,8 +1122,10 @@
       estimates.forEach(({ vehicle, minimum, maximum, duration }) => {
         const id = `comparison${vehicle}`;
         document.getElementById(`${id}Fare`).innerText =
-          `৳${minimum} - ৳${maximum}`;
-        document.getElementById(`${id}Duration`).innerText = `About ${duration} mins`;
+          `${formatLocalizedFare(minimum)} - ${formatLocalizedFare(maximum)}`;
+        document.getElementById(`${id}Duration`).innerText = currentLanguage === 'bn'
+          ? `প্রায় ${formatLocalizedNumber(duration)} মিনিট`
+          : `About ${formatLocalizedNumber(duration)} mins`;
         document.getElementById(`${id}Cheapest`).classList.toggle('hidden', minimum !== lowestFare);
         document.getElementById(`${id}Fastest`).classList.toggle('hidden', duration !== shortestDuration);
         document.getElementById(`${id}Selected`).classList.toggle('hidden', vehicle !== selectedVehicle);
@@ -869,15 +1134,18 @@
         document.getElementById(`${id}`).classList.toggle('ring-blue-100', vehicle === selectedVehicle);
         const selectButton = document.getElementById(`select${vehicle}Vehicle`);
         selectButton.setAttribute('aria-pressed', String(vehicle === selectedVehicle));
-        selectButton.innerText = vehicle === selectedVehicle ? `Selected ${vehicle}` : `Choose ${vehicle}`;
+        const buttonLabel = vehicle === selectedVehicle ? `Selected ${vehicle}` : `Choose ${vehicle}`;
+        selectButton.innerText = getLocalizedText(buttonLabel);
         selectButton.className = `mt-4 w-full rounded-lg px-3 py-2 text-sm font-semibold transition ${vehicle === selectedVehicle ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`;
       });
     }
 
     // 5. Calculate Rates and Update UI
     function renderMetricsAndFares() {
-      document.getElementById('routeDistance').innerText = currentDistanceKm.toFixed(1) + ' km';
-      document.getElementById('routeDuration').innerText = currentDurationMins + ' mins';
+      document.getElementById('routeDistance').innerText = `${formatLocalizedNumber(currentDistanceKm, 1)} ${getLocalizedText('km')}`;
+      document.getElementById('routeDuration').innerText = currentLanguage === 'bn'
+        ? `${formatLocalizedNumber(currentDurationMins)} মিনিট`
+        : `${formatLocalizedNumber(currentDurationMins)} mins`;
 
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
@@ -886,30 +1154,36 @@
       const dhakaTimeText = document.getElementById('dhakaTimeText');
       const badgeDot = document.getElementById('surgeStatusDot');
       const multText = document.getElementById('surgeMultiplierText');
-      dhakaTimeText.innerText = `Dhaka time ${dhakaTime.formattedTime}`;
+      dhakaTimeText.innerText = currentLanguage === 'bn'
+        ? `ঢাকার সময় ${dhakaTime.formattedTime}`
+        : `Dhaka time ${dhakaTime.formattedTime}`;
 
       if (isPeak) {
         badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
         badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
-        badgeText.innerText = isSimulatedSurge ? "Simulated Peak" : dhakaTime.peakPeriod;
-        multText.innerText = "1.25x - 1.55x (Peak estimate)";
+        badgeText.innerText = getLocalizedText(isSimulatedSurge ? 'Simulated Peak' : dhakaTime.peakPeriod);
+        multText.innerText = currentLanguage === 'bn'
+          ? '১.২৫x - ১.৫৫x (পিক আওয়ারের আনুমানিক)'
+          : '1.25x - 1.55x (Peak estimate)';
         multText.className = "text-lg font-bold text-rose-600";
       } else {
         badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
         badgeDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-        badgeText.innerText = "Non-Peak";
-        multText.innerText = "0.95x - 1.15x (Non-Peak estimate)";
+        badgeText.innerText = getLocalizedText('Non-Peak');
+        multText.innerText = currentLanguage === 'bn'
+          ? '০.৯৫x - ১.১৫x (নন-পিকের আনুমানিক)'
+          : '0.95x - 1.15x (Non-Peak estimate)';
         multText.className = "text-lg font-bold text-emerald-600";
       }
 
       renderVehicleComparison(isPeak);
       const fare = getVehicleFareEstimate(selectedVehicle, isPeak);
-      document.getElementById('uberFareLabel').innerText = `${selectedVehicle} estimate`;
-      document.getElementById('pathaoFareLabel').innerText = `${selectedVehicle} estimate`;
-      document.getElementById('indriveFareLabel').innerText = `${selectedVehicle} suggested bid`;
-      document.getElementById('uberFare').innerText = `৳${fare.minimum} - ৳${fare.maximum}`;
-      document.getElementById('pathaoFare').innerText = `৳${fare.pathaoMin} - ৳${fare.pathaoMax}`;
-      document.getElementById('indriveFare').innerText = `৳${fare.indriveBid}`;
+      document.getElementById('uberFareLabel').innerText = getLocalizedText(`${selectedVehicle} estimate`);
+      document.getElementById('pathaoFareLabel').innerText = getLocalizedText(`${selectedVehicle} estimate`);
+      document.getElementById('indriveFareLabel').innerText = getLocalizedText(`${selectedVehicle} suggested bid`);
+      document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.minimum)} - ${formatLocalizedFare(fare.maximum)}`;
+      document.getElementById('pathaoFare').innerText = `${formatLocalizedFare(fare.pathaoMin)} - ${formatLocalizedFare(fare.pathaoMax)}`;
+      document.getElementById('indriveFare').innerText = formatLocalizedFare(fare.indriveBid);
     }
 
     // 6. Action Button Handlers
@@ -949,9 +1223,17 @@
       const dKey = document.getElementById('dropoffSelect').value;
       const dName = LOCATIONS[dKey].name;
       const fare = document.getElementById('pathaoFare').innerText;
-      const rideDetails = `Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
+      const rideDetails = currentLanguage === 'bn'
+        ? `গন্তব্য: ${getLocalizedLocationName(dName)} | যানবাহন: ${getLocalizedText(selectedVehicle)} | BharaDekhi-এর Pathao আনুমানিক ভাড়া: ${fare}`
+        : `Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
 
-      openRideAppAndCopy('pathao://', rideDetails, `Copied ${selectedVehicle} estimate and destination. Opening Pathao...`);
+      openRideAppAndCopy(
+        'pathao://',
+        rideDetails,
+        currentLanguage === 'bn'
+          ? `${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া ও গন্তব্য কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
+          : `Copied ${selectedVehicle} estimate and destination. Opening Pathao...`
+      );
     }
 
     function handleInDriveClick() {
@@ -959,8 +1241,16 @@
       const dName = LOCATIONS[dKey].name;
       const bid = document.getElementById('indriveFare').innerText;
 
-      const message = `Destination: ${dName} | Ride: ${selectedVehicle} | Suggested offer: ${bid}`;
-      openRideAppAndCopy('indrive://', message, `Copied ${selectedVehicle} destination and suggested offer: ${bid}. Opening inDrive...`);
+      const message = currentLanguage === 'bn'
+        ? `গন্তব্য: ${getLocalizedLocationName(dName)} | যানবাহন: ${getLocalizedText(selectedVehicle)} | প্রস্তাবিত দর: ${bid}`
+        : `Destination: ${dName} | Ride: ${selectedVehicle} | Suggested offer: ${bid}`;
+      openRideAppAndCopy(
+        'indrive://',
+        message,
+        currentLanguage === 'bn'
+          ? `${getLocalizedText(selectedVehicle)}-এর গন্তব্য ও প্রস্তাবিত দর ${bid} কপি করা হয়েছে। inDrive খোলা হচ্ছে...`
+          : `Copied ${selectedVehicle} destination and suggested offer: ${bid}. Opening inDrive...`
+      );
     }
 
     // 7. Helpers
@@ -989,7 +1279,7 @@
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').innerText = msg;
+      document.getElementById('toastMessage').innerText = getLocalizedText(msg);
       toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
       toast.classList.add('opacity-100', 'translate-y-0');
       setTimeout(() => {
@@ -1248,8 +1538,10 @@
     // Boot
     window.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
+      document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
       populateLocationSelectors();
       initMap();
+      applyLanguage();
       updateRoute();
       renderMetricsAndFares();
       setInterval(renderMetricsAndFares, 30000);

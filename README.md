@@ -14,6 +14,7 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
   * 🛺 **CNG Auto-Rickshaw** (Base: ৳50 | ৳18/km)
   * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
 * **Side-by-Side Ride Comparison:** Compares estimated fares and approximate travel times for bike, CNG, and car, highlighting the lowest fare and shortest trip estimate.
+* **English/Bangla Language Toggle:** Switches the app interface and Dhaka location names between English and Bangla, saving the choice in the browser.
 * **Unified Ride-Sharing Bridge:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
   * **Pathao:** Opens the Pathao app with an app deep link and copies the destination to the clipboard.
