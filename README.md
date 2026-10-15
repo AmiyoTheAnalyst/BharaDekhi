@@ -66,5 +66,15 @@ Accounts previously stored in individual browsers are not automatically imported
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/AmiyoTheAnalyst/commute-dhaka-web.git
-   cd commute-dhaka-web
+   git clone https://github.com/AmiyoTheAnalyst/BharaDekhi.git
+   cd BharaDekhi
+   ```
+
+2. **Start a local web server** from the repository folder:
+   ```bash
+   python -m http.server 8000
+   ```
+
+3. Open `http://localhost:8000` in your browser. Stop the server with `Ctrl+C`.
+
+The app is a static HTML site and has no build step. For sign-up and login locally, make sure `http://localhost:8000/**` is listed as an allowed redirect URL in the Supabase Authentication settings.
