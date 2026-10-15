@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bharadekhi.netlify.app/sitemap.xml
+Sitemap: https://bharadekhi.vercel.app/sitemap.xml

@@ -28,7 +28,7 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
 * **Map & Geodata:** [Leaflet.js](https://leafletjs.com/) with OpenStreetMap tiles
 * **Routing API:** [OSRM (Open Source Routing Machine)](https://project-osrm.org/)
 * **Icons:** [Lucide Icons](https://lucide.dev/)
-* **Deployment & CI/CD:** Netlify
+* **Deployment & CI/CD:** Vercel
 * **Authentication & shared accounts:** [Supabase](https://supabase.com/)
 
 ---
@@ -41,7 +41,7 @@ The application uses Supabase Auth for shared email/password accounts and a prot
 2. Open the project's **SQL Editor** and run [`supabase/schema.sql`](./supabase/schema.sql). This creates the profile table, account-sync triggers, and row-level security policies.
 3. In the Supabase project settings, copy the **Project URL** and the **publishable key** (or legacy `anon` key). In `index.html`, replace `https://YOUR_PROJECT_REF.supabase.co` and `YOUR_SUPABASE_PUBLISHABLE_KEY` in the `SUPABASE_URL` and `SUPABASE_ANON_KEY` constants.
    - The publishable/anon key is intended for browser use. Never put a Supabase `service_role` or secret key in `index.html`.
-4. In Supabase **Authentication → URL Configuration**, set the Site URL to `https://bharadekhi.netlify.app` and add `https://bharadekhi.netlify.app/**` (and the local development URL, if used) to the allowed redirect URLs so public sign-up and email confirmation work on the deployed site.
+4. In Supabase **Authentication → URL Configuration**, set the Site URL to `https://bharadekhi.vercel.app` and add `https://bharadekhi.vercel.app/**` (and the local development URL, if used) to the allowed redirect URLs so public sign-up and email confirmation work on the deployed site.
 5. Create the admin account for `amiyohasan23@gmail.com` in Supabase **Authentication → Users** and confirm its email. The admin's verified email is checked by the database row-level security policy. The old browser-only demo admin password is no longer used.
 6. Deploy the updated site. New signups will be stored centrally, and the verified admin can open **Registered Accounts** to see all profiles.
 
