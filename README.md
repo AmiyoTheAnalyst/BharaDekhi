@@ -2,6 +2,8 @@
 
 An interactive web-based transit route planner and ride-sharing fare estimator tailored for commuters in Dhaka, Bangladesh. BharaDekhi calculates road distances and travel times across major transit hubs, models local peak-hour traffic surge conditions, and provides a multi-app launcher bridge for **Uber**, **Pathao**, and **inDrive**.
 
+The brand lockup uses the Connected BD mark with the tagline **“Route Planner & Fare Estimator.”**
+
 ---
 
 ## 🌟 Features

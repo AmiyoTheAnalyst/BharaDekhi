@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f7fb">
+  <title>BharaDekhi Logo Concepts</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f7fb;
+      color: #10243b;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 6% 0%, rgb(191 219 254 / 55%), transparent 34rem),
+        #f4f7fb;
+    }
+    .wrap { width: min(1040px, calc(100% - 36px)); margin: 0 auto; padding: 54px 0 64px; }
+    .eyebrow { margin: 0 0 12px; color: #2563a6; font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); letter-spacing: -.045em; line-height: 1.05; }
+    .intro { max-width: 660px; margin: 16px 0 0; color: #52647a; font-size: 16px; line-height: 1.7; }
+    .concepts { display: grid; gap: 22px; margin-top: 38px; }
+    .concept {
+      overflow: hidden;
+      border: 1px solid #dfe7f0;
+      border-radius: 24px;
+      background: rgb(255 255 255 / 94%);
+      box-shadow: 0 18px 45px rgb(15 35 60 / 7%);
+    }
+    .concept-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 25px 28px 16px; }
+    .concept-title { display: flex; align-items: center; gap: 12px; }
+    .number { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 11px; background: #edf4ff; color: #205aa6; font-size: 13px; font-weight: 800; }
+    h2 { margin: 0; font-size: 19px; letter-spacing: -.02em; }
+    .concept-top p { margin: 5px 0 0; color: #617287; font-size: 13px; line-height: 1.55; }
+    .palette { display: flex; gap: 6px; padding-top: 4px; }
+    .swatch { width: 17px; height: 17px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 0 1px rgb(15 35 60 / 10%); }
+    .mockup {
+      display: grid;
+      grid-template-columns: minmax(250px, 1.2fr) minmax(240px, .8fr);
+      min-height: 174px;
+      margin: 0 16px 16px;
+      overflow: hidden;
+      border: 1px solid #e7edf4;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #f8fbff, #edf3fa);
+    }
+    .lockup-stage, .icon-stage { display: flex; align-items: center; justify-content: center; padding: 28px; }
+    .icon-stage { border-left: 1px solid #e2e9f1; background: rgb(255 255 255 / 54%); }
+    .lockup { display: flex; align-items: center; gap: 14px; }
+    .mark { width: 68px; height: 68px; flex: 0 0 auto; }
+    .wordmark { display: block; width: min(295px, 100%); height: auto; overflow: visible; }
+    .icon-pair { display: flex; align-items: center; gap: 24px; }
+    .icon-pair .mark { width: 54px; height: 54px; }
+    .favicon {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: 11px;
+      box-shadow: 0 5px 12px rgb(15 35 60 / 12%);
+    }
+    .favicon svg { width: 24px; height: 24px; }
+    .notes { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px 22px; color: #65778c; font-size: 12px; }
+    .tagline { font-weight: 600; letter-spacing: .02em; }
+    .footer { margin-top: 24px; color: #718096; font-size: 12px; line-height: 1.7; }
+    @media (max-width: 640px) {
+      .wrap { padding-top: 34px; }
+      .concept-top { padding: 20px 18px 14px; }
+      .palette { display: none; }
+      .mockup { grid-template-columns: 1fr; }
+      .icon-stage { min-height: 110px; border-top: 1px solid #e2e9f1; border-left: 0; }
+      .lockup-stage { min-height: 140px; }
+      .notes { align-items: flex-start; flex-direction: column; padding: 0 20px 20px; }
+      .wordmark { width: 240px; }
+      .mark { width: 58px; height: 58px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="eyebrow">BharaDekhi · Logo exploration</p>
+    <h1>More connected BD ideas.</h1>
+    <p class="intro">Building on the connected-letter direction, here are a few more ways to combine BharaDekhi initials, route lines, and pickup-to-destination markers.</p>
+
+    <section class="concepts" aria-label="Logo concepts">
+      <article class="concept">
+        <div class="concept-top">
+          <div class="concept-title">
+            <span class="number">01</span>
+            <div>
+              <h2>Route Pin</h2>
+              <p>A familiar map pin with a road running through it: direct, friendly, and easy to recognize.</p>
+            </div>
+          </div>
+          <div class="palette" aria-label="Navy, blue, and mint palette">
+            <span class="swatch" style="background:#123b65"></span><span class="swatch" style="background:#2878dc"></span><span class="swatch" style="background:#35c69a"></span>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="lockup-stage">
+            <div class="lockup">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Route Pin icon">
+                <defs><linearGradient id="pinGradient" x1="8" y1="6" x2="62" y2="66" gradientUnits="userSpaceOnUse"><stop stop-color="#3488f5"/><stop offset="1" stop-color="#1456b7"/></linearGradient></defs>
+                <path d="M36 4C20.8 4 9 15.7 9 30.3c0 19.5 24.2 36.7 25.2 37.4a3 3 0 0 0 3.6 0C38.8 67 63 49.8 63 30.3 63 15.7 51.2 4 36 4Z" fill="url(#pinGradient)"/>
+                <path d="M26 49c5.5-5.5 4.8-10.5 10.3-16s5.5-10.4 10-14" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="6"/>
+                <circle cx="26" cy="49" r="3" fill="#35d3a0"/><circle cx="46.3" cy="19" r="3" fill="#ffd166"/>
+              </svg>
+              <svg class="wordmark" viewBox="0 0 310 66" role="img" aria-label="BharaDekhi wordmark">
+                <text x="0" y="43" fill="#123b65" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="780" letter-spacing="-1.8">Bhara<tspan fill="#2878dc">Dekhi</tspan></text>
+                <text x="2" y="61" fill="#65778c" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2.1">YOUR CITY. YOUR ROUTE.</text>
+              </svg>
+            </div>
+          </div>
+          <div class="icon-stage">
+            <div class="icon-pair">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Route Pin app icon">
+                <path d="M36 4C20.8 4 9 15.7 9 30.3c0 19.5 24.2 36.7 25.2 37.4a3 3 0 0 0 3.6 0C38.8 67 63 49.8 63 30.3 63 15.7 51.2 4 36 4Z" fill="#236dd2"/>
+                <path d="M26 49c5.5-5.5 4.8-10.5 10.3-16s5.5-10.4 10-14" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="6"/>
+                <circle cx="26" cy="49" r="3" fill="#35d3a0"/><circle cx="46.3" cy="19" r="3" fill="#ffd166"/>
+              </svg>
+              <span class="favicon" style="background:#236dd2">
+                <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M36 4C20.8 4 9 15.7 9 30.3c0 19.5 24.2 36.7 25.2 37.4a3 3 0 0 0 3.6 0C38.8 67 63 49.8 63 30.3 63 15.7 51.2 4 36 4Z" fill="#fff"/><path d="M28 48c5-5 5-11 10-16s5-10 9-14" fill="none" stroke="#236dd2" stroke-linecap="round" stroke-width="6"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="notes"><span class="tagline">Meaning: pickup · destination · journey</span><span>Strongest map connection</span></div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top">
+          <div class="concept-title">
+            <span class="number">02</span>
+            <div>
+              <h2>Connected BD</h2>
+              <p>A compact monogram built around two stops and one continuous road. More ownable as an app badge.</p>
+            </div>
+          </div>
+          <div class="palette" aria-label="Deep teal, sky blue, and coral palette">
+            <span class="swatch" style="background:#113f46"></span><span class="swatch" style="background:#4bb8c8"></span><span class="swatch" style="background:#ff8066"></span>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="lockup-stage">
+            <div class="lockup">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Connected BD icon">
+                <rect x="4" y="4" width="64" height="64" rx="21" fill="#113f46"/>
+                <path d="M25 19v34h11c10 0 16-5.7 16-15S46 23 36 23H25" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+                <path d="M17 51c8-1 11-7 16-13 5-6 9-9 17-10" fill="none" stroke="#4bb8c8" stroke-linecap="round" stroke-width="4" stroke-dasharray="3 5"/>
+                <circle cx="17" cy="51" r="5" fill="#ff8066"/><circle cx="50" cy="28" r="5" fill="#ff8066"/>
+              </svg>
+              <svg class="wordmark" viewBox="0 0 310 66" role="img" aria-label="BharaDekhi wordmark">
+                <text x="0" y="43" fill="#113f46" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="780" letter-spacing="-1.8">Bhara<tspan fill="#168a98">Dekhi</tspan></text>
+                <text x="2" y="61" fill="#65778c" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2.1">TWO STOPS. ONE SIMPLE PLAN.</text>
+              </svg>
+            </div>
+          </div>
+          <div class="icon-stage">
+            <div class="icon-pair">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Connected BD app icon">
+                <rect x="4" y="4" width="64" height="64" rx="21" fill="#113f46"/>
+                <path d="M25 19v34h11c10 0 16-5.7 16-15S46 23 36 23H25" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+                <path d="M17 51c8-1 11-7 16-13 5-6 9-9 17-10" fill="none" stroke="#4bb8c8" stroke-linecap="round" stroke-width="4" stroke-dasharray="3 5"/>
+                <circle cx="17" cy="51" r="5" fill="#ff8066"/><circle cx="50" cy="28" r="5" fill="#ff8066"/>
+              </svg>
+              <span class="favicon" style="background:#113f46">
+                <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M25 19v34h11c10 0 16-5.7 16-15S46 23 36 23H25" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"/><path d="M17 51c8-1 11-7 16-13 5-6 9-9 17-10" fill="none" stroke="#4bb8c8" stroke-linecap="round" stroke-width="4" stroke-dasharray="3 5"/><circle cx="17" cy="51" r="5" fill="#ff8066"/><circle cx="50" cy="28" r="5" fill="#ff8066"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="notes"><span class="tagline">Meaning: BharaDekhi initials · connected stops</span><span>Most distinctive silhouette</span></div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top">
+          <div class="concept-title">
+            <span class="number">03</span>
+            <div>
+              <h2>Dhaka Wayfinder</h2>
+              <p>A clean compass and route motif with a green accent. Calm, modern, and made for a helpful local guide.</p>
+            </div>
+          </div>
+          <div class="palette" aria-label="Midnight blue, cobalt, and green palette">
+            <span class="swatch" style="background:#192b50"></span><span class="swatch" style="background:#4169e1"></span><span class="swatch" style="background:#38a979"></span>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="lockup-stage">
+            <div class="lockup">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Dhaka Wayfinder icon">
+                <circle cx="36" cy="36" r="31" fill="#192b50"/>
+                <circle cx="36" cy="36" r="23" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1.5"/>
+                <path d="m47 18-8 23-15 13 8-23 15-13Z" fill="#fff"/>
+                <path d="m39 41-15 13 8-23 7 10Z" fill="#9fc3ff"/>
+                <circle cx="36" cy="36" r="4" fill="#38a979" stroke="#fff" stroke-width="2"/>
+              </svg>
+              <svg class="wordmark" viewBox="0 0 310 66" role="img" aria-label="BharaDekhi wordmark">
+                <text x="0" y="43" fill="#192b50" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="780" letter-spacing="-1.8">Bhara<tspan fill="#4169e1">Dekhi</tspan></text>
+                <text x="2" y="61" fill="#65778c" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2.1">A CLEARER WAY THROUGH DHAKA</text>
+              </svg>
+            </div>
+          </div>
+          <div class="icon-stage">
+            <div class="icon-pair">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Dhaka Wayfinder app icon">
+                <circle cx="36" cy="36" r="31" fill="#192b50"/>
+                <circle cx="36" cy="36" r="23" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1.5"/>
+                <path d="m47 18-8 23-15 13 8-23 15-13Z" fill="#fff"/>
+                <path d="m39 41-15 13 8-23 7 10Z" fill="#9fc3ff"/>
+                <circle cx="36" cy="36" r="4" fill="#38a979" stroke="#fff" stroke-width="2"/>
+              </svg>
+              <span class="favicon" style="background:#192b50">
+                <svg viewBox="0 0 72 72" aria-hidden="true"><path d="m47 18-8 23-15 13 8-23 15-13Z" fill="#fff"/><path d="m39 41-15 13 8-23 7 10Z" fill="#9fc3ff"/><circle cx="36" cy="36" r="4" fill="#38a979" stroke="#fff" stroke-width="2"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="notes"><span class="tagline">Meaning: guidance · direction · city routes</span><span>Most polished and versatile</span></div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top">
+          <div class="concept-title">
+            <span class="number">04</span>
+            <div>
+              <h2>One Continuous Route</h2>
+              <p>The B flows into the D as one uninterrupted road, with two stops marking the start and finish.</p>
+            </div>
+          </div>
+          <div class="palette" aria-label="Black, cyan, and amber palette">
+            <span class="swatch" style="background:#050505"></span><span class="swatch" style="background:#39b7c7"></span><span class="swatch" style="background:#ffbd59"></span>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="lockup-stage">
+            <div class="lockup">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="One Continuous Route icon">
+                <rect x="4" y="4" width="64" height="64" rx="20" fill="#050505"/>
+                <path d="M24 18v36h13c8 0 12-4 12-10 0-5-3-8-8-9 4-1 6-4 6-8 0-6-4-9-11-9H24Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5.5"/>
+                <path d="M16 52c7-1 10-5 15-11 6-8 10-14 25-21" fill="none" stroke="#39b7c7" stroke-linecap="round" stroke-width="4"/>
+                <circle cx="16" cy="52" r="5" fill="#ffbd59" stroke="#050505" stroke-width="2"/>
+                <circle cx="56" cy="20" r="5" fill="#ffbd59" stroke="#050505" stroke-width="2"/>
+              </svg>
+              <svg class="wordmark" viewBox="0 0 310 66" role="img" aria-label="BharaDekhi wordmark">
+                <text x="0" y="43" fill="#050505" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="780" letter-spacing="-1.8">Bhara<tspan fill="#168c9d">Dekhi</tspan></text>
+                <text x="2" y="61" fill="#65778c" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2.1">ONE ROUTE. TWO POINTS.</text>
+              </svg>
+            </div>
+          </div>
+          <div class="icon-stage">
+            <div class="icon-pair">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="One Continuous Route app icon">
+                <rect x="4" y="4" width="64" height="64" rx="20" fill="#050505"/>
+                <path d="M24 18v36h13c8 0 12-4 12-10 0-5-3-8-8-9 4-1 6-4 6-8 0-6-4-9-11-9H24Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5.5"/>
+                <path d="M16 52c7-1 10-5 15-11 6-8 10-14 25-21" fill="none" stroke="#39b7c7" stroke-linecap="round" stroke-width="4"/>
+                <circle cx="16" cy="52" r="5" fill="#ffbd59" stroke="#050505" stroke-width="2"/>
+                <circle cx="56" cy="20" r="5" fill="#ffbd59" stroke="#050505" stroke-width="2"/>
+              </svg>
+              <span class="favicon" style="background:#050505">
+                <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M24 18v36h13c8 0 12-4 12-10 0-5-3-8-8-9 4-1 6-4 6-8 0-6-4-9-11-9H24Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/><path d="M16 52c7-1 10-5 15-11 6-8 10-14 25-21" fill="none" stroke="#39b7c7" stroke-linecap="round" stroke-width="5"/><circle cx="16" cy="52" r="5" fill="#ffbd59"/><circle cx="56" cy="20" r="5" fill="#ffbd59"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="notes"><span class="tagline">Meaning: the initials become the route itself</span><span>Black background · cyan route · gold endpoints</span></div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top">
+          <div class="concept-title">
+            <span class="number">05</span>
+            <div>
+              <h2>Two Stops, One BD</h2>
+              <p>A bright, open monogram with an obvious origin and destination—made to stay legible at small sizes.</p>
+            </div>
+          </div>
+          <div class="palette" aria-label="Black, mint, and gold palette">
+            <span class="swatch" style="background:#050505"></span><span class="swatch" style="background:#54d6b0"></span><span class="swatch" style="background:#ffcf6e"></span>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="lockup-stage">
+            <div class="lockup">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Two Stops One BD icon">
+                <rect x="4" y="4" width="64" height="64" rx="21" fill="#050505"/>
+                <path d="M25 18v36h12c8 0 12-4 12-10 0-5-4-8-10-9 5-1 8-4 8-9 0-5-4-8-11-8H25Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+                <path d="M16 25h10M46 47h10" stroke="#54d6b0" stroke-linecap="round" stroke-width="3"/>
+                <circle cx="16" cy="25" r="5" fill="#ffcf6e"/>
+                <circle cx="56" cy="47" r="5" fill="#54d6b0"/>
+              </svg>
+              <svg class="wordmark" viewBox="0 0 310 66" role="img" aria-label="BharaDekhi wordmark">
+                <text x="0" y="43" fill="#293e8b" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="780" letter-spacing="-1.8">Bhara<tspan fill="#397cdb">Dekhi</tspan></text>
+                <text x="2" y="61" fill="#65778c" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.6">ROUTE PLANNER &amp; FARE ESTIMATOR</text>
+              </svg>
+            </div>
+          </div>
+          <div class="icon-stage">
+            <div class="icon-pair">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Two Stops One BD app icon">
+                <rect x="4" y="4" width="64" height="64" rx="21" fill="#050505"/>
+                <path d="M25 18v36h12c8 0 12-4 12-10 0-5-4-8-10-9 5-1 8-4 8-9 0-5-4-8-11-8H25Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+                <path d="M16 25h10M46 47h10" stroke="#54d6b0" stroke-linecap="round" stroke-width="3"/>
+                <circle cx="16" cy="25" r="5" fill="#ffcf6e"/>
+                <circle cx="56" cy="47" r="5" fill="#54d6b0"/>
+              </svg>
+              <span class="favicon" style="background:#050505">
+                <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M25 18v36h12c8 0 12-4 12-10 0-5-4-8-10-9 5-1 8-4 8-9 0-5-4-8-11-8H25Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/><path d="M16 25h10M46 47h10" stroke="#54d6b0" stroke-linecap="round" stroke-width="4"/><circle cx="16" cy="25" r="5" fill="#ffcf6e"/><circle cx="56" cy="47" r="5" fill="#54d6b0"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="notes"><span class="tagline">Meaning: easy start and end points</span><span>Black background · mint route · gold start</span></div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top">
+          <div class="concept-title">
+            <span class="number">06</span>
+            <div>
+              <h2>Street Grid Monogram</h2>
+              <p>A compact BD built from intersecting streets, with a small green destination point for a subtle Dhaka map feel.</p>
+            </div>
+          </div>
+          <div class="palette" aria-label="Charcoal, electric blue, and green palette">
+            <span class="swatch" style="background:#202f43"></span><span class="swatch" style="background:#5595f5"></span><span class="swatch" style="background:#53c99a"></span>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="lockup-stage">
+            <div class="lockup">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Street Grid Monogram icon">
+                <rect x="4" y="4" width="64" height="64" rx="19" fill="#202f43"/>
+                <path d="M25 18v36h12c8 0 12-4 12-10 0-5-4-8-10-9 5-1 8-4 8-9 0-5-4-8-11-8H25Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+                <path d="M15 45h14M35 27h20M39 40h17" fill="none" stroke="#5595f5" stroke-linecap="round" stroke-width="2.5"/>
+                <circle cx="15" cy="45" r="4.5" fill="#53c99a"/>
+                <circle cx="55" cy="27" r="4.5" fill="#53c99a"/>
+              </svg>
+              <svg class="wordmark" viewBox="0 0 310 66" role="img" aria-label="BharaDekhi wordmark">
+                <text x="0" y="43" fill="#202f43" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="780" letter-spacing="-1.8">Bhara<tspan fill="#397cdb">Dekhi</tspan></text>
+                <text x="2" y="61" fill="#65778c" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2.1">MADE FOR THE CITY IN MOTION</text>
+              </svg>
+            </div>
+          </div>
+          <div class="icon-stage">
+            <div class="icon-pair">
+              <svg class="mark" viewBox="0 0 72 72" role="img" aria-label="Street Grid Monogram app icon">
+                <rect x="4" y="4" width="64" height="64" rx="19" fill="#202f43"/>
+                <path d="M25 18v36h12c8 0 12-4 12-10 0-5-4-8-10-9 5-1 8-4 8-9 0-5-4-8-11-8H25Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"/>
+                <path d="M15 45h14M35 27h20M39 40h17" fill="none" stroke="#5595f5" stroke-linecap="round" stroke-width="2.5"/>
+                <circle cx="15" cy="45" r="4.5" fill="#53c99a"/>
+                <circle cx="55" cy="27" r="4.5" fill="#53c99a"/>
+              </svg>
+              <span class="favicon" style="background:#202f43">
+                <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M25 18v36h12c8 0 12-4 12-10 0-5-4-8-10-9 5-1 8-4 8-9 0-5-4-8-11-8H25Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/><path d="M15 45h14M35 27h20M39 40h17" fill="none" stroke="#5595f5" stroke-linecap="round" stroke-width="3.5"/><circle cx="15" cy="45" r="5" fill="#53c99a"/><circle cx="55" cy="27" r="5" fill="#53c99a"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="notes"><span class="tagline">Meaning: local streets stitched together</span><span>Most urban and map-like</span></div>
+      </article>
+    </section>
+
+    <p class="footer">Concept 05 is now used on the BharaDekhi site with the “Route Planner &amp; Fare Estimator” tagline. Other concepts remain visual explorations only.</p>
+  </main>
+</body>
+</html>
