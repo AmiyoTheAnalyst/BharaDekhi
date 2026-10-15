@@ -27,6 +27,15 @@
       "operatingSystem": "Any"
     }
   </script>
+  <script>
+    try {
+      if (localStorage.getItem('bharadekhiTheme') === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    } catch (error) {
+      console.warn('Could not restore the saved theme preference:', error);
+    }
+  </script>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,6 +50,53 @@
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
+    html[data-theme="dark"] { color-scheme: dark; }
+    html[data-theme="dark"] body { background-color: #0f172a; color: #e2e8f0; }
+    html[data-theme="dark"] .bg-white { background-color: #1e293b !important; }
+    html[data-theme="dark"] .bg-slate-50 { background-color: #0f172a !important; }
+    html[data-theme="dark"] .bg-slate-100 { background-color: #334155 !important; }
+    html[data-theme="dark"] .bg-slate-200 { background-color: #475569 !important; }
+    html[data-theme="dark"] .bg-blue-50 { background-color: #172554 !important; }
+    html[data-theme="dark"] .bg-blue-100 { background-color: #1e3a8a !important; }
+    html[data-theme="dark"] .bg-emerald-50 { background-color: #022c22 !important; }
+    html[data-theme="dark"] .bg-emerald-100 { background-color: #064e3b !important; }
+    html[data-theme="dark"] .bg-rose-50 { background-color: #4c0519 !important; }
+    html[data-theme="dark"] .bg-rose-100 { background-color: #881337 !important; }
+    html[data-theme="dark"] .bg-amber-50 { background-color: #451a03 !important; }
+    html[data-theme="dark"] .bg-amber-100 { background-color: #78350f !important; }
+    html[data-theme="dark"] .bg-red-50 { background-color: #450a0a !important; }
+    html[data-theme="dark"] .border-slate-100,
+    html[data-theme="dark"] .border-slate-200,
+    html[data-theme="dark"] .border-slate-300 { border-color: #475569 !important; }
+    html[data-theme="dark"] .text-slate-900,
+    html[data-theme="dark"] .text-slate-800 { color: #f1f5f9 !important; }
+    html[data-theme="dark"] .text-slate-700,
+    html[data-theme="dark"] .text-slate-600 { color: #cbd5e1 !important; }
+    html[data-theme="dark"] .text-slate-500 { color: #94a3b8 !important; }
+    html[data-theme="dark"] .text-slate-400 { color: #94a3b8 !important; }
+    html[data-theme="dark"] .text-blue-700,
+    html[data-theme="dark"] .text-blue-800 { color: #bfdbfe !important; }
+    html[data-theme="dark"] .text-emerald-700,
+    html[data-theme="dark"] .text-emerald-800 { color: #a7f3d0 !important; }
+    html[data-theme="dark"] .text-rose-700,
+    html[data-theme="dark"] .text-rose-800 { color: #fecdd3 !important; }
+    html[data-theme="dark"] .text-amber-700,
+    html[data-theme="dark"] .text-amber-800 { color: #fde68a !important; }
+    html[data-theme="dark"] .text-red-700 { color: #fecaca !important; }
+    html[data-theme="dark"] input,
+    html[data-theme="dark"] select,
+    html[data-theme="dark"] textarea { background-color: #0f172a; color: #e2e8f0; border-color: #475569; }
+    html[data-theme="dark"] input::placeholder,
+    html[data-theme="dark"] textarea::placeholder { color: #94a3b8; }
+    html[data-theme="dark"] option { background-color: #1e293b; color: #e2e8f0; }
+    html[data-theme="dark"] .hover\:bg-slate-50:hover { background-color: #334155 !important; }
+    html[data-theme="dark"] .hover\:bg-slate-100:hover { background-color: #475569 !important; }
+    html[data-theme="dark"] .hover\:bg-slate-200:hover { background-color: #64748b !important; }
+    html[data-theme="dark"] .leaflet-popup-content-wrapper,
+    html[data-theme="dark"] .leaflet-popup-tip { background-color: #1e293b; color: #e2e8f0; }
+    html[data-theme="dark"] .leaflet-control-zoom a { background-color: #1e293b; color: #e2e8f0; border-color: #475569; }
+    html[data-theme="dark"] .leaflet-control-attribution { background-color: rgb(30 41 59 / 85%); color: #cbd5e1; }
+    html[data-theme="dark"] .leaflet-control-attribution a { color: #93c5fd; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -61,6 +117,10 @@
       <!-- Surge Indicator & Toggle -->
       <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
         <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch to dark mode" aria-pressed="false">
+          <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
+          <span id="themeToggleLabel">Dark mode</span>
+        </button>
         <label class="flex items-center gap-2 text-xs font-medium cursor-pointer bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
           <span>Simulate Surge</span>
           <input type="checkbox" id="surgeToggle" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer" onchange="toggleSurgeSimulation()">
@@ -622,6 +682,11 @@
     const BENGALI_TRANSLATIONS = {
       'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
       'Switch language': 'ভাষা পরিবর্তন করুন',
+      'Dark mode': 'ডার্ক মোড',
+      'Light mode': 'লাইট মোড',
+      'Switch to dark mode': 'ডার্ক মোড চালু করুন',
+      'Switch to light mode': 'লাইট মোড চালু করুন',
+      'Could not save theme preference.': 'থিম পছন্দ সংরক্ষণ করা যায়নি।',
       'Simulate Surge': 'পিক আওয়ার অনুকরণ',
       'Morning Peak': 'সকাল পিক আওয়ার',
       'Evening Peak': 'সন্ধ্যা পিক আওয়ার',
@@ -848,6 +913,7 @@
     );
 
     let currentLanguage = localStorage.getItem('bharadekhiLanguage') === 'bn' ? 'bn' : 'en';
+    let currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 
     function getLocalizedText(text) {
       if (currentLanguage === 'en') {
@@ -924,12 +990,40 @@
       if (typeof updateLocationLabels === 'function') updateLocationLabels();
       if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
       if (typeof renderCurrentLocationStatus === 'function') renderCurrentLocationStatus();
+      if (typeof applyTheme === 'function') applyTheme();
     }
 
     function toggleLanguage() {
       currentLanguage = currentLanguage === 'en' ? 'bn' : 'en';
       localStorage.setItem('bharadekhiLanguage', currentLanguage);
       applyLanguage();
+    }
+
+    function applyTheme() {
+      const isDark = currentTheme === 'dark';
+      document.documentElement.dataset.theme = currentTheme;
+      document.querySelector('meta[name="theme-color"]').content = isDark ? '#0f172a' : '#2563eb';
+      const toggle = document.getElementById('themeToggle');
+      const label = isDark ? 'Light mode' : 'Dark mode';
+      const ariaLabel = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+      toggle.setAttribute('aria-label', getLocalizedText(ariaLabel));
+      toggle.setAttribute('aria-pressed', String(isDark));
+      document.getElementById('themeToggleLabel').textContent = getLocalizedText(label);
+      document.getElementById('themeToggleIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('bharadekhiTheme', nextTheme);
+      } catch (error) {
+        console.error('Could not save the theme preference:', error);
+        showToast('Could not save theme preference.');
+        return;
+      }
+      currentTheme = nextTheme;
+      applyTheme();
     }
 
     const ADMIN_EMAIL = 'amiyohasan23@gmail.com';
@@ -2060,6 +2154,7 @@
     window.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
       populateLocationSelectors();
       initMap();
       applyLanguage();
