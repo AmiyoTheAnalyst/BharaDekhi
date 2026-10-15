@@ -53,6 +53,5 @@ Accounts previously stored in individual browsers are not automatically imported
 ## 🚀 Running Locally
 
 1.1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/AmiyoTheAnalyst/BharaDekhi.git](https://github.com/AmiyoTheAnalyst/BharaDekhi.git)
-   cd BharaDekhi
+    git clone https://github.com/AmiyoTheAnalyst/BharaDekhi.git
+cd BharaDekhi
