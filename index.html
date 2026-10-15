@@ -212,6 +212,7 @@
             <span>Use my current location</span>
           </button>
           <p id="currentLocationStatus" class="mt-1 text-xs text-slate-500" aria-live="polite">Your browser will ask permission before sharing your location.</p>
+          <p class="mt-1 text-xs text-slate-400">Nearby place names come from OpenStreetMap; building-level details depend on available map data.</p>
         </div>
 
         <!-- Destination Selector -->
@@ -676,6 +677,10 @@
       'Your browser will ask permission before sharing your location.': 'আপনার অবস্থান শেয়ার করার আগে ব্রাউজার অনুমতি চাইবে।',
       'Getting your current location…': 'আপনার বর্তমান অবস্থান খোঁজা হচ্ছে…',
       'Current location is being used as your pickup.': 'আপনার বর্তমান অবস্থান যাত্রা শুরুর স্থান হিসেবে ব্যবহৃত হচ্ছে।',
+      'Finding a nearby place name…': 'কাছাকাছি স্থানের নাম খোঁজা হচ্ছে…',
+      'Pickup set to:': 'যাত্রার শুরুর স্থান:',
+      'Could not find a nearby place name. Using your current location coordinates.': 'কাছাকাছি স্থানের নাম পাওয়া যায়নি। আপনার বর্তমান অবস্থানের স্থানাঙ্ক ব্যবহার করা হচ্ছে।',
+      'Nearby place names come from OpenStreetMap; building-level details depend on available map data.': 'কাছাকাছি স্থানের নাম OpenStreetMap থেকে নেওয়া হয়; ভবনের নির্দিষ্ট তথ্য মানচিত্রে থাকা তথ্যের ওপর নির্ভর করে।',
       'Current location requires HTTPS. Open the deployed site or use localhost.': 'বর্তমান অবস্থান ব্যবহারে HTTPS প্রয়োজন। ওয়েবসাইটটি খুলুন অথবা localhost ব্যবহার করুন।',
       'Location access was denied. Allow location access in your browser settings and try again.': 'অবস্থানের অনুমতি দেওয়া হয়নি। ব্রাউজার সেটিংসে অবস্থানের অনুমতি দিয়ে আবার চেষ্টা করুন।',
       'Your location could not be determined. Check your device location settings and try again.': 'আপনার অবস্থান নির্ধারণ করা যায়নি। ডিভাইসের অবস্থান সেটিংস পরীক্ষা করে আবার চেষ্টা করুন।',
@@ -918,6 +923,7 @@
       if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
       if (typeof updateLocationLabels === 'function') updateLocationLabels();
       if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
+      if (typeof renderCurrentLocationStatus === 'function') renderCurrentLocationStatus();
     }
 
     function toggleLanguage() {
@@ -1084,9 +1090,8 @@
       }
 
       const button = document.getElementById('useCurrentLocationBtn');
-      const status = document.getElementById('currentLocationStatus');
       button.disabled = true;
-      status.textContent = getLocalizedText('Getting your current location…');
+      setCurrentLocationStatus('Getting your current location…');
 
       navigator.geolocation.getCurrentPosition(position => {
         currentLocation = {
@@ -1094,6 +1099,7 @@
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
+        const lookupId = ++currentLocationLookupId;
 
         const pickupSelect = document.getElementById('pickupSelect');
         let currentOption = Array.from(pickupSelect.options)
@@ -1101,17 +1107,19 @@
         if (!currentOption) {
           currentOption = document.createElement('option');
           currentOption.value = CURRENT_LOCATION_KEY;
-          currentOption.dataset.englishName = 'Current location';
           pickupSelect.appendChild(currentOption);
         }
+        currentOption.dataset.englishName = 'Current location';
+        currentOption.textContent = getLocalizedText('Current location');
         pickupSelect.value = CURRENT_LOCATION_KEY;
         updateLocationLabels();
-        status.textContent = getLocalizedText('Current location is being used as your pickup.');
+        setCurrentLocationStatus('Finding a nearby place name…');
         button.disabled = false;
         onLocationChange();
+        resolveCurrentLocationName(currentLocation, lookupId);
       }, error => {
         button.disabled = false;
-        status.textContent = getLocalizedText('Your browser will ask permission before sharing your location.');
+        setCurrentLocationStatus('Your browser will ask permission before sharing your location.');
         if (error.code === 1) {
           showToast('Location access was denied. Allow location access in your browser settings and try again.');
         } else if (error.code === 2) {
@@ -1124,6 +1132,79 @@
         timeout: 15000,
         maximumAge: 60000
       });
+    }
+
+    function setCurrentLocationStatus(messageKey, placeName = '') {
+      currentLocationStatusKey = messageKey;
+      currentLocationStatusName = placeName;
+      renderCurrentLocationStatus();
+    }
+
+    function renderCurrentLocationStatus() {
+      const status = document.getElementById('currentLocationStatus');
+      if (!status) return;
+      const message = getLocalizedText(currentLocationStatusKey);
+      status.textContent = currentLocationStatusName
+        ? `${message} ${getLocalizedLocationName(currentLocationStatusName)}`
+        : message;
+    }
+
+    async function resolveCurrentLocationName(location, lookupId) {
+      try {
+        const params = new URLSearchParams({
+          format: 'jsonv2',
+          lat: String(location.lat),
+          lon: String(location.lng),
+          zoom: '18',
+          addressdetails: '1',
+          'accept-language': 'en'
+        });
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`);
+        if (!response.ok) throw new Error(`Reverse geocoding returned ${response.status}.`);
+        const result = await response.json();
+        const placeName = getReverseGeocodedPlaceName(result);
+        if (!placeName) throw new Error('Reverse geocoding returned no nearby place name.');
+        if (lookupId !== currentLocationLookupId ||
+            document.getElementById('pickupSelect').value !== CURRENT_LOCATION_KEY ||
+            currentLocation !== location) return;
+
+        currentLocation.name = placeName;
+        const pickupOption = document.querySelector(`#pickupSelect option[value="${CURRENT_LOCATION_KEY}"]`);
+        if (pickupOption) {
+          pickupOption.dataset.englishName = placeName;
+          pickupOption.textContent = getLocalizedLocationName(placeName);
+        }
+        updateLocationLabels();
+        setCurrentLocationStatus('Pickup set to:', placeName);
+      } catch (error) {
+        console.warn('Could not reverse geocode the current location:', error);
+        if (lookupId === currentLocationLookupId &&
+            document.getElementById('pickupSelect').value === CURRENT_LOCATION_KEY &&
+            currentLocation === location) {
+          setCurrentLocationStatus(
+            'Could not find a nearby place name. Using your current location coordinates.'
+          );
+        }
+      }
+    }
+
+    function getReverseGeocodedPlaceName(result) {
+      const address = result.address || {};
+      const place = result.name || address.amenity || address.shop || address.office ||
+        address.tourism || address.leisure || address.building || address.house_name;
+      const street = [address.house_number, address.road].filter(Boolean).join(' ');
+      const area = address.neighbourhood || address.suburb || address.quarter ||
+        address.city_district || address.village || address.town || address.city ||
+        address.county;
+      const parts = [place, street, area].filter(Boolean);
+      const uniqueParts = [...new Set(parts.map(part => part.trim()).filter(Boolean))];
+      if (uniqueParts.length) return uniqueParts.slice(0, 3).join(', ');
+
+      if (typeof result.display_name === 'string') {
+        const displayParts = result.display_name.split(',').map(part => part.trim()).filter(Boolean);
+        if (displayParts.length) return displayParts.slice(0, 3).join(', ');
+      }
+      return '';
     }
 
     const MAX_SAVED_PLACES = 8;
@@ -1379,6 +1460,9 @@
     let isSimulatedSurge = false;
     const CURRENT_LOCATION_KEY = 'bharadekhi-current-location';
     let currentLocation = null;
+    let currentLocationLookupId = 0;
+    let currentLocationStatusKey = 'Your browser will ask permission before sharing your location.';
+    let currentLocationStatusName = '';
 
     // Leaflet map objects
     let map, pickupMarker, dropMarker, routePolyline;
@@ -1689,7 +1773,9 @@
     function onLocationChange() {
       const pickupSelect = document.getElementById('pickupSelect');
       if (pickupSelect.value !== CURRENT_LOCATION_KEY && currentLocation) {
+        currentLocationLookupId += 1;
         currentLocation = null;
+        setCurrentLocationStatus('Your browser will ask permission before sharing your location.');
         pickupSelect.querySelector(`option[value="${CURRENT_LOCATION_KEY}"]`)?.remove();
         document.getElementById('currentLocationStatus').textContent =
           getLocalizedText('Your browser will ask permission before sharing your location.');
