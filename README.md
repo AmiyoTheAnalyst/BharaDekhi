@@ -38,6 +38,17 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
 
 ---
 
+## 📍 Location, privacy, and service notes
+
+* BharaDekhi only requests device location after the user selects **Use my current location** and grants browser permission.
+* When current location is used, its coordinates are sent to the public OSRM routing service to calculate a route and to OpenStreetMap's Nominatim service to find a nearby place name. Place-name detail depends on OpenStreetMap coverage; it may return a nearby street or area instead of a building.
+* The public Nominatim service has limited shared capacity and a maximum usage rate of one request per second for the entire application. Current-location lookup is user-triggered and intended for moderate use; it is not a high-volume geocoding service. Review the [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) before changing or scaling this integration.
+* If the user opens Uber, the current pickup coordinates are included in Uber's link. If the user opens Pathao or inDrive, pickup details (including current coordinates) are copied to the clipboard so they can be entered in that app. Do not share the copied text if you do not want to share your precise location.
+* Current-location routes are intentionally excluded from recent-trip history. Saved places and non-GPS recent routes, plus the selected language and theme, are stored in browser local storage. Travel history is separated by signed-in email on that browser, but does not sync between devices.
+* Routing and place-name services may be unavailable or return approximate/incomplete results. If road routing fails, BharaDekhi falls back to an approximate distance calculation. Fare and duration values are estimates, not live quotes from ride providers.
+
+---
+
 ## ▲ Deploying on Vercel
 
 1. Import this GitHub repository into Vercel and select the repository root as the project root.
