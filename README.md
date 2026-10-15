@@ -52,7 +52,8 @@ Accounts previously stored in individual browsers are not automatically imported
 
 ## 🚀 Running Locally
 
-1. **Clone the repository:**
+1.1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/AmiyoTheAnalyst/commute-dhaka-web.git](https://github.com/AmiyoTheAnalyst/commute-dhaka-web.git)
-   cd commute-dhaka-web
+   git clone https://github.com/AmiyoTheAnalyst/BharaDekhi.git
+   cd BharaDekhi
+
