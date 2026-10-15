@@ -19,7 +19,7 @@ An interactive web-based transit route planner and ride-sharing fare estimator t
 * **English/Bangla Language Toggle:** Switches the app interface and Dhaka location names between English and Bangla, saving the choice in the browser.
 * **Dark Mode:** Offers a dark theme for the interface and map controls; remembers the choice in the browser.
 * **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices. Routes using precise current-location or map-pin coordinates are excluded from history.
-* **Public FAQ:** Answers common questions about estimated fares, peak-hour periods, provider pricing, and account requirements before sign-in.
+* **Public FAQ Page:** A header help icon opens a dedicated FAQ page with answers about fare estimates, peak-hour periods, provider pricing, and account requirements. It is available without signing in and supports English and Bangla.
 * **Unified Ride-Sharing Bridge:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
   * **Pathao:** Opens the Pathao app with an app deep link and copies pickup, destination, vehicle, and the BharaDekhi estimate to the clipboard.
