@@ -1163,6 +1163,10 @@
         await completeLogin(data.user);
       } catch (error) {
         console.error('Sign-in failed:', error);
+        if (error.code === 'invalid_credentials' || error.message?.toLowerCase() === 'invalid login credentials') {
+          showToast('Email or password is incorrect. Please check your details and try again.');
+          return;
+        }
         showToast(error.message || 'Could not sign in. Please try again.');
       }
     }
