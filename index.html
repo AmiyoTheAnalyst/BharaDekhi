@@ -3,16 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Plan trips across Dhaka with map-based pickup and destination routing, estimated fares, and links to Uber, Pathao, and inDrive. Compare bike, CNG, and car fares.">
+  <meta name="description" content="BharaDekhi (Bhara Dekhi) helps plan trips in Dhaka, Bangladesh. Compare estimated bike, CNG, and car fares and open your route in Uber, Pathao, or inDrive.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#2563eb">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="BharaDekhi | Route Planner & Fare Estimator">
-  <meta property="og:description" content="Plan Dhaka routes, compare estimated ride fares, and open your trip with Uber, Pathao, or inDrive.">
-  <meta property="og:url" content="https://bharadekhi.netlify.app">
+  <meta property="og:title" content="BharaDekhi | Dhaka Ride Fare Estimator & Route Planner">
+  <meta property="og:description" content="Compare estimated bike, CNG, and car fares and plan trips across Dhaka with BharaDekhi.">
+  <meta property="og:url" content="https://bharadekhi.netlify.app/">
   <meta name="twitter:card" content="summary">
-  <link rel="canonical" href="https://bharadekhi.netlify.app">
-  <title>BharaDekhi | Route Planner & Fare Estimator</title>
+  <link rel="canonical" href="https://bharadekhi.netlify.app/">
+  <title>BharaDekhi | Dhaka Ride Fare Estimator &amp; Route Planner</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "BharaDekhi",
+      "alternateName": "Bhara Dekhi",
+      "url": "https://bharadekhi.netlify.app/",
+      "description": "Plan trips in Dhaka, Bangladesh, compare estimated bike, CNG, and car fares, and open routes in ride-sharing apps.",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "Any"
+    }
+  </script>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -58,9 +70,9 @@
     </div>
   </header>
 
-  <nav id="amiyoModeNav" class="hidden bg-white border-b border-slate-200" aria-label="Amiyo account mode">
+  <nav id="amiyoModeNav" class="hidden bg-white border-b border-slate-200" aria-label="BharaDekhi admin account mode">
     <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
-      <span class="text-sm font-semibold text-slate-700">Amiyo Hasan</span>
+      <span class="text-sm font-semibold text-slate-700">BharaDekhi Admin</span>
       <div class="flex items-center rounded-lg border border-slate-200 p-1" role="group" aria-label="Choose account mode">
         <button id="chooseUserModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">User</button>
         <button id="chooseAdminModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">Admin</button>
@@ -139,7 +151,7 @@
   <!-- Role Selection -->
   <section id="roleSelectionView" class="panel-section hidden max-w-xl mx-auto px-4 pt-10 pb-6">
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 text-center">
-      <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Amiyo Hasan</p>
+      <p class="text-xs uppercase tracking-[0.2em] text-slate-500">BharaDekhi Admin</p>
       <h3 class="mt-3 text-2xl font-black text-slate-900">Choose a mode from the navigation bar</h3>
     </div>
   </section>
@@ -989,7 +1001,7 @@
 
       if (isAdminUser(user)) {
         localStorage.setItem('commuteHubRole', 'admin-pending');
-        showToast('Welcome, Amiyo Hasan! Choose a role.');
+        showToast('Welcome, BharaDekhi Admin! Choose a role.');
         showView('role');
       } else {
         localStorage.setItem('commuteHubRole', 'user');
