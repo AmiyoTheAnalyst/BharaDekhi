@@ -1,0 +1,75 @@
+{
+  "notice": "Unverified draft routes and estimated segment distances; not official BRTA records.",
+  "farePolicy": {
+    "farePerKm": 2.45,
+    "rounding": "ceil-to-taka",
+    "minimumFareByType": {
+      "non-ac": 10,
+      "ac": 20
+    },
+    "distanceBasis": "draft-estimate-not-BRTA-notified"
+  },
+  "routes": [
+    {
+      "id": "raida-mirpur-motijheel",
+      "service": "Raida",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        { "locationKey": "mirpur", "name": "Mirpur 10", "distanceKmFromPrevious": 0 },
+        { "locationKey": "gulshan", "name": "Gulshan 1", "distanceKmFromPrevious": 5.5 },
+        { "locationKey": "rampura", "name": "Rampura", "distanceKmFromPrevious": 4.2 },
+        { "locationKey": "motijheel", "name": "Motijheel", "distanceKmFromPrevious": 5.2 }
+      ]
+    },
+    {
+      "id": "bikolpo-uttara-azimpur",
+      "service": "Bikolpo",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        { "locationKey": "uttara", "name": "Uttara", "distanceKmFromPrevious": 0 },
+        { "locationKey": "mohakhali", "name": "Mohakhali", "distanceKmFromPrevious": 11.5 },
+        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 4.3 },
+        { "locationKey": "azimpur", "name": "Azimpur", "distanceKmFromPrevious": 4.8 }
+      ]
+    },
+    {
+      "id": "projapoti-mirpur-motijheel",
+      "service": "Projapoti",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        { "locationKey": "mirpur", "name": "Mirpur 10", "distanceKmFromPrevious": 0 },
+        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 8.1 },
+        { "locationKey": "azimpur", "name": "Azimpur", "distanceKmFromPrevious": 4.6 },
+        { "locationKey": "motijheel", "name": "Motijheel", "distanceKmFromPrevious": 3.1 }
+      ]
+    },
+    {
+      "id": "victor-savar-azimpur",
+      "service": "Victor Classic",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        { "locationKey": "savar", "name": "Savar", "distanceKmFromPrevious": 0 },
+        { "locationKey": "mirpur", "name": "Mirpur 10", "distanceKmFromPrevious": 17.5 },
+        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 8.1 },
+        { "locationKey": "azimpur", "name": "Azimpur", "distanceKmFromPrevious": 4.6 }
+      ]
+    },
+    {
+      "id": "brtc-ac-uttara-motijheel",
+      "service": "BRTC AC",
+      "type": "ac",
+      "status": "unverified-draft",
+      "stops": [
+        { "locationKey": "uttara", "name": "Uttara", "distanceKmFromPrevious": 0 },
+        { "locationKey": "banani", "name": "Banani", "distanceKmFromPrevious": 12.5 },
+        { "locationKey": "mohakhali", "name": "Mohakhali", "distanceKmFromPrevious": 2.3 },
+        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 4.3 },
+        { "locationKey": "motijheel", "name": "Motijheel", "distanceKmFromPrevious": 7.2 }
+      ]
+    }
+  ]
+}

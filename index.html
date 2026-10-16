@@ -618,6 +618,17 @@
           Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site's baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
         </p>
       </section>
+
+      <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-4">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="localBusFinderHeading" class="text-base font-bold text-slate-900">Dhaka local bus finder</h2>
+          <span id="busDraftBadge" class="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800">Draft route data — verify before travel</span>
+        </div>
+        <p id="busFarePolicy" class="mt-1 text-xs text-slate-500">Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
+        <p id="busFinderStatus" class="mt-3 text-sm text-slate-600" aria-live="polite">Loading local bus routes…</p>
+        <div id="busRouteResults" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-live="polite"></div>
+        <p id="busRouteDisclaimer" class="mt-3 text-xs leading-relaxed text-slate-500">Route and stoppage data are unverified draft suggestions, not official BRTA route-distance records. Fares use approximate route distances and the selected minimum; confirm bus direction, stops, and fare locally before boarding.</p>
+      </section>
     </div>
 
     <!-- COMPARISON & LAUNCH SECTION -->
@@ -1004,6 +1015,28 @@
       'CNG': 'সিএনজি',
       'Car': 'গাড়ি',
       'MRT Line 6 hybrid estimate': 'এমআরটি লাইন ৬ হাইব্রিড ভাড়া',
+      'Dhaka local bus finder': 'ঢাকার লোকাল বাস খুঁজুন',
+      'Draft route data — verify before travel': 'খসড়া রুট তথ্য — যাওয়ার আগে যাচাই করুন',
+      'Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.': 'আনুমানিক ভাড়া: প্রতি কিমি ৳২.৪৫, পরবর্তী টাকায় পূর্ণ; নন-এসি সর্বনিম্ন ৳১০, এসি সর্বনিম্ন ৳২০।',
+      'Loading local bus routes…': 'লোকাল বাসের রুট লোড হচ্ছে…',
+      'Route and stoppage data are unverified draft suggestions, not official BRTA route-distance records. Fares use approximate route distances and the selected minimum; confirm bus direction, stops, and fare locally before boarding.': 'রুট ও স্টপেজের তথ্য যাচাই না করা খসড়া; এগুলো BRTA-র সরকারি দূরত্বের রেকর্ড নয়। আনুমানিক রুট দূরত্ব ও নির্ধারিত সর্বনিম্ন ভাড়ায় হিসাব করা হয়েছে; ওঠার আগে বাসের দিক, স্টপ ও ভাড়া স্থানীয়ভাবে নিশ্চিত করুন।',
+      'Could not load local bus routes. Please refresh or check the route data file.': 'লোকাল বাসের রুট লোড করা যায়নি। আবার লোড করুন অথবা রুটের তথ্য ফাইল পরীক্ষা করুন।',
+      'No listed bus matches both selected locations in the current draft data. Try nearby stops or check back after route data is verified.': 'বর্তমান খসড়া তথ্যে নির্বাচিত দুই স্থানের জন্য কোনো বাসের মিল পাওয়া যায়নি। কাছের স্টপ বেছে নিন অথবা রুট যাচাইয়ের পর আবার দেখুন।',
+      'No bus data is available for your current-location or map-pin trip yet. Choose listed locations to check draft routes.': 'বর্তমান অবস্থান বা মানচিত্রের পিনের জন্য এখনও বাসের তথ্য নেই। খসড়া রুট দেখতে তালিকাভুক্ত স্থান বেছে নিন।',
+      'Bus route': 'বাসের রুট',
+      'Non-AC': 'নন-এসি',
+      'AC': 'এসি',
+      'Draft estimate — confirm locally': 'খসড়া হিসাব — স্থানীয়ভাবে নিশ্চিত করুন',
+      'Fare distance': 'ভাড়া-দূরত্ব',
+      'Estimated bus fare': 'আনুমানিক বাস ভাড়া',
+      'Stops between': 'মাঝের স্টপ',
+      'No intermediate stop listed': 'মাঝখানে কোনো স্টপ তালিকাভুক্ত নেই',
+      'Raida': 'রাইদা',
+      'Bikolpo': 'বিকল্প',
+      'Projapoti': 'প্রজাপতি',
+      'Victor Classic': 'ভিক্টর ক্লাসিক',
+      'BRTC AC': 'বিআরটিসি এসি',
+      'Gulshan 1': 'গুলশান ১',
       'Finding nearest stations…': 'নিকটতম স্টেশন খোঁজা হচ্ছে…',
       'MRT Pass (10% off)': 'এমআরটি পাস (১০% ছাড়)',
       'Direct': 'সরাসরি',
@@ -1271,6 +1304,7 @@
       if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
       if (typeof renderCurrentLocationStatus === 'function') renderCurrentLocationStatus();
       if (typeof renderMapSelectionControls === 'function') renderMapSelectionControls();
+      if (typeof renderBusRouteFinder === 'function') renderBusRouteFinder();
       if (typeof applyTheme === 'function') applyTheme();
     }
 
@@ -1971,6 +2005,7 @@
       { name: 'Bangladesh Secretariat', lat: 23.7286, lng: 90.4042 },
       { name: 'Motijheel', lat: 23.7251, lng: 90.4172 }
     ];
+    let busRouteData = null;
 
     let selectedVehicle = 'Bike';
     let currentDistanceKm = 10.2;
@@ -2210,6 +2245,141 @@
         const item = document.createElement('li');
         item.textContent = step;
         list.appendChild(item);
+      });
+    }
+
+    async function loadBusRouteData() {
+      const status = document.getElementById('busFinderStatus');
+      try {
+        const response = await fetch('./assets/dhaka-bus-routes.json');
+        if (!response.ok) throw new Error(`Route data request failed with status ${response.status}.`);
+        const data = await response.json();
+        if (!data.farePolicy || !Array.isArray(data.routes)) {
+          throw new Error('The bus route data file is missing its fare policy or routes list.');
+        }
+        if (!Number.isFinite(data.farePolicy.farePerKm) ||
+            !data.farePolicy.minimumFareByType ||
+            !Number.isFinite(data.farePolicy.minimumFareByType['non-ac']) ||
+            !Number.isFinite(data.farePolicy.minimumFareByType.ac)) {
+          throw new Error('The bus route data file has an invalid fare policy.');
+        }
+        data.routes.forEach(route => {
+          if (!route.id || !route.service || !['ac', 'non-ac'].includes(route.type) ||
+              !Array.isArray(route.stops) || route.stops.length < 2) {
+            throw new Error(`The bus route data file has an invalid route entry: ${route.id || 'unknown'}.`);
+          }
+          route.stops.forEach((stop, index) => {
+            if (!Object.prototype.hasOwnProperty.call(LOCATIONS, stop.locationKey) ||
+                !stop.name ||
+                !Number.isFinite(stop.distanceKmFromPrevious) ||
+                stop.distanceKmFromPrevious < 0 ||
+                (index === 0 && stop.distanceKmFromPrevious !== 0) ||
+                (index > 0 && stop.distanceKmFromPrevious === 0)) {
+              throw new Error(`The bus route data file has an invalid stop in route ${route.id}.`);
+            }
+          });
+        });
+        busRouteData = data;
+        renderBusRouteFinder();
+      } catch (error) {
+        console.error('Could not load local bus routes:', error);
+        status.textContent = getLocalizedText('Could not load local bus routes. Please refresh or check the route data file.');
+        document.getElementById('busRouteResults').replaceChildren();
+      }
+    }
+
+    function getBusRouteMatches(pickupKey, destinationKey) {
+      const { farePolicy, routes } = busRouteData;
+      return routes.flatMap(route => {
+        const pickupIndex = route.stops.findIndex(stop => stop.locationKey === pickupKey);
+        const destinationIndex = route.stops.findIndex(stop => stop.locationKey === destinationKey);
+        if (pickupIndex === -1 || destinationIndex === -1 || pickupIndex === destinationIndex) return [];
+
+        const startIndex = Math.min(pickupIndex, destinationIndex);
+        const endIndex = Math.max(pickupIndex, destinationIndex);
+        const direction = pickupIndex < destinationIndex ? 1 : -1;
+        const journeyStops = [];
+        for (let index = pickupIndex; ; index += direction) {
+          journeyStops.push(route.stops[index]);
+          if (index === destinationIndex) break;
+        }
+
+        let distanceKm = 0;
+        for (let index = startIndex + 1; index <= endIndex; index += 1) {
+          distanceKm += route.stops[index].distanceKmFromPrevious;
+        }
+
+        const minimumFare = farePolicy.minimumFareByType[route.type];
+        if (!Number.isFinite(distanceKm) || distanceKm <= 0 || !Number.isFinite(minimumFare)) {
+          throw new Error(`Invalid bus fare data for route ${route.id}.`);
+        }
+        const fare = Math.max(minimumFare, Math.ceil(distanceKm * farePolicy.farePerKm));
+
+        return [{ ...route, journeyStops, distanceKm, fare }];
+      }).sort((first, second) => first.fare - second.fare || first.distanceKm - second.distanceKm);
+    }
+
+    function renderBusRouteFinder() {
+      if (!busRouteData) return;
+      const status = document.getElementById('busFinderStatus');
+      const results = document.getElementById('busRouteResults');
+      results.replaceChildren();
+
+      const pickupKey = document.getElementById('pickupSelect').value;
+      const destinationKey = document.getElementById('dropoffSelect').value;
+      if ([CURRENT_LOCATION_KEY, MAP_PICKUP_KEY, MAP_DESTINATION_KEY].includes(pickupKey) ||
+          [CURRENT_LOCATION_KEY, MAP_PICKUP_KEY, MAP_DESTINATION_KEY].includes(destinationKey)) {
+        status.textContent = getLocalizedText('No bus data is available for your current-location or map-pin trip yet. Choose listed locations to check draft routes.');
+        return;
+      }
+
+      const matches = getBusRouteMatches(pickupKey, destinationKey);
+      if (matches.length === 0) {
+        status.textContent = getLocalizedText('No listed bus matches both selected locations in the current draft data. Try nearby stops or check back after route data is verified.');
+        return;
+      }
+
+      status.textContent = currentLanguage === 'bn'
+        ? `${formatLocalizedNumber(matches.length)}টি বাস রুট পাওয়া গেছে।`
+        : `${formatLocalizedNumber(matches.length)} bus route${matches.length === 1 ? '' : 's'} found.`;
+      matches.forEach(route => {
+        const card = document.createElement('article');
+        card.className = 'rounded-xl border border-slate-200 bg-white p-4';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-2';
+        const title = document.createElement('h3');
+        title.className = 'font-bold text-slate-900';
+        title.textContent = `${getLocalizedText(route.service)} · ${getLocalizedText(route.type === 'ac' ? 'AC' : 'Non-AC')}`;
+        const draftTag = document.createElement('span');
+        draftTag.className = 'rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-800';
+        draftTag.textContent = getLocalizedText('Draft estimate — confirm locally');
+        header.append(title, draftTag);
+        card.appendChild(header);
+
+        const routeLine = document.createElement('p');
+        routeLine.className = 'mt-2 text-sm font-medium text-slate-700';
+        routeLine.textContent = route.journeyStops
+          .map(stop => getLocalizedLocationName(stop.name))
+          .join(' → ');
+        card.appendChild(routeLine);
+
+        const distanceLine = document.createElement('p');
+        distanceLine.className = 'mt-3 text-xs text-slate-500';
+        distanceLine.textContent = `${getLocalizedText('Fare distance')}: ${formatLocalizedNumber(route.distanceKm, 1)} ${getLocalizedText('km')}`;
+        card.appendChild(distanceLine);
+
+        const fareLine = document.createElement('p');
+        fareLine.className = 'mt-1 text-lg font-black text-blue-800';
+        fareLine.textContent = `${getLocalizedText('Estimated bus fare')}: ${formatLocalizedFare(route.fare)}`;
+        card.appendChild(fareLine);
+
+        const stops = route.journeyStops.slice(1, -1).map(stop => getLocalizedLocationName(stop.name));
+        const stopsLine = document.createElement('p');
+        stopsLine.className = 'mt-1 text-xs text-slate-600';
+        stopsLine.textContent = `${getLocalizedText('Stops between')}: ${stops.length ? stops.join(', ') : getLocalizedText('No intermediate stop listed')}`;
+        card.appendChild(stopsLine);
+        results.appendChild(card);
       });
     }
 
@@ -2560,6 +2730,7 @@
           getLocalizedText('Your browser will ask permission before sharing your location.');
       }
       updateRoute();
+      renderBusRouteFinder();
     }
 
     function toggleSurgeSimulation() {
@@ -2846,6 +3017,7 @@
       populateLocationSelectors();
       initMap();
       applyLanguage();
+      loadBusRouteData();
       updateRoute();
       renderMetricsAndFares();
       setInterval(renderMetricsAndFares, 30000);
