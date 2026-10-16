@@ -1013,7 +1013,7 @@
   </section>
 
   <script>
-    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
+    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
 
     const BENGALI_TRANSLATIONS = {
       'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
@@ -1024,6 +1024,7 @@
       'Light mode': 'লাইট মোড',
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
       'Switch to light mode': 'লাইট মোড চালু করুন',
+      [MRT_ESTIMATE_DISCLAIMER]: 'এগুলো আনুমানিক হিসাব, লাইভ ভাড়া নয়। নিকটতম স্টেশন ও স্টেশনে যাতায়াতের দূরত্ব সরলরেখার মানচিত্র দূরত্ব দিয়ে নির্ধারণ করা হয়; মেট্রোর ভাড়া উত্তরার উত্তর স্টেশন থেকে প্রকাশিত ভাড়া তালিকার ভিত্তিতে, দুই স্টেশনের তালিকাভুক্ত ভাড়ার পার্থক্য থেকে আনুমানিক হিসাব করা হয় (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০)। ঐচ্ছিক পাসে ১০% ছাড় প্রয়োগ করা হয়। ফিডার পথের দূরত্বে ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত রিকশার ভাড়া ৳২০ + প্রতি কিমি ৳১২, পরবর্তী ৳১০-এ বাড়িয়ে হিসাব করা হয়; এর বেশি হলে রিকশা ভাড়া পাওয়া যায় না দেখানো হয়। বাইক ও সিএনজিতে সাইটের ভিত্তি ভাড়া ব্যবহার করা হয়। স্বয়ংক্রিয় বৃষ্টির হিসাব মধ্য ঢাকার Open-Meteo আবহাওয়ার তথ্য ব্যবহার করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% যোগ করে, মেট্রো ভাড়ায় নয়। রিকশা/সিএনজির গতি ঘণ্টায় ১২ কিমি এবং বাইকের ১৮ কিমি ধরা হয়। সরাসরি রাইডের সময় পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতির ভিত্তিতে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Could not save theme preference.': 'থিম পছন্দ সংরক্ষণ করা যায়নি।',
       'Rain fare': 'বৃষ্টির ভাড়া',
       'Weather data by Open-Meteo.com': 'Open-Meteo.com-এর আবহাওয়ার তথ্য',
@@ -2144,22 +2145,22 @@
     };
 
     const MRT_LINE_6_STATIONS = [
-      { name: 'Uttara North', lat: 23.8759, lng: 90.3795 },
-      { name: 'Uttara Center', lat: 23.8672, lng: 90.3850 },
-      { name: 'Uttara South', lat: 23.8588, lng: 90.3861 },
-      { name: 'Pallabi', lat: 23.8237, lng: 90.3653 },
-      { name: 'Mirpur 11', lat: 23.8193, lng: 90.3651 },
-      { name: 'Mirpur 10', lat: 23.8069, lng: 90.3687 },
-      { name: 'Kazipara', lat: 23.7972, lng: 90.3752 },
-      { name: 'Shewrapara', lat: 23.7873, lng: 90.3750 },
-      { name: 'Agargaon', lat: 23.7770, lng: 90.3795 },
-      { name: 'Bijoy Sarani', lat: 23.7653, lng: 90.3904 },
-      { name: 'Farmgate', lat: 23.7579, lng: 90.3891 },
-      { name: 'Karwan Bazar', lat: 23.7501, lng: 90.3917 },
-      { name: 'Shahbag', lat: 23.7389, lng: 90.3955 },
-      { name: 'Dhaka University', lat: 23.7335, lng: 90.3994 },
-      { name: 'Bangladesh Secretariat', lat: 23.7286, lng: 90.4042 },
-      { name: 'Motijheel', lat: 23.7251, lng: 90.4172 }
+      { name: 'Uttara North', lat: 23.8759, lng: 90.3795, fareFromUttara: 0 },
+      { name: 'Uttara Center', lat: 23.8672, lng: 90.3850, fareFromUttara: 20 },
+      { name: 'Uttara South', lat: 23.8588, lng: 90.3861, fareFromUttara: 20 },
+      { name: 'Pallabi', lat: 23.8237, lng: 90.3653, fareFromUttara: 30 },
+      { name: 'Mirpur 11', lat: 23.8193, lng: 90.3651, fareFromUttara: 30 },
+      { name: 'Mirpur 10', lat: 23.8069, lng: 90.3687, fareFromUttara: 40 },
+      { name: 'Kazipara', lat: 23.7972, lng: 90.3752, fareFromUttara: 40 },
+      { name: 'Shewrapara', lat: 23.7873, lng: 90.3750, fareFromUttara: 50 },
+      { name: 'Agargaon', lat: 23.7770, lng: 90.3795, fareFromUttara: 60 },
+      { name: 'Bijoy Sarani', lat: 23.7653, lng: 90.3904, fareFromUttara: 60 },
+      { name: 'Farmgate', lat: 23.7579, lng: 90.3891, fareFromUttara: 70 },
+      { name: 'Karwan Bazar', lat: 23.7501, lng: 90.3917, fareFromUttara: 80 },
+      { name: 'Shahbag', lat: 23.7389, lng: 90.3955, fareFromUttara: 80 },
+      { name: 'Dhaka University', lat: 23.7335, lng: 90.3994, fareFromUttara: 90 },
+      { name: 'Bangladesh Secretariat', lat: 23.7286, lng: 90.4042, fareFromUttara: 90 },
+      { name: 'Motijheel', lat: 23.7251, lng: 90.4172, fareFromUttara: 100 }
     ];
     let busRouteData = null;
 
@@ -2653,15 +2654,11 @@
         return;
       }
 
-      let lineDistanceKm = 0;
-      for (let index = firstStationIndex + 1; index <= lastStationIndex; index += 1) {
-        lineDistanceKm += calculateDirectDistance(
-          MRT_LINE_6_STATIONS[index - 1],
-          MRT_LINE_6_STATIONS[index]
-        );
-      }
-
-      const standardMrtFare = Math.min(100, Math.max(20, Math.ceil(lineDistanceKm) * 5));
+      const stationFareDifference = Math.abs(
+        MRT_LINE_6_STATIONS[lastStationIndex].fareFromUttara -
+        MRT_LINE_6_STATIONS[firstStationIndex].fareFromUttara
+      );
+      const standardMrtFare = Math.min(100, Math.max(20, stationFareDifference));
       const hasMrtPass = document.getElementById('mrtPassToggle').checked;
       const mrtFare = hasMrtPass ? Math.round(standardMrtFare * 0.9) : standardMrtFare;
       const firstMileOptions = getFeederOptions(pickupStation.distanceKm, isPeak);
