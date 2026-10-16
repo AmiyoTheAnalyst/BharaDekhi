@@ -728,7 +728,7 @@
           </section>
         </div>
         <p id="mrtEstimateDisclaimer" class="mt-2 text-xs leading-relaxed text-slate-500">
-          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site's baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
+            Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Rickshaw fare ranges reflect bargaining; the peak-hour estimate keeps the low end unchanged and adds ৳10 to the upper end. Bike and CNG use the site's baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
         </p>
       </section>
 
@@ -1014,7 +1014,7 @@
   </section>
 
   <script>
-    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
+    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Rickshaw fare ranges reflect bargaining; peak hours keep the low estimate unchanged and add ৳10 to the upper estimate. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
 
     const BENGALI_TRANSLATIONS = {
       'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
@@ -1060,6 +1060,7 @@
       'Non-Peak': 'নন-পিক আওয়ার',
       'Peak estimate': 'পিক আওয়ারের আনুমানিক ভাড়া',
       'Non-Peak estimate': 'নন-পিকের আনুমানিক ভাড়া',
+      'Rickshaw peak adjustment: +৳10 to upper end': 'রিকশার পিক ভাড়া: সর্বোচ্চ সীমায় +৳১০',
       'Dhaka time': 'ঢাকার সময়',
       'Choose account mode': 'অ্যাকাউন্টের ধরন বেছে নিন',
       'User': 'ব্যবহারকারী',
@@ -1235,7 +1236,7 @@
       'station intervals': 'স্টেশন ব্যবধান',
       'faster than direct ride': 'সরাসরি যাত্রার চেয়ে দ্রুত',
       'slower than direct ride': 'সরাসরি যাত্রার চেয়ে ধীর',
-      'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Peak and Heavy Rain multipliers are applied to ride and feeder estimates, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। পিক আওয়ার ও ভারী বৃষ্টির গুণক রাইড ও ফিডার ভাড়ায় প্রয়োগ করা হয়, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
+      [MRT_ESTIMATE_DISCLAIMER]: 'এগুলো আনুমানিক হিসাব, লাইভ ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াতের দূরত্ব সরলরেখার মানচিত্র দূরত্বে নির্ধারণ করা হয়; মেট্রোর ভাড়া উত্তরার উত্তর স্টেশন থেকে প্রকাশিত ভাড়া তালিকার ভিত্তিতে, দুই স্টেশনের তালিকাভুক্ত ভাড়ার পার্থক্য থেকে আনুমানিক হিসাব করা হয় (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০)। ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার পথের দূরত্বে ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত রিকশার ভাড়া ৳২০ + প্রতি কিমি ৳১২, পরবর্তী ৳১০-এ বাড়িয়ে হিসাব করা হয়; এর বেশি হলে রিকশা ভাড়া পাওয়া যায় না দেখানো হয়। রিকশার ভাড়ার সীমায় দরদামের বিষয়টি ধরা হয়েছে; পিক আওয়ারে সর্বনিম্ন হিসাব অপরিবর্তিত থাকে এবং সর্বোচ্চ ভাড়া ৳১০ বাড়ে। বাইক ও সিএনজিতে সাইটের ভিত্তি ভাড়া ব্যবহার করা হয়। স্বয়ংক্রিয় বৃষ্টির হিসাব মধ্য ঢাকার Open-Meteo আবহাওয়ার তথ্য ব্যবহার করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% যোগ করে, মেট্রো ভাড়ায় নয়। রিকশা/সিএনজির গতি ঘণ্টায় ১২ কিমি এবং বাইকের ১৮ কিমি ধরা হয়। সরাসরি রাইডের সময় পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতির ভিত্তিতে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Both locations are closest to the same MRT station; no Metro leg to estimate.': 'দুই স্থানই একই নিকটতম এমআরটি স্টেশনের কাছে; মেট্রো যাত্রা হিসাব করা যায় না।',
       'Uttara North': 'উত্তরা উত্তর',
       'Uttara Center': 'উত্তরা সেন্টার',
@@ -2412,6 +2413,26 @@
 
         const durationMins = Math.ceil(routeDistanceKm / speedKmh * 60);
         const fare = Math.ceil((base + routeDistanceKm * perKm + durationMins * perMin) / 10) * 10;
+        if (vehicle === 'Rickshaw') {
+          const fareMin = Math.max(0, fare - 10);
+          let fareMax = fare + (isPeak ? 10 : 0);
+          let adjustedFareMin = fareMin;
+          if (isHeavyRain) {
+            adjustedFareMin = Math.ceil(fareMin * 1.3 / 10) * 10;
+            fareMax = Math.ceil(fareMax * 1.5 / 10) * 10;
+          }
+          return {
+            vehicle,
+            fare,
+            fareMin: adjustedFareMin,
+            fareMax,
+            distanceKm: routeDistanceKm,
+            durationMins,
+            isWalking: false,
+            isAvailable: true
+          };
+        }
+
         const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
         return {
           vehicle,
@@ -2989,7 +3010,7 @@
         : `Dhaka time ${dhakaTime.formattedTime}`;
 
       const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
-      const multiplierLabel = `${formatLocalizedNumber(minimumMultiplier, 3)}x - ${formatLocalizedNumber(maximumMultiplier, 3)}x (${getLocalizedText(isPeak ? 'Peak estimate' : 'Non-Peak estimate')}${isHeavyRain ? ` + ${getLocalizedText('Heavy Rain uplift')}` : ''})`;
+      const multiplierLabel = `${formatLocalizedNumber(minimumMultiplier, 3)}x - ${formatLocalizedNumber(maximumMultiplier, 3)}x (${getLocalizedText(isPeak ? 'Peak estimate' : 'Non-Peak estimate')}${isHeavyRain ? ` + ${getLocalizedText('Heavy Rain uplift')}` : ''}${isPeak ? ` · ${getLocalizedText('Rickshaw peak adjustment: +৳10 to upper end')}` : ''})`;
       if (isPeak) {
         badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
         badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
