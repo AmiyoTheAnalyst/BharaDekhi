@@ -176,16 +176,73 @@
       color: #1d4ed8;
     }
     #userDashboardView {
-      max-width: 76rem;
-      padding-top: 2rem;
-      gap: 1.25rem;
+      max-width: 80rem;
+      padding-top: 1.75rem;
+      gap: 1.5rem;
     }
     #userDashboardView > div {
       border-radius: 1.5rem;
       box-shadow: 0 12px 36px rgb(15 23 42 / 5%);
     }
-    #userDashboardView > div:nth-child(2) {
-      padding: 1.75rem;
+    #userDashboardView .planner-hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      border: 1px solid rgb(191 219 254 / 75%);
+      border-radius: 1.75rem;
+      background:
+        radial-gradient(circle at 88% 22%, rgb(125 211 252 / 30%), transparent 14rem),
+        linear-gradient(120deg, #eff6ff 0%, #f8fbff 55%, #ecfeff 100%);
+      padding: clamp(1.5rem, 4vw, 2.75rem);
+    }
+    #userDashboardView .planner-hero::after {
+      position: absolute;
+      z-index: -1;
+      right: -5rem;
+      bottom: -9rem;
+      width: 22rem;
+      height: 22rem;
+      border: 1px solid rgb(37 99 235 / 10%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2rem rgb(37 99 235 / 3%), 0 0 0 4rem rgb(37 99 235 / 2%);
+      content: "";
+      pointer-events: none;
+    }
+    #userDashboardView .planner-hero h2 {
+      max-width: 42rem;
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      line-height: 1.08;
+      letter-spacing: -0.045em;
+    }
+    #userDashboardView .planner-hero p {
+      max-width: 44rem;
+    }
+    #userDashboardView .planner-step {
+      border: 1px solid rgb(191 219 254 / 80%);
+      background: rgb(255 255 255 / 78%);
+      color: #1e3a8a;
+    }
+    #userDashboardView .planner-section-title {
+      font-size: clamp(1.2rem, 2vw, 1.5rem);
+      line-height: 1.25;
+      letter-spacing: -0.025em;
+    }
+    #userDashboardView #travelShortcutsHeading {
+      font-size: 1.2rem;
+    }
+    #userDashboardView #pickupSelect,
+    #userDashboardView #dropoffSelect {
+      min-height: 3.25rem;
+      border-radius: 0.9rem;
+      font-weight: 600;
+    }
+    #userDashboardView #comparisonBike,
+    #userDashboardView #comparisonCNG,
+    #userDashboardView #comparisonCar {
+      padding: 1.25rem;
+    }
+    #userDashboardView .planner-route-card {
+      padding: clamp(1.25rem, 3vw, 2rem);
     }
     #userDashboardView #map {
       height: 360px;
@@ -212,7 +269,7 @@
       transform: translateY(-2px);
       box-shadow: 0 12px 24px rgb(15 23 42 / 8%);
     }
-    #userDashboardView > div:nth-child(3) > div > div {
+    #userDashboardView .planner-provider-card {
       border-radius: 1.3rem;
       box-shadow: 0 8px 26px rgb(15 23 42 / 5%);
     }
@@ -239,7 +296,21 @@
     html[data-theme="dark"] #authView > div:first-child > div > div:first-child {
       background: linear-gradient(145deg, #0b1c30 0%, #12364f 54%, #1e40af 100%);
     }
+    html[data-theme="dark"] #userDashboardView .planner-hero {
+      border-color: #334e68;
+      background:
+        radial-gradient(circle at 88% 22%, rgb(59 130 246 / 18%), transparent 14rem),
+        linear-gradient(120deg, #14243a 0%, #172b40 55%, #102f3b 100%);
+    }
+    html[data-theme="dark"] #userDashboardView .planner-step {
+      border-color: #3b536c;
+      background: rgb(15 23 42 / 72%);
+      color: #bfdbfe;
+    }
     @media (max-width: 640px) {
+      header {
+        position: static !important;
+      }
       header > div {
         padding-block: 0.75rem;
       }
@@ -255,7 +326,7 @@
       #userDashboardView {
         padding-top: 1.25rem;
       }
-      #userDashboardView > div:nth-child(2) {
+      #userDashboardView .planner-route-card {
         padding: 1.1rem;
       }
       #userDashboardView #map {
@@ -405,7 +476,7 @@
   </section>
 
   <!-- User Dashboard -->
-  <main id="userDashboardView" class="panel-section hidden max-w-4xl mx-auto px-4 pt-6 space-y-6">
+  <main id="userDashboardView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 space-y-6">
     <div class="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
       <div>
         <p class="text-xs uppercase tracking-wide text-slate-500">Welcome back</p>
@@ -416,8 +487,26 @@
       </button>
     </div>
 
+    <section class="planner-hero" aria-labelledby="tripPlannerPageHeading">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-700">Dhaka trip planner</p>
+      <h2 id="tripPlannerPageHeading" class="mt-3 font-black text-slate-900">Plan your next Dhaka trip</h2>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">Choose where you’re going, compare fares and travel times, then pick the route that works for you.</p>
+      <div class="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
+        <span class="planner-step inline-flex items-center gap-2 rounded-full px-3 py-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">1</span> Choose your route</span>
+        <span class="planner-step inline-flex items-center gap-2 rounded-full px-3 py-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">2</span> Compare options</span>
+        <span class="planner-step inline-flex items-center gap-2 rounded-full px-3 py-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">3</span> Pick your ride</span>
+      </div>
+    </section>
+
     <!-- Location Selector & Route Card -->
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+    <div class="planner-route-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Step 1 · Your journey</p>
+          <h2 class="planner-section-title mt-1 font-extrabold text-slate-900">Choose pickup and destination</h2>
+          <p class="mt-1 text-sm text-slate-500">Select a place or use your current location to get started.</p>
+        </div>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Pickup Selector -->
         <div>
@@ -446,7 +535,7 @@
 
       <section aria-labelledby="travelShortcutsHeading" class="border-t border-slate-100 pt-4">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="travelShortcutsHeading" class="text-base font-bold text-slate-900">Saved places &amp; recent trips</h2>
+          <h2 id="travelShortcutsHeading" class="planner-section-title font-bold text-slate-900">Saved places &amp; recent trips</h2>
           <p class="text-xs text-slate-500">Saved on this device for your account. Recent trips are routes you estimated, not completed rides.</p>
         </div>
         <p class="mt-1 text-xs text-slate-500">Current-location trips are not saved in history to protect your precise location.</p>
@@ -477,8 +566,8 @@
       </section>
 
       <!-- Vehicle Mode Tabs -->
-      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
-        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Vehicle:</span>
+      <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Preferred vehicle</span>
         <button onclick="setVehicle('Bike')" id="btnBike" aria-pressed="true" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-blue-600 text-white shadow-sm">
           <i data-lucide="bike" class="w-4 h-4"></i> Bike
         </button>
@@ -492,6 +581,11 @@
 
       <!-- Interactive Map -->
       <div class="relative">
+        <div class="mb-3">
+          <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Route map</p>
+          <h2 class="planner-section-title mt-1 font-extrabold text-slate-900">Your trip at a glance</h2>
+          <p class="mt-1 text-sm text-slate-500">Use the map to fine-tune either end of your route.</p>
+        </div>
         <div class="mb-2 flex flex-wrap items-center gap-2">
           <span class="text-xs font-semibold text-slate-600">Tap map to set:</span>
           <button id="mapSetPickupBtn" type="button" aria-pressed="false" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">Set pickup</button>
@@ -508,7 +602,9 @@
       </div>
 
       <!-- Distance & Estimated Time Tiles -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+      <div>
+        <h2 class="planner-section-title mb-3 font-extrabold text-slate-900">Distance and travel time</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
           <span class="text-xs text-slate-500 font-medium block">Road Distance</span>
           <span id="routeDistance" class="text-lg font-bold text-slate-900">10.2 km</span>
@@ -521,11 +617,15 @@
           <span class="text-xs text-slate-500 font-medium block">Surge Multiplier</span>
           <span id="surgeMultiplierText" class="text-lg font-bold text-emerald-600">1.0x (Off-Peak)</span>
         </div>
+        </div>
       </div>
 
       <section aria-labelledby="vehicleComparisonHeading" class="border-t border-slate-100 pt-4">
         <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-          <h2 id="vehicleComparisonHeading" class="text-base font-bold text-slate-900">Compare ride options</h2>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Step 2 · Compare</p>
+            <h2 id="vehicleComparisonHeading" class="planner-section-title mt-1 font-extrabold text-slate-900">Compare ride options</h2>
+          </div>
           <span class="text-xs text-slate-500">Choose a ride to update provider estimates and ride details</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" aria-live="polite">
@@ -583,7 +683,8 @@
       <section aria-labelledby="mrtEstimatorHeading" class="border-t border-slate-100 pt-4">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 id="mrtEstimatorHeading" class="text-base font-bold text-slate-900">MRT Line 6 hybrid estimate</h2>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">More ways to travel</p>
+            <h2 id="mrtEstimatorHeading" class="planner-section-title mt-1 font-extrabold text-slate-900">MRT Line 6 hybrid estimate</h2>
             <p id="mrtStationRoute" class="mt-1 text-sm font-medium text-slate-700" aria-live="polite">Finding nearest stations…</p>
           </div>
           <label class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-800">
@@ -633,7 +734,10 @@
 
       <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-4">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="localBusFinderHeading" class="text-base font-bold text-slate-900">Dhaka local bus finder</h2>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">More ways to travel</p>
+            <h2 id="localBusFinderHeading" class="planner-section-title mt-1 font-extrabold text-slate-900">Dhaka local bus finder</h2>
+          </div>
           <span id="busDraftBadge" class="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800">Draft route data — verify before travel</span>
         </div>
         <p id="busFarePolicy" class="mt-1 text-xs text-slate-500">Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
@@ -644,16 +748,19 @@
     </div>
 
     <!-- COMPARISON & LAUNCH SECTION -->
-    <div>
-      <h2 class="text-base font-bold text-slate-900 mb-3 flex items-center justify-between">
-        <span>Available Services & Fares</span>
+    <div class="planner-provider-section">
+      <h2 class="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <span>
+          <span class="block text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Step 3 · Book or continue</span>
+          <span class="planner-section-title mt-1 block font-extrabold text-slate-900">Available services &amp; fares</span>
+        </span>
         <span class="text-xs font-normal text-slate-500">Click to compare & launch</span>
       </h2>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         <!-- UBER CARD -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+        <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -674,7 +781,7 @@
         </div>
 
         <!-- PATHAO CARD -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+        <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -695,7 +802,7 @@
         </div>
 
         <!-- INDRIVE CARD -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+        <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -956,6 +1063,24 @@
       'User': 'ব্যবহারকারী',
       'Admin': 'অ্যাডমিন',
       'Your Dhaka commute starts here.': 'আপনার ঢাকার যাত্রা শুরু হোক এখানে।',
+      'Dhaka trip planner': 'ঢাকায় যাত্রা পরিকল্পনা',
+      'Plan your next Dhaka trip': 'ঢাকায় আপনার পরবর্তী যাত্রা পরিকল্পনা করুন',
+      'Choose where you’re going, compare fares and travel times, then pick the route that works for you.': 'গন্তব্য বেছে নিন, ভাড়া ও যাত্রার সময় তুলনা করুন, তারপর আপনার জন্য উপযুক্ত পথটি নিন।',
+      'Choose your route': 'আপনার রুট বেছে নিন',
+      'Compare options': 'বিকল্প তুলনা করুন',
+      'Pick your ride': 'যাতায়াতের মাধ্যম বেছে নিন',
+      'Step 1 · Your journey': 'ধাপ ১ · আপনার যাত্রা',
+      'Choose pickup and destination': 'শুরুর স্থান ও গন্তব্য বেছে নিন',
+      'Select a place or use your current location to get started.': 'শুরু করতে একটি স্থান বেছে নিন অথবা আপনার বর্তমান অবস্থান ব্যবহার করুন।',
+      'Preferred vehicle': 'পছন্দের যানবাহন',
+      'Route map': 'রুটের মানচিত্র',
+      'Your trip at a glance': 'এক নজরে আপনার যাত্রা',
+      'Use the map to fine-tune either end of your route.': 'মানচিত্রে যাত্রার শুরু বা শেষের স্থান আরও নির্দিষ্ট করুন।',
+      'Distance and travel time': 'দূরত্ব ও যাত্রার সময়',
+      'Step 2 · Compare': 'ধাপ ২ · তুলনা করুন',
+      'More ways to travel': 'যাতায়াতের আরও উপায়',
+      'Step 3 · Book or continue': 'ধাপ ৩ · বুক করুন বা এগিয়ে যান',
+      'Available services & fares': 'উপলভ্য সেবা ও ভাড়া',
       'Frequently Asked Questions': 'সাধারণ জিজ্ঞাসা',
       'FAQ': 'সাধারণ জিজ্ঞাসা',
       'Learn how BharaDekhi estimates fares and helps plan trips around Dhaka.': 'BharaDekhi কীভাবে ভাড়া হিসাব করে এবং ঢাকায় যাত্রা পরিকল্পনায় সাহায্য করে জানুন।',
@@ -1033,7 +1158,6 @@
       'Pickup': 'পিকআপ',
       'Pickup:': 'পিকআপ:',
       'Destination:': 'গন্তব্য:',
-      'Vehicle:': 'যানবাহন:',
       'Bike': 'বাইক',
       'CNG': 'সিএনজি',
       'Car': 'গাড়ি',
