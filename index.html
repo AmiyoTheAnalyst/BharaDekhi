@@ -743,7 +743,8 @@
         <p id="busFarePolicy" class="mt-1 text-xs text-slate-500">Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
         <p id="busFinderStatus" class="mt-3 text-sm text-slate-600" aria-live="polite">Loading local bus routes…</p>
         <div id="busRouteResults" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-live="polite"></div>
-        <p id="busRouteDisclaimer" class="mt-3 text-xs leading-relaxed text-slate-500">Route and stoppage data are unverified draft suggestions, not official BRTA route-distance records. Fares use approximate route distances and the selected minimum; confirm bus direction, stops, and fare locally before boarding.</p>
+        <div id="busHybridResults" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-live="polite"></div>
+        <p id="busRouteDisclaimer" class="mt-3 text-xs leading-relaxed text-slate-500">Direct and bus + feeder suggestions use unverified draft routes and stop distances, not official BRTA route-distance records. Feeder fares and travel times are estimates; longer feeder legs may not be practical. Confirm the bus direction, stops, feeder availability, and fare locally before boarding.</p>
       </section>
     </div>
 
@@ -1171,6 +1172,18 @@
       'Could not load local bus routes. Please refresh or check the route data file.': 'লোকাল বাসের রুট লোড করা যায়নি। আবার লোড করুন অথবা রুটের তথ্য ফাইল পরীক্ষা করুন।',
       'No listed bus matches both selected locations in the current draft data. Try nearby stops or check back after route data is verified.': 'বর্তমান খসড়া তথ্যে নির্বাচিত দুই স্থানের জন্য কোনো বাসের মিল পাওয়া যায়নি। কাছের স্টপ বেছে নিন অথবা রুট যাচাইয়ের পর আবার দেখুন।',
       'No bus data is available for your current-location or map-pin trip yet. Choose listed locations to check draft routes.': 'বর্তমান অবস্থান বা মানচিত্রের পিনের জন্য এখনও বাসের তথ্য নেই। খসড়া রুট দেখতে তালিকাভুক্ত স্থান বেছে নিন।',
+      'No direct route in the draft data; showing bus + feeder suggestions below.': 'খসড়া তথ্যে সরাসরি বাসের রুট নেই; নিচে বাস + ফিডার যাত্রার পরামর্শ দেখানো হয়েছে।',
+      'Direct bus routes': 'সরাসরি বাসের রুট',
+      'Bus + feeder options': 'বাস + ফিডার বিকল্প',
+      'Bus + feeder': 'বাস + ফিডার',
+      'Ride to board': 'বাসে উঠতে যান',
+      'Ride from exit': 'বাস থেকে নেমে যান',
+      'Bus segment': 'বাসের অংশ',
+      'Estimated total': 'মোট আনুমানিক ভাড়া',
+      'Estimated journey time': 'আনুমানিক যাত্রার সময়',
+      'feeder leg': 'ফিডার পথ',
+      'Long feeder ride; check whether this connection is practical.': 'ফিডার পথটি দীর্ঘ; এই সংযোগটি বাস্তবসম্মত কি না যাচাই করুন।',
+      'Could not estimate a bus + feeder route for these locations.': 'এই স্থানগুলোর জন্য বাস + ফিডার রুটের হিসাব করা যায়নি।',
       'Bus route': 'বাসের রুট',
       'Non-AC': 'নন-এসি',
       'AC': 'এসি',
@@ -1339,6 +1352,7 @@
     };
 
     const BENGALI_LOCATION_NAMES = {
+      'Azimpur': 'আজিমপুর',
       'Azimpur Bus Stand': 'আজিমপুর বাস স্ট্যান্ড',
       'Uttara': 'উত্তরা',
       'Banani': 'বনানী',
@@ -2543,29 +2557,126 @@
       }).sort((first, second) => first.fare - second.fare || first.distanceKm - second.distanceKm);
     }
 
+    function getBusHybridMatches(pickup, destination, isPeak, directMatches) {
+      const { farePolicy, routes } = busRouteData;
+      return routes.map(route => {
+        let bestMatch = null;
+        for (let startIndex = 0; startIndex < route.stops.length; startIndex += 1) {
+          for (let endIndex = 0; endIndex < route.stops.length; endIndex += 1) {
+            if (startIndex === endIndex) continue;
+            if (directMatches.some(match =>
+              match.id === route.id &&
+              match.journeyStops[0] === route.stops[startIndex] &&
+              match.journeyStops[match.journeyStops.length - 1] === route.stops[endIndex]
+            )) continue;
+
+            const direction = startIndex < endIndex ? 1 : -1;
+            const journeyStops = [];
+            for (let index = startIndex; ; index += direction) {
+              journeyStops.push(route.stops[index]);
+              if (index === endIndex) break;
+            }
+
+            const firstMileDistanceKm = calculateDirectDistance(
+              pickup,
+              LOCATIONS[route.stops[startIndex].locationKey]
+            );
+            const lastMileDistanceKm = calculateDirectDistance(
+              destination,
+              LOCATIONS[route.stops[endIndex].locationKey]
+            );
+            const firstMileOptions = getFeederOptions(firstMileDistanceKm, isPeak)
+              .filter(option => option.isAvailable !== false);
+            const lastMileOptions = getFeederOptions(lastMileDistanceKm, isPeak)
+              .filter(option => option.isAvailable !== false);
+            if (!firstMileOptions.length || !lastMileOptions.length) continue;
+            const firstMile = firstMileOptions[0];
+            const lastMile = lastMileOptions[0];
+
+            const lowIndex = Math.min(startIndex, endIndex);
+            const highIndex = Math.max(startIndex, endIndex);
+            let busDistanceKm = 0;
+            for (let index = lowIndex + 1; index <= highIndex; index += 1) {
+              busDistanceKm += route.stops[index].distanceKmFromPrevious;
+            }
+            if (!Number.isFinite(busDistanceKm) || busDistanceKm <= 0) continue;
+            const busFare = Math.max(
+              farePolicy.minimumFareByType[route.type],
+              Math.ceil(busDistanceKm * farePolicy.farePerKm)
+            );
+            const feederFareMin = firstMile.fareMin + lastMile.fareMin;
+            const feederFareMax = firstMile.fareMax + lastMile.fareMax;
+            const busSpeedKmh = isPeak ? 15 : 22;
+            const durationMins = firstMile.durationMins + lastMile.durationMins +
+              Math.ceil(busDistanceKm / busSpeedKmh * 60) + 10;
+            const candidate = {
+              ...route,
+              journeyStops,
+              startIndex,
+              endIndex,
+              busDistanceKm,
+              busFare,
+              firstMile,
+              lastMile,
+              feederFareMin,
+              feederFareMax,
+              fareMin: busFare + feederFareMin,
+              fareMax: busFare + feederFareMax,
+              durationMins
+            };
+            if (!bestMatch ||
+                candidate.fareMin < bestMatch.fareMin ||
+                (candidate.fareMin === bestMatch.fareMin &&
+                  candidate.durationMins < bestMatch.durationMins)) {
+              bestMatch = candidate;
+            }
+          }
+        }
+        return bestMatch;
+      }).filter(Boolean)
+        .sort((first, second) =>
+          first.fareMin - second.fareMin ||
+          first.durationMins - second.durationMins
+        )
+        .slice(0, 3);
+    }
+
     function renderBusRouteFinder() {
       if (!busRouteData) return;
       const status = document.getElementById('busFinderStatus');
       const results = document.getElementById('busRouteResults');
+      const hybridResults = document.getElementById('busHybridResults');
       results.replaceChildren();
+      hybridResults.replaceChildren();
 
       const pickupKey = document.getElementById('pickupSelect').value;
       const destinationKey = document.getElementById('dropoffSelect').value;
-      if ([CURRENT_LOCATION_KEY, MAP_PICKUP_KEY, MAP_DESTINATION_KEY].includes(pickupKey) ||
-          [CURRENT_LOCATION_KEY, MAP_PICKUP_KEY, MAP_DESTINATION_KEY].includes(destinationKey)) {
-        status.textContent = getLocalizedText('No bus data is available for your current-location or map-pin trip yet. Choose listed locations to check draft routes.');
+      const pickup = getLocationForKey(pickupKey);
+      const destination = getLocationForKey(destinationKey);
+      if (!pickup || !destination) {
+        status.textContent = getLocalizedText('Could not estimate a bus + feeder route for these locations.');
         return;
       }
 
       const matches = getBusRouteMatches(pickupKey, destinationKey);
-      if (matches.length === 0) {
-        status.textContent = getLocalizedText('No listed bus matches both selected locations in the current draft data. Try nearby stops or check back after route data is verified.');
-        return;
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const hybridMatches = getBusHybridMatches(pickup, destination, isPeak, matches);
+      const directStatus = matches.length
+        ? currentLanguage === 'bn'
+          ? `${formatLocalizedNumber(matches.length)}টি সরাসরি বাস রুট পাওয়া গেছে।`
+          : `${formatLocalizedNumber(matches.length)} direct bus route${matches.length === 1 ? '' : 's'} found.`
+        : getLocalizedText('No direct route in the draft data; showing bus + feeder suggestions below.');
+      const hybridStatus = currentLanguage === 'bn'
+        ? `${formatLocalizedNumber(hybridMatches.length)}টি বাস + ফিডার বিকল্প`
+        : `${formatLocalizedNumber(hybridMatches.length)} bus + feeder option${hybridMatches.length === 1 ? '' : 's'}`;
+      status.textContent = `${directStatus} ${hybridStatus}.`;
+      if (matches.length) {
+        const directHeading = document.createElement('h3');
+        directHeading.className = 'md:col-span-2 text-sm font-bold text-slate-800';
+        directHeading.textContent = getLocalizedText('Direct bus routes');
+        results.appendChild(directHeading);
       }
-
-      status.textContent = currentLanguage === 'bn'
-        ? `${formatLocalizedNumber(matches.length)}টি বাস রুট পাওয়া গেছে।`
-        : `${formatLocalizedNumber(matches.length)} bus route${matches.length === 1 ? '' : 's'} found.`;
       matches.forEach(route => {
         const card = document.createElement('article');
         card.className = 'rounded-xl border border-slate-200 bg-white p-4';
@@ -2604,6 +2715,67 @@
         stopsLine.textContent = `${getLocalizedText('Stops between')}: ${stops.length ? stops.join(', ') : getLocalizedText('No intermediate stop listed')}`;
         card.appendChild(stopsLine);
         results.appendChild(card);
+      });
+
+      const heading = document.createElement('h3');
+      heading.className = 'md:col-span-2 text-sm font-bold text-slate-800';
+      heading.textContent = getLocalizedText('Bus + feeder options');
+      hybridResults.appendChild(heading);
+      hybridMatches.forEach(route => {
+        const card = document.createElement('article');
+        card.className = 'rounded-xl border border-blue-200 bg-blue-50 p-4';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-2';
+        const title = document.createElement('h3');
+        title.className = 'font-bold text-slate-900';
+        title.textContent = `${getLocalizedText('Bus + feeder')}: ${getLocalizedText(route.service)} · ${getLocalizedText(route.type === 'ac' ? 'AC' : 'Non-AC')}`;
+        const draftTag = document.createElement('span');
+        draftTag.className = 'rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-800';
+        draftTag.textContent = getLocalizedText('Draft estimate — confirm locally');
+        header.append(title, draftTag);
+        card.appendChild(header);
+
+        const feederLines = [
+          [getLocalizedText('Ride to board'), pickup, route.journeyStops[0], route.firstMile],
+          [getLocalizedText('Ride from exit'), route.journeyStops[route.journeyStops.length - 1], destination, route.lastMile]
+        ];
+        feederLines.forEach(([label, from, to, feeder]) => {
+          const line = document.createElement('p');
+          line.className = 'mt-2 text-xs text-slate-700';
+          line.textContent = `${label}: ${getLocalizedLocationName(from.name)} → ${getLocalizedLocationName(to.name)} · ${getLocalizedText(feeder.vehicle)} · ${formatLocalizedNumber(feeder.distanceKm, 1)} ${getLocalizedText('km')}`;
+          card.appendChild(line);
+        });
+
+        const routeLine = document.createElement('p');
+        routeLine.className = 'mt-2 text-sm font-medium text-slate-700';
+        routeLine.textContent = route.journeyStops
+          .map(stop => getLocalizedLocationName(stop.name))
+          .join(' → ');
+        card.appendChild(routeLine);
+
+        const breakdown = document.createElement('p');
+        breakdown.className = 'mt-3 text-xs text-slate-600';
+        breakdown.textContent = `${getLocalizedText('Bus segment')}: ${formatLocalizedFare(route.busFare)} (${formatLocalizedNumber(route.busDistanceKm, 1)} ${getLocalizedText('km')}) · ${getLocalizedText('feeder leg')}: ${formatLocalizedFareRange(route.feederFareMin, route.feederFareMax)}`;
+        card.appendChild(breakdown);
+
+        const fareLine = document.createElement('p');
+        fareLine.className = 'mt-1 text-lg font-black text-blue-800';
+        fareLine.textContent = `${getLocalizedText('Estimated total')}: ${formatLocalizedFareRange(route.fareMin, route.fareMax)}`;
+        card.appendChild(fareLine);
+
+        const durationLine = document.createElement('p');
+        durationLine.className = 'mt-1 text-xs text-slate-600';
+        durationLine.textContent = `${getLocalizedText('Estimated journey time')}: ~${formatLocalizedNumber(route.durationMins)} ${getLocalizedText('mins')}`;
+        card.appendChild(durationLine);
+
+        if (route.firstMile.distanceKm > 5 || route.lastMile.distanceKm > 5) {
+          const warning = document.createElement('p');
+          warning.className = 'mt-2 text-xs font-medium text-amber-800';
+          warning.textContent = getLocalizedText('Long feeder ride; check whether this connection is practical.');
+          card.appendChild(warning);
+        }
+        hybridResults.appendChild(card);
       });
     }
 
