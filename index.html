@@ -615,7 +615,7 @@
           </section>
         </div>
         <p id="mrtEstimateDisclaimer" class="mt-2 text-xs leading-relaxed text-slate-500">
-          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site's baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
+          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site's baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
         </p>
       </section>
     </div>
@@ -883,7 +883,7 @@
   </section>
 
   <script>
-    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
+    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
 
     const BENGALI_TRANSLATIONS = {
       'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
@@ -1030,6 +1030,7 @@
       'Walk to': 'হেঁটে যান',
       'Already at the station; no feeder needed.': 'স্টেশনে পৌঁছে গেছেন; ফিডার লাগবে না।',
       'Walking distance; no feeder fare.': 'হেঁটে যাওয়ার দূরত্ব; ফিডার ভাড়া লাগবে না।',
+      'Unavailable (rickshaw is usually used for trips up to 5 km)': 'পাওয়া যায় না (সাধারণত ৫ কিমি পর্যন্ত রিকশায় যাতায়াত করা হয়)',
       'Cheapest for this leg': 'এই পথে সবচেয়ে কম ভাড়া',
       'Rickshaw fare estimate': 'রিকশার আনুমানিক ভাড়া',
       'Bike fare estimate': 'বাইকের আনুমানিক ভাড়া',
@@ -1040,6 +1041,7 @@
       'station intervals': 'স্টেশন ব্যবধান',
       'faster than direct ride': 'সরাসরি যাত্রার চেয়ে দ্রুত',
       'slower than direct ride': 'সরাসরি যাত্রার চেয়ে ধীর',
+      'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Both locations are closest to the same MRT station; no Metro leg to estimate.': 'দুই স্থানই একই নিকটতম এমআরটি স্টেশনের কাছে; মেট্রো যাত্রা হিসাব করা যায় না।',
       'Uttara North': 'উত্তরা উত্তর',
       'Uttara Center': 'উত্তরা সেন্টার',
@@ -2121,12 +2123,23 @@
       }
 
       const accessModes = [
-        { vehicle: 'Rickshaw', base: 30, perKm: 25, perMin: 0, speedKmh: 12 },
+        { vehicle: 'Rickshaw', base: 20, perKm: 12, perMin: 0, speedKmh: 12, maximumDistanceKm: 5 },
         { vehicle: 'Bike', ...VEHICLE_RATES.Bike, speedKmh: 18 },
         { vehicle: 'CNG', ...VEHICLE_RATES.CNG, speedKmh: 12 }
       ];
 
-      return accessModes.map(({ vehicle, base, perKm, perMin, speedKmh }) => {
+      return accessModes.map(({ vehicle, base, perKm, perMin, speedKmh, maximumDistanceKm }) => {
+        if (maximumDistanceKm && routeDistanceKm > maximumDistanceKm) {
+          return {
+            vehicle,
+            fare: null,
+            distanceKm: routeDistanceKm,
+            durationMins: null,
+            isWalking: false,
+            isAvailable: false
+          };
+        }
+
         const durationMins = Math.ceil(routeDistanceKm / speedKmh * 60);
         const fare = base + routeDistanceKm * perKm + durationMins * perMin;
         return {
@@ -2134,9 +2147,14 @@
           fare: Math.ceil(fare / 10) * 10,
           distanceKm: routeDistanceKm,
           durationMins,
-          isWalking: false
+          isWalking: false,
+          isAvailable: true
         };
-      }).sort((first, second) => first.fare - second.fare || first.durationMins - second.durationMins);
+      }).sort((first, second) => {
+        if (!first.isAvailable) return 1;
+        if (!second.isAvailable) return -1;
+        return first.fare - second.fare || first.durationMins - second.durationMins;
+      });
     }
 
     function renderFeederOptions(containerId, options, locationName, stationName, headingId) {
@@ -2151,10 +2169,10 @@
         : `${getLocalizedText('From your exit station')}: ${localizedStation} → ${localizedLocation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`;
       container.replaceChildren();
 
-      const cheapestFare = Math.min(...options.map(option => option.fare));
+      const cheapestFare = Math.min(...options.filter(option => option.isAvailable !== false).map(option => option.fare));
       options.forEach(option => {
         const row = document.createElement('div');
-        row.className = `flex items-center justify-between gap-2 rounded-lg px-3 py-2 ${option.fare === cheapestFare ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-50 text-slate-700'}`;
+        row.className = `flex items-center justify-between gap-2 rounded-lg px-3 py-2 ${option.isAvailable !== false && option.fare === cheapestFare ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-50 text-slate-700'}`;
 
         const mode = document.createElement('span');
         mode.className = 'font-medium';
@@ -2167,8 +2185,12 @@
 
         const price = document.createElement('span');
         price.className = 'flex items-center gap-2 font-semibold';
-        price.textContent = option.isWalking ? getLocalizedText('Walking distance; no feeder fare.') : formatLocalizedFare(option.fare);
-        if (option.fare === cheapestFare && !option.isWalking) {
+        price.textContent = option.isWalking
+          ? getLocalizedText('Walking distance; no feeder fare.')
+          : option.isAvailable === false
+            ? getLocalizedText('Unavailable (rickshaw is usually used for trips up to 5 km)')
+            : formatLocalizedFare(option.fare);
+        if (option.isAvailable !== false && option.fare === cheapestFare && !option.isWalking) {
           const badge = document.createElement('span');
           badge.className = 'rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800';
           badge.textContent = getLocalizedText('Cheapest option');
@@ -2178,7 +2200,7 @@
         container.appendChild(row);
       });
 
-      return options[0];
+      return options.find(option => option.isAvailable !== false) || options[0];
     }
 
     function renderMrtJourneySteps(steps) {
