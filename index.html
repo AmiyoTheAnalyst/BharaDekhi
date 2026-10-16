@@ -294,6 +294,18 @@
           <span>Simulate Surge</span>
           <input type="checkbox" id="surgeToggle" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer" onchange="toggleSurgeSimulation()">
         </label>
+        <div class="flex flex-col gap-1 rounded-xl border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs text-sky-800">
+          <label for="rainModeSelect" class="flex items-center gap-2 font-semibold">
+            <span>Rain fare</span>
+            <select id="rainModeSelect" class="rounded-md border border-sky-200 bg-white px-1.5 py-1 text-xs text-slate-700">
+              <option value="auto">Auto (Dhaka weather)</option>
+              <option value="rain">Always apply rain fare</option>
+              <option value="dry">Never apply rain fare</option>
+            </select>
+          </label>
+          <span id="weatherStatus" class="text-[10px]" aria-live="polite">Checking Dhaka weather…</span>
+          <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="text-[10px] underline decoration-dotted">Weather data by Open-Meteo.com</a>
+        </div>
         <div id="surgeBadge" class="flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200" aria-live="polite">
           <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span class="flex flex-col">
@@ -564,7 +576,7 @@
           </article>
         </div>
         <p class="mt-3 text-xs leading-relaxed text-slate-500">
-          Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:30–8:30 PM); actual traffic, fares, and times may differ. The route tile shows OSRM duration; vehicle comparison times use estimated average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by mode (Bike 0.85x, CNG 1.15x, Car 1.0x). Fare estimates still use OSRM distance and duration.
+          Estimates only, not live quotes. Peak periods are estimated from Dhaka time (8:30–10:30 AM, 5:00–8:00 PM). Current weather estimates for central Dhaka are checked with Open-Meteo every 15 minutes; rain adds a 1.3x–1.5x uplift to ride and feeder estimates. Use the selector to force rain fares on or off. Metro and local bus fares are not weather-adjusted.
         </p>
       </section>
 
@@ -615,7 +627,7 @@
           </section>
         </div>
         <p id="mrtEstimateDisclaimer" class="mt-2 text-xs leading-relaxed text-slate-500">
-          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site's baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
+          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site's baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
         </p>
       </section>
 
@@ -894,7 +906,7 @@
   </section>
 
   <script>
-    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
+    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
 
     const BENGALI_TRANSLATIONS = {
       'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
@@ -906,6 +918,18 @@
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
       'Switch to light mode': 'লাইট মোড চালু করুন',
       'Could not save theme preference.': 'থিম পছন্দ সংরক্ষণ করা যায়নি।',
+      'Rain fare': 'বৃষ্টির ভাড়া',
+      'Weather data by Open-Meteo.com': 'Open-Meteo.com-এর আবহাওয়ার তথ্য',
+      'Auto (Dhaka weather)': 'স্বয়ংক্রিয় (ঢাকার আবহাওয়া)',
+      'Always apply rain fare': 'সবসময় বৃষ্টির ভাড়া',
+      'Never apply rain fare': 'কখনো বৃষ্টির ভাড়া নয়',
+      'Checking Dhaka weather…': 'ঢাকার আবহাওয়া দেখা হচ্ছে…',
+      'Dhaka weather estimate: Rain indicated (automatic)': 'ঢাকার আবহাওয়ার আনুমানিক: বৃষ্টি আছে (স্বয়ংক্রিয়)',
+      'Dhaka weather estimate: No rain indicated (automatic)': 'ঢাকার আবহাওয়ার আনুমানিক: বৃষ্টি নেই (স্বয়ংক্রিয়)',
+      'Dhaka weather unavailable; rain adjustment is off in automatic mode.': 'ঢাকার আবহাওয়া পাওয়া যাচ্ছে না; স্বয়ংক্রিয় মোডে বৃষ্টির অতিরিক্ত ভাড়া বন্ধ।',
+      'Dhaka weather unavailable; keeping the last detected condition.': 'ঢাকার আবহাওয়া পাওয়া যাচ্ছে না; সর্বশেষ শনাক্ত অবস্থা বহাল আছে।',
+      'Rain fare is on (manual override).': 'বৃষ্টির ভাড়া চালু (ম্যানুয়াল নিয়ন্ত্রণ)।',
+      'Rain fare is off (manual override).': 'বৃষ্টির ভাড়া বন্ধ (ম্যানুয়াল নিয়ন্ত্রণ)।',
       'Tap map to set:': 'মানচিত্রে ট্যাপ করে নির্ধারণ করুন:',
       'Set pickup': 'পিকআপ নির্ধারণ',
       'Set destination': 'গন্তব্য নির্ধারণ',
@@ -919,15 +943,14 @@
       'Map pin set to:': 'মানচিত্রের পিন নির্ধারণ করা হয়েছে:',
       'You selected the same point for pickup and destination. Choose a different point.': 'পিকআপ ও গন্তব্যের জন্য একই স্থান নির্বাচন করেছেন। অন্য স্থান বেছে নিন।',
       'Simulate Surge': 'পিক আওয়ার অনুকরণ',
+      'Heavy Rain': 'ভারী বৃষ্টি',
+      'Heavy Rain uplift': 'ভারী বৃষ্টির অতিরিক্ত ভাড়া',
       'Morning Peak': 'সকাল পিক আওয়ার',
       'Evening Peak': 'সন্ধ্যা পিক আওয়ার',
       'Simulated Peak': 'অনুকৃত পিক আওয়ার',
       'Non-Peak': 'নন-পিক আওয়ার',
-      'Simulated Peak': 'অনুকৃত পিক আওয়ার',
       'Peak estimate': 'পিক আওয়ারের আনুমানিক ভাড়া',
       'Non-Peak estimate': 'নন-পিকের আনুমানিক ভাড়া',
-      '1.25x - 1.55x (Peak estimate)': '১.২৫x - ১.৫৫x (পিক আওয়ারের আনুমানিক)',
-      '0.95x - 1.15x (Non-Peak estimate)': '০.৯৫x - ১.১৫x (নন-পিকের আনুমানিক)',
       'Dhaka time': 'ঢাকার সময়',
       'Choose account mode': 'অ্যাকাউন্টের ধরন বেছে নিন',
       'User': 'ব্যবহারকারী',
@@ -941,7 +964,7 @@
       'Are these the official Uber, Pathao, or inDrive prices?': 'এগুলো কি Uber, Pathao বা inDrive-এর নির্ধারিত ভাড়া?',
       'No. These are independent estimates, not live provider quotes. Each ride service sets its own fare, availability, fees, and surge pricing. Check the provider’s app for the final price before booking.': 'না। এগুলো স্বতন্ত্র আনুমানিক হিসাব, সেবাদাতার সরাসরি ভাড়া নয়। প্রতিটি সেবা নিজস্ব ভাড়া, যানবাহনের প্রাপ্যতা, ফি ও পিক চার্জ নির্ধারণ করে। বুক করার আগে সংশ্লিষ্ট অ্যাপে চূড়ান্ত ভাড়া দেখে নিন।',
       'When does BharaDekhi consider it peak hour in Dhaka?': 'BharaDekhi কখন ঢাকায় পিক আওয়ার ধরে?',
-      'The current estimate uses Dhaka local time and treats 8:30–10:30 AM and 5:30–8:30 PM as approximate weekday-style peak windows. Actual traffic and provider surge pricing can differ.': 'বর্তমান হিসাব ঢাকার স্থানীয় সময় ব্যবহার করে এবং সকাল ৮:৩০–১০:৩০ ও বিকেল ৫:৩০–রাত ৮:৩০-কে আনুমানিক কর্মদিবসের পিক সময় ধরে। প্রকৃত যানজট ও সেবাদাতার পিক চার্জ ভিন্ন হতে পারে।',
+      'The current estimate uses Dhaka local time and treats 8:30–10:30 AM and 5:00–8:00 PM as approximate peak windows. Peak fares use an illustrative 1.4x–2.2x band. Current Dhaka rain is detected automatically from Open-Meteo weather data and adds a stacked 30%–50% uplift to ride and feeder estimates. The rain fare selector can force rain on or off. Actual traffic, weather, and provider surge pricing can differ.': 'বর্তমান হিসাব ঢাকার স্থানীয় সময় ব্যবহার করে এবং সকাল ৮:৩০–১০:৩০ ও বিকেল ৫টা–রাত ৮টাকে আনুমানিক পিক সময় ধরে। পিক ভাড়ায় ধারণামূলক ১.৪x–২.২x সীমা ব্যবহার করা হয়। Open-Meteo আবহাওয়ার তথ্য থেকে ঢাকার বৃষ্টি স্বয়ংক্রিয়ভাবে শনাক্ত করে রাইড ও ফিডার ভাড়ায় অতিরিক্ত ৩০%–৫০% যোগ করা হয়। বৃষ্টির ভাড়া নির্বাচক দিয়ে বৃষ্টির ভাড়া চালু বা বন্ধ করা যায়। প্রকৃত যানজট, আবহাওয়া ও সেবাদাতার পিক চার্জ ভিন্ন হতে পারে।',
       'Do I need an account to use the route planner?': 'রুট পরিকল্পনা ব্যবহার করতে কি অ্যাকাউন্ট দরকার?',
       'Yes. Sign in or create an account to open the route planner, compare ride options, and use the links to ride services.': 'হ্যাঁ। রুট পরিকল্পনা খুলতে, যাত্রার বিকল্প তুলনা করতে এবং রাইড সেবার লিংক ব্যবহার করতে লগ ইন করুন অথবা অ্যাকাউন্ট তৈরি করুন।',
       'Saved places & recent trips': 'সংরক্ষিত স্থান ও সাম্প্রতিক যাত্রা',
@@ -1074,7 +1097,7 @@
       'station intervals': 'স্টেশন ব্যবধান',
       'faster than direct ride': 'সরাসরি যাত্রার চেয়ে দ্রুত',
       'slower than direct ride': 'সরাসরি যাত্রার চেয়ে ধীর',
-      'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
+      'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Peak and Heavy Rain multipliers are applied to ride and feeder estimates, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। পিক আওয়ার ও ভারী বৃষ্টির গুণক রাইড ও ফিডার ভাড়ায় প্রয়োগ করা হয়, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Both locations are closest to the same MRT station; no Metro leg to estimate.': 'দুই স্থানই একই নিকটতম এমআরটি স্টেশনের কাছে; মেট্রো যাত্রা হিসাব করা যায় না।',
       'Uttara North': 'উত্তরা উত্তর',
       'Uttara Center': 'উত্তরা সেন্টার',
@@ -1092,6 +1115,7 @@
       'Dhaka University': 'ঢাকা বিশ্ববিদ্যালয়',
       'Bangladesh Secretariat': 'বাংলাদেশ সচিবালয়',
       'Motijheel': 'মতিঝিল',
+      'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। Open-Meteo মধ্য ঢাকার বর্তমান আবহাওয়ার তথ্য থেকে বৃষ্টি স্বয়ংক্রিয়ভাবে অনুমান করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% অতিরিক্ত যোগ করে, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। রিকশার ভাড়া ৳৩০ + প্রতি কিমি ৳২৫; বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি; ভাড়া পরবর্তী ৳১০-এ বাড়িয়ে ধরা হয়। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Calculating Road Distance via OSRM...': 'OSRM দিয়ে সড়ক দূরত্ব হিসাব করা হচ্ছে...',
       'Road Distance': 'সড়ক দূরত্ব',
@@ -1100,6 +1124,7 @@
       'mins': 'মিনিট',
       'About': 'প্রায়',
       'Surge Multiplier': 'পিক আওয়ার গুণক',
+      'Estimates only, not live quotes. Peak periods are estimated from Dhaka time (8:30–10:30 AM, 5:00–8:00 PM). Current weather estimates for central Dhaka are checked with Open-Meteo every 15 minutes; rain adds a 1.3x–1.5x uplift to ride and feeder estimates. Use the selector to force rain fares on or off. Metro and local bus fares are not weather-adjusted.': 'এগুলো আনুমানিক হিসাব, সরাসরি ভাড়া নয়। ঢাকার সময় অনুযায়ী পিক সময় সকাল ৮:৩০–১০:৩০ এবং বিকেল ৫টা–রাত ৮টা। Open-Meteo দিয়ে মধ্য ঢাকার বর্তমান আবহাওয়ার আনুমানিক তথ্য প্রতি ১৫ মিনিটে যাচাই হয়; বৃষ্টিতে রাইড ও ফিডার ভাড়ায় ১.৩x–১.৫x অতিরিক্ত যোগ হয়। বৃষ্টির ভাড়া নির্বাচক দিয়ে চালু বা বন্ধ করা যায়। মেট্রো ও লোকাল বাসের ভাড়া আবহাওয়া অনুযায়ী বদলায় না।',
       'Compare ride options': 'যাত্রার বিকল্প তুলনা করুন',
       'Choose a ride to update provider estimates and ride details': 'সেবার ভাড়া ও যাত্রার তথ্য দেখতে যানবাহন বেছে নিন',
       'Cheapest': 'সবচেয়ে কম ভাড়া',
@@ -1114,7 +1139,7 @@
       'Selected Bike': 'বাইক নির্বাচিত',
       'Selected CNG': 'সিএনজি নির্বাচিত',
       'Selected Car': 'গাড়ি নির্বাচিত',
-      'Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:30–8:30 PM); actual traffic, fares, and times may differ. The route tile shows OSRM duration; vehicle comparison times use estimated average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by mode (Bike 0.85x, CNG 1.15x, Car 1.0x). Fare estimates still use OSRM distance and duration.': 'এগুলো তুলনার জন্য আনুমানিক হিসাব, সরাসরি ভাড়া নয়। ঢাকার পিক সময় আনুমানিক সকাল ৮:৩০–১০:৩০ এবং বিকেল ৫:৩০–রাত ৮:৩০। প্রকৃত যানজট, ভাড়া ও সময় ভিন্ন হতে পারে। রুট টাইল OSRM-এর সময় দেখায়; যানবাহনের তুলনামূলক সময় পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতির ভিত্তিতে, যানবাহন অনুযায়ী সমন্বয় করে হিসাব করা হয় (বাইক ০.৮৫x, সিএনজি ১.১৫x, গাড়ি ১.০x)। ভাড়ার হিসাব OSRM দূরত্ব ও সময় ব্যবহার করে।',
+      'Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:00–8:00 PM). Peak estimates use a 1.4x–2.2x band; rain is detected automatically using Open-Meteo current weather data for central Dhaka and adds a stacked 1.3x–1.5x uplift. Weather checks refresh every 15 minutes. If weather is unavailable, automatic mode leaves the rain uplift off and shows an unavailable status; the selector can force rain on or off. Metro and local bus fares do not use the rain uplift. The route tile shows OSRM duration; vehicle comparison times use estimated average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by mode (Bike 0.85x, CNG 1.15x, Car 1.0x). Fare estimates still use OSRM distance and duration.': 'এগুলো তুলনার জন্য আনুমানিক হিসাব, সরাসরি ভাড়া নয়। ঢাকার পিক সময় আনুমানিক সকাল ৮:৩০–১০:৩০ এবং বিকেল ৫টা–রাত ৮টা। পিক ভাড়ার আনুমানিক সীমা ১.৪x–২.২x; মধ্য ঢাকার বর্তমান আবহাওয়ার Open-Meteo তথ্য দিয়ে বৃষ্টি স্বয়ংক্রিয়ভাবে শনাক্ত করে এর সঙ্গে ১.৩x–১.৫x অতিরিক্ত গুণক যোগ হয়। প্রতি ১৫ মিনিটে আবহাওয়া যাচাই হয়। আবহাওয়ার তথ্য না পাওয়া গেলে স্বয়ংক্রিয় মোডে বৃষ্টির অতিরিক্ত ভাড়া বন্ধ থাকে এবং তথ্য না পাওয়ার অবস্থা দেখায়; নির্বাচক দিয়ে বৃষ্টির ভাড়া চালু বা বন্ধ করা যায়। মেট্রো ও লোকাল বাসের ভাড়ায় বৃষ্টির অতিরিক্ত ভাড়া প্রযোজ্য নয়। রুট টাইল OSRM-এর সময় দেখায়; যানবাহনের তুলনামূলক সময় পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতির ভিত্তিতে, যানবাহন অনুযায়ী সমন্বয় করে হিসাব করা হয় (বাইক ০.৮৫x, সিএনজি ১.১৫x, গাড়ি ১.০x)। ভাড়ার হিসাব OSRM দূরত্ব ও সময় ব্যবহার করে।',
       'Available Services & Fares': 'উপলভ্য সেবা ও ভাড়া',
       'Click to compare & launch': 'তুলনা করতে ও অ্যাপ খুলতে চাপ দিন',
       'Deep-Link': 'অ্যাপ লিংক',
@@ -1243,6 +1268,12 @@
       return `৳${formatLocalizedNumber(amount)}`;
     }
 
+    function formatLocalizedFareRange(minimum, maximum) {
+      return minimum === maximum
+        ? formatLocalizedFare(minimum)
+        : `${formatLocalizedFare(minimum)} - ${formatLocalizedFare(maximum)}`;
+    }
+
     function getLocalizedLocationName(name) {
       return currentLanguage === 'bn'
         ? BENGALI_LOCATION_NAMES[name] || BENGALI_TRANSLATIONS[name] || name
@@ -1299,6 +1330,7 @@
       languageToggle.setAttribute('aria-label', currentLanguage === 'en' ? 'Switch to Bangla' : 'ইংরেজিতে পরিবর্তন করুন');
       document.getElementById('faqLink').title = getLocalizedText('Frequently Asked Questions');
 
+      if (typeof renderDhakaWeatherStatus === 'function') renderDhakaWeatherStatus();
       if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
       if (typeof updateLocationLabels === 'function') updateLocationLabels();
       if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
@@ -2011,6 +2043,10 @@
     let currentDistanceKm = 10.2;
     let currentDurationMins = 32;
     let isSimulatedSurge = false;
+    let isHeavyRain = false;
+    let rainFareMode = 'auto';
+    let dhakaRainDetected = null;
+    let dhakaWeatherStatus = 'checking';
     const CURRENT_LOCATION_KEY = 'bharadekhi-current-location';
     let currentLocation = null;
     let currentLocationLookupId = 0;
@@ -2042,7 +2078,7 @@
       map.on('click', handleMapClick);
     }
 
-    // Peak windows are estimates in Dhaka local time: 8:30-10:30 AM and 5:30-8:30 PM.
+    // Peak windows are estimates in Dhaka local time: 8:30-10:30 AM and 5:00-8:00 PM.
     function getDhakaTimeInfo(now = new Date()) {
       const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Dhaka',
@@ -2058,7 +2094,7 @@
       const currentTime = hour + minute / 60;
       let peakPeriod = null;
       if (currentTime >= 8.5 && currentTime < 10.5) peakPeriod = 'Morning Peak';
-      else if (currentTime >= 17.5 && currentTime < 20.5) peakPeriod = 'Evening Peak';
+      else if (currentTime >= 17 && currentTime < 20) peakPeriod = 'Evening Peak';
 
       const displayFormatter = new Intl.DateTimeFormat(currentLanguage === 'bn' ? 'bn-BD' : 'en-US', {
         timeZone: 'Asia/Dhaka',
@@ -2067,6 +2103,64 @@
         hour12: true
       });
       return { formattedTime: displayFormatter.format(now), peakPeriod };
+    }
+
+    function renderDhakaWeatherStatus() {
+      const status = document.getElementById('weatherStatus');
+      if (rainFareMode === 'rain') {
+        status.textContent = getLocalizedText('Rain fare is on (manual override).');
+      } else if (rainFareMode === 'dry') {
+        status.textContent = getLocalizedText('Rain fare is off (manual override).');
+      } else if (dhakaWeatherStatus === 'checking') {
+        status.textContent = getLocalizedText('Checking Dhaka weather…');
+      } else if (dhakaWeatherStatus === 'unavailable') {
+        status.textContent = getLocalizedText(
+          dhakaRainDetected === null
+            ? 'Dhaka weather unavailable; rain adjustment is off in automatic mode.'
+            : 'Dhaka weather unavailable; keeping the last detected condition.'
+        );
+      } else {
+        status.textContent = getLocalizedText(dhakaRainDetected
+          ? 'Dhaka weather estimate: Rain indicated (automatic)'
+          : 'Dhaka weather estimate: No rain indicated (automatic)');
+      }
+    }
+
+    function updateRainFareState() {
+      isHeavyRain = rainFareMode === 'rain' ||
+        (rainFareMode === 'auto' && dhakaRainDetected === true);
+      renderDhakaWeatherStatus();
+      renderMetricsAndFares();
+    }
+
+    async function refreshDhakaWeather() {
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=23.8103&longitude=90.4125&current=precipitation%2Crain%2Cshowers%2Cweather_code&timezone=Asia%2FDhaka';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      dhakaWeatherStatus = 'checking';
+      renderDhakaWeatherStatus();
+
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Weather service returned ${response.status}.`);
+        const data = await response.json();
+        const current = data.current;
+        if (!current || !Number.isFinite(current.precipitation) ||
+            !Number.isFinite(current.weather_code)) {
+          throw new Error('Weather service returned incomplete current conditions.');
+        }
+
+        const rainyWeatherCodes = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]);
+        dhakaRainDetected = current.precipitation > 0 || rainyWeatherCodes.has(current.weather_code);
+        dhakaWeatherStatus = 'available';
+      } catch (error) {
+        console.warn('Could not refresh Dhaka weather:', error);
+        dhakaWeatherStatus = 'unavailable';
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      updateRainFareState();
     }
 
     // 4. Update Route, Markers & Fetch OSRM Road Distance
@@ -2144,12 +2238,14 @@
       }, { station: MRT_LINE_6_STATIONS[0], index: 0, distanceKm: Infinity });
     }
 
-    function getFeederOptions(accessDistanceKm) {
+    function getFeederOptions(accessDistanceKm, isPeak) {
       const routeDistanceKm = accessDistanceKm * 1.25;
       if (routeDistanceKm < 0.1) {
         return [{
           vehicle: 'Walk',
           fare: 0,
+          fareMin: 0,
+          fareMax: 0,
           distanceKm: routeDistanceKm,
           durationMins: Math.ceil(routeDistanceKm / 4.5 * 60),
           isWalking: true,
@@ -2176,10 +2272,13 @@
         }
 
         const durationMins = Math.ceil(routeDistanceKm / speedKmh * 60);
-        const fare = base + routeDistanceKm * perKm + durationMins * perMin;
+        const fare = Math.ceil((base + routeDistanceKm * perKm + durationMins * perMin) / 10) * 10;
+        const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
         return {
           vehicle,
-          fare: Math.ceil(fare / 10) * 10,
+          fare,
+          fareMin: isPeak || isHeavyRain ? Math.ceil(fare * minimumMultiplier / 10) * 10 : fare,
+          fareMax: isPeak || isHeavyRain ? Math.ceil(fare * maximumMultiplier / 10) * 10 : fare,
           distanceKm: routeDistanceKm,
           durationMins,
           isWalking: false,
@@ -2204,10 +2303,10 @@
         : `${getLocalizedText('From your exit station')}: ${localizedStation} → ${localizedLocation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`;
       container.replaceChildren();
 
-      const cheapestFare = Math.min(...options.filter(option => option.isAvailable !== false).map(option => option.fare));
+      const cheapestFare = Math.min(...options.filter(option => option.isAvailable !== false).map(option => option.fareMin));
       options.forEach(option => {
         const row = document.createElement('div');
-        row.className = `flex items-center justify-between gap-2 rounded-lg px-3 py-2 ${option.isAvailable !== false && option.fare === cheapestFare ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-50 text-slate-700'}`;
+        row.className = `flex items-center justify-between gap-2 rounded-lg px-3 py-2 ${option.isAvailable !== false && option.fareMin === cheapestFare ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-50 text-slate-700'}`;
 
         const mode = document.createElement('span');
         mode.className = 'font-medium';
@@ -2224,8 +2323,8 @@
           ? getLocalizedText('Walking distance; no feeder fare.')
           : option.isAvailable === false
             ? getLocalizedText('Unavailable (rickshaw is usually used for trips up to 5 km)')
-            : formatLocalizedFare(option.fare);
-        if (option.isAvailable !== false && option.fare === cheapestFare && !option.isWalking) {
+            : formatLocalizedFareRange(option.fareMin, option.fareMax);
+        if (option.isAvailable !== false && option.fareMin === cheapestFare && !option.isWalking) {
           const badge = document.createElement('span');
           badge.className = 'rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800';
           badge.textContent = getLocalizedText('Cheapest option');
@@ -2441,8 +2540,8 @@
       const standardMrtFare = Math.min(100, Math.max(20, Math.ceil(lineDistanceKm) * 5));
       const hasMrtPass = document.getElementById('mrtPassToggle').checked;
       const mrtFare = hasMrtPass ? Math.round(standardMrtFare * 0.9) : standardMrtFare;
-      const firstMileOptions = getFeederOptions(pickupStation.distanceKm);
-      const lastMileOptions = getFeederOptions(destinationStation.distanceKm);
+      const firstMileOptions = getFeederOptions(pickupStation.distanceKm, isPeak);
+      const lastMileOptions = getFeederOptions(destinationStation.distanceKm, isPeak);
       const firstMile = renderFeederOptions(
         'firstMileOptionList',
         firstMileOptions,
@@ -2457,8 +2556,10 @@
         destinationStation.station.name,
         'lastMileHeading'
       );
-      const feederFare = firstMile.fare + lastMile.fare;
-      const hybridFare = mrtFare + feederFare;
+      const feederFareMin = firstMile.fareMin + lastMile.fareMin;
+      const feederFareMax = firstMile.fareMax + lastMile.fareMax;
+      const hybridFareMin = mrtFare + feederFareMin;
+      const hybridFareMax = mrtFare + feederFareMax;
       const hybridDuration = 5 + (stationIntervals * 2) +
         firstMile.durationMins + lastMile.durationMins + 4;
       const timeDifference = directDuration - hybridDuration;
@@ -2469,8 +2570,8 @@
       document.getElementById('mrtFare').textContent = hasMrtPass
         ? `${formatLocalizedFare(mrtFare)} (${formatLocalizedFare(standardMrtFare)} ${getLocalizedText('without pass')})`
         : formatLocalizedFare(mrtFare);
-      document.getElementById('mrtFeederFare').textContent = formatLocalizedFare(feederFare);
-      document.getElementById('mrtHybridFare').textContent = formatLocalizedFare(hybridFare);
+      document.getElementById('mrtFeederFare').textContent = formatLocalizedFareRange(feederFareMin, feederFareMax);
+      document.getElementById('mrtHybridFare').textContent = formatLocalizedFareRange(hybridFareMin, hybridFareMax);
       document.getElementById('mrtHybridDuration').textContent = currentLanguage === 'bn'
         ? `প্রায় ${formatLocalizedNumber(hybridDuration)} মিনিট`
         : `About ${formatLocalizedNumber(hybridDuration)} mins`;
@@ -2487,13 +2588,13 @@
         ? firstMile.isAtStation
           ? getLocalizedText('Already at the station; no feeder needed.')
           : `${getLocalizedText('Walk to')} ${getLocalizedText(pickupStation.station.name)} (${formatLocalizedNumber(firstMile.distanceKm, 1)} ${getLocalizedText('km')}).`
-        : `${getLocalizedText('Take')} ${getLocalizedText(firstMile.vehicle)}: ${getLocalizedLocationName(pickup.name)} → ${getLocalizedText(pickupStation.station.name)} (${formatLocalizedFare(firstMile.fare)}).`;
+        : `${getLocalizedText('Take')} ${getLocalizedText(firstMile.vehicle)}: ${getLocalizedLocationName(pickup.name)} → ${getLocalizedText(pickupStation.station.name)} (${formatLocalizedFareRange(firstMile.fareMin, firstMile.fareMax)}).`;
       const metroStep = `${getLocalizedText('Board at')} ${getLocalizedText(pickupStation.station.name)}; ${getLocalizedText('Get off at')} ${getLocalizedText(destinationStation.station.name)} (${formatLocalizedNumber(stationIntervals)} ${getLocalizedText('station intervals')}, ${formatLocalizedFare(mrtFare)}).`;
       const lastMileStep = lastMile.isWalking
         ? lastMile.isAtStation
           ? getLocalizedText('Already at the station; no feeder needed.')
           : `${getLocalizedText('Walk to')} ${getLocalizedLocationName(destination.name)} (${formatLocalizedNumber(lastMile.distanceKm, 1)} ${getLocalizedText('km')}).`
-        : `${getLocalizedText('Take')} ${getLocalizedText(lastMile.vehicle)}: ${getLocalizedText(destinationStation.station.name)} → ${getLocalizedLocationName(destination.name)} (${formatLocalizedFare(lastMile.fare)}).`;
+        : `${getLocalizedText('Take')} ${getLocalizedText(lastMile.vehicle)}: ${getLocalizedText(destinationStation.station.name)} → ${getLocalizedLocationName(destination.name)} (${formatLocalizedFareRange(lastMile.fareMin, lastMile.fareMax)}).`;
       renderMrtJourneySteps([
         `${getLocalizedText('First mile')}: ${firstMileStep}`,
         `${getLocalizedText('MRT journey')}: ${metroStep}`,
@@ -2515,13 +2616,23 @@
       ));
     }
 
+    function getFareMultipliers(isPeak) {
+      const minimumMultiplier = isPeak ? 1.4 : 0.95;
+      const maximumMultiplier = isPeak ? 2.2 : 1.15;
+      return isHeavyRain
+        ? {
+            minimumMultiplier: minimumMultiplier * 1.3,
+            maximumMultiplier: maximumMultiplier * 1.5
+          }
+        : { minimumMultiplier, maximumMultiplier };
+    }
+
     function getVehicleFareEstimate(vehicle, isPeak) {
       const { base, perKm, perMin } = VEHICLE_RATES[vehicle];
       const standardFare = base + (currentDistanceKm * perKm) + (currentDurationMins * perMin);
-      const lowMult = isPeak ? 1.25 : 0.95;
-      const highMult = isPeak ? 1.55 : 1.15;
-      const uberMin = Math.round(standardFare * lowMult);
-      const uberMax = Math.round(standardFare * highMult);
+      const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
+      const uberMin = Math.round(standardFare * minimumMultiplier);
+      const uberMax = Math.round(standardFare * maximumMultiplier);
 
       return {
         minimum: uberMin,
@@ -2584,23 +2695,25 @@
         ? `ঢাকার সময় ${dhakaTime.formattedTime}`
         : `Dhaka time ${dhakaTime.formattedTime}`;
 
+      const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
+      const multiplierLabel = `${formatLocalizedNumber(minimumMultiplier, 3)}x - ${formatLocalizedNumber(maximumMultiplier, 3)}x (${getLocalizedText(isPeak ? 'Peak estimate' : 'Non-Peak estimate')}${isHeavyRain ? ` + ${getLocalizedText('Heavy Rain uplift')}` : ''})`;
       if (isPeak) {
         badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
         badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
         badgeText.innerText = getLocalizedText(isSimulatedSurge ? 'Simulated Peak' : dhakaTime.peakPeriod);
-        multText.innerText = currentLanguage === 'bn'
-          ? '১.২৫x - ১.৫৫x (পিক আওয়ারের আনুমানিক)'
-          : '1.25x - 1.55x (Peak estimate)';
-        multText.className = "text-lg font-bold text-rose-600";
       } else {
+        badgeText.innerText = getLocalizedText('Non-Peak');
+      }
+      if (isHeavyRain) badgeText.innerText += ` · ${getLocalizedText('Heavy Rain')}`;
+      if (!isPeak && isHeavyRain) {
+        badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200";
+        badgeDot.className = "w-2 h-2 rounded-full bg-sky-500 animate-pulse";
+      } else if (!isPeak) {
         badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
         badgeDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-        badgeText.innerText = getLocalizedText('Non-Peak');
-        multText.innerText = currentLanguage === 'bn'
-          ? '০.৯৫x - ১.১৫x (নন-পিকের আনুমানিক)'
-          : '0.95x - 1.15x (Non-Peak estimate)';
-        multText.className = "text-lg font-bold text-emerald-600";
       }
+      multText.innerText = multiplierLabel;
+      multText.className = `text-lg font-bold ${isPeak ? 'text-rose-600' : isHeavyRain ? 'text-sky-600' : 'text-emerald-600'}`;
 
       renderVehicleComparison(isPeak);
       const fare = getVehicleFareEstimate(selectedVehicle, isPeak);
@@ -3014,15 +3127,26 @@
       document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
       document.getElementById('themeToggle').addEventListener('click', toggleTheme);
       document.getElementById('mrtPassToggle').addEventListener('change', renderMetricsAndFares);
+      document.getElementById('rainModeSelect').addEventListener('change', event => {
+        rainFareMode = event.currentTarget.value;
+        updateRainFareState();
+      });
       populateLocationSelectors();
       initMap();
       applyLanguage();
       loadBusRouteData();
       updateRoute();
       renderMetricsAndFares();
+      refreshDhakaWeather();
+      setInterval(() => {
+        if (!document.hidden) refreshDhakaWeather();
+      }, 15 * 60 * 1000);
       setInterval(renderMetricsAndFares, 30000);
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) renderMetricsAndFares();
+        if (!document.hidden) {
+          refreshDhakaWeather();
+          renderMetricsAndFares();
+        }
       });
 
       if (!initializeSupabase()) {
