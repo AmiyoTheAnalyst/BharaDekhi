@@ -600,9 +600,22 @@
             <p id="mrtTimeComparison" class="mt-1 text-xs font-semibold text-emerald-700" aria-live="polite"></p>
           </article>
         </div>
-        <p id="mrtFeederDetails" class="mt-3 text-xs leading-relaxed text-slate-600"></p>
+        <div id="mrtJourneyPlan" class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+          <h3 id="mrtJourneyPlanHeading" class="text-sm font-bold text-slate-900">How to make this trip</h3>
+          <ol id="mrtJourneySteps" class="mt-2 list-decimal space-y-2 pl-5 text-sm text-slate-700"></ol>
+        </div>
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <section id="firstMileOptions" class="rounded-xl border border-slate-200 bg-white p-4" aria-labelledby="firstMileHeading">
+            <h3 id="firstMileHeading" class="text-sm font-bold text-slate-900">To your boarding station</h3>
+            <div id="firstMileOptionList" class="mt-2 space-y-2 text-sm"></div>
+          </section>
+          <section id="lastMileOptions" class="rounded-xl border border-slate-200 bg-white p-4" aria-labelledby="lastMileHeading">
+            <h3 id="lastMileHeading" class="text-sm font-bold text-slate-900">From your exit station</h3>
+            <div id="lastMileOptionList" class="mt-2 space-y-2 text-sm"></div>
+          </section>
+        </div>
         <p id="mrtEstimateDisclaimer" class="mt-2 text-xs leading-relaxed text-slate-500">
-          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder fares assume a rickshaw at ৳30 + ৳25/km per access leg. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval, 5 minutes waiting, and 12 km/h for feeder trips. Actual fares, station access, and traffic may differ.
+          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site's baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
         </p>
       </section>
     </div>
@@ -870,7 +883,7 @@
   </section>
 
   <script>
-    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder fares assume a rickshaw at ৳30 + ৳25/km per access leg. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval, 5 minutes waiting, and 12 km/h for feeder trips. Actual fares, station access, and traffic may differ.';
+    const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
 
     const BENGALI_TRANSLATIONS = {
       'Route Resolver & Fare Launcher': 'রুট পরিকল্পনা ও ভাড়া তুলনা',
@@ -1001,6 +1014,27 @@
       'Estimated journey time': 'আনুমানিক যাত্রার সময়',
       'First-mile rickshaw': 'শুরুর পথে রিকশা',
       'Last-mile rickshaw': 'শেষ পথে রিকশা',
+      'How to make this trip': 'এই যাত্রা কীভাবে করবেন',
+      'To your boarding station': 'মেট্রো স্টেশনে পৌঁছান',
+      'From your exit station': 'নামার স্টেশন থেকে গন্তব্যে',
+      'First mile': 'প্রথম ধাপ',
+      'Last mile': 'শেষ ধাপ',
+      'Walk': 'হেঁটে',
+      'Rickshaw': 'রিকশা',
+      'Cheapest': 'সবচেয়ে কম ভাড়া',
+      'Cheapest option': 'সবচেয়ে সস্তা',
+      'Board at': 'উঠুন',
+      'Get off at': 'নামুন',
+      'Take': 'নিন',
+      'to reach': 'পৌঁছাতে',
+      'Walk to': 'হেঁটে যান',
+      'Already at the station; no feeder needed.': 'স্টেশনে পৌঁছে গেছেন; ফিডার লাগবে না।',
+      'Walking distance; no feeder fare.': 'হেঁটে যাওয়ার দূরত্ব; ফিডার ভাড়া লাগবে না।',
+      'Cheapest for this leg': 'এই পথে সবচেয়ে কম ভাড়া',
+      'Rickshaw fare estimate': 'রিকশার আনুমানিক ভাড়া',
+      'Bike fare estimate': 'বাইকের আনুমানিক ভাড়া',
+      'CNG fare estimate': 'সিএনজির আনুমানিক ভাড়া',
+      'MRT journey': 'মেট্রো যাত্রা',
       'with pass': 'পাসসহ',
       'without pass': 'পাস ছাড়া',
       'station intervals': 'স্টেশন ব্যবধান',
@@ -1023,7 +1057,7 @@
       'Dhaka University': 'ঢাকা বিশ্ববিদ্যালয়',
       'Bangladesh Secretariat': 'বাংলাদেশ সচিবালয়',
       'Motijheel': 'মতিঝিল',
-      [MRT_ESTIMATE_DISCLAIMER]: 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার ভাড়া প্রতি পথে রিকশার জন্য ৳৩০ + প্রতি কিমি ৳২৫ ধরে হিসাব করা হয়। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট, অপেক্ষায় ৫ মিনিট এবং ফিডার যাত্রায় ঘণ্টায় ১২ কিমি ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে。',
+      'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। রিকশার ভাড়া ৳৩০ + প্রতি কিমি ৳২৫; বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি; ভাড়া পরবর্তী ৳১০-এ বাড়িয়ে ধরা হয়। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Calculating Road Distance via OSRM...': 'OSRM দিয়ে সড়ক দূরত্ব হিসাব করা হচ্ছে...',
       'Road Distance': 'সড়ক দূরত্ব',
       'km': 'কিমি',
@@ -2073,14 +2107,88 @@
       }, { station: MRT_LINE_6_STATIONS[0], index: 0, distanceKm: Infinity });
     }
 
-    function getRickshawEstimate(accessDistanceKm) {
+    function getFeederOptions(accessDistanceKm) {
       const routeDistanceKm = accessDistanceKm * 1.25;
-      if (routeDistanceKm < 0.1) return { fare: 0, distanceKm: routeDistanceKm, durationMins: 0 };
-      return {
-        fare: Math.ceil((30 + 25 * routeDistanceKm) / 10) * 10,
-        distanceKm: routeDistanceKm,
-        durationMins: Math.ceil(routeDistanceKm / 12 * 60)
-      };
+      if (routeDistanceKm < 0.1) {
+        return [{
+          vehicle: 'Walk',
+          fare: 0,
+          distanceKm: routeDistanceKm,
+          durationMins: Math.ceil(routeDistanceKm / 4.5 * 60),
+          isWalking: true,
+          isAtStation: routeDistanceKm < 0.05
+        }];
+      }
+
+      const accessModes = [
+        { vehicle: 'Rickshaw', base: 30, perKm: 25, perMin: 0, speedKmh: 12 },
+        { vehicle: 'Bike', ...VEHICLE_RATES.Bike, speedKmh: 18 },
+        { vehicle: 'CNG', ...VEHICLE_RATES.CNG, speedKmh: 12 }
+      ];
+
+      return accessModes.map(({ vehicle, base, perKm, perMin, speedKmh }) => {
+        const durationMins = Math.ceil(routeDistanceKm / speedKmh * 60);
+        const fare = base + routeDistanceKm * perKm + durationMins * perMin;
+        return {
+          vehicle,
+          fare: Math.ceil(fare / 10) * 10,
+          distanceKm: routeDistanceKm,
+          durationMins,
+          isWalking: false
+        };
+      }).sort((first, second) => first.fare - second.fare || first.durationMins - second.durationMins);
+    }
+
+    function renderFeederOptions(containerId, options, locationName, stationName, headingId) {
+      const container = document.getElementById(containerId);
+      const heading = document.getElementById(headingId);
+      const localizedLocation = getLocalizedLocationName(locationName);
+      const localizedStation = getLocalizedText(stationName);
+      const isFirstMile = headingId === 'firstMileHeading';
+
+      heading.textContent = isFirstMile
+        ? `${getLocalizedText('To your boarding station')}: ${localizedLocation} → ${localizedStation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`
+        : `${getLocalizedText('From your exit station')}: ${localizedStation} → ${localizedLocation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`;
+      container.replaceChildren();
+
+      const cheapestFare = Math.min(...options.map(option => option.fare));
+      options.forEach(option => {
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between gap-2 rounded-lg px-3 py-2 ${option.fare === cheapestFare ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-50 text-slate-700'}`;
+
+        const mode = document.createElement('span');
+        mode.className = 'font-medium';
+        mode.textContent = option.isWalking
+          ? option.isAtStation
+            ? getLocalizedText('Already at the station; no feeder needed.')
+            : `${getLocalizedText('Walk')} · ${formatLocalizedNumber(option.distanceKm, 1)} ${getLocalizedText('km')}`
+          : getLocalizedText(option.vehicle);
+        row.appendChild(mode);
+
+        const price = document.createElement('span');
+        price.className = 'flex items-center gap-2 font-semibold';
+        price.textContent = option.isWalking ? getLocalizedText('Walking distance; no feeder fare.') : formatLocalizedFare(option.fare);
+        if (option.fare === cheapestFare && !option.isWalking) {
+          const badge = document.createElement('span');
+          badge.className = 'rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800';
+          badge.textContent = getLocalizedText('Cheapest option');
+          price.appendChild(badge);
+        }
+        row.appendChild(price);
+        container.appendChild(row);
+      });
+
+      return options[0];
+    }
+
+    function renderMrtJourneySteps(steps) {
+      const list = document.getElementById('mrtJourneySteps');
+      list.replaceChildren();
+      steps.forEach(step => {
+        const item = document.createElement('li');
+        item.textContent = step;
+        list.appendChild(item);
+      });
     }
 
     function renderMrtEstimate(isPeak) {
@@ -2123,7 +2231,10 @@
         document.getElementById('mrtHybridFare').textContent = '—';
         document.getElementById('mrtHybridDuration').textContent = '—';
         document.getElementById('mrtTimeComparison').textContent = '';
-        document.getElementById('mrtFeederDetails').textContent = '';
+        renderMrtJourneySteps([]);
+        document.getElementById('mrtJourneyPlan').classList.add('hidden');
+        document.getElementById('firstMileOptions').classList.add('hidden');
+        document.getElementById('lastMileOptions').classList.add('hidden');
         return;
       }
 
@@ -2138,8 +2249,22 @@
       const standardMrtFare = Math.min(100, Math.max(20, Math.ceil(lineDistanceKm) * 5));
       const hasMrtPass = document.getElementById('mrtPassToggle').checked;
       const mrtFare = hasMrtPass ? Math.round(standardMrtFare * 0.9) : standardMrtFare;
-      const firstMile = getRickshawEstimate(pickupStation.distanceKm);
-      const lastMile = getRickshawEstimate(destinationStation.distanceKm);
+      const firstMileOptions = getFeederOptions(pickupStation.distanceKm);
+      const lastMileOptions = getFeederOptions(destinationStation.distanceKm);
+      const firstMile = renderFeederOptions(
+        'firstMileOptionList',
+        firstMileOptions,
+        pickup.name,
+        pickupStation.station.name,
+        'firstMileHeading'
+      );
+      const lastMile = renderFeederOptions(
+        'lastMileOptionList',
+        lastMileOptions,
+        destination.name,
+        destinationStation.station.name,
+        'lastMileHeading'
+      );
       const feederFare = firstMile.fare + lastMile.fare;
       const hybridFare = mrtFare + feederFare;
       const hybridDuration = 5 + (stationIntervals * 2) +
@@ -2162,9 +2287,26 @@
         : currentLanguage === 'bn'
           ? `সরাসরি যাত্রার চেয়ে ${formatLocalizedNumber(Math.abs(timeDifference))} মিনিট ${timeDifference > 0 ? 'দ্রুত' : 'বেশি সময় লাগে'}`
           : `About ${formatLocalizedNumber(Math.abs(timeDifference))} mins ${getLocalizedText(timeDifference > 0 ? 'faster than direct ride' : 'slower than direct ride')}`;
-      document.getElementById('mrtFeederDetails').textContent = currentLanguage === 'bn'
-        ? `${getLocalizedText('First-mile rickshaw')}: ${formatLocalizedNumber(firstMile.distanceKm, 1)} কিমি (${formatLocalizedFare(firstMile.fare)}); ${getLocalizedText('Last-mile rickshaw')}: ${formatLocalizedNumber(lastMile.distanceKm, 1)} কিমি (${formatLocalizedFare(lastMile.fare)}).`
-        : `${getLocalizedText('First-mile rickshaw')}: ${formatLocalizedNumber(firstMile.distanceKm, 1)} km (${formatLocalizedFare(firstMile.fare)}); ${getLocalizedText('Last-mile rickshaw')}: ${formatLocalizedNumber(lastMile.distanceKm, 1)} km (${formatLocalizedFare(lastMile.fare)}).`;
+      document.getElementById('mrtJourneyPlan').classList.remove('hidden');
+      document.getElementById('firstMileOptions').classList.remove('hidden');
+      document.getElementById('lastMileOptions').classList.remove('hidden');
+
+      const firstMileStep = firstMile.isWalking
+        ? firstMile.isAtStation
+          ? getLocalizedText('Already at the station; no feeder needed.')
+          : `${getLocalizedText('Walk to')} ${getLocalizedText(pickupStation.station.name)} (${formatLocalizedNumber(firstMile.distanceKm, 1)} ${getLocalizedText('km')}).`
+        : `${getLocalizedText('Take')} ${getLocalizedText(firstMile.vehicle)}: ${getLocalizedLocationName(pickup.name)} → ${getLocalizedText(pickupStation.station.name)} (${formatLocalizedFare(firstMile.fare)}).`;
+      const metroStep = `${getLocalizedText('Board at')} ${getLocalizedText(pickupStation.station.name)}; ${getLocalizedText('Get off at')} ${getLocalizedText(destinationStation.station.name)} (${formatLocalizedNumber(stationIntervals)} ${getLocalizedText('station intervals')}, ${formatLocalizedFare(mrtFare)}).`;
+      const lastMileStep = lastMile.isWalking
+        ? lastMile.isAtStation
+          ? getLocalizedText('Already at the station; no feeder needed.')
+          : `${getLocalizedText('Walk to')} ${getLocalizedLocationName(destination.name)} (${formatLocalizedNumber(lastMile.distanceKm, 1)} ${getLocalizedText('km')}).`
+        : `${getLocalizedText('Take')} ${getLocalizedText(lastMile.vehicle)}: ${getLocalizedText(destinationStation.station.name)} → ${getLocalizedLocationName(destination.name)} (${formatLocalizedFare(lastMile.fare)}).`;
+      renderMrtJourneySteps([
+        `${getLocalizedText('First mile')}: ${firstMileStep}`,
+        `${getLocalizedText('MRT journey')}: ${metroStep}`,
+        `${getLocalizedText('Last mile')}: ${lastMileStep}`
+      ]);
     }
 
     const VEHICLE_RATES = {
