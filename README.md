@@ -18,6 +18,7 @@ The brand lockup uses the Connected BD mark with the tagline **“Route Planner 
   * 🛺 **CNG Auto-Rickshaw** (Base: ৳50 | ৳18/km)
   * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
 * **Side-by-Side Ride Comparison:** Compares estimated fares and approximate travel times for bike, CNG, and car, highlighting the lowest fare and shortest trip estimate.
+* **MRT Line 6 Hybrid Estimator:** Finds the nearest metro stations for each endpoint and compares estimated station-to-station fare plus first/last-mile rickshaw fares and journey time with a direct ride. Includes an optional 10% MRT Pass discount; station, feeder, fare, and traffic values are illustrative assumptions, not live data.
 * **English/Bangla Language Toggle:** Switches the app interface and Dhaka location names between English and Bangla, saving the choice in the browser.
 * **Dark Mode:** Offers a dark theme for the interface and map controls; remembers the choice in the browser.
 * **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices. Routes using precise current-location or map-pin coordinates are excluded from history.
