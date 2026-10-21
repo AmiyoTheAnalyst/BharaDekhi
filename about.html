@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Meet Amiyo Hasan, a full-stack software engineer and web developer in Dhaka, Bangladesh.">
+  <meta name="theme-color" content="#f5f7fb">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="canonical" href="https://bharadekhi.vercel.app/about.html">
+  <title>About Amiyo Hasan | BharaDekhi</title>
+  <script>
+    try {
+      if (localStorage.getItem('bharadekhiTheme') === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    } catch (error) {
+      console.warn('Could not restore the saved theme preference:', error);
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background:
+        radial-gradient(ellipse at 12% 0%, rgb(219 234 254 / 55%), transparent 34rem),
+        #f5f7fb;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header { background-color: rgb(255 255 255 / 92%); backdrop-filter: blur(16px); }
+    html[data-theme="dark"] { color-scheme: dark; }
+    html[data-theme="dark"] body {
+      background:
+        radial-gradient(ellipse at 12% 0%, rgb(30 58 138 / 22%), transparent 34rem),
+        #0f172a;
+      color: #e2e8f0;
+    }
+    html[data-theme="dark"] header,
+    html[data-theme="dark"] .surface { background-color: #1e293b; }
+    html[data-theme="dark"] .border-slate-200 { border-color: #475569; }
+    html[data-theme="dark"] .text-slate-900,
+    html[data-theme="dark"] .text-slate-800 { color: #f1f5f9; }
+    html[data-theme="dark"] .text-slate-700,
+    html[data-theme="dark"] .text-slate-600 { color: #cbd5e1; }
+    html[data-theme="dark"] .text-slate-500 { color: #94a3b8; }
+    html[data-theme="dark"] .text-blue-700 { color: #bfdbfe; }
+    html[data-theme="dark"] .bg-slate-50 { background-color: #0f172a; }
+    html[data-theme="dark"] .bg-blue-50 { background-color: #172554; }
+    html[data-theme="dark"] .hover\:bg-slate-50:hover { background-color: #334155; }
+  </style>
+</head>
+<body class="min-h-screen px-4 pb-8 text-slate-800 antialiased">
+  <header class="-mx-4 sticky top-0 z-10 border-b border-slate-200">
+    <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <a href="./index.html" class="flex items-center gap-2 rounded-lg" aria-label="BharaDekhi home">
+        <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
+        <span>
+          <span class="block text-base font-bold leading-tight text-slate-900">Bhara<span class="text-blue-700">Dekhi</span></span>
+          <span class="block text-[9px] font-bold tracking-[0.13em] text-slate-500" data-en="Route Planner & Fare Estimator" data-bn="রুট পরিকল্পনা ও ভাড়ার আনুমানিক হিসাব">Route Planner &amp; Fare Estimator</span>
+        </span>
+      </a>
+      <div class="flex items-center gap-2">
+        <button id="languageToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-pressed="false">Dark mode</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-4xl pt-8 sm:pt-12">
+    <section class="surface rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-10">
+      <div class="border-b border-slate-200 pb-7">
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-700" data-en="Software engineer & web developer" data-bn="সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার">Software engineer &amp; web developer</p>
+        <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Amiyo Hasan</h1>
+        <p class="mt-2 text-sm font-medium text-slate-600" data-en="Dhaka, Bangladesh" data-bn="ঢাকা, বাংলাদেশ">Dhaka, Bangladesh</p>
+        <p class="mt-5 max-w-3xl leading-relaxed text-slate-700" data-en="Product-focused full-stack software engineer and web developer with hands-on experience in React, Next.js, JavaScript, and REST APIs. Interested in building responsive applications, geospatial tools, and practical web experiences." data-bn="React, Next.js, JavaScript ও REST API-তে বাস্তব অভিজ্ঞতাসম্পন্ন, পণ্যকেন্দ্রিক ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার। রেসপনসিভ অ্যাপ্লিকেশন, জিওস্পেশিয়াল টুল এবং ব্যবহারিক ওয়েব অভিজ্ঞতা তৈরি করতে আগ্রহী।">Product-focused full-stack software engineer and web developer with hands-on experience in React, Next.js, JavaScript, and REST APIs. Interested in building responsive applications, geospatial tools, and practical web experiences.</p>
+      </div>
+
+      <section class="border-b border-slate-200 py-7" aria-labelledby="contactHeading">
+        <h2 id="contactHeading" class="text-lg font-bold text-slate-900" data-en="Contact & profiles" data-bn="যোগাযোগ ও প্রোফাইল">Contact &amp; profiles</h2>
+        <div class="mt-4 flex flex-wrap gap-3 text-sm">
+          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="mailto:amiyohasan23@gmail.com">Email</a>
+          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="tel:+8801519835369">+880 1519-835369</a>
+          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="https://github.com/AmiyoTheAnalyst" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="https://www.linkedin.com/in/amiyo-hasan" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </section>
+
+      <section class="border-b border-slate-200 py-7" aria-labelledby="skillsHeading">
+        <h2 id="skillsHeading" class="text-lg font-bold text-slate-900" data-en="Technical skills" data-bn="প্রযুক্তিগত দক্ষতা">Technical skills</h2>
+        <dl class="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-[10rem_1fr]">
+          <dt class="font-bold text-slate-800" data-en="Frontend" data-bn="ফ্রন্টএন্ড">Frontend</dt>
+          <dd class="text-slate-600">React.js, Next.js, JavaScript (ES6+), Tailwind CSS, HTML5/CSS3, Responsive UI/UX</dd>
+          <dt class="font-bold text-slate-800" data-en="Backend & data" data-bn="ব্যাকএন্ড ও ডেটা">Backend &amp; data</dt>
+          <dd class="text-slate-600">RESTful API design, Node.js basics, SQL, data extraction &amp; query optimization</dd>
+          <dt class="font-bold text-slate-800" data-en="Libraries & tools" data-bn="লাইব্রেরি ও টুল">Libraries &amp; tools</dt>
+          <dd class="text-slate-600">Leaflet.js, Open-Meteo API, OSRM routing, Git, GitHub, Vercel, Postman</dd>
+          <dt class="font-bold text-slate-800" data-en="Core strengths" data-bn="মূল দক্ষতা">Core strengths</dt>
+          <dd class="text-slate-600">State management, multi-modal transit logic, surge-pricing heuristics, component architecture</dd>
+        </dl>
+      </section>
+
+      <section class="border-b border-slate-200 py-7" aria-labelledby="projectsHeading">
+        <h2 id="projectsHeading" class="text-lg font-bold text-slate-900" data-en="Featured projects" data-bn="উল্লেখযোগ্য প্রজেক্ট">Featured projects</h2>
+        <article class="mt-4 rounded-2xl border border-slate-200 p-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <h3 class="font-bold text-slate-900">BharaDekhi — Multi-Modal Transit &amp; Fare Estimator</h3>
+            <div class="flex gap-3 text-sm font-semibold">
+              <a class="text-blue-700 underline underline-offset-2" href="https://bharadekhi.vercel.app/" target="_blank" rel="noopener noreferrer" data-en="Live site" data-bn="লাইভ সাইট">Live site</a>
+              <a class="text-blue-700 underline underline-offset-2" href="https://github.com/AmiyoTheAnalyst/BharaDekhi" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600" data-en="A Dhaka commuter platform for comparing estimated fares across rickshaw, bike, CNG, car, bus, and metro. Combines OSRM routing, Leaflet maps, weather-aware fare estimates, and ride-hailing links." data-bn="রিকশা, বাইক, সিএনজি, গাড়ি, বাস ও মেট্রোর আনুমানিক ভাড়া তুলনার জন্য ঢাকার যাত্রীদের প্ল্যাটফর্ম। এতে OSRM রাউটিং, Leaflet মানচিত্র, আবহাওয়া-ভিত্তিক ভাড়া হিসাব এবং রাইড-হেইলিং লিংক রয়েছে।">A Dhaka commuter platform for comparing estimated fares across rickshaw, bike, CNG, car, bus, and metro. Combines OSRM routing, Leaflet maps, weather-aware fare estimates, and ride-hailing links.</p>
+        </article>
+        <article class="mt-3 rounded-2xl border border-slate-200 p-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <h3 class="font-bold text-slate-900" data-en="Relational Data Engine & Query Architecture" data-bn="রিলেশনাল ডেটা ইঞ্জিন ও কুয়েরি আর্কিটেকচার">Relational Data Engine &amp; Query Architecture</h3>
+            <a class="text-sm font-semibold text-blue-700 underline underline-offset-2" href="https://github.com/AmiyoTheAnalyst/SQL-Project" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </div>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600" data-en="A SQL and data-modeling project focused on relational schemas, multi-table queries, business-intelligence insights, and query performance." data-bn="রিলেশনাল স্কিমা, বহু-টেবিল কুয়েরি, বিজনেস ইন্টেলিজেন্স বিশ্লেষণ এবং কুয়েরি পারফরম্যান্স নিয়ে SQL ও ডেটা মডেলিং প্রজেক্ট।">A SQL and data-modeling project focused on relational schemas, multi-table queries, business-intelligence insights, and query performance.</p>
+        </article>
+      </section>
+
+      <section class="pt-7" aria-labelledby="educationHeading">
+        <h2 id="educationHeading" class="text-lg font-bold text-slate-900" data-en="Education" data-bn="শিক্ষা">Education</h2>
+        <h3 class="mt-4 font-bold text-slate-900" data-en="Bachelor of Science in Computer Science & Engineering (B.Sc. CSE)" data-bn="কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিংয়ে স্নাতক (B.Sc. CSE)">Bachelor of Science in Computer Science &amp; Engineering (B.Sc. CSE)</h3>
+        <p class="mt-1 text-sm text-slate-600">BRAC University, Dhaka, Bangladesh</p>
+        <p class="mt-1 text-sm text-slate-500" data-en="Expected September 2027" data-bn="সম্ভাব্য সমাপ্তি: সেপ্টেম্বর ২০২৭">Expected September 2027</p>
+      </section>
+    </section>
+
+    <div class="mt-6 text-center">
+      <a href="./index.html" class="inline-flex rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700" data-en="Back to BharaDekhi" data-bn="BharaDekhi-তে ফিরে যান">Back to BharaDekhi</a>
+    </div>
+  </main>
+
+  <footer class="mx-auto mt-8 max-w-4xl border-t border-slate-200 px-4 py-6 text-center text-xs text-slate-500">
+    <p>BharaDekhi · Dhaka, Bangladesh</p>
+  </footer>
+
+  <script>
+    const languageToggle = document.getElementById('languageToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    let language = localStorage.getItem('bharadekhiLanguage') === 'bn' ? 'bn' : 'en';
+
+    function applyLanguage() {
+      document.documentElement.lang = language;
+      document.querySelectorAll('[data-en][data-bn]').forEach(element => {
+        element.textContent = element.dataset[language];
+      });
+      languageToggle.textContent = language === 'en' ? 'বাংলা' : 'English';
+      languageToggle.setAttribute('aria-label', language === 'en' ? 'Switch to Bangla' : 'ইংরেজিতে পরিবর্তন করুন');
+      themeToggle.textContent = document.documentElement.dataset.theme === 'dark'
+        ? (language === 'en' ? 'Light mode' : 'লাইট মোড')
+        : (language === 'en' ? 'Dark mode' : 'ডার্ক মোড');
+    }
+
+    function applyTheme() {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      themeToggle.setAttribute('aria-pressed', String(dark));
+      themeToggle.textContent = dark
+        ? (language === 'en' ? 'Light mode' : 'লাইট মোড')
+        : (language === 'en' ? 'Dark mode' : 'ডার্ক মোড');
+    }
+
+    languageToggle.addEventListener('click', () => {
+      language = language === 'en' ? 'bn' : 'en';
+      try {
+        localStorage.setItem('bharadekhiLanguage', language);
+      } catch (error) {
+        console.warn('Could not save the language preference:', error);
+      }
+      applyLanguage();
+    });
+
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      try {
+        localStorage.setItem('bharadekhiTheme', nextTheme);
+      } catch (error) {
+        console.warn('Could not save the theme preference:', error);
+      }
+      applyTheme();
+    });
+
+    applyLanguage();
+    applyTheme();
+  </script>
+</body>
+</html>
