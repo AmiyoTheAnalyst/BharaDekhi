@@ -5,7 +5,7 @@
   <meta name="google-site-verification" content="3huM-rDlDhqw31JY2ntw3FVEk_HjZ2kG7vVjnI516x0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Bhara dekhi (BharaDekhi) helps plan trips in Dhaka. Compare estimated bike, CNG, and car fares and open routes in Uber, Pathao, and inDrive.">
+  <meta name="description" content="Bhara dekhi (BharaDekhi) helps plan trips in Dhaka. Compare estimated bike, CNG, and car fares and open routes in Uber and Pathao.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#2563eb">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
@@ -758,7 +758,7 @@
         <span class="text-xs font-normal text-slate-500">Click to compare & launch</span>
       </h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         <!-- UBER CARD -->
         <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
@@ -802,27 +802,6 @@
           </button>
         </div>
 
-        <!-- INDRIVE CARD -->
-        <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
-                <span class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-xs font-black">in</span>
-                inDrive
-              </span>
-              <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">App Deep-Link</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-3">Opens the inDrive app and copies your destination and suggested bid.</p>
-            <div class="bg-slate-50 rounded-xl p-3 mb-4">
-              <span id="indriveFareLabel" class="text-xs text-slate-500 block">Bike suggested bid</span>
-              <span id="indriveFare" class="text-2xl font-black text-emerald-700">৳130</span>
-            </div>
-          </div>
-          <button onclick="handleInDriveClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm">
-            <i data-lucide="external-link" class="w-4 h-4"></i> Open in inDrive
-          </button>
-        </div>
-
       </div>
     </div>
 
@@ -835,7 +814,7 @@
     <!-- Legal Disclaimer -->
     <footer class="pt-2 text-center">
       <p class="text-xs text-slate-500 max-w-xl mx-auto leading-relaxed">
-        * Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber, Pathao, and inDrive.
+        * Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber and Pathao.
       </p>
     </footer>
 
@@ -1093,7 +1072,7 @@
       'Learn how BharaDekhi estimates fares and helps plan trips around Dhaka.': 'BharaDekhi কীভাবে ভাড়া হিসাব করে এবং ঢাকায় যাত্রা পরিকল্পনায় সাহায্য করে জানুন।',
       'How are the fare estimates calculated?': 'ভাড়ার আনুমানিক হিসাব কীভাবে করা হয়?',
       'BharaDekhi estimates fares from the selected route’s road distance and estimated travel time, using baseline rates for bike, CNG, and car. The estimates are for comparison and may not match a provider’s final price.': 'নির্বাচিত রুটের সড়ক দূরত্ব ও আনুমানিক যাত্রার সময়ের ভিত্তিতে বাইক, সিএনজি ও গাড়ির প্রাথমিক হার ব্যবহার করে BharaDekhi ভাড়া হিসাব করে। এই হিসাব তুলনার জন্য; সেবাদাতার চূড়ান্ত ভাড়ার সঙ্গে মিল নাও থাকতে পারে।',
-      'Are these the official Uber, Pathao, or inDrive prices?': 'এগুলো কি Uber, Pathao বা inDrive-এর নির্ধারিত ভাড়া?',
+      'Are these the official Uber or Pathao prices?': 'এগুলো কি Uber বা Pathao-এর নির্ধারিত ভাড়া?',
       'No. These are independent estimates, not live provider quotes. Each ride service sets its own fare, availability, fees, and surge pricing. Check the provider’s app for the final price before booking.': 'না। এগুলো স্বতন্ত্র আনুমানিক হিসাব, সেবাদাতার সরাসরি ভাড়া নয়। প্রতিটি সেবা নিজস্ব ভাড়া, যানবাহনের প্রাপ্যতা, ফি ও পিক চার্জ নির্ধারণ করে। বুক করার আগে সংশ্লিষ্ট অ্যাপে চূড়ান্ত ভাড়া দেখে নিন।',
       'When does BharaDekhi consider it peak hour in Dhaka?': 'BharaDekhi কখন ঢাকায় পিক আওয়ার ধরে?',
       'The current estimate uses Dhaka local time and treats 8:30–10:30 AM and 5:00–8:00 PM as approximate peak windows. Peak fares use an illustrative 1.4x–2.2x band. Current Dhaka rain is detected automatically from Open-Meteo weather data and adds a stacked 30%–50% uplift to ride and feeder estimates. The rain fare selector can force rain on or off. Actual traffic, weather, and provider surge pricing can differ.': 'বর্তমান হিসাব ঢাকার স্থানীয় সময় ব্যবহার করে এবং সকাল ৮:৩০–১০:৩০ ও বিকেল ৫টা–রাত ৮টাকে আনুমানিক পিক সময় ধরে। পিক ভাড়ায় ধারণামূলক ১.৪x–২.২x সীমা ব্যবহার করা হয়। Open-Meteo আবহাওয়ার তথ্য থেকে ঢাকার বৃষ্টি স্বয়ংক্রিয়ভাবে শনাক্ত করে রাইড ও ফিডার ভাড়ায় অতিরিক্ত ৩০%–৫০% যোগ করা হয়। বৃষ্টির ভাড়া নির্বাচক দিয়ে বৃষ্টির ভাড়া চালু বা বন্ধ করা যায়। প্রকৃত যানজট, আবহাওয়া ও সেবাদাতার পিক চার্জ ভিন্ন হতে পারে।',
@@ -1289,17 +1268,12 @@
       'App Deep-Link': 'অ্যাপ লিংক',
       'Opens Uber with pickup and drop-off pinned. Uber provides its own live quote; this estimate is for guidance.': 'পিকআপ ও গন্তব্য নির্ধারণ করে Uber খুলবে। Uber-এর সরাসরি ভাড়া আলাদা; এই হিসাবটি শুধু ধারণার জন্য।',
       'Opens the Pathao app and copies your destination.': 'Pathao অ্যাপ খুলবে এবং গন্তব্য কপি করবে।',
-      'Opens the inDrive app and copies your destination and suggested bid.': 'inDrive অ্যাপ খুলবে এবং গন্তব্য ও প্রস্তাবিত দর কপি করবে।',
       'Bike estimate': 'বাইকের আনুমানিক ভাড়া',
       'CNG estimate': 'সিএনজির আনুমানিক ভাড়া',
       'Car estimate': 'গাড়ির আনুমানিক ভাড়া',
-      'Bike suggested bid': 'বাইকের প্রস্তাবিত দর',
-      'CNG suggested bid': 'সিএনজির প্রস্তাবিত দর',
-      'Car suggested bid': 'গাড়ির প্রস্তাবিত দর',
       'Open in Uber': 'Uber-এ খুলুন',
       'Open in Pathao': 'Pathao-তে খুলুন',
-      'Open in inDrive': 'inDrive-এ খুলুন',
-      '* Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber, Pathao, and inDrive.': '* দেখানো ভাড়া OSRM দূরত্ব ও ঢাকার সাধারণ ভাড়ার ভিত্তিতে আনুমানিক হিসাব। Uber, Pathao ও inDrive-এর প্রকৃত ভাড়া ও পিক চার্জ আলাদা হতে পারে।',
+      '* Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber and Pathao.': '* দেখানো ভাড়া OSRM দূরত্ব ও ঢাকার সাধারণ ভাড়ার ভিত্তিতে আনুমানিক হিসাব। Uber ও Pathao-এর প্রকৃত ভাড়া ও পিক চার্জ আলাদা হতে পারে।',
       'Made with care by': 'যত্নসহকারে তৈরি করেছেন',
       'Amiyo Hasan': 'অমিয় হাসান',
       'Admin access': 'অ্যাডমিন প্রবেশ',
@@ -2958,8 +2932,7 @@
         minimum: uberMin,
         maximum: uberMax,
         pathaoMin: Math.round(uberMin * 0.97),
-        pathaoMax: Math.round(uberMax * 0.97),
-        indriveBid: Math.round(uberMin * 0.88)
+        pathaoMax: Math.round(uberMax * 0.97)
       };
     }
 
@@ -3039,10 +3012,8 @@
       const fare = getVehicleFareEstimate(selectedVehicle, isPeak);
       document.getElementById('uberFareLabel').innerText = getLocalizedText(`${selectedVehicle} estimate`);
       document.getElementById('pathaoFareLabel').innerText = getLocalizedText(`${selectedVehicle} estimate`);
-      document.getElementById('indriveFareLabel').innerText = getLocalizedText(`${selectedVehicle} suggested bid`);
       document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.minimum)} - ${formatLocalizedFare(fare.maximum)}`;
       document.getElementById('pathaoFare').innerText = `${formatLocalizedFare(fare.pathaoMin)} - ${formatLocalizedFare(fare.pathaoMax)}`;
-      document.getElementById('indriveFare').innerText = formatLocalizedFare(fare.indriveBid);
       renderMrtEstimate(isPeak);
     }
 
@@ -3099,28 +3070,6 @@
         currentLanguage === 'bn'
           ? `শুরুর স্থান, গন্তব্য ও ${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
           : `Copied pickup, destination, and ${selectedVehicle} estimate. Opening Pathao...`
-      );
-    }
-
-    function handleInDriveClick() {
-      const dKey = document.getElementById('dropoffSelect').value;
-      const pKey = document.getElementById('pickupSelect').value;
-      const pLoc = getLocationForKey(pKey);
-      const dLoc = getLocationForKey(dKey);
-      if (!pLoc || !dLoc) return;
-      const pName = formatRideAppLocation(pLoc, pKey);
-      const dName = formatRideAppLocation(dLoc, dKey);
-      const bid = document.getElementById('indriveFare').innerText;
-
-      const message = currentLanguage === 'bn'
-        ? `শুরুর স্থান: ${pName} | গন্তব্য: ${dName} | যানবাহন: ${getLocalizedText(selectedVehicle)} | প্রস্তাবিত দর: ${bid}`
-        : `Pickup: ${pName} | Destination: ${dName} | Ride: ${selectedVehicle} | Suggested offer: ${bid}`;
-      openRideAppAndCopy(
-        'indrive://',
-        message,
-        currentLanguage === 'bn'
-          ? `শুরুর স্থান, গন্তব্য ও প্রস্তাবিত দর ${bid} কপি করা হয়েছে। inDrive খোলা হচ্ছে...`
-          : `Copied pickup, destination, and suggested offer: ${bid}. Opening inDrive...`
       );
     }
 

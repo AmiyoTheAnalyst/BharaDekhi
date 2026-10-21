@@ -1,6 +1,6 @@
 # 🚖 BharaDekhi
 
-An interactive web-based transit route planner and ride-sharing fare estimator tailored for commuters in Dhaka, Bangladesh. BharaDekhi calculates road distances and travel times across major transit hubs, models local peak-hour traffic surge conditions, and provides a multi-app launcher bridge for **Uber**, **Pathao**, and **inDrive**.
+An interactive web-based transit route planner and ride-sharing fare estimator tailored for commuters in Dhaka, Bangladesh. BharaDekhi calculates road distances and travel times across major transit hubs, models local peak-hour traffic surge conditions, and provides app-launch links for **Uber** and **Pathao**.
 
 The brand lockup uses the Connected BD mark with the tagline **“Route Planner & Fare Estimator.”**
 
@@ -10,7 +10,7 @@ The brand lockup uses the Connected BD mark with the tagline **“Route Planner 
 
 * **Interactive Dhaka Map:** Leaflet.js map layer powered by OpenStreetMap, mapping high-traffic hubs across Dhaka (Azimpur, BRAC University Merul Badda, Dhanmondi 27, Gulshan 1, Mirpur 10, Motijheel).
 * **Tap-to-Set Map Locations:** Choose pickup or destination mode and tap the map to use that precise coordinate. The app looks up the nearest available OpenStreetMap place name and uses the pin for routing and fare estimates. Map-picked coordinates are temporary and are not saved in recent-trip history.
-* **Current-Location Pickup:** Request browser geolocation to use the device's current coordinates as the pickup for the route, fare estimate, and map. A reverse-geocoding lookup requests the nearest available place/address name from OpenStreetMap; building-level detail depends on map coverage and is not guaranteed. Requires location permission and a secure context (HTTPS or localhost). Uber's universal link receives the pickup coordinates; Pathao and inDrive open normally and copy pickup coordinates with the ride details because their app links do not prefill those fields here. Current GPS trips are not saved in recent-trip history.
+* **Current-Location Pickup:** Request browser geolocation to use the device's current coordinates as the pickup for the route, fare estimate, and map. A reverse-geocoding lookup requests the nearest available place/address name from OpenStreetMap; building-level detail depends on map coverage and is not guaranteed. Requires location permission and a secure context (HTTPS or localhost). Uber's universal link receives the pickup coordinates; Pathao opens normally and copies pickup coordinates with the ride details because its app link does not prefill those fields here. Current GPS trips are not saved in recent-trip history.
 * **Live Road Distance & Travel Duration:** Calculates driving distances and trip duration using the public Open Source Routing Machine (OSRM) API, backed by an algorithmic Haversine fallback engine.
 * **Peak-Hour & Heavy-Rain Fare Estimator:** Uses Dhaka local time (Asia/Dhaka) to automatically estimate morning (8:30 AM – 10:30 AM) and evening (5:00 PM – 8:00 PM) peak periods, with an optional peak simulation toggle. Peak fare estimates use an illustrative 1.4x–2.2x range. Current rain is checked automatically every 15 minutes using Open-Meteo conditions for central Dhaka; the rain fare selector can also force the 1.3x–1.5x uplift on or off. The rain uplift applies to ride and feeder estimates, not Metro or local bus fares. If weather data is unavailable, automatic mode shows a status and does not add the rain uplift unless a prior reading is available. Weather status links to its data source. These are estimates, not live provider quotes.
 
@@ -26,10 +26,9 @@ The brand lockup uses the Connected BD mark with the tagline **“Route Planner 
 * **Dark Mode:** Offers a dark theme for the interface and map controls; remembers the choice in the browser.
 * **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices. Routes using precise current-location or map-pin coordinates are excluded from history.
 * **Public FAQ Page:** A header help icon opens a dedicated FAQ page with answers about fare estimates, peak-hour periods, provider pricing, and account requirements. It is available without signing in and supports English and Bangla.
-* **Unified Ride-Sharing Bridge:**
+* **Ride-Sharing Links:**
   * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
   * **Pathao:** Opens the Pathao app with an app deep link and copies pickup, destination, vehicle, and the BharaDekhi estimate to the clipboard.
-  * **inDrive:** Opens the inDrive app with an app deep link and copies pickup, destination, vehicle, and the suggested bid for quick bidding.
 
 ---
 
@@ -51,7 +50,7 @@ The brand lockup uses the Connected BD mark with the tagline **“Route Planner 
 * When current location is used, its coordinates are sent to the public OSRM routing service to calculate a route and to OpenStreetMap's Nominatim service to find a nearby place name. Place-name detail depends on OpenStreetMap coverage; it may return a nearby street or area instead of a building.
 * Map-picked coordinates are used for the route, fare estimate, and nearby-place lookup, but are kept only in the current page session and excluded from recent-trip history.
 * The public Nominatim service has limited shared capacity and a maximum usage rate of one request per second for the entire application. Current-location and map-pin lookups are user-triggered and paced within each browser session; the service is not a high-volume geocoding provider. Review the [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) before changing or scaling this integration.
-* If the user opens Uber, the current pickup coordinates are included in Uber's link. If the user opens Pathao or inDrive, pickup details (including current coordinates) are copied to the clipboard so they can be entered in that app. Do not share the copied text if you do not want to share your precise location.
+* If the user opens Uber, the current pickup coordinates are included in Uber's link. If the user opens Pathao, pickup details (including current coordinates) are copied to the clipboard so they can be entered in that app. Do not share the copied text if you do not want to share your precise location.
 * Current-location and map-pin routes are intentionally excluded from recent-trip history. Saved places and other recent routes, plus the selected language and theme, are stored in browser local storage. Travel history is separated by signed-in email on that browser, but does not sync between devices.
 * Routing and place-name services may be unavailable or return approximate/incomplete results. If road routing fails, BharaDekhi falls back to an approximate distance calculation. Fare and duration values are estimates, not live quotes from ride providers.
 
