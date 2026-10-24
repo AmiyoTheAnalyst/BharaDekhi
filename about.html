@@ -7,17 +7,28 @@
   <meta name="theme-color" content="#f5f7fb">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="canonical" href="https://bharadekhi.vercel.app/about.html">
-  <title>About Amiyo Hasan | BharaDekhi</title>
+  <title>About Amiyo Hasan | BharaDekhi Developer</title>
   <script>
     try {
-      if (localStorage.getItem('bharadekhiTheme') === 'dark') {
+      const savedTheme = localStorage.getItem('bharadekhiTheme');
+      if (savedTheme === 'dark') {
         document.documentElement.dataset.theme = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.dataset.theme = 'light';
+        document.documentElement.classList.remove('dark');
       }
     } catch (error) {
       console.warn('Could not restore the saved theme preference:', error);
     }
   </script>
+  <script>
+    tailwind = {
+      darkMode: ['selector', '[data-theme="dark"]']
+    };
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
       background:
@@ -35,7 +46,7 @@
     }
     html[data-theme="dark"] header,
     html[data-theme="dark"] .surface { background-color: #1e293b; }
-    html[data-theme="dark"] .border-slate-200 { border-color: #475569; }
+    html[data-theme="dark"] .border-slate-200 { border-color: #334155; }
     html[data-theme="dark"] .text-slate-900,
     html[data-theme="dark"] .text-slate-800 { color: #f1f5f9; }
     html[data-theme="dark"] .text-slate-700,
@@ -45,10 +56,18 @@
     html[data-theme="dark"] .bg-slate-50 { background-color: #0f172a; }
     html[data-theme="dark"] .bg-blue-50 { background-color: #172554; }
     html[data-theme="dark"] .hover\:bg-slate-50:hover { background-color: #334155; }
+
+    @keyframes pulseAura {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.08); opacity: 0.35; }
+    }
+    .avatar-glow {
+      animation: pulseAura 4s ease-in-out infinite;
+    }
   </style>
 </head>
-<body class="min-h-screen px-4 pb-8 text-slate-800 antialiased">
-  <header class="-mx-4 sticky top-0 z-10 border-b border-slate-200">
+<body class="min-h-screen px-4 pb-12 text-slate-800 antialiased">
+  <header class="-mx-4 sticky top-0 z-30 border-b border-slate-200 shadow-sm">
     <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
       <a href="./index.html" class="flex items-center gap-2 rounded-lg" aria-label="BharaDekhi home">
         <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
@@ -58,85 +77,255 @@
         </span>
       </a>
       <div class="flex items-center gap-2">
-        <button id="languageToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-pressed="false">Dark mode</button>
+        <a href="./index.html" class="surface inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" data-en="Planner" data-bn="প্ল্যানার">
+          <i data-lucide="map" class="h-3.5 w-3.5 text-blue-600"></i>
+          <span>Planner</span>
+        </a>
+        <a href="./faq.html" class="surface inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95">
+          <i data-lucide="circle-help" class="h-3.5 w-3.5"></i>
+          <span>FAQ</span>
+        </a>
+        <button id="languageToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="surface inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-pressed="false">
+          <span id="themeToggleIconContainer" class="flex items-center justify-center">
+            <i id="themeIcon" data-lucide="moon" class="h-3.5 w-3.5"></i>
+          </span>
+          <span id="themeLabel">Dark mode</span>
+        </button>
       </div>
     </div>
   </header>
 
   <main class="mx-auto max-w-4xl pt-8 sm:pt-12">
-    <section class="surface rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-10">
-      <div class="border-b border-slate-200 pb-7">
-        <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-700" data-en="Software engineer & web developer" data-bn="সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার">Software engineer &amp; web developer</p>
-        <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Amiyo Hasan</h1>
-        <p class="mt-2 text-sm font-medium text-slate-600" data-en="Dhaka, Bangladesh" data-bn="ঢাকা, বাংলাদেশ">Dhaka, Bangladesh</p>
-        <p class="mt-5 max-w-3xl leading-relaxed text-slate-700" data-en="Product-focused full-stack software engineer and web developer with hands-on experience in React, Next.js, JavaScript, and REST APIs. Interested in building responsive applications, geospatial tools, and practical web experiences." data-bn="React, Next.js, JavaScript ও REST API-তে বাস্তব অভিজ্ঞতাসম্পন্ন, পণ্যকেন্দ্রিক ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার। রেসপনসিভ অ্যাপ্লিকেশন, জিওস্পেশিয়াল টুল এবং ব্যবহারিক ওয়েব অভিজ্ঞতা তৈরি করতে আগ্রহী।">Product-focused full-stack software engineer and web developer with hands-on experience in React, Next.js, JavaScript, and REST APIs. Interested in building responsive applications, geospatial tools, and practical web experiences.</p>
+    <section class="surface rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-10 transition-all">
+      <!-- Profile Header Lockup -->
+      <div class="border-b border-slate-200 pb-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between">
+          <div class="flex items-center gap-4">
+            <!-- Animated Avatar Aura -->
+            <div class="relative">
+              <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-500 opacity-60 blur-sm avatar-glow"></div>
+              <div class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 font-black text-2xl text-white shadow-md">
+                AH
+              </div>
+              <span class="absolute -bottom-1 -right-1 flex h-4 w-4" title="Active developer">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white dark:border-slate-800"></span>
+              </span>
+            </div>
+
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[0.18em] text-blue-700" data-en="Software engineer & web developer" data-bn="সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার">Software engineer &amp; web developer</p>
+              <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl mt-0.5">Amiyo Hasan</h1>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <i data-lucide="map-pin" class="h-3.5 w-3.5 text-slate-400"></i>
+                  <span data-en="Dhaka, Bangladesh" data-bn="ঢাকা, বাংলাদেশ">Dhaka, Bangladesh</span>
+                </span>
+                <span class="text-slate-300 dark:text-slate-600">·</span>
+                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  <span data-en="Open to Opportunities" data-bn="কাজের জন্য উন্মুক্ত">Open to Opportunities</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="mt-6 max-w-3xl text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300" data-en="Product-focused full-stack software engineer and web developer with hands-on experience in React, Next.js, JavaScript, and REST APIs. Passionate about engineering high-performance responsive web applications, geospatial tools, and seamless user experiences." data-bn="React, Next.js, JavaScript ও REST API-তে বাস্তব অভিজ্ঞতাসম্পন্ন, পণ্যকেন্দ্রিক ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার। রেসপনসিভ ওয়েব অ্যাপ্লিকেশন, জিওস্পেশিয়াল টুল এবং মসৃণ ইউজার এক্সপেরিয়েন্স তৈরি করতে নিবেদিত।">Product-focused full-stack software engineer and web developer with hands-on experience in React, Next.js, JavaScript, and REST APIs. Passionate about engineering high-performance responsive web applications, geospatial tools, and seamless user experiences.</p>
       </div>
 
+      <!-- Contact & Verified Profiles Section -->
       <section class="border-b border-slate-200 py-7" aria-labelledby="contactHeading">
-        <h2 id="contactHeading" class="text-lg font-bold text-slate-900" data-en="Contact & profiles" data-bn="যোগাযোগ ও প্রোফাইল">Contact &amp; profiles</h2>
-        <div class="mt-4 flex flex-wrap gap-3 text-sm">
-          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="mailto:amiyohasan23@gmail.com">Email</a>
-          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="https://github.com/AmiyoTheAnalyst" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a class="rounded-full border border-slate-200 px-4 py-2 font-medium text-blue-700 hover:bg-slate-50" href="https://www.linkedin.com/in/amiyo-hasan" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <div class="flex items-center justify-between">
+          <h2 id="contactHeading" class="text-lg font-bold text-slate-900" data-en="Contact & verified profiles" data-bn="যোগাযোগ ও প্রোফাইল">Contact &amp; verified profiles</h2>
+          <span class="text-xs text-slate-400">Direct links</span>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2.5 text-xs sm:text-sm">
+          <!-- LinkedIn Verified Link -->
+          <a class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/80 px-4 py-2.5 font-bold text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:border-blue-800/80 dark:bg-blue-950/70 dark:text-blue-300 transition-all shadow-sm active:scale-95" href="https://www.linkedin.com/in/amiyo-hasan-6729873a7/" target="_blank" rel="noopener noreferrer">
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            <span>LinkedIn Profile</span>
+            <i data-lucide="external-link" class="h-3 w-3 opacity-60"></i>
+          </a>
+
+          <!-- GitHub Profile -->
+          <a class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-all shadow-sm active:scale-95" href="https://github.com/AmiyoTheAnalyst" target="_blank" rel="noopener noreferrer">
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <span>GitHub (@AmiyoTheAnalyst)</span>
+            <i data-lucide="external-link" class="h-3 w-3 opacity-60"></i>
+          </a>
+
+          <!-- Direct Gmail Web Composer -->
+          <a class="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/80 px-4 py-2.5 font-bold text-rose-700 hover:bg-rose-100 hover:border-rose-300 dark:border-rose-800/80 dark:bg-rose-950/70 dark:text-rose-300 transition-all shadow-sm active:scale-95" href="https://mail.google.com/mail/?view=cm&fs=1&to=amiyohasan23@gmail.com" target="_blank" rel="noopener noreferrer" title="Open Gmail composer directly in browser">
+            <i data-lucide="mail" class="h-4 w-4 text-rose-600"></i>
+            <span>Compose in Gmail</span>
+            <i data-lucide="external-link" class="h-3 w-3 opacity-60"></i>
+          </a>
+
+          <!-- Interactive One-Click Copy Button -->
+          <button type="button" id="copyEmailBtn" onclick="copyEmail(this)" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-all shadow-sm active:scale-95 cursor-pointer" title="Click to copy email address">
+            <i data-lucide="copy" class="h-4 w-4 text-slate-400"></i>
+            <span id="copyBtnText">Copy: amiyohasan23@gmail.com</span>
+          </button>
         </div>
       </section>
 
+      <!-- Technical Skills Interactive Matrix -->
       <section class="border-b border-slate-200 py-7" aria-labelledby="skillsHeading">
-        <h2 id="skillsHeading" class="text-lg font-bold text-slate-900" data-en="Technical skills" data-bn="প্রযুক্তিগত দক্ষতা">Technical skills</h2>
-        <dl class="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-[10rem_1fr]">
-          <dt class="font-bold text-slate-800" data-en="Frontend" data-bn="ফ্রন্টএন্ড">Frontend</dt>
-          <dd class="text-slate-600">React.js, Next.js, JavaScript (ES6+), Tailwind CSS, HTML5/CSS3, Responsive UI/UX</dd>
-          <dt class="font-bold text-slate-800" data-en="Backend & data" data-bn="ব্যাকএন্ড ও ডেটা">Backend &amp; data</dt>
-          <dd class="text-slate-600">RESTful API design, Node.js basics, SQL, data extraction &amp; query optimization</dd>
-          <dt class="font-bold text-slate-800" data-en="Libraries & tools" data-bn="লাইব্রেরি ও টুল">Libraries &amp; tools</dt>
-          <dd class="text-slate-600">Leaflet.js, Open-Meteo API, OSRM routing, Git, GitHub, Vercel, Postman</dd>
-          <dt class="font-bold text-slate-800" data-en="Core strengths" data-bn="মূল দক্ষতা">Core strengths</dt>
-          <dd class="text-slate-600">State management, multi-modal transit logic, surge-pricing heuristics, component architecture</dd>
-        </dl>
-      </section>
-
-      <section class="border-b border-slate-200 py-7" aria-labelledby="projectsHeading">
-        <h2 id="projectsHeading" class="text-lg font-bold text-slate-900" data-en="Featured projects" data-bn="উল্লেখযোগ্য প্রজেক্ট">Featured projects</h2>
-        <article class="mt-4 rounded-2xl border border-slate-200 p-5">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <h3 class="font-bold text-slate-900">BharaDekhi — Multi-Modal Transit &amp; Fare Estimator</h3>
-            <div class="flex gap-3 text-sm font-semibold">
-              <a class="text-blue-700 underline underline-offset-2" href="https://bharadekhi.vercel.app/" target="_blank" rel="noopener noreferrer" data-en="Live site" data-bn="লাইভ সাইট">Live site</a>
-              <a class="text-blue-700 underline underline-offset-2" href="https://github.com/AmiyoTheAnalyst/BharaDekhi" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <h2 id="skillsHeading" class="text-lg font-bold text-slate-900" data-en="Technical skills & tools" data-bn="প্রযুক্তিগত দক্ষতা ও টুল">Technical skills &amp; tools</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <!-- Frontend Card -->
+          <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700/60 dark:bg-slate-800/50">
+            <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm mb-2.5">
+              <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
+                <i data-lucide="layout" class="h-3.5 w-3.5"></i>
+              </span>
+              <span data-en="Frontend Engineering" data-bn="ফ্রন্টএন্ড ইঞ্জিনিয়ারিং">Frontend Engineering</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">React.js</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Next.js</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">JavaScript (ES6+)</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Tailwind CSS</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">HTML5/CSS3</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Responsive UX/UI</span>
             </div>
           </div>
-          <p class="mt-2 text-sm leading-relaxed text-slate-600" data-en="A Dhaka commuter platform for comparing estimated fares across rickshaw, bike, CNG, car, bus, and metro. Combines OSRM routing, Leaflet maps, weather-aware fare estimates, and ride-hailing links." data-bn="রিকশা, বাইক, সিএনজি, গাড়ি, বাস ও মেট্রোর আনুমানিক ভাড়া তুলনার জন্য ঢাকার যাত্রীদের প্ল্যাটফর্ম। এতে OSRM রাউটিং, Leaflet মানচিত্র, আবহাওয়া-ভিত্তিক ভাড়া হিসাব এবং রাইড-হেইলিং লিংক রয়েছে।">A Dhaka commuter platform for comparing estimated fares across rickshaw, bike, CNG, car, bus, and metro. Combines OSRM routing, Leaflet maps, weather-aware fare estimates, and ride-hailing links.</p>
-        </article>
-        <article class="mt-3 rounded-2xl border border-slate-200 p-5">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <h3 class="font-bold text-slate-900" data-en="Relational Data Engine & Query Architecture" data-bn="রিলেশনাল ডেটা ইঞ্জিন ও কুয়েরি আর্কিটেকচার">Relational Data Engine &amp; Query Architecture</h3>
-            <a class="text-sm font-semibold text-blue-700 underline underline-offset-2" href="https://github.com/AmiyoTheAnalyst/SQL-Project" target="_blank" rel="noopener noreferrer">GitHub</a>
+
+          <!-- Backend & Data Card -->
+          <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700/60 dark:bg-slate-800/50">
+            <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm mb-2.5">
+              <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
+                <i data-lucide="database" class="h-3.5 w-3.5"></i>
+              </span>
+              <span data-en="Backend & Databases" data-bn="ব্যাকএন্ড ও ডেটাবেস">Backend &amp; Databases</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">RESTful APIs</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Node.js</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">SQL & Relational DBs</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Supabase</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Query Optimization</span>
+            </div>
           </div>
-          <p class="mt-2 text-sm leading-relaxed text-slate-600" data-en="A SQL and data-modeling project focused on relational schemas, multi-table queries, business-intelligence insights, and query performance." data-bn="রিলেশনাল স্কিমা, বহু-টেবিল কুয়েরি, বিজনেস ইন্টেলিজেন্স বিশ্লেষণ এবং কুয়েরি পারফরম্যান্স নিয়ে SQL ও ডেটা মডেলিং প্রজেক্ট।">A SQL and data-modeling project focused on relational schemas, multi-table queries, business-intelligence insights, and query performance.</p>
+
+          <!-- Geospatial & Transit Card -->
+          <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700/60 dark:bg-slate-800/50">
+            <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm mb-2.5">
+              <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300">
+                <i data-lucide="compass" class="h-3.5 w-3.5"></i>
+              </span>
+              <span data-en="Geospatial & Transit Systems" data-bn="জিওস্পেশিয়াল ও ট্রানজিট ব্যবস্থা">Geospatial &amp; Transit Systems</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Leaflet.js</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">OSRM Road Routing</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Open-Meteo Weather API</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Multi-Modal Fare Algorithms</span>
+            </div>
+          </div>
+
+          <!-- Architecture & Tools Card -->
+          <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700/60 dark:bg-slate-800/50">
+            <div class="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-sm mb-2.5">
+              <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300">
+                <i data-lucide="cpu" class="h-3.5 w-3.5"></i>
+              </span>
+              <span data-en="Architecture & Workflow" data-bn="আর্কিটেকচার ও টুলস">Architecture &amp; Workflow</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Git &amp; GitHub</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Vercel Deployment</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Postman</span>
+              <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">Component State Architecture</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Projects Section -->
+      <section class="border-b border-slate-200 py-7" aria-labelledby="projectsHeading">
+        <h2 id="projectsHeading" class="text-lg font-bold text-slate-900" data-en="Featured projects" data-bn="উল্লেখযোগ্য প্রজেক্ট">Featured projects</h2>
+        
+        <!-- Project 1: BharaDekhi -->
+        <article class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:border-blue-400 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-blue-500 transition-all">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 mb-1.5">
+                <span>Featured Transit Platform</span>
+              </div>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">BharaDekhi — Multi-Modal Transit &amp; Fare Estimator</h3>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-bold">
+              <a class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700 shadow-sm transition active:scale-95" href="https://bharadekhi.vercel.app/" target="_blank" rel="noopener noreferrer">
+                <span>Live Site</span>
+                <i data-lucide="external-link" class="h-3 w-3"></i>
+              </a>
+              <a class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition active:scale-95" href="https://github.com/AmiyoTheAnalyst/BharaDekhi" target="_blank" rel="noopener noreferrer">
+                <span>GitHub</span>
+                <i data-lucide="external-link" class="h-3 w-3"></i>
+              </a>
+            </div>
+          </div>
+          <p class="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300" data-en="A Dhaka commuter platform for comparing estimated fares across rickshaw, bike, CNG, car, local bus, and MRT Line 6 metro. Features real-time OSRM routing, Leaflet map geometry, weather-aware fare adjustments with Open-Meteo, peak surge models, and one-tap deep links to Uber and Pathao." data-bn="রিকশা, বাইক, সিএনজি, গাড়ি, বাস ও মেট্রোর আনুমানিক ভাড়া তুলনার জন্য ঢাকার যাত্রীদের প্ল্যাটফর্ম। এতে OSRM রাউটিং, Leaflet মানচিত্র, আবহাওয়া-ভিত্তিক ভাড়া হিসাব এবং রাইড-হেইলিং লিংক রয়েছে।">A Dhaka commuter platform for comparing estimated fares across rickshaw, bike, CNG, car, local bus, and MRT Line 6 metro. Features real-time OSRM routing, Leaflet map geometry, weather-aware fare adjustments with Open-Meteo, peak surge models, and one-tap deep links to Uber and Pathao.</p>
+        </article>
+
+        <!-- Project 2: Relational Data Engine -->
+        <article class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-500 transition-all">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-200 mb-1.5">
+                <span>Data Modeling &amp; Analytics</span>
+              </div>
+              <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white" data-en="Relational Data Engine & Query Architecture" data-bn="রিলেশনাল ডেটা ইঞ্জিন ও কুয়েরি আর্কিটেকচার">Relational Data Engine &amp; Query Architecture</h3>
+            </div>
+            <a class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition active:scale-95" href="https://github.com/AmiyoTheAnalyst/SQL-Project" target="_blank" rel="noopener noreferrer">
+              <span>GitHub</span>
+              <i data-lucide="external-link" class="h-3 w-3"></i>
+            </a>
+          </div>
+          <p class="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300" data-en="A SQL and data-modeling project focused on relational database schemas, multi-table joins, subqueries, business-intelligence reporting, and performance query optimization." data-bn="রিলেশনাল স্কিমা, বহু-টেবিল কুয়েরি, বিজনেস ইন্টেলিজেন্স বিশ্লেষণ এবং কুয়েরি পারফরম্যান্স নিয়ে SQL ও ডেটা মডেলিং প্রজেক্ট।">A SQL and data-modeling project focused on relational database schemas, multi-table joins, subqueries, business-intelligence reporting, and performance query optimization.</p>
         </article>
       </section>
 
+      <!-- Education Section -->
       <section class="pt-7" aria-labelledby="educationHeading">
         <h2 id="educationHeading" class="text-lg font-bold text-slate-900" data-en="Education" data-bn="শিক্ষা">Education</h2>
-        <h3 class="mt-4 font-bold text-slate-900" data-en="Bachelor of Science in Computer Science & Engineering (B.Sc. CSE)" data-bn="কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিংয়ে স্নাতক (B.Sc. CSE)">Bachelor of Science in Computer Science &amp; Engineering (B.Sc. CSE)</h3>
-        <p class="mt-1 text-sm text-slate-600">BRAC University, Dhaka, Bangladesh</p>
-        <p class="mt-1 text-sm text-slate-500" data-en="Expected September 2027" data-bn="সম্ভাব্য সমাপ্তি: সেপ্টেম্বর ২০২৭">Expected September 2027</p>
+        <div class="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-700/60 dark:bg-slate-800/40">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="font-black text-slate-900 dark:text-white text-base" data-en="Bachelor of Science in Computer Science & Engineering (B.Sc. CSE)" data-bn="কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিংয়ে স্নাতক (B.Sc. CSE)">Bachelor of Science in Computer Science &amp; Engineering (B.Sc. CSE)</h3>
+              <p class="mt-1 text-sm font-semibold text-blue-700 dark:text-blue-400">BRAC University, Dhaka, Bangladesh</p>
+              <p class="mt-1 text-xs text-slate-500" data-en="Expected Graduation: September 2027" data-bn="সম্ভাব্য সমাপ্তি: সেপ্টেম্বর ২০২৭">Expected Graduation: September 2027</p>
+            </div>
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
+              <i data-lucide="graduation-cap" class="h-5 w-5"></i>
+            </span>
+          </div>
+        </div>
       </section>
     </section>
 
-    <div class="mt-6 text-center">
-      <a href="./index.html" class="inline-flex rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700" data-en="Back to BharaDekhi" data-bn="BharaDekhi-তে ফিরে যান">Back to BharaDekhi</a>
+    <!-- Return to BharaDekhi CTA -->
+    <div class="mt-8 flex justify-center">
+      <a href="./index.html" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition active:scale-95" data-en="Return to BharaDekhi Route Planner" data-bn="BharaDekhi রুট প্ল্যানারে ফিরে যান">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i>
+        <span>Return to BharaDekhi Route Planner</span>
+      </a>
     </div>
   </main>
 
-  <footer class="mx-auto mt-8 max-w-4xl border-t border-slate-200 px-4 py-6 text-center text-xs text-slate-500">
-    <p>BharaDekhi · Dhaka, Bangladesh</p>
+  <footer class="mx-auto mt-12 max-w-4xl border-t border-slate-200 px-4 py-6 text-center text-xs text-slate-500">
+    <p>BharaDekhi · Designed &amp; Developed by Amiyo Hasan · Dhaka, Bangladesh</p>
   </footer>
 
   <script>
     const languageToggle = document.getElementById('languageToggle');
     const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const themeIcon = document.getElementById('themeIcon');
     let language = localStorage.getItem('bharadekhiLanguage') === 'bn' ? 'bn' : 'en';
 
     function applyLanguage() {
@@ -146,17 +335,18 @@
       });
       languageToggle.textContent = language === 'en' ? 'বাংলা' : 'English';
       languageToggle.setAttribute('aria-label', language === 'en' ? 'Switch to Bangla' : 'ইংরেজিতে পরিবর্তন করুন');
-      themeToggle.textContent = document.documentElement.dataset.theme === 'dark'
-        ? (language === 'en' ? 'Light mode' : 'লাইট মোড')
-        : (language === 'en' ? 'Dark mode' : 'ডার্ক মোড');
+      applyTheme();
     }
 
     function applyTheme() {
       const dark = document.documentElement.dataset.theme === 'dark';
+      document.documentElement.classList.toggle('dark', dark);
       themeToggle.setAttribute('aria-pressed', String(dark));
-      themeToggle.textContent = dark
+      themeLabel.textContent = dark
         ? (language === 'en' ? 'Light mode' : 'লাইট মোড')
         : (language === 'en' ? 'Dark mode' : 'ডার্ক মোড');
+      themeIcon.setAttribute('data-lucide', dark ? 'sun' : 'moon');
+      lucide.createIcons();
     }
 
     languageToggle.addEventListener('click', () => {
@@ -172,6 +362,7 @@
     themeToggle.addEventListener('click', () => {
       const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.dataset.theme = nextTheme;
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
       try {
         localStorage.setItem('bharadekhiTheme', nextTheme);
       } catch (error) {
@@ -180,8 +371,23 @@
       applyTheme();
     });
 
+    function copyEmail(btn) {
+      const email = 'amiyohasan23@gmail.com';
+      navigator.clipboard.writeText(email).then(() => {
+        const textSpan = document.getElementById('copyBtnText');
+        const orig = textSpan.textContent;
+        textSpan.textContent = 'Copied! ✓';
+        setTimeout(() => {
+          textSpan.textContent = orig;
+        }, 2500);
+      }).catch(() => {
+        window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + email, '_blank');
+      });
+    }
+
     applyLanguage();
     applyTheme();
+    lucide.createIcons();
   </script>
 </body>
 </html>

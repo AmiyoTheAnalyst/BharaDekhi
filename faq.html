@@ -63,9 +63,13 @@
         </span>
       </a>
       <div class="flex items-center gap-2">
-        <button id="languageToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" class="surface inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-pressed="false">
-          <i id="themeIcon" data-lucide="moon" class="h-4 w-4" aria-hidden="true"></i>
+        <a href="./index.html" class="surface inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" data-en="Planner" data-bn="প্ল্যানার">
+          <i data-lucide="map" class="h-3.5 w-3.5 text-blue-600"></i>
+          <span data-en="Planner" data-bn="প্ল্যানার">Planner</span>
+        </a>
+        <button id="languageToggle" type="button" class="surface rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="surface inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-pressed="false">
+          <i id="themeIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span id="themeLabel">Dark mode</span>
         </button>
       </div>
@@ -133,8 +137,74 @@
     </section>
   </main>
 
-  <footer class="mx-auto mt-8 max-w-4xl border-t border-slate-200 px-4 py-6 text-center text-xs text-slate-500">
-    <p><span data-en="Made with care by " data-bn="যত্নসহকারে তৈরি করেছেন ">Made with care by </span><a href="./about.html" class="font-bold text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-blue-700"><span data-en="Amiyo Hasan" data-bn="অমিয় হাসান">Amiyo Hasan</span></a>.</p>
+  <!-- Enhanced Modern Developer Credit & Platform Footer -->
+  <footer class="mx-auto max-w-4xl mt-12 mb-8 px-4">
+    <div class="rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-slate-900/5 dark:border-slate-700/60 dark:bg-slate-900/80 transition-all">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <!-- Author Identity & Story -->
+        <div class="flex items-center gap-4 text-left">
+          <div class="relative group">
+            <div class="h-14 w-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 p-0.5 shadow-lg shadow-blue-500/25">
+              <div class="h-full w-full rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center font-black text-xl text-blue-600 dark:text-blue-400 tracking-tight">
+                AH
+              </div>
+            </div>
+            <span class="absolute -bottom-1 -right-1 flex h-4 w-4" title="Active developer">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
+            </span>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="text-base font-extrabold text-slate-900 dark:text-white" data-en="Amiyo Hasan" data-bn="অমিয় হাসান">Amiyo Hasan</h4>
+              <span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/80" data-en="Developer" data-bn="ডেভেলপার">Developer</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" data-en="Full-Stack Software Engineer &amp; Web Developer · Dhaka, Bangladesh" data-bn="ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার ও ওয়েব ডেভেলপার · ঢাকা, বাংলাদেশ">Full-Stack Software Engineer &amp; Web Developer · Dhaka, Bangladesh</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1" data-en="Creator of BharaDekhi — Dhaka Multi-Modal Transit &amp; Fare Engine" data-bn="ভাড়াদেখি-এর নির্মাতা — ঢাকার মাল্টি-মোডাল ট্রানজিট ও ভাড়ার হিসাব ইঞ্জিন">Creator of BharaDekhi — Dhaka Multi-Modal Transit &amp; Fare Engine</p>
+          </div>
+        </div>
+
+        <!-- Social Connect Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <!-- LinkedIn Verified Link -->
+          <a href="https://www.linkedin.com/in/amiyo-hasan-6729873a7/" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-3.5 py-2 text-xs font-bold text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-300 dark:border-blue-800/60 dark:bg-blue-950/60 dark:text-blue-300 transition-all active:scale-95" aria-label="Amiyo Hasan on LinkedIn">
+            <svg class="h-4 w-4 fill-current text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            <span>LinkedIn</span>
+            <i data-lucide="external-link" class="h-3 w-3 opacity-60"></i>
+          </a>
+
+          <!-- GitHub -->
+          <a href="https://github.com/AmiyoTheAnalyst" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:border-slate-900 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-white dark:hover:text-white transition-all active:scale-95" aria-label="Amiyo Hasan on GitHub">
+            <svg class="h-4 w-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <span>GitHub</span>
+          </a>
+
+          <!-- Email: Direct Gmail Web Composer -->
+          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=amiyohasan23@gmail.com" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/70 px-3.5 py-2 text-xs font-bold text-rose-700 shadow-sm hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/60 dark:text-rose-300 transition-all active:scale-95" title="Open Gmail composer directly in browser">
+            <i data-lucide="mail" class="h-4 w-4 text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform"></i>
+            <span data-en="Compose in Gmail" data-bn="Gmail-এ লিখুন">Compose in Gmail</span>
+          </a>
+
+          <!-- Copy Email Button -->
+          <button type="button" onclick="copyDeveloperEmail(this)" class="group inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-all active:scale-95 cursor-pointer" title="Copy amiyohasan23@gmail.com">
+            <i data-lucide="copy" class="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors"></i>
+            <span class="copy-text" data-en="Copy Email" data-bn="ইমেইল কপি">Copy Email</span>
+          </button>
+
+          <!-- About Amiyo Hasan Profile Page -->
+          <a href="./about.html" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95">
+            <i data-lucide="user" class="h-3.5 w-3.5"></i>
+            <span data-en="Portfolio" data-bn="পোর্টফোলিও">Portfolio</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400 dark:text-slate-500">
+        <p><span data-en="Made with care by " data-bn="যত্নসহকারে তৈরি করেছেন ">Made with care by </span><a href="./about.html" class="font-bold text-slate-700 dark:text-slate-300 underline decoration-slate-300 dark:decoration-slate-600 underline-offset-2 hover:text-blue-600"><span data-en="Amiyo Hasan" data-bn="অমিয় হাসান">Amiyo Hasan</span></a>. <span data-en="Released for Dhaka commuters." data-bn="ঢাকার নিত্যযাত্রীদের জন্য প্রকাশিত।">Released for Dhaka commuters.</span></p>
+        <p>© 2026 BharaDekhi · Built with Leaflet, OSRM &amp; Open-Meteo</p>
+      </div>
+    </div>
   </footer>
 
   <script>
@@ -160,7 +230,7 @@
         ? (language === 'en' ? 'Light mode' : 'লাইট মোড')
         : (language === 'en' ? 'Dark mode' : 'ডার্ক মোড');
       themeIcon.setAttribute('data-lucide', dark ? 'sun' : 'moon');
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     languageToggle.addEventListener('click', () => {
@@ -185,8 +255,24 @@
       applyTheme();
     });
 
+    function copyDeveloperEmail(btn) {
+      const email = 'amiyohasan23@gmail.com';
+      navigator.clipboard.writeText(email).then(() => {
+        const textSpan = btn ? btn.querySelector('.copy-text') : null;
+        const orig = textSpan ? textSpan.textContent : 'Copy Email';
+        if (textSpan) textSpan.textContent = language === 'bn' ? 'কপি হয়েছে! ✓' : 'Copied! ✓';
+        setTimeout(() => {
+          if (textSpan) textSpan.textContent = orig;
+        }, 2500);
+      }).catch(() => {
+        window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + email, '_blank');
+      });
+    }
+    window.copyDeveloperEmail = copyDeveloperEmail;
+
     applyLanguage();
     applyTheme();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   </script>
 </body>
 </html>
