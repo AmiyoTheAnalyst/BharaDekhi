@@ -895,9 +895,11 @@
           <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span>FAQ</span>
         </a>
-        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm" aria-label="Switch to dark mode" aria-pressed="false">
-          <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
+        <button id="languageToggle" type="button" onclick="toggleLanguage()" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" onclick="toggleTheme()" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch to dark mode" aria-pressed="false">
+          <span id="themeToggleIconContainer" class="flex items-center justify-center">
+            <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
+          </span>
           <span id="themeToggleLabel">Dark mode</span>
         </button>
 
@@ -2309,7 +2311,7 @@
     function getLocalizedLocationName(name) {
       return currentLanguage === 'bn'
         ? BENGALI_LOCATION_NAMES[name] || BENGALI_TRANSLATIONS[name] || name
-        : name;
+        : ENGLISH_TRANSLATIONS[name] || name;
     }
 
     function updateLocationLabels() {
@@ -2334,17 +2336,41 @@
       }
     }
 
+    const originalTextMap = new WeakMap();
+
     function applyLanguage() {
       document.documentElement.lang = currentLanguage === 'bn' ? 'bn' : 'en';
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: function(node) {
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            const tag = parent.tagName;
+            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+
       let node;
       while ((node = walker.nextNode())) {
         const original = node.nodeValue;
         const trimmed = original.trim();
         if (!trimmed) continue;
         const normalized = trimmed.replace(/\s+/g, ' ');
-        const localized = getLocalizedText(normalized);
-        if (localized !== normalized) {
+        if (!originalTextMap.has(node)) {
+          originalTextMap.set(node, normalized);
+        }
+        const baseEnglish = originalTextMap.get(node) || normalized;
+        const localized = currentLanguage === 'bn'
+          ? (BENGALI_TRANSLATIONS[baseEnglish] || BENGALI_LOCATION_NAMES[baseEnglish] || getLocalizedText(baseEnglish))
+          : baseEnglish;
+
+        if (localized && localized !== trimmed) {
           const leadingWhitespace = original.match(/^\s*/)[0];
           const trailingWhitespace = original.match(/\s*$/)[0];
           node.nodeValue = `${leadingWhitespace}${localized}${trailingWhitespace}`;
@@ -2352,15 +2378,31 @@
       }
 
       document.querySelectorAll('input[placeholder]').forEach(input => {
-        input.placeholder = getLocalizedText(input.placeholder);
+        if (!input.dataset.originalPlaceholder) {
+          input.dataset.originalPlaceholder = input.placeholder;
+        }
+        const basePlaceholder = input.dataset.originalPlaceholder;
+        input.placeholder = currentLanguage === 'bn' ? getLocalizedText(basePlaceholder) : basePlaceholder;
       });
+
       document.querySelectorAll('[aria-label]').forEach(element => {
-        element.setAttribute('aria-label', getLocalizedText(element.getAttribute('aria-label')));
+        if (!element.dataset.originalAriaLabel) {
+          element.dataset.originalAriaLabel = element.getAttribute('aria-label');
+        }
+        const baseAria = element.dataset.originalAriaLabel;
+        element.setAttribute('aria-label', currentLanguage === 'bn' ? getLocalizedText(baseAria) : baseAria);
       });
+
       const languageToggle = document.getElementById('languageToggle');
-      languageToggle.textContent = currentLanguage === 'en' ? 'বাংলা' : 'English';
-      languageToggle.setAttribute('aria-label', currentLanguage === 'en' ? 'Switch to Bangla' : 'ইংরেজিতে পরিবর্তন করুন');
-      document.getElementById('faqLink').title = getLocalizedText('Frequently Asked Questions');
+      if (languageToggle) {
+        languageToggle.textContent = currentLanguage === 'en' ? 'বাংলা' : 'English';
+        languageToggle.setAttribute('aria-label', currentLanguage === 'en' ? 'Switch to Bangla' : 'Switch to English');
+      }
+
+      const faqLink = document.getElementById('faqLink');
+      if (faqLink) {
+        faqLink.title = getLocalizedText('Frequently Asked Questions');
+      }
 
       if (typeof renderDhakaWeatherStatus === 'function') renderDhakaWeatherStatus();
       if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
@@ -2376,22 +2418,35 @@
 
     function toggleLanguage() {
       currentLanguage = currentLanguage === 'en' ? 'bn' : 'en';
-      localStorage.setItem('bharadekhiLanguage', currentLanguage);
+      try {
+        localStorage.setItem('bharadekhiLanguage', currentLanguage);
+      } catch (e) {
+        console.warn('Could not save language preference:', e);
+      }
       applyLanguage();
     }
 
     function applyTheme() {
       const isDark = currentTheme === 'dark';
       document.documentElement.dataset.theme = currentTheme;
-      document.querySelector('meta[name="theme-color"]').content = isDark ? '#0f172a' : '#2563eb';
+      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeColorMeta) {
+        themeColorMeta.content = isDark ? '#0f172a' : '#2563eb';
+      }
       const toggle = document.getElementById('themeToggle');
-      const label = isDark ? 'Light mode' : 'Dark mode';
-      const ariaLabel = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-      toggle.setAttribute('aria-label', getLocalizedText(ariaLabel));
-      toggle.setAttribute('aria-pressed', String(isDark));
-      document.getElementById('themeToggleLabel').textContent = getLocalizedText(label);
-      document.getElementById('themeToggleIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-      lucide.createIcons();
+      if (toggle) {
+        const label = isDark ? 'Light mode' : 'Dark mode';
+        const ariaLabel = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+        toggle.setAttribute('aria-label', getLocalizedText(ariaLabel));
+        toggle.setAttribute('aria-pressed', String(isDark));
+        const labelEl = document.getElementById('themeToggleLabel');
+        if (labelEl) labelEl.textContent = getLocalizedText(label);
+        const iconContainer = document.getElementById('themeToggleIconContainer');
+        if (iconContainer) {
+          iconContainer.innerHTML = `<i data-lucide="${isDark ? 'sun' : 'moon'}" class="h-3.5 w-3.5" aria-hidden="true"></i>`;
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
     }
 
     function toggleTheme() {
@@ -2400,8 +2455,6 @@
         localStorage.setItem('bharadekhiTheme', nextTheme);
       } catch (error) {
         console.error('Could not save the theme preference:', error);
-        showToast('Could not save theme preference.');
-        return;
       }
       currentTheme = nextTheme;
       applyTheme();
@@ -4534,25 +4587,6 @@
           ? `শুরুর স্থান, গন্তব্য ও ${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
           : `Copied pickup, destination, and ${selectedVehicle} estimate. Opening Pathao...`
       );
-      const dKey = document.getElementById('dropoffSelect').value;
-      const pKey = document.getElementById('pickupSelect').value;
-      const pLoc = getLocationForKey(pKey);
-      const dLoc = getLocationForKey(dKey);
-      if (!pLoc || !dLoc) return;
-      const pName = formatRideAppLocation(pLoc, pKey);
-      const dName = formatRideAppLocation(dLoc, dKey);
-      const fare = document.getElementById('pathaoFare').innerText;
-      const rideDetails = currentLanguage === 'bn'
-        ? `শুরুর স্থান: ${pName} | গন্তব্য: ${dName} | যানবাহন: ${getLocalizedText(selectedVehicle)} | BharaDekhi-এর Pathao আনুমানিক ভাড়া: ${fare}`
-        : `Pickup: ${pName} | Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
-
-      openRideAppAndCopy(
-        'pathao://',
-        rideDetails,
-        currentLanguage === 'bn'
-          ? `শুরুর স্থান, গন্তব্য ও ${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
-          : `Copied pickup, destination, and ${selectedVehicle} estimate. Opening Pathao...`
-      );
     }
 
     function formatRideAppLocation(location, key) {
@@ -4927,28 +4961,28 @@
         }
       });
     }
-    document.getElementById('savePlaceForm').addEventListener('submit', handleSavePlace);
-    document.getElementById('savedPlacesList').addEventListener('click', handleSavedPlacesClick);
-    document.getElementById('recentTripsList').addEventListener('click', handleRecentTripsClick);
-    document.getElementById('clearRecentTripsBtn').addEventListener('click', () => {
+    document.getElementById('savePlaceForm')?.addEventListener('submit', handleSavePlace);
+    document.getElementById('savedPlacesList')?.addEventListener('click', handleSavedPlacesClick);
+    document.getElementById('recentTripsList')?.addEventListener('click', handleRecentTripsClick);
+    document.getElementById('clearRecentTripsBtn')?.addEventListener('click', () => {
       const data = readTravelData();
       data.trips = [];
       saveTravelData(data, 'Recent trips cleared.');
     });
-    document.getElementById('chooseUserModeBtn').addEventListener('click', () => chooseRole('user'));
-    document.getElementById('chooseAdminModeBtn').addEventListener('click', () => chooseRole('admin'));
-    document.getElementById('refreshAdminAccountsBtn').addEventListener('click', loadAdminAccounts);
+    document.getElementById('chooseUserModeBtn')?.addEventListener('click', () => chooseRole('user'));
+    document.getElementById('chooseAdminModeBtn')?.addEventListener('click', () => chooseRole('admin'));
+    document.getElementById('refreshAdminAccountsBtn')?.addEventListener('click', loadAdminAccounts);
     document.querySelectorAll('.admin-section-tab').forEach(button => {
       button.addEventListener('click', () => showAdminSection(button.dataset.adminSection));
     });
 
     // Boot
-    window.addEventListener('DOMContentLoaded', async () => {
+    async function bootApp() {
       lucide.createIcons();
-      document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
-      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-      document.getElementById('mrtPassToggle').addEventListener('change', renderMetricsAndFares);
-      document.getElementById('rainModeSelect').addEventListener('change', event => {
+      document.getElementById('languageToggle')?.addEventListener('click', toggleLanguage);
+      document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+      document.getElementById('mrtPassToggle')?.addEventListener('change', renderMetricsAndFares);
+      document.getElementById('rainModeSelect')?.addEventListener('change', event => {
         rainFareMode = event.currentTarget.value;
         updateRainFareState();
       });
@@ -5013,7 +5047,13 @@
         showToast(`Could not restore your session: ${error.message}`);
         showView('auth');
       }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', bootApp);
+    } else {
+      bootApp();
+    }
   </script>
 </body>
 </html>
