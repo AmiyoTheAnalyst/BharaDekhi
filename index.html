@@ -65,6 +65,11 @@
     html[data-theme="dark"] .bg-amber-50 { background-color: #451a03 !important; }
     html[data-theme="dark"] .bg-amber-100 { background-color: #78350f !important; }
     html[data-theme="dark"] .bg-red-50 { background-color: #450a0a !important; }
+    html[data-theme="dark"] .bg-sky-50 { background-color: #082f49 !important; }
+    html[data-theme="dark"] .bg-sky-100 { background-color: #0369a1 !important; }
+    html[data-theme="dark"] .border-sky-200 { border-color: #0369a1 !important; }
+    html[data-theme="dark"] .text-sky-800,
+    html[data-theme="dark"] .text-sky-700 { color: #bae6fd !important; }
     html[data-theme="dark"] .border-slate-100,
     html[data-theme="dark"] .border-slate-200,
     html[data-theme="dark"] .border-slate-300 { border-color: #475569 !important; }
@@ -735,6 +740,138 @@
       border-color: #3b82f6 !important;
       transition: box-shadow 0.2s ease, border-color 0.2s ease;
     }
+
+    /* 1. Header HUD & Micro Switch */
+    .header-hud-pill {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .surge-switch-track {
+      transition: background-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    #surgeToggle:checked + span {
+      transform: translateX(12px);
+      background-color: #fbbf24;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.85);
+    }
+
+    /* 2. Conic Border Beam Animation */
+    @keyframes borderBeamRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .border-beam-card {
+      position: relative;
+      border-radius: 1.25rem !important;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    }
+    .border-beam-active {
+      border-color: transparent !important;
+      box-shadow: 0 0 28px -4px rgba(16, 185, 129, 0.42), 0 10px 25px -5px rgba(0, 0, 0, 0.12) !important;
+      overflow: hidden;
+    }
+    .border-beam-active::before {
+      content: '';
+      position: absolute;
+      inset: -150%;
+      background: conic-gradient(
+        from 0deg at 50% 50%,
+        transparent 0deg,
+        transparent 260deg,
+        rgba(16, 185, 129, 0.25) 290deg,
+        #10b981 330deg,
+        #38bdf8 350deg,
+        #6366f1 360deg
+      );
+      animation: borderBeamRotate 3.6s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .border-beam-active::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: calc(1.25rem - 2px);
+      background: #ffffff;
+      z-index: 1;
+      pointer-events: none;
+    }
+    html[data-theme="dark"] .border-beam-active::after {
+      background: #1e293b;
+    }
+    .border-beam-active > * {
+      position: relative;
+      z-index: 2;
+    }
+    .best-value-badge {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.45);
+    }
+
+    /* 3. Launch Button Particle Burst & Haptic Pop */
+    @keyframes btnHapticPop {
+      0% { transform: scale(1); }
+      30% { transform: scale(0.92); }
+      65% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .btn-haptic-pop {
+      animation: btnHapticPop 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes burstParticleShoot {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      }
+      65% {
+        opacity: 0.95;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.18) rotate(var(--rot));
+      }
+    }
+    .burst-particle {
+      animation: burstParticleShoot 0.75s cubic-bezier(0.12, 0.9, 0.32, 1) forwards;
+    }
+
+    /* 4. MRT Line 6 Interactive Station Light-Path */
+    .mrt-track-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+    .mrt-track-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 9999px;
+    }
+    .mrt-track-scroll::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.45);
+      border-radius: 9999px;
+    }
+    @keyframes mrtTrainGlowPulse {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 20px rgba(16, 185, 129, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 18px rgba(16, 185, 129, 1), 0 0 30px rgba(52, 211, 153, 0.65);
+      }
+    }
+    .mrt-train-beacon {
+      animation: mrtTrainGlowPulse 2s ease-in-out infinite;
+    }
+    .mrt-node-btn {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+    }
+    .mrt-node-btn:hover {
+      transform: scale(1.15);
+    }
+    @keyframes mrtActiveLinePulse {
+      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 4px #10b981); }
+      50% { opacity: 1; filter: drop-shadow(0 0 10px #34d399); }
+    }
+    .mrt-active-rail-pulse {
+      animation: mrtActiveLinePulse 2.5s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -752,39 +889,68 @@
         </a>
       </div>
       
-      <!-- Surge Indicator & Toggle -->
-      <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-        <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
-          <i data-lucide="circle-help" class="h-4 w-4" aria-hidden="true"></i>
+      <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 shadow-sm" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
+          <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span>FAQ</span>
         </a>
-        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" aria-label="Switch to dark mode" aria-pressed="false">
+        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm" aria-label="Switch to dark mode" aria-pressed="false">
           <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span id="themeToggleLabel">Dark mode</span>
         </button>
-        <label class="flex items-center gap-2 text-xs font-medium cursor-pointer bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-          <span>Simulate Surge</span>
-          <input type="checkbox" id="surgeToggle" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer" onchange="toggleSurgeSimulation()">
-        </label>
-        <div class="flex flex-col gap-1 rounded-xl border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs text-sky-800">
-          <label for="rainModeSelect" class="flex items-center gap-2 font-semibold">
-            <span>Rain fare</span>
-            <select id="rainModeSelect" class="rounded-md border border-sky-200 bg-white px-1.5 py-1 text-xs text-slate-700">
-              <option value="auto">Auto (Dhaka weather)</option>
-              <option value="rain">Always apply rain fare</option>
-              <option value="dry">Never apply rain fare</option>
-            </select>
-          </label>
-          <span id="weatherStatus" class="text-[10px]" aria-live="polite">Checking Dhaka weather…</span>
-          <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="text-[10px] underline decoration-dotted">Weather data by Open-Meteo.com</a>
-        </div>
-        <div id="surgeBadge" class="flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200" aria-live="polite">
-          <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="flex flex-col">
-            <span id="surgeStatusText">Non-Peak</span>
-            <span id="dhakaTimeText" class="font-normal">Dhaka time --:--</span>
+
+        <!-- Weather Console Pill with Tooltip Popover -->
+        <div id="headerWeatherPill" class="relative group inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition">
+          <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500">
+            <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
           </span>
+          <label for="rainModeSelect" class="sr-only">Rain fare mode</label>
+          <select id="rainModeSelect" class="bg-transparent text-xs font-bold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 py-0.5 pr-1" title="Select Rain Fare Calculation Mode">
+            <option value="auto">Auto Weather</option>
+            <option value="rain">Force Rain (+30%)</option>
+            <option value="dry">Dry / Normal</option>
+          </select>
+
+          <!-- Interactive Info Tooltip Beacon -->
+          <div class="relative flex items-center">
+            <button type="button" id="weatherInfoBtn" class="text-slate-400 hover:text-sky-500 transition-colors p-0.5 rounded-full focus:outline-none" aria-label="Dhaka weather info and source">
+              <i data-lucide="info" class="w-3 h-3"></i>
+            </button>
+            <!-- Dropdown Info Card on Hover/Focus -->
+            <div id="weatherTooltipCard" class="absolute right-0 top-full mt-2 w-64 p-3 rounded-xl bg-white border border-slate-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-50 pointer-events-auto">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+                <span class="text-[11px] font-bold text-slate-900 uppercase tracking-wider">Dhaka Live Weather</span>
+              </div>
+              <p id="weatherStatus" class="text-xs text-slate-600 leading-snug mb-2" aria-live="polite">Checking Dhaka weather…</p>
+              <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                <span>Central Dhaka (23.81° N)</span>
+                <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">Open-Meteo</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sleek Hardware Micro Switch for Surge -->
+        <label id="headerSurgeCapsule" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm cursor-pointer hover:border-amber-400/80 transition group">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
+          <span>Surge</span>
+          <span class="relative inline-flex items-center w-7 h-4 rounded-full bg-slate-200 transition-colors surge-switch-track">
+            <input type="checkbox" id="surgeToggle" class="sr-only peer" onchange="toggleSurgeSimulation()">
+            <span class="w-3 h-3 rounded-full bg-white shadow-sm transform transition-transform duration-200 translate-x-0.5 peer-checked:translate-x-3.5 peer-checked:bg-amber-400"></span>
+          </span>
+        </label>
+
+        <!-- Dhaka Live Time & Peak Radar Badge -->
+        <div id="surgeBadge" class="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm transition-all duration-300" aria-live="polite">
+          <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+          <div class="flex items-center gap-1.5 leading-none">
+            <span id="surgeStatusText" class="font-bold">Non-Peak</span>
+            <span class="opacity-40">·</span>
+            <span id="dhakaTimeText" class="font-normal opacity-90">Dhaka --:--</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1248,9 +1414,51 @@
           <span class="text-xs text-slate-500 font-medium block">Est. Travel Time</span>
           <span id="routeDuration" class="text-lg font-bold text-slate-900">32 mins</span>
         </div>
-        <div class="col-span-2 sm:col-span-1 bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col justify-center">
-          <span class="text-xs text-slate-500 font-medium block">Surge Multiplier</span>
-          <span id="surgeMultiplierText" class="text-lg font-bold text-emerald-600">1.0x (Off-Peak)</span>
+        <div class="col-span-2 sm:col-span-1 bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col items-center justify-between relative overflow-hidden shadow-sm">
+          <div class="w-full flex items-center justify-between">
+            <span class="text-xs text-slate-500 font-semibold tracking-wide flex items-center gap-1.5">
+              <i data-lucide="gauge" class="w-3.5 h-3.5 text-blue-500"></i>
+              <span>Surge Meter</span>
+            </span>
+            <span id="surgeGaugeBadge" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider bg-emerald-100 text-emerald-800 transition-colors">
+              NORMAL
+            </span>
+          </div>
+
+          <!-- SVG Tachometer Semi-Circle Gauge -->
+          <div class="relative w-36 h-20 mt-1 flex items-center justify-center">
+            <svg class="w-36 h-20 overflow-visible" viewBox="0 0 140 76">
+              <defs>
+                <linearGradient id="surgeGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="50%" stop-color="#f59e0b" />
+                  <stop offset="100%" stop-color="#f43f5e" />
+                </linearGradient>
+              </defs>
+              <!-- Background Arc (180 deg) -->
+              <path d="M 15 70 A 55 55 0 0 1 125 70" fill="none" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round" />
+              <!-- Tick Marks -->
+              <line x1="15" y1="70" x2="23" y2="70" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="70" y1="15" x2="70" y2="23" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="125" y1="70" x2="117" y2="70" stroke="#94a3b8" stroke-width="1.5" />
+              <!-- Dynamic Colored Arc -->
+              <path id="surgeGaugeArc" d="M 15 70 A 55 55 0 0 1 125 70" fill="none" stroke="url(#surgeGaugeGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="172.79" stroke-dashoffset="172.79" style="transition: stroke-dashoffset 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);" />
+              <!-- Tachometer Rotating Pointer Needle -->
+              <g id="surgeGaugeNeedleGroup" transform="translate(70, 70) rotate(-90)" style="transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                <circle cx="0" cy="0" r="5" fill="#3b82f6" />
+                <path d="M -2.5 0 L 0 -54 L 2.5 0 Z" fill="#ef4444" />
+                <circle cx="0" cy="0" r="2" fill="#ffffff" />
+              </g>
+            </svg>
+            <!-- Center Readout -->
+            <div class="absolute bottom-0 text-center flex flex-col items-center">
+              <span id="surgeMultiplierValue" class="text-xl font-black text-slate-900 tracking-tight leading-none">1.0x</span>
+            </div>
+          </div>
+
+          <span id="surgeMultiplierText" class="mt-1 text-[11px] text-center font-medium text-slate-500 line-clamp-1">
+            Off-Peak (1.0x)
+          </span>
         </div>
         </div>
       </div>
@@ -1326,6 +1534,53 @@
             <input id="mrtPassToggle" type="checkbox" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
             <span id="mrtPassLabel">MRT Pass (10% off)</span>
           </label>
+        </div>
+
+        <!-- MRT Line 6 Interactive Station Light-Path -->
+        <div id="mrtStationLightPathContainer" class="mt-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-emerald-50/90 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs shadow-sm">
+                M6
+              </span>
+              <span class="font-bold text-sm text-slate-900">MRT Line 6 Station Light-Path</span>
+              <span id="mrtLightPathStationCount" class="text-[11px] font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                16 Stations
+              </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-300 animate-pulse"></span> <span id="mrtLegendBoard">Boarding</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-rose-300 animate-pulse"></span> <span id="mrtLegendExit">Exit</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-300"></span> <span id="mrtLegendOther">Waypoints</span></span>
+            </div>
+          </div>
+
+          <!-- Horizontal Station Light-Path Track -->
+          <div class="relative overflow-x-auto py-5 px-3 mrt-track-scroll select-none" id="mrtLightPathScrollWrapper">
+            <div id="mrtLightPathTrack" class="relative flex items-center min-w-[840px] h-16">
+              <!-- Viaduct Base Rail Track -->
+              <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-2.5 rounded-full bg-slate-200"></div>
+              <!-- Glowing Active Illuminated Segment -->
+              <div id="mrtActiveRail" class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 shadow-[0_0_14px_#10b981] mrt-active-rail-pulse transition-all duration-700 ease-out" style="left: 0%; width: 0%;"></div>
+              <!-- Cruising Animated Train Beacon -->
+              <div id="mrtCruisingTrain" class="absolute top-1/2 -translate-y-1/2 -mt-4 z-20 transition-all duration-700 ease-out flex items-center justify-center pointer-events-none" style="left: 0%;">
+                <div class="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-lg text-[10px] font-black tracking-wider mrt-train-beacon">
+                  <span>🚅</span>
+                  <span>METRO</span>
+                </div>
+              </div>
+              <!-- 16 Interactive Station Nodes -->
+              <div id="mrtNodesContainer" class="relative w-full flex items-center justify-between z-10 px-6">
+                <!-- Dynamically populated station nodes -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Station inspection tooltip / quick details bar -->
+          <div id="mrtStationDetailsBar" class="mt-2 text-xs flex items-center justify-between text-slate-600 pt-2 border-t border-emerald-100">
+            <span id="mrtStationStatusTip">Tap any station along the line to inspect</span>
+            <span class="font-medium text-emerald-700">Uttara North ↔ Motijheel</span>
+          </div>
         </div>
         <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <article class="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -1411,7 +1666,7 @@
               <span id="uberFare" class="text-2xl font-black text-slate-900">৳145 - ৳175</span>
             </div>
           </div>
-          <button onclick="handleUberClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-black text-white hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-sm">
+          <button onclick="handleUberClick(event)" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-black text-white hover:bg-slate-800 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
             <i data-lucide="external-link" class="w-4 h-4"></i> Open in Uber
           </button>
         </div>
@@ -1432,7 +1687,7 @@
               <span id="pathaoFare" class="text-2xl font-black text-slate-900">৳140 - ৳170</span>
             </div>
           </div>
-          <button onclick="handlePathaoClick()" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-sm">
+          <button onclick="handlePathaoClick(event)" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
             <i data-lucide="external-link" class="w-4 h-4"></i> Open in Pathao
           </button>
         </div>
@@ -1872,6 +2127,20 @@
       'Dhaka University': 'ঢাকা বিশ্ববিদ্যালয়',
       'Bangladesh Secretariat': 'বাংলাদেশ সচিবালয়',
       'Motijheel': 'মতিঝিল',
+      'MRT Line 6 Station Light-Path': 'এমআরটি লাইন ৬ স্টেশন লাইট-পাথ',
+      '16 Stations': '১৬টি স্টেশন',
+      'Boarding': 'ওঠার স্টেশন',
+      'Exit': 'নামার স্টেশন',
+      'Waypoints': 'যাত্রাপথের স্টেশন',
+      'Surge Meter': 'সার্জ মিটার',
+      'NORMAL': 'স্বাভাবিক',
+      'MODERATE': 'মাঝারি',
+      'HIGH SURGE': 'উচ্চ সার্জ',
+      '⭐ Best Value': '⭐ সেরা সাশ্রয়ী',
+      'Surge': 'সার্জ',
+      'Auto Weather': 'স্বয়ংক্রিয় আবহাওয়া',
+      'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
+      'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। Open-Meteo মধ্য ঢাকার বর্তমান আবহাওয়ার তথ্য থেকে বৃষ্টি স্বয়ংক্রিয়ভাবে অনুমান করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% অতিরিক্ত যোগ করে, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। রিকশার ভাড়া ৳৩০ + প্রতি কিমি ৳২৫; বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি; ভাড়া পরবর্তী ৳১০-এ বাড়িয়ে ধরা হয়। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Calculating Road Distance via OSRM...': 'OSRM দিয়ে সড়ক দূরত্ব হিসাব করা হচ্ছে...',
@@ -3152,22 +3421,41 @@
 
     function renderDhakaWeatherStatus() {
       const status = document.getElementById('weatherStatus');
-      if (rainFareMode === 'rain') {
-        status.textContent = getLocalizedText('Rain fare is on (manual override).');
-      } else if (rainFareMode === 'dry') {
-        status.textContent = getLocalizedText('Rain fare is off (manual override).');
-      } else if (dhakaWeatherStatus === 'checking') {
-        status.textContent = getLocalizedText('Checking Dhaka weather…');
-      } else if (dhakaWeatherStatus === 'unavailable') {
-        status.textContent = getLocalizedText(
-          dhakaRainDetected === null
-            ? 'Dhaka weather unavailable; rain adjustment is off in automatic mode.'
-            : 'Dhaka weather unavailable; keeping the last detected condition.'
-        );
-      } else {
-        status.textContent = getLocalizedText(dhakaRainDetected
-          ? 'Dhaka weather estimate: Rain indicated (automatic)'
-          : 'Dhaka weather estimate: No rain indicated (automatic)');
+      const iconContainer = document.getElementById('weatherIconContainer');
+      const isRainingNow = isHeavyRain || rainFareMode === 'rain' || (rainFareMode === 'auto' && dhakaRainDetected === true);
+
+      if (iconContainer) {
+        if (isRainingNow) {
+          iconContainer.className = 'flex items-center justify-center text-sky-500 dark:text-sky-400';
+          iconContainer.innerHTML = '<i data-lucide="cloud-rain" class="w-3.5 h-3.5 animate-bounce" aria-hidden="true"></i>';
+        } else if (dhakaWeatherStatus === 'checking') {
+          iconContainer.className = 'flex items-center justify-center text-slate-400';
+          iconContainer.innerHTML = '<i data-lucide="cloud-sun" class="w-3.5 h-3.5 animate-pulse" aria-hidden="true"></i>';
+        } else {
+          iconContainer.className = 'flex items-center justify-center text-amber-500 dark:text-amber-400';
+          iconContainer.innerHTML = '<i data-lucide="sun" class="w-3.5 h-3.5" aria-hidden="true"></i>';
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      if (status) {
+        if (rainFareMode === 'rain') {
+          status.textContent = getLocalizedText('Rain fare is on (manual override).');
+        } else if (rainFareMode === 'dry') {
+          status.textContent = getLocalizedText('Rain fare is off (manual override).');
+        } else if (dhakaWeatherStatus === 'checking') {
+          status.textContent = getLocalizedText('Checking Dhaka weather…');
+        } else if (dhakaWeatherStatus === 'unavailable') {
+          status.textContent = getLocalizedText(
+            dhakaRainDetected === null
+              ? 'Dhaka weather unavailable; rain adjustment is off in automatic mode.'
+              : 'Dhaka weather unavailable; keeping the last detected condition.'
+          );
+        } else {
+          status.textContent = getLocalizedText(dhakaRainDetected
+            ? 'Dhaka weather estimate: Rain indicated (automatic)'
+            : 'Dhaka weather estimate: No rain indicated (automatic)');
+        }
       }
     }
 
@@ -3738,6 +4026,99 @@
       });
     }
 
+    function renderMrtStationLightPath(pickupStation, destinationStation, firstStationIndex, lastStationIndex) {
+      const container = document.getElementById('mrtNodesContainer');
+      const activeRail = document.getElementById('mrtActiveRail');
+      const train = document.getElementById('mrtCruisingTrain');
+      const countBadge = document.getElementById('mrtLightPathStationCount');
+      const statusTip = document.getElementById('mrtStationStatusTip');
+      if (!container || !activeRail) return;
+
+      const totalStations = MRT_LINE_6_STATIONS.length;
+      const stationIntervals = Math.abs(lastStationIndex - firstStationIndex);
+
+      if (countBadge) {
+        countBadge.textContent = stationIntervals > 0
+          ? (currentLanguage === 'bn' ? `${formatLocalizedNumber(stationIntervals)} স্টেশন বিরতি · ~${formatLocalizedNumber(stationIntervals * 2)} মি.` : `${stationIntervals} stations · ~${stationIntervals * 2} mins in transit`)
+          : (currentLanguage === 'bn' ? '১৬টি স্টেশন (লাইন ৬)' : '16 Stations (Line 6)');
+      }
+
+      const startPct = (firstStationIndex / (totalStations - 1)) * 100;
+      const endPct = (lastStationIndex / (totalStations - 1)) * 100;
+      const widthPct = Math.max(0, endPct - startPct);
+
+      activeRail.style.left = `${startPct}%`;
+      activeRail.style.width = stationIntervals > 0 ? `${widthPct}%` : '0%';
+
+      if (train) {
+        if (stationIntervals > 0) {
+          train.style.display = 'flex';
+          train.style.left = `calc(${startPct}% + ${widthPct * 0.5}% - 32px)`;
+        } else {
+          train.style.display = 'none';
+        }
+      }
+
+      container.innerHTML = '';
+      MRT_LINE_6_STATIONS.forEach((st, idx) => {
+        const isBoarding = idx === pickupStation.index;
+        const isExit = idx === destinationStation.index;
+        const isSegment = idx >= firstStationIndex && idx <= lastStationIndex && stationIntervals > 0;
+
+        const nodeWrapper = document.createElement('button');
+        nodeWrapper.type = 'button';
+        nodeWrapper.className = 'mrt-node-btn relative flex flex-col items-center group focus:outline-none cursor-pointer';
+        nodeWrapper.setAttribute('aria-label', `${st.name} Station`);
+
+        let nodeDotClass = 'w-4 h-4 rounded-full border-2 transition-all duration-300 ';
+        if (isBoarding && isExit) {
+          nodeDotClass += 'bg-emerald-500 border-white ring-4 ring-emerald-400 shadow-[0_0_12px_#10b981] scale-125 z-30 animate-pulse';
+        } else if (isBoarding) {
+          nodeDotClass += 'bg-emerald-500 border-white ring-4 ring-emerald-400 shadow-[0_0_12px_#10b981] scale-125 z-30 animate-pulse';
+        } else if (isExit) {
+          nodeDotClass += 'bg-rose-500 border-white ring-4 ring-rose-400 shadow-[0_0_12px_#f43f5e] scale-125 z-30 animate-pulse';
+        } else if (isSegment) {
+          nodeDotClass += 'bg-emerald-400 border-white ring-2 ring-emerald-200 z-20';
+        } else {
+          nodeDotClass += 'bg-slate-300 border-slate-100 text-transparent opacity-60 hover:opacity-100';
+        }
+
+        const localizedName = currentLanguage === 'bn' ? getLocalizedText(st.name) : st.name;
+        let badgeTag = '';
+        if (isBoarding && !isExit) {
+          badgeTag = `<span class="absolute -top-7 px-2 py-0.5 rounded text-[9px] font-black tracking-wider bg-emerald-600 text-white shadow-md whitespace-nowrap">${currentLanguage === 'bn' ? '🟢 যাত্রা শুরু' : '🟢 BOARD'}</span>`;
+        } else if (isExit && !isBoarding) {
+          badgeTag = `<span class="absolute -top-7 px-2 py-0.5 rounded text-[9px] font-black tracking-wider bg-rose-600 text-white shadow-md whitespace-nowrap">${currentLanguage === 'bn' ? '🏁 নামার স্থান' : '🏁 EXIT'}</span>`;
+        } else if (isBoarding && isExit) {
+          badgeTag = `<span class="absolute -top-7 px-2 py-0.5 rounded text-[9px] font-black tracking-wider bg-blue-600 text-white shadow-md whitespace-nowrap">${currentLanguage === 'bn' ? '📍 উভয় একই স্টেশন' : '📍 SAME STATION'}</span>`;
+        }
+
+        nodeWrapper.innerHTML = `
+          <div class="relative flex flex-col items-center">
+            ${badgeTag}
+            <div class="${nodeDotClass}"></div>
+            <span class="mt-2 text-[10px] font-bold text-center leading-tight whitespace-nowrap transition-colors ${isBoarding || isExit ? 'text-slate-900 font-extrabold scale-105' : isSegment ? 'text-emerald-700 font-bold' : 'text-slate-400'}">
+              ${localizedName}
+            </span>
+          </div>
+        `;
+
+        nodeWrapper.addEventListener('click', () => {
+          if (statusTip) {
+            statusTip.innerHTML = `<strong>${localizedName}</strong> · ${currentLanguage === 'bn' ? 'উত্তরা উত্তর থেকে ভাড়া' : 'Fare from Uttara North'}: ৳${st.fareFromUttara} · ${isBoarding ? (currentLanguage === 'bn' ? 'আপনার ওঠার স্টেশন' : 'Your boarding station') : isExit ? (currentLanguage === 'bn' ? 'আপনার নামার স্টেশন' : 'Your exit station') : (currentLanguage === 'bn' ? 'লাইন ৬ স্টেশন' : 'Line 6 Station')}`;
+          }
+        });
+
+        container.appendChild(nodeWrapper);
+      });
+
+      const scrollWrapper = document.getElementById('mrtLightPathScrollWrapper');
+      if (scrollWrapper && stationIntervals > 0) {
+        const scrollTarget = (startPct / 100) * (container.scrollWidth - scrollWrapper.clientWidth);
+        scrollWrapper.scrollTo({ left: Math.max(0, scrollTarget - 40), behavior: 'smooth' });
+      }
+    }
+
     function renderMrtEstimate(isPeak) {
       document.getElementById('mrtEstimatorHeading').textContent = getLocalizedText('MRT Line 6 hybrid estimate');
       document.getElementById('mrtPassLabel').textContent = getLocalizedText('MRT Pass (10% off)');
@@ -3760,6 +4141,9 @@
       const firstStationIndex = Math.min(pickupStation.index, destinationStation.index);
       const lastStationIndex = Math.max(pickupStation.index, destinationStation.index);
       const stationIntervals = lastStationIndex - firstStationIndex;
+
+      // Update interactive MRT station light-path
+      renderMrtStationLightPath(pickupStation, destinationStation, firstStationIndex, lastStationIndex);
       const directFare = getVehicleFareEstimate(selectedVehicle, isPeak);
       const directDuration = getEstimatedRoadDuration(selectedVehicle, isPeak);
       document.getElementById('directRideMode').textContent = getLocalizedText(selectedVehicle);
@@ -3909,22 +4293,47 @@
 
       estimates.forEach(({ vehicle, minimum, maximum, duration }) => {
         const id = `comparison${vehicle}`;
+        const card = document.getElementById(id);
+        const isCheapest = minimum === lowestFare;
+        const isSelected = vehicle === selectedVehicle;
+
+        if (card) {
+          card.classList.add('border-beam-card');
+          card.classList.toggle('border-beam-active', isCheapest);
+          if (!isCheapest) {
+            card.classList.toggle('border-blue-500', isSelected);
+            card.classList.toggle('ring-2', isSelected);
+            card.classList.toggle('ring-blue-100', isSelected);
+          } else {
+            card.classList.remove('border-blue-500', 'ring-2', 'ring-blue-100');
+          }
+        }
+
         document.getElementById(`${id}Fare`).innerText =
           `${formatLocalizedFare(minimum)} - ${formatLocalizedFare(maximum)}`;
         document.getElementById(`${id}Duration`).innerText = currentLanguage === 'bn'
           ? `প্রায় ${formatLocalizedNumber(duration)} মিনিট`
           : `About ${formatLocalizedNumber(duration)} mins`;
-        document.getElementById(`${id}Cheapest`).classList.toggle('hidden', minimum !== lowestFare);
+
+        const cheapestBadge = document.getElementById(`${id}Cheapest`);
+        if (cheapestBadge) {
+          cheapestBadge.classList.toggle('hidden', !isCheapest);
+          if (isCheapest) {
+            cheapestBadge.innerText = currentLanguage === 'bn' ? '⭐ সেরা সাশ্রয়ী' : '⭐ Best Value';
+            cheapestBadge.className = 'rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white best-value-badge animate-pulse';
+          }
+        }
+
         document.getElementById(`${id}Fastest`).classList.toggle('hidden', duration !== shortestDuration);
-        document.getElementById(`${id}Selected`).classList.toggle('hidden', vehicle !== selectedVehicle);
-        document.getElementById(`${id}`).classList.toggle('border-blue-500', vehicle === selectedVehicle);
-        document.getElementById(`${id}`).classList.toggle('ring-2', vehicle === selectedVehicle);
-        document.getElementById(`${id}`).classList.toggle('ring-blue-100', vehicle === selectedVehicle);
+        document.getElementById(`${id}Selected`).classList.toggle('hidden', !isSelected);
+
         const selectButton = document.getElementById(`select${vehicle}Vehicle`);
-        selectButton.setAttribute('aria-pressed', String(vehicle === selectedVehicle));
-        const buttonLabel = vehicle === selectedVehicle ? `Selected ${vehicle}` : `Choose ${vehicle}`;
-        selectButton.innerText = getLocalizedText(buttonLabel);
-        selectButton.className = `mt-4 w-full rounded-lg px-3 py-2 text-sm font-semibold transition ${vehicle === selectedVehicle ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`;
+        if (selectButton) {
+          selectButton.setAttribute('aria-pressed', String(isSelected));
+          const buttonLabel = isSelected ? `Selected ${vehicle}` : `Choose ${vehicle}`;
+          selectButton.innerText = getLocalizedText(buttonLabel);
+          selectButton.className = `mt-4 w-full rounded-lg px-3 py-2 text-sm font-semibold transition ${isSelected ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`;
+        }
       });
     }
 
@@ -3942,29 +4351,68 @@
       const dhakaTimeText = document.getElementById('dhakaTimeText');
       const badgeDot = document.getElementById('surgeStatusDot');
       const multText = document.getElementById('surgeMultiplierText');
-      dhakaTimeText.innerText = currentLanguage === 'bn'
-        ? `ঢাকার সময় ${dhakaTime.formattedTime}`
-        : `Dhaka time ${dhakaTime.formattedTime}`;
+
+      if (dhakaTimeText) {
+        dhakaTimeText.innerText = currentLanguage === 'bn'
+          ? `ঢাকার সময় ${dhakaTime.formattedTime}`
+          : `Dhaka ${dhakaTime.formattedTime}`;
+      }
 
       const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
-      const multiplierLabel = `${formatLocalizedNumber(minimumMultiplier, 3)}x - ${formatLocalizedNumber(maximumMultiplier, 3)}x (${getLocalizedText(isPeak ? 'Peak estimate' : 'Non-Peak estimate')}${isHeavyRain ? ` + ${getLocalizedText('Heavy Rain uplift')}` : ''}${isPeak ? ` · ${getLocalizedText('Rickshaw peak adjustment: +৳10 to upper end')}` : ''})`;
-      if (isPeak) {
-        badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200";
-        badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
-        badgeText.innerText = getLocalizedText(isSimulatedSurge ? 'Simulated Peak' : dhakaTime.peakPeriod);
-      } else {
-        badgeText.innerText = getLocalizedText('Non-Peak');
+      const multiplierLabel = `${formatLocalizedNumber(minimumMultiplier, 2)}x - ${formatLocalizedNumber(maximumMultiplier, 2)}x (${getLocalizedText(isPeak ? 'Peak estimate' : 'Non-Peak estimate')}${isHeavyRain ? ` + ${getLocalizedText('Heavy Rain uplift')}` : ''})`;
+
+      if (badge && badgeDot && badgeText) {
+        if (isPeak) {
+          badge.className = "inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200 shadow-sm transition-all duration-300";
+          badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse";
+          badgeText.innerText = getLocalizedText(isSimulatedSurge ? 'Simulated Peak' : dhakaTime.peakPeriod);
+        } else if (isHeavyRain) {
+          badge.className = "inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 shadow-sm transition-all duration-300";
+          badgeDot.className = "w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_8px_#0284c7] animate-pulse";
+          badgeText.innerText = `${getLocalizedText('Non-Peak')} · ${getLocalizedText('Heavy Rain')}`;
+        } else {
+          badge.className = "inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm transition-all duration-300";
+          badgeDot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse";
+          badgeText.innerText = getLocalizedText('Non-Peak');
+        }
       }
-      if (isHeavyRain) badgeText.innerText += ` · ${getLocalizedText('Heavy Rain')}`;
-      if (!isPeak && isHeavyRain) {
-        badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200";
-        badgeDot.className = "w-2 h-2 rounded-full bg-sky-500 animate-pulse";
-      } else if (!isPeak) {
-        badge.className = "flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
-        badgeDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+
+      // Update Animated Surge Multiplier Radial Gauge / Tachometer
+      const avgMultiplier = (minimumMultiplier + maximumMultiplier) / 2;
+      const ratio = Math.max(0, Math.min(1, (avgMultiplier - 1.0) / 1.2));
+      const needleAngle = -90 + (ratio * 180);
+      const arcTotalLength = 172.79;
+      const arcOffset = arcTotalLength * (1 - ratio);
+
+      const needleEl = document.getElementById('surgeGaugeNeedleGroup');
+      if (needleEl) {
+        needleEl.setAttribute('transform', `translate(70, 70) rotate(${needleAngle.toFixed(1)})`);
       }
-      multText.innerText = multiplierLabel;
-      multText.className = `text-lg font-bold ${isPeak ? 'text-rose-600' : isHeavyRain ? 'text-sky-600' : 'text-emerald-600'}`;
+      const arcEl = document.getElementById('surgeGaugeArc');
+      if (arcEl) {
+        arcEl.style.strokeDashoffset = `${arcOffset.toFixed(2)}px`;
+      }
+      const valEl = document.getElementById('surgeMultiplierValue');
+      if (valEl) {
+        valEl.innerText = `${formatLocalizedNumber(avgMultiplier, 2)}x`;
+      }
+      const gaugeBadge = document.getElementById('surgeGaugeBadge');
+      if (gaugeBadge) {
+        if (ratio < 0.2) {
+          gaugeBadge.innerText = currentLanguage === 'bn' ? 'স্বাভাবিক' : 'NORMAL';
+          gaugeBadge.className = 'text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider bg-emerald-100 text-emerald-800 transition-colors';
+        } else if (ratio < 0.6) {
+          gaugeBadge.innerText = currentLanguage === 'bn' ? 'মাঝারি' : 'MODERATE';
+          gaugeBadge.className = 'text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider bg-amber-100 text-amber-800 transition-colors';
+        } else {
+          gaugeBadge.innerText = currentLanguage === 'bn' ? 'উচ্চ সার্জ' : 'HIGH SURGE';
+          gaugeBadge.className = 'text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider bg-rose-100 text-rose-800 animate-pulse transition-colors';
+        }
+      }
+
+      if (multText) {
+        multText.innerText = multiplierLabel;
+      }
 
       renderVehicleComparison(isPeak);
       const fare = getVehicleFareEstimate(selectedVehicle, isPeak);
@@ -3973,6 +4421,61 @@
       document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.minimum)} - ${formatLocalizedFare(fare.maximum)}`;
       document.getElementById('pathaoFare').innerText = `${formatLocalizedFare(fare.pathaoMin)} - ${formatLocalizedFare(fare.pathaoMax)}`;
       renderMrtEstimate(isPeak);
+    }
+
+    // Launch Button Particle Burst Animation
+    function triggerLaunchParticleBurst(event, appType) {
+      const btn = event?.currentTarget || (appType === 'uber' ? document.querySelector('[onclick*="handleUberClick"]') : document.querySelector('[onclick*="handlePathaoClick"]'));
+      if (btn) {
+        btn.classList.add('btn-haptic-pop');
+        setTimeout(() => btn.classList.remove('btn-haptic-pop'), 400);
+      }
+      const rect = btn ? btn.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
+      const originX = event?.clientX ?? (rect.left + rect.width / 2);
+      const originY = event?.clientY ?? (rect.top + rect.height / 2);
+
+      const colors = appType === 'uber'
+        ? ['#000000', '#ffffff', '#38bdf8', '#60a5fa', '#a855f7', '#64748b']
+        : ['#dc2626', '#ef4444', '#f97316', '#fbbf24', '#ffffff', '#b91c1c'];
+
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;';
+      document.body.appendChild(container);
+
+      const particleCount = 28;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'burst-particle';
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.45;
+        const distance = 40 + Math.random() * 85;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        const size = 5 + Math.random() * 7;
+        const rot = Math.random() * 360;
+
+        particle.style.cssText = `
+          position: fixed;
+          left: ${originX}px;
+          top: ${originY}px;
+          width: ${size}px;
+          height: ${size}px;
+          background-color: ${color};
+          border-radius: ${Math.random() > 0.4 ? '50%' : '3px'};
+          pointer-events: none;
+          z-index: 99999;
+          transform: translate(-50%, -50%);
+          --dx: ${dx.toFixed(1)}px;
+          --dy: ${dy.toFixed(1)}px;
+          --rot: ${rot.toFixed(1)}deg;
+          box-shadow: 0 0 10px ${color};
+        `;
+        container.appendChild(particle);
+      }
+
+      setTimeout(() => {
+        container.remove();
+      }, 850);
     }
 
     // 6. Action Button Handlers
@@ -3992,7 +4495,8 @@
         });
     }
 
-    function handleUberClick() {
+    function handleUberClick(event) {
+      triggerLaunchParticleBurst(event, 'uber');
       const pKey = document.getElementById('pickupSelect').value;
       const dKey = document.getElementById('dropoffSelect').value;
       const pLoc = getLocationForKey(pKey);
@@ -4009,7 +4513,27 @@
       window.open(uberLink, '_blank');
     }
 
-    function handlePathaoClick() {
+    function handlePathaoClick(event) {
+      triggerLaunchParticleBurst(event, 'pathao');
+      const dKey = document.getElementById('dropoffSelect').value;
+      const pKey = document.getElementById('pickupSelect').value;
+      const pLoc = getLocationForKey(pKey);
+      const dLoc = getLocationForKey(dKey);
+      if (!pLoc || !dLoc) return;
+      const pName = formatRideAppLocation(pLoc, pKey);
+      const dName = formatRideAppLocation(dLoc, dKey);
+      const fare = document.getElementById('pathaoFare').innerText;
+      const rideDetails = currentLanguage === 'bn'
+        ? `শুরুর স্থান: ${pName} | গন্তব্য: ${dName} | যানবাহন: ${getLocalizedText(selectedVehicle)} | BharaDekhi-এর Pathao আনুমানিক ভাড়া: ${fare}`
+        : `Pickup: ${pName} | Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
+
+      openRideAppAndCopy(
+        'pathao://',
+        rideDetails,
+        currentLanguage === 'bn'
+          ? `শুরুর স্থান, গন্তব্য ও ${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
+          : `Copied pickup, destination, and ${selectedVehicle} estimate. Opening Pathao...`
+      );
       const dKey = document.getElementById('dropoffSelect').value;
       const pKey = document.getElementById('pickupSelect').value;
       const pLoc = getLocationForKey(pKey);
