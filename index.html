@@ -934,31 +934,97 @@
       0%, 70% { left: -60%; }
       100% { left: 140%; }
     }
+
+    /* Scroll-reveal transitions */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal-on-scroll.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal-on-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
+    /* Staggered appearance for Fare Comparison Cards */
+    .fare-stagger-card {
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .fare-stagger-1 {
+      transition-delay: 40ms;
+    }
+    .fare-stagger-2 {
+      transition-delay: 110ms;
+    }
+    .fare-stagger-3 {
+      transition-delay: 180ms;
+    }
+
+    @keyframes fareCardUpdatePop {
+      0% { opacity: 0.7; transform: translateY(4px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .fare-card-updated {
+      animation: fareCardUpdatePop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Gentle hover elevation on interactive cards */
+    .interactive-elevate {
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+      will-change: transform, box-shadow;
+    }
+    .interactive-elevate:hover {
+      transform: translateY(-2.5px);
+      box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+    }
+    html[data-theme="dark"] .interactive-elevate:hover {
+      box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(56, 189, 248, 0.1);
+    }
+
+    /* Smooth transitions between login and sign-up forms */
+    .auth-form-wrap {
+      position: relative;
+    }
+    .auth-form-fade {
+      animation: authFormSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes authFormSlideIn {
+      0% { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
 
   <!-- Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
+  <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <a href="./index.html" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
-          <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-11 w-11 shrink-0">
+          <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
           <span class="block">
-            <h1 class="text-lg font-bold leading-tight text-slate-900">Bhara<span class="text-blue-700">Dekhi</span></h1>
-            <span class="block text-[9px] font-bold tracking-[0.13em] text-slate-500">Route Planner &amp; Fare Estimator</span>
+            <h1 class="text-base sm:text-lg font-bold leading-tight text-slate-900 dark:text-white">Bhara<span class="text-blue-700 dark:text-blue-400">Dekhi</span></h1>
+            <span class="block text-[9px] font-bold tracking-[0.13em] text-slate-500 dark:text-slate-400">Route Planner &amp; Fare Estimator</span>
           </span>
         </a>
       </div>
       
       <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
-      <div class="flex flex-wrap items-center justify-end gap-2">
-        <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 shadow-sm" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
+      <div class="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
+        <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm shrink-0 whitespace-nowrap" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
           <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span>FAQ</span>
         </a>
-        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch to dark mode" aria-pressed="false">
+        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Switch to dark mode" aria-pressed="false">
           <span id="themeToggleIconContainer" class="flex items-center justify-center">
             <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
           </span>
@@ -966,7 +1032,7 @@
         </button>
 
         <!-- Weather Console Pill with Tooltip Popover -->
-        <div id="headerWeatherPill" class="relative group inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white dark:border-slate-700/80 dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500">
+        <div id="headerWeatherPill" class="relative group inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0">
           <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500">
             <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
           </span>
@@ -982,7 +1048,6 @@
             <button type="button" id="weatherInfoBtn" class="text-slate-400 hover:text-sky-500 transition-colors p-0.5 rounded-full focus:outline-none" aria-label="Dhaka weather info and source">
               <i data-lucide="info" class="w-3 h-3"></i>
             </button>
-            <!-- Dropdown Info Card on Hover/Focus -->
             <div id="weatherTooltipCard" class="absolute right-0 top-full mt-2 w-72 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-700 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-50 pointer-events-auto">
               <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-2">
@@ -1001,17 +1066,17 @@
         </div>
 
         <!-- Sleek Hardware Micro Switch for Surge -->
-        <label id="headerSurgeCapsule" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white dark:border-slate-700/80 dark:bg-slate-800/90 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer hover:border-amber-400/80 transition group">
+        <label id="headerSurgeCapsule" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white dark:border-slate-700/80 dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer hover:border-amber-400/80 transition group shrink-0 whitespace-nowrap">
           <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
           <span>Surge</span>
-          <span class="relative inline-flex items-center w-7 h-4 rounded-full bg-slate-200 transition-colors surge-switch-track">
+          <span class="relative inline-flex items-center w-7 h-4 rounded-full bg-slate-200 dark:bg-slate-700 transition-colors surge-switch-track">
             <input type="checkbox" id="surgeToggle" class="sr-only peer" onchange="toggleSurgeSimulation()">
             <span class="w-3 h-3 rounded-full bg-white shadow-sm transform transition-transform duration-200 translate-x-0.5 peer-checked:translate-x-3.5 peer-checked:bg-amber-400"></span>
           </span>
         </label>
 
         <!-- Dhaka Live Time & Peak Radar Badge -->
-        <div id="surgeBadge" class="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm transition-all duration-300" aria-live="polite">
+        <div id="surgeBadge" class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/70 shadow-sm transition-all duration-300 shrink-0 whitespace-nowrap" aria-live="polite">
           <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
           <div class="flex items-center gap-1.5 leading-none">
             <span id="surgeStatusText" class="font-bold">Non-Peak</span>
@@ -1034,7 +1099,7 @@
   </nav>
 
   <!-- Auth Landing -->
-  <section id="authView" class="max-w-5xl mx-auto px-4 pt-2 pb-2">
+  <section id="authView" class="max-w-5xl mx-auto px-4 pt-2 pb-2 reveal-on-scroll revealed">
     <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       <div class="grid grid-cols-1 lg:grid-cols-12 min-h-0">
         <!-- Left: Animated Futuristic Dhaka Transit Showcase (7 cols on lg) -->
@@ -1059,7 +1124,7 @@
 
           <!-- Middle: Animated Dhaka Transit Node Constellation Map SVG -->
           <div class="relative z-10 my-2.5 py-0.5">
-            <div class="auth-constellation-card rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md shadow-xl">
+            <div class="auth-constellation-card interactive-elevate rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md shadow-xl">
               <div class="flex items-center justify-between mb-2 text-xs font-semibold text-blue-200/90">
                 <span class="flex items-center gap-1.5">
                   <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Transit Network
@@ -1174,37 +1239,39 @@
             <button type="button" data-auth-tab="signup" class="auth-tab relative z-10 rounded-lg py-1.5 text-xs font-bold transition-colors duration-200 text-slate-600 dark:text-slate-400">Sign Up</button>
           </div>
 
-          <form id="loginForm" class="auth-form space-y-2.5">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
-              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Login</button>
-          </form>
+          <div class="auth-form-wrap">
+            <form id="loginForm" class="auth-form space-y-2.5 auth-form-fade">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
+                <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
+                <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              </div>
+              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Login</button>
+            </form>
 
-          <form id="signupForm" class="auth-form hidden space-y-2.5">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Full Name</label>
-              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
-              <input type="password" placeholder="Create password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Confirm Password</label>
-              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
-            </div>
-            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Create Account</button>
-          </form>
+            <form id="signupForm" class="auth-form hidden space-y-2.5 auth-form-fade">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Full Name</label>
+                <input type="text" placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
+                <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
+                <input type="password" placeholder="Create password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Confirm Password</label>
+                <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              </div>
+              <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Create Account</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -1231,7 +1298,7 @@
       </button>
     </div>
 
-    <section class="planner-hero relative overflow-hidden" aria-labelledby="tripPlannerPageHeading" id="plannerHeroSection">
+    <section class="planner-hero relative overflow-hidden reveal-on-scroll" aria-labelledby="tripPlannerPageHeading" id="plannerHeroSection">
       <!-- Ambient animated backdrop glow -->
       <div class="hero-aurora-glow" aria-hidden="true"></div>
 
@@ -1269,7 +1336,7 @@
         <div class="lg:col-span-5 flex justify-center lg:justify-end">
           <div class="hero-visual-stage relative w-full max-w-sm" id="heroVisualStage">
             <!-- Central Dhaka Transit Visual Display -->
-            <div class="hero-stage-card relative rounded-2xl border border-white/70 bg-white/75 backdrop-blur-md p-4 shadow-xl dark:border-slate-700/60 dark:bg-slate-900/65">
+            <div class="hero-stage-card interactive-elevate relative rounded-2xl border border-white/70 bg-white/75 backdrop-blur-md p-4 shadow-xl dark:border-slate-700/60 dark:bg-slate-900/65">
               
               <!-- Transit Scene SVG with animated paths, metro train, and road traffic -->
               <svg viewBox="0 0 320 180" class="w-full h-auto overflow-visible select-none" aria-hidden="true">
@@ -1365,7 +1432,7 @@
     </section>
 
     <!-- Location Selector & Route Card -->
-    <div class="planner-route-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+    <div class="planner-route-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4 reveal-on-scroll">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Step 1 · Your journey</p>
@@ -1546,7 +1613,7 @@
         </div>
       </div>
 
-      <section aria-labelledby="vehicleComparisonHeading" class="border-t border-slate-100 pt-4">
+      <section aria-labelledby="vehicleComparisonHeading" class="border-t border-slate-100 pt-4 reveal-on-scroll">
         <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
           <div>
             <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Step 2 · Compare</p>
@@ -1555,7 +1622,7 @@
           <span class="text-xs text-slate-500">Choose a ride to update provider estimates and ride details</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" aria-live="polite">
-          <article id="comparisonBike" class="rounded-xl border border-slate-200 bg-white p-4">
+          <article id="comparisonBike" class="fare-stagger-card fare-stagger-1 interactive-elevate rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-950/80 dark:text-sky-300 shadow-sm">
@@ -1578,7 +1645,7 @@
             <p id="comparisonBikeDuration" class="font-semibold text-slate-800">—</p>
             <button id="selectBikeVehicle" type="button" aria-pressed="false" onclick="setVehicle('Bike')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose Bike</button>
           </article>
-          <article id="comparisonCNG" class="rounded-xl border border-slate-200 bg-white p-4">
+          <article id="comparisonCNG" class="fare-stagger-card fare-stagger-2 interactive-elevate rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 shadow-sm">
@@ -1601,7 +1668,7 @@
             <p id="comparisonCNGDuration" class="font-semibold text-slate-800">—</p>
             <button id="selectCNGVehicle" type="button" aria-pressed="false" onclick="setVehicle('CNG')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose CNG</button>
           </article>
-          <article id="comparisonCar" class="rounded-xl border border-slate-200 bg-white p-4">
+          <article id="comparisonCar" class="fare-stagger-card fare-stagger-3 interactive-elevate rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 shadow-sm">
@@ -1630,7 +1697,7 @@
         </p>
       </section>
 
-      <section aria-labelledby="mrtEstimatorHeading" class="border-t border-slate-100 pt-4">
+      <section aria-labelledby="mrtEstimatorHeading" class="border-t border-slate-100 pt-4 reveal-on-scroll">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">More ways to travel</p>
@@ -1644,7 +1711,7 @@
         </div>
 
         <!-- MRT Line 6 Interactive Station Light-Path -->
-        <div id="mrtStationLightPathContainer" class="mt-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-emerald-50/90 shadow-sm">
+        <div id="mrtStationLightPathContainer" class="interactive-elevate mt-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-emerald-50/90 shadow-sm">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2">
               <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs shadow-sm">
@@ -1729,7 +1796,7 @@
         </p>
       </section>
 
-      <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-4">
+      <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-4 reveal-on-scroll">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
           <div>
             <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">More ways to travel</p>
@@ -1746,7 +1813,7 @@
     </div>
 
     <!-- COMPARISON & LAUNCH SECTION -->
-    <div class="planner-provider-section">
+    <div class="planner-provider-section reveal-on-scroll">
       <h2 class="mb-3 flex flex-wrap items-end justify-between gap-2">
         <span>
           <span class="block text-xs font-bold uppercase tracking-[0.16em] text-blue-700">Step 3 · Book or continue</span>
@@ -1758,7 +1825,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         <!-- UBER CARD -->
-        <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+        <div class="planner-provider-card interactive-elevate bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -1779,7 +1846,7 @@
         </div>
 
         <!-- PATHAO CARD -->
-        <div class="planner-provider-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
+        <div class="planner-provider-card interactive-elevate bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-300 transition">
           <div>
             <div class="flex items-center justify-between mb-3">
               <span class="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -1990,8 +2057,8 @@
   </section>
 
   <!-- Sleek Compact Animated Developer Credit Bar -->
-  <footer class="mx-auto max-w-5xl mt-5 mb-3 px-4">
-    <div class="dev-credit-bar relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/85 backdrop-blur-xl px-4 py-3 sm:px-6 sm:py-3 shadow-lg shadow-slate-900/5 dark:border-slate-700/60 dark:bg-slate-900/85 transition-all hover:border-blue-400/50">
+  <footer class="mx-auto max-w-5xl mt-5 mb-3 px-4 reveal-on-scroll">
+    <div class="dev-credit-bar interactive-elevate relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/85 backdrop-blur-xl px-4 py-3 sm:px-6 sm:py-3 shadow-lg shadow-slate-900/5 dark:border-slate-700/60 dark:bg-slate-900/85 transition-all hover:border-blue-400/50">
       <!-- Ambient Shimmer Beam Animation -->
       <div class="dev-shimmer-beam" aria-hidden="true"></div>
 
@@ -2104,7 +2171,7 @@
       'Step 3 · Book or continue': 'ধাপ ৩ · বুক করুন বা এগিয়ে যান',
       'Available services & fares': 'উপলভ্য সেবা ও ভাড়া',
       'Frequently Asked Questions': 'সাধারণ জিজ্ঞাসা',
-      'FAQ': 'সাধারণ জিজ্ঞাসা',
+      'FAQ': 'FAQ',
       'Learn how BharaDekhi estimates fares and helps plan trips around Dhaka.': 'BharaDekhi কীভাবে ভাড়া হিসাব করে এবং ঢাকায় যাত্রা পরিকল্পনায় সাহায্য করে জানুন।',
       'How are the fare estimates calculated?': 'ভাড়ার আনুমানিক হিসাব কীভাবে করা হয়?',
       'BharaDekhi estimates fares from the selected route’s road distance and estimated travel time, using baseline rates for bike, CNG, and car. The estimates are for comparison and may not match a provider’s final price.': 'নির্বাচিত রুটের সড়ক দূরত্ব ও আনুমানিক যাত্রার সময়ের ভিত্তিতে বাইক, সিএনজি ও গাড়ির প্রাথমিক হার ব্যবহার করে BharaDekhi ভাড়া হিসাব করে। এই হিসাব তুলনার জন্য; সেবাদাতার চূড়ান্ত ভাড়ার সঙ্গে মিল নাও থাকতে পারে।',
@@ -2284,7 +2351,7 @@
       'HIGH SURGE': 'উচ্চ সার্জ',
       '⭐ Best Value': '⭐ সেরা সাশ্রয়ী',
       'Surge': 'সার্জ',
-      'Auto Weather': 'স্বয়ংক্রিয় আবহাওয়া',
+      'Auto Weather': 'আবহাওয়া (Auto)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
       'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। Open-Meteo মধ্য ঢাকার বর্তমান আবহাওয়ার তথ্য থেকে বৃষ্টি স্বয়ংক্রিয়ভাবে অনুমান করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% অতিরিক্ত যোগ করে, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
@@ -2414,7 +2481,7 @@
       'Weather console': 'আবহাওয়া কনসোল',
       'Live Route & Fare Engine': 'লাইভ রুট ও ভাড়ার হিসাব',
       'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
-      'Auto Weather': 'স্বয়ংক্রিয় আবহাওয়া',
+      'Auto Weather': 'আবহাওয়া (Auto)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
       'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
@@ -4665,7 +4732,7 @@
 
       if (dhakaTimeText) {
         dhakaTimeText.innerText = currentLanguage === 'bn'
-          ? `ঢাকার সময় ${dhakaTime.formattedTime}`
+          ? `ঢাকা ${dhakaTime.formattedTime}`
           : `Dhaka ${dhakaTime.formattedTime}`;
       }
 
@@ -4732,6 +4799,16 @@
       document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.minimum)} - ${formatLocalizedFare(fare.maximum)}`;
       document.getElementById('pathaoFare').innerText = `${formatLocalizedFare(fare.pathaoMin)} - ${formatLocalizedFare(fare.pathaoMax)}`;
       renderMrtEstimate(isPeak);
+
+      // Staggered pop refresh animation on fare comparison cards
+      ['comparisonBike', 'comparisonCNG', 'comparisonCar'].forEach(id => {
+        const card = document.getElementById(id);
+        if (card) {
+          card.classList.remove('fare-card-updated');
+          void card.offsetWidth;
+          card.classList.add('fare-card-updated');
+        }
+      });
     }
 
     // Launch Button Particle Burst Animation
@@ -4945,9 +5022,9 @@
         const show = form.id === (type === 'login' ? 'loginForm' : 'signupForm');
         form.classList.toggle('hidden', !show);
         if (show) {
-          form.classList.remove('auth-form-enter');
+          form.classList.remove('auth-form-fade', 'auth-form-enter');
           void form.offsetWidth;
-          form.classList.add('auth-form-enter');
+          form.classList.add('auth-form-fade');
         }
       });
     }
@@ -4977,6 +5054,37 @@
           if (typeof updateVehicleSlidingPill === 'function') updateVehicleSlidingPill();
         });
       }
+
+      if (typeof initScrollReveals === 'function') {
+        requestAnimationFrame(initScrollReveals);
+      }
+    }
+
+    let scrollRevealObserver = null;
+    function initScrollReveals() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => el.classList.add('revealed'));
+        return;
+      }
+      if (!scrollRevealObserver) {
+        scrollRevealObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              scrollRevealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+      }
+
+      document.querySelectorAll('.reveal-on-scroll:not(.revealed)').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('revealed');
+        } else {
+          scrollRevealObserver.observe(el);
+        }
+      });
     }
 
     function updateUserGreeting() {
@@ -5256,6 +5364,7 @@
       initMap();
       applyLanguage();
       applyTheme();
+      initScrollReveals();
       updateVehicleSlidingPill();
       window.addEventListener('resize', updateVehicleSlidingPill);
       loadBusRouteData();
