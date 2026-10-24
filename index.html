@@ -135,43 +135,46 @@
       box-shadow: 0 7px 18px rgb(37 99 235 / 20%);
     }
     #authView {
-      max-width: 76rem;
-      padding-top: 2.5rem;
+      max-width: 66rem;
+      padding-top: 0.75rem;
     }
     #authView > div:first-child {
-      border-radius: 1.75rem;
+      border-radius: 1.5rem;
       border-color: rgb(226 232 240 / 75%);
-      box-shadow: 0 24px 70px rgb(15 23 42 / 10%);
+      box-shadow: 0 16px 48px rgb(15 23 42 / 8%);
     }
     #authView > div:first-child > div > div:first-child {
       position: relative;
       isolation: isolate;
       overflow: hidden;
       background: linear-gradient(145deg, #102a43 0%, #174c70 54%, #2563a6 100%);
-      padding: 3.25rem;
+      padding: 1.5rem 1.75rem;
     }
     #authView > div:first-child > div > div:first-child::after {
       position: absolute;
       z-index: -1;
-      right: -8rem;
-      bottom: -12rem;
-      width: 28rem;
-      height: 28rem;
+      right: -6rem;
+      bottom: -10rem;
+      width: 20rem;
+      height: 20rem;
       border: 1px solid rgb(255 255 255 / 14%);
       border-radius: 50%;
-      box-shadow: 0 0 0 2.5rem rgb(255 255 255 / 4%), 0 0 0 5rem rgb(255 255 255 / 3%);
+      box-shadow: 0 0 0 2rem rgb(255 255 255 / 4%), 0 0 0 4rem rgb(255 255 255 / 3%);
       content: "";
       pointer-events: none;
     }
     #authView > div:first-child > div > div:nth-child(2) {
-      padding: 2.5rem;
+      padding: 1.5rem 1.75rem;
     }
     #authView h2 {
       max-width: 28rem;
-      line-height: 1.12;
-      letter-spacing: -0.04em;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
     }
-    #authView form input,
+    #authView form input {
+      min-height: 2.35rem;
+      border-radius: 0.75rem;
+    }
     #userDashboardView input,
     #userDashboardView select {
       min-height: 2.9rem;
@@ -179,7 +182,7 @@
     }
     #authView [data-auth-tab],
     #authView form button {
-      border-radius: 0.9rem;
+      border-radius: 0.75rem;
     }
     #authView > section {
       border-radius: 1.5rem;
@@ -883,6 +886,54 @@
     .mrt-active-rail-pulse {
       animation: mrtActiveLinePulse 2.5s ease-in-out infinite;
     }
+
+    /* Sleek Compact Animated Developer Credit Bar */
+    .dev-credit-bar {
+      position: relative;
+    }
+    .dev-shimmer-beam {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
+      animation: devShimmerSlide 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    html[data-theme="dark"] .dev-shimmer-beam {
+      background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.12), transparent);
+    }
+    @keyframes devShimmerSlide {
+      0% { left: -100%; }
+      50%, 100% { left: 160%; }
+    }
+    .avatar-pulse-glow {
+      animation: avatarAura 3s ease-in-out infinite alternate;
+    }
+    @keyframes avatarAura {
+      0% { box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+      100% { box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45), 0 0 0 2px rgba(56, 189, 248, 0.3); }
+    }
+    .portfolio-animated-btn {
+      overflow: hidden;
+      position: relative;
+    }
+    .portfolio-btn-shine {
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+      transform: rotate(25deg);
+      animation: btnShine 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes btnShine {
+      0%, 70% { left: -60%; }
+      100% { left: 140%; }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -983,41 +1034,41 @@
   </nav>
 
   <!-- Auth Landing -->
-  <section id="authView" class="max-w-4xl mx-auto px-4 pt-10 pb-6">
-    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+  <section id="authView" class="max-w-5xl mx-auto px-4 pt-2 pb-2">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 min-h-0">
         <!-- Left: Animated Futuristic Dhaka Transit Showcase (7 cols on lg) -->
-        <div class="lg:col-span-7 auth-hero-banner relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-8 md:p-10 text-white flex flex-col justify-between">
+        <div class="lg:col-span-7 auth-hero-banner relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-5 md:p-6 text-white flex flex-col justify-between">
           <!-- Animated Aurora Glow Orb -->
           <div class="auth-aurora-glow" aria-hidden="true"></div>
 
           <!-- Top Brand Lockup -->
           <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-blue-300 border border-blue-400/25 backdrop-blur-md">
-              <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping"></span>
+            <div class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-300 border border-blue-400/25 backdrop-blur-md">
+              <span class="h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping"></span>
               <span>BharaDekhi Platform</span>
             </div>
 
-            <h2 class="mt-4 text-3xl md:text-4xl font-black tracking-tight leading-tight">
+            <h2 class="mt-2 text-2xl md:text-3xl font-black tracking-tight leading-tight">
               Your Dhaka commute starts here.
             </h2>
-            <p class="mt-3 text-sm md:text-base text-blue-100/80 leading-relaxed max-w-md">
+            <p class="mt-1 text-xs md:text-sm text-blue-100/80 leading-relaxed max-w-md">
               Smart transit route planner, real-time fare estimator, and ride-hailing deep-link launcher for Dhaka commuters.
             </p>
           </div>
 
           <!-- Middle: Animated Dhaka Transit Node Constellation Map SVG -->
-          <div class="relative z-10 my-6 py-1">
-            <div class="auth-constellation-card rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl">
-              <div class="flex items-center justify-between mb-3 text-xs font-semibold text-blue-200/90">
+          <div class="relative z-10 my-2.5 py-0.5">
+            <div class="auth-constellation-card rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-md shadow-xl">
+              <div class="flex items-center justify-between mb-2 text-xs font-semibold text-blue-200/90">
                 <span class="flex items-center gap-1.5">
                   <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Transit Network
                 </span>
-                <span class="text-[10px] tracking-wider uppercase text-blue-300/70">Dhaka Hubs</span>
+                <span class="text-[9px] tracking-wider uppercase text-blue-300/70">Dhaka Hubs</span>
               </div>
 
               <!-- Animated Route Network SVG -->
-              <svg viewBox="0 0 320 110" class="w-full h-auto overflow-visible select-none" aria-hidden="true">
+              <svg viewBox="0 0 320 98" class="w-full h-auto overflow-visible select-none" aria-hidden="true">
                 <defs>
                   <linearGradient id="authNetGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.4" />
@@ -1027,58 +1078,58 @@
                 </defs>
 
                 <!-- Connecting route lines -->
-                <path d="M 30 75 Q 85 20, 160 55 T 290 35" fill="none" stroke="url(#authNetGrad)" stroke-width="2.5" stroke-linecap="round" />
-                <path d="M 30 75 Q 85 20, 160 55 T 290 35" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 20" class="auth-dash-stream" />
-                <path d="M 60 90 L 160 55 L 230 85" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3 3" />
+                <path d="M 30 70 Q 85 18, 160 50 T 290 30" fill="none" stroke="url(#authNetGrad)" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M 30 70 Q 85 18, 160 50 T 290 30" fill="none" stroke="#93c5fa" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 20" class="auth-dash-stream" />
+                <path d="M 60 82 L 160 50 L 230 75" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3 3" />
 
                 <!-- Route Nodes (Dhaka Hubs) -->
                 <!-- Uttara Node -->
-                <g transform="translate(290, 35)">
-                  <circle cx="0" cy="0" r="10" fill="none" stroke="#a855f7" stroke-width="1.5" class="animate-ping opacity-50" />
+                <g transform="translate(290, 30)">
+                  <circle cx="0" cy="0" r="9" fill="none" stroke="#a855f7" stroke-width="1.5" class="animate-ping opacity-50" />
                   <circle cx="0" cy="0" r="5" fill="#a855f7" />
-                  <text x="0" y="-10" text-anchor="middle" fill="#e9d5ff" font-size="9" font-weight="bold">Uttara</text>
+                  <text x="0" y="-9" text-anchor="middle" fill="#e9d5ff" font-size="9" font-weight="bold">Uttara</text>
                 </g>
 
                 <!-- Mirpur Node -->
-                <g transform="translate(160, 55)">
-                  <circle cx="0" cy="0" r="12" fill="none" stroke="#60a5fa" stroke-width="1.5" class="animate-ping opacity-60" />
+                <g transform="translate(160, 50)">
+                  <circle cx="0" cy="0" r="11" fill="none" stroke="#60a5fa" stroke-width="1.5" class="animate-ping opacity-60" />
                   <circle cx="0" cy="0" r="6" fill="#3b82f6" />
-                  <text x="0" y="-11" text-anchor="middle" fill="#dbeafe" font-size="9" font-weight="bold">Mirpur 10</text>
+                  <text x="0" y="-10" text-anchor="middle" fill="#dbeafe" font-size="9" font-weight="bold">Mirpur 10</text>
                 </g>
 
                 <!-- Motijheel Node -->
-                <g transform="translate(30, 75)">
-                  <circle cx="0" cy="0" r="10" fill="none" stroke="#10b981" stroke-width="1.5" class="animate-ping opacity-50" />
+                <g transform="translate(30, 70)">
+                  <circle cx="0" cy="0" r="9" fill="none" stroke="#10b981" stroke-width="1.5" class="animate-ping opacity-50" />
                   <circle cx="0" cy="0" r="5" fill="#10b981" />
-                  <text x="0" y="18" text-anchor="middle" fill="#a7f3d0" font-size="9" font-weight="bold">Motijheel</text>
+                  <text x="0" y="16" text-anchor="middle" fill="#a7f3d0" font-size="9" font-weight="bold">Motijheel</text>
                 </g>
 
                 <!-- Dhanmondi Node -->
-                <g transform="translate(230, 85)">
+                <g transform="translate(230, 75)">
                   <circle cx="0" cy="0" r="4" fill="#38bdf8" />
-                  <text x="0" y="16" text-anchor="middle" fill="#bae6fd" font-size="8" font-weight="bold">Dhanmondi</text>
+                  <text x="0" y="15" text-anchor="middle" fill="#bae6fd" font-size="8" font-weight="bold">Dhanmondi</text>
                 </g>
 
                 <!-- Animated Courier Vehicle moving along path -->
                 <g class="auth-moving-vehicle">
-                  <animateMotion dur="5s" repeatCount="indefinite" rotate="auto" path="M 30 75 Q 85 20, 160 55 T 290 35" />
+                  <animateMotion dur="5s" repeatCount="indefinite" rotate="auto" path="M 30 70 Q 85 18, 160 50 T 290 30" />
                   <circle cx="0" cy="0" r="5" fill="#60a5fa" />
                   <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
                 </g>
               </svg>
 
               <!-- Floating Live Mode Tags inside constellation card -->
-              <div class="mt-3 flex flex-wrap gap-2 pt-2 border-t border-white/10 text-[11px] font-semibold">
-                <span class="auth-badge-float-1 inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2.5 py-0.5 text-blue-200 border border-blue-400/30">
+              <div class="mt-2 flex flex-wrap gap-1.5 pt-1.5 border-t border-white/10 text-[10px] font-semibold">
+                <span class="auth-badge-float-1 inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-blue-200 border border-blue-400/30">
                   <span>🏍️ Bike</span>
                 </span>
-                <span class="auth-badge-float-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-emerald-200 border border-emerald-400/30">
+                <span class="auth-badge-float-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-emerald-200 border border-emerald-400/30">
                   <span>🛺 CNG</span>
                 </span>
-                <span class="auth-badge-float-3 inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-2.5 py-0.5 text-purple-200 border border-purple-400/30">
+                <span class="auth-badge-float-3 inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-purple-200 border border-purple-400/30">
                   <span>🚇 Metro Rail</span>
                 </span>
-                <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-amber-200 border border-amber-400/30">
+                <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-amber-200 border border-amber-400/30">
                   <span>🚌 Local Bus</span>
                 </span>
               </div>
@@ -1086,73 +1137,73 @@
           </div>
 
           <!-- Bottom: Key Value Pillars -->
-          <div class="relative z-10 space-y-2 text-xs text-blue-100/90 pt-1">
-            <div class="flex items-center gap-2.5">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold">✓</span>
+          <div class="relative z-10 space-y-1 text-[11px] sm:text-xs text-blue-100/90 pt-0.5">
+            <div class="flex items-center gap-2">
+              <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold text-[10px]">✓</span>
               <span>Instant road distance & travel time estimation</span>
             </div>
-            <div class="flex items-center gap-2.5">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold">✓</span>
+            <div class="flex items-center gap-2">
+              <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold text-[10px]">✓</span>
               <span>Automated peak-hour surge & rain fare calculation</span>
             </div>
-            <div class="flex items-center gap-2.5">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold">✓</span>
+            <div class="flex items-center gap-2">
+              <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold text-[10px]">✓</span>
               <span>One-tap deep linking to Uber & Pathao</span>
             </div>
           </div>
         </div>
 
         <!-- Right: Auth Portal Form (5 cols on lg) -->
-        <div class="lg:col-span-5 p-6 md:p-8 flex flex-col justify-center">
-          <div class="flex items-center justify-between mb-5">
+        <div class="lg:col-span-5 p-5 md:p-6 flex flex-col justify-center">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Welcome</p>
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Access Portal</h3>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Welcome</p>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white">Access Portal</h3>
             </div>
-            <button type="button" id="adminAccessBtn" class="text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <button type="button" id="adminAccessBtn" class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full px-2.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
               Admin Access
             </button>
           </div>
 
-          <p id="authSetupNotice" class="hidden mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"></p>
+          <p id="authSetupNotice" class="hidden mb-3 rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800"></p>
 
           <!-- Fluid Segmented Sliding Tab Track -->
-          <div class="auth-tab-track relative grid grid-cols-2 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 mb-5 border border-slate-200/60 dark:border-slate-700/60">
+          <div class="auth-tab-track relative grid grid-cols-2 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 mb-3.5 border border-slate-200/60 dark:border-slate-700/60">
             <div id="authSlidingPill" class="auth-sliding-pill absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-white dark:bg-slate-900 shadow-sm pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
-            <button type="button" data-auth-tab="login" class="auth-tab relative z-10 rounded-lg py-2.5 text-sm font-semibold transition-colors duration-200 text-blue-600 dark:text-blue-400">Login</button>
-            <button type="button" data-auth-tab="signup" class="auth-tab relative z-10 rounded-lg py-2.5 text-sm font-semibold transition-colors duration-200 text-slate-600 dark:text-slate-400">Sign Up</button>
+            <button type="button" data-auth-tab="login" class="auth-tab relative z-10 rounded-lg py-1.5 text-xs font-bold transition-colors duration-200 text-blue-600 dark:text-blue-400">Login</button>
+            <button type="button" data-auth-tab="signup" class="auth-tab relative z-10 rounded-lg py-1.5 text-xs font-bold transition-colors duration-200 text-slate-600 dark:text-slate-400">Sign Up</button>
           </div>
 
-          <form id="loginForm" class="auth-form space-y-4">
+          <form id="loginForm" class="auth-form space-y-2.5">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
+              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
-              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
+              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99]">Login</button>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Login</button>
           </form>
 
-          <form id="signupForm" class="auth-form hidden space-y-4">
+          <form id="signupForm" class="auth-form hidden space-y-2.5">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Full Name</label>
-              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Full Name</label>
+              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
+              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
-              <input type="password" placeholder="Create password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
+              <input type="password" placeholder="Create password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Confirm Password</label>
-              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+              <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Confirm Password</label>
+              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
-            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99]">Create Account</button>
+            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Create Account</button>
           </form>
         </div>
       </div>
@@ -1938,72 +1989,45 @@
     </section>
   </section>
 
-  <!-- Enhanced Modern Developer Credit & Platform Footer -->
-  <footer class="mx-auto max-w-5xl mt-14 mb-8 px-4">
-    <div class="rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-slate-900/5 dark:border-slate-700/60 dark:bg-slate-900/80 transition-all">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-        <!-- Author Identity & Story -->
-        <div class="flex items-center gap-4 text-left">
+  <!-- Sleek Compact Animated Developer Credit Bar -->
+  <footer class="mx-auto max-w-5xl mt-5 mb-3 px-4">
+    <div class="dev-credit-bar relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/85 backdrop-blur-xl px-4 py-3 sm:px-6 sm:py-3 shadow-lg shadow-slate-900/5 dark:border-slate-700/60 dark:bg-slate-900/85 transition-all hover:border-blue-400/50">
+      <!-- Ambient Shimmer Beam Animation -->
+      <div class="dev-shimmer-beam" aria-hidden="true"></div>
+
+      <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <!-- Developer Identity & Story -->
+        <div class="flex items-center gap-3">
           <div class="relative group">
-            <div class="h-14 w-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 p-0.5 shadow-lg shadow-blue-500/25">
-              <div class="h-full w-full rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center font-black text-xl text-blue-600 dark:text-blue-400 tracking-tight">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 p-0.5 shadow-md shadow-blue-500/20 avatar-pulse-glow">
+              <div class="h-full w-full rounded-[10px] bg-white dark:bg-slate-900 flex items-center justify-center font-black text-sm text-blue-600 dark:text-blue-400 tracking-tight">
                 AH
               </div>
             </div>
-            <span class="absolute -bottom-1 -right-1 flex h-4 w-4" title="Active developer">
+            <span class="absolute -bottom-0.5 -right-0.5 flex h-3 w-3" title="Active developer">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border border-white dark:border-slate-900"></span>
             </span>
           </div>
 
           <div>
             <div class="flex items-center gap-2">
-              <h4 class="text-base font-extrabold text-slate-900 dark:text-white">Amiyo Hasan</h4>
-              <span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/80">Developer</span>
+              <h4 class="text-sm font-extrabold text-slate-900 dark:text-white" data-en="Amiyo Hasan" data-bn="অমিয় হাসান">Amiyo Hasan</h4>
+              <span class="rounded-full bg-blue-50 px-2 py-0.2 text-[9px] font-bold text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/80" data-en="Developer" data-bn="ডেভেলপার">Developer</span>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Full-Stack Software Engineer &amp; Web Developer · Dhaka, Bangladesh</p>
-            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Creator of BharaDekhi — Dhaka Multi-Modal Transit &amp; Fare Engine</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5" data-en="Creator of BharaDekhi · Full-Stack Software Engineer · Dhaka" data-bn="ভাড়াদেখি-এর নির্মাতা · ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার · ঢাকা">Creator of BharaDekhi · Full-Stack Software Engineer · Dhaka</p>
           </div>
         </div>
 
-        <!-- Social Connect Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-2">
-          <!-- LinkedIn Verified Link -->
-          <a href="https://www.linkedin.com/in/amiyo-hasan-6729873a7/" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/70 px-3.5 py-2 text-xs font-bold text-blue-700 shadow-sm hover:bg-blue-100 hover:border-blue-300 dark:border-blue-800/60 dark:bg-blue-950/60 dark:text-blue-300 transition-all active:scale-95" aria-label="Amiyo Hasan on LinkedIn">
-            <svg class="h-4 w-4 fill-current text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            <span>LinkedIn</span>
-            <i data-lucide="external-link" class="h-3 w-3 opacity-60"></i>
-          </a>
-
-          <!-- GitHub -->
-          <a href="https://github.com/AmiyoTheAnalyst" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:border-slate-900 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-white dark:hover:text-white transition-all active:scale-95" aria-label="Amiyo Hasan on GitHub">
-            <svg class="h-4 w-4 fill-current group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            <span>GitHub</span>
-          </a>
-
-          <!-- Email: Direct Gmail Web Composer -->
-          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=amiyohasan23@gmail.com" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/70 px-3.5 py-2 text-xs font-bold text-rose-700 shadow-sm hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/60 dark:text-rose-300 transition-all active:scale-95" title="Open Gmail composer directly in browser">
-            <i data-lucide="mail" class="h-4 w-4 text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform"></i>
-            <span>Compose in Gmail</span>
-          </a>
-
-          <!-- Copy Email Button -->
-          <button type="button" onclick="copyDeveloperEmail(this)" class="group inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-all active:scale-95 cursor-pointer" title="Copy amiyohasan23@gmail.com">
-            <i data-lucide="copy" class="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors"></i>
-            <span class="copy-text">Copy Email</span>
-          </button>
-
-          <!-- About Amiyo Hasan Profile Page -->
-          <a href="./about.html" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95">
-            <i data-lucide="user" class="h-3.5 w-3.5"></i>
-            <span>Portfolio</span>
+        <!-- Animated Portfolio & Connect CTA -->
+        <div class="flex items-center gap-2">
+          <a href="./about.html" class="portfolio-animated-btn group relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/25 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-[1.03] active:scale-95" aria-label="View Amiyo Hasan Portfolio & Connect Links">
+            <span class="portfolio-btn-shine" aria-hidden="true"></span>
+            <i data-lucide="sparkles" class="h-3.5 w-3.5 text-blue-200 group-hover:rotate-12 transition-transform"></i>
+            <span data-en="Portfolio & Connect" data-bn="পোর্টফোলিও ও যোগাযোগ">Portfolio &amp; Connect</span>
+            <i data-lucide="arrow-right" class="h-3.5 w-3.5 opacity-80 group-hover:translate-x-1 transition-transform"></i>
           </a>
         </div>
-      </div>
-
-      <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400 dark:text-slate-500">
-        <p>Made with care by <a href="./about.html" class="font-bold text-slate-700 dark:text-slate-300 underline decoration-slate-300 dark:decoration-slate-600 underline-offset-2 hover:text-blue-600">Amiyo Hasan</a>. Released for Dhaka commuters.</p>
-        <p>© 2026 BharaDekhi · Built with Leaflet, OSRM &amp; Open-Meteo</p>
       </div>
     </div>
   </footer>
@@ -2406,7 +2430,9 @@
       'Fast Solo': 'দ্রুত একক যাত্রা',
       'Economy 3-Wheeler': 'সাশ্রয়ী ৩-হুইলার',
       'AC Comfort': 'শীতাতপ নিয়ন্ত্রিত আরামদায়ক',
-      'Live Radar': 'লাইভ রাডার'
+      'Live Radar': 'লাইভ রাডার',
+      'Portfolio & Connect': 'পোর্টফোলিও ও যোগাযোগ',
+      'Creator of BharaDekhi · Full-Stack Software Engineer · Dhaka': 'ভাড়াদেখি-এর নির্মাতা · ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার · ঢাকা'
     };
 
     const BENGALI_LOCATION_NAMES = {
