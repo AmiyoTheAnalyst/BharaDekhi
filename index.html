@@ -176,7 +176,9 @@
       border-radius: 0.75rem;
     }
     #userDashboardView input,
-    #userDashboardView select {
+    #userDashboardView select,
+    #userPlannerView input,
+    #userPlannerView select {
       min-height: 2.9rem;
       border-radius: 0.85rem;
     }
@@ -194,16 +196,19 @@
     #authView details[open] summary {
       color: #1d4ed8;
     }
-    #userDashboardView {
+    #userDashboardView,
+    #userPlannerView {
       max-width: 80rem;
       padding-top: 1.75rem;
       gap: 1.5rem;
     }
-    #userDashboardView > div {
+    #userDashboardView > div,
+    #userPlannerView > div {
       border-radius: 1.5rem;
       box-shadow: 0 12px 36px rgb(15 23 42 / 5%);
     }
-    #userDashboardView .planner-hero {
+    #userDashboardView .planner-hero,
+    #userPlannerView .planner-hero {
       position: relative;
       isolation: isolate;
       overflow: hidden;
@@ -214,7 +219,8 @@
         linear-gradient(120deg, #eff6ff 0%, #f8fbff 55%, #ecfeff 100%);
       padding: clamp(1.5rem, 4vw, 2.75rem);
     }
-    #userDashboardView .planner-hero::after {
+    #userDashboardView .planner-hero::after,
+    #userPlannerView .planner-hero::after {
       position: absolute;
       z-index: -1;
       right: -5rem;
@@ -227,43 +233,55 @@
       content: "";
       pointer-events: none;
     }
-    #userDashboardView .planner-hero h2 {
+    #userDashboardView .planner-hero h2,
+    #userPlannerView .planner-hero h2 {
       max-width: 42rem;
       font-size: clamp(1.8rem, 4vw, 2.75rem);
       line-height: 1.08;
       letter-spacing: -0.045em;
     }
-    #userDashboardView .planner-hero p {
+    #userDashboardView .planner-hero p,
+    #userPlannerView .planner-hero p {
       max-width: 44rem;
     }
-    #userDashboardView .planner-step {
+    #userDashboardView .planner-step,
+    #userPlannerView .planner-step {
       border: 1px solid rgb(191 219 254 / 80%);
       background: rgb(255 255 255 / 78%);
       color: #1e3a8a;
     }
-    #userDashboardView .planner-section-title {
+    #userDashboardView .planner-section-title,
+    #userPlannerView .planner-section-title {
       font-size: clamp(1.2rem, 2vw, 1.5rem);
       line-height: 1.25;
       letter-spacing: -0.025em;
     }
-    #userDashboardView #travelShortcutsHeading {
+    #userDashboardView #travelShortcutsHeading,
+    #userPlannerView #travelShortcutsHeading {
       font-size: 1.2rem;
     }
     #userDashboardView #pickupSelect,
-    #userDashboardView #dropoffSelect {
+    #userDashboardView #dropoffSelect,
+    #userPlannerView #pickupSelect,
+    #userPlannerView #dropoffSelect {
       min-height: 3.25rem;
       border-radius: 0.9rem;
       font-weight: 600;
     }
     #userDashboardView #comparisonBike,
     #userDashboardView #comparisonCNG,
-    #userDashboardView #comparisonCar {
+    #userDashboardView #comparisonCar,
+    #userPlannerView #comparisonBike,
+    #userPlannerView #comparisonCNG,
+    #userPlannerView #comparisonCar {
       padding: 1.25rem;
     }
-    #userDashboardView .planner-route-card {
+    #userDashboardView .planner-route-card,
+    #userPlannerView .planner-route-card {
       padding: clamp(1.25rem, 3vw, 2rem);
     }
-    #userDashboardView #map {
+    #userDashboardView #map,
+    #userPlannerView #map {
       height: 360px;
       border: 1px solid #dbe3ee;
       border-radius: 1.1rem;
@@ -271,13 +289,19 @@
     }
     #userDashboardView .vehicle-btn,
     #userDashboardView #mapSetPickupBtn,
-    #userDashboardView #mapSetDestinationBtn {
+    #userDashboardView #mapSetDestinationBtn,
+    #userPlannerView .vehicle-btn,
+    #userPlannerView #mapSetPickupBtn,
+    #userPlannerView #mapSetDestinationBtn {
       min-height: 2.5rem;
       border-radius: 0.8rem;
     }
     #userDashboardView #comparisonBike,
     #userDashboardView #comparisonCNG,
-    #userDashboardView #comparisonCar {
+    #userDashboardView #comparisonCar,
+    #userPlannerView #comparisonBike,
+    #userPlannerView #comparisonCNG,
+    #userPlannerView #comparisonCar {
       border-radius: 1.25rem;
       transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
                   box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
@@ -287,7 +311,8 @@
       will-change: transform, box-shadow;
       position: relative;
     }
-    #userDashboardView #comparisonBike:hover {
+    #userDashboardView #comparisonBike:hover,
+    #userPlannerView #comparisonBike:hover {
       transform: translateY(-7px) scale(1.02) !important;
       border-color: #38bdf8 !important;
       outline: 2px solid #38bdf8 !important;
@@ -295,10 +320,12 @@
       box-shadow: 0 24px 45px -10px rgba(14, 165, 233, 0.55), 0 0 35px rgba(56, 189, 248, 0.4) !important;
       z-index: 25;
     }
-    html[data-theme="dark"] #userDashboardView #comparisonBike:hover {
+    html[data-theme="dark"] #userDashboardView #comparisonBike:hover,
+    html[data-theme="dark"] #userPlannerView #comparisonBike:hover {
       background: linear-gradient(180deg, #0e2447 0%, #0b1528 100%) !important;
     }
-    #userDashboardView #comparisonCNG:hover {
+    #userDashboardView #comparisonCNG:hover,
+    #userPlannerView #comparisonCNG:hover {
       transform: translateY(-7px) scale(1.02) !important;
       border-color: #34d399 !important;
       outline: 2px solid #34d399 !important;
@@ -306,10 +333,12 @@
       box-shadow: 0 24px 45px -10px rgba(16, 185, 129, 0.55), 0 0 35px rgba(52, 211, 153, 0.4) !important;
       z-index: 25;
     }
-    html[data-theme="dark"] #userDashboardView #comparisonCNG:hover {
+    html[data-theme="dark"] #userDashboardView #comparisonCNG:hover,
+    html[data-theme="dark"] #userPlannerView #comparisonCNG:hover {
       background: linear-gradient(180deg, #092e22 0%, #0b1528 100%) !important;
     }
-    #userDashboardView #comparisonCar:hover {
+    #userDashboardView #comparisonCar:hover,
+    #userPlannerView #comparisonCar:hover {
       transform: translateY(-7px) scale(1.02) !important;
       border-color: #818cf8 !important;
       outline: 2px solid #818cf8 !important;
@@ -317,28 +346,37 @@
       box-shadow: 0 24px 45px -10px rgba(99, 102, 241, 0.55), 0 0 35px rgba(129, 140, 248, 0.4) !important;
       z-index: 25;
     }
-    html[data-theme="dark"] #userDashboardView #comparisonCar:hover {
+    html[data-theme="dark"] #userDashboardView #comparisonCar:hover,
+    html[data-theme="dark"] #userPlannerView #comparisonCar:hover {
       background: linear-gradient(180deg, #1d1f4b 0%, #0b1528 100%) !important;
     }
     #userDashboardView #comparisonBike:hover .ride-icon-badge,
     #userDashboardView #comparisonCNG:hover .ride-icon-badge,
-    #userDashboardView #comparisonCar:hover .ride-icon-badge {
+    #userDashboardView #comparisonCar:hover .ride-icon-badge,
+    #userPlannerView #comparisonBike:hover .ride-icon-badge,
+    #userPlannerView #comparisonCNG:hover .ride-icon-badge,
+    #userPlannerView #comparisonCar:hover .ride-icon-badge {
       transform: scale(1.18) rotate(4deg);
       transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    #userDashboardView .planner-provider-card {
+    #userDashboardView .planner-provider-card,
+    #userPlannerView .planner-provider-card {
       border-radius: 1.3rem;
       box-shadow: 0 8px 26px rgb(15 23 42 / 5%);
     }
     #authView button,
-    #userDashboardView button {
+    #userDashboardView button,
+    #userPlannerView button {
       transition-duration: 160ms;
     }
     #authView button:focus-visible,
     #userDashboardView button:focus-visible,
+    #userPlannerView button:focus-visible,
     #authView input:focus-visible,
     #userDashboardView input:focus-visible,
-    #userDashboardView select:focus-visible {
+    #userPlannerView input:focus-visible,
+    #userDashboardView select:focus-visible,
+    #userPlannerView select:focus-visible {
       outline: 3px solid rgb(59 130 246 / 35%);
       outline-offset: 2px;
     }
@@ -353,13 +391,15 @@
     html[data-theme="dark"] #authView > div:first-child > div > div:first-child {
       background: linear-gradient(145deg, #0b1c30 0%, #12364f 54%, #1e40af 100%);
     }
-    html[data-theme="dark"] #userDashboardView .planner-hero {
+    html[data-theme="dark"] #userDashboardView .planner-hero,
+    html[data-theme="dark"] #userPlannerView .planner-hero {
       border-color: #334e68;
       background:
         radial-gradient(circle at 88% 22%, rgb(59 130 246 / 18%), transparent 14rem),
         linear-gradient(120deg, #14243a 0%, #172b40 55%, #102f3b 100%);
     }
-    html[data-theme="dark"] #userDashboardView .planner-step {
+    html[data-theme="dark"] #userDashboardView .planner-step,
+    html[data-theme="dark"] #userPlannerView .planner-step {
       border-color: #3b536c;
       background: rgb(15 23 42 / 72%);
       color: #bfdbfe;
@@ -380,14 +420,52 @@
       #authView > div:first-child > div > div:nth-child(2) {
         padding: 1.5rem;
       }
-      #userDashboardView {
+      #userDashboardView,
+      #userPlannerView {
         padding-top: 1.25rem;
       }
-      #userDashboardView .planner-route-card {
+      #userDashboardView .planner-route-card,
+      #userPlannerView .planner-route-card {
         padding: 1.1rem;
       }
-      #userDashboardView #map {
+      #userDashboardView #map,
+      #userPlannerView #map {
         height: 300px;
+      }
+    }
+
+    /* =========================================================
+       Screen 1: Full-Screen Animated Dhaka Crossroads Landing Page
+       ========================================================= */
+    #userLandingView {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100svh;
+      min-height: 100svh;
+      overflow: hidden;
+      background: #030712;
+      z-index: 35;
+    }
+    #userLandingView .dhaka-cyber-showcase {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 100svh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .landing-cta-container {
+      position: absolute;
+      bottom: max(1.25rem, env(safe-area-inset-bottom, 1.25rem));
+      right: max(1.25rem, env(safe-area-inset-right, 1.25rem));
+      z-index: 40;
+    }
+    @media (min-width: 640px) {
+      .landing-cta-container {
+        bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
+        right: max(2rem, env(safe-area-inset-right, 2rem));
       }
     }
 
@@ -1083,6 +1161,7 @@
     }
 
     #comparisonBike.ride-option-hover-card:hover,
+    #userPlannerView #comparisonBike:hover,
     #userDashboardView #comparisonBike:hover {
       transform: translateY(-7px) scale(1.02) !important;
       border-color: #38bdf8 !important;
@@ -1092,11 +1171,13 @@
       z-index: 25;
     }
     html[data-theme="dark"] #comparisonBike.ride-option-hover-card:hover,
+    html[data-theme="dark"] #userPlannerView #comparisonBike:hover,
     html[data-theme="dark"] #userDashboardView #comparisonBike:hover {
       background: linear-gradient(180deg, #0e2447 0%, #0b1528 100%) !important;
     }
 
     #comparisonCNG.ride-option-hover-card:hover,
+    #userPlannerView #comparisonCNG:hover,
     #userDashboardView #comparisonCNG:hover {
       transform: translateY(-7px) scale(1.02) !important;
       border-color: #34d399 !important;
@@ -1106,11 +1187,13 @@
       z-index: 25;
     }
     html[data-theme="dark"] #comparisonCNG.ride-option-hover-card:hover,
+    html[data-theme="dark"] #userPlannerView #comparisonCNG:hover,
     html[data-theme="dark"] #userDashboardView #comparisonCNG:hover {
       background: linear-gradient(180deg, #092e22 0%, #0b1528 100%) !important;
     }
 
     #comparisonCar.ride-option-hover-card:hover,
+    #userPlannerView #comparisonCar:hover,
     #userDashboardView #comparisonCar:hover {
       transform: translateY(-7px) scale(1.02) !important;
       border-color: #818cf8 !important;
@@ -1120,6 +1203,7 @@
       z-index: 25;
     }
     html[data-theme="dark"] #comparisonCar.ride-option-hover-card:hover,
+    html[data-theme="dark"] #userPlannerView #comparisonCar:hover,
     html[data-theme="dark"] #userDashboardView #comparisonCar:hover {
       background: linear-gradient(180deg, #1d1f4b 0%, #0b1528 100%) !important;
     }
@@ -1301,7 +1385,7 @@
   <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
       <div class="flex items-center gap-2 shrink-0">
-        <a href="./index.html" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
+        <a href="#/home" onclick="if (localStorage.getItem('commuteHubLoggedIn') === 'true') { event.preventDefault(); navigateToRoute('#/home'); }" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
           <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
           <span class="block">
             <h1 class="text-base sm:text-lg font-bold leading-tight text-slate-900 dark:text-white">Bhara<span class="text-blue-700 dark:text-blue-400">Dekhi</span></h1>
@@ -1579,40 +1663,11 @@
     </div>
   </section>
 
-  <!-- User Dashboard -->
-  <main id="userDashboardView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 space-y-6">
+  <!-- Screen 1: Dedicated Full-Screen Animated Dhaka City Landing Page -->
+  <section id="userLandingView" class="panel-section hidden fixed inset-0 z-30 w-full h-[100svh] min-h-[100svh] overflow-hidden bg-slate-950 select-none" aria-label="Dhaka Crossroads Animation Landing Page">
 
-    <!-- 1. POST-LOGIN DHAKA CITY ROUTES ANIMATION SHOWCASE SECTION (Picture 5) -->
-    <section id="userShowcaseSection" class="space-y-6 transition-all duration-500">
-      <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-            <i data-lucide="compass" class="w-5 h-5 animate-spin-slow"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Welcome back</p>
-              <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-500 border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Transit Hub Active
-              </span>
-            </div>
-            <h3 id="userGreeting" class="text-lg font-bold text-slate-900 dark:text-white">User</h3>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="openTripPlannerView()" class="hidden sm:inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition shadow-md shadow-blue-600/20 active:scale-95">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-            <span>Open Planner</span>
-          </button>
-          <button id="logoutBtn" type="button" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs px-3.5 py-2 rounded-xl transition">
-            Logout
-          </button>
-        </div>
-      </div>
-
-      <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
-      <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase relative w-full h-[500px] sm:h-[560px] md:h-[620px] lg:h-[680px] overflow-hidden rounded-3xl border border-sky-500/30 text-white shadow-2xl shadow-black/80 select-none">
+    <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
+    <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase relative w-full h-full min-h-[100svh] overflow-hidden text-white select-none">
         
         <!-- Top-Left HUD Header: Transit Grid & Slogan -->
         <div class="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex flex-col gap-1 pointer-events-none">
@@ -1628,12 +1683,19 @@
           </p>
         </div>
 
-        <!-- Top-Right Live Traffic Signal State Badge -->
-        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2.5 pointer-events-none">
-          <div id="trafficSignalBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors">
+        <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
+        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2">
+          <div id="trafficSignalBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none">
             <span id="trafficSignalDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="trafficSignalText">🚦 N-S GREEN · TRAFFIC FLOWING</span>
           </div>
+          <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer" title="Switch language / ভাষা পরিবর্তন">
+            বাংলা
+          </button>
+          <button type="button" onclick="logout()" class="px-2.5 py-1.5 rounded-full bg-slate-900/85 hover:bg-rose-950/80 hover:border-rose-700 text-slate-200 hover:text-rose-300 border border-slate-700 text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer" title="Logout">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
         </div>
 
         <!-- 3D / 2.5D Isometric Miniature Dhaka Crossroads SVG Canvas -->
@@ -2212,8 +2274,8 @@
         </div>
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
-        <div class="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-30">
-          <button type="button" onclick="openTripPlannerView()" class="group relative flex items-center gap-3 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md">
+        <div class="landing-cta-container absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30">
+          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/plan-trip')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-3 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300">
               <i data-lucide="compass" class="w-5 h-5 text-white"></i>
             </div>
@@ -2225,43 +2287,55 @@
         </div>
 
       </div>
+  </section>
 
-      <!-- Quick Corridor Starter Pills -->
-      <div class="pt-1 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <span class="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1.5">
-          <i data-lucide="trending-up" class="w-3.5 h-3.5 text-blue-500"></i>
-          Quick corridor launch:
-        </span>
-        <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="startCorridorTrip('uttara', 'motijheel')" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-sky-600 dark:text-sky-300 border border-slate-200 dark:border-slate-800 hover:border-sky-500 font-semibold transition active:scale-95 cursor-pointer shadow-sm">
-            ⚡ Uttara ⇄ Motijheel (Metro)
-          </button>
-          <button type="button" onclick="startCorridorTrip('mirpur', 'dhanmondi')" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-300 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 font-semibold transition active:scale-95 cursor-pointer shadow-sm">
-            ⚡ Mirpur 10 ⇄ Dhanmondi
-          </button>
-          <button type="button" onclick="startCorridorTrip('azimpur', 'brac')" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-300 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 font-semibold transition active:scale-95 cursor-pointer shadow-sm">
-            ⚡ Azimpur ⇄ BRAC University
-          </button>
-          <button type="button" onclick="startCorridorTrip('farmgate', 'gulshan')" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-amber-600 dark:text-amber-300 border border-slate-200 dark:border-slate-800 hover:border-amber-500 font-semibold transition active:scale-95 cursor-pointer shadow-sm">
-            ⚡ Farmgate ⇄ Gulshan
-          </button>
+  <!-- Screen 2: Dedicated Trip Planner Page -->
+  <main id="userPlannerView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-6">
+
+    <!-- Top Navigation Banner: Return to City Animation & Status -->
+    <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
+      <button type="button" onclick="navigateToRoute('#/home')" class="inline-flex items-center gap-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-700 dark:text-sky-300 border border-blue-200/60 dark:border-slate-700 px-3.5 py-2 text-xs font-bold transition active:scale-95 shadow-sm" aria-label="Return to animated Dhaka city landing page">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>&larr; Back to City Animation</span>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="text-right hidden sm:block">
+          <div class="flex items-center gap-1.5 justify-end">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Transit Active</span>
+          </div>
+          <span class="text-xs text-blue-600 dark:text-blue-400 font-semibold" id="userGreeting">Trip Planner</span>
         </div>
-      </div>
-    </section>
-
-    <!-- 2. TRIP PLANNER SECTION -->
-    <section id="userPlannerSection" class="space-y-6 transition-all duration-300">
-      <!-- Top banner for returning to City Route Animation -->
-      <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
-        <button type="button" onclick="showDhakaCityShowcase()" class="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3.5 py-2 text-xs font-semibold transition active:scale-95">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-500"></i>
-          <span>City Route Animation</span>
+        <button id="logoutBtn" type="button" onclick="logout()" class="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-xl text-xs font-semibold transition" aria-label="Log out">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Logout</span>
         </button>
-        <div class="text-right">
-          <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Trip Planner</span>
-          <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Route &amp; Multi-Modal Comparison</span>
-        </div>
       </div>
+    </div>
+
+    <!-- Quick Corridor Starter Pills -->
+    <div class="flex flex-wrap items-center justify-between gap-3 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-2.5 shadow-sm">
+      <span class="text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1.5">
+        <i data-lucide="trending-up" class="w-3.5 h-3.5 text-blue-500"></i>
+        Quick corridor launch:
+      </span>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="startCorridorTrip('uttara', 'motijheel')" class="px-3 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-sky-600 dark:text-sky-300 border border-slate-200 dark:border-slate-700 hover:border-sky-500 font-semibold transition active:scale-95 cursor-pointer shadow-xs text-xs">
+          ⚡ Uttara ⇄ Motijheel (Metro)
+        </button>
+        <button type="button" onclick="startCorridorTrip('mirpur', 'dhanmondi')" class="px-3 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-300 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 font-semibold transition active:scale-95 cursor-pointer shadow-xs text-xs">
+          ⚡ Mirpur 10 ⇄ Dhanmondi
+        </button>
+        <button type="button" onclick="startCorridorTrip('azimpur', 'brac')" class="px-3 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 font-semibold transition active:scale-95 cursor-pointer shadow-xs text-xs">
+          ⚡ Azimpur ⇄ BRAC University
+        </button>
+        <button type="button" onclick="startCorridorTrip('farmgate', 'gulshan')" class="px-3 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-300 border border-slate-200 dark:border-slate-700 hover:border-amber-500 font-semibold transition active:scale-95 cursor-pointer shadow-xs text-xs">
+          ⚡ Farmgate ⇄ Gulshan
+        </button>
+      </div>
+    </div>
+
+    <div id="userPlannerSection" class="space-y-6">
 
     <section class="planner-hero relative overflow-hidden reveal-on-scroll" aria-labelledby="tripPlannerPageHeading" id="plannerHeroSection">
       <!-- Ambient animated backdrop glow -->
@@ -3387,9 +3461,9 @@
       </p>
     </footer>
 
-    </section> <!-- /userPlannerSection -->
+    </div> <!-- /userPlannerSection -->
 
-  </main>
+  </main> <!-- /userPlannerView -->
 
   <!-- Admin Dashboard -->
   <section id="adminPanel" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 pb-12 space-y-6">
@@ -7764,35 +7838,53 @@
       });
     }
 
-    function openTripPlannerView() {
-      const planner = document.getElementById('userPlannerSection') || document.getElementById('plannerHeroSection');
-      if (planner) {
-        planner.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          if (map) {
-            map.invalidateSize({ pan: false });
-            if (routePolyline && routePolyline.getLatLngs().length > 0) {
-              map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
-            }
-          }
-          if (typeof updateVehicleSlidingPill === 'function') updateVehicleSlidingPill();
-          if (typeof updateMoreWaysToTravelCards === 'function') updateMoreWaysToTravelCards();
-          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-        });
-        planner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // =========================================================
+    // SPA Route Navigation System (Screen 1: Landing vs Screen 2: Trip Planner)
+    // =========================================================
+    function navigateToRoute(route) {
+      if (window.location.hash !== route) {
+        window.location.hash = route;
+      } else {
+        handleRoute();
       }
     }
 
-    function showDhakaCityShowcase() {
-      const showcase = document.getElementById('userShowcaseSection');
-      if (showcase) {
-        showcase.classList.remove('hidden');
-        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-        if (typeof initDhakaCrossroadsSimulation === 'function') {
-          initDhakaCrossroadsSimulation();
-        }
-        showcase.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function handleRoute() {
+      const hash = window.location.hash || '';
+      const currentUser = localStorage.getItem('commuteHubCurrentUser');
+      const role = localStorage.getItem('commuteHubRole');
+      const isLoggedIn = localStorage.getItem('commuteHubLoggedIn') === 'true' && Boolean(currentUser);
+
+      if (!isLoggedIn) {
+        showView('auth');
+        return;
       }
+
+      if (role === 'admin' && (hash === '#/admin' || hash === '#admin')) {
+        showView('admin');
+        return;
+      }
+      if ((role === 'admin-pending' || hash === '#/role' || hash === '#role') && role !== 'user') {
+        showView('role');
+        return;
+      }
+
+      if (hash === '#/plan-trip' || hash === '#plan-trip') {
+        showView('user-planner');
+      } else {
+        showView('user-landing');
+      }
+    }
+
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('popstate', handleRoute);
+
+    function openTripPlannerView() {
+      navigateToRoute('#/plan-trip');
+    }
+
+    function showDhakaCityShowcase() {
+      navigateToRoute('#/home');
     }
 
     function startCorridorTrip(pickupKey, dropoffKey) {
@@ -7803,7 +7895,7 @@
       if (typeof handleLocationChange === 'function') {
         handleLocationChange();
       }
-      openTripPlannerView();
+      navigateToRoute('#/plan-trip');
     }
 
     // =========================================================
@@ -8394,23 +8486,58 @@
     function showView(view) {
       const authView = document.getElementById('authView');
       const roleSelectionView = document.getElementById('roleSelectionView');
-      const userDashboardView = document.getElementById('userDashboardView');
+      const userLandingView = document.getElementById('userLandingView');
+      const userPlannerView = document.getElementById('userPlannerView') || document.getElementById('userDashboardView');
       const adminPanel = document.getElementById('adminPanel');
+      const mainHeader = document.querySelector('header');
 
-      authView.classList.toggle('hidden', view !== 'auth');
-      roleSelectionView.classList.toggle('hidden', view !== 'role');
-      userDashboardView.classList.toggle('hidden', view !== 'user');
-      adminPanel.classList.toggle('hidden', view !== 'admin');
+      const isLanding = view === 'user-landing' || view === 'landing';
+      const isPlanner = view === 'user-planner' || view === 'planner' || view === 'user';
+      const isAuth = view === 'auth';
+      const isRole = view === 'role';
+      const isAdmin = view === 'admin';
+
+      if (authView) authView.classList.toggle('hidden', !isAuth);
+      if (roleSelectionView) roleSelectionView.classList.toggle('hidden', !isRole);
+      if (userLandingView) userLandingView.classList.toggle('hidden', !isLanding);
+      if (userPlannerView) userPlannerView.classList.toggle('hidden', !isPlanner);
+      if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin);
+
+      // Hide main header on full-screen animated landing page so it occupies the entire screen
+      if (mainHeader) {
+        mainHeader.classList.toggle('hidden', isLanding);
+      }
+
       updateAdminModeNavigation();
-      if (view === 'admin') loadAdminAccounts();
-      if (view === 'user') {
-        renderTravelShortcuts();
+
+      if (isAdmin) loadAdminAccounts();
+
+      if (isLanding) {
+        // Sync URL hash
+        if (window.location.hash !== '#/home' && window.location.hash !== '#home') {
+          history.replaceState(null, '', '#/home');
+        }
+        // Start or resume simulation
+        dhakaCrossroadsRunning = false;
         if (typeof initDhakaCrossroadsSimulation === 'function') {
           initDhakaCrossroadsSimulation();
         }
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       }
 
-      if (view === 'user') {
+      if (isPlanner) {
+        // Sync URL hash
+        if (window.location.hash !== '#/plan-trip' && window.location.hash !== '#plan-trip') {
+          history.replaceState(null, '', '#/plan-trip');
+        }
+        // Pause simulation while on planner page to save CPU
+        if (dhakaCrossroadsAnimId) {
+          cancelAnimationFrame(dhakaCrossroadsAnimId);
+          dhakaCrossroadsAnimId = null;
+          dhakaCrossroadsRunning = false;
+        }
+
+        renderTravelShortcuts();
         requestAnimationFrame(() => {
           if (map) {
             map.invalidateSize({ pan: false });
@@ -8419,6 +8546,8 @@
             }
           }
           if (typeof updateVehicleSlidingPill === 'function') updateVehicleSlidingPill();
+          if (typeof updateMoreWaysToTravelCards === 'function') updateMoreWaysToTravelCards();
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
         });
       }
 
@@ -8548,11 +8677,11 @@
       if (isAdminUser(user)) {
         localStorage.setItem('commuteHubRole', 'admin-pending');
         showToast('Welcome, BharaDekhi Admin! Choose a role.');
-        showView('role');
+        navigateToRoute('#/role');
       } else {
         localStorage.setItem('commuteHubRole', 'user');
         showToast(`Welcome, ${displayName}!`);
-        showView('user');
+        navigateToRoute('#/home');
       }
     }
 
@@ -8600,9 +8729,14 @@
       localStorage.removeItem('commuteHubRole');
       localStorage.removeItem('commuteHubCurrentUser');
       showToast('Logged out successfully.');
-      showView('auth');
+      navigateToRoute('#/login');
       setAuthTab('login');
     }
+
+    function logout() {
+      logoutUser();
+    }
+    window.logout = logout;
 
     async function logoutAdmin() {
       if (supabaseClient) {
@@ -8617,7 +8751,7 @@
       localStorage.removeItem('commuteHubRole');
       localStorage.removeItem('commuteHubCurrentUser');
       showToast('Admin logged out.');
-      showView('auth');
+      navigateToRoute('#/login');
       setAuthTab('login');
     }
 
@@ -8630,7 +8764,7 @@
         localStorage.setItem('commuteHubRole', 'user');
         updateUserGreeting();
         showToast('You are now using the User mode.');
-        showView('user');
+        navigateToRoute('#/home');
         return;
       }
 
@@ -8638,7 +8772,7 @@
         if (currentUser?.email?.toLowerCase() !== ADMIN_EMAIL) return;
         localStorage.setItem('commuteHubRole', 'admin');
         showToast('You are now using the Admin mode.');
-        showView('admin');
+        navigateToRoute('#/admin');
       }
     }
 
@@ -8752,6 +8886,7 @@
       if (!initializeSupabase()) {
         clearLocalAuthState();
         showView('auth');
+        history.replaceState(null, '', '#/login');
         return;
       }
 
@@ -8761,6 +8896,7 @@
         if (!session?.user) {
           clearLocalAuthState();
           showView('auth');
+          history.replaceState(null, '', '#/login');
           return;
         }
 
@@ -8774,21 +8910,33 @@
 
         if (isAdminUser(user)) {
           const role = localStorage.getItem('commuteHubRole');
-          if (role === 'admin') showView('admin');
-          else if (role === 'user') showView('user');
-          else {
+          if (role === 'admin') navigateToRoute('#/admin');
+          else if (role === 'user') {
+            const hash = window.location.hash;
+            if (hash === '#/plan-trip' || hash === '#plan-trip') {
+              navigateToRoute('#/plan-trip');
+            } else {
+              navigateToRoute('#/home');
+            }
+          } else {
             localStorage.setItem('commuteHubRole', 'admin-pending');
-            showView('role');
+            navigateToRoute('#/role');
           }
         } else {
           localStorage.setItem('commuteHubRole', 'user');
-          showView('user');
+          const hash = window.location.hash;
+          if (hash === '#/plan-trip' || hash === '#plan-trip') {
+            navigateToRoute('#/plan-trip');
+          } else {
+            navigateToRoute('#/home');
+          }
         }
       } catch (error) {
         console.error('Could not restore the signed-in session:', error);
         clearLocalAuthState();
         showToast(`Could not restore your session: ${error.message}`);
         showView('auth');
+        history.replaceState(null, '', '#/login');
       }
     }
 
