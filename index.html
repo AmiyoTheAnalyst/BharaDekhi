@@ -573,6 +573,80 @@
       60% { transform: scale(1.15); }
       100% { transform: scale(1); }
     }
+
+    /* =========================================================
+       Hero Section Interactive Dhaka Transit Stage Animations
+       ========================================================= */
+    .hero-aurora-glow {
+      position: absolute;
+      top: -20%;
+      right: -8%;
+      width: 24rem;
+      height: 24rem;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.28) 0%, rgba(14, 165, 233, 0.12) 50%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+      animation: auroraPulse 8s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    html[data-theme="dark"] .hero-aurora-glow {
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(37, 99, 235, 0.18) 50%, transparent 70%);
+    }
+    @keyframes auroraPulse {
+      0% { transform: scale(0.9) translate(0, 0); opacity: 0.6; }
+      50% { transform: scale(1.18) translate(-15px, 12px); opacity: 0.95; }
+      100% { transform: scale(1) translate(12px, -8px); opacity: 0.7; }
+    }
+
+    .hero-visual-stage {
+      perspective: 900px;
+    }
+    .hero-stage-card {
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+      will-change: transform;
+    }
+    html[data-theme="dark"] .hero-stage-card {
+      background: rgba(15, 23, 42, 0.72) !important;
+      border-color: rgba(56, 189, 248, 0.22) !important;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    }
+    .hero-highway-stream {
+      animation: dashStream 2s linear infinite;
+    }
+    @keyframes dashStream {
+      to {
+        stroke-dashoffset: -38;
+      }
+    }
+    .hero-chip-mrt {
+      animation: heroFloatOne 4.5s ease-in-out infinite;
+    }
+    .hero-chip-rate {
+      animation: heroFloatTwo 5.2s ease-in-out infinite;
+    }
+    @keyframes heroFloatOne {
+      0%, 100% { transform: translateY(0px) rotate(0.5deg); }
+      50% { transform: translateY(-6px) rotate(-0.5deg); }
+    }
+    @keyframes heroFloatTwo {
+      0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+      50% { transform: translateY(5px) rotate(0.5deg); }
+    }
+
+    .interactive-step {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+    }
+    .interactive-step:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.18);
+      border-color: #93c5fd;
+    }
+    html[data-theme="dark"] .interactive-step:hover {
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+      border-color: #60a5fa;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -727,14 +801,127 @@
       </button>
     </div>
 
-    <section class="planner-hero" aria-labelledby="tripPlannerPageHeading">
-      <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-700">Dhaka trip planner</p>
-      <h2 id="tripPlannerPageHeading" class="mt-3 font-black text-slate-900">Plan your next Dhaka trip</h2>
-      <p class="mt-3 text-sm leading-relaxed text-slate-600">Choose where you’re going, compare fares and travel times, then pick the route that works for you.</p>
-      <div class="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
-        <span class="planner-step inline-flex items-center gap-2 rounded-full px-3 py-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">1</span> Choose your route</span>
-        <span class="planner-step inline-flex items-center gap-2 rounded-full px-3 py-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">2</span> Compare options</span>
-        <span class="planner-step inline-flex items-center gap-2 rounded-full px-3 py-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">3</span> Pick your ride</span>
+    <section class="planner-hero relative overflow-hidden" aria-labelledby="tripPlannerPageHeading" id="plannerHeroSection">
+      <!-- Ambient animated backdrop glow -->
+      <div class="hero-aurora-glow" aria-hidden="true"></div>
+
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Left Column: Heading & Steps -->
+        <div class="lg:col-span-7">
+          <div class="inline-flex items-center gap-2 rounded-full bg-blue-50/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/70 dark:border-blue-800/60 mb-1">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+            </span>
+            <span>Dhaka trip planner</span>
+          </div>
+
+          <h2 id="tripPlannerPageHeading" class="mt-2 font-black text-slate-900 tracking-tight">Plan your next Dhaka trip</h2>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600">Choose where you’re going, compare fares and travel times, then pick the route that works for you.</p>
+
+          <div class="mt-5 flex flex-wrap gap-2 text-xs font-semibold">
+            <button type="button" class="planner-step interactive-step inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-slate-700 hover:text-blue-700 dark:text-slate-200 dark:hover:text-blue-300 transition" data-step-target="pickupSelect">
+              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-sm">1</span>
+              <span>Choose your route</span>
+            </button>
+            <button type="button" class="planner-step interactive-step inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-slate-700 hover:text-blue-700 dark:text-slate-200 dark:hover:text-blue-300 transition" data-step-target="vehicleComparisonHeading">
+              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-sm">2</span>
+              <span>Compare options</span>
+            </button>
+            <button type="button" class="planner-step interactive-step inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-slate-700 hover:text-blue-700 dark:text-slate-200 dark:hover:text-blue-300 transition" data-step-target="plannerProviderSection">
+              <span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-sm">3</span>
+              <span>Pick your ride</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Animated Dhaka Transit Visual Stage -->
+        <div class="lg:col-span-5 flex justify-center lg:justify-end">
+          <div class="hero-visual-stage relative w-full max-w-sm" id="heroVisualStage">
+            <!-- Central Dhaka Transit Visual Display -->
+            <div class="hero-stage-card relative rounded-2xl border border-white/70 bg-white/75 backdrop-blur-md p-4 shadow-xl dark:border-slate-700/60 dark:bg-slate-900/65">
+              
+              <!-- Transit Scene SVG with animated paths, metro train, and road traffic -->
+              <svg viewBox="0 0 320 180" class="w-full h-auto overflow-visible select-none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="heroRoadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
+                    <stop offset="50%" stop-color="#2563eb" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.3" />
+                  </linearGradient>
+                  <linearGradient id="heroMetroGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#059669" stop-opacity="0.3" />
+                    <stop offset="50%" stop-color="#10b981" stop-opacity="0.95" />
+                    <stop offset="100%" stop-color="#34d399" stop-opacity="0.3" />
+                  </linearGradient>
+                </defs>
+
+                <!-- City skyline silhouette in background -->
+                <path d="M10 135 L25 135 L25 115 L40 115 L40 135 L55 135 L55 100 L70 100 L70 135 L95 135 L95 90 L115 90 L115 135 L135 135 L135 105 L150 105 L150 135 L180 135 L180 85 L200 85 L200 135 L225 135 L225 110 L245 110 L245 135 L270 135 L270 95 L285 95 L285 135 L310 135" 
+                      fill="none" stroke="currentColor" stroke-width="1.5" class="text-slate-300 dark:text-slate-700/60 opacity-40" />
+
+                <!-- Road Viaduct / Flyover Curve (Dhaka Expressway) -->
+                <path id="heroRoadPath" d="M15 145 C90 145, 120 75, 200 75 C260 75, 280 115, 305 115" 
+                      fill="none" stroke="url(#heroRoadGrad)" stroke-width="5" stroke-linecap="round" />
+                
+                <!-- Animated Road Glow Dash Pulse -->
+                <path d="M15 145 C90 145, 120 75, 200 75 C260 75, 280 115, 305 115" 
+                      fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-dasharray="8 30" class="hero-highway-stream" />
+
+                <!-- Metro Rail Elevated Viaduct (Line 6) -->
+                <path id="heroMetroPath" d="M15 45 C100 45, 140 125, 220 125 C270 125, 290 85, 305 85" 
+                      fill="none" stroke="url(#heroMetroGrad)" stroke-width="4" stroke-dasharray="6 4" stroke-linecap="round" opacity="0.85" />
+
+                <!-- Metro Station Pillars -->
+                <line x1="70" y1="47" x2="70" y2="145" stroke="currentColor" stroke-width="2" stroke-dasharray="2 3" class="text-slate-300 dark:text-slate-700/50" />
+                <line x1="160" y1="100" x2="160" y2="155" stroke="currentColor" stroke-width="2" stroke-dasharray="2 3" class="text-slate-300 dark:text-slate-700/50" />
+                <line x1="250" y1="115" x2="250" y2="155" stroke="currentColor" stroke-width="2" stroke-dasharray="2 3" class="text-slate-300 dark:text-slate-700/50" />
+
+                <!-- Animated Metro Train (Glides along Metro Rail) -->
+                <g class="hero-metro-train">
+                  <animateMotion dur="8s" repeatCount="indefinite" rotate="auto" path="M 15 45 C 100 45, 140 125, 220 125 C 270 125, 290 85, 305 85" keyTimes="0;0.5;1" keyPoints="0;1;0" />
+                  <rect x="-14" y="-5" width="28" height="10" rx="3" fill="#10b981" />
+                  <rect x="-10" y="-3" width="5" height="6" rx="1" fill="#ecfdf5" />
+                  <rect x="-2" y="-3" width="5" height="6" rx="1" fill="#ecfdf5" />
+                  <rect x="6" y="-3" width="5" height="6" rx="1" fill="#ecfdf5" />
+                  <circle cx="13" cy="0" r="1.5" fill="#fef08a" />
+                </g>
+
+                <!-- Animated Commute Vehicle (glides along highway) -->
+                <g class="hero-road-vehicle">
+                  <animateMotion dur="5.5s" repeatCount="indefinite" rotate="auto" path="M 15 145 C 90 145, 120 75, 200 75 C 260 75, 280 115, 305 115" />
+                  <circle cx="0" cy="0" r="7" fill="#2563eb" />
+                  <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
+                  <polygon points="6,-2.5 13,-6 13,6 6,2.5" fill="rgba(96, 165, 250, 0.45)" />
+                </g>
+
+                <!-- Station Hub Rings -->
+                <g transform="translate(68, 46)">
+                  <circle cx="0" cy="0" r="5" fill="#10b981" />
+                  <circle cx="0" cy="0" r="10" fill="none" stroke="#10b981" stroke-width="1.5" class="animate-ping opacity-60" />
+                </g>
+                <g transform="translate(250, 115)">
+                  <circle cx="0" cy="0" r="5" fill="#3b82f6" />
+                  <circle cx="0" cy="0" r="10" fill="none" stroke="#3b82f6" stroke-width="1.5" class="animate-ping opacity-60" />
+                </g>
+              </svg>
+
+              <!-- Floating Live Metric Chips -->
+              <div class="hero-chip-mrt absolute -top-3 -right-2 flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-white/95 px-2.5 py-1 text-[11px] font-bold text-emerald-800 shadow-md backdrop-blur-md dark:border-emerald-700/60 dark:bg-emerald-950/90 dark:text-emerald-300">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>MRT Line 6 Active</span>
+              </div>
+
+              <div class="hero-chip-rate absolute -bottom-3 -left-2 flex items-center gap-1.5 rounded-full border border-blue-300/80 bg-white/95 px-2.5 py-1 text-[11px] font-bold text-blue-800 shadow-md backdrop-blur-md dark:border-blue-700/60 dark:bg-blue-950/90 dark:text-blue-300">
+                <span class="text-xs">⚡</span>
+                <span>Live Route & Fare Engine</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -833,9 +1020,9 @@
             <button id="mapSetDestinationBtn" type="button" aria-pressed="false" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Set destination</button>
             <span id="mapSelectionStatus" class="text-xs text-slate-500" aria-live="polite">Choose pickup or destination, then tap the map.</span>
           </div>
-          <button id="replayRouteBtn" type="button" aria-label="Animate trip" title="Animate route and vehicle" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition">
-            <i data-lucide="play" class="w-3.5 h-3.5 text-blue-600"></i>
-            <span id="replayBtnText">Animate trip</span>
+          <button id="toggleAnimBtn" type="button" aria-label="Stop animation" title="Stop route animation" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition">
+            <i id="toggleAnimIcon" data-lucide="pause" class="w-3.5 h-3.5 text-rose-500 fill-rose-500"></i>
+            <span id="toggleAnimText">Stop animation</span>
           </button>
         </div>
         <div id="map"></div>
@@ -1510,6 +1697,11 @@
       'Animate trip': 'যাত্রা অ্যানিমেট করুন',
       'Animate route': 'রুট অ্যানিমেট করুন',
       'Animate route and vehicle': 'রুট ও যানবাহন অ্যানিমেশন দেখুন',
+      'Stop animation': 'অ্যানিমেশন বন্ধ করুন',
+      'Play animation': 'অ্যানিমেশন চালু করুন',
+      'Stop route animation': 'রুট অ্যানিমেশন বন্ধ করুন',
+      'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
+      'Live Route & Fare Engine': 'লাইভ রুট ও ভাড়ার হিসাব',
       'Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:00–8:00 PM). Peak estimates use a 1.4x–2.2x band; rain is detected automatically using Open-Meteo current weather data for central Dhaka and adds a stacked 1.3x–1.5x uplift. Weather checks refresh every 15 minutes. If weather is unavailable, automatic mode leaves the rain uplift off and shows an unavailable status; the selector can force rain on or off. Metro and local bus fares do not use the rain uplift. The route tile shows OSRM duration; vehicle comparison times use estimated average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by mode (Bike 0.85x, CNG 1.15x, Car 1.0x). Fare estimates still use OSRM distance and duration.': 'এগুলো তুলনার জন্য আনুমানিক হিসাব, সরাসরি ভাড়া নয়। ঢাকার পিক সময় আনুমানিক সকাল ৮:৩০–১০:৩০ এবং বিকেল ৫টা–রাত ৮টা। পিক ভাড়ার আনুমানিক সীমা ১.৪x–২.২x; মধ্য ঢাকার বর্তমান আবহাওয়ার Open-Meteo তথ্য দিয়ে বৃষ্টি স্বয়ংক্রিয়ভাবে শনাক্ত করে এর সঙ্গে ১.৩x–১.৫x অতিরিক্ত গুণক যোগ হয়। প্রতি ১৫ মিনিটে আবহাওয়া যাচাই হয়। আবহাওয়ার তথ্য না পাওয়া গেলে স্বয়ংক্রিয় মোডে বৃষ্টির অতিরিক্ত ভাড়া বন্ধ থাকে এবং তথ্য না পাওয়ার অবস্থা দেখায়; নির্বাচক দিয়ে বৃষ্টির ভাড়া চালু বা বন্ধ করা যায়। মেট্রো ও লোকাল বাসের ভাড়ায় বৃষ্টির অতিরিক্ত ভাড়া প্রযোজ্য নয়। রুট টাইল OSRM-এর সময় দেখায়; যানবাহনের তুলনামূলক সময় পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতির ভিত্তিতে, যানবাহন অনুযায়ী সমন্বয় করে হিসাব করা হয় (বাইক ০.৮৫x, সিএনজি ১.১৫x, গাড়ি ১.০x)। ভাড়ার হিসাব OSRM দূরত্ব ও সময় ব্যবহার করে।',
       'Available Services & Fares': 'উপলভ্য সেবা ও ভাড়া',
       'Click to compare & launch': 'তুলনা করতে ও অ্যাপ খুলতে চাপ দিন',
@@ -1705,6 +1897,7 @@
       if (typeof renderTravelShortcuts === 'function') renderTravelShortcuts();
       if (typeof renderCurrentLocationStatus === 'function') renderCurrentLocationStatus();
       if (typeof renderMapSelectionControls === 'function') renderMapSelectionControls();
+      if (typeof updateAnimToggleButton === 'function') updateAnimToggleButton();
       if (typeof renderBusRouteFinder === 'function') renderBusRouteFinder();
       if (typeof applyTheme === 'function') applyTheme();
     }
@@ -2436,7 +2629,9 @@
     let map, pickupMarker, dropMarker, routePolyline;
     let vehicleMarker = null;
     let routeAnimFrame = null;
+    let routeLoopTimeout = null;
     let isRouteAnimating = false;
+    let isAnimEnabled = true; // automated by default
     let latestRouteCoords = null;
     let lastVehicleHeading = 0;
 
@@ -2531,6 +2726,10 @@
         cancelAnimationFrame(routeAnimFrame);
         routeAnimFrame = null;
       }
+      if (routeLoopTimeout) {
+        clearTimeout(routeLoopTimeout);
+        routeLoopTimeout = null;
+      }
 
       // Precalculate cumulative distances
       const cumDists = [0];
@@ -2570,14 +2769,26 @@
         return;
       }
 
-      const duration = 1200; // ms
+      // Slower, smooth and realistic transit duration (6 seconds)
+      const duration = 6000;
       const startTime = performance.now();
       isRouteAnimating = true;
 
       function step(now) {
+        if (!isAnimEnabled) {
+          isRouteAnimating = false;
+          routeAnimFrame = null;
+          return;
+        }
+
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / duration);
-        const ease = 1 - Math.pow(1 - progress, 3);
+        // Linear-to-smooth progression for realistic steady cruising
+        const ease = progress < 0.1
+          ? (progress / 0.1) * (progress / 0.1) * 0.1
+          : progress > 0.9
+          ? 0.9 + (1 - Math.pow((1 - progress) / 0.1, 2)) * 0.1
+          : progress;
         const targetDist = totalDist * ease;
 
         let segIdx = 0;
@@ -2621,10 +2832,71 @@
           }
           isRouteAnimating = false;
           routeAnimFrame = null;
+
+          // Automated continuous loop: pause at destination for 1.4s then loop again
+          if (isAnimEnabled && latestRouteCoords && latestRouteCoords.length > 1) {
+            routeLoopTimeout = setTimeout(() => {
+              if (isAnimEnabled && latestRouteCoords) {
+                animateRouteAndVehicle(latestRouteCoords, selectedVehicle);
+              }
+            }, 1400);
+          }
         }
       }
 
       routeAnimFrame = requestAnimationFrame(step);
+    }
+
+    function toggleRouteAnimation() {
+      if (isAnimEnabled) {
+        // Stop animation
+        isAnimEnabled = false;
+        if (routeAnimFrame) {
+          cancelAnimationFrame(routeAnimFrame);
+          routeAnimFrame = null;
+        }
+        if (routeLoopTimeout) {
+          clearTimeout(routeLoopTimeout);
+          routeLoopTimeout = null;
+        }
+        isRouteAnimating = false;
+        if (routePolyline && latestRouteCoords) {
+          routePolyline.setLatLngs(latestRouteCoords);
+        }
+        if (vehicleMarker && latestRouteCoords && latestRouteCoords.length > 0) {
+          vehicleMarker.setLatLng(latestRouteCoords[latestRouteCoords.length - 1]);
+        }
+        updateAnimToggleButton();
+      } else {
+        // Resume animation
+        isAnimEnabled = true;
+        updateAnimToggleButton();
+        if (latestRouteCoords && latestRouteCoords.length > 1) {
+          animateRouteAndVehicle(latestRouteCoords, selectedVehicle);
+        }
+      }
+    }
+
+    function updateAnimToggleButton() {
+      const btn = document.getElementById('toggleAnimBtn');
+      const text = document.getElementById('toggleAnimText');
+      const icon = document.getElementById('toggleAnimIcon');
+      if (!btn || !text || !icon) return;
+
+      if (isAnimEnabled) {
+        text.textContent = getLocalizedText('Stop animation');
+        btn.setAttribute('aria-label', getLocalizedText('Stop animation'));
+        btn.title = getLocalizedText('Stop route animation');
+        icon.setAttribute('data-lucide', 'pause');
+        icon.className = 'w-3.5 h-3.5 text-rose-500 fill-rose-500';
+      } else {
+        text.textContent = getLocalizedText('Play animation');
+        btn.setAttribute('aria-label', getLocalizedText('Play animation'));
+        btn.title = getLocalizedText('Play animation');
+        icon.setAttribute('data-lucide', 'play');
+        icon.className = 'w-3.5 h-3.5 text-blue-600 fill-blue-600';
+      }
+      lucide.createIcons();
     }
 
     // 2. Initialize Leaflet Map
@@ -2772,7 +3044,28 @@
           latestRouteCoords = coords;
           const bounds = L.latLngBounds(coords);
           map.fitBounds(bounds, { padding: [30, 30] });
-          animateRouteAndVehicle(coords, selectedVehicle);
+          if (isAnimEnabled) {
+            animateRouteAndVehicle(coords, selectedVehicle);
+          } else {
+            if (routePolyline) map.removeLayer(routePolyline);
+            routePolyline = L.polyline(coords, {
+              color: '#2563eb',
+              weight: 6,
+              opacity: 0.85,
+              lineCap: 'round',
+              lineJoin: 'round',
+              className: 'animated-route-polyline'
+            }).addTo(map);
+            if (!vehicleMarker) {
+              vehicleMarker = L.marker(coords[coords.length - 1], {
+                icon: getVehicleIcon(selectedVehicle, 0),
+                zIndexOffset: 1000
+              }).addTo(map);
+            } else {
+              vehicleMarker.setLatLng(coords[coords.length - 1]);
+              vehicleMarker.setIcon(getVehicleIcon(selectedVehicle, 0));
+            }
+          }
         } else {
           throw new Error('No route found for the selected locations.');
         }
@@ -2786,7 +3079,13 @@
         latestRouteCoords = fallbackCoords;
         const bounds = L.latLngBounds(fallbackCoords);
         map.fitBounds(bounds, { padding: [30, 30] });
-        animateRouteAndVehicle(fallbackCoords, selectedVehicle);
+        if (isAnimEnabled) {
+          animateRouteAndVehicle(fallbackCoords, selectedVehicle);
+        } else {
+          if (routePolyline) map.removeLayer(routePolyline);
+          routePolyline = L.polyline(fallbackCoords, { color: '#2563eb', dashArray: '5, 10' }).addTo(map);
+          if (vehicleMarker) vehicleMarker.setLatLng(fallbackCoords[1]);
+        }
       } finally {
         if (requestId !== routeUpdateId) return;
         document.getElementById('loadingOverlay').classList.add('hidden');
@@ -3840,11 +4139,43 @@
     document.getElementById('useCurrentLocationBtn').addEventListener('click', useCurrentLocation);
     document.getElementById('mapSetPickupBtn').addEventListener('click', () => setMapSelectionTarget('pickup'));
     document.getElementById('mapSetDestinationBtn').addEventListener('click', () => setMapSelectionTarget('destination'));
-    document.getElementById('replayRouteBtn').addEventListener('click', () => {
-      if (latestRouteCoords && latestRouteCoords.length > 1) {
-        animateRouteAndVehicle(latestRouteCoords, selectedVehicle);
-      }
+    document.getElementById('toggleAnimBtn').addEventListener('click', toggleRouteAnimation);
+
+    // Hero Section interactive steps click-to-scroll
+    document.querySelectorAll('.interactive-step').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.stepTarget;
+        if (!targetId) return;
+        const target = targetId === 'plannerProviderSection'
+          ? document.querySelector('.planner-provider-section')
+          : document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
+
+    // Hero 3D interactive tilt
+    const heroVisual = document.getElementById('heroVisualStage');
+    if (heroVisual) {
+      heroVisual.addEventListener('mousemove', (e) => {
+        const rect = heroVisual.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const tiltX = (y / (rect.height / 2)) * -6;
+        const tiltY = (x / (rect.width / 2)) * 6;
+        const card = heroVisual.querySelector('.hero-stage-card');
+        if (card) {
+          card.style.transform = `perspective(800px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+        }
+      });
+      heroVisual.addEventListener('mouseleave', () => {
+        const card = heroVisual.querySelector('.hero-stage-card');
+        if (card) {
+          card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        }
+      });
+    }
     document.getElementById('savePlaceForm').addEventListener('submit', handleSavePlace);
     document.getElementById('savedPlacesList').addEventListener('click', handleSavedPlacesClick);
     document.getElementById('recentTripsList').addEventListener('click', handleRecentTripsClick);
