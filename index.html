@@ -1021,6 +1021,116 @@
       box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.45), 0 20px 45px -10px rgba(16, 185, 129, 0.3) !important;
       background: linear-gradient(180deg, #09261f 0%, #091124 100%) !important;
     }
+
+    /* Classy Animated Hover for Ride & Transit Options (Pictures 2 & 3) */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .ride-option-hover-card {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.25s ease,
+                  background 0.25s ease;
+      will-change: transform, box-shadow;
+      position: relative;
+    }
+    .ride-option-hover-card:hover {
+      transform: translateY(-7px) scale(1.02);
+      z-index: 20;
+    }
+
+    #comparisonBike.ride-option-hover-card:hover {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 22px 35px -8px rgba(14, 165, 233, 0.35), 0 0 25px rgba(56, 189, 248, 0.2) !important;
+    }
+    html[data-theme="dark"] #comparisonBike.ride-option-hover-card:hover {
+      background: linear-gradient(180deg, #0e2447 0%, #0b1528 100%) !important;
+    }
+
+    #comparisonCNG.ride-option-hover-card:hover {
+      border-color: #34d399 !important;
+      box-shadow: 0 22px 35px -8px rgba(16, 185, 129, 0.35), 0 0 25px rgba(52, 211, 153, 0.2) !important;
+    }
+    html[data-theme="dark"] #comparisonCNG.ride-option-hover-card:hover {
+      background: linear-gradient(180deg, #092e22 0%, #0b1528 100%) !important;
+    }
+
+    #comparisonCar.ride-option-hover-card:hover {
+      border-color: #818cf8 !important;
+      box-shadow: 0 22px 35px -8px rgba(99, 102, 241, 0.35), 0 0 25px rgba(129, 140, 248, 0.2) !important;
+    }
+    html[data-theme="dark"] #comparisonCar.ride-option-hover-card:hover {
+      background: linear-gradient(180deg, #1d1f4b 0%, #0b1528 100%) !important;
+    }
+
+    #cardMetroOption.ride-option-hover-card:hover {
+      transform: translateY(-7px) scale(1.02);
+      border-color: #38bdf8 !important;
+      box-shadow: 0 24px 45px -10px rgba(14, 165, 233, 0.45), 0 0 30px rgba(56, 189, 248, 0.3) !important;
+      background: linear-gradient(180deg, #0e2347 0%, #091124 100%) !important;
+    }
+
+    #cardBusOption.ride-option-hover-card:hover {
+      transform: translateY(-7px) scale(1.02);
+      border-color: #34d399 !important;
+      box-shadow: 0 24px 45px -10px rgba(16, 185, 129, 0.45), 0 0 30px rgba(52, 211, 153, 0.3) !important;
+      background: linear-gradient(180deg, #0b2c22 0%, #091124 100%) !important;
+    }
+
+    .ride-option-hover-card:hover .ride-icon-badge {
+      transform: scale(1.18) rotate(4deg);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ride-option-hover-card:hover button {
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    }
+
+    /* 3D Futuristic Dhaka City Routes Animation Showcase (Picture 5) */
+    .dhaka-cyber-showcase {
+      perspective: 1200px;
+      background: radial-gradient(circle at 50% 30%, #0d234d 0%, #071026 50%, #030611 100%);
+      box-shadow: 0 25px 50px -12px rgba(2, 6, 23, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    @keyframes neonDashFlow {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -60; }
+    }
+    .neon-dash-flow {
+      animation: neonDashFlow 1.2s linear infinite;
+    }
+    @keyframes compassNeedleOscillate {
+      0%, 100% { transform: rotate(-8deg); }
+      50% { transform: rotate(12deg); }
+    }
+    .compass-needle-anim {
+      transform-origin: center;
+      animation: compassNeedleOscillate 4s ease-in-out infinite;
+    }
+    @keyframes radarPulseRing {
+      0% { transform: scale(0.85); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.3; }
+      100% { transform: scale(0.85); opacity: 0.8; }
+    }
+    .radar-pulse-ring {
+      animation: radarPulseRing 3s ease-in-out infinite;
+      transform-origin: center;
+    }
+    @keyframes waypointFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .waypoint-pin-float {
+      animation: waypointFloat 3s ease-in-out infinite;
+    }
+    .animate-spin-slow {
+      animation: spin 8s linear infinite;
+    }
+
     .transit-inner-card {
       background: rgba(14, 25, 52, 0.75);
       border: 1px solid rgba(71, 85, 105, 0.35);
@@ -1079,7 +1189,7 @@
 
   <!-- Header -->
   <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 flex items-center justify-between gap-1.5 sm:gap-2 flex-nowrap overflow-x-auto no-scrollbar">
       <div class="flex items-center gap-2 shrink-0">
         <a href="./index.html" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
           <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
@@ -1091,7 +1201,7 @@
       </div>
       
       <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
-      <div class="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
+      <div class="flex items-center justify-end gap-1 sm:gap-1.5 shrink-0">
         <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm shrink-0 whitespace-nowrap" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
           <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span>FAQ</span>
@@ -1361,15 +1471,247 @@
 
   <!-- User Dashboard -->
   <main id="userDashboardView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 space-y-6">
-    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
-      <div>
-        <p class="text-xs uppercase tracking-wide text-slate-500">Welcome back</p>
-        <h3 id="userGreeting" class="text-lg font-bold text-slate-900">User</h3>
+
+    <!-- 1. POST-LOGIN DHAKA CITY ROUTES ANIMATION SHOWCASE SECTION (Picture 5) -->
+    <section id="userShowcaseSection" class="space-y-6 transition-all duration-500">
+      <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+            <i data-lucide="compass" class="w-5 h-5 animate-spin-slow"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Welcome back</p>
+              <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-500 border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Transit Hub Active
+              </span>
+            </div>
+            <h3 id="userGreeting" class="text-lg font-bold text-slate-900 dark:text-white">User</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openTripPlannerView()" class="hidden sm:inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition shadow-md shadow-blue-600/20 active:scale-95">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+            <span>Open Planner</span>
+          </button>
+          <button id="logoutBtn" type="button" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs px-3.5 py-2 rounded-xl transition">
+            Logout
+          </button>
+        </div>
       </div>
-      <button id="logoutBtn" type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl transition">
-        Logout
-      </button>
-    </div>
+
+      <!-- Classy Futuristic Dhaka City Routes Animation Showcase -->
+      <div class="dhaka-cyber-showcase relative overflow-hidden rounded-3xl border border-sky-500/20 p-5 md:p-8 text-white shadow-2xl">
+        <!-- Top HUD Bar: Compass & Telemetry -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 relative z-20">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-950/80 border border-sky-500/40 text-sky-300 text-xs font-bold backdrop-blur-md shadow-inner">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span class="tracking-wide">DHAKA TRANSIT GRID</span>
+            </div>
+            <span class="text-xs text-slate-400 hidden sm:inline-block">MRT-6 • Flyover Corridors • City Express</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Compass HUD -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/80 text-xs font-semibold backdrop-blur-md">
+              <svg class="w-4 h-4 text-sky-400 compass-needle-anim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15 12 12 10 9 12 12 2" fill="#38bdf8"></polygon>
+                <polygon points="12 22 9 12 12 14 15 12 12 22" fill="#64748b"></polygon>
+                <circle cx="12" cy="12" r="2" fill="#ffffff"></circle>
+              </svg>
+              <span class="font-mono text-[11px] text-slate-300">N 23.81°</span>
+            </div>
+            <!-- Speed HUD -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/80 text-xs font-semibold backdrop-blur-md">
+              <i data-lucide="gauge" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span class="font-mono text-[11px] text-emerald-300">42 km/h</span>
+              <span class="text-[10px] text-slate-400">Flow</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Perspective Dhaka City Neon Highway Canvas -->
+        <div class="relative w-full aspect-[21/9] min-h-[300px] max-h-[460px] flex items-center justify-center select-none overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-sm">
+          <!-- Neon Grid Floor Background -->
+          <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: linear-gradient(rgba(56, 189, 248, 0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.25) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg) translateY(20px);"></div>
+
+          <!-- SVG City Corridors & Animated Vehicle -->
+          <svg viewBox="0 0 1000 450" class="w-full h-full object-cover relative z-10">
+            <defs>
+              <linearGradient id="cyberSkylineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"/>
+              </linearGradient>
+              <linearGradient id="cyberRibbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0284c7" stop-opacity="0.4"/>
+                <stop offset="25%" stop-color="#0ea5e9" stop-opacity="0.9"/>
+                <stop offset="50%" stop-color="#38bdf8" stop-opacity="1"/>
+                <stop offset="75%" stop-color="#10b981" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#059669" stop-opacity="0.4"/>
+              </linearGradient>
+              <linearGradient id="cyberFeederGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+                <stop offset="50%" stop-color="#34d399" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.2"/>
+              </linearGradient>
+              <filter id="cyberGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="8" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="headlightGlow">
+                <feGaussianBlur stdDeviation="5"/>
+              </filter>
+            </defs>
+
+            <!-- Distant Skyline Silhouettes -->
+            <path d="M 40,240 L 65,240 L 65,190 L 95,190 L 95,240 L 130,240 L 130,170 L 165,170 L 165,240 L 210,240 L 210,150 L 245,150 L 245,240 L 300,240 L 300,185 L 340,185 L 340,240 L 410,240 L 410,130 L 450,130 L 450,240 L 530,240 L 530,165 L 570,165 L 570,240 L 650,240 L 650,140 L 690,140 L 690,240 L 770,240 L 770,180 L 810,180 L 810,240 L 880,240 L 880,160 L 915,160 L 915,240 L 960,240" fill="url(#cyberSkylineGrad)" stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.3"/>
+
+            <!-- Secondary Feeder Paths (Green & Amber) -->
+            <path d="M 120,380 C 220,350 280,310 370,270" fill="none" stroke="url(#cyberFeederGrad)" stroke-width="3" stroke-dasharray="6 6" class="neon-dash-flow opacity-70"/>
+            <path d="M 640,210 C 720,240 820,310 900,360" fill="none" stroke="url(#cyberFeederGrad)" stroke-width="3" stroke-dasharray="6 6" class="neon-dash-flow opacity-70"/>
+
+            <!-- Main Dhaka Cyber Highway & Metro Line 6 Corridor (Motion Path) -->
+            <!-- Ribbon Base (Outer Glow) -->
+            <path d="M 60,340 C 200,380 260,240 450,250 C 620,260 720,150 940,180" fill="none" stroke="#0284c7" stroke-width="16" opacity="0.25" filter="url(#cyberGlow)"/>
+            <!-- Highway Deck Ribbon -->
+            <path id="dhakaMotionRibbon" d="M 60,340 C 200,380 260,240 450,250 C 620,260 720,150 940,180" fill="none" stroke="url(#cyberRibbonGrad)" stroke-width="8" stroke-linecap="round"/>
+            <!-- Center Glowing Dash Flow -->
+            <path d="M 60,340 C 200,380 260,240 450,250 C 620,260 720,150 940,180" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="14 36" class="neon-dash-flow" filter="url(#cyberGlow)"/>
+
+            <!-- Cruising Commuter Cyber Vehicle along Motion Path -->
+            <g>
+              <g transform="translate(-18, -10)">
+                <!-- Headlight Beam Cone -->
+                <polygon points="36,10 75,-2 75,22" fill="#fef08a" opacity="0.35" filter="url(#headlightGlow)"/>
+                <!-- Vehicle Body -->
+                <rect x="0" y="3" width="34" height="14" rx="7" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5" filter="url(#cyberGlow)"/>
+                <!-- Cabin Glass -->
+                <rect x="8" y="5" width="16" height="10" rx="4" fill="#38bdf8" opacity="0.9"/>
+                <!-- Tail lights -->
+                <circle cx="2" cy="6" r="2" fill="#ef4444"/>
+                <circle cx="2" cy="14" r="2" fill="#ef4444"/>
+                <!-- Headlights -->
+                <circle cx="33" cy="6" r="2" fill="#fef08a"/>
+                <circle cx="33" cy="14" r="2" fill="#fef08a"/>
+              </g>
+              <!-- AnimateMotion along the ribbon -->
+              <animateMotion dur="7s" repeatCount="indefinite" rotate="auto">
+                <mpath href="#dhakaMotionRibbon"/>
+              </animateMotion>
+            </g>
+
+            <!-- Waypoint Station Nodes along the Dhaka Transit Ribbon -->
+            <!-- 1. Uttara North -->
+            <g transform="translate(60, 340)" class="waypoint-pin-float">
+              <circle r="18" fill="#38bdf8" opacity="0.15" class="radar-pulse-ring"/>
+              <circle r="8" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5"/>
+              <circle r="3.5" fill="#ffffff"/>
+              <text x="0" y="-14" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle" filter="url(#cyberGlow)">Uttara North</text>
+              <text x="0" y="24" fill="#38bdf8" font-size="9" font-weight="600" text-anchor="middle">Terminal 1</text>
+            </g>
+
+            <!-- 2. Mirpur 10 -->
+            <g transform="translate(230, 340)" class="waypoint-pin-float" style="animation-delay: -1s;">
+              <circle r="16" fill="#10b981" opacity="0.15" class="radar-pulse-ring"/>
+              <circle r="7" fill="#059669" stroke="#34d399" stroke-width="2.5"/>
+              <circle r="3" fill="#ffffff"/>
+              <text x="0" y="-13" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle" filter="url(#cyberGlow)">Mirpur 10</text>
+              <text x="0" y="22" fill="#34d399" font-size="9" font-weight="600" text-anchor="middle">Hub Interchange</text>
+            </g>
+
+            <!-- 3. Bijoy Sarani / Farmgate -->
+            <g transform="translate(450, 250)" class="waypoint-pin-float" style="animation-delay: -2s;">
+              <circle r="20" fill="#38bdf8" opacity="0.2" class="radar-pulse-ring"/>
+              <circle r="8" fill="#0284c7" stroke="#38bdf8" stroke-width="3"/>
+              <circle r="3.5" fill="#ffffff"/>
+              <text x="0" y="-15" fill="#ffffff" font-size="12" font-weight="900" text-anchor="middle" filter="url(#cyberGlow)">Bijoy Sarani</text>
+              <text x="0" y="24" fill="#7dd3fc" font-size="9" font-weight="600" text-anchor="middle">MRT-6 Center</text>
+            </g>
+
+            <!-- 4. Dhaka University -->
+            <g transform="translate(680, 205)" class="waypoint-pin-float" style="animation-delay: -1.5s;">
+              <circle r="16" fill="#10b981" opacity="0.15" class="radar-pulse-ring"/>
+              <circle r="7" fill="#059669" stroke="#34d399" stroke-width="2.5"/>
+              <circle r="3" fill="#ffffff"/>
+              <text x="0" y="-13" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle" filter="url(#cyberGlow)">Dhaka Univ</text>
+              <text x="0" y="22" fill="#34d399" font-size="9" font-weight="600" text-anchor="middle">Campus Hub</text>
+            </g>
+
+            <!-- 5. Motijheel -->
+            <g transform="translate(940, 180)" class="waypoint-pin-float" style="animation-delay: -0.5s;">
+              <circle r="18" fill="#38bdf8" opacity="0.15" class="radar-pulse-ring"/>
+              <circle r="8" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5"/>
+              <circle r="3.5" fill="#ffffff"/>
+              <text x="0" y="-14" fill="#ffffff" font-size="11" font-weight="800" text-anchor="middle" filter="url(#cyberGlow)">Motijheel</text>
+              <text x="0" y="24" fill="#38bdf8" font-size="9" font-weight="600" text-anchor="middle">Commercial Ctr</text>
+            </g>
+          </svg>
+
+          <!-- Floating Glass Overlay: Plan Your Trip CTA -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none z-20">
+            <div class="pointer-events-auto bg-slate-900/85 backdrop-blur-xl border border-sky-400/30 rounded-3xl p-6 sm:p-8 max-w-lg shadow-2xl shadow-black/70 transition-transform duration-300 hover:scale-[1.02]">
+              <div class="inline-flex items-center gap-2 rounded-full bg-sky-500/15 px-3 py-1 text-xs font-bold text-sky-400 border border-sky-400/30 mb-3">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Dhaka Transit Corridors</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                Your Dhaka commute starts here.
+              </h2>
+              <p class="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Select your pickup and destination to compare direct rides, Metro Rail Line 6, feeder connections, and local buses.
+              </p>
+              <div class="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button type="button" onclick="openTripPlannerView()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-blue-500/35 transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer">
+                  <i data-lucide="compass" class="w-4 h-4"></i>
+                  <span>Plan your trip</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Corridor Starter Pills -->
+        <div class="mt-6 pt-5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <span class="text-slate-400 font-semibold flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5 text-sky-400"></i>
+            Popular corridors:
+          </span>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="startCorridorTrip('uttara', 'motijheel')" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-sky-300 border border-slate-700/80 hover:border-sky-500 font-semibold transition active:scale-95 cursor-pointer">
+              ⚡ Uttara ⇄ Motijheel (Metro)
+            </button>
+            <button type="button" onclick="startCorridorTrip('mirpur', 'dhanmondi')" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-emerald-300 border border-slate-700/80 hover:border-emerald-500 font-semibold transition active:scale-95 cursor-pointer">
+              ⚡ Mirpur 10 ⇄ Dhanmondi
+            </button>
+            <button type="button" onclick="startCorridorTrip('azimpur', 'brac')" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-indigo-300 border border-slate-700/80 hover:border-indigo-500 font-semibold transition active:scale-95 cursor-pointer">
+              ⚡ Azimpur ⇄ BRAC University
+            </button>
+            <button type="button" onclick="startCorridorTrip('farmgate', 'gulshan')" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-slate-700/80 hover:border-amber-500 font-semibold transition active:scale-95 cursor-pointer">
+              ⚡ Farmgate ⇄ Gulshan
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TRIP PLANNER SECTION (Revealed smoothly on clicking 'Plan your trip') -->
+    <section id="userPlannerSection" class="hidden space-y-6 transition-all duration-300">
+      <!-- Top banner for returning to City Route Animation -->
+      <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
+        <button type="button" onclick="showDhakaCityShowcase()" class="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3.5 py-2 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span>City Route Animation</span>
+        </button>
+        <div class="text-right">
+          <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Trip Planner</span>
+          <span class="text-xs text-blue-600 dark:text-blue-400 font-medium">Route &amp; Multi-Modal Comparison</span>
+        </div>
+      </div>
 
     <section class="planner-hero relative overflow-hidden reveal-on-scroll" aria-labelledby="tripPlannerPageHeading" id="plannerHeroSection">
       <!-- Ambient animated backdrop glow -->
@@ -1695,10 +2037,10 @@
           <span class="text-xs text-slate-500">Choose a ride to update provider estimates and ride details</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" aria-live="polite">
-          <article id="comparisonBike" class="fare-stagger-card fare-stagger-1 interactive-elevate rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
+          <article id="comparisonBike" class="fare-stagger-card fare-stagger-1 interactive-elevate ride-option-hover-card rounded-xl border border-slate-200 bg-white p-4 cursor-pointer" onclick="setVehicle('Bike')">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-950/80 dark:text-sky-300 shadow-sm">
+                <div class="ride-icon-badge flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700 dark:bg-sky-950/80 dark:text-sky-300 shadow-sm">
                   <i data-lucide="bike" class="h-4 w-4"></i>
                 </div>
                 <div>
@@ -1716,12 +2058,12 @@
             <p id="comparisonBikeFare" class="text-xl font-black text-slate-900">—</p>
             <p class="mt-2 text-xs text-slate-500">Estimated travel time</p>
             <p id="comparisonBikeDuration" class="font-semibold text-slate-800">—</p>
-            <button id="selectBikeVehicle" type="button" aria-pressed="false" onclick="setVehicle('Bike')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose Bike</button>
+            <button id="selectBikeVehicle" type="button" aria-pressed="false" onclick="event.stopPropagation(); setVehicle('Bike')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose Bike</button>
           </article>
-          <article id="comparisonCNG" class="fare-stagger-card fare-stagger-2 interactive-elevate rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
+          <article id="comparisonCNG" class="fare-stagger-card fare-stagger-2 interactive-elevate ride-option-hover-card rounded-xl border border-slate-200 bg-white p-4 cursor-pointer" onclick="setVehicle('CNG')">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 shadow-sm">
+                <div class="ride-icon-badge flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 shadow-sm">
                   <i data-lucide="zap" class="h-4 w-4"></i>
                 </div>
                 <div>
@@ -1739,12 +2081,12 @@
             <p id="comparisonCNGFare" class="text-xl font-black text-slate-900">—</p>
             <p class="mt-2 text-xs text-slate-500">Estimated travel time</p>
             <p id="comparisonCNGDuration" class="font-semibold text-slate-800">—</p>
-            <button id="selectCNGVehicle" type="button" aria-pressed="false" onclick="setVehicle('CNG')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose CNG</button>
+            <button id="selectCNGVehicle" type="button" aria-pressed="false" onclick="event.stopPropagation(); setVehicle('CNG')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose CNG</button>
           </article>
-          <article id="comparisonCar" class="fare-stagger-card fare-stagger-3 interactive-elevate rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
+          <article id="comparisonCar" class="fare-stagger-card fare-stagger-3 interactive-elevate ride-option-hover-card rounded-xl border border-slate-200 bg-white p-4 cursor-pointer" onclick="setVehicle('Car')">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 shadow-sm">
+                <div class="ride-icon-badge flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 shadow-sm">
                   <i data-lucide="car" class="h-4 w-4"></i>
                 </div>
                 <div>
@@ -1762,7 +2104,7 @@
             <p id="comparisonCarFare" class="text-xl font-black text-slate-900">—</p>
             <p class="mt-2 text-xs text-slate-500">Estimated travel time</p>
             <p id="comparisonCarDuration" class="font-semibold text-slate-800">—</p>
-            <button id="selectCarVehicle" type="button" aria-pressed="false" onclick="setVehicle('Car')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose Car</button>
+            <button id="selectCarVehicle" type="button" aria-pressed="false" onclick="event.stopPropagation(); setVehicle('Car')" class="mt-4 w-full rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Choose Car</button>
           </article>
         </div>
         <p class="mt-3 text-xs leading-relaxed text-slate-500">
@@ -1793,11 +2135,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" aria-live="polite">
           
           <!-- CARD A: METRO RAIL -->
-          <article id="cardMetroOption" class="transit-navy-card p-4 md:p-5 rounded-2xl border border-slate-800 hover:border-sky-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group shadow-lg shadow-black/20" onclick="togglePublicTransportMode('metro')">
+          <article id="cardMetroOption" class="transit-navy-card ride-option-hover-card p-4 md:p-5 rounded-2xl border border-slate-800 hover:border-sky-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group shadow-lg shadow-black/20" onclick="togglePublicTransportMode('metro')">
             <div>
               <div class="flex items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-3">
-                  <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 group-hover:scale-105 group-hover:bg-sky-500/30 transition-transform">
+                  <div class="ride-icon-badge flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 group-hover:scale-105 group-hover:bg-sky-500/30 transition-transform">
                     <span class="text-xl">🚆</span>
                   </div>
                   <div>
@@ -1818,12 +2160,14 @@
               <!-- Metric Grid -->
               <div class="grid grid-cols-2 gap-2 bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 mb-3">
                 <div>
-                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Estimated Fare</span>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Total Route Fare</span>
                   <span id="cardMetroFare" class="text-xl font-black text-sky-400 mt-0.5 block">৳30</span>
+                  <span id="cardMetroFareBreakdown" class="text-[10px] text-slate-400 font-medium block truncate">Metro ৳30</span>
                 </div>
                 <div>
-                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Transit Time</span>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Total Journey Time</span>
                   <span id="cardMetroDuration" class="text-sm font-bold text-slate-200 mt-1 block">~8 mins</span>
+                  <span id="cardMetroDurationSub" class="text-[10px] text-slate-400 font-medium block truncate">(MRT + Feeder)</span>
                 </div>
               </div>
 
@@ -1842,11 +2186,11 @@
           </article>
 
           <!-- CARD B: LOCAL BUS -->
-          <article id="cardBusOption" class="transit-navy-card p-4 md:p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group shadow-lg shadow-black/20" onclick="togglePublicTransportMode('bus')">
+          <article id="cardBusOption" class="transit-navy-card ride-option-hover-card p-4 md:p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group shadow-lg shadow-black/20" onclick="togglePublicTransportMode('bus')">
             <div>
               <div class="flex items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-3">
-                  <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 group-hover:scale-105 group-hover:bg-emerald-500/30 transition-transform">
+                  <div class="ride-icon-badge flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 group-hover:scale-105 group-hover:bg-emerald-500/30 transition-transform">
                     <span class="text-xl">🚌</span>
                   </div>
                   <div>
@@ -1869,10 +2213,12 @@
                 <div>
                   <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Estimated Fare</span>
                   <span id="cardBusFare" class="text-xl font-black text-emerald-400 mt-0.5 block">৳25 - ৳35</span>
+                  <span id="cardBusFareBreakdown" class="text-[10px] text-slate-400 font-medium block truncate">City corridor</span>
                 </div>
                 <div>
                   <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Journey Time</span>
                   <span id="cardBusDuration" class="text-sm font-bold text-slate-200 mt-1 block">~35 mins</span>
+                  <span id="cardBusDurationSub" class="text-[10px] text-slate-400 font-medium block truncate">Direct / Transfer</span>
                 </div>
               </div>
 
@@ -2491,6 +2837,8 @@
       </p>
     </footer>
 
+    </section> <!-- /userPlannerSection -->
+
   </main>
 
   <!-- Admin Dashboard -->
@@ -2724,7 +3072,7 @@
       'Could not save theme preference.': 'থিম পছন্দ সংরক্ষণ করা যায়নি।',
       'Rain fare': 'বৃষ্টির ভাড়া',
       'Weather data by Open-Meteo.com': 'Open-Meteo.com-এর আবহাওয়ার তথ্য',
-      'Auto (Dhaka weather)': 'স্বয়ংক্রিয় (ঢাকার আবহাওয়া)',
+      'Auto (Dhaka weather)': 'আবহাওয়া',
       'Always apply rain fare': 'সবসময় বৃষ্টির ভাড়া',
       'Never apply rain fare': 'কখনো বৃষ্টির ভাড়া নয়',
       'Checking Dhaka weather…': 'ঢাকার আবহাওয়া দেখা হচ্ছে…',
@@ -3022,6 +3370,20 @@
       'Hide Bus Routes': 'বাস রুট বন্ধ করুন',
       'Close Planner': 'প্ল্যানার বন্ধ করুন',
       'Active': 'সক্রিয়',
+      'Total Route Fare': 'মোট রুট ভাড়া',
+      'Total Journey Time': 'মোট যাত্রার সময়',
+      'Plan your trip': 'যাত্রা পরিকল্পনা করুন',
+      'City Route Animation': 'শহরের রুট অ্যানিমেশন',
+      'Open Planner': 'প্ল্যানার খুলুন',
+      'Popular corridors:': 'জনপ্রিয় রুটসমূহ:',
+      'Dhaka Transit Corridors': 'ঢাকার ট্রানজিট করিডোর',
+      'Direct city corridor': 'সরাসরি নগর করিডোর',
+      'Direct bus transit': 'সরাসরি বাস যাত্রা',
+      'Bus + Feeder transfer': 'বাস ও ফিডার সংযোগ',
+      'No service': 'সেবা নেই',
+      'Feeder from': 'ফিডার',
+      'Feeders': 'ফিডার সংযোগ',
+      'Transit Hub Active': 'সক্রিয় ট্রানজিট হাব',
       'Estimated Fare': 'আনুমানিক ভাড়া',
       'Transit Time': 'ভ্রমণের সময়',
       'Journey Time': 'যাত্রার সময়',
@@ -6038,15 +6400,48 @@
       const calculatedMrtFare = hasMrtPass ? Math.round(standardMrtFare * 0.9) : standardMrtFare;
       const mrtDuration = Math.max(4, stationIntervals * 2.5);
 
+      // First & last mile feeder calculations for total lowest route fare
+      const firstMileOptions = getFeederOptions(pickupStation.distanceKm, isPeak).filter(o => o.isAvailable !== false);
+      const lastMileOptions = getFeederOptions(destinationStation.distanceKm, isPeak).filter(o => o.isAvailable !== false);
+
+      const firstMile = firstMileOptions.find(o => o.vehicle === selectedMrtFirstMileMode) || firstMileOptions[0];
+      const lastMile = lastMileOptions.find(o => o.vehicle === selectedMrtLastMileMode) || lastMileOptions[0];
+
+      const f1Min = firstMile ? firstMile.fareMin : 0;
+      const f1Max = firstMile ? firstMile.fareMax : 0;
+      const f2Min = lastMile ? lastMile.fareMin : 0;
+      const f2Max = lastMile ? lastMile.fareMax : 0;
+
+      const totalRouteFareMin = calculatedMrtFare + f1Min + f2Min;
+      const totalRouteFareMax = calculatedMrtFare + f1Max + f2Max;
+
+      const f1Dur = firstMile ? firstMile.durationMins : 0;
+      const f2Dur = lastMile ? lastMile.durationMins : 0;
+      const totalRouteDuration = Math.round(5 + mrtDuration + f1Dur + f2Dur + 4);
+
       const cardMetroFare = document.getElementById('cardMetroFare');
+      const cardMetroFareBreakdown = document.getElementById('cardMetroFareBreakdown');
       const cardMetroDuration = document.getElementById('cardMetroDuration');
+      const cardMetroDurationSub = document.getElementById('cardMetroDurationSub');
       const cardMetroStations = document.getElementById('cardMetroStations');
 
       if (cardMetroFare) {
-        cardMetroFare.textContent = formatLocalizedFare(calculatedMrtFare);
+        cardMetroFare.textContent = totalRouteFareMin === totalRouteFareMax
+          ? formatLocalizedFare(totalRouteFareMin)
+          : `${formatLocalizedFare(totalRouteFareMin)} - ${formatLocalizedFare(totalRouteFareMax)}`;
+      }
+      if (cardMetroFareBreakdown) {
+        if (f1Min === 0 && f2Min === 0) {
+          cardMetroFareBreakdown.textContent = `${getLocalizedText('Metro')}: ${formatLocalizedFare(calculatedMrtFare)}`;
+        } else {
+          cardMetroFareBreakdown.textContent = `${getLocalizedText('Metro')} ${formatLocalizedFare(calculatedMrtFare)} + ${getLocalizedText('Feeder from')} ${formatLocalizedFare(f1Min + f2Min)}`;
+        }
       }
       if (cardMetroDuration) {
-        cardMetroDuration.textContent = `~${formatLocalizedNumber(Math.round(mrtDuration))} ${getLocalizedText('mins')}`;
+        cardMetroDuration.textContent = `~${formatLocalizedNumber(totalRouteDuration)} ${getLocalizedText('mins')}`;
+      }
+      if (cardMetroDurationSub) {
+        cardMetroDurationSub.textContent = `(${getLocalizedText('MRT')} ~${formatLocalizedNumber(Math.round(mrtDuration))}m + ${getLocalizedText('Feeders')})`;
       }
       if (cardMetroStations) {
         if (stationIntervals === 0) {
@@ -6058,7 +6453,9 @@
 
       // 2. CARD B: Local Bus
       const cardBusFare = document.getElementById('cardBusFare');
+      const cardBusFareBreakdown = document.getElementById('cardBusFareBreakdown');
       const cardBusDuration = document.getElementById('cardBusDuration');
+      const cardBusDurationSub = document.getElementById('cardBusDurationSub');
       const cardBusRouteInfo = document.getElementById('cardBusRouteInfo');
 
       if (!busRouteData) {
@@ -6080,8 +6477,14 @@
               ? formatLocalizedFare(minFare)
               : `${formatLocalizedFare(minFare)} - ${formatLocalizedFare(maxFare)}`;
           }
+          if (cardBusFareBreakdown) {
+            cardBusFareBreakdown.textContent = getLocalizedText('Direct city corridor');
+          }
           if (cardBusDuration) {
             cardBusDuration.textContent = `~${formatLocalizedNumber(minTime)} ${getLocalizedText('mins')}`;
+          }
+          if (cardBusDurationSub) {
+            cardBusDurationSub.textContent = getLocalizedText('Direct bus transit');
           }
           if (cardBusRouteInfo) {
             const names = matches.slice(0, 2).map(m => getLocalizedText(m.service)).join(', ') + (matches.length > 2 ? '...' : '');
@@ -6092,8 +6495,14 @@
           if (cardBusFare) {
             cardBusFare.textContent = `${formatLocalizedFare(primary.fareMin)} - ${formatLocalizedFare(primary.fareMax)}`;
           }
+          if (cardBusFareBreakdown) {
+            cardBusFareBreakdown.textContent = `${getLocalizedText('Bus')} ${formatLocalizedFare(primary.busFare)} + ${getLocalizedText('Feeder from')} ${formatLocalizedFare(primary.feederFareMin)}`;
+          }
           if (cardBusDuration) {
             cardBusDuration.textContent = `~${formatLocalizedNumber(primary.durationMins)} ${getLocalizedText('mins')}`;
+          }
+          if (cardBusDurationSub) {
+            cardBusDurationSub.textContent = getLocalizedText('Bus + Feeder transfer');
           }
           if (cardBusRouteInfo) {
             cardBusRouteInfo.textContent = `${getLocalizedText('Bus + Feeder Transfer')}: ${getLocalizedText(primary.service)}`;
@@ -6102,8 +6511,14 @@
           if (cardBusFare) {
             cardBusFare.textContent = getLocalizedText('Unavailable');
           }
+          if (cardBusFareBreakdown) {
+            cardBusFareBreakdown.textContent = getLocalizedText('No service');
+          }
           if (cardBusDuration) {
             cardBusDuration.textContent = getLocalizedText('Route not found');
+          }
+          if (cardBusDurationSub) {
+            cardBusDurationSub.textContent = '—';
           }
           if (cardBusRouteInfo) {
             cardBusRouteInfo.textContent = getLocalizedText('No direct bus routes for this corridor');
@@ -6798,6 +7213,49 @@
       });
     }
 
+    function openTripPlannerView() {
+      const showcase = document.getElementById('userShowcaseSection');
+      const planner = document.getElementById('userPlannerSection');
+      if (showcase) showcase.classList.add('hidden');
+      if (planner) {
+        planner.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          if (map) {
+            map.invalidateSize({ pan: false });
+            if (routePolyline && routePolyline.getLatLngs().length > 0) {
+              map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+            }
+          }
+          if (typeof updateVehicleSlidingPill === 'function') updateVehicleSlidingPill();
+          if (typeof updateMoreWaysToTravelCards === 'function') updateMoreWaysToTravelCards();
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        });
+        planner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function showDhakaCityShowcase() {
+      const showcase = document.getElementById('userShowcaseSection');
+      const planner = document.getElementById('userPlannerSection');
+      if (planner) planner.classList.add('hidden');
+      if (showcase) {
+        showcase.classList.remove('hidden');
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        showcase.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function startCorridorTrip(pickupKey, dropoffKey) {
+      const pSelect = document.getElementById('pickupSelect');
+      const dSelect = document.getElementById('dropoffSelect');
+      if (pSelect && pickupKey) pSelect.value = pickupKey;
+      if (dSelect && dropoffKey) dSelect.value = dropoffKey;
+      if (typeof handleLocationChange === 'function') {
+        handleLocationChange();
+      }
+      openTripPlannerView();
+    }
+
     function showView(view) {
       const authView = document.getElementById('authView');
       const roleSelectionView = document.getElementById('roleSelectionView');
@@ -6810,7 +7268,10 @@
       adminPanel.classList.toggle('hidden', view !== 'admin');
       updateAdminModeNavigation();
       if (view === 'admin') loadAdminAccounts();
-      if (view === 'user') renderTravelShortcuts();
+      if (view === 'user') {
+        renderTravelShortcuts();
+        showDhakaCityShowcase();
+      }
 
       if (view === 'user') {
         requestAnimationFrame(() => {
