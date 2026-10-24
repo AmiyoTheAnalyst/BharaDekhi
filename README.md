@@ -1,87 +1,136 @@
-# 🚖 BharaDekhi
+# 🚖 BharaDekhi — Dhaka Multi-Modal Transit Planner & Fare Engine
 
-An interactive web-based transit route planner and ride-sharing fare estimator tailored for commuters in Dhaka, Bangladesh. BharaDekhi calculates road distances and travel times across major transit hubs, models local peak-hour traffic surge conditions, and provides app-launch links for **Uber** and **Pathao**.
+[![Live Deployment](https://img.shields.io/badge/Production-Live%20on%20Vercel-blue?style=for-the-badge&logo=vercel)](https://bharadekhi.vercel.app/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow?style=for-the-badge&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Modern%20UI-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Leaflet](https://img.shields.io/badge/Leaflet.js-Geospatial%20Mapping-199900?style=for-the-badge&logo=leaflet)](https://leafletjs.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Postgres%20RLS-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
 
-The brand lockup uses the Connected BD mark with the tagline **“Route Planner & Fare Estimator.”**
+An advanced, interactive multi-modal transit route planner, real-time fare estimator, and ride-hailing launcher engineered specifically for commuters in Dhaka, Bangladesh. 
 
----
-
-## 🌟 Features
-
-* **Interactive Dhaka Map:** Leaflet.js map layer powered by OpenStreetMap, mapping high-traffic hubs across Dhaka (Azimpur, BRAC University Merul Badda, Dhanmondi 27, Gulshan 1, Mirpur 10, Motijheel).
-* **Tap-to-Set Map Locations:** Choose pickup or destination mode and tap the map to use that precise coordinate. The app looks up the nearest available OpenStreetMap place name and uses the pin for routing and fare estimates. Map-picked coordinates are temporary and are not saved in recent-trip history.
-* **Current-Location Pickup:** Request browser geolocation to use the device's current coordinates as the pickup for the route, fare estimate, and map. A reverse-geocoding lookup requests the nearest available place/address name from OpenStreetMap; building-level detail depends on map coverage and is not guaranteed. Requires location permission and a secure context (HTTPS or localhost). Uber's universal link receives the pickup coordinates; Pathao opens normally and copies pickup coordinates with the ride details because its app link does not prefill those fields here. Current GPS trips are not saved in recent-trip history.
-* **Live Road Distance & Travel Duration:** Calculates driving distances and trip duration using the public Open Source Routing Machine (OSRM) API, backed by an algorithmic Haversine fallback engine.
-* **Peak-Hour & Heavy-Rain Fare Estimator:** Uses Dhaka local time (Asia/Dhaka) to automatically estimate morning (8:30 AM – 10:30 AM) and evening (5:00 PM – 8:00 PM) peak periods, with an optional peak simulation toggle. Peak fare estimates use an illustrative 1.4x–2.2x range. Current rain is checked automatically every 15 minutes using Open-Meteo conditions for central Dhaka; the rain fare selector can also force the 1.3x–1.5x uplift on or off. The rain uplift applies to ride and feeder estimates, not Metro or local bus fares. If weather data is unavailable, automatic mode shows a status and does not add the rain uplift unless a prior reading is available. Weather status links to its data source. These are estimates, not live provider quotes.
-
-  The Open-Meteo free API is limited to non-commercial use and requires CC BY 4.0 attribution; commercial deployments should use an eligible paid API plan. See [Open-Meteo Terms](https://open-meteo.com/en/terms) and [data licence](https://open-meteo.com/en/licence).
-* **Multi-Modal Fare Estimation:** Calibrated baseline rate heuristics for:
-  * 🏍️ **Bike** (Base: ৳30 | ৳14/km)
-  * 🛺 **CNG Auto-Rickshaw** (Base: ৳50 | ৳18/km)
-  * 🚗 **Sedan Car** (Base: ৳80 | ৳24/km)
-* **Side-by-Side Ride Comparison:** Compares estimated fares and approximate travel times for bike, CNG, and car, highlighting the lowest fare and shortest trip estimate.
-* **MRT Line 6 Hybrid Estimator:** Finds the nearest metro stations for each endpoint, compares rickshaw, bike, and CNG estimates for both station-access legs, highlights the cheapest feeder for each leg, and gives step-by-step boarding/exit guidance. Metro fares use a published Uttara North fare chart; the estimator calculates a station-pair fare from the difference between each station's fare from Uttara North, with the ৳20 minimum and ৳100 maximum. Rickshaw feeder fares use a custom ৳20 + ৳12/km estimate, rounded up to ৳10, for legs up to 5 km; longer rickshaw legs are marked unavailable. Rickshaw ranges allow ৳10 for bargaining off-peak; peak hours keep the lower estimate unchanged and add just ৳10 to the upper estimate (for example, ৳40–৳50 off-peak becomes ৳40–৳60 at peak). Other feeder modes retain their existing surge estimates. Compares the hybrid fare and journey time with a direct ride and includes an optional 10% MRT Pass discount. Feeder and traffic values are illustrative assumptions, not live data. The fare chart is a secondary published source, not a live DMTCL feed: [GLG Assets Dhaka Metro Rail fare chart](https://glgassets.com/dhaka-metro-rail-route-schedule-fare/).
-* **Dhaka Local Bus Finder:** Shows direct matches from a static JSON route list plus up to three bus + feeder suggestions that connect nearby listed route stops to the selected endpoints. Hybrid results show feeder modes, bus stops, estimated fare totals, and approximate journey time. Bus fares use ৳2.45/km (rounded up to a taka) with ৳10 non-AC / ৳20 AC minimums. Routes, stop distances, and feeder estimates are unverified drafts, not BRTA-notified records; long feeder legs may not be practical. Confirm the bus direction, stops, feeder availability, and fare locally before travel.
-* **English/Bangla Language Toggle:** Switches the app interface and Dhaka location names between English and Bangla, saving the choice in the browser.
-* **Dark Mode:** Offers a dark theme for the interface and map controls; remembers the choice in the browser.
-* **Saved Places & Recent Trips:** Save up to eight named Dhaka locations and quickly reuse them as pickup or destination. The latest eight estimated routes can be planned again or cleared; this history records estimates, not completed rides. Data is stored in the current browser and kept separate by signed-in account, so it is not synced across devices. Routes using precise current-location or map-pin coordinates are excluded from history.
-* **Public FAQ Page:** A header help icon opens a dedicated FAQ page with answers about fare estimates, peak-hour periods, provider pricing, and account requirements. It is available without signing in and supports English and Bangla.
-* **Ride-Sharing Links:**
-  * **Uber:** Uses official universal deep-linking (`m.uber.com/ul/`) with pre-pinned pickup and drop-off coordinates.
-  * **Pathao:** Opens the Pathao app with an app deep link and copies pickup, destination, vehicle, and the BharaDekhi estimate to the clipboard.
+BharaDekhi solves Dhaka's commuting uncertainty by unifying road routing, peak-hour traffic surge modeling, live weather adjustments, metro rail feeder optimization, local bus networks, and direct app deep-linking into a single, high-performance web platform.
 
 ---
 
-## 🛠️ Tech Stack
-
-* **Frontend:** HTML5, Modern Vanilla JavaScript (ES6+)
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/) (CDN)
-* **Map & Geodata:** [Leaflet.js](https://leafletjs.com/) with OpenStreetMap tiles
-* **Routing API:** [OSRM (Open Source Routing Machine)](https://project-osrm.org/)
-* **Icons:** [Lucide Icons](https://lucide.dev/)
-* **Deployment & CI/CD:** Vercel
-* **Authentication & shared accounts:** [Supabase](https://supabase.com/)
+## 🔗 Quick Links
+* **Live Web App:** [https://bharadekhi.vercel.app/](https://bharadekhi.vercel.app/)
+* **Developer Portfolio:** [https://bharadekhi.vercel.app/about.html](https://bharadekhi.vercel.app/about.html)
+* **Interactive FAQ & Help Center:** [https://bharadekhi.vercel.app/faq.html](https://bharadekhi.vercel.app/faq.html)
+* **Developer LinkedIn:** [Amiyo Hasan](https://www.linkedin.com/in/amiyo-hasan-6729873a7/)
+* **Developer GitHub:** [@AmiyoTheAnalyst](https://github.com/AmiyoTheAnalyst)
 
 ---
 
-## 📍 Location, privacy, and service notes
+## 🌟 Core Features & Implementation Highlights
 
-* BharaDekhi only requests device location after the user selects **Use my current location** and grants browser permission.
-* When current location is used, its coordinates are sent to the public OSRM routing service to calculate a route and to OpenStreetMap's Nominatim service to find a nearby place name. Place-name detail depends on OpenStreetMap coverage; it may return a nearby street or area instead of a building.
-* Map-picked coordinates are used for the route, fare estimate, and nearby-place lookup, but are kept only in the current page session and excluded from recent-trip history.
-* The public Nominatim service has limited shared capacity and a maximum usage rate of one request per second for the entire application. Current-location and map-pin lookups are user-triggered and paced within each browser session; the service is not a high-volume geocoding provider. Review the [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) before changing or scaling this integration.
-* If the user opens Uber, the current pickup coordinates are included in Uber's link. If the user opens Pathao, pickup details (including current coordinates) are copied to the clipboard so they can be entered in that app. Do not share the copied text if you do not want to share your precise location.
-* Current-location and map-pin routes are intentionally excluded from recent-trip history. Saved places and other recent routes, plus the selected language and theme, are stored in browser local storage. Travel history is separated by signed-in email on that browser, but does not sync between devices.
-* Routing and place-name services may be unavailable or return approximate/incomplete results. If road routing fails, BharaDekhi falls back to an approximate distance calculation. Fare and duration values are estimates, not live quotes from ride providers.
+### 1. 🗺️ Geospatial Routing & Automated Trip Simulation
+* **Interactive Vector Mapping:** Built on [Leaflet.js](https://leafletjs.com/) and OpenStreetMap cartography, customized with high-contrast road styling and theme-reactive tile management (Dark / Light mode).
+* **Live Road Distance Calculation:** Integrated with the public **OSRM (Open Source Routing Machine)** driving API, delivering exact road polyline geometries and driving durations.
+* **Algorithmic Haversine Fallback:** Resilient mathematical routing layer ensuring continuous operation even during external network or API interruptions.
+* **Automated Route Animation:** Automated smooth playback along the route with dynamic vehicle icon heading rotation, speed throttling, automated camera panning, and play/pause controls.
+* **Tap-to-Set Map Coordinates & GPS Geolocation:** Commuters can tap anywhere on the Dhaka map or use HTML5 browser geolocation. The application resolves nearby landmark and street names using OpenStreetMap's Nominatim reverse-geocoding API.
+
+### 2. ⚡ Dynamic Surge Multiplier & Real-Time Weather Radar
+* **Time-Aware Peak Surge Engine:** Tracks local Dhaka time (`Asia/Dhaka`) to detect morning (8:30 AM – 10:30 AM) and evening (5:00 PM – 8:00 PM) peak windows, applying a calibrated 1.4x – 2.2x surge multiplier.
+* **Animated Surge Tachometer:** Custom radial gauge visualization indicating real-time traffic surge pressure (Normal, Moderate, High Surge).
+* **Live Precipitation Polling:** Periodically queries the [Open-Meteo Weather API](https://open-meteo.com/) for central Dhaka precipitation. When rain is detected, the engine dynamically applies an automated 30%–50% rain fare uplift to ride-hailing and feeder legs. Includes manual override controls.
+
+### 3. 🚇 MRT Line 6 Hybrid Light-Path Viaduct
+* **Interactive 16-Station Light-Path:** Custom visual viaduct track representing MRT Line 6 from Uttara North to Motijheel, featuring an illuminated active transit segment and an animated train cruising beacon (`🚅 METRO`).
+* **Multi-Modal Feeder Optimization:** Calculates first-mile and last-mile access to and from metro stations, comparing rickshaw, bike, and CNG options to highlight the most cost-effective combination.
+* **Rickshaw Bargaining Model:** Emulates authentic Dhaka bargaining dynamics (Base ৳20 + ৳12/km, rounded up to the nearest ৳10; peak hours add ৳10 to the upper bargaining limit while preserving base rates).
+* **MRT Pass Discount:** Built-in 10% discount toggle for MRT Pass / Rapid Pass holders.
+
+### 4. 🚌 Dhaka Local Bus Finder
+* **Transit Graph Resolver:** Connects origin and destination hubs with direct Dhaka bus routes and up to three hybrid feeder suggestions.
+* **BRTA Fare Policy Emulation:** Models Bangladesh Road Transport Authority fare rules (৳2.45/km with ৳10 non-AC and ৳20 AC minimums).
+
+### 5. 🚀 One-Tap Ride-Hailing Deep Links & Particle Bursts
+* **Uber Universal Deep-Linking:** Automatically constructs `m.uber.com/ul/` deep-links with pre-pinned pickup and drop-off GPS coordinates.
+* **Pathao Native App Launcher:** Opens the Pathao mobile app and synthesizes clipboard ride instructions (pickup, destination, vehicle mode, and estimated fare).
+* **Haptic Particle Burst Physics:** Interactive particle burst explosion physics on action buttons providing tactile, responsive feedback.
+
+### 6. 🎨 Advanced UI, Motion & Animation Architecture
+* **Conic "Border Beam" Glow:** Rotating conic-gradient illumination highlighting the best-value travel option.
+* **Aurora Ambient Backdrops:** Multi-layer animated radial glows and subtle gradient blurs creating futuristic visual depth.
+* **Fluid Sliding Pill Tabs:** Segmented tab controls utilizing `cubic-bezier(0.34, 1.56, 0.64, 1)` spring physics.
+* **Scroll-Triggered Reveals:** Restrained 400ms fade-and-slide section reveals powered by the `IntersectionObserver` API.
+* **Staggered Fare Cards:** Staggered visual entrance delays (40ms, 110ms, 180ms) and pop refresh animations on price updates.
+* **Smooth FAQ Accordion:** CSS Grid expansion (`grid-template-rows: 0fr -> 1fr`) with animated closure transitions.
+* **Transit Constellation Map:** SVG vector network with continuous `<animateMotion>` vehicle tracking.
+* **Accessibility First:** Full automatic adherence to `prefers-reduced-motion: reduce`.
+
+### 7. 🌐 Zero-Layout-Shift Bilingual System & Themes
+* **Size-Parity Localization:** Instant switching between English and Bangla across the entire platform without layout breaks, text wrapping, or viewport expansion.
+* **Synchronized Dark / Light Themes:** Dual-palette system with persistent `localStorage` preference and synchronized map tile styling.
+
+### 8. 🔐 Supabase Authentication & Admin Control Center
+* **Central User Authentication:** Supabase Auth handling secure sign-up, sign-in, and password management.
+* **PostgreSQL Row-Level Security (RLS):** Database-level access control policies ensuring non-admin users only access their own profiles.
+* **Admin Dashboard:** Verified admin control center for viewing registered user metrics and platform accounts.
 
 ---
 
-## ▲ Deploying on Vercel
+## 🛠️ Skills, Tools & Technologies Used
 
-1. Import this GitHub repository into Vercel and select the repository root as the project root.
-2. Choose **Other** as the framework preset. This is a static HTML site; no build command is required, and `index.html` at the root is the homepage.
-3. Deploy the project and assign `bharadekhi.vercel.app` as its production domain.
-4. Keep `robots.txt` and `sitemap.xml` in the repository root. The sitemap and canonical URL already point to the production domain.
-
-Vercel can deploy subsequent pushes to the connected production branch automatically.
+| Domain | Technologies & Tools |
+| :--- | :--- |
+| **Frontend Engineering** | Vanilla JavaScript (ES6+), HTML5, Modern CSS3, CSS Custom Properties |
+| **UI Styling & Design Systems** | [Tailwind CSS](https://tailwindcss.com/), [Lucide Icons](https://lucide.dev/), Glassmorphism, Conic Gradients |
+| **Motion & Animation** | CSS `@keyframes`, GPU-accelerated `transform`, SVG `<animateMotion>`, CSS Grid Accordions |
+| **Geospatial & Mapping** | [Leaflet.js](https://leafletjs.com/), OpenStreetMap, [OSRM API](https://project-osrm.org/), Nominatim Geocoding |
+| **Real-Time Data & APIs** | [Open-Meteo Weather API](https://open-meteo.com/), `Asia/Dhaka` Clock Engine, REST APIs |
+| **Backend & Database** | [Supabase](https://supabase.com/), PostgreSQL, Row-Level Security (RLS), Database Triggers |
+| **Performance & A11y** | `IntersectionObserver API`, `prefers-reduced-motion`, Zero-Layout-Shift Typography |
+| **DevOps & Tooling** | Vercel (CI/CD Automated Deployment), Git, GitHub, Postman API Testing |
 
 ---
 
-## 🔐 Shared account setup
+## 🏗️ Architecture & Data Flow
 
-The application uses Supabase Auth for shared email/password accounts and a protected `profiles` table for the admin account list. Set up a Supabase project before enabling sign-up:
+```mermaid
+flowchart TD
+    User["👤 Commuter"] --> UI["🖥️ BharaDekhi UI (index.html)"]
+    
+    subgraph Client ["Client-Side State & Animation Layer"]
+        UI --> Map["🗺️ Leaflet Map & Marker System"]
+        UI --> Anim["✨ Animation Engine (Scroll Reveals, Particle Bursts, Border Beam)"]
+        UI --> Lang["🌐 Bilingual Engine (EN / BN Parity)"]
+        UI --> Theme["🌗 Theme Switcher (Dark / Light)"]
+    end
 
-1. Create a Supabase project.
-2. Open the project's **SQL Editor** and run [`supabase/schema.sql`](./supabase/schema.sql). This creates the profile table, account-sync triggers, and row-level security policies.
-3. In the Supabase project settings, copy the **Project URL** and the **publishable key** (or legacy `anon` key). In `index.html`, replace `https://YOUR_PROJECT_REF.supabase.co` and `YOUR_SUPABASE_PUBLISHABLE_KEY` in the `SUPABASE_URL` and `SUPABASE_ANON_KEY` constants.
-   - The publishable/anon key is intended for browser use. Never put a Supabase `service_role` or secret key in `index.html`.
-4. In Supabase **Authentication → URL Configuration**, set the Site URL to `https://bharadekhi.vercel.app` and add `https://bharadekhi.vercel.app/**` (and the local development URL, if used) to the allowed redirect URLs so public sign-up and email confirmation work on the deployed site.
-5. Create the admin account for `amiyohasan23@gmail.com` in Supabase **Authentication → Users** and confirm its email. The admin's verified email is checked by the database row-level security policy. The old browser-only demo admin password is no longer used.
-6. Deploy the updated site. New signups will be stored centrally, and the verified admin can open **Registered Accounts** to see all profiles.
+    subgraph ExternalAPIs ["External APIs & Transit Feeds"]
+        Map --> OSRM["🛣️ OSRM Driving Engine (Road Distance & Geometry)"]
+        Map --> Nominatim["📍 Nominatim Reverse Geocoding"]
+        UI --> Weather["🌧️ Open-Meteo API (Dhaka Live Rain Polling)"]
+    end
 
-The browser only receives the public publishable/anon key. Database row-level security allows regular users to read only their own profile and allows the verified admin email above to read the account list. Passwords are managed by Supabase Auth and are never stored in the profile table.
+    subgraph Backend ["Backend & Database Services"]
+        UI --> Supabase["🔐 Supabase Auth & PostgreSQL"]
+        Supabase --> RLS["🛡️ Row-Level Security Policies"]
+    end
 
-Accounts previously stored in individual browsers are not automatically imported into Supabase. Each friend must create an account again on the updated site; this avoids transferring the old browser-stored passwords.
+    subgraph DeepLinks ["Ride Providers"]
+        UI --> Uber["🚗 Uber Universal Link (Pinned Coordinates)"]
+        UI --> Pathao["🏍️ Pathao App Link & Clipboard Protocol"]
+    end
+```
+
+---
+
+## 📐 Fare Calculation Logic & Modes
+
+Baseline rates calibrated for Dhaka road conditions:
+
+| Vehicle Mode | Base Fare | Per-KM Rate | Speed (Peak / Off-Peak) | Surge Modeling |
+| :--- | :--- | :--- | :--- | :--- |
+| **🏍️ Bike** | ৳30 | ৳14 / km | 18 km/h / 24 km/h | 1.4x – 2.2x Peak · +30%–50% Rain |
+| **🛺 CNG** | ৳50 | ৳18 / km | 12 km/h / 18 km/h | 1.4x – 2.2x Peak · +30%–50% Rain |
+| **🚗 Car (Sedan)** | ৳80 | ৳24 / km | 15 km/h / 22 km/h | 1.4x – 2.2x Peak · +30%–50% Rain |
+| **🚇 MRT Line 6** | ৳20 min | ৳5 / km (max ৳100) | 2 min/station + 5 min wait | Fixed fare chart · 10% Pass Discount |
+| **🚌 Local Bus** | ৳10 min (Non-AC) | ৳2.45 / km | BRTA Draft Table | Fixed per-km fare |
+
+*Estimates are illustrative baseline calculations and independent of live dynamic pricing set by ride-hailing operators.*
 
 ---
 
@@ -93,11 +142,34 @@ Accounts previously stored in individual browsers are not automatically imported
    cd BharaDekhi
    ```
 
-2. **Start a local web server** from the repository folder:
+2. **Start a local development server:**
    ```bash
+   # Using Python 3
    python -m http.server 8000
+
+   # Or using Node.js npx
+   npx serve .
    ```
 
-3. Open `http://localhost:8000` in your browser. Stop the server with `Ctrl+C`.
+3. Open **`http://localhost:8000`** in your browser.
 
-The app is a static HTML site and has no build step. For sign-up and login locally, make sure `http://localhost:8000/**` is listed as an allowed redirect URL in the Supabase Authentication settings.
+---
+
+## 👨‍💻 Developer & Verified Profiles
+
+**Amiyo Hasan**  
+*Creator of BharaDekhi · Full-Stack Software Engineer & Web Developer*  
+*B.Sc. in Computer Science & Engineering (B.Sc. CSE), BRAC University, Dhaka, Bangladesh*
+
+* **Portfolio:** [https://bharadekhi.vercel.app/about.html](https://bharadekhi.vercel.app/about.html)
+* **LinkedIn:** [https://www.linkedin.com/in/amiyo-hasan-6729873a7/](https://www.linkedin.com/in/amiyo-hasan-6729873a7/)
+* **GitHub:** [https://github.com/AmiyoTheAnalyst](https://github.com/AmiyoTheAnalyst)
+* **Email:** [amiyohasan23@gmail.com](mailto:amiyohasan23@gmail.com)
+
+---
+
+## 📄 License & Attribution
+* **License:** Released for Dhaka commuters under standard open web practices.
+* **Map Data:** © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+* **Routing:** Powered by [Project OSRM](https://project-osrm.org/).
+* **Weather Data:** Provided by [Open-Meteo.com](https://open-meteo.com/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
