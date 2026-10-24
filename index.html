@@ -333,6 +333,246 @@
         height: 300px;
       }
     }
+
+    /* =========================================================
+       Interactive Map Animations (Route Snake, Vehicle & Pins)
+       ========================================================= */
+    .custom-map-pin-wrapper {
+      background: transparent;
+      border: none;
+    }
+    .custom-pin {
+      position: relative;
+      width: 36px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-pin .pin-body {
+      position: absolute;
+      top: 2px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 3;
+    }
+    .pin-pickup .pin-body {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border: 2px solid #ffffff;
+    }
+    .pin-destination .pin-body {
+      background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+      border: 2px solid #ffffff;
+    }
+    html[data-theme="dark"] .pin-pickup .pin-body,
+    html[data-theme="dark"] .pin-destination .pin-body {
+      border-color: #0f172a;
+    }
+    .pin-body .pin-letter {
+      transform: rotate(45deg);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 11px;
+      line-height: 1;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: -0.02em;
+    }
+    .pin-shadow {
+      position: absolute;
+      bottom: 0px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 5px;
+      background: radial-gradient(ellipse, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0) 70%);
+      border-radius: 50%;
+      z-index: 1;
+    }
+    html[data-theme="dark"] .pin-shadow {
+      background: radial-gradient(ellipse, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+    }
+    .pin-radar-ring,
+    .pin-radar-ring-2 {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .pin-pickup .pin-radar-ring,
+    .pin-pickup .pin-radar-ring-2 {
+      border: 2px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.15);
+    }
+    .pin-destination .pin-radar-ring,
+    .pin-destination .pin-radar-ring-2 {
+      border: 2px solid #f43f5e;
+      background: rgba(244, 63, 94, 0.15);
+    }
+    .pin-radar-ring {
+      width: 32px;
+      height: 32px;
+      margin-left: -16px;
+      margin-bottom: -16px;
+      left: 50%;
+      bottom: 2px;
+      animation: radarWave 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    }
+    .pin-radar-ring-2 {
+      width: 32px;
+      height: 32px;
+      margin-left: -16px;
+      margin-bottom: -16px;
+      left: 50%;
+      bottom: 2px;
+      animation: radarWave 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+      animation-delay: 1.2s;
+    }
+    @keyframes radarWave {
+      0% { transform: scale(0.3); opacity: 0.9; }
+      60% { opacity: 0.4; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    .pin-drop-bounce {
+      animation: pinDropBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    @keyframes pinDropBounce {
+      0% { transform: translateY(-20px) rotate(-45deg) scale(0.7); opacity: 0; }
+      70% { transform: translateY(3px) rotate(-45deg) scale(1.05); opacity: 1; }
+      100% { transform: translateY(0) rotate(-45deg) scale(1); opacity: 1; }
+    }
+
+    /* Map Tap Ripple */
+    .map-tap-ripple-container {
+      pointer-events: none;
+    }
+    .map-tap-ripple {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid #2563eb;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0) 70%);
+      animation: tapRipple 0.65s ease-out forwards;
+    }
+    @keyframes tapRipple {
+      0% { transform: scale(0.1); opacity: 1; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    /* Vehicle Marker */
+    .custom-vehicle-icon-wrapper {
+      background: transparent;
+      border: none;
+    }
+    .vehicle-marker-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #ffffff;
+      border: 2px solid #2563eb;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.22), 0 0 0 3px rgba(37, 99, 235, 0.2);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      user-select: none;
+    }
+    html[data-theme="dark"] .vehicle-marker-badge {
+      background: #1e293b;
+      border-color: #60a5fa;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(96, 165, 250, 0.25);
+    }
+    .vehicle-marker-badge.vehicle-bike {
+      border-color: #2563eb;
+    }
+    .vehicle-marker-badge.vehicle-cng {
+      border-color: #059669;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22), 0 0 0 3px rgba(5, 150, 105, 0.2);
+    }
+    html[data-theme="dark"] .vehicle-marker-badge.vehicle-cng {
+      border-color: #34d399;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(52, 211, 153, 0.25);
+    }
+    .vehicle-marker-badge.vehicle-car {
+      border-color: #7c3aed;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.22), 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+    html[data-theme="dark"] .vehicle-marker-badge.vehicle-car {
+      border-color: #a78bfa;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(167, 139, 250, 0.25);
+    }
+    .vehicle-emoji-icon {
+      font-size: 19px;
+      line-height: 1;
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    }
+    .vehicle-pointer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .vehicle-pointer::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 8px solid #2563eb;
+    }
+    .vehicle-cng .vehicle-pointer::before {
+      border-bottom-color: #059669;
+    }
+    .vehicle-car .vehicle-pointer::before {
+      border-bottom-color: #7c3aed;
+    }
+    html[data-theme="dark"] .vehicle-pointer::before {
+      border-bottom-color: #60a5fa;
+    }
+    html[data-theme="dark"] .vehicle-cng .vehicle-pointer::before {
+      border-bottom-color: #34d399;
+    }
+    html[data-theme="dark"] .vehicle-car .vehicle-pointer::before {
+      border-bottom-color: #a78bfa;
+    }
+    .animated-route-polyline {
+      filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.35));
+    }
+    html[data-theme="dark"] .animated-route-polyline {
+      filter: drop-shadow(0 2px 7px rgba(96, 165, 250, 0.45));
+    }
+    .vehicle-arrival-pulse {
+      animation: vehicleArrive 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes vehicleArrive {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    .vehicle-bounce {
+      animation: vehicleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes vehicleBounce {
+      0% { transform: scale(0.8); }
+      60% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -586,11 +826,17 @@
           <h2 class="planner-section-title mt-1 font-extrabold text-slate-900">Your trip at a glance</h2>
           <p class="mt-1 text-sm text-slate-500">Use the map to fine-tune either end of your route.</p>
         </div>
-        <div class="mb-2 flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold text-slate-600">Tap map to set:</span>
-          <button id="mapSetPickupBtn" type="button" aria-pressed="false" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">Set pickup</button>
-          <button id="mapSetDestinationBtn" type="button" aria-pressed="false" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Set destination</button>
-          <span id="mapSelectionStatus" class="text-xs text-slate-500" aria-live="polite">Choose pickup or destination, then tap the map.</span>
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-semibold text-slate-600">Tap map to set:</span>
+            <button id="mapSetPickupBtn" type="button" aria-pressed="false" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">Set pickup</button>
+            <button id="mapSetDestinationBtn" type="button" aria-pressed="false" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Set destination</button>
+            <span id="mapSelectionStatus" class="text-xs text-slate-500" aria-live="polite">Choose pickup or destination, then tap the map.</span>
+          </div>
+          <button id="replayRouteBtn" type="button" aria-label="Animate trip" title="Animate route and vehicle" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition">
+            <i data-lucide="play" class="w-3.5 h-3.5 text-blue-600"></i>
+            <span id="replayBtnText">Animate trip</span>
+          </button>
         </div>
         <div id="map"></div>
         <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex items-center justify-center rounded-xl">
@@ -1261,6 +1507,9 @@
       'Selected Bike': 'বাইক নির্বাচিত',
       'Selected CNG': 'সিএনজি নির্বাচিত',
       'Selected Car': 'গাড়ি নির্বাচিত',
+      'Animate trip': 'যাত্রা অ্যানিমেট করুন',
+      'Animate route': 'রুট অ্যানিমেট করুন',
+      'Animate route and vehicle': 'রুট ও যানবাহন অ্যানিমেশন দেখুন',
       'Estimates are for comparison only, not live quotes. Peak periods are approximate Dhaka-time windows (8:30–10:30 AM and 5:00–8:00 PM). Peak estimates use a 1.4x–2.2x band; rain is detected automatically using Open-Meteo current weather data for central Dhaka and adds a stacked 1.3x–1.5x uplift. Weather checks refresh every 15 minutes. If weather is unavailable, automatic mode leaves the rain uplift off and shows an unavailable status; the selector can force rain on or off. Metro and local bus fares do not use the rain uplift. The route tile shows OSRM duration; vehicle comparison times use estimated average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by mode (Bike 0.85x, CNG 1.15x, Car 1.0x). Fare estimates still use OSRM distance and duration.': 'এগুলো তুলনার জন্য আনুমানিক হিসাব, সরাসরি ভাড়া নয়। ঢাকার পিক সময় আনুমানিক সকাল ৮:৩০–১০:৩০ এবং বিকেল ৫টা–রাত ৮টা। পিক ভাড়ার আনুমানিক সীমা ১.৪x–২.২x; মধ্য ঢাকার বর্তমান আবহাওয়ার Open-Meteo তথ্য দিয়ে বৃষ্টি স্বয়ংক্রিয়ভাবে শনাক্ত করে এর সঙ্গে ১.৩x–১.৫x অতিরিক্ত গুণক যোগ হয়। প্রতি ১৫ মিনিটে আবহাওয়া যাচাই হয়। আবহাওয়ার তথ্য না পাওয়া গেলে স্বয়ংক্রিয় মোডে বৃষ্টির অতিরিক্ত ভাড়া বন্ধ থাকে এবং তথ্য না পাওয়ার অবস্থা দেখায়; নির্বাচক দিয়ে বৃষ্টির ভাড়া চালু বা বন্ধ করা যায়। মেট্রো ও লোকাল বাসের ভাড়ায় বৃষ্টির অতিরিক্ত ভাড়া প্রযোজ্য নয়। রুট টাইল OSRM-এর সময় দেখায়; যানবাহনের তুলনামূলক সময় পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতির ভিত্তিতে, যানবাহন অনুযায়ী সমন্বয় করে হিসাব করা হয় (বাইক ০.৮৫x, সিএনজি ১.১৫x, গাড়ি ১.০x)। ভাড়ার হিসাব OSRM দূরত্ব ও সময় ব্যবহার করে।',
       'Available Services & Fares': 'উপলভ্য সেবা ও ভাড়া',
       'Click to compare & launch': 'তুলনা করতে ও অ্যাপ খুলতে চাপ দিন',
@@ -1701,6 +1950,7 @@
     function handleMapClick(event) {
       if (!mapSelectionTarget) return;
       const target = mapSelectionTarget;
+      triggerMapTapRipple(event.latlng, target === 'pickup' ? '#2563eb' : '#f43f5e');
       const otherKey = target === 'pickup'
         ? document.getElementById('dropoffSelect').value
         : document.getElementById('pickupSelect').value;
@@ -2182,8 +2432,200 @@
     let nextReverseGeocodeTime = 0;
     let routeUpdateId = 0;
 
-    // Leaflet map objects
+    // Leaflet map objects & animation state
     let map, pickupMarker, dropMarker, routePolyline;
+    let vehicleMarker = null;
+    let routeAnimFrame = null;
+    let isRouteAnimating = false;
+    let latestRouteCoords = null;
+    let lastVehicleHeading = 0;
+
+    // --- Interactive Map & Route Animations ---
+    function createCustomPinIcon(type = 'pickup') {
+      const isPickup = type === 'pickup';
+      const colorClass = isPickup ? 'pin-pickup' : 'pin-destination';
+      const letter = isPickup ? 'A' : 'B';
+      const title = isPickup ? 'Pickup' : 'Destination';
+
+      return L.divIcon({
+        className: 'custom-map-pin-wrapper',
+        html: `
+          <div class="custom-pin ${colorClass}" title="${title}">
+            <div class="pin-radar-ring"></div>
+            <div class="pin-radar-ring-2"></div>
+            <div class="pin-body">
+              <span class="pin-letter">${letter}</span>
+            </div>
+            <div class="pin-shadow"></div>
+          </div>
+        `,
+        iconSize: [36, 42],
+        iconAnchor: [18, 40],
+        popupAnchor: [0, -38]
+      });
+    }
+
+    function triggerPinBounce(marker) {
+      if (!marker) return;
+      const el = marker.getElement();
+      if (el) {
+        const pin = el.querySelector('.pin-body');
+        if (pin) {
+          pin.classList.remove('pin-drop-bounce');
+          void pin.offsetWidth;
+          pin.classList.add('pin-drop-bounce');
+        }
+      }
+    }
+
+    function triggerMapTapRipple(latlng, color = '#2563eb') {
+      if (!map) return;
+      const rippleIcon = L.divIcon({
+        className: 'map-tap-ripple-container',
+        html: `<div class="map-tap-ripple" style="border-color: ${color};"></div>`,
+        iconSize: [50, 50],
+        iconAnchor: [25, 25]
+      });
+      const rippleMarker = L.marker(latlng, { icon: rippleIcon, interactive: false }).addTo(map);
+      setTimeout(() => {
+        if (map) map.removeLayer(rippleMarker);
+      }, 700);
+    }
+
+    function calculateBearing(p1, p2) {
+      const lat1 = p1[0] * Math.PI / 180;
+      const lon1 = p1[1] * Math.PI / 180;
+      const lat2 = p2[0] * Math.PI / 180;
+      const lon2 = p2[1] * Math.PI / 180;
+      const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
+      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    }
+
+    function calculateCoordDist(p1, p2) {
+      const dLat = p2[0] - p1[0];
+      const dLng = p2[1] - p1[1];
+      return Math.sqrt(dLat * dLat + dLng * dLng);
+    }
+
+    function getVehicleIcon(vehicleType, heading = 0) {
+      const iconEmoji = vehicleType === 'CNG' ? '🛺' : vehicleType === 'Car' ? '🚗' : '🏍️';
+      const colorClass = vehicleType === 'CNG' ? 'vehicle-cng' : vehicleType === 'Car' ? 'vehicle-car' : 'vehicle-bike';
+      return L.divIcon({
+        className: 'custom-vehicle-icon-wrapper',
+        html: `
+          <div class="vehicle-marker-badge ${colorClass}">
+            <div class="vehicle-pointer" style="transform: rotate(${heading}deg);"></div>
+            <span class="vehicle-emoji-icon">${iconEmoji}</span>
+          </div>
+        `,
+        iconSize: [38, 38],
+        iconAnchor: [19, 19]
+      });
+    }
+
+    function animateRouteAndVehicle(coords, vehicleType = selectedVehicle) {
+      if (!map || !coords || coords.length < 2) return;
+
+      if (routeAnimFrame) {
+        cancelAnimationFrame(routeAnimFrame);
+        routeAnimFrame = null;
+      }
+
+      // Precalculate cumulative distances
+      const cumDists = [0];
+      for (let i = 0; i < coords.length - 1; i++) {
+        cumDists.push(cumDists[i] + calculateCoordDist(coords[i], coords[i + 1]));
+      }
+      const totalDist = cumDists[cumDists.length - 1];
+      if (totalDist === 0) return;
+
+      if (routePolyline) map.removeLayer(routePolyline);
+      routePolyline = L.polyline([coords[0]], {
+        color: '#2563eb',
+        weight: 6,
+        opacity: 0.85,
+        lineCap: 'round',
+        lineJoin: 'round',
+        className: 'animated-route-polyline'
+      }).addTo(map);
+
+      const startHeading = calculateBearing(coords[0], coords[1]);
+      lastVehicleHeading = startHeading;
+
+      if (!vehicleMarker) {
+        vehicleMarker = L.marker(coords[0], {
+          icon: getVehicleIcon(vehicleType, startHeading),
+          zIndexOffset: 1000
+        }).addTo(map);
+      } else {
+        vehicleMarker.setLatLng(coords[0]);
+        vehicleMarker.setIcon(getVehicleIcon(vehicleType, startHeading));
+      }
+
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) {
+        routePolyline.setLatLngs(coords);
+        vehicleMarker.setLatLng(coords[coords.length - 1]);
+        return;
+      }
+
+      const duration = 1200; // ms
+      const startTime = performance.now();
+      isRouteAnimating = true;
+
+      function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const targetDist = totalDist * ease;
+
+        let segIdx = 0;
+        while (segIdx < cumDists.length - 2 && cumDists[segIdx + 1] < targetDist) {
+          segIdx++;
+        }
+
+        const segStartDist = cumDists[segIdx];
+        const segEndDist = cumDists[segIdx + 1];
+        const segSpan = segEndDist - segStartDist;
+        const segRatio = segSpan > 0 ? (targetDist - segStartDist) / segSpan : 0;
+
+        const pA = coords[segIdx];
+        const pB = coords[segIdx + 1];
+        const curLat = pA[0] + (pB[0] - pA[0]) * segRatio;
+        const curLng = pA[1] + (pB[1] - pA[1]) * segRatio;
+        const currentPoint = [curLat, curLng];
+
+        const currentCoords = coords.slice(0, segIdx + 1);
+        currentCoords.push(currentPoint);
+        routePolyline.setLatLngs(currentCoords);
+
+        const currentHeading = calculateBearing(pA, pB);
+        lastVehicleHeading = currentHeading;
+
+        if (vehicleMarker) {
+          vehicleMarker.setLatLng(currentPoint);
+          vehicleMarker.setIcon(getVehicleIcon(selectedVehicle, currentHeading));
+        }
+
+        if (progress < 1) {
+          routeAnimFrame = requestAnimationFrame(step);
+        } else {
+          routePolyline.setLatLngs(coords);
+          if (vehicleMarker) {
+            vehicleMarker.setLatLng(coords[coords.length - 1]);
+            const el = vehicleMarker.getElement();
+            if (el) {
+              el.classList.add('vehicle-arrival-pulse');
+            }
+          }
+          isRouteAnimating = false;
+          routeAnimFrame = null;
+        }
+      }
+
+      routeAnimFrame = requestAnimationFrame(step);
+    }
 
     // 2. Initialize Leaflet Map
     function initMap() {
@@ -2193,8 +2635,16 @@
       }).addTo(map);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      pickupMarker = L.marker([LOCATIONS.azimpur.lat, LOCATIONS.azimpur.lng]).addTo(map).bindPopup('Pickup');
-      dropMarker = L.marker([LOCATIONS.brac.lat, LOCATIONS.brac.lng]).addTo(map).bindPopup('Destination');
+      pickupMarker = L.marker([LOCATIONS.azimpur.lat, LOCATIONS.azimpur.lng], {
+        icon: createCustomPinIcon('pickup'),
+        zIndexOffset: 500
+      }).addTo(map).bindPopup('Pickup');
+
+      dropMarker = L.marker([LOCATIONS.brac.lat, LOCATIONS.brac.lng], {
+        icon: createCustomPinIcon('destination'),
+        zIndexOffset: 500
+      }).addTo(map).bindPopup('Destination');
+
       map.on('click', handleMapClick);
     }
 
@@ -2299,6 +2749,8 @@
 
       pickupMarker.setLatLng([pLoc.lat, pLoc.lng]).setPopupContent(`${getLocalizedText('Pickup')}: ${getLocalizedLocationName(pLoc.name)}`);
       dropMarker.setLatLng([dLoc.lat, dLoc.lng]).setPopupContent(`${getLocalizedText('Destination')}: ${getLocalizedLocationName(dLoc.name)}`);
+      triggerPinBounce(pickupMarker);
+      triggerPinBounce(dropMarker);
 
       document.getElementById('loadingOverlay').classList.remove('hidden');
 
@@ -2315,11 +2767,12 @@
           currentDistanceKm = route.distance / 1000;
           currentDurationMins = Math.round(route.duration / 60);
 
-          // Draw the road path on Leaflet
+          // Draw the road path on Leaflet with smooth snake animation & moving vehicle
           const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-          if (routePolyline) map.removeLayer(routePolyline);
-          routePolyline = L.polyline(coords, { color: '#2563eb', weight: 5, opacity: 0.8 }).addTo(map);
-          map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+          latestRouteCoords = coords;
+          const bounds = L.latLngBounds(coords);
+          map.fitBounds(bounds, { padding: [30, 30] });
+          animateRouteAndVehicle(coords, selectedVehicle);
         } else {
           throw new Error('No route found for the selected locations.');
         }
@@ -2329,8 +2782,11 @@
         // Fallback calculation (approximate Haversine distance)
         currentDistanceKm = calculateDirectDistance(pLoc, dLoc) * 1.35;
         currentDurationMins = Math.round(currentDistanceKm * 3.2);
-        if (routePolyline) map.removeLayer(routePolyline);
-        routePolyline = L.polyline([[pLoc.lat, pLoc.lng], [dLoc.lat, dLoc.lng]], { color: '#2563eb', dashArray: '5, 10' }).addTo(map);
+        const fallbackCoords = [[pLoc.lat, pLoc.lng], [dLoc.lat, dLoc.lng]];
+        latestRouteCoords = fallbackCoords;
+        const bounds = L.latLngBounds(fallbackCoords);
+        map.fitBounds(bounds, { padding: [30, 30] });
+        animateRouteAndVehicle(fallbackCoords, selectedVehicle);
       } finally {
         if (requestId !== routeUpdateId) return;
         document.getElementById('loadingOverlay').classList.add('hidden');
@@ -3092,6 +3548,15 @@
       document.querySelectorAll('.vehicle-btn').forEach(button => {
         button.setAttribute('aria-pressed', String(button === activeBtn));
       });
+      if (vehicleMarker) {
+        vehicleMarker.setIcon(getVehicleIcon(selectedVehicle, lastVehicleHeading));
+        const el = vehicleMarker.getElement();
+        if (el) {
+          el.classList.remove('vehicle-bounce');
+          void el.offsetWidth;
+          el.classList.add('vehicle-bounce');
+        }
+      }
       renderMetricsAndFares();
     }
 
@@ -3375,6 +3840,11 @@
     document.getElementById('useCurrentLocationBtn').addEventListener('click', useCurrentLocation);
     document.getElementById('mapSetPickupBtn').addEventListener('click', () => setMapSelectionTarget('pickup'));
     document.getElementById('mapSetDestinationBtn').addEventListener('click', () => setMapSelectionTarget('destination'));
+    document.getElementById('replayRouteBtn').addEventListener('click', () => {
+      if (latestRouteCoords && latestRouteCoords.length > 1) {
+        animateRouteAndVehicle(latestRouteCoords, selectedVehicle);
+      }
+    });
     document.getElementById('savePlaceForm').addEventListener('submit', handleSavePlace);
     document.getElementById('savedPlacesList').addEventListener('click', handleSavedPlacesClick);
     document.getElementById('recentTripsList').addEventListener('click', handleRecentTripsClick);
