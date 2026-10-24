@@ -647,6 +647,94 @@
       box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
       border-color: #60a5fa;
     }
+
+    /* Fluid Liquid Sliding Pill for Vehicle Mode Selector */
+    .vehicle-segmented-track {
+      position: relative;
+    }
+    .vehicle-sliding-pill {
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+      transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.25s ease, background 0.3s ease;
+      will-change: transform, width;
+    }
+    .vehicle-sliding-pill.pill-bike {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.38);
+    }
+    .vehicle-sliding-pill.pill-cng {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 2px 10px rgba(5, 150, 105, 0.38);
+    }
+    .vehicle-sliding-pill.pill-car {
+      background: linear-gradient(135deg, #6366f1, #4338ca);
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.38);
+    }
+    .vehicle-btn {
+      position: relative;
+      z-index: 10;
+      cursor: pointer;
+    }
+
+    /* Auth View Entrance & Micro-animations */
+    #authView > div:first-child {
+      animation: authCardFloatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes authCardFloatIn {
+      0% { opacity: 0; transform: translateY(20px) scale(0.985); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .auth-aurora-glow {
+      position: absolute;
+      top: -30%;
+      left: -20%;
+      width: 28rem;
+      height: 28rem;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, 0.35) 0%, rgba(59, 130, 246, 0.15) 50%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      animation: auroraPulse 10s ease-in-out infinite alternate;
+    }
+    .auth-dash-stream {
+      animation: authDashMove 2.4s linear infinite;
+    }
+    @keyframes authDashMove {
+      to {
+        stroke-dashoffset: -26;
+      }
+    }
+    .auth-badge-float-1 {
+      animation: authFloatBadge 4.2s ease-in-out infinite;
+    }
+    .auth-badge-float-2 {
+      animation: authFloatBadge 4.8s ease-in-out infinite 0.7s;
+    }
+    .auth-badge-float-3 {
+      animation: authFloatBadge 5.4s ease-in-out infinite 1.4s;
+    }
+    @keyframes authFloatBadge {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3.5px); }
+    }
+    .auth-tab-track {
+      position: relative;
+    }
+    .auth-sliding-pill {
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes authFormEnter {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .auth-form-enter {
+      animation: authFormEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #authView input:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+      border-color: #3b82f6 !important;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -715,65 +803,174 @@
   <!-- Auth Landing -->
   <section id="authView" class="max-w-4xl mx-auto px-4 pt-10 pb-6">
     <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="grid grid-cols-1 lg:grid-cols-2">
-        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white">
-          <p class="text-sm uppercase tracking-[0.2em] text-blue-100">BharaDekhi</p>
-          <h2 class="mt-4 text-3xl font-black">Your Dhaka commute starts here.</h2>
-          <p class="mt-4 text-blue-100 leading-relaxed">
-            Sign up as a rider, log in, and access your route planner. Admin access is kept separate for system management.
-          </p>
-          <div class="mt-8 space-y-3 text-sm text-blue-50">
-            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Live pickup and destination selection</div>
-            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Fare comparison across services</div>
-            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Separate admin control dashboard</div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+        <!-- Left: Animated Futuristic Dhaka Transit Showcase (7 cols on lg) -->
+        <div class="lg:col-span-7 auth-hero-banner relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-8 md:p-10 text-white flex flex-col justify-between">
+          <!-- Animated Aurora Glow Orb -->
+          <div class="auth-aurora-glow" aria-hidden="true"></div>
+
+          <!-- Top Brand Lockup -->
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-blue-300 border border-blue-400/25 backdrop-blur-md">
+              <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping"></span>
+              <span>BharaDekhi Platform</span>
+            </div>
+
+            <h2 class="mt-4 text-3xl md:text-4xl font-black tracking-tight leading-tight">
+              Your Dhaka commute starts here.
+            </h2>
+            <p class="mt-3 text-sm md:text-base text-blue-100/80 leading-relaxed max-w-md">
+              Smart transit route planner, real-time fare estimator, and ride-hailing deep-link launcher for Dhaka commuters.
+            </p>
+          </div>
+
+          <!-- Middle: Animated Dhaka Transit Node Constellation Map SVG -->
+          <div class="relative z-10 my-6 py-1">
+            <div class="auth-constellation-card rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md shadow-2xl">
+              <div class="flex items-center justify-between mb-3 text-xs font-semibold text-blue-200/90">
+                <span class="flex items-center gap-1.5">
+                  <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Transit Network
+                </span>
+                <span class="text-[10px] tracking-wider uppercase text-blue-300/70">Dhaka Hubs</span>
+              </div>
+
+              <!-- Animated Route Network SVG -->
+              <svg viewBox="0 0 320 110" class="w-full h-auto overflow-visible select-none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="authNetGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.4" />
+                    <stop offset="50%" stop-color="#60a5fa" stop-opacity="0.9" />
+                    <stop offset="100%" stop-color="#a855f7" stop-opacity="0.4" />
+                  </linearGradient>
+                </defs>
+
+                <!-- Connecting route lines -->
+                <path d="M 30 75 Q 85 20, 160 55 T 290 35" fill="none" stroke="url(#authNetGrad)" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M 30 75 Q 85 20, 160 55 T 290 35" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 20" class="auth-dash-stream" />
+                <path d="M 60 90 L 160 55 L 230 85" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="3 3" />
+
+                <!-- Route Nodes (Dhaka Hubs) -->
+                <!-- Uttara Node -->
+                <g transform="translate(290, 35)">
+                  <circle cx="0" cy="0" r="10" fill="none" stroke="#a855f7" stroke-width="1.5" class="animate-ping opacity-50" />
+                  <circle cx="0" cy="0" r="5" fill="#a855f7" />
+                  <text x="0" y="-10" text-anchor="middle" fill="#e9d5ff" font-size="9" font-weight="bold">Uttara</text>
+                </g>
+
+                <!-- Mirpur Node -->
+                <g transform="translate(160, 55)">
+                  <circle cx="0" cy="0" r="12" fill="none" stroke="#60a5fa" stroke-width="1.5" class="animate-ping opacity-60" />
+                  <circle cx="0" cy="0" r="6" fill="#3b82f6" />
+                  <text x="0" y="-11" text-anchor="middle" fill="#dbeafe" font-size="9" font-weight="bold">Mirpur 10</text>
+                </g>
+
+                <!-- Motijheel Node -->
+                <g transform="translate(30, 75)">
+                  <circle cx="0" cy="0" r="10" fill="none" stroke="#10b981" stroke-width="1.5" class="animate-ping opacity-50" />
+                  <circle cx="0" cy="0" r="5" fill="#10b981" />
+                  <text x="0" y="18" text-anchor="middle" fill="#a7f3d0" font-size="9" font-weight="bold">Motijheel</text>
+                </g>
+
+                <!-- Dhanmondi Node -->
+                <g transform="translate(230, 85)">
+                  <circle cx="0" cy="0" r="4" fill="#38bdf8" />
+                  <text x="0" y="16" text-anchor="middle" fill="#bae6fd" font-size="8" font-weight="bold">Dhanmondi</text>
+                </g>
+
+                <!-- Animated Courier Vehicle moving along path -->
+                <g class="auth-moving-vehicle">
+                  <animateMotion dur="5s" repeatCount="indefinite" rotate="auto" path="M 30 75 Q 85 20, 160 55 T 290 35" />
+                  <circle cx="0" cy="0" r="5" fill="#60a5fa" />
+                  <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
+                </g>
+              </svg>
+
+              <!-- Floating Live Mode Tags inside constellation card -->
+              <div class="mt-3 flex flex-wrap gap-2 pt-2 border-t border-white/10 text-[11px] font-semibold">
+                <span class="auth-badge-float-1 inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2.5 py-0.5 text-blue-200 border border-blue-400/30">
+                  <span>🏍️ Bike</span>
+                </span>
+                <span class="auth-badge-float-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-emerald-200 border border-emerald-400/30">
+                  <span>🛺 CNG</span>
+                </span>
+                <span class="auth-badge-float-3 inline-flex items-center gap-1 rounded-full bg-purple-500/20 px-2.5 py-0.5 text-purple-200 border border-purple-400/30">
+                  <span>🚇 Metro Rail</span>
+                </span>
+                <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-amber-200 border border-amber-400/30">
+                  <span>🚌 Local Bus</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Key Value Pillars -->
+          <div class="relative z-10 space-y-2 text-xs text-blue-100/90 pt-1">
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold">✓</span>
+              <span>Instant road distance & travel time estimation</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold">✓</span>
+              <span>Automated peak-hour surge & rain fare calculation</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 font-bold">✓</span>
+              <span>One-tap deep linking to Uber & Pathao</span>
+            </div>
           </div>
         </div>
 
-        <div class="p-6 md:p-8">
+        <!-- Right: Auth Portal Form (5 cols on lg) -->
+        <div class="lg:col-span-5 p-6 md:p-8 flex flex-col justify-center">
           <div class="flex items-center justify-between mb-5">
-            <h3 class="text-xl font-bold text-slate-900">Access Portal</h3>
-            <button type="button" id="adminAccessBtn" class="text-xs font-semibold text-slate-600 border border-slate-200 rounded-full px-3 py-1.5 hover:bg-slate-100 transition">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Welcome</p>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">Access Portal</h3>
+            </div>
+            <button type="button" id="adminAccessBtn" class="text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
               Admin Access
             </button>
           </div>
 
           <p id="authSetupNotice" class="hidden mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"></p>
 
-          <div class="grid grid-cols-2 bg-slate-100 rounded-xl p-1 mb-5">
-            <button type="button" data-auth-tab="login" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition bg-white text-blue-600 shadow-sm">Login</button>
-            <button type="button" data-auth-tab="signup" class="auth-tab rounded-lg py-2.5 text-sm font-semibold transition text-slate-600">Sign Up</button>
+          <!-- Fluid Segmented Sliding Tab Track -->
+          <div class="auth-tab-track relative grid grid-cols-2 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 mb-5 border border-slate-200/60 dark:border-slate-700/60">
+            <div id="authSlidingPill" class="auth-sliding-pill absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-white dark:bg-slate-900 shadow-sm pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
+            <button type="button" data-auth-tab="login" class="auth-tab relative z-10 rounded-lg py-2.5 text-sm font-semibold transition-colors duration-200 text-blue-600 dark:text-blue-400">Login</button>
+            <button type="button" data-auth-tab="signup" class="auth-tab relative z-10 rounded-lg py-2.5 text-sm font-semibold transition-colors duration-200 text-slate-600 dark:text-slate-400">Sign Up</button>
           </div>
 
           <form id="loginForm" class="auth-form space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
+              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
+              <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition">Login</button>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99]">Login</button>
           </form>
 
           <form id="signupForm" class="auth-form hidden space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
-              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Full Name</label>
+              <input type="text" placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
+              <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-              <input type="password" placeholder="Create password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
+              <input type="password" placeholder="Create password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Confirm Password</label>
-              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Confirm Password</label>
+              <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
             </div>
-            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">Create Account</button>
+            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99]">Create Account</button>
           </form>
         </div>
       </div>
@@ -992,18 +1189,23 @@
         </div>
       </section>
 
-      <!-- Vehicle Mode Tabs -->
-      <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-100">
-      <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Preferred vehicle</span>
-        <button onclick="setVehicle('Bike')" id="btnBike" aria-pressed="true" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-blue-600 text-white shadow-sm">
-          <i data-lucide="bike" class="w-4 h-4"></i> Bike
-        </button>
-        <button onclick="setVehicle('CNG')" id="btnCNG" aria-pressed="false" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200">
-          <i data-lucide="zap" class="w-4 h-4"></i> CNG
-        </button>
-        <button onclick="setVehicle('Car')" id="btnCar" aria-pressed="false" class="vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200">
-          <i data-lucide="car" class="w-4 h-4"></i> Car
-        </button>
+      <!-- Vehicle Mode Tabs with Liquid Sliding Pill -->
+      <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Preferred vehicle</span>
+        <div id="vehicleTrack" class="vehicle-segmented-track relative inline-flex items-center rounded-xl bg-slate-100/90 dark:bg-slate-800/90 p-1 shadow-inner border border-slate-200/60 dark:border-slate-700/60">
+          <!-- Liquid Sliding Background Pill -->
+          <div id="vehicleSlidingPill" class="vehicle-sliding-pill absolute top-1 bottom-1 left-0 rounded-lg pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] pill-bike"></div>
+          
+          <button onclick="setVehicle('Bike')" id="btnBike" aria-pressed="true" class="vehicle-btn relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-white">
+            <i data-lucide="bike" class="w-4 h-4"></i> <span>Bike</span>
+          </button>
+          <button onclick="setVehicle('CNG')" id="btnCNG" aria-pressed="false" class="vehicle-btn relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+            <i data-lucide="zap" class="w-4 h-4"></i> <span>CNG</span>
+          </button>
+          <button onclick="setVehicle('Car')" id="btnCar" aria-pressed="false" class="vehicle-btn relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+            <i data-lucide="car" class="w-4 h-4"></i> <span>Car</span>
+          </button>
+        </div>
       </div>
 
       <!-- Interactive Map -->
@@ -1898,6 +2100,7 @@
       if (typeof renderCurrentLocationStatus === 'function') renderCurrentLocationStatus();
       if (typeof renderMapSelectionControls === 'function') renderMapSelectionControls();
       if (typeof updateAnimToggleButton === 'function') updateAnimToggleButton();
+      if (typeof updateVehicleSlidingPill === 'function') requestAnimationFrame(updateVehicleSlidingPill);
       if (typeof renderBusRouteFinder === 'function') renderBusRouteFinder();
       if (typeof applyTheme === 'function') applyTheme();
     }
@@ -3836,17 +4039,27 @@
     }
 
     // 7. Helpers
+    function updateVehicleSlidingPill() {
+      const activeBtn = document.getElementById('btn' + selectedVehicle);
+      const pill = document.getElementById('vehicleSlidingPill');
+      if (!activeBtn || !pill) return;
+      pill.style.width = `${activeBtn.offsetWidth}px`;
+      pill.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+      pill.className = `vehicle-sliding-pill absolute top-1 bottom-1 left-0 rounded-lg pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] pill-${selectedVehicle.toLowerCase()}`;
+    }
+
     function setVehicle(type) {
       if (!Object.prototype.hasOwnProperty.call(VEHICLE_RATES, type)) return;
       selectedVehicle = type;
-      document.querySelectorAll('.vehicle-btn').forEach(b => {
-        b.className = "vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200";
-      });
       const activeBtn = document.getElementById('btn' + type);
-      activeBtn.className = "vehicle-btn flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition bg-blue-600 text-white shadow-sm";
-      document.querySelectorAll('.vehicle-btn').forEach(button => {
-        button.setAttribute('aria-pressed', String(button === activeBtn));
+      document.querySelectorAll('.vehicle-btn').forEach(btn => {
+        const isActive = btn === activeBtn;
+        btn.setAttribute('aria-pressed', String(isActive));
+        btn.className = `vehicle-btn relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200 ${
+          isActive ? 'text-white' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+        }`;
       });
+      updateVehicleSlidingPill();
       if (vehicleMarker) {
         vehicleMarker.setIcon(getVehicleIcon(selectedVehicle, lastVehicleHeading));
         const el = vehicleMarker.getElement();
@@ -3898,19 +4111,28 @@
     function setAuthTab(type) {
       const tabs = document.querySelectorAll('.auth-tab');
       const forms = document.querySelectorAll('.auth-form');
+      const pill = document.getElementById('authSlidingPill');
+
+      if (pill) {
+        pill.style.transform = type === 'login' ? 'translateX(0%)' : 'translateX(100%)';
+      }
 
       tabs.forEach(tab => {
         const active = tab.dataset.authTab === type;
-        tab.classList.toggle('bg-white', active);
         tab.classList.toggle('text-blue-600', active);
-        tab.classList.toggle('shadow-sm', active);
+        tab.classList.toggle('dark:text-blue-400', active);
         tab.classList.toggle('text-slate-600', !active);
-        tab.classList.toggle('hover:text-slate-900', !active);
+        tab.classList.toggle('dark:text-slate-400', !active);
       });
 
       forms.forEach(form => {
         const show = form.id === (type === 'login' ? 'loginForm' : 'signupForm');
         form.classList.toggle('hidden', !show);
+        if (show) {
+          form.classList.remove('auth-form-enter');
+          void form.offsetWidth;
+          form.classList.add('auth-form-enter');
+        }
       });
     }
 
@@ -3928,10 +4150,15 @@
       if (view === 'admin') loadAdminAccounts();
       if (view === 'user') renderTravelShortcuts();
 
-      if (view === 'user' && map) {
+      if (view === 'user') {
         requestAnimationFrame(() => {
-          map.invalidateSize({ pan: false });
-          if (routePolyline) map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+          if (map) {
+            map.invalidateSize({ pan: false });
+            if (routePolyline && routePolyline.getLatLngs().length > 0) {
+              map.fitBounds(routePolyline.getBounds(), { padding: [30, 30] });
+            }
+          }
+          if (typeof updateVehicleSlidingPill === 'function') updateVehicleSlidingPill();
         });
       }
     }
@@ -4204,6 +4431,8 @@
       populateLocationSelectors();
       initMap();
       applyLanguage();
+      updateVehicleSlidingPill();
+      window.addEventListener('resize', updateVehicleSlidingPill);
       loadBusRouteData();
       updateRoute();
       renderMetricsAndFares();
