@@ -1011,6 +1011,16 @@
       position: relative;
       overflow: hidden;
     }
+    .transit-card-active-metro {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.45), 0 20px 45px -10px rgba(14, 165, 233, 0.3) !important;
+      background: linear-gradient(180deg, #0d1e3d 0%, #091124 100%) !important;
+    }
+    .transit-card-active-bus {
+      border-color: #34d399 !important;
+      box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.45), 0 20px 45px -10px rgba(16, 185, 129, 0.3) !important;
+      background: linear-gradient(180deg, #09261f 0%, #091124 100%) !important;
+    }
     .transit-inner-card {
       background: rgba(14, 25, 52, 0.75);
       border: 1px solid rgba(71, 85, 105, 0.35);
@@ -1760,7 +1770,147 @@
         </p>
       </section>
 
-      <!-- SECTION 1: METRO RAIL (MRT LINE 6 DIRECT) -->
+      <!-- MORE WAYS TO TRAVEL SECTION (COMPACT PUBLIC TRANSIT COMPARISON) -->
+      <section id="moreWaysToTravelSection" aria-labelledby="moreWaysToTravelHeading" class="border-t border-slate-100 dark:border-slate-800/80 pt-5 reveal-on-scroll">
+        <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-bold uppercase tracking-wider">
+                Public Transit
+              </span>
+            </div>
+            <h2 id="moreWaysToTravelHeading" class="planner-section-title font-extrabold text-slate-900 dark:text-slate-100">
+              More Ways to Travel
+            </h2>
+            <p id="moreWaysToTravelSubtitle" class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              Compare public transport options to find a route that fits your budget and destination.
+            </p>
+          </div>
+          <span class="text-xs text-slate-400 hidden sm:inline-block">Select an option to view route details</span>
+        </div>
+
+        <!-- 2 Compact Comparison Cards (Side-by-side on desktop, stacked on mobile) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" aria-live="polite">
+          
+          <!-- CARD A: METRO RAIL -->
+          <article id="cardMetroOption" class="transit-navy-card p-4 md:p-5 rounded-2xl border border-slate-800 hover:border-sky-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group shadow-lg shadow-black/20" onclick="togglePublicTransportMode('metro')">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 group-hover:scale-105 group-hover:bg-sky-500/30 transition-transform">
+                    <span class="text-xl">🚆</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-extrabold text-base text-white tracking-wide">Metro Rail</h3>
+                      <span class="rounded-full bg-sky-500/20 border border-sky-500/30 px-2 py-0.5 text-[10px] font-bold text-sky-300">MRT Line 6</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium">Fast, air-conditioned rapid transit</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span id="metroCardSelectedBadge" class="hidden rounded-full bg-sky-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                    Active
+                  </span>
+                </div>
+              </div>
+
+              <!-- Metric Grid -->
+              <div class="grid grid-cols-2 gap-2 bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 mb-3">
+                <div>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Estimated Fare</span>
+                  <span id="cardMetroFare" class="text-xl font-black text-sky-400 mt-0.5 block">৳30</span>
+                </div>
+                <div>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Transit Time</span>
+                  <span id="cardMetroDuration" class="text-sm font-bold text-slate-200 mt-1 block">~8 mins</span>
+                </div>
+              </div>
+
+              <!-- Stations preview -->
+              <div class="flex items-center gap-2 text-xs text-slate-300 mb-2">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-400 shrink-0"></i>
+                <span id="cardMetroStations" class="truncate font-medium text-slate-300">Dhaka University → Bijoy Sarani</span>
+              </div>
+            </div>
+
+            <!-- View Metro Route Button -->
+            <button id="btnToggleMetroRoute" type="button" class="mt-3 w-full py-2.5 px-3 rounded-xl font-semibold text-xs bg-sky-600 hover:bg-sky-500 text-white active:scale-95 transition flex items-center justify-center gap-1.5 shadow-md shadow-sky-600/30" onclick="event.stopPropagation(); togglePublicTransportMode('metro');">
+              <span id="btnToggleMetroRouteText">View Metro Route</span>
+              <i id="btnToggleMetroRouteIcon" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300"></i>
+            </button>
+          </article>
+
+          <!-- CARD B: LOCAL BUS -->
+          <article id="cardBusOption" class="transit-navy-card p-4 md:p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group shadow-lg shadow-black/20" onclick="togglePublicTransportMode('bus')">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 group-hover:scale-105 group-hover:bg-emerald-500/30 transition-transform">
+                    <span class="text-xl">🚌</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-extrabold text-base text-white tracking-wide">Local Bus</h3>
+                      <span class="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-300">City Corridor</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium">Affordable city buses & feeder connections</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span id="busCardSelectedBadge" class="hidden rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                    Active
+                  </span>
+                </div>
+              </div>
+
+              <!-- Metric Grid -->
+              <div class="grid grid-cols-2 gap-2 bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 mb-3">
+                <div>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Estimated Fare</span>
+                  <span id="cardBusFare" class="text-xl font-black text-emerald-400 mt-0.5 block">৳25 - ৳35</span>
+                </div>
+                <div>
+                  <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Journey Time</span>
+                  <span id="cardBusDuration" class="text-sm font-bold text-slate-200 mt-1 block">~35 mins</span>
+                </div>
+              </div>
+
+              <!-- Route info preview -->
+              <div class="flex items-center gap-2 text-xs text-slate-300 mb-2">
+                <i data-lucide="route" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                <span id="cardBusRouteInfo" class="truncate font-medium text-slate-300">Direct bus routes available</span>
+              </div>
+            </div>
+
+            <!-- View Bus Routes Button -->
+            <button id="btnToggleBusRoute" type="button" class="mt-3 w-full py-2.5 px-3 rounded-xl font-semibold text-xs bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95 transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30" onclick="event.stopPropagation(); togglePublicTransportMode('bus');">
+              <span id="btnToggleBusRouteText">View Bus Routes</span>
+              <i id="btnToggleBusRouteIcon" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300"></i>
+            </button>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- METRO RAIL PORTAL (Wrapper around Section 1 & Section 2) -->
+      <div id="metroRailPortal" class="hidden space-y-6 pt-2 transition-all duration-300">
+        <!-- Metro Portal Top Banner with Close button -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-sky-950/60 border border-sky-800/80 text-sky-200 shadow-md">
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-sky-600 text-white font-black text-xs shadow-sm">M6</span>
+            <div>
+              <h3 class="font-bold text-sm text-white">Metro Rail Journey Planner &amp; Feeder Options</h3>
+              <p class="text-[11px] text-sky-300/80">Interactive Station light-path, feeder options &amp; fare estimator</p>
+            </div>
+          </div>
+          <button type="button" onclick="closePublicTransportPortal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition active:scale-95">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <span id="closeMetroPortalBtnText">Close Planner</span>
+          </button>
+        </div>
+
+        <!-- SECTION 1: METRO RAIL (MRT LINE 6 DIRECT) -->
       <section aria-labelledby="mrtDirectHeading" class="border-t border-slate-100 pt-5 reveal-on-scroll">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
@@ -2176,6 +2326,26 @@
           <div id="lastMileOptions"><div id="lastMileHeading"></div><div id="lastMileOptionList"></div></div>
         </div>
       </section>
+    </div>
+
+    <!-- BUS JOURNEY PORTAL (Wrapper around Section 3 & Section 4) -->
+    <div id="busJourneyPortal" class="hidden space-y-6 pt-2 transition-all duration-300">
+      <!-- Bus Portal Top Banner with Close button -->
+      <div class="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-800/80 text-emerald-200 shadow-md">
+        <div class="flex items-center gap-2.5">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-sm">
+            <i data-lucide="bus" class="w-4 h-4"></i>
+          </span>
+          <div>
+            <h3 class="font-bold text-sm text-white">Local Bus &amp; Feeder Journey Planner</h3>
+            <p class="text-[11px] text-emerald-300/80">Direct bus routes, stop intersections, and feeder transfers</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePublicTransportPortal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition active:scale-95">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span id="closeBusPortalBtnText">Close Planner</span>
+        </button>
+      </div>
 
       <!-- SECTION 3: DHAKA LOCAL BUS FINDER (DIRECT BUS ROUTES) -->
       <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-5 reveal-on-scroll">
@@ -2249,6 +2419,7 @@
         </p>
       </section>
     </div>
+  </div>
 
     <!-- COMPARISON & LAUNCH SECTION -->
     <div class="planner-provider-section reveal-on-scroll">
@@ -2837,6 +3008,39 @@
       'Open in Uber': 'Uber-এ খুলুন',
       'Open in Pathao': 'Pathao-তে খুলুন',
       '* Fares shown are baseline mathematical estimates based on OSRM distance and standard Dhaka transport rates. Official dynamic surge and final charges are set independently by Uber and Pathao.': '* দেখানো ভাড়া OSRM দূরত্ব ও ঢাকার সাধারণ ভাড়ার ভিত্তিতে আনুমানিক হিসাব। Uber ও Pathao-এর প্রকৃত ভাড়া ও পিক চার্জ আলাদা হতে পারে।',
+      'More Ways to Travel': 'যাত্রার আরও উপায়',
+      'Compare public transport options to find a route that fits your budget and destination.': 'আপনার বাজেট ও গন্তব্যের সাথে মানানসই রুট পেতে গণপরিবহন বিকল্প তুলনা করুন।',
+      'Public Transit': 'গণপরিবহন',
+      'Metro Rail': 'মেট্রোরেল',
+      'Fast, air-conditioned rapid transit': 'দ্রুত ও শীতাতপ নিয়ন্ত্রিত মেট্রো সেবা',
+      'View Metro Route': 'মেট্রো রুট দেখুন',
+      'Hide Metro Route': 'মেট্রো রুট বন্ধ করুন',
+      'Local Bus': 'লোকাল বাস',
+      'City Corridor': 'নগর করিডোর',
+      'Affordable city buses & feeder connections': 'সাশ্রয়ী সিটি বাস ও ফিডার যোগাযোগ',
+      'View Bus Routes': 'বাস রুট দেখুন',
+      'Hide Bus Routes': 'বাস রুট বন্ধ করুন',
+      'Close Planner': 'প্ল্যানার বন্ধ করুন',
+      'Active': 'সক্রিয়',
+      'Estimated Fare': 'আনুমানিক ভাড়া',
+      'Transit Time': 'ভ্রমণের সময়',
+      'Journey Time': 'যাত্রার সময়',
+      'Route not found': 'রুট পাওয়া যায়নি',
+      'Unavailable': 'অনুপলব্ধ',
+      'direct bus routes': 'টি সরাসরি বাস রুট',
+      'No direct bus routes for this corridor': 'এই করিডোরে সরাসরি কোনো বাস রুট নেই',
+      'Bus + Feeder Transfer': 'বাস + ফিডার সমন্বিত রুট',
+      'Metro Rail Detailed Journey Planner': 'মেট্রোরেল বিস্তারিত জার্নি প্ল্যানার',
+      'Metro Rail Journey Planner & Feeder Options': 'মেট্রোরেল জার্নি প্ল্যানার ও ফিডার বিকল্প',
+      'Local Bus & Feeder Journey Planner': 'লোকাল বাস ও ফিডার জার্নি প্ল্যানার',
+      'Interactive Station light-path, feeder options & fare estimator': 'ইন্টারেক্টিভ স্টেশন লাইট-পাথ, ফিডার অপশন ও ভাড়া নির্ণায়ক',
+      'Direct bus routes, stop intersections, and feeder transfers': 'সরাসরি বাস রুট, স্টপ ইন্টারসেকশন ও ফিডার ট্রান্সফার',
+      'Select an option to view route details': 'রুটের বিবরণ দেখতে একটি বিকল্প নির্বাচন করুন',
+      'First-Mile Feeder': 'প্রথম মাইল ফিডার',
+      'Last-Mile Feeder': 'শেষ মাইল ফিডার',
+      'Board': 'বোর্ডিং',
+      'Exit': 'প্রস্থান',
+      'Alight': 'নামার স্থান',
       'Made with care by': 'যত্নসহকারে তৈরি করেছেন',
       'Amiyo Hasan': 'অমিয় হাসান',
       'Admin access': 'অ্যাডমিন প্রবেশ',
@@ -3977,6 +4181,8 @@
     // Leaflet map objects & animation state
     let map, pickupMarker, dropMarker, routePolyline;
     let vehicleMarker = null;
+    let transitMapLayerGroup = null;
+    let activePublicTransportMode = null; // null | 'metro' | 'bus'
     let routeAnimFrame = null;
     let routeLoopTimeout = null;
     let isRouteAnimating = false;
@@ -4267,6 +4473,7 @@
       }).addTo(map).bindPopup('Destination');
 
       map.on('click', handleMapClick);
+      transitMapLayerGroup = L.layerGroup().addTo(map);
     }
 
     // Peak windows are estimates in Dhaka local time: 8:30-10:30 AM and 5:00-8:00 PM.
@@ -4509,11 +4716,13 @@
       const mapElement = document.getElementById('map') || document.querySelector('.leaflet-container');
       if (mapElement) {
         mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if (typeof map !== 'undefined' && routePolyline && routePolyline.getLatLngs().length > 0) {
-          setTimeout(() => {
+        setTimeout(() => {
+          if (activePublicTransportMode && typeof updateMapTransitVisualization === 'function') {
+            updateMapTransitVisualization(activePublicTransportMode);
+          } else if (typeof map !== 'undefined' && routePolyline && routePolyline.getLatLngs().length > 0) {
             map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
-          }, 350);
-        }
+          }
+        }, 350);
       }
     }
 
@@ -4549,6 +4758,9 @@
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
     }
 
     function selectMrtLastMileMode(mode) {
@@ -4556,6 +4768,9 @@
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
     }
 
     function selectBusFirstMileMode(mode) {
@@ -4573,6 +4788,9 @@
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
     }
 
     function setCustomMrtExitStation(idx) {
@@ -4580,6 +4798,9 @@
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
     }
 
     function resetCustomMrtStations() {
@@ -4594,6 +4815,9 @@
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
     }
 
     function getFeederOptions(accessDistanceKm, isPeak) {
@@ -4881,6 +5105,7 @@
         });
         busRouteData = data;
         renderBusRouteFinder();
+        if (typeof updateMoreWaysToTravelCards === 'function') updateMoreWaysToTravelCards();
       } catch (error) {
         console.error('Could not load local bus routes:', error);
         if (status) status.textContent = getLocalizedText('Could not load local bus routes. Please refresh or check the route data file.');
@@ -5780,6 +6005,479 @@
       });
     }
 
+    // --- More Ways to Travel (Public Transit Comparison & Modes) ---
+    function updateMoreWaysToTravelCards() {
+      const pickupKey = document.getElementById('pickupSelect')?.value;
+      const dropoffKey = document.getElementById('dropoffSelect')?.value;
+      const pickup = getLocationForKey(pickupKey);
+      const destination = getLocationForKey(dropoffKey);
+      if (!pickup || !destination) return;
+
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+
+      // 1. CARD A: Metro Rail
+      const defaultPickupStation = getNearestMrtStation(pickup);
+      const defaultDestinationStation = getNearestMrtStation(destination);
+      const pickupStation = customMrtPickupStationIdx !== null
+        ? { station: MRT_LINE_6_STATIONS[customMrtPickupStationIdx], index: customMrtPickupStationIdx }
+        : defaultPickupStation;
+      const destinationStation = customMrtDropoffStationIdx !== null
+        ? { station: MRT_LINE_6_STATIONS[customMrtDropoffStationIdx], index: customMrtDropoffStationIdx }
+        : defaultDestinationStation;
+
+      const firstStationIndex = Math.min(pickupStation.index, destinationStation.index);
+      const lastStationIndex = Math.max(pickupStation.index, destinationStation.index);
+      const stationIntervals = Math.abs(lastStationIndex - firstStationIndex);
+      const stationFareDifference = Math.abs(
+        MRT_LINE_6_STATIONS[lastStationIndex].fareFromUttara -
+        MRT_LINE_6_STATIONS[firstStationIndex].fareFromUttara
+      );
+      const standardMrtFare = stationIntervals === 0 ? 0 : Math.min(100, Math.max(20, stationFareDifference));
+      const hasMrtPass = document.getElementById('mrtPassToggle')?.checked;
+      const calculatedMrtFare = hasMrtPass ? Math.round(standardMrtFare * 0.9) : standardMrtFare;
+      const mrtDuration = Math.max(4, stationIntervals * 2.5);
+
+      const cardMetroFare = document.getElementById('cardMetroFare');
+      const cardMetroDuration = document.getElementById('cardMetroDuration');
+      const cardMetroStations = document.getElementById('cardMetroStations');
+
+      if (cardMetroFare) {
+        cardMetroFare.textContent = formatLocalizedFare(calculatedMrtFare);
+      }
+      if (cardMetroDuration) {
+        cardMetroDuration.textContent = `~${formatLocalizedNumber(Math.round(mrtDuration))} ${getLocalizedText('mins')}`;
+      }
+      if (cardMetroStations) {
+        if (stationIntervals === 0) {
+          cardMetroStations.textContent = `${getLocalizedText(pickupStation.station.name)} · ${getLocalizedText('Both locations closest to same station')}`;
+        } else {
+          cardMetroStations.textContent = `${getLocalizedText(pickupStation.station.name)} → ${getLocalizedText(destinationStation.station.name)} (${formatLocalizedNumber(stationIntervals)} ${getLocalizedText('stations')})`;
+        }
+      }
+
+      // 2. CARD B: Local Bus
+      const cardBusFare = document.getElementById('cardBusFare');
+      const cardBusDuration = document.getElementById('cardBusDuration');
+      const cardBusRouteInfo = document.getElementById('cardBusRouteInfo');
+
+      if (!busRouteData) {
+        if (cardBusFare) cardBusFare.textContent = '...';
+        if (cardBusDuration) cardBusDuration.textContent = '...';
+        if (cardBusRouteInfo) cardBusRouteInfo.textContent = getLocalizedText('Loading local bus routes…');
+      } else {
+        const matches = typeof getBusRouteMatches === 'function' ? getBusRouteMatches(pickupKey, dropoffKey) : [];
+        const hybridMatches = typeof getBusHybridMatches === 'function' ? getBusHybridMatches(pickup, destination, isPeak, matches) : [];
+
+        if (matches.length > 0) {
+          const minFare = Math.min(...matches.map(m => m.fare));
+          const maxFare = Math.max(...matches.map(m => m.fare));
+          const speedKmh = isPeak ? 15 : 22;
+          const minTime = Math.min(...matches.map(m => Math.max(15, Math.round((m.distanceKm / speedKmh) * 60))));
+
+          if (cardBusFare) {
+            cardBusFare.textContent = minFare === maxFare
+              ? formatLocalizedFare(minFare)
+              : `${formatLocalizedFare(minFare)} - ${formatLocalizedFare(maxFare)}`;
+          }
+          if (cardBusDuration) {
+            cardBusDuration.textContent = `~${formatLocalizedNumber(minTime)} ${getLocalizedText('mins')}`;
+          }
+          if (cardBusRouteInfo) {
+            const names = matches.slice(0, 2).map(m => getLocalizedText(m.service)).join(', ') + (matches.length > 2 ? '...' : '');
+            cardBusRouteInfo.textContent = `${formatLocalizedNumber(matches.length)} ${getLocalizedText('direct bus routes')} (${names})`;
+          }
+        } else if (hybridMatches.length > 0) {
+          const primary = hybridMatches[0];
+          if (cardBusFare) {
+            cardBusFare.textContent = `${formatLocalizedFare(primary.fareMin)} - ${formatLocalizedFare(primary.fareMax)}`;
+          }
+          if (cardBusDuration) {
+            cardBusDuration.textContent = `~${formatLocalizedNumber(primary.durationMins)} ${getLocalizedText('mins')}`;
+          }
+          if (cardBusRouteInfo) {
+            cardBusRouteInfo.textContent = `${getLocalizedText('Bus + Feeder Transfer')}: ${getLocalizedText(primary.service)}`;
+          }
+        } else {
+          if (cardBusFare) {
+            cardBusFare.textContent = getLocalizedText('Unavailable');
+          }
+          if (cardBusDuration) {
+            cardBusDuration.textContent = getLocalizedText('Route not found');
+          }
+          if (cardBusRouteInfo) {
+            cardBusRouteInfo.textContent = getLocalizedText('No direct bus routes for this corridor');
+          }
+        }
+      }
+
+      // Synchronize active mode visualization if a portal is already open
+      if (activePublicTransportMode === 'metro') {
+        updateMapTransitVisualization('metro');
+      } else if (activePublicTransportMode === 'bus') {
+        updateMapTransitVisualization('bus');
+      }
+    }
+
+    function togglePublicTransportMode(mode) {
+      if (activePublicTransportMode === mode) {
+        closePublicTransportPortal();
+      } else {
+        openPublicTransportPortal(mode);
+      }
+    }
+
+    function openPublicTransportPortal(mode) {
+      activePublicTransportMode = mode;
+      const metroPortal = document.getElementById('metroRailPortal');
+      const busPortal = document.getElementById('busJourneyPortal');
+      const cardMetro = document.getElementById('cardMetroOption');
+      const cardBus = document.getElementById('cardBusOption');
+      const metroBadge = document.getElementById('metroCardSelectedBadge');
+      const busBadge = document.getElementById('busCardSelectedBadge');
+      const metroBtnText = document.getElementById('btnToggleMetroRouteText');
+      const metroBtnIcon = document.getElementById('btnToggleMetroRouteIcon');
+      const busBtnText = document.getElementById('btnToggleBusRouteText');
+      const busBtnIcon = document.getElementById('btnToggleBusRouteIcon');
+
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+
+      if (mode === 'metro') {
+        if (metroPortal) metroPortal.classList.remove('hidden');
+        if (busPortal) busPortal.classList.add('hidden');
+
+        if (cardMetro) {
+          cardMetro.classList.add('transit-card-active-metro');
+          cardMetro.setAttribute('aria-expanded', 'true');
+        }
+        if (cardBus) {
+          cardBus.classList.remove('transit-card-active-bus');
+          cardBus.setAttribute('aria-expanded', 'false');
+        }
+
+        if (metroBadge) metroBadge.classList.remove('hidden');
+        if (busBadge) busBadge.classList.add('hidden');
+
+        if (metroBtnText) metroBtnText.textContent = getLocalizedText('Hide Metro Route');
+        if (metroBtnIcon) metroBtnIcon.style.transform = 'rotate(180deg)';
+        if (busBtnText) busBtnText.textContent = getLocalizedText('View Bus Routes');
+        if (busBtnIcon) busBtnIcon.style.transform = 'rotate(0deg)';
+
+        renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
+        updateMapTransitVisualization('metro');
+
+        if (metroPortal) {
+          metroPortal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else if (mode === 'bus') {
+        if (busPortal) busPortal.classList.remove('hidden');
+        if (metroPortal) metroPortal.classList.add('hidden');
+
+        if (cardBus) {
+          cardBus.classList.add('transit-card-active-bus');
+          cardBus.setAttribute('aria-expanded', 'true');
+        }
+        if (cardMetro) {
+          cardMetro.classList.remove('transit-card-active-metro');
+          cardMetro.setAttribute('aria-expanded', 'false');
+        }
+
+        if (busBadge) busBadge.classList.remove('hidden');
+        if (metroBadge) metroBadge.classList.add('hidden');
+
+        if (busBtnText) busBtnText.textContent = getLocalizedText('Hide Bus Routes');
+        if (busBtnIcon) busBtnIcon.style.transform = 'rotate(180deg)';
+        if (metroBtnText) metroBtnText.textContent = getLocalizedText('View Metro Route');
+        if (metroBtnIcon) metroBtnIcon.style.transform = 'rotate(0deg)';
+
+        if (typeof renderBusRouteFinder === 'function') renderBusRouteFinder();
+        updateMapTransitVisualization('bus');
+
+        if (busPortal) {
+          busPortal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function closePublicTransportPortal() {
+      activePublicTransportMode = null;
+      const metroPortal = document.getElementById('metroRailPortal');
+      const busPortal = document.getElementById('busJourneyPortal');
+      const cardMetro = document.getElementById('cardMetroOption');
+      const cardBus = document.getElementById('cardBusOption');
+      const metroBadge = document.getElementById('metroCardSelectedBadge');
+      const busBadge = document.getElementById('busCardSelectedBadge');
+      const metroBtnText = document.getElementById('btnToggleMetroRouteText');
+      const metroBtnIcon = document.getElementById('btnToggleMetroRouteIcon');
+      const busBtnText = document.getElementById('btnToggleBusRouteText');
+      const busBtnIcon = document.getElementById('btnToggleBusRouteIcon');
+
+      if (metroPortal) metroPortal.classList.add('hidden');
+      if (busPortal) busPortal.classList.add('hidden');
+
+      if (cardMetro) {
+        cardMetro.classList.remove('transit-card-active-metro');
+        cardMetro.setAttribute('aria-expanded', 'false');
+      }
+      if (cardBus) {
+        cardBus.classList.remove('transit-card-active-bus');
+        cardBus.setAttribute('aria-expanded', 'false');
+      }
+
+      if (metroBadge) metroBadge.classList.add('hidden');
+      if (busBadge) busBadge.classList.add('hidden');
+
+      if (metroBtnText) metroBtnText.textContent = getLocalizedText('View Metro Route');
+      if (metroBtnIcon) metroBtnIcon.style.transform = 'rotate(0deg)';
+      if (busBtnText) busBtnText.textContent = getLocalizedText('View Bus Routes');
+      if (busBtnIcon) busBtnIcon.style.transform = 'rotate(0deg)';
+
+      updateMapTransitVisualization('direct');
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    function updateMapTransitVisualization(mode) {
+      if (!map) return;
+      if (!transitMapLayerGroup) {
+        transitMapLayerGroup = L.layerGroup().addTo(map);
+      }
+      transitMapLayerGroup.clearLayers();
+
+      const pickupKey = document.getElementById('pickupSelect')?.value;
+      const dropoffKey = document.getElementById('dropoffSelect')?.value;
+      const pickup = getLocationForKey(pickupKey);
+      const destination = getLocationForKey(dropoffKey);
+
+      if (mode === 'metro' && pickup && destination) {
+        if (routePolyline) {
+          routePolyline.setStyle({ opacity: 0.15, dashArray: '4, 8' });
+        }
+        if (vehicleMarker) {
+          vehicleMarker.setOpacity(0.15);
+        }
+
+        const pStation = getNearestMrtStation(pickup);
+        const dStation = getNearestMrtStation(destination);
+        const allLatLngs = [];
+        allLatLngs.push([pickup.lat, pickup.lng]);
+
+        // First-mile feeder dashed line
+        if (pStation && (Math.abs(pStation.station.lat - pickup.lat) > 0.0005 || Math.abs(pStation.station.lng - pickup.lng) > 0.0005)) {
+          const feeder1 = L.polyline([
+            [pickup.lat, pickup.lng],
+            [pStation.station.lat, pStation.station.lng]
+          ], {
+            color: '#10b981',
+            weight: 4,
+            dashArray: '6, 8',
+            opacity: 0.95
+          }).addTo(transitMapLayerGroup);
+          feeder1.bindTooltip(getLocalizedText('First-Mile Feeder'), { sticky: true });
+        }
+
+        // MRT Line 6 segment
+        if (pStation && dStation) {
+          const firstIdx = Math.min(pStation.index, dStation.index);
+          const lastIdx = Math.max(pStation.index, dStation.index);
+          const mrtCoords = MRT_LINE_6_STATIONS.slice(firstIdx, lastIdx + 1).map(s => [s.lat, s.lng]);
+          if (pStation.index > dStation.index) mrtCoords.reverse();
+
+          // Outer Glow
+          L.polyline(mrtCoords, {
+            color: '#38bdf8',
+            weight: 10,
+            opacity: 0.45,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(transitMapLayerGroup);
+
+          // Core MRT Line
+          const mrtLine = L.polyline(mrtCoords, {
+            color: '#0284c7',
+            weight: 6,
+            opacity: 1,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(transitMapLayerGroup);
+          mrtLine.bindTooltip(`MRT Line 6 (${Math.abs(dStation.index - pStation.index)} ${getLocalizedText('stations')})`, { sticky: true });
+
+          mrtCoords.forEach(c => allLatLngs.push(c));
+
+          // Boarding Station Badge
+          const boardIcon = L.divIcon({
+            className: 'mrt-map-marker-pin',
+            html: `
+              <div style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: 2px solid #ffffff; border-radius: 9999px; padding: 4px 10px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.6); white-space: nowrap; transform: translate(-50%, -100%);">
+                <span>🚆</span>
+                <span>${getLocalizedText('Board')}: ${getLocalizedText(pStation.station.name)}</span>
+              </div>
+            `,
+            iconSize: [0, 0]
+          });
+          L.marker([pStation.station.lat, pStation.station.lng], { icon: boardIcon, zIndexOffset: 2500 }).addTo(transitMapLayerGroup);
+
+          // Exit Station Badge
+          const exitIcon = L.divIcon({
+            className: 'mrt-map-marker-pin',
+            html: `
+              <div style="background: linear-gradient(135deg, #0369a1, #0c4a6e); color: #fff; border: 2px solid #ffffff; border-radius: 9999px; padding: 4px 10px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 4px 14px rgba(3, 105, 161, 0.6); white-space: nowrap; transform: translate(-50%, -100%);">
+                <span>🏁</span>
+                <span>${getLocalizedText('Exit')}: ${getLocalizedText(dStation.station.name)}</span>
+              </div>
+            `,
+            iconSize: [0, 0]
+          });
+          L.marker([dStation.station.lat, dStation.station.lng], { icon: exitIcon, zIndexOffset: 2500 }).addTo(transitMapLayerGroup);
+        }
+
+        // Last-mile feeder dashed line
+        if (dStation && (Math.abs(dStation.station.lat - destination.lat) > 0.0005 || Math.abs(dStation.station.lng - destination.lng) > 0.0005)) {
+          const feeder2 = L.polyline([
+            [dStation.station.lat, dStation.station.lng],
+            [destination.lat, destination.lng]
+          ], {
+            color: '#10b981',
+            weight: 4,
+            dashArray: '6, 8',
+            opacity: 0.95
+          }).addTo(transitMapLayerGroup);
+          feeder2.bindTooltip(getLocalizedText('Last-Mile Feeder'), { sticky: true });
+        }
+
+        allLatLngs.push([destination.lat, destination.lng]);
+        if (allLatLngs.length > 1) {
+          map.fitBounds(L.latLngBounds(allLatLngs), { padding: [45, 45] });
+        }
+      } else if (mode === 'bus' && pickup && destination) {
+        if (routePolyline) {
+          routePolyline.setStyle({ opacity: 0.15, dashArray: '4, 8' });
+        }
+        if (vehicleMarker) {
+          vehicleMarker.setOpacity(0.15);
+        }
+
+        const allLatLngs = [];
+        allLatLngs.push([pickup.lat, pickup.lng]);
+
+        const dhakaTime = getDhakaTimeInfo();
+        const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+        const matches = typeof getBusRouteMatches === 'function' ? getBusRouteMatches(pickupKey, dropoffKey) : [];
+        const hybridMatches = typeof getBusHybridMatches === 'function' ? getBusHybridMatches(pickup, destination, isPeak, matches) : [];
+
+        if (matches.length > 0) {
+          const busRoute = L.polyline([[pickup.lat, pickup.lng], [destination.lat, destination.lng]], {
+            color: '#10b981',
+            weight: 6,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }).addTo(transitMapLayerGroup);
+          busRoute.bindTooltip(`🚌 Bus Corridor: ${matches[0].service}`, { sticky: true });
+
+          const busIcon = L.divIcon({
+            className: 'bus-map-marker-pin',
+            html: `
+              <div style="background: linear-gradient(135deg, #059669, #047857); color: #fff; border: 2px solid #ffffff; border-radius: 9999px; padding: 4px 10px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.6); white-space: nowrap; transform: translate(-50%, -100%);">
+                <span>🚌</span>
+                <span>${matches[0].service} (~${formatLocalizedFare(matches[0].fare)})</span>
+              </div>
+            `,
+            iconSize: [0, 0]
+          });
+          const midLat = (pickup.lat + destination.lat) / 2;
+          const midLng = (pickup.lng + destination.lng) / 2;
+          L.marker([midLat, midLng], { icon: busIcon, zIndexOffset: 2500 }).addTo(transitMapLayerGroup);
+        } else if (hybridMatches.length > 0) {
+          const prim = hybridMatches[0];
+          const startStopLoc = prim.journeyStops?.[0]?.locationKey ? LOCATIONS[prim.journeyStops[0].locationKey] : null;
+          const endStopLoc = prim.journeyStops?.[prim.journeyStops.length - 1]?.locationKey ? LOCATIONS[prim.journeyStops[prim.journeyStops.length - 1].locationKey] : null;
+
+          if (startStopLoc) {
+            L.polyline([[pickup.lat, pickup.lng], [startStopLoc.lat, startStopLoc.lng]], {
+              color: '#38bdf8',
+              weight: 4,
+              dashArray: '6, 8',
+              opacity: 0.95
+            }).addTo(transitMapLayerGroup);
+            allLatLngs.push([startStopLoc.lat, startStopLoc.lng]);
+
+            const stop1Icon = L.divIcon({
+              className: 'bus-stop-pin',
+              html: `
+                <div style="background:#059669;color:#fff;border:2px solid #fff;border-radius:9999px;padding:3px 8px;font-size:10px;font-weight:800;white-space:nowrap;transform:translate(-50%,-100%);">
+                  🚏 ${getLocalizedText('Board')}: ${prim.journeyStops[0].name}
+                </div>
+              `,
+              iconSize: [0, 0]
+            });
+            L.marker([startStopLoc.lat, startStopLoc.lng], { icon: stop1Icon, zIndexOffset: 2500 }).addTo(transitMapLayerGroup);
+          }
+
+          if (startStopLoc && endStopLoc) {
+            L.polyline([[startStopLoc.lat, startStopLoc.lng], [endStopLoc.lat, endStopLoc.lng]], {
+              color: '#10b981',
+              weight: 6,
+              opacity: 0.95,
+              lineCap: 'round',
+              lineJoin: 'round'
+            }).addTo(transitMapLayerGroup);
+            allLatLngs.push([endStopLoc.lat, endStopLoc.lng]);
+
+            const stop2Icon = L.divIcon({
+              className: 'bus-stop-pin',
+              html: `
+                <div style="background:#047857;color:#fff;border:2px solid #fff;border-radius:9999px;padding:3px 8px;font-size:10px;font-weight:800;white-space:nowrap;transform:translate(-50%,-100%);">
+                  🏁 ${getLocalizedText('Alight')}: ${prim.journeyStops[prim.journeyStops.length - 1].name}
+                </div>
+              `,
+              iconSize: [0, 0]
+            });
+            L.marker([endStopLoc.lat, endStopLoc.lng], { icon: stop2Icon, zIndexOffset: 2500 }).addTo(transitMapLayerGroup);
+          }
+
+          if (endStopLoc) {
+            L.polyline([[endStopLoc.lat, endStopLoc.lng], [destination.lat, destination.lng]], {
+              color: '#38bdf8',
+              weight: 4,
+              dashArray: '6, 8',
+              opacity: 0.95
+            }).addTo(transitMapLayerGroup);
+          }
+        }
+
+        allLatLngs.push([destination.lat, destination.lng]);
+        if (allLatLngs.length > 1) {
+          map.fitBounds(L.latLngBounds(allLatLngs), { padding: [45, 45] });
+        }
+      } else {
+        if (routePolyline) {
+          routePolyline.setStyle({
+            color: '#2563eb',
+            weight: 6,
+            opacity: 0.85,
+            dashArray: null
+          });
+        }
+        if (vehicleMarker) {
+          vehicleMarker.setOpacity(1);
+        }
+        if (latestRouteCoords && latestRouteCoords.length > 0) {
+          map.fitBounds(L.latLngBounds(latestRouteCoords), { padding: [30, 30] });
+        }
+      }
+    }
+
     // 5. Calculate Rates and Update UI
     function renderMetricsAndFares() {
       document.getElementById('routeDistance').innerText = `${formatLocalizedNumber(currentDistanceKm, 1)} ${getLocalizedText('km')}`;
@@ -5864,6 +6562,9 @@
       document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.minimum)} - ${formatLocalizedFare(fare.maximum)}`;
       document.getElementById('pathaoFare').innerText = `${formatLocalizedFare(fare.pathaoMin)} - ${formatLocalizedFare(fare.pathaoMax)}`;
       renderMrtEstimate(isPeak);
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
 
       // Staggered pop refresh animation on fare comparison cards
       ['comparisonBike', 'comparisonCNG', 'comparisonCar'].forEach(id => {
@@ -6008,6 +6709,9 @@
 
     function setVehicle(type) {
       if (!Object.prototype.hasOwnProperty.call(VEHICLE_RATES, type)) return;
+      if (activePublicTransportMode !== null && typeof closePublicTransportPortal === 'function') {
+        closePublicTransportPortal();
+      }
       selectedVehicle = type;
       const activeBtn = document.getElementById('btn' + type);
       document.querySelectorAll('.vehicle-btn').forEach(btn => {

@@ -35,22 +35,29 @@ BharaDekhi solves Dhaka's commuting uncertainty by unifying road routing, peak-h
 * **Animated Surge Tachometer:** Custom radial gauge visualization indicating real-time traffic surge pressure (Normal, Moderate, High Surge).
 * **Live Precipitation Polling:** Periodically queries the [Open-Meteo Weather API](https://open-meteo.com/) for central Dhaka precipitation. When rain is detected, the engine dynamically applies an automated 30%–50% rain fare uplift to ride-hailing and feeder legs. Includes manual override controls.
 
-### 3. 🚇 MRT Line 6 Hybrid Light-Path Viaduct
+### 3. 🚆 Interactive “More Ways to Travel” Public Transit Comparison
+* **Compact Transit Comparison Cards:** Positioned immediately below direct ride options (Bike, CNG, Car), providing commuters with high-contrast, side-by-side comparison cards for **Metro Rail** and **Local Bus**.
+* **Conditional Journey Planner Rendering:** Detailed route planners remain neatly collapsed by default to eliminate visual clutter. Selecting "View Metro Route" or "View Bus Routes" smoothly reveals the full dark navy journey dashboard with station timelines, feeder combinations, and stop intersections.
+* **Synchronized Dynamic Mapping:** Selecting a public transit mode dynamically switches the map view from direct road lines to illuminated MRT Line 6 track segments, station badges, or bus corridors with dashed first/last-mile feeder connections. Returning to direct ride options immediately restores the driving polyline.
+* **Synchronized Real-Time State:** Every change to pickup or destination automatically updates fares, durations, and stations across the comparison cards and active portals without page reloads.
+
+### 4. 🚇 MRT Line 6 Hybrid Light-Path Viaduct
 * **Interactive 16-Station Light-Path:** Custom visual viaduct track representing MRT Line 6 from Uttara North to Motijheel, featuring an illuminated active transit segment and an animated train cruising beacon (`🚅 METRO`).
 * **Multi-Modal Feeder Optimization:** Calculates first-mile and last-mile access to and from metro stations, comparing rickshaw, bike, and CNG options to highlight the most cost-effective combination.
 * **Rickshaw Bargaining Model:** Emulates authentic Dhaka bargaining dynamics (Base ৳20 + ৳12/km, rounded up to the nearest ৳10; peak hours add ৳10 to the upper bargaining limit while preserving base rates).
 * **MRT Pass Discount:** Built-in 10% discount toggle for MRT Pass / Rapid Pass holders.
 
-### 4. 🚌 Dhaka Local Bus Finder
-* **Transit Graph Resolver:** Connects origin and destination hubs with direct Dhaka bus routes and up to three hybrid feeder suggestions.
+### 5. 🚌 Dhaka Local Bus & Feeder Journey Planner
+* **Transit Graph Resolver:** Connects origin and destination hubs with direct Dhaka bus routes and multi-modal hybrid feeder suggestions.
 * **BRTA Fare Policy Emulation:** Models Bangladesh Road Transport Authority fare rules (৳2.45/km with ৳10 non-AC and ৳20 AC minimums).
 
-### 5. 🚀 One-Tap Ride-Hailing Deep Links & Particle Bursts
+### 6. 🚀 One-Tap Ride-Hailing Deep Links & Particle Bursts
 * **Uber Universal Deep-Linking:** Automatically constructs `m.uber.com/ul/` deep-links with pre-pinned pickup and drop-off GPS coordinates.
 * **Pathao Native App Launcher:** Opens the Pathao mobile app and synthesizes clipboard ride instructions (pickup, destination, vehicle mode, and estimated fare).
 * **Haptic Particle Burst Physics:** Interactive particle burst explosion physics on action buttons providing tactile, responsive feedback.
 
-### 6. 🎨 Advanced UI, Motion & Animation Architecture
+### 7. 🎨 Advanced UI, Motion & Animation Architecture
+* **Dark Navy Transit Dashboard:** High-contrast aesthetic with deep navy gradients, illuminated cyan and emerald accents, and glowing badges.
 * **Conic "Border Beam" Glow:** Rotating conic-gradient illumination highlighting the best-value travel option.
 * **Aurora Ambient Backdrops:** Multi-layer animated radial glows and subtle gradient blurs creating futuristic visual depth.
 * **Fluid Sliding Pill Tabs:** Segmented tab controls utilizing `cubic-bezier(0.34, 1.56, 0.64, 1)` spring physics.
@@ -60,11 +67,11 @@ BharaDekhi solves Dhaka's commuting uncertainty by unifying road routing, peak-h
 * **Transit Constellation Map:** SVG vector network with continuous `<animateMotion>` vehicle tracking.
 * **Accessibility First:** Full automatic adherence to `prefers-reduced-motion: reduce`.
 
-### 7. 🌐 Zero-Layout-Shift Bilingual System & Themes
+### 8. 🌐 Zero-Layout-Shift Bilingual System & Themes
 * **Size-Parity Localization:** Instant switching between English and Bangla across the entire platform without layout breaks, text wrapping, or viewport expansion.
 * **Synchronized Dark / Light Themes:** Dual-palette system with persistent `localStorage` preference and synchronized map tile styling.
 
-### 8. 🔐 Supabase Authentication & Admin Control Center
+### 9. 🔐 Supabase Authentication & Admin Control Center
 * **Central User Authentication:** Supabase Auth handling secure sign-up, sign-in, and password management.
 * **PostgreSQL Row-Level Security (RLS):** Database-level access control policies ensuring non-admin users only access their own profiles.
 * **Admin Dashboard:** Verified admin control center for viewing registered user metrics and platform accounts.
