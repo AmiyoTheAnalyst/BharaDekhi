@@ -29,14 +29,25 @@
   </script>
   <script>
     try {
-      if (localStorage.getItem('bharadekhiTheme') === 'dark') {
+      const savedTheme = localStorage.getItem('bharadekhiTheme');
+      if (savedTheme === 'dark') {
         document.documentElement.dataset.theme = 'dark';
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.dataset.theme = 'light';
+        document.documentElement.classList.remove('dark');
       }
     } catch (error) {
       console.warn('Could not restore the saved theme preference:', error);
     }
   </script>
   
+  <!-- Tailwind CSS dark mode configuration -->
+  <script>
+    tailwind = {
+      darkMode: ['selector', '[data-theme="dark"]']
+    };
+  </script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -895,8 +906,8 @@
           <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span>FAQ</span>
         </a>
-        <button id="languageToggle" type="button" onclick="toggleLanguage()" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" onclick="toggleTheme()" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch to dark mode" aria-pressed="false">
+        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch language">বাংলা</button>
+        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition active:scale-95" aria-label="Switch to dark mode" aria-pressed="false">
           <span id="themeToggleIconContainer" class="flex items-center justify-center">
             <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
           </span>
@@ -2243,7 +2254,40 @@
       'Account created. Check your email to confirm the account, then log in.': 'অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল নিশ্চিত করে লগ ইন করুন।',
       'Logged out successfully.': 'সফলভাবে লগ আউট হয়েছে।',
       'Admin logged out.': 'অ্যাডমিন লগ আউট হয়েছে।',
-      'Shared sign-in is not configured yet. Follow the Supabase setup instructions in README.md, then add your project URL and publishable key to index.html.': 'শেয়ার করা লগ ইন এখনো সেটআপ করা হয়নি। README.md-এর Supabase নির্দেশনা অনুসরণ করে প্রজেক্ট URL ও পাবলিক কী index.html-এ যোগ করুন।'
+      'Shared sign-in is not configured yet. Follow the Supabase setup instructions in README.md, then add your project URL and publishable key to index.html.': 'শেয়ার করা লগ ইন এখনো সেটআপ করা হয়নি। README.md-এর Supabase নির্দেশনা অনুসরণ করে প্রজেক্ট URL ও পাবলিক কী index.html-এ যোগ করুন।',
+      'DHAKA TRIP PLANNER': 'ঢাকায় যাত্রা পরিকল্পনা',
+      'Dhaka Trip Planner': 'ঢাকায় যাত্রা পরিকল্পনা',
+      'STEP 1 · YOUR JOURNEY': 'ধাপ ১ · আপনার যাত্রা',
+      'STEP 1 . YOUR JOURNEY': 'ধাপ ১ · আপনার যাত্রা',
+      'Step 1 . Your journey': 'ধাপ ১ · আপনার যাত্রা',
+      'Select a place, or use your current location to get started.': 'শুরু করতে একটি স্থান বেছে নিন অথবা আপনার বর্তমান অবস্থান ব্যবহার করুন।',
+      "Choose where you're going, compare fares and travel times, then pick the route that works for you.": 'গন্তব্য বেছে নিন, ভাড়া ও যাত্রার সময় তুলনা করুন, তারপর আপনার জন্য উপযুক্ত পথটি নিন।',
+      'Dhaka Live Weather': 'ঢাকার লাইভ আবহাওয়া',
+      'DHAKA LIVE WEATHER': 'ঢাকার লাইভ আবহাওয়া',
+      'Live Transit Network': 'লাইভ ট্রানজিট নেটওয়ার্ক',
+      'Dhaka Hubs': 'ঢাকার হাবসমূহ',
+      'BharaDekhi Platform': 'ভাড়াদেখি প্ল্যাটফর্ম',
+      'Smart transit route planner, real-time fare estimator, and ride-hailing deep-link launcher for Dhaka commuters.': 'ঢাকার যাত্রীদের জন্য স্মার্ট ট্রানজিট রুট প্ল্যানার, রিয়েল-টাইম ভাড়ার হিসাব এবং রাইড অ্যাপ লঞ্চার।',
+      'Instant road distance & travel time estimation': 'তাৎক্ষণিক সড়ক দূরত্ব ও যাত্রার সময় অনুমান',
+      'Automated peak-hour surge & rain fare calculation': 'স্বয়ংক্রিয় পিক আওয়ার সার্জ ও বৃষ্টির ভাড়া হিসাব',
+      'One-tap deep linking to Uber & Pathao': 'এক ক্লিকে Uber ও Pathao-তে রাইড বুকিং',
+      'Open-Meteo API': 'Open-Meteo এপিআই',
+      '16 Stations (Line 6)': '১৬টি স্টেশন (লাইন ৬)',
+      'Surge': 'সার্জ',
+      'Non-Peak': 'নন-পিক',
+      'Peak': 'পিক',
+      'Dhaka': 'ঢাকা',
+      'Live': 'লাইভ',
+      'Weather console': 'আবহাওয়া কনসোল',
+      'Live Route & Fare Engine': 'লাইভ রুট ও ভাড়ার হিসাব',
+      'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
+      'Auto Weather': 'স্বয়ংক্রিয় আবহাওয়া',
+      'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
+      'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
+      'Switch to dark mode': 'ডার্ক মোড চালু করুন',
+      'Switch to light mode': 'লাইট মোড চালু করুন',
+      'Switch to Bangla': 'বাংলায় পরিবর্তন করুন',
+      'Switch to English': 'ইংরেজিতে পরিবর্তন করুন'
     };
 
     const BENGALI_LOCATION_NAMES = {
@@ -2287,10 +2331,16 @@
     let currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 
     function getLocalizedText(text) {
+      if (!text) return text;
+      const str = String(text);
+      const trimmed = str.trim();
+      const normalized = trimmed.replace(/\s+/g, ' ');
       if (currentLanguage === 'en') {
-        return ENGLISH_TRANSLATIONS[text] || text;
+        return ENGLISH_TRANSLATIONS[normalized] || ENGLISH_TRANSLATIONS[trimmed] || ENGLISH_TRANSLATIONS[str] || str;
       }
-      return BENGALI_TRANSLATIONS[text] || BENGALI_LOCATION_NAMES[text] || text;
+      return BENGALI_TRANSLATIONS[normalized] || BENGALI_LOCATION_NAMES[normalized] ||
+             BENGALI_TRANSLATIONS[trimmed] || BENGALI_LOCATION_NAMES[trimmed] ||
+             BENGALI_TRANSLATIONS[str] || BENGALI_LOCATION_NAMES[str] || str;
     }
 
     function formatLocalizedNumber(value, maximumFractionDigits = 0) {
@@ -2362,18 +2412,29 @@
         const trimmed = original.trim();
         if (!trimmed) continue;
         const normalized = trimmed.replace(/\s+/g, ' ');
-        if (!originalTextMap.has(node)) {
-          originalTextMap.set(node, normalized);
-        }
-        const baseEnglish = originalTextMap.get(node) || normalized;
-        const localized = currentLanguage === 'bn'
-          ? (BENGALI_TRANSLATIONS[baseEnglish] || BENGALI_LOCATION_NAMES[baseEnglish] || getLocalizedText(baseEnglish))
-          : baseEnglish;
 
-        if (localized && localized !== trimmed) {
+        let target = normalized;
+        if (currentLanguage === 'bn') {
+          // Translate to Bengali
+          const base = originalTextMap.get(node) || normalized;
+          const translated = BENGALI_TRANSLATIONS[base] || BENGALI_LOCATION_NAMES[base] ||
+                             BENGALI_TRANSLATIONS[normalized] || BENGALI_LOCATION_NAMES[normalized];
+          if (translated) {
+            if (!originalTextMap.has(node)) {
+              originalTextMap.set(node, base);
+            }
+            target = translated;
+          }
+        } else {
+          // Translate back to English
+          const base = originalTextMap.get(node);
+          target = base || ENGLISH_TRANSLATIONS[normalized] || normalized;
+        }
+
+        if (target && target !== trimmed) {
           const leadingWhitespace = original.match(/^\s*/)[0];
           const trailingWhitespace = original.match(/\s*$/)[0];
-          node.nodeValue = `${leadingWhitespace}${localized}${trailingWhitespace}`;
+          node.nodeValue = `${leadingWhitespace}${target}${trailingWhitespace}`;
         }
       }
 
@@ -2381,16 +2442,16 @@
         if (!input.dataset.originalPlaceholder) {
           input.dataset.originalPlaceholder = input.placeholder;
         }
-        const basePlaceholder = input.dataset.originalPlaceholder;
-        input.placeholder = currentLanguage === 'bn' ? getLocalizedText(basePlaceholder) : basePlaceholder;
+        const base = input.dataset.originalPlaceholder;
+        input.placeholder = currentLanguage === 'bn' ? getLocalizedText(base) : base;
       });
 
       document.querySelectorAll('[aria-label]').forEach(element => {
         if (!element.dataset.originalAriaLabel) {
           element.dataset.originalAriaLabel = element.getAttribute('aria-label');
         }
-        const baseAria = element.dataset.originalAriaLabel;
-        element.setAttribute('aria-label', currentLanguage === 'bn' ? getLocalizedText(baseAria) : baseAria);
+        const base = element.dataset.originalAriaLabel;
+        element.setAttribute('aria-label', currentLanguage === 'bn' ? getLocalizedText(base) : base);
       });
 
       const languageToggle = document.getElementById('languageToggle');
@@ -2427,8 +2488,9 @@
     }
 
     function applyTheme() {
-      const isDark = currentTheme === 'dark';
-      document.documentElement.dataset.theme = currentTheme;
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      currentTheme = isDark ? 'dark' : 'light';
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
         themeColorMeta.content = isDark ? '#0f172a' : '#2563eb';
@@ -2450,15 +2512,25 @@
     }
 
     function toggleTheme() {
-      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      const nextTheme = isDark ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+      currentTheme = nextTheme;
       try {
         localStorage.setItem('bharadekhiTheme', nextTheme);
       } catch (error) {
         console.error('Could not save the theme preference:', error);
       }
-      currentTheme = nextTheme;
       applyTheme();
     }
+
+    // Expose helpers globally so they are always accessible
+    window.toggleLanguage = toggleLanguage;
+    window.toggleTheme = toggleTheme;
+    window.applyLanguage = applyLanguage;
+    window.applyTheme = applyTheme;
+    window.getLocalizedText = getLocalizedText;
 
     const ADMIN_EMAIL = 'amiyohasan23@gmail.com';
     const SUPABASE_URL = 'https://lzyhjgqcsuvgzmatkjfi.supabase.co';
@@ -4979,8 +5051,16 @@
     // Boot
     async function bootApp() {
       lucide.createIcons();
-      document.getElementById('languageToggle')?.addEventListener('click', toggleLanguage);
-      document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+      const langToggleBtn = document.getElementById('languageToggle');
+      if (langToggleBtn && !langToggleBtn.dataset.bound) {
+        langToggleBtn.dataset.bound = 'true';
+        langToggleBtn.addEventListener('click', toggleLanguage);
+      }
+      const themeToggleBtn = document.getElementById('themeToggle');
+      if (themeToggleBtn && !themeToggleBtn.dataset.bound) {
+        themeToggleBtn.dataset.bound = 'true';
+        themeToggleBtn.addEventListener('click', toggleTheme);
+      }
       document.getElementById('mrtPassToggle')?.addEventListener('change', renderMetricsAndFares);
       document.getElementById('rainModeSelect')?.addEventListener('change', event => {
         rainFareMode = event.currentTarget.value;
@@ -4989,6 +5069,7 @@
       populateLocationSelectors();
       initMap();
       applyLanguage();
+      applyTheme();
       updateVehicleSlidingPill();
       window.addEventListener('resize', updateVehicleSlidingPill);
       loadBusRouteData();
