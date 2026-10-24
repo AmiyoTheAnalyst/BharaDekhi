@@ -1576,596 +1576,607 @@
         </div>
       </div>
 
-      <!-- Classy Futuristic Dhaka City Routes Animation Showcase (Inspired by Picture 5) -->
-      <div class="dhaka-cyber-showcase relative w-full h-[460px] sm:h-[520px] md:h-[600px] lg:h-[640px] overflow-hidden rounded-3xl border border-sky-500/30 text-white shadow-2xl shadow-black/80 select-none">
+      <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
+      <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase relative w-full h-[500px] sm:h-[560px] md:h-[620px] lg:h-[680px] overflow-hidden rounded-3xl border border-sky-500/30 text-white shadow-2xl shadow-black/80 select-none">
         
         <!-- Top-Left HUD Header: Transit Grid & Slogan -->
         <div class="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex flex-col gap-1 pointer-events-none">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950/85 border border-sky-500/40 text-sky-300 text-xs font-bold backdrop-blur-md shadow-lg w-fit">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-xs font-bold backdrop-blur-md shadow-lg w-fit">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>DHAKA TRANSIT GRID · LIVE NETWORK</span>
+            <span>DHAKA TRANSIT GRID · LIVING CROSSROADS</span>
           </div>
           <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
             Dhaka, Moving Smarter
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 font-medium max-w-sm sm:max-w-md drop-shadow">
-            Multiple ways. One destination. Metro Line 6 • Flyovers • City Corridors • Feeder Routes
+            Mirpur 10 Crossroads · Multimodal Traffic Signals, Metro Rail &amp; Pedestrians
           </p>
         </div>
 
-        <!-- Top-Right Telemetry & Flow Bar -->
-        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 hidden sm:flex items-center gap-2.5 pointer-events-none">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/85 border border-slate-700/80 text-xs font-semibold backdrop-blur-md shadow-lg">
-            <svg class="w-4 h-4 text-sky-400 compass-needle-anim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="12 2 15 12 12 10 9 12 12 2" fill="#38bdf8"></polygon>
-              <polygon points="12 22 9 12 12 14 15 12 12 22" fill="#64748b"></polygon>
-              <circle cx="12" cy="12" r="2" fill="#ffffff"></circle>
-            </svg>
-            <span class="font-mono text-[11px] text-slate-300">N 23.81°</span>
-          </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/85 border border-slate-700/80 text-xs font-semibold backdrop-blur-md shadow-lg">
-            <i data-lucide="gauge" class="w-3.5 h-3.5 text-emerald-400"></i>
-            <span class="font-mono text-[11px] text-emerald-300">42 km/h</span>
-            <span class="text-[10px] text-slate-400">Flow</span>
+        <!-- Top-Right Live Traffic Signal State Badge -->
+        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2.5 pointer-events-none">
+          <div id="trafficSignalBadge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors">
+            <span id="trafficSignalDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="trafficSignalText">🚦 N-S GREEN · TRAFFIC FLOWING</span>
           </div>
         </div>
 
-        <!-- 3D Panoramic Dhaka City Animated Canvas -->
-        <svg viewBox="0 0 1200 680" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full object-cover">
+        <!-- 3D / 2.5D Isometric Miniature Dhaka Crossroads SVG Canvas -->
+        <svg id="dhakaCrossroadsSvg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full object-cover">
           <defs>
             <!-- Atmospheric Gradients -->
-            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#030712"/>
-              <stop offset="40%" stop-color="#091834"/>
-              <stop offset="80%" stop-color="#0c254e"/>
-              <stop offset="100%" stop-color="#08142b"/>
+            <linearGradient id="crSkyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#04091a"/>
+              <stop offset="50%" stop-color="#081530"/>
+              <stop offset="100%" stop-color="#0b1e42"/>
             </linearGradient>
 
-            <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#092042" stop-opacity="0.95"/>
-              <stop offset="50%" stop-color="#071732" stop-opacity="0.9"/>
-              <stop offset="100%" stop-color="#040d1e" stop-opacity="1"/>
+            <linearGradient id="crAsphaltGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#141c2b"/>
+              <stop offset="100%" stop-color="#1d273a"/>
             </linearGradient>
 
-            <linearGradient id="skylineGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#1e3a68" stop-opacity="0.45"/>
-              <stop offset="100%" stop-color="#0d1b32" stop-opacity="0.95"/>
+            <linearGradient id="crSidewalkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#1e293b"/>
             </linearGradient>
 
-            <linearGradient id="bracTowerGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#0284c7" stop-opacity="0.3"/>
-              <stop offset="40%" stop-color="#0f2b52" stop-opacity="0.9"/>
-              <stop offset="100%" stop-color="#081427" stop-opacity="0.95"/>
+            <!-- Building Facade Gradients -->
+            <linearGradient id="bldgTealGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0d9488"/>
+              <stop offset="50%" stop-color="#115e59"/>
+              <stop offset="100%" stop-color="#042f2e"/>
             </linearGradient>
 
-            <linearGradient id="curzonHallGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#7f1d1d" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#1e1b2e" stop-opacity="0.95"/>
+            <linearGradient id="bldgOrangeGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ea580c"/>
+              <stop offset="50%" stop-color="#9a3412"/>
+              <stop offset="100%" stop-color="#431407"/>
             </linearGradient>
 
-            <!-- Road & Track Gradients -->
-            <linearGradient id="metroTrackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#0284c7" stop-opacity="0.7"/>
-              <stop offset="30%" stop-color="#38bdf8" stop-opacity="1"/>
-              <stop offset="70%" stop-color="#60a5fa" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.7"/>
+            <linearGradient id="bldgCreamGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fef3c7"/>
+              <stop offset="50%" stop-color="#d97706"/>
+              <stop offset="100%" stop-color="#78350f"/>
             </linearGradient>
 
-            <linearGradient id="expresswayGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#334155" stop-opacity="0.9"/>
-              <stop offset="50%" stop-color="#1e293b" stop-opacity="0.95"/>
-              <stop offset="100%" stop-color="#334155" stop-opacity="0.9"/>
+            <linearGradient id="bldgRedGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#dc2626"/>
+              <stop offset="50%" stop-color="#991b1b"/>
+              <stop offset="100%" stop-color="#450a0a"/>
             </linearGradient>
 
-            <linearGradient id="feederGreenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#059669" stop-opacity="0.8"/>
-              <stop offset="50%" stop-color="#10b981" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#34d399" stop-opacity="0.8"/>
+            <linearGradient id="stationRoofGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+              <stop offset="50%" stop-color="#0284c7" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#075985" stop-opacity="0.85"/>
+            </linearGradient>
+
+            <linearGradient id="viaductTrackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="50%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#0ea5e9"/>
             </linearGradient>
 
             <!-- Glow Filters -->
-            <filter id="cityGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="6" result="blur"/>
+            <filter id="crLightGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
               <feMerge>
                 <feMergeNode in="blur"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
 
-            <filter id="headlightBeamGlow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="7"/>
+            <filter id="crStreetlampGlow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="16"/>
             </filter>
 
-            <filter id="neonSubtleGlow" x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge>
-                <feMergeNode in="blur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
+            <filter id="crHeadlightBeam" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="6"/>
             </filter>
           </defs>
 
-          <!-- 1. Background Sky -->
-          <rect width="1200" height="680" fill="url(#skyGrad)"/>
+          <!-- 1. Background Night Sky -->
+          <rect width="1200" height="700" fill="url(#crSkyGrad)"/>
 
-          <!-- Perspective Isometric Cyber Grid Floor -->
-          <g opacity="0.12">
-            <line x1="0" y1="260" x2="1200" y2="260" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="0" y1="360" x2="1200" y2="360" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="0" y1="460" x2="1200" y2="460" stroke="#38bdf8" stroke-width="1.2"/>
-            <line x1="0" y1="560" x2="1200" y2="560" stroke="#38bdf8" stroke-width="1.5"/>
-            <line x1="100" y1="200" x2="0" y2="680" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="300" y1="200" x2="200" y2="680" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="500" y1="200" x2="450" y2="680" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="700" y1="200" x2="720" y2="680" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="900" y1="200" x2="980" y2="680" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="1100" y1="200" x2="1200" y2="680" stroke="#38bdf8" stroke-width="1"/>
+          <!-- Distant Skyline Silhouettes -->
+          <path d="M 0,160 L 50,160 L 50,105 L 90,105 L 90,160 L 140,160 L 140,85 L 180,85 L 180,160 L 250,160 L 250,95 L 290,95 L 290,160 L 370,160 L 370,70 L 420,70 L 420,160 L 520,160 L 520,110 L 570,110 L 570,160 L 670,160 L 670,80 L 710,80 L 710,160 L 800,160 L 800,95 L 850,95 L 850,160 L 920,160 L 920,65 L 970,65 L 970,160 L 1050,160 L 1050,90 L 1100,90 L 1100,160 L 1200,160 Z" fill="#071328" opacity="0.6"/>
+
+          <!-- Twinkling Night Stars -->
+          <circle cx="95" cy="35" r="1.5" fill="#bae6fd" class="star-twinkle-1"/>
+          <circle cx="230" cy="50" r="1.2" fill="#ffffff" class="star-twinkle-2"/>
+          <circle cx="380" cy="25" r="1.6" fill="#7dd3fc" class="star-twinkle-3"/>
+          <circle cx="540" cy="45" r="1.4" fill="#ffffff" class="star-twinkle-1"/>
+          <circle cx="680" cy="30" r="1.5" fill="#38bdf8" class="star-twinkle-2"/>
+          <circle cx="860" cy="40" r="1.2" fill="#ffffff" class="star-twinkle-3"/>
+          <circle cx="1020" cy="25" r="1.5" fill="#7dd3fc" class="star-twinkle-1"/>
+          <circle cx="1140" cy="48" r="1.3" fill="#bae6fd" class="star-twinkle-2"/>
+
+          <!-- ========================================================
+               2. ELEVATED METRO RAIL VIADUCT & MIRPUR 10 STATION (Top)
+               ======================================================== -->
+          
+          <!-- Concrete Viaduct Piers -->
+          <g fill="#1e293b" stroke="#334155" stroke-width="1.5">
+            <rect x="80" y="105" width="22" height="70" rx="2"/>
+            <rect x="250" y="105" width="22" height="70" rx="2"/>
+            <rect x="420" y="105" width="22" height="70" rx="2"/>
+            <rect x="600" y="105" width="22" height="70" rx="2"/>
+            <rect x="1100" y="105" width="22" height="70" rx="2"/>
+            <!-- Hammerhead Caps -->
+            <polygon points="70,105 112,105 106,115 76,115"/>
+            <polygon points="240,105 282,105 276,115 246,115"/>
+            <polygon points="410,105 452,105 446,115 416,115"/>
+            <polygon points="590,105 632,105 626,115 596,115"/>
+            <polygon points="1090,105 1132,105 1126,115 1096,115"/>
           </g>
 
-          <!-- Twinkling Starfield -->
-          <g>
-            <circle cx="85" cy="45" r="1.5" fill="#bae6fd" class="star-twinkle-1"/>
-            <circle cx="210" cy="75" r="1.2" fill="#ffffff" class="star-twinkle-2"/>
-            <circle cx="340" cy="30" r="1.8" fill="#7dd3fc" class="star-twinkle-3"/>
-            <circle cx="480" cy="85" r="1.4" fill="#ffffff" class="star-twinkle-1"/>
-            <circle cx="620" cy="40" r="1.6" fill="#38bdf8" class="star-twinkle-2"/>
-            <circle cx="790" cy="65" r="1.3" fill="#bae6fd" class="star-twinkle-3"/>
-            <circle cx="910" cy="35" r="1.5" fill="#ffffff" class="star-twinkle-1"/>
-            <circle cx="1060" cy="80" r="1.7" fill="#7dd3fc" class="star-twinkle-2"/>
-            <circle cx="1140" cy="45" r="1.2" fill="#ffffff" class="star-twinkle-3"/>
-          </g>
+          <!-- Viaduct Track Deck -->
+          <rect x="-100" y="98" width="1400" height="14" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+          <!-- Dual Steel Rails with Glowing Cyan Core -->
+          <line x1="-100" y1="102" x2="1300" y2="102" stroke="url(#viaductTrackGrad)" stroke-width="3" filter="url(#crLightGlow)"/>
+          <line x1="-100" y1="108" x2="1300" y2="108" stroke="url(#viaductTrackGrad)" stroke-width="3" filter="url(#crLightGlow)"/>
 
-          <!-- 2. Distant Dhaka City Skyline Silhouettes with Illuminated Windows -->
-          <g>
-            <!-- Background Sky-glow -->
-            <ellipse cx="600" cy="240" rx="550" ry="120" fill="#0284c7" opacity="0.08" filter="url(#cityGlow)"/>
-
-            <!-- High-Rise Tower Silhouettes -->
-            <path d="M 0,260 L 40,260 L 40,195 L 75,195 L 75,260 L 110,260 L 110,165 L 145,165 L 145,260 L 190,260 L 190,140 L 235,140 L 235,260 L 270,260 L 270,175 L 310,175 L 310,260 L 370,260 L 370,125 L 420,125 L 420,260 L 470,260 L 470,160 L 515,160 L 515,260 L 575,260 L 575,110 L 625,110 L 625,260 L 685,260 L 685,150 L 730,150 L 730,260 L 790,260 L 790,120 L 835,120 L 835,260 L 880,260 L 880,180 L 920,180 L 920,260 L 975,260 L 975,135 L 1025,135 L 1025,260 L 1070,260 L 1070,170 L 1115,170 L 1115,260 L 1160,260 L 1160,190 L 1200,190 L 1200,260 Z" fill="url(#skylineGrad)" stroke="#38bdf8" stroke-width="0.8" stroke-opacity="0.3"/>
-
-            <!-- Lit Windows in Distant Towers -->
-            <g fill="#7dd3fc" opacity="0.6" class="window-glow-pulse">
-              <rect x="118" y="175" width="4" height="4"/>
-              <rect x="126" y="175" width="4" height="4"/>
-              <rect x="118" y="188" width="4" height="4"/>
-              <rect x="126" y="188" width="4" height="4"/>
-              <rect x="198" y="152" width="5" height="5"/>
-              <rect x="210" y="152" width="5" height="5"/>
-              <rect x="198" y="165" width="5" height="5"/>
-              <rect x="210" y="165" width="5" height="5"/>
-              <rect x="222" y="165" width="5" height="5"/>
-              <rect x="380" y="138" width="5" height="5"/>
-              <rect x="395" y="138" width="5" height="5"/>
-              <rect x="408" y="138" width="5" height="5"/>
-              <rect x="380" y="152" width="5" height="5"/>
-              <rect x="395" y="152" width="5" height="5"/>
-              <rect x="585" y="125" width="6" height="5"/>
-              <rect x="600" y="125" width="6" height="5"/>
-              <rect x="612" y="125" width="6" height="5"/>
-              <rect x="585" y="138" width="6" height="5"/>
-              <rect x="600" y="138" width="6" height="5"/>
-              <rect x="612" y="138" width="6" height="5"/>
-              <rect x="800" y="135" width="5" height="5"/>
-              <rect x="815" y="135" width="5" height="5"/>
-              <rect x="800" y="150" width="5" height="5"/>
-              <rect x="815" y="150" width="5" height="5"/>
-              <rect x="985" y="150" width="6" height="5"/>
-              <rect x="1000" y="150" width="6" height="5"/>
-              <rect x="985" y="165" width="6" height="5"/>
-              <rect x="1000" y="165" width="6" height="5"/>
+          <!-- Mirpur 10 Metro Station Structure (Upper Right) -->
+          <g id="mirpur10StationGroup" transform="translate(710, 30)">
+            <!-- Glass Canopy Arched Roof -->
+            <path d="M 0,55 Q 160,0 330,55 L 320,85 L 10,85 Z" fill="url(#stationRoofGrad)" stroke="#38bdf8" stroke-width="2" filter="url(#crLightGlow)"/>
+            <!-- Roof Truss Ribs -->
+            <path d="M 40,43 L 40,85 M 95,30 L 95,85 M 165,22 L 165,85 M 235,30 L 235,85 M 285,43 L 285,85" stroke="#7dd3fc" stroke-width="1.5" stroke-opacity="0.6"/>
+            <!-- Station Main Concourse Body -->
+            <rect x="10" y="80" width="310" height="35" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+            <!-- Platform Lighting & Commuter Silhouettes -->
+            <line x1="20" y1="84" x2="310" y2="84" stroke="#ffffff" stroke-width="3" opacity="0.9" filter="url(#crLightGlow)"/>
+            <g fill="#93c5fd" opacity="0.85">
+              <circle cx="50" cy="74" r="3.5"/><rect x="48" y="78" width="4" height="6"/>
+              <circle cx="80" cy="74" r="3.5"/><rect x="78" y="78" width="4" height="6"/>
+              <circle cx="120" cy="74" r="3.5"/><rect x="118" y="78" width="4" height="6"/>
+              <circle cx="180" cy="74" r="3.5"/><rect x="178" y="78" width="4" height="6"/>
+              <circle cx="240" cy="74" r="3.5"/><rect x="238" y="78" width="4" height="6"/>
+              <circle cx="280" cy="74" r="3.5"/><rect x="278" y="78" width="4" height="6"/>
             </g>
+            <!-- Large Prominent Mirpur 10 Station Signboard (As in Reference Picture) -->
+            <rect x="35" y="45" width="180" height="28" rx="6" fill="#020617" stroke="#38bdf8" stroke-width="1.8" filter="url(#crLightGlow)"/>
+            <!-- Metro Logo Icon (M) -->
+            <circle cx="55" cy="59" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+            <text x="55" y="63" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle">M</text>
+            <!-- Station Name in Bengali and English -->
+            <text x="72" y="56" fill="#ffffff" font-size="11" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">মিরপুর ১০</text>
+            <text x="72" y="68" fill="#38bdf8" font-size="9" font-weight="700">Mirpur 10</text>
 
-            <!-- Aviation Warning Beacons atop Towers -->
-            <circle cx="212" cy="138" r="2" fill="#ef4444" class="beacon-blink"/>
-            <circle cx="395" cy="123" r="2" fill="#ef4444" class="beacon-blink" style="animation-delay: -0.7s;"/>
-            <circle cx="600" cy="108" r="2.5" fill="#ef4444" class="beacon-blink" style="animation-delay: -0.3s;"/>
-            <circle cx="812" cy="118" r="2" fill="#ef4444" class="beacon-blink" style="animation-delay: -1s;"/>
-            <circle cx="1000" cy="133" r="2" fill="#ef4444" class="beacon-blink" style="animation-delay: -0.5s;"/>
+            <!-- Escalators & Stairs Connecting Station to Street Sidewalk -->
+            <polygon points="50,115 110,215 130,215 70,115" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+            <line x1="55" y1="120" x2="115" y2="210" stroke="#38bdf8" stroke-width="2" opacity="0.8" filter="url(#crLightGlow)"/>
+            <!-- Station Support Columns to Ground -->
+            <rect x="30" y="115" width="12" height="100" fill="#334155"/>
+            <rect x="280" y="115" width="12" height="100" fill="#334155"/>
           </g>
 
-          <!-- 3. Recognizable Dhaka City Landmarks (Midground) -->
+          <!-- Continuous Moving Dhaka Metro Rail Train (MRT Line 6) -->
+          <g id="crossroadsMetroTrain" transform="translate(150, 88)">
+            <!-- High-Beam Headlight Cone -->
+            <polygon points="260,14 360,2 360,26" fill="#7dd3fc" opacity="0.45" filter="url(#crHeadlightBeam)"/>
+            
+            <!-- Lead Car -->
+            <path d="M 195,3 L 245,3 Q 262,14 245,23 L 195,23 Z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <!-- MRT Green & Red Ribbon Livery -->
+            <rect x="195" y="11" width="58" height="2.5" fill="#16a34a"/>
+            <rect x="195" y="13.5" width="58" height="2" fill="#dc2626"/>
+            <!-- Aerodynamic Windshield & Windows -->
+            <polygon points="244,6 256,12 244,18" fill="#0284c7" filter="url(#crLightGlow)"/>
+            <rect x="200" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="214" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="228" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <!-- Headlights -->
+            <circle cx="258" cy="10" r="2.2" fill="#ffffff"/>
+            <circle cx="258" cy="18" r="2.2" fill="#ffffff"/>
 
-          <!-- Landmark A: Dhaka University Curzon Hall & Campus (Left side) -->
-          <g id="dhakaUniversityComplex" transform="translate(45, 175)">
-            <!-- Curzon Hall Red-Brick Main Pavilion -->
-            <rect x="0" y="45" width="150" height="75" rx="4" fill="url(#curzonHallGrad)" stroke="#f87171" stroke-width="1.2" stroke-opacity="0.4"/>
-            <!-- Arched Heritage Windows -->
+            <!-- Gangway 1 -->
+            <rect x="190" y="8" width="5" height="10" fill="#475569"/>
+
+            <!-- Coach 2 -->
+            <rect x="130" y="3" width="60" height="20" rx="2" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <rect x="130" y="11" width="60" height="2.5" fill="#16a34a"/>
+            <rect x="130" y="13.5" width="60" height="2" fill="#dc2626"/>
+            <rect x="135" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="149" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="163" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="177" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <!-- Roof Pantograph -->
+            <path d="M 155,3 L 160,-4 L 165,3" stroke="#cbd5e1" stroke-width="1.2" fill="none"/>
+
+            <!-- Gangway 2 -->
+            <rect x="125" y="8" width="5" height="10" fill="#475569"/>
+
+            <!-- Coach 3 -->
+            <rect x="65" y="3" width="60" height="20" rx="2" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <rect x="65" y="11" width="60" height="2.5" fill="#16a34a"/>
+            <rect x="65" y="13.5" width="60" height="2" fill="#dc2626"/>
+            <rect x="70" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="84" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="98" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="112" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+
+            <!-- Gangway 3 -->
+            <rect x="60" y="8" width="5" height="10" fill="#475569"/>
+
+            <!-- Trail Car -->
+            <path d="M 60,3 L 15,3 Q 0,14 15,23 L 60,23 Z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <rect x="10" y="11" width="50" height="2.5" fill="#16a34a"/>
+            <rect x="10" y="13.5" width="50" height="2" fill="#dc2626"/>
+            <rect x="20" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="34" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="48" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <!-- Red Taillights -->
+            <circle cx="4" cy="9" r="2" fill="#ef4444"/>
+            <circle cx="4" cy="17" r="2" fill="#ef4444"/>
+          </g>
+
+
+          <!-- ========================================================
+               3. 2.5D SURROUNDING DHAKA BUILDINGS & BILLBOARDS
+               ======================================================== -->
+
+          <!-- Quadrant A: Top-Left (NW) Dhaka Architecture -->
+          <g id="nwBuildingsGroup">
+            <!-- 4-Story Terracotta Building with Balconies -->
+            <rect x="40" y="165" width="230" height="150" rx="4" fill="url(#bldgOrangeGrad)" stroke="#f97316" stroke-width="1.2"/>
+            <!-- 3D Roof Ledge -->
+            <polygon points="35,165 275,165 265,155 45,155" fill="#431407"/>
+            <!-- Illuminated Windows & Balconies -->
             <g fill="#fef08a" opacity="0.85">
-              <path d="M 15,65 Q 22,55 29,65 L 29,82 L 15,82 Z"/>
-              <path d="M 40,65 Q 47,55 54,65 L 54,82 L 40,82 Z"/>
-              <path d="M 65,65 Q 72,55 79,65 L 79,82 L 65,82 Z"/>
-              <path d="M 95,65 Q 102,55 109,65 L 109,82 L 95,82 Z"/>
-              <path d="M 120,65 Q 127,55 134,65 L 134,82 L 120,82 Z"/>
+              <rect x="60" y="180" width="18" height="20" rx="1"/>
+              <rect x="95" y="180" width="18" height="20" rx="1"/>
+              <rect x="130" y="180" width="18" height="20" rx="1"/>
+              <rect x="165" y="180" width="18" height="20" rx="1"/>
+              <rect x="200" y="180" width="18" height="20" rx="1"/>
+              <rect x="60" y="215" width="18" height="20" rx="1"/>
+              <rect x="95" y="215" width="18" height="20" rx="1"/>
+              <rect x="130" y="215" width="18" height="20" rx="1"/>
+              <rect x="165" y="215" width="18" height="20" rx="1"/>
+              <rect x="200" y="215" width="18" height="20" rx="1"/>
             </g>
-            <!-- Central Heritage Dome & Spire -->
-            <path d="M 60,45 Q 75,18 90,45 Z" fill="#991b1b" stroke="#fca5a5" stroke-width="1.5"/>
-            <line x1="75" y1="18" x2="75" y2="4" stroke="#fef08a" stroke-width="2"/>
-            <circle cx="75" cy="3" r="2" fill="#fef08a"/>
-            <!-- University Label -->
-            <rect x="15" y="94" width="120" height="18" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1" opacity="0.9"/>
-            <text x="75" y="106" fill="#38bdf8" font-size="9" font-weight="800" text-anchor="middle" letter-spacing="0.5">DHAKA UNIVERSITY</text>
-          </g>
+            <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") -->
+            <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+            <rect x="55" y="263" width="90" height="14" fill="#d97706"/>
+            <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ঢাকা বেকারি</text>
+            <rect x="58" y="280" width="84" height="26" fill="#fef08a" opacity="0.75"/>
 
-          <!-- Landmark B: BRAC University Modern Glass Tower (Right side) -->
-          <g id="bracUniversityTower" transform="translate(930, 95)">
-            <!-- Glass Skyscraper Facade -->
-            <rect x="0" y="30" width="130" height="170" rx="6" fill="url(#bracTowerGrad)" stroke="#38bdf8" stroke-width="1.5" filter="url(#neonSubtleGlow)"/>
-            <!-- Diagonal Bracing Architectural Motif -->
-            <path d="M 0,30 L 130,90 M 130,30 L 0,90 M 0,90 L 130,150 M 130,90 L 0,150 M 0,150 L 130,200 M 130,150 L 0,200" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.3"/>
-            <!-- Illuminated Window Rows -->
-            <g fill="#e0f2fe" opacity="0.8">
-              <rect x="15" y="45" width="20" height="6" rx="1"/>
-              <rect x="42" y="45" width="20" height="6" rx="1"/>
-              <rect x="69" y="45" width="20" height="6" rx="1"/>
-              <rect x="96" y="45" width="20" height="6" rx="1"/>
-              <rect x="15" y="65" width="20" height="6" rx="1"/>
-              <rect x="42" y="65" width="20" height="6" rx="1"/>
-              <rect x="69" y="65" width="20" height="6" rx="1"/>
-              <rect x="96" y="65" width="20" height="6" rx="1"/>
-              <rect x="15" y="105" width="20" height="6" rx="1"/>
-              <rect x="42" y="105" width="20" height="6" rx="1"/>
-              <rect x="69" y="105" width="20" height="6" rx="1"/>
-              <rect x="96" y="105" width="20" height="6" rx="1"/>
-              <rect x="15" y="125" width="20" height="6" rx="1"/>
-              <rect x="42" y="125" width="20" height="6" rx="1"/>
-              <rect x="69" y="125" width="20" height="6" rx="1"/>
-              <rect x="96" y="125" width="20" height="6" rx="1"/>
-            </g>
-            <!-- Rooftop Antenna Mast -->
-            <line x1="65" y1="30" x2="65" y2="8" stroke="#38bdf8" stroke-width="2.5"/>
-            <circle cx="65" cy="7" r="3" fill="#ef4444" class="beacon-blink"/>
-            <!-- Rooftop Glowing Sign -->
-            <rect x="8" y="165" width="114" height="20" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
-            <text x="65" y="179" fill="#38bdf8" font-size="9" font-weight="900" text-anchor="middle" letter-spacing="0.5">BRAC UNIVERSITY</text>
-          </g>
+            <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+            <rect x="165" y="263" width="90" height="14" fill="#059669"/>
+            <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">গ্রীন ফার্মেসি</text>
+            <rect x="168" y="280" width="84" height="26" fill="#a7f3d0" opacity="0.75"/>
 
-          <!-- Landmark C: Elevated MRT Line 6 Station (Bijoy Sarani) -->
-          <g id="bijoySaraniStation" transform="translate(480, 185)">
-            <!-- Elevated Station Support Piers -->
-            <rect x="40" y="55" width="14" height="40" fill="#334155"/>
-            <rect x="180" y="55" width="14" height="40" fill="#334155"/>
-            <!-- Translucent Curved Canopy Roof -->
-            <path d="M 15,35 Q 120,10 225,35 L 220,55 L 20,55 Z" fill="#0284c7" fill-opacity="0.5" stroke="#38bdf8" stroke-width="2" filter="url(#cityGlow)"/>
-            <!-- Platform Body -->
-            <rect x="15" y="50" width="210" height="15" rx="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
-            <!-- Platform Lighting & Commuters -->
-            <line x1="25" y1="52" x2="215" y2="52" stroke="#ffffff" stroke-width="2" opacity="0.8"/>
-            <circle cx="60" cy="46" r="3" fill="#93c5fd"/>
-            <circle cx="95" cy="46" r="3" fill="#93c5fd"/>
-            <circle cx="140" cy="46" r="3" fill="#93c5fd"/>
-            <circle cx="175" cy="46" r="3" fill="#93c5fd"/>
-            <!-- Station Signboard -->
-            <rect x="55" y="24" width="130" height="16" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-            <text x="120" y="35" fill="#38bdf8" font-size="8.5" font-weight="900" text-anchor="middle">BIJOY SARANI MRT</text>
-          </g>
-
-          <!-- Landmark D: Pedestrian Foot-Overbridge crossing the highway -->
-          <g id="pedestrianFootbridge" transform="translate(505, 310)">
-            <rect x="0" y="10" width="180" height="14" rx="2" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/>
-            <!-- Truss Cross Bracing -->
-            <path d="M 0,10 L 15,0 L 30,10 L 45,0 L 60,10 L 75,0 L 90,10 L 105,0 L 120,10 L 135,0 L 150,10 L 165,0 L 180,10" stroke="#94a3b8" stroke-width="1.2" fill="none"/>
-            <line x1="0" y1="0" x2="180" y2="0" stroke="#94a3b8" stroke-width="1.5"/>
-            <!-- Walkway Light Strip -->
-            <line x1="5" y1="12" x2="175" y2="12" stroke="#38bdf8" stroke-width="2" opacity="0.8" filter="url(#neonSubtleGlow)"/>
-            <!-- Support Columns -->
-            <rect x="10" y="24" width="8" height="35" fill="#475569"/>
-            <rect x="162" y="24" width="8" height="35" fill="#475569"/>
-          </g>
-
-          <!-- 4. Water Lake & Reflection (Hatirjheel Basin at Bottom) -->
-          <g>
-            <path d="M 0,550 C 250,520 500,580 800,540 C 1000,515 1120,545 1200,550 L 1200,680 L 0,680 Z" fill="url(#waterGrad)"/>
-            <!-- Shimmering Water Reflection Ripples -->
-            <g stroke="#38bdf8" stroke-width="1.2" opacity="0.35" class="lake-ripple-anim">
-              <path d="M 120,575 Q 180,572 240,575 M 320,590 Q 400,586 480,590 M 580,565 Q 670,562 760,565 M 880,580 Q 960,576 1040,580"/>
-              <path d="M 180,620 Q 280,617 380,620 M 520,635 Q 640,630 760,635 M 840,615 Q 940,612 1040,615" opacity="0.6"/>
+            <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" (As in Reference Image) -->
+            <g transform="translate(50, 160)">
+              <!-- Billboard Frame & Lighting Pillars -->
+              <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="1.8" filter="url(#crLightGlow)"/>
+              <!-- Green Graphic Background -->
+              <rect x="5" y="-80" width="160" height="70" rx="4" fill="#065f46"/>
+              <!-- City Silhouette Graphic inside Billboard -->
+              <path d="M 10,-20 L 30,-20 L 30,-45 L 45,-45 L 45,-20 L 70,-20 L 70,-55 L 90,-55 L 90,-20 L 120,-20 L 120,-40 L 140,-40 L 140,-20 L 160,-20 Z" fill="#022c22" opacity="0.6"/>
+              <!-- Bengali Text Calligraphy -->
+              <text x="20" y="-55" fill="#fef08a" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
+              <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">আমাদের</text>
+              <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">শহর</text>
+              <!-- Spotlight Tubes -->
+              <circle cx="40" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
+              <circle cx="130" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
             </g>
           </g>
 
-          <!-- ========================================================
-               5. THE 4 TRANSIT ROADS & CORRIDORS
-               ======================================================== -->
-
-          <!-- ROAD 1: Elevated Metro Rail Line 6 Viaduct Track (Blue Corridor) -->
-          <!-- Viaduct Support Pillars -->
-          <g fill="#1e293b" stroke="#334155" stroke-width="1">
-            <rect x="140" y="245" width="16" height="45"/>
-            <rect x="340" y="245" width="16" height="45"/>
-            <rect x="740" y="245" width="16" height="45"/>
-            <rect x="940" y="245" width="16" height="45"/>
-            <rect x="1120" y="245" width="16" height="45"/>
-          </g>
-          <!-- Viaduct Outer Glow & Concrete Deck -->
-          <path d="M -120,245 C 220,245 420,240 600,240 C 780,240 980,255 1320,255" fill="none" stroke="#0284c7" stroke-width="14" opacity="0.3" filter="url(#cityGlow)"/>
-          <path d="M -120,245 C 220,245 420,240 600,240 C 780,240 980,255 1320,255" fill="none" stroke="#1e293b" stroke-width="10"/>
-          <!-- Active Electric Rail Line (Motion Path 1) -->
-          <path id="metroLineTrack" d="M -120,245 C 220,245 420,240 600,240 C 780,240 980,255 1320,255" fill="none" stroke="url(#metroTrackGrad)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M -120,245 C 220,245 420,240 600,240 C 780,240 980,255 1320,255" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="16 34" class="neon-dash-flow"/>
-
-          <!-- ROAD 2: Main Elevated Expressway / Flyover (Indigo Highway) -->
-          <!-- Expressway Deck -->
-          <path d="M -100,360 C 240,380 480,330 720,345 C 960,360 1120,330 1320,320" fill="none" stroke="#0f172a" stroke-width="22" opacity="0.9"/>
-          <!-- Expressway Surface -->
-          <path id="expresswayFlyover" d="M -100,360 C 240,380 480,330 720,345 C 960,360 1120,330 1320,320" fill="none" stroke="url(#expresswayGrad)" stroke-width="16" stroke-linecap="round"/>
-          <!-- Center White Dashed Lane -->
-          <path d="M -100,360 C 240,380 480,330 720,345 C 960,360 1120,330 1320,320" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="14 26" opacity="0.75"/>
-          <!-- Outer Amber Guardrails -->
-          <path d="M -100,352 C 240,372 480,322 720,337 C 960,352 1120,322 1320,312" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.5"/>
-          <path d="M -100,368 C 240,388 480,338 720,353 C 960,368 1120,338 1320,328" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.5"/>
-
-          <!-- ROAD 3: City Arterial Avenue (Emerald Corridor) -->
-          <path d="M -80,470 C 220,500 480,440 740,470 C 980,500 1140,450 1300,440" fill="none" stroke="#091b2e" stroke-width="24" opacity="0.95"/>
-          <path id="cityAvenue" d="M -80,470 C 220,500 480,440 740,470 C 980,500 1140,450 1300,440" fill="none" stroke="#162e42" stroke-width="16" stroke-linecap="round"/>
-          <!-- Emerald Glowing Center Divider -->
-          <path d="M -80,470 C 220,500 480,440 740,470 C 980,500 1140,450 1300,440" fill="none" stroke="#10b981" stroke-width="2.5" stroke-dasharray="12 28" opacity="0.8" class="neon-dash-flow"/>
-
-          <!-- ROAD 4: Neighborhood Feeder Street (Mint Green & Amber) -->
-          <path d="M -60,580 C 180,610 400,560 640,590 C 880,610 1060,570 1280,560" fill="none" stroke="#042f2e" stroke-width="16" opacity="0.9"/>
-          <path id="feederStreet" d="M -60,580 C 180,610 400,560 640,590 C 880,610 1060,570 1280,560" fill="none" stroke="url(#feederGreenGrad)" stroke-width="10" stroke-linecap="round"/>
-          <path d="M -60,580 C 180,610 400,560 640,590 C 880,610 1060,570 1280,560" fill="none" stroke="#fef08a" stroke-width="1.6" stroke-dasharray="8 18" opacity="0.75"/>
-
-
-          <!-- ========================================================
-               6. THE 6 ANIMATED VEHICLES (Moving smoothly along paths)
-               ======================================================== -->
-
-          <!-- 1. METRO RAIL: MRT Line 6 3-Car Bullet Train -->
-          <g>
-            <g transform="translate(-55, -10)">
-              <!-- Forward Headlight Beam Cone -->
-              <polygon points="105,10 180,-6 180,26" fill="#7dd3fc" opacity="0.4" filter="url(#headlightBeamGlow)"/>
-              
-              <!-- Lead Car -->
-              <path d="M 60,2 L 95,2 Q 106,10 95,18 L 60,18 Z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.2"/>
-              <!-- MRT Green & Red Side Stripe -->
-              <rect x="60" y="8" width="40" height="2" fill="#16a34a"/>
-              <rect x="60" y="10" width="40" height="1.5" fill="#dc2626"/>
-              <!-- Cabin Cyan Windows -->
-              <rect x="64" y="4" width="7" height="4" rx="1" fill="#0284c7"/>
-              <rect x="74" y="4" width="7" height="4" rx="1" fill="#0284c7"/>
-              <rect x="84" y="4" width="7" height="4" rx="1" fill="#0284c7"/>
-              <polygon points="94,4 102,9 94,12" fill="#38bdf8"/>
-              <!-- Headlights -->
-              <circle cx="102" cy="7" r="1.8" fill="#ffffff"/>
-              <circle cx="102" cy="13" r="1.8" fill="#ffffff"/>
-
-              <!-- Car Coupler 1 -->
-              <rect x="56" y="8" width="4" height="4" fill="#64748b"/>
-
-              <!-- Middle Car -->
-              <rect x="20" y="2" width="36" height="16" rx="2" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.2"/>
-              <rect x="20" y="8" width="36" height="2" fill="#16a34a"/>
-              <rect x="20" y="10" width="36" height="1.5" fill="#dc2626"/>
-              <rect x="24" y="4" width="6" height="4" rx="1" fill="#0284c7"/>
-              <rect x="34" y="4" width="6" height="4" rx="1" fill="#0284c7"/>
-              <rect x="44" y="4" width="6" height="4" rx="1" fill="#0284c7"/>
-              <!-- Roof Pantograph -->
-              <path d="M 34,2 L 38,-4 L 42,2" stroke="#cbd5e1" stroke-width="1" fill="none"/>
-
-              <!-- Car Coupler 2 -->
-              <rect x="16" y="8" width="4" height="4" fill="#64748b"/>
-
-              <!-- Trail Car -->
-              <path d="M 16,2 L -15,2 Q -22,10 -15,18 L 16,18 Z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.2"/>
-              <rect x="-15" y="8" width="31" height="2" fill="#16a34a"/>
-              <rect x="-15" y="10" width="31" height="1.5" fill="#dc2626"/>
-              <rect x="-10" y="4" width="6" height="4" rx="1" fill="#0284c7"/>
-              <rect x="-1" y="4" width="6" height="4" rx="1" fill="#0284c7"/>
-              <rect x="8" y="4" width="6" height="4" rx="1" fill="#0284c7"/>
-              <!-- Red Taillights -->
-              <circle cx="-18" cy="6" r="1.8" fill="#ef4444"/>
-              <circle cx="-18" cy="14" r="1.8" fill="#ef4444"/>
+          <!-- Quadrant B: Bottom-Left (SW) Architecture -->
+          <g id="swBuildingsGroup">
+            <!-- Multistory Residential Block in Teal & Cream -->
+            <rect x="40" y="525" width="240" height="155" rx="4" fill="url(#bldgTealGrad)" stroke="#14b8a6" stroke-width="1.2"/>
+            <!-- 3D Roof -->
+            <polygon points="35,525 285,525 275,515 45,515" fill="#042f2e"/>
+            <!-- Rooftop Water Tank (Iconic Dhaka Detail) -->
+            <rect x="70" y="495" width="30" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+            <text x="85" y="508" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
+            <!-- TV Antennas -->
+            <line x1="140" y1="515" x2="140" y2="490" stroke="#94a3b8" stroke-width="1.5"/>
+            <line x1="135" y1="495" x2="145" y2="495" stroke="#94a3b8" stroke-width="1.5"/>
+            <!-- Balcony Windows -->
+            <g fill="#fde68a" opacity="0.8">
+              <rect x="65" y="540" width="22" height="22" rx="1"/>
+              <rect x="110" y="540" width="22" height="22" rx="1"/>
+              <rect x="155" y="540" width="22" height="22" rx="1"/>
+              <rect x="200" y="540" width="22" height="22" rx="1"/>
+              <rect x="65" y="580" width="22" height="22" rx="1"/>
+              <rect x="110" y="580" width="22" height="22" rx="1"/>
+              <rect x="155" y="580" width="22" height="22" rx="1"/>
+              <rect x="200" y="580" width="22" height="22" rx="1"/>
             </g>
-            <animateMotion dur="7s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#metroLineTrack"/>
-            </animateMotion>
+            <!-- Ground-floor Traditional Tea Stall (টং দোকান) -->
+            <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#b45309" stroke-width="1"/>
+            <text x="340" y="542" fill="#fef08a" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">চায়ের টং</text>
+            <circle cx="340" cy="552" r="3.5" fill="#f59e0b" filter="url(#crLightGlow)"/>
           </g>
 
-          <!-- 2. DHAKA RED CITY BUS (Expressway Flyover) -->
-          <g>
-            <g transform="translate(-25, -11)">
-              <!-- Headlight Beam -->
-              <polygon points="50,11 110,0 110,22" fill="#fef08a" opacity="0.35" filter="url(#headlightBeamGlow)"/>
-              <!-- Bus Body -->
-              <rect x="0" y="2" width="48" height="18" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
-              <!-- White Upper Roof Accent -->
-              <rect x="3" y="0" width="42" height="3" rx="1" fill="#ffffff"/>
-              <!-- Front Destination Board -->
-              <rect x="38" y="4" width="8" height="3" fill="#fef08a"/>
-              <!-- Upper Windows -->
-              <rect x="5" y="4" width="6" height="4" rx="1" fill="#bae6fd"/>
-              <rect x="13" y="4" width="6" height="4" rx="1" fill="#bae6fd"/>
-              <rect x="21" y="4" width="6" height="4" rx="1" fill="#bae6fd"/>
-              <rect x="29" y="4" width="6" height="4" rx="1" fill="#bae6fd"/>
-              <!-- Lower Windows -->
-              <rect x="5" y="11" width="6" height="5" rx="1" fill="#bae6fd"/>
-              <rect x="13" y="11" width="6" height="5" rx="1" fill="#bae6fd"/>
-              <rect x="21" y="11" width="6" height="5" rx="1" fill="#bae6fd"/>
-              <rect x="29" y="11" width="6" height="5" rx="1" fill="#bae6fd"/>
-              <!-- Front Windshield -->
-              <rect x="38" y="8" width="8" height="8" rx="1" fill="#7dd3fc"/>
-              <!-- Headlights & Taillights -->
-              <circle cx="47" cy="16" r="1.8" fill="#fef08a"/>
-              <circle cx="1" cy="7" r="1.5" fill="#ef4444"/>
-              <circle cx="1" cy="15" r="1.5" fill="#ef4444"/>
+          <!-- Quadrant C: Bottom-Right (SE) Architecture -->
+          <g id="seBuildingsGroup">
+            <!-- Modern Commercial Building in Slate Blue -->
+            <rect x="880" y="525" width="260" height="155" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+            <!-- Rooftop Water Tank & Antenna -->
+            <rect x="910" y="495" width="32" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+            <line x1="980" y1="525" x2="980" y2="485" stroke="#ef4444" stroke-width="2"/>
+            <circle cx="980" cy="484" r="2.5" fill="#ef4444" class="beacon-blink"/>
+
+            <!-- Large Authentic Billboard: "সবাই মিলে একটি ভালো ঢাকা" (As in Reference Image) -->
+            <g transform="translate(890, 530)">
+              <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#38bdf8" stroke-width="2" filter="url(#crLightGlow)"/>
+              <rect x="5" y="5" width="220" height="85" rx="4" fill="#172554"/>
+              <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">সবাই মিলে</text>
+              <text x="18" y="52" fill="#38bdf8" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">একটি ভালো</text>
+              <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
+              <!-- Decorative City Graph Graphic -->
+              <path d="M 140,75 L 155,50 L 170,60 L 190,35 L 210,75 Z" fill="#3b82f6" opacity="0.4"/>
             </g>
-            <animateMotion dur="9.5s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#expresswayFlyover"/>
-            </animateMotion>
-          </g>
-
-          <!-- 3. PRIVATE CAR (AC Comfort Sedan on Expressway) -->
-          <g>
-            <g transform="translate(-18, -8)">
-              <!-- Headlight Beam -->
-              <polygon points="34,8 85,-1 85,17" fill="#fef08a" opacity="0.3" filter="url(#headlightBeamGlow)"/>
-              <!-- Car Body -->
-              <rect x="0" y="3" width="34" height="11" rx="4" fill="#312e81" stroke="#818cf8" stroke-width="1.2"/>
-              <!-- Cabin Glass -->
-              <path d="M 8,3 L 13,0 L 25,0 L 29,3 Z" fill="#6366f1"/>
-              <!-- Headlights -->
-              <circle cx="33" cy="5" r="1.5" fill="#ffffff"/>
-              <circle cx="33" cy="11" r="1.5" fill="#ffffff"/>
-              <!-- Taillights -->
-              <circle cx="1" cy="5" r="1.5" fill="#ef4444"/>
-              <circle cx="1" cy="11" r="1.5" fill="#ef4444"/>
-            </g>
-            <animateMotion dur="7.5s" begin="-3.5s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#expresswayFlyover"/>
-            </animateMotion>
-          </g>
-
-          <!-- 4. GREEN CNG AUTO-RICKSHAW (City Arterial Avenue) -->
-          <g>
-            <g transform="translate(-15, -10)">
-              <!-- Headlight Beam -->
-              <polygon points="28,10 75,0 75,20" fill="#fef08a" opacity="0.38" filter="url(#headlightBeamGlow)"/>
-              <!-- Green Body -->
-              <rect x="2" y="4" width="24" height="12" rx="5" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
-              <!-- Yellow Hood Roof -->
-              <path d="M 2,7 Q 14,0 26,7 L 24,9 L 4,9 Z" fill="#facc15"/>
-              <!-- Passenger Wire Mesh Window -->
-              <rect x="6" y="8" width="10" height="6" rx="2" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
-              <!-- Driver Front Windshield -->
-              <polygon points="18,8 24,8 22,12 18,12" fill="#a7f3d0"/>
-              <!-- Front Single Wheel -->
-              <circle cx="25" cy="15" r="2.5" fill="#0f172a" stroke="#cbd5e1" stroke-width="0.8"/>
-              <!-- Rear Wheel -->
-              <circle cx="7" cy="15" r="2.5" fill="#0f172a" stroke="#cbd5e1" stroke-width="0.8"/>
-              <!-- Front Headlight -->
-              <circle cx="26" cy="10" r="1.8" fill="#fef08a"/>
-              <!-- Rear Taillight -->
-              <circle cx="2" cy="12" r="1.5" fill="#ef4444"/>
-            </g>
-            <animateMotion dur="10s" begin="-1.8s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#cityAvenue"/>
-            </animateMotion>
-          </g>
-
-          <!-- 5. COMMUTER MOTORBIKE (Fast Commuter on City Avenue) -->
-          <g>
-            <g transform="translate(-12, -8)">
-              <!-- Sharp Headlight Beam -->
-              <polygon points="24,8 70,1 70,15" fill="#38bdf8" opacity="0.45" filter="url(#headlightBeamGlow)"/>
-              <!-- Wheels -->
-              <circle cx="2" cy="10" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-              <circle cx="20" cy="10" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-              <!-- Bike Frame & Tank -->
-              <path d="M 2,10 L 9,5 L 15,5 L 20,10" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
-              <!-- Rider Silhouette & Helmet -->
-              <circle cx="12" cy="2" r="2.5" fill="#38bdf8"/>
-              <path d="M 9,5 L 12,3 L 15,7" stroke="#ffffff" stroke-width="1.5" fill="none"/>
-              <!-- Taillight Red Streak -->
-              <circle cx="1" cy="7" r="1.5" fill="#ef4444"/>
-              <line x1="0" y1="7" x2="-8" y2="7" stroke="#ef4444" stroke-width="1.5" opacity="0.7"/>
-            </g>
-            <animateMotion dur="6.2s" begin="-4.2s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#cityAvenue"/>
-            </animateMotion>
-          </g>
-
-          <!-- 6. TRADITIONAL DHAKA CYCLE RICKSHAW (Neighborhood Feeder Street) -->
-          <g>
-            <g transform="translate(-16, -13)">
-              <!-- Spoked Rear Wheels -->
-              <circle cx="2" cy="14" r="4.5" fill="none" stroke="#f59e0b" stroke-width="1.2"/>
-              <circle cx="2" cy="14" r="1.5" fill="#f59e0b"/>
-              <circle cx="2" cy="14" r="3.5" stroke="#fef08a" stroke-width="0.5" stroke-dasharray="2 2" fill="none"/>
-              
-              <!-- Front Bicycle Wheel -->
-              <circle cx="24" cy="14" r="4" fill="none" stroke="#f59e0b" stroke-width="1.2"/>
-              <circle cx="24" cy="14" r="1.5" fill="#f59e0b"/>
-
-              <!-- Rickshaw Carriage Body & Painted Tin Back -->
-              <path d="M -2,12 L 8,12 L 12,6 L 4,6 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
-              <!-- Decorative Tin Art Plate -->
-              <rect x="-3" y="8" width="3" height="6" fill="#ef4444"/>
-
-              <!-- Traditional Amber/Crimson Hooded Canopy -->
-              <path d="M 2,6 Q 4,-3 12,1 L 10,6 Z" fill="#d97706" stroke="#fbbf24" stroke-width="1"/>
-
-              <!-- Bicycle Frame connecting carriage to front wheel -->
-              <line x1="8" y1="12" x2="16" y2="12" stroke="#64748b" stroke-width="1.5"/>
-              <line x1="16" y1="12" x2="22" y2="5" stroke="#64748b" stroke-width="1.5"/>
-              <line x1="22" y1="5" x2="24" y2="14" stroke="#64748b" stroke-width="1.5"/>
-              <!-- Handlebars -->
-              <line x1="20" y1="4" x2="24" y2="4" stroke="#cbd5e1" stroke-width="1.5"/>
-
-              <!-- Pedaling Rickshaw Puller Silhouette -->
-              <circle cx="16" cy="4" r="2.5" fill="#fde047"/>
-              <path d="M 16,6 L 15,10 L 19,13" stroke="#fde047" stroke-width="1.8" fill="none"/>
-            </g>
-            <animateMotion dur="14s" begin="-2.5s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#feederStreet"/>
-            </animateMotion>
           </g>
 
 
           <!-- ========================================================
-               7. TRANSIT HUBS & WAYPOINT BADGES (With Pulsing Halos)
+               4. ROADS, ASPHALT, CURBS & ROAD MARKINGS
                ======================================================== -->
 
-          <!-- 1. Azimpur Bus Stand (Starting Hub) -->
-          <g transform="translate(90, 560)" class="waypoint-pin-float cursor-pointer" onclick="startCorridorTrip('azimpur', 'brac')">
-            <circle r="18" fill="#10b981" opacity="0.2" class="radar-pulse-ring"/>
-            <circle r="8" fill="#047857" stroke="#34d399" stroke-width="2.5"/>
-            <circle r="3.5" fill="#ffffff"/>
-            <rect x="-65" y="-30" width="130" height="20" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="1.2" opacity="0.95"/>
-            <text x="0" y="-17" fill="#34d399" font-size="9" font-weight="800" text-anchor="middle">📍 Azimpur Bus Stand</text>
+          <!-- 4 Sidewalk Corner Slabs -->
+          <path d="M 0,165 L 490,165 L 490,320 Q 490,340 470,340 L 0,340 Z" fill="url(#crSidewalkGrad)"/>
+          <path d="M 0,500 L 470,500 Q 490,500 490,520 L 490,700 L 0,700 Z" fill="url(#crSidewalkGrad)"/>
+          <path d="M 710,165 L 1200,165 L 1200,340 L 730,340 Q 710,340 710,320 Z" fill="url(#crSidewalkGrad)"/>
+          <path d="M 730,500 L 1200,500 L 1200,700 L 710,700 L 710,520 Q 710,500 730,500 Z" fill="url(#crSidewalkGrad)"/>
+
+          <!-- Yellow & Black Dhaka Curb Markings at the 4 Corners -->
+          <g stroke="#f59e0b" stroke-width="3.5" fill="none">
+            <!-- NW Curb -->
+            <path d="M 450,340 L 470,340 Q 490,340 490,320 L 490,300"/>
+            <!-- SW Curb -->
+            <path d="M 450,500 L 470,500 Q 490,500 490,520 L 490,540"/>
+            <!-- NE Curb -->
+            <path d="M 750,340 L 730,340 Q 710,340 710,320 L 710,300"/>
+            <!-- SE Curb -->
+            <path d="M 750,500 L 730,500 Q 710,500 710,520 L 710,540"/>
           </g>
 
-          <!-- 2. Dhaka University (Campus & MRT Interchange) -->
-          <g transform="translate(320, 242)" class="waypoint-pin-float cursor-pointer" style="animation-delay: -1s;" onclick="startCorridorTrip('mirpur', 'dhanmondi')">
-            <circle r="20" fill="#38bdf8" opacity="0.22" class="radar-pulse-ring"/>
-            <circle r="8.5" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5"/>
-            <circle r="4" fill="#ffffff"/>
-            <rect x="-65" y="-30" width="130" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" opacity="0.95"/>
-            <text x="0" y="-17" fill="#38bdf8" font-size="9" font-weight="800" text-anchor="middle">🎓 Dhaka University</text>
+          <!-- Road Surfaces (East-West and North-South Intersecting Crossroads) -->
+          <!-- Horizontal East-West Road -->
+          <rect x="0" y="340" width="1200" height="160" fill="url(#crAsphaltGrad)"/>
+          <!-- Vertical North-South Road -->
+          <rect x="490" y="165" width="220" height="535" fill="url(#crAsphaltGrad)"/>
+
+          <!-- Central Intersection Junction Box Area -->
+          <rect x="490" y="340" width="220" height="160" fill="#172033"/>
+
+          <!-- Center Yellow Dividers -->
+          <!-- East-West Center Line -->
+          <line x1="0" y1="420" x2="450" y2="420" stroke="#f59e0b" stroke-width="2.5"/>
+          <line x1="750" y1="420" x2="1200" y2="420" stroke="#f59e0b" stroke-width="2.5"/>
+          <!-- North-South Center Line -->
+          <line x1="600" y1="165" x2="600" y2="305" stroke="#f59e0b" stroke-width="2.5"/>
+          <line x1="600" y1="535" x2="600" y2="700" stroke="#f59e0b" stroke-width="2.5"/>
+
+          <!-- White Dashed Lane Dividers -->
+          <g stroke="#ffffff" stroke-width="1.8" stroke-dasharray="14 22" opacity="0.75">
+            <!-- East-West Lanes -->
+            <line x1="0" y1="380" x2="450" y2="380"/>
+            <line x1="0" y1="460" x2="450" y2="460"/>
+            <line x1="750" y1="380" x2="1200" y2="380"/>
+            <line x1="750" y1="460" x2="1200" y2="460"/>
+            <!-- North-South Lanes -->
+            <line x1="545" y1="165" x2="545" y2="305"/>
+            <line x1="655" y1="165" x2="655" y2="305"/>
+            <line x1="545" y1="535" x2="545" y2="700"/>
+            <line x1="655" y1="535" x2="655" y2="700"/>
           </g>
 
-          <!-- 3. Bijoy Sarani MRT Hub (Central Station) -->
-          <g transform="translate(600, 240)" class="waypoint-pin-float cursor-pointer" style="animation-delay: -2s;" onclick="startCorridorTrip('uttara', 'motijheel')">
-            <circle r="22" fill="#38bdf8" opacity="0.25" class="radar-pulse-ring"/>
-            <circle r="9" fill="#0369a1" stroke="#7dd3fc" stroke-width="3"/>
-            <circle r="4" fill="#ffffff"/>
-            <rect x="-65" y="-32" width="130" height="22" rx="11" fill="#0f172a" stroke="#7dd3fc" stroke-width="1.4" opacity="0.95"/>
-            <text x="0" y="-18" fill="#7dd3fc" font-size="9.5" font-weight="900" text-anchor="middle">🚆 Bijoy Sarani MRT</text>
+          <!-- Road Directional Lane Arrows (White painted arrows) -->
+          <g fill="#ffffff" opacity="0.8">
+            <!-- Eastbound Arrows -->
+            <path d="M 320,458 L 332,458 L 332,455 L 340,460 L 332,465 L 332,462 L 320,462 Z"/>
+            <path d="M 320,438 L 332,438 L 332,435 L 340,440 L 332,445 L 332,442 L 320,442 Z"/>
+            <!-- Westbound Arrows -->
+            <path d="M 880,382 L 868,382 L 868,385 L 860,380 L 868,375 L 868,378 L 880,378 Z"/>
+            <path d="M 880,402 L 868,402 L 868,405 L 860,400 L 868,395 L 868,398 L 880,398 Z"/>
+            <!-- Southbound Arrows -->
+            <path d="M 543,230 L 543,242 L 540,242 L 545,250 L 550,242 L 547,242 L 547,230 Z"/>
+            <path d="M 578,230 L 578,242 L 575,242 L 580,250 L 585,242 L 582,242 L 582,230 Z"/>
+            <!-- Northbound Arrows -->
+            <path d="M 622,650 L 622,638 L 619,638 L 624,630 L 629,638 L 626,638 L 626,650 Z"/>
+            <path d="M 657,650 L 657,638 L 654,638 L 659,630 L 664,638 L 661,638 L 661,650 Z"/>
           </g>
 
-          <!-- 4. BRAC University Hub (Destination Hub) -->
-          <g transform="translate(990, 252)" class="waypoint-pin-float cursor-pointer" style="animation-delay: -1.5s;" onclick="startCorridorTrip('azimpur', 'brac')">
-            <circle r="20" fill="#f43f5e" opacity="0.22" class="radar-pulse-ring"/>
-            <circle r="8.5" fill="#be123c" stroke="#fb7185" stroke-width="2.5"/>
-            <circle r="4" fill="#ffffff"/>
-            <rect x="-65" y="-30" width="130" height="20" rx="10" fill="#0f172a" stroke="#fb7185" stroke-width="1.2" opacity="0.95"/>
-            <text x="0" y="-17" fill="#fb7185" font-size="9" font-weight="800" text-anchor="middle">🏫 BRAC University</text>
+
+          <!-- ========================================================
+               5. THE 4 PROMINENT ZEBRA CROSSINGS & STOP LINES
+               ======================================================== -->
+
+          <!-- White Stop Lines -->
+          <g stroke="#ffffff" stroke-width="4.5" opacity="0.95">
+            <!-- Eastbound Stop Line (West approach) -->
+            <line x1="448" y1="420" x2="448" y2="500"/>
+            <!-- Westbound Stop Line (East approach) -->
+            <line x1="752" y1="340" x2="752" y2="420"/>
+            <!-- Southbound Stop Line (North approach) -->
+            <line x1="490" y1="304" x2="600" y2="304"/>
+            <!-- Northbound Stop Line (South approach) -->
+            <line x1="600" y1="536" x2="710" y2="536"/>
           </g>
 
-          <!-- 5. Motijheel Commercial Terminal -->
-          <g transform="translate(1180, 258)" class="waypoint-pin-float cursor-pointer" style="animation-delay: -0.8s;" onclick="startCorridorTrip('uttara', 'motijheel')">
-            <circle r="18" fill="#38bdf8" opacity="0.2" class="radar-pulse-ring"/>
-            <circle r="8" fill="#0284c7" stroke="#38bdf8" stroke-width="2.5"/>
-            <circle r="3.5" fill="#ffffff"/>
-            <rect x="-65" y="-30" width="130" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" opacity="0.95"/>
-            <text x="0" y="-17" fill="#38bdf8" font-size="9" font-weight="800" text-anchor="middle">🏙️ Motijheel Terminal</text>
+          <!-- 4 Clearly Marked White Zebra Crossings -->
+          <g fill="#ffffff" opacity="0.95">
+            <!-- 1. North Zebra Crossing (Across Vertical Road, y ≈ 312..332) -->
+            <rect x="502" y="312" width="14" height="22" rx="1"/>
+            <rect x="526" y="312" width="14" height="22" rx="1"/>
+            <rect x="550" y="312" width="14" height="22" rx="1"/>
+            <rect x="574" y="312" width="14" height="22" rx="1"/>
+            <rect x="612" y="312" width="14" height="22" rx="1"/>
+            <rect x="636" y="312" width="14" height="22" rx="1"/>
+            <rect x="660" y="312" width="14" height="22" rx="1"/>
+            <rect x="684" y="312" width="14" height="22" rx="1"/>
+
+            <!-- 2. South Zebra Crossing (Across Vertical Road, y ≈ 508..528) -->
+            <rect x="502" y="508" width="14" height="22" rx="1"/>
+            <rect x="526" y="508" width="14" height="22" rx="1"/>
+            <rect x="550" y="508" width="14" height="22" rx="1"/>
+            <rect x="574" y="508" width="14" height="22" rx="1"/>
+            <rect x="612" y="508" width="14" height="22" rx="1"/>
+            <rect x="636" y="508" width="14" height="22" rx="1"/>
+            <rect x="660" y="508" width="14" height="22" rx="1"/>
+            <rect x="684" y="508" width="14" height="22" rx="1"/>
+
+            <!-- 3. West Zebra Crossing (Across Horizontal Road, x ≈ 462..484) -->
+            <rect x="462" y="350" width="22" height="14" rx="1"/>
+            <rect x="462" y="372" width="22" height="14" rx="1"/>
+            <rect x="462" y="394" width="22" height="14" rx="1"/>
+            <rect x="462" y="426" width="22" height="14" rx="1"/>
+            <rect x="462" y="448" width="22" height="14" rx="1"/>
+            <rect x="462" y="470" width="22" height="14" rx="1"/>
+
+            <!-- 4. East Zebra Crossing (Across Horizontal Road, x ≈ 716..738) -->
+            <rect x="716" y="350" width="22" height="14" rx="1"/>
+            <rect x="716" y="372" width="22" height="14" rx="1"/>
+            <rect x="716" y="394" width="22" height="14" rx="1"/>
+            <rect x="716" y="426" width="22" height="14" rx="1"/>
+            <rect x="716" y="448" width="22" height="14" rx="1"/>
+            <rect x="716" y="470" width="22" height="14" rx="1"/>
+          </g>
+
+
+          <!-- ========================================================
+               6. WARM STREETLIGHTS & TREES (Dhaka Evening Ambience)
+               ======================================================== -->
+
+          <!-- Ambient Streetlight Radial Illumination Pools -->
+          <ellipse cx="460" cy="320" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
+          <ellipse cx="740" cy="320" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
+          <ellipse cx="460" cy="520" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
+          <ellipse cx="740" cy="520" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
+
+          <!-- Streetlight Poles & Fixtures -->
+          <g stroke="#64748b" stroke-width="2">
+            <!-- NW Streetlamp -->
+            <line x1="465" y1="320" x2="465" y2="295"/>
+            <path d="M 465,295 Q 465,285 455,288" fill="none"/>
+            <circle cx="454" cy="289" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+
+            <!-- NE Streetlamp -->
+            <line x1="735" y1="320" x2="735" y2="295"/>
+            <path d="M 735,295 Q 735,285 745,288" fill="none"/>
+            <circle cx="746" cy="289" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+
+            <!-- SW Streetlamp -->
+            <line x1="465" y1="520" x2="465" y2="545"/>
+            <path d="M 465,545 Q 465,555 455,552" fill="none"/>
+            <circle cx="454" cy="551" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+
+            <!-- SE Streetlamp -->
+            <line x1="735" y1="520" x2="735" y2="545"/>
+            <path d="M 735,545 Q 735,555 745,552" fill="none"/>
+            <circle cx="746" cy="551" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+          </g>
+
+          <!-- Lush Green Roadside Trees & Shrubbery -->
+          <g>
+            <!-- NW Trees -->
+            <circle cx="430" cy="250" r="18" fill="#15803d" opacity="0.9"/>
+            <circle cx="438" cy="242" r="14" fill="#22c55e" opacity="0.8"/>
+            <circle cx="422" cy="245" r="12" fill="#166534" opacity="0.9"/>
+
+            <!-- NE Trees -->
+            <circle cx="770" cy="270" r="20" fill="#15803d" opacity="0.9"/>
+            <circle cx="780" cy="260" r="16" fill="#22c55e" opacity="0.8"/>
+            <circle cx="760" cy="265" r="13" fill="#166534" opacity="0.9"/>
+
+            <!-- SW Trees -->
+            <circle cx="420" cy="610" r="22" fill="#15803d" opacity="0.9"/>
+            <circle cx="430" cy="600" r="17" fill="#22c55e" opacity="0.8"/>
+
+            <!-- SE Trees -->
+            <circle cx="780" cy="620" r="22" fill="#15803d" opacity="0.9"/>
+            <circle cx="792" cy="610" r="18" fill="#22c55e" opacity="0.8"/>
+          </g>
+
+
+          <!-- ========================================================
+               7. THE 4 INTERSECTION TRAFFIC LIGHT SIGNAL HEADS
+               ======================================================== -->
+          <g id="crossroadsSignals">
+            <!-- 1. Northwest Corner Signal Pole (x=480, y=325) -->
+            <g transform="translate(476, 305)">
+              <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+              <circle id="sig_nw_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
+              <circle id="sig_nw_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
+              <circle id="sig_nw_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+            </g>
+
+            <!-- 2. Northeast Corner Signal Pole (x=716, y=305) -->
+            <g transform="translate(716, 305)">
+              <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+              <circle id="sig_ne_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
+              <circle id="sig_ne_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
+              <circle id="sig_ne_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+            </g>
+
+            <!-- 3. Southwest Corner Signal Pole (x=476, y=510) -->
+            <g transform="translate(476, 510)">
+              <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+              <circle id="sig_sw_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
+              <circle id="sig_sw_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
+              <circle id="sig_sw_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+            </g>
+
+            <!-- 4. Southeast Corner Signal Pole (x=716, y=510) -->
+            <g transform="translate(716, 510)">
+              <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+              <circle id="sig_se_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
+              <circle id="sig_se_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
+              <circle id="sig_se_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+            </g>
+          </g>
+
+
+          <!-- ========================================================
+               8. DYNAMIC VEHICLES (Moving & Queueing across Lanes)
+               ======================================================== -->
+          <g id="dhakaVehiclesLayer">
+            <!-- All vehicle elements are instantiated and driven dynamically by JS -->
+          </g>
+
+
+          <!-- ========================================================
+               9. ANIMATED PEDESTRIANS ON ZEBRA CROSSINGS
+               ======================================================== -->
+          <g id="dhakaPedestriansLayer">
+            <!-- Pedestrian figures walking across zebra stripes or waiting at curbs -->
           </g>
 
         </svg>
 
-        <!-- Bottom-Left Legend: Transit Networks -->
-        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-20 hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-950/85 border border-slate-800 backdrop-blur-md text-xs font-semibold text-slate-300 shadow-xl pointer-events-none">
-          <span class="flex items-center gap-1.5 text-sky-400 font-bold"><span class="w-2.5 h-1.5 rounded-full bg-sky-400"></span> Metro Line 6</span>
-          <span class="text-slate-600">•</span>
-          <span class="flex items-center gap-1.5 text-rose-400 font-bold"><span class="w-2.5 h-1.5 rounded-full bg-rose-500"></span> City Bus</span>
-          <span class="text-slate-600">•</span>
-          <span class="flex items-center gap-1.5 text-emerald-400 font-bold"><span class="w-2.5 h-1.5 rounded-full bg-emerald-400"></span> CNG &amp; Feeder</span>
-          <span class="text-slate-600">•</span>
-          <span class="flex items-center gap-1.5 text-indigo-400 font-bold"><span class="w-2.5 h-1.5 rounded-full bg-indigo-400"></span> Motorbike / Car</span>
-          <span class="text-slate-600">•</span>
-          <span class="flex items-center gap-1.5 text-amber-400 font-bold"><span class="w-2.5 h-1.5 rounded-full bg-amber-400"></span> Rickshaw</span>
+        <!-- Bottom-Left Legend: Transport Modes (Matching User Reference Image) -->
+        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-20 hidden md:flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-950/90 border border-slate-800 backdrop-blur-md text-xs font-semibold text-slate-300 shadow-xl pointer-events-none">
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-1.5 rounded-full bg-sky-400"></span>
+            <span class="text-sky-300 font-bold">Metro Rail</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-1.5 rounded-full bg-rose-500"></span>
+            <span class="text-rose-300 font-bold">Bus</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-1.5 rounded-full bg-emerald-400"></span>
+            <span class="text-emerald-300 font-bold">CNG / Bike / Car</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-1.5 rounded-full bg-amber-400"></span>
+            <span class="text-amber-300 font-bold">Rickshaw</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-4 border-b-2 border-dotted border-purple-400"></span>
+            <span class="text-purple-300 font-bold">Walking</span>
+          </div>
         </div>
 
-        <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in the Bottom-Right Corner) -->
+        <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
         <div class="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-30">
           <button type="button" onclick="openTripPlannerView()" class="group relative flex items-center gap-3 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md">
             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300">
@@ -7741,6 +7752,9 @@
       if (showcase) {
         showcase.classList.remove('hidden');
         if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        if (typeof initDhakaCrossroadsSimulation === 'function') {
+          initDhakaCrossroadsSimulation();
+        }
         showcase.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
@@ -7754,6 +7768,591 @@
         handleLocationChange();
       }
       openTripPlannerView();
+    }
+
+    // =========================================================
+    // Living Dhaka Crossroads Simulation Engine (Mirpur 10 Crossroads)
+    // Coordinated Traffic Signal System, Multi-Modal Vehicles, Zebra Crossing Pedestrians & Metro
+    // =========================================================
+    let dhakaCrossroadsAnimId = null;
+    let dhakaCrossroadsRunning = false;
+    let dhakaCrossroadsObserver = null;
+
+    function initDhakaCrossroadsSimulation() {
+      const container = document.getElementById('dhakaCrossroadsContainer');
+      const svg = document.getElementById('dhakaCrossroadsSvg');
+      if (!container || !svg) return;
+
+      if (dhakaCrossroadsRunning) return;
+      dhakaCrossroadsRunning = true;
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Traffic Signal Phases (Total: 22.8s repeating loop)
+      const PHASES = [
+        { id: 'NS_GREEN', duration: 7500, nsLight: 'green', ewLight: 'red', pedLight: 'red', label: '🚦 N-S GREEN · TRAFFIC FLOWING', badgeColor: 'text-emerald-300', dotColor: 'bg-emerald-400' },
+        { id: 'NS_YELLOW', duration: 1800, nsLight: 'yellow', ewLight: 'red', pedLight: 'red', label: '⚠️ N-S CLEARANCE · PREPARE TO STOP', badgeColor: 'text-amber-300', dotColor: 'bg-amber-400' },
+        { id: 'ALL_RED_PED', duration: 5500, nsLight: 'red', ewLight: 'red', pedLight: 'green', label: '🚶 PEDESTRIANS CROSSING · ALL VEHICLES STOPPED', badgeColor: 'text-purple-300', dotColor: 'bg-purple-400' },
+        { id: 'EW_GREEN', duration: 6200, nsLight: 'red', ewLight: 'green', pedLight: 'red', label: '🚦 E-W GREEN · TRAFFIC FLOWING', badgeColor: 'text-emerald-300', dotColor: 'bg-emerald-400' },
+        { id: 'EW_YELLOW', duration: 1800, nsLight: 'red', ewLight: 'yellow', pedLight: 'red', label: '⚠️ E-W CLEARANCE · PREPARE TO STOP', badgeColor: 'text-amber-300', dotColor: 'bg-amber-400' }
+      ];
+      const TOTAL_CYCLE = PHASES.reduce((acc, p) => acc + p.duration, 0);
+
+      // DOM Handles for Signal Lights
+      const sigLamps = {
+        nw_red: document.getElementById('sig_nw_red'),
+        nw_yellow: document.getElementById('sig_nw_yellow'),
+        nw_green: document.getElementById('sig_nw_green'),
+        ne_red: document.getElementById('sig_ne_red'),
+        ne_yellow: document.getElementById('sig_ne_yellow'),
+        ne_green: document.getElementById('sig_ne_green'),
+        sw_red: document.getElementById('sig_sw_red'),
+        sw_yellow: document.getElementById('sig_sw_yellow'),
+        sw_green: document.getElementById('sig_sw_green'),
+        se_red: document.getElementById('sig_se_red'),
+        se_yellow: document.getElementById('sig_se_yellow'),
+        se_green: document.getElementById('sig_se_green')
+      };
+      const badgeText = document.getElementById('trafficSignalText');
+      const badgeDot = document.getElementById('trafficSignalDot');
+      const trainEl = document.getElementById('crossroadsMetroTrain');
+      const vehiclesLayer = document.getElementById('dhakaVehiclesLayer');
+      const pedsLayer = document.getElementById('dhakaPedestriansLayer');
+
+      // Colors for signal states
+      const LAMP_COLORS = {
+        red_on: '#ef4444', red_off: '#3b0707',
+        yellow_on: '#eab308', yellow_off: '#422006',
+        green_on: '#22c55e', green_off: '#052e16'
+      };
+
+      // 1. Initialize Vehicle fleet across 4 directions
+      // Stop lines: EB: x=446, WB: x=752, SB: y=304, NB: y=536
+      const vehicles = [
+        // Eastbound (Horizontal, moving Right, Y=435 inner, Y=470 outer)
+        { id: 'v_eb_car', dir: 'EB', lane: 1, type: 'car', color: '#f8fafc', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446 },
+        { id: 'v_eb_bike', dir: 'EB', lane: 1, type: 'bike', color: '#38bdf8', w: 24, h: 12, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446 },
+        { id: 'v_eb_bus', dir: 'EB', lane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446 },
+        { id: 'v_eb_cng', dir: 'EB', lane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: -80, speed: 40, maxSpeed: 48, stopLine: 446 },
+        { id: 'v_eb_rickshaw', dir: 'EB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: -210, speed: 25, maxSpeed: 28, stopLine: 446 },
+
+        // Westbound (Horizontal, moving Left, Y=405 inner, Y=370 outer)
+        { id: 'v_wb_car', dir: 'WB', lane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752 },
+        { id: 'v_wb_bike', dir: 'WB', lane: 1, type: 'bike', color: '#f43f5e', w: 24, h: 12, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752 },
+        { id: 'v_wb_bus', dir: 'WB', lane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752 },
+        { id: 'v_wb_cng', dir: 'WB', lane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: 1270, speed: 40, maxSpeed: 48, stopLine: 752 },
+        { id: 'v_wb_rickshaw', dir: 'WB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: 1420, speed: 25, maxSpeed: 28, stopLine: 752 },
+
+        // Southbound (Vertical, moving Down, X=580 inner, X=544 outer)
+        { id: 'v_sb_car', dir: 'SB', lane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304 },
+        { id: 'v_sb_bike', dir: 'SB', lane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304 },
+        { id: 'v_sb_bus', dir: 'SB', lane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304 },
+        { id: 'v_sb_cng', dir: 'SB', lane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 30, speed: 40, maxSpeed: 48, stopLine: 304 },
+        { id: 'v_sb_rickshaw', dir: 'SB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: -120, speed: 25, maxSpeed: 28, stopLine: 304 },
+
+        // Northbound (Vertical, moving Up, X=620 inner, X=656 outer)
+        { id: 'v_nb_car', dir: 'NB', lane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536 },
+        { id: 'v_nb_bike', dir: 'NB', lane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536 },
+        { id: 'v_nb_bus', dir: 'NB', lane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536 },
+        { id: 'v_nb_cng', dir: 'NB', lane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 680, speed: 40, maxSpeed: 48, stopLine: 536 },
+        { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536 }
+      ];
+
+      // Build Vehicle SVG Elements
+      if (vehiclesLayer) {
+        vehiclesLayer.innerHTML = '';
+        vehicles.forEach(v => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('id', v.id);
+
+          if (v.dir === 'EB') {
+            if (v.type === 'bus') {
+              g.innerHTML = `
+                <polygon points="76,12 135,2 135,22" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="0" width="76" height="24" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
+                <rect x="4" y="0" width="68" height="3" rx="1" fill="#ffffff"/>
+                <rect x="56" y="4" width="16" height="4" fill="#fef08a"/>
+                <rect x="6" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="18" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="30" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="42" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="56" y="9" width="16" height="12" rx="1" fill="#7dd3fc"/>
+                <circle cx="75" cy="6" r="1.8" fill="#ffffff"/>
+                <circle cx="75" cy="18" r="1.8" fill="#ffffff"/>
+                <circle cx="1" cy="6" r="1.8" fill="#ef4444"/>
+                <circle cx="1" cy="18" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'car') {
+              g.innerHTML = `
+                <polygon points="44,10 90,2 90,18" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="1" width="44" height="18" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 10,1 L 15,-1 L 30,-1 L 35,1 Z" fill="#38bdf8" opacity="0.8"/>
+                <circle cx="43" cy="5" r="1.8" fill="#ffffff"/>
+                <circle cx="43" cy="15" r="1.8" fill="#ffffff"/>
+                <circle cx="1" cy="5" r="1.8" fill="#ef4444"/>
+                <circle cx="1" cy="15" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'cng') {
+              g.innerHTML = `
+                <polygon points="32,8 70,0 70,16" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <rect x="2" y="2" width="28" height="14" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
+                <path d="M 2,5 Q 14,0 26,5 L 24,7 L 4,7 Z" fill="#facc15"/>
+                <rect x="6" y="6" width="10" height="7" rx="1" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
+                <circle cx="30" cy="8" r="2" fill="#fef08a"/>
+                <circle cx="1" cy="9" r="1.5" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'rickshaw') {
+              g.innerHTML = `
+                <circle cx="4" cy="12" r="4.5" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
+                <circle cx="4" cy="12" r="1.5" fill="#f59e0b"/>
+                <circle cx="28" cy="12" r="4" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
+                <rect x="-1" y="7" width="3" height="6" fill="#ef4444"/>
+                <path d="M 2,10 L 11,10 L 14,4 L 6,4 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
+                <path d="M 4,4 Q 6,-3 14,1 L 13,5 Z" fill="#f59e0b" stroke="#fde047" stroke-width="1"/>
+                <circle cx="21" cy="2" r="2.5" fill="#fde047"/>
+                <path d="M 21,4 L 19,8 L 24,11" stroke="#fde047" stroke-width="1.8" fill="none"/>
+              `;
+            } else if (v.type === 'bike') {
+              g.innerHTML = `
+                <polygon points="23,6 60,1 60,11" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+                <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+                <path d="M 3,6 L 10,2 L 16,2 L 20,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
+                <circle cx="12" cy="1" r="2.5" fill="#38bdf8"/>
+                <circle cx="1" cy="5" r="1.5" fill="#ef4444"/>
+              `;
+            }
+          } else if (v.dir === 'WB') {
+            if (v.type === 'bus') {
+              g.innerHTML = `
+                <polygon points="0,12 -60,2 -60,22" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="0" width="76" height="24" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
+                <rect x="4" y="0" width="68" height="3" rx="1" fill="#ffffff"/>
+                <rect x="4" y="4" width="16" height="4" fill="#fef08a"/>
+                <rect x="4" y="9" width="16" height="12" rx="1" fill="#7dd3fc"/>
+                <rect x="26" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="38" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="50" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <rect x="62" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
+                <circle cx="1" cy="6" r="1.8" fill="#ffffff"/>
+                <circle cx="1" cy="18" r="1.8" fill="#ffffff"/>
+                <circle cx="75" cy="6" r="1.8" fill="#ef4444"/>
+                <circle cx="75" cy="18" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'car') {
+              g.innerHTML = `
+                <polygon points="0,10 -46,2 -46,18" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="1" width="44" height="18" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 34,1 L 29,-1 L 14,-1 L 9,1 Z" fill="#38bdf8" opacity="0.8"/>
+                <circle cx="1" cy="5" r="1.8" fill="#ffffff"/>
+                <circle cx="1" cy="15" r="1.8" fill="#ffffff"/>
+                <circle cx="43" cy="5" r="1.8" fill="#ef4444"/>
+                <circle cx="43" cy="15" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'cng') {
+              g.innerHTML = `
+                <polygon points="0,8 -38,0 -38,16" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <rect x="2" y="2" width="28" height="14" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
+                <path d="M 28,5 Q 16,0 4,5 L 6,7 L 26,7 Z" fill="#facc15"/>
+                <rect x="14" y="6" width="10" height="7" rx="1" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
+                <circle cx="1" cy="8" r="2" fill="#fef08a"/>
+                <circle cx="29" cy="9" r="1.5" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'rickshaw') {
+              g.innerHTML = `
+                <circle cx="28" cy="12" r="4.5" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
+                <circle cx="28" cy="12" r="1.5" fill="#f59e0b"/>
+                <circle cx="4" cy="12" r="4" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
+                <rect x="30" y="7" width="3" height="6" fill="#ef4444"/>
+                <path d="M 30,10 L 21,10 L 18,4 L 26,4 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
+                <path d="M 28,4 Q 26,-3 18,1 L 19,5 Z" fill="#f59e0b" stroke="#fde047" stroke-width="1"/>
+                <circle cx="11" cy="2" r="2.5" fill="#fde047"/>
+                <path d="M 11,4 L 13,8 L 8,11" stroke="#fde047" stroke-width="1.8" fill="none"/>
+              `;
+            } else if (v.type === 'bike') {
+              g.innerHTML = `
+                <polygon points="1,6 -36,1 -36,11" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+                <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+                <path d="M 20,6 L 13,2 L 7,2 L 3,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
+                <circle cx="11" cy="1" r="2.5" fill="#38bdf8"/>
+                <circle cx="22" cy="5" r="1.5" fill="#ef4444"/>
+              `;
+            }
+          } else if (v.dir === 'SB') {
+            // Southbound (Facing down)
+            if (v.type === 'bus') {
+              g.innerHTML = `
+                <polygon points="12,76 2,135 22,135" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
+                <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
+                <rect x="4" y="56" width="16" height="4" fill="#fef08a"/>
+                <rect x="4" y="60" width="16" height="12" rx="1" fill="#7dd3fc"/>
+                <circle cx="6" cy="75" r="1.8" fill="#ffffff"/>
+                <circle cx="18" cy="75" r="1.8" fill="#ffffff"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ef4444"/>
+                <circle cx="18" cy="1" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'car') {
+              g.innerHTML = `
+                <polygon points="10,44 2,90 18,90" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="5" cy="43" r="1.8" fill="#ffffff"/>
+                <circle cx="15" cy="43" r="1.8" fill="#ffffff"/>
+                <circle cx="5" cy="1" r="1.8" fill="#ef4444"/>
+                <circle cx="15" cy="1" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'cng') {
+              g.innerHTML = `
+                <polygon points="8,32 0,70 16,70" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
+                <circle cx="8" cy="30" r="2" fill="#fef08a"/>
+                <circle cx="8" cy="1" r="1.5" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'rickshaw') {
+              g.innerHTML = `
+                <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
+                <circle cx="9" cy="28" r="2.5" fill="#fde047"/>
+                <circle cx="9" cy="32" r="3" fill="#0f172a"/>
+              `;
+            } else if (v.type === 'bike') {
+              g.innerHTML = `
+                <polygon points="6,23 1,60 11,60" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
+                <circle cx="6" cy="10" r="2.5" fill="#38bdf8"/>
+                <circle cx="6" cy="22" r="1.8" fill="#ffffff"/>
+              `;
+            }
+          } else if (v.dir === 'NB') {
+            // Northbound (Facing up)
+            if (v.type === 'bus') {
+              g.innerHTML = `
+                <polygon points="12,0 2,-60 22,-60" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
+                <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
+                <rect x="4" y="16" width="16" height="4" fill="#fef08a"/>
+                <rect x="4" y="4" width="16" height="12" rx="1" fill="#7dd3fc"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="18" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="6" cy="75" r="1.8" fill="#ef4444"/>
+                <circle cx="18" cy="75" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'car') {
+              g.innerHTML = `
+                <polygon points="10,0 2,-46 18,-46" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="5" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="15" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="5" cy="43" r="1.8" fill="#ef4444"/>
+                <circle cx="15" cy="43" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'cng') {
+              g.innerHTML = `
+                <polygon points="8,0 0,-38 16,-38" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
+                <circle cx="8" cy="1" r="2" fill="#fef08a"/>
+                <circle cx="8" cy="30" r="1.5" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'rickshaw') {
+              g.innerHTML = `
+                <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
+                <circle cx="9" cy="6" r="2.5" fill="#fde047"/>
+                <circle cx="9" cy="2" r="3" fill="#0f172a"/>
+              `;
+            } else if (v.type === 'bike') {
+              g.innerHTML = `
+                <polygon points="6,1 1,-36 11,-36" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
+                <circle cx="6" cy="12" r="2.5" fill="#38bdf8"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ffffff"/>
+              `;
+            }
+          }
+          vehiclesLayer.appendChild(g);
+          v.el = g;
+        });
+      }
+
+      // 2. Initialize Pedestrians across the 4 Zebra Crossings
+      const pedestrians = [
+        // North Zebra (Horizontal, y=323, x: 505 -> 695)
+        { id: 'ped_n1', axis: 'H', y: 320, start: 505, end: 695, color: '#38bdf8' },
+        { id: 'ped_n2', axis: 'H', y: 327, start: 690, end: 510, color: '#facc15' },
+        // South Zebra (Horizontal, y=518, x: 505 -> 695)
+        { id: 'ped_s1', axis: 'H', y: 515, start: 505, end: 695, color: '#ec4899' },
+        { id: 'ped_s2', axis: 'H', y: 522, start: 690, end: 510, color: '#34d399' },
+        // West Zebra (Vertical, x=473, y: 350 -> 490)
+        { id: 'ped_w1', axis: 'V', x: 470, start: 350, end: 490, color: '#818cf8' },
+        { id: 'ped_w2', axis: 'V', x: 476, start: 485, end: 355, color: '#fb923c' },
+        // East Zebra (Vertical, x=727, y: 350 -> 490)
+        { id: 'ped_e1', axis: 'V', x: 724, start: 350, end: 490, color: '#38bdf8' },
+        { id: 'ped_e2', axis: 'V', x: 730, start: 485, end: 355, color: '#fef08a' }
+      ];
+
+      if (pedsLayer) {
+        pedsLayer.innerHTML = '';
+        pedestrians.forEach(p => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('id', p.id);
+          g.innerHTML = `
+            <circle cx="0" cy="-6" r="2.8" fill="#fed7aa"/>
+            <rect x="-2.2" y="-3.5" width="4.4" height="6.5" rx="1" fill="${p.color}"/>
+            <line x1="-1.2" y1="3" x2="-1.2" y2="7" stroke="#1e293b" stroke-width="1.2"/>
+            <line x1="1.2" y1="3" x2="1.2" y2="7" stroke="#1e293b" stroke-width="1.2"/>
+          `;
+          pedsLayer.appendChild(g);
+          p.el = g;
+        });
+      }
+
+      let lastTime = performance.now();
+      let cycleTimer = 0;
+      let trainX = 150;
+
+      // Animation Loop
+      function tick(currentTime) {
+        if (!dhakaCrossroadsRunning) return;
+        const dt = Math.min(0.08, (currentTime - lastTime) / 1000);
+        lastTime = currentTime;
+
+        if (!prefersReducedMotion) {
+          cycleTimer = (cycleTimer + dt * 1000) % TOTAL_CYCLE;
+          trainX += 62 * dt;
+          if (trainX > 1400) trainX = -320;
+          if (trainEl) {
+            trainEl.setAttribute('transform', `translate(${trainX.toFixed(1)}, 88)`);
+          }
+        }
+
+        // Determine current traffic phase
+        let accumulated = 0;
+        let activePhase = PHASES[0];
+        let phaseElapsed = 0;
+
+        for (let i = 0; i < PHASES.length; i++) {
+          if (cycleTimer >= accumulated && cycleTimer < accumulated + PHASES[i].duration) {
+            activePhase = PHASES[i];
+            phaseElapsed = cycleTimer - accumulated;
+            break;
+          }
+          accumulated += PHASES[i].duration;
+        }
+
+        // 1. Update Traffic Lights visual lamps
+        const isNSGreen = activePhase.nsLight === 'green';
+        const isNSYellow = activePhase.nsLight === 'yellow';
+        const isNSRed = activePhase.nsLight === 'red';
+
+        const isEWGreen = activePhase.ewLight === 'green';
+        const isEWYellow = activePhase.ewLight === 'yellow';
+        const isEWRed = activePhase.ewLight === 'red';
+
+        // NW & NE control North-South approaches
+        if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.nw_yellow) sigLamps.nw_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.nw_green) sigLamps.nw_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        if (sigLamps.ne_red) sigLamps.ne_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.ne_yellow) sigLamps.ne_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.ne_green) sigLamps.ne_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        // SW & SE control East-West approaches
+        if (sigLamps.sw_red) sigLamps.sw_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.sw_yellow) sigLamps.sw_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.sw_green) sigLamps.sw_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        if (sigLamps.se_red) sigLamps.se_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.se_yellow) sigLamps.se_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.se_green) sigLamps.se_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        // Update Live Status Badge
+        if (badgeText && badgeDot) {
+          badgeText.innerText = activePhase.label;
+          badgeDot.className = `w-2.5 h-2.5 rounded-full ${activePhase.dotColor} animate-pulse`;
+          const badgeContainer = document.getElementById('trafficSignalBadge');
+          if (badgeContainer) {
+            badgeContainer.className = `flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors`;
+          }
+        }
+
+        // 2. Update Vehicles Physics, Queueing & Movements
+        // Group vehicles by direction and lane to ensure collision-free queueing
+        const groups = {
+          'EB_1': vehicles.filter(v => v.dir === 'EB' && v.lane === 1).sort((a,b) => b.pos - a.pos),
+          'EB_2': vehicles.filter(v => v.dir === 'EB' && v.lane === 2).sort((a,b) => b.pos - a.pos),
+          'WB_1': vehicles.filter(v => v.dir === 'WB' && v.lane === 1).sort((a,b) => a.pos - b.pos),
+          'WB_2': vehicles.filter(v => v.dir === 'WB' && v.lane === 2).sort((a,b) => a.pos - b.pos),
+          'SB_1': vehicles.filter(v => v.dir === 'SB' && v.lane === 1).sort((a,b) => b.pos - a.pos),
+          'SB_2': vehicles.filter(v => v.dir === 'SB' && v.lane === 2).sort((a,b) => b.pos - a.pos),
+          'NB_1': vehicles.filter(v => v.dir === 'NB' && v.lane === 1).sort((a,b) => a.pos - b.pos),
+          'NB_2': vehicles.filter(v => v.dir === 'NB' && v.lane === 2).sort((a,b) => a.pos - b.pos),
+        };
+
+        Object.keys(groups).forEach(key => {
+          const laneVehicles = groups[key];
+          for (let i = 0; i < laneVehicles.length; i++) {
+            const v = laneVehicles[i];
+            const leader = i > 0 ? laneVehicles[i - 1] : null;
+            let targetSpeed = v.maxSpeed;
+
+            if (v.dir === 'EB') {
+              const distToStop = v.stopLine - (v.pos + v.w);
+              const pastStopLine = (v.pos + v.w) > v.stopLine;
+
+              if (!pastStopLine && !isEWGreen) {
+                if (distToStop > 0 && distToStop < 160) {
+                  targetSpeed = Math.max(0, (distToStop / 160) * v.maxSpeed * 0.7);
+                  if (distToStop < 6) targetSpeed = 0;
+                }
+              }
+              if (leader) {
+                const distToLeader = leader.pos - (v.pos + v.w);
+                if (distToLeader < 26) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, leader.speed * 0.9));
+                  if (distToLeader < 12) targetSpeed = 0;
+                }
+              }
+              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 4.0);
+              v.pos += v.speed * dt;
+              if (v.pos > 1280) {
+                const trailing = laneVehicles[laneVehicles.length - 1];
+                v.pos = Math.min(-140, trailing.pos - v.w - 35);
+              }
+              const laneY = v.lane === 1 ? 438 : 468;
+              if (v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
+
+            } else if (v.dir === 'WB') {
+              const distToStop = v.pos - v.stopLine;
+              const pastStopLine = v.pos < v.stopLine;
+
+              if (!pastStopLine && !isEWGreen) {
+                if (distToStop > 0 && distToStop < 160) {
+                  targetSpeed = Math.max(0, (distToStop / 160) * v.maxSpeed * 0.7);
+                  if (distToStop < 6) targetSpeed = 0;
+                }
+              }
+              if (leader) {
+                const distToLeader = v.pos - (leader.pos + leader.w);
+                if (distToLeader < 26) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, leader.speed * 0.9));
+                  if (distToLeader < 12) targetSpeed = 0;
+                }
+              }
+              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 4.0);
+              v.pos -= v.speed * dt;
+              if (v.pos < -140) {
+                const trailing = laneVehicles[laneVehicles.length - 1];
+                v.pos = Math.max(1340, trailing.pos + trailing.w + 35);
+              }
+              const laneY = v.lane === 1 ? 405 : 368;
+              if (v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
+
+            } else if (v.dir === 'SB') {
+              const distToStop = v.stopLine - (v.pos + v.h);
+              const pastStopLine = (v.pos + v.h) > v.stopLine;
+
+              if (!pastStopLine && !isNSGreen) {
+                if (distToStop > 0 && distToStop < 160) {
+                  targetSpeed = Math.max(0, (distToStop / 160) * v.maxSpeed * 0.7);
+                  if (distToStop < 6) targetSpeed = 0;
+                }
+              }
+              if (leader) {
+                const distToLeader = leader.pos - (v.pos + v.h);
+                if (distToLeader < 26) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, leader.speed * 0.9));
+                  if (distToLeader < 12) targetSpeed = 0;
+                }
+              }
+              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 4.0);
+              v.pos += v.speed * dt;
+              if (v.pos > 730) {
+                const trailing = laneVehicles[laneVehicles.length - 1];
+                v.pos = Math.min(140, trailing.pos - v.h - 35);
+              }
+              const laneX = v.lane === 1 ? 580 : 542;
+              if (v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
+
+            } else if (v.dir === 'NB') {
+              const distToStop = v.pos - v.stopLine;
+              const pastStopLine = v.pos < v.stopLine;
+
+              if (!pastStopLine && !isNSGreen) {
+                if (distToStop > 0 && distToStop < 160) {
+                  targetSpeed = Math.max(0, (distToStop / 160) * v.maxSpeed * 0.7);
+                  if (distToStop < 6) targetSpeed = 0;
+                }
+              }
+              if (leader) {
+                const distToLeader = v.pos - (leader.pos + leader.h);
+                if (distToLeader < 26) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, leader.speed * 0.9));
+                  if (distToLeader < 12) targetSpeed = 0;
+                }
+              }
+              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 4.0);
+              v.pos -= v.speed * dt;
+              if (v.pos < 120) {
+                const trailing = laneVehicles[laneVehicles.length - 1];
+                v.pos = Math.max(760, trailing.pos + trailing.h + 35);
+              }
+              const laneX = v.lane === 1 ? 618 : 656;
+              if (v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
+            }
+          }
+        });
+
+        // 3. Update Pedestrians: Cross ONLY during ALL_RED_PED phase
+        const isPedPhase = activePhase.id === 'ALL_RED_PED';
+        pedestrians.forEach(p => {
+          let currentCoord = p.start;
+          let bob = 0;
+
+          if (isPedPhase) {
+            const progress = Math.min(1, Math.max(0, phaseElapsed / (activePhase.duration - 400)));
+            currentCoord = p.start + (p.end - p.start) * progress;
+            bob = Math.abs(Math.sin(progress * Math.PI * 8)) * 2;
+          } else {
+            // Standing waiting safely at curb
+            currentCoord = p.start;
+          }
+
+          if (p.el) {
+            if (p.axis === 'H') {
+              p.el.setAttribute('transform', `translate(${currentCoord.toFixed(1)}, ${(p.y - bob).toFixed(1)})`);
+            } else {
+              p.el.setAttribute('transform', `translate(${(p.x - bob).toFixed(1)}, ${currentCoord.toFixed(1)})`);
+            }
+          }
+        });
+
+        dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+      }
+
+      // Start animation loop
+      dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+
+      // Clean intersection observer to pause when scrolled out of view
+      if ('IntersectionObserver' in window && !dhakaCrossroadsObserver) {
+        dhakaCrossroadsObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              if (!dhakaCrossroadsRunning) {
+                dhakaCrossroadsRunning = true;
+                lastTime = performance.now();
+                dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+              }
+            } else {
+              dhakaCrossroadsRunning = false;
+              if (dhakaCrossroadsAnimId) {
+                cancelAnimationFrame(dhakaCrossroadsAnimId);
+                dhakaCrossroadsAnimId = null;
+              }
+            }
+          });
+        }, { threshold: 0.1 });
+        dhakaCrossroadsObserver.observe(container);
+      }
     }
 
     function showView(view) {
@@ -7770,6 +8369,9 @@
       if (view === 'admin') loadAdminAccounts();
       if (view === 'user') {
         renderTravelShortcuts();
+        if (typeof initDhakaCrossroadsSimulation === 'function') {
+          initDhakaCrossroadsSimulation();
+        }
       }
 
       if (view === 'user') {
