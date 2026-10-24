@@ -1000,6 +1000,69 @@
       0% { opacity: 0; transform: translateY(6px); }
       100% { opacity: 1; transform: translateY(0); }
     }
+
+    /* Modern Dark Navy Transit Dashboard & Journey Timeline */
+    .transit-navy-card {
+      background: #091124;
+      color: #e2e8f0;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      box-shadow: 0 20px 45px -10px rgba(2, 6, 23, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border-radius: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .transit-inner-card {
+      background: rgba(14, 25, 52, 0.75);
+      border: 1px solid rgba(71, 85, 105, 0.35);
+      border-radius: 1rem;
+      backdrop-filter: blur(8px);
+    }
+    .feeder-card-item {
+      background: rgba(15, 27, 56, 0.75);
+      border: 1.5px solid rgba(71, 85, 105, 0.45);
+      border-radius: 0.875rem;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .feeder-card-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+    }
+    .feeder-card-item.feeder-card-active {
+      background: rgba(13, 38, 51, 0.95);
+      border-color: #10b981;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.35), inset 0 0 12px rgba(16, 185, 129, 0.12);
+      transform: translateY(-2px);
+    }
+    .journey-line-pulse {
+      stroke-dasharray: 6 6;
+      animation: journeyDashMove 20s linear infinite;
+    }
+    @keyframes journeyDashMove {
+      from { stroke-dashoffset: 200; }
+      to { stroke-dashoffset: 0; }
+    }
+    .transit-cta-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+    }
+    .transit-cta-btn:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+      transform: translateY(-1px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .journey-line-pulse {
+        animation: none;
+      }
+      .feeder-card-item:hover, .transit-cta-btn:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -1697,48 +1760,75 @@
         </p>
       </section>
 
-      <section aria-labelledby="mrtEstimatorHeading" class="border-t border-slate-100 pt-4 reveal-on-scroll">
-        <div class="flex flex-wrap items-start justify-between gap-3">
+      <!-- SECTION 1: METRO RAIL (MRT LINE 6 DIRECT) -->
+      <section aria-labelledby="mrtDirectHeading" class="border-t border-slate-100 pt-5 reveal-on-scroll">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
-            <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">More ways to travel</p>
-            <h2 id="mrtEstimatorHeading" class="planner-section-title mt-1 font-extrabold text-slate-900">MRT Line 6 hybrid estimate</h2>
-            <p id="mrtStationRoute" class="mt-1 text-sm font-medium text-slate-700" aria-live="polite">Finding nearest stations…</p>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-sky-600 text-white font-black text-xs shadow-sm">
+                M6
+              </span>
+              <p class="text-xs font-bold uppercase tracking-[0.16em] text-sky-700 dark:text-sky-400">MRT Line 6</p>
+            </div>
+            <h2 id="mrtDirectHeading" class="planner-section-title mt-1 font-extrabold text-slate-900 dark:text-slate-100">Metro Rail Route &amp; Stations</h2>
+            <p id="mrtStationRoute" class="mt-0.5 text-sm font-medium text-slate-600 dark:text-slate-400" aria-live="polite">Finding nearest stations…</p>
           </div>
-          <label class="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-800">
-            <input id="mrtPassToggle" type="checkbox" class="h-4 w-4 rounded text-blue-600 focus:ring-blue-500">
+          <label class="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/60 px-3 py-2 text-sm font-semibold text-sky-800 dark:text-sky-300 cursor-pointer">
+            <input id="mrtPassToggle" type="checkbox" class="h-4 w-4 rounded text-sky-600 focus:ring-sky-500">
             <span id="mrtPassLabel">MRT Pass (10% off)</span>
           </label>
         </div>
 
+        <!-- Prominent Metro Fare & Transit Summary Card -->
+        <div id="mrtRailSummaryCard" class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-gradient-to-r from-sky-50 via-slate-50 to-blue-50 dark:from-slate-800/90 dark:via-slate-800/60 dark:to-slate-800/90 border border-sky-200 dark:border-sky-900/50 shadow-sm mb-4">
+          <div class="flex flex-col">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" id="mrtSumBoardLabel">Boarding Station</span>
+            <span id="mrtSumBoardStation" class="text-sm font-bold text-emerald-700 dark:text-emerald-400 truncate mt-0.5">—</span>
+            <span id="mrtSumBoardNote" class="text-[10px] text-slate-400">Nearest to pickup</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" id="mrtSumExitLabel">Exit Station</span>
+            <span id="mrtSumExitStation" class="text-sm font-bold text-rose-700 dark:text-rose-400 truncate mt-0.5">—</span>
+            <span id="mrtSumExitNote" class="text-[10px] text-slate-400">Nearest to destination</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" id="mrtSumTransitLabel">Transit Duration</span>
+            <span id="mrtSumDuration" class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-0.5">—</span>
+            <span id="mrtSumIntervals" class="text-[10px] text-slate-400">0 stations</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" id="mrtSumFareLabel">Standard Fare</span>
+            <span id="mrtSumFare" class="text-lg font-black text-sky-700 dark:text-sky-400 mt-0.5 leading-none">—</span>
+            <span id="mrtSumPassDiscount" class="text-[10px] text-emerald-600 font-medium">10% discount available</span>
+          </div>
+        </div>
+
         <!-- MRT Line 6 Interactive Station Light-Path -->
-        <div id="mrtStationLightPathContainer" class="interactive-elevate mt-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-emerald-50/90 shadow-sm">
+        <div id="mrtStationLightPathContainer" class="interactive-elevate p-4 rounded-2xl border border-sky-200 dark:border-sky-900/40 bg-gradient-to-r from-sky-50/90 via-slate-50/60 to-blue-50/90 dark:from-[#0d1c3a] dark:via-[#09152e] dark:to-[#0d1c3a] shadow-md">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2">
-              <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs shadow-sm">
-                M6
-              </span>
-              <span class="font-bold text-sm text-slate-900">MRT Line 6 Station Light-Path</span>
-              <span id="mrtLightPathStationCount" class="text-[11px] font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+              <span class="font-bold text-sm text-slate-900 dark:text-slate-100">MRT Line 6 Station Light-Path</span>
+              <span id="mrtLightPathStationCount" class="text-[11px] font-semibold text-sky-800 dark:text-sky-300 bg-sky-100 dark:bg-sky-950/80 px-2.5 py-0.5 rounded-full">
                 16 Stations
               </span>
             </div>
-            <div class="flex items-center gap-3 text-xs text-slate-600">
+            <div class="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
               <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-300 animate-pulse"></span> <span id="mrtLegendBoard">Boarding</span></span>
               <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-rose-300 animate-pulse"></span> <span id="mrtLegendExit">Exit</span></span>
-              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-300"></span> <span id="mrtLegendOther">Waypoints</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span> <span id="mrtLegendOther">Waypoints</span></span>
             </div>
           </div>
 
           <!-- Horizontal Station Light-Path Track -->
           <div class="relative overflow-x-auto py-5 px-3 mrt-track-scroll select-none" id="mrtLightPathScrollWrapper">
-            <div id="mrtLightPathTrack" class="relative flex items-center min-w-[840px] h-16">
+            <div id="mrtLightPathTrack" class="relative flex items-center min-w-[860px] h-16">
               <!-- Viaduct Base Rail Track -->
-              <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-2.5 rounded-full bg-slate-200"></div>
+              <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-2 rounded-full bg-slate-300/60 dark:bg-slate-700/60"></div>
               <!-- Glowing Active Illuminated Segment -->
-              <div id="mrtActiveRail" class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 shadow-[0_0_14px_#10b981] mrt-active-rail-pulse transition-all duration-700 ease-out" style="left: 0%; width: 0%;"></div>
+              <div id="mrtActiveRail" class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-sky-400 shadow-[0_0_14px_#0284c7] mrt-active-rail-pulse transition-all duration-700 ease-out" style="left: 0%; width: 0%;"></div>
               <!-- Cruising Animated Train Beacon -->
               <div id="mrtCruisingTrain" class="absolute top-1/2 -translate-y-1/2 -mt-4 z-20 transition-all duration-700 ease-out flex items-center justify-center pointer-events-none" style="left: 0%;">
-                <div class="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-lg text-[10px] font-black tracking-wider mrt-train-beacon">
+                <div class="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-600 text-white shadow-lg text-[10px] font-black tracking-wider mrt-train-beacon">
                   <span>🚅</span>
                   <span>METRO</span>
                 </div>
@@ -1750,65 +1840,413 @@
             </div>
           </div>
 
-          <!-- Station inspection tooltip / quick details bar -->
-          <div id="mrtStationDetailsBar" class="mt-2 text-xs flex items-center justify-between text-slate-600 pt-2 border-t border-emerald-100">
-            <span id="mrtStationStatusTip">Tap any station along the line to inspect</span>
-            <span class="font-medium text-emerald-700">Uttara North ↔ Motijheel</span>
+          <!-- Station inspection & quick detail bar with Set as Board/Exit buttons -->
+          <div id="mrtStationDetailsBar" class="mt-2 text-xs flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-sky-200/50 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+            <div class="flex items-center gap-2">
+              <span id="mrtStationStatusTip">Tap any station along the line to inspect &amp; customize</span>
+            </div>
+            <div id="mrtStationInspectorActions" class="hidden items-center gap-2">
+              <button type="button" id="mrtSetBoardBtn" class="px-2 py-0.5 text-[11px] font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition">🟢 Set as Boarding</button>
+              <button type="button" id="mrtSetExitBtn" class="px-2 py-0.5 text-[11px] font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition">🏁 Set as Exit</button>
+              <button type="button" id="mrtResetStationsBtn" class="px-2 py-0.5 text-[11px] font-medium rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 transition">↺ Reset to nearest</button>
+            </div>
           </div>
         </div>
-        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <article class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h3 class="text-sm font-bold text-slate-800"><span id="directRideLabel">Direct</span> <span id="directRideMode">Bike</span></h3>
-            <p id="directRideFareLabel" class="mt-2 text-xs text-slate-500">Estimated fare</p>
-            <p id="directRideFare" class="text-xl font-black text-slate-900">—</p>
-            <p id="directRideTimeLabel" class="mt-2 text-xs text-slate-500">Estimated time in traffic</p>
-            <p id="directRideDuration" class="font-semibold text-slate-800">—</p>
-          </article>
-          <article class="rounded-xl border border-blue-200 bg-blue-50 p-4">
-            <h3 id="mrtHybridLabel" class="text-sm font-bold text-blue-800">Metro + feeder</h3>
-            <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-              <span id="mrtFareLabel" class="text-slate-600">MRT fare</span><span id="mrtFare" class="text-right font-semibold text-slate-900">—</span>
-              <span id="mrtFeederFareLabel" class="text-slate-600">Feeder fare</span><span id="mrtFeederFare" class="text-right font-semibold text-slate-900">—</span>
-            </div>
-            <p id="mrtHybridFareLabel" class="mt-3 text-xs text-slate-500">Estimated hybrid total</p>
-            <p id="mrtHybridFare" class="text-xl font-black text-blue-800">—</p>
-            <p id="mrtHybridDurationLabel" class="mt-2 text-xs text-slate-500">Estimated journey time</p>
-            <p id="mrtHybridDuration" class="font-semibold text-slate-800">—</p>
-            <p id="mrtTimeComparison" class="mt-1 text-xs font-semibold text-emerald-700" aria-live="polite"></p>
-          </article>
-        </div>
-        <div id="mrtJourneyPlan" class="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-          <h3 id="mrtJourneyPlanHeading" class="text-sm font-bold text-slate-900">How to make this trip</h3>
-          <ol id="mrtJourneySteps" class="mt-2 list-decimal space-y-2 pl-5 text-sm text-slate-700"></ol>
-        </div>
-        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <section id="firstMileOptions" class="rounded-xl border border-slate-200 bg-white p-4" aria-labelledby="firstMileHeading">
-            <h3 id="firstMileHeading" class="text-sm font-bold text-slate-900">To your boarding station</h3>
-            <div id="firstMileOptionList" class="mt-2 space-y-2 text-sm"></div>
-          </section>
-          <section id="lastMileOptions" class="rounded-xl border border-slate-200 bg-white p-4" aria-labelledby="lastMileHeading">
-            <h3 id="lastMileHeading" class="text-sm font-bold text-slate-900">From your exit station</h3>
-            <div id="lastMileOptionList" class="mt-2 space-y-2 text-sm"></div>
-          </section>
-        </div>
-        <p id="mrtEstimateDisclaimer" class="mt-2 text-xs leading-relaxed text-slate-500">
-            Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Rickshaw fare ranges reflect bargaining; the peak-hour estimate keeps the low end unchanged and adds ৳10 to the upper end. Bike and CNG use the site's baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.
-        </p>
       </section>
 
-      <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-4 reveal-on-scroll">
+      <!-- SECTION 2: METRO + FEEDER (MODERN DARK NAVY DASHBOARD - REFERENCE DESIGN) -->
+      <section aria-labelledby="mrtEstimatorHeading" class="mt-6 transit-navy-card p-5 md:p-6 reveal-on-scroll">
+        <!-- Top Header & Badges -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-950/80 border border-sky-800/60 text-sky-400 text-[11px] font-bold tracking-wider uppercase mb-1.5">
+              <span>🚆</span>
+              <span id="mrtKickerLabel">MORE WAYS TO TRAVEL</span>
+            </div>
+            <h2 id="mrtEstimatorHeading" class="text-2xl md:text-3xl font-black text-white tracking-tight">Metro + Feeder</h2>
+            <p id="mrtSubtitle" class="mt-1 text-xs md:text-sm text-slate-400 max-w-2xl leading-relaxed">
+              Fast, affordable and reliable. Take the MRT for the long route, then use a feeder (rickshaw, CNG, bike, etc.) for the first and last mile.
+            </p>
+          </div>
+
+          <!-- Header Stat Cards -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Total Time -->
+            <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#0e1c3d]/90 border border-sky-900/60 shadow-sm">
+              <div class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-400" id="mrtHeaderTimeLabel">Total time</span>
+                <span id="mrtTotalTimeBadge" class="text-xs md:text-sm font-extrabold text-white">~ 51 mins</span>
+              </div>
+            </div>
+            <!-- Estimated Fare -->
+            <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#0e1c3d]/90 border border-sky-900/60 shadow-sm">
+              <div class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">
+                ৳
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-400" id="mrtHeaderFareLabel">Estimated fare</span>
+                <span id="mrtEstimatedFareBadge" class="text-xs md:text-sm font-extrabold text-white">৳140 - ৳160</span>
+              </div>
+            </div>
+            <!-- Eco Friendly -->
+            <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#0e2c2f]/90 border border-emerald-900/60 shadow-sm">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="leaf" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-emerald-400" id="mrtEcoLabel">Eco friendly</span>
+                <span class="text-xs font-bold text-slate-300" id="mrtEcoSub">Lower carbon footprint</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Journey Timeline Box -->
+        <div class="mt-5 rounded-2xl bg-[#0c1836]/90 border border-slate-700/60 p-4 shadow-inner">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/70 border border-sky-800/70 text-xs text-sky-200">
+              <span class="font-bold text-sky-400" id="mrtSelectedRouteLabel">Selected route</span>
+              <span id="mrtSelectedRoutePill" class="font-semibold text-slate-200">Azimpur Bus Stand → BRAC University</span>
+            </div>
+            <button type="button" onclick="scrollToRouteMap()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700/90 border border-slate-600/60 text-xs font-semibold text-slate-200 transition">
+              <i data-lucide="map" class="w-3.5 h-3.5 text-sky-400"></i>
+              <span id="mrtViewOnMapBtn">View on map &gt;</span>
+            </button>
+          </div>
+
+          <!-- Multi-Node Interactive Journey Timeline Graphic -->
+          <div class="relative py-2 overflow-x-auto mrt-track-scroll select-none">
+            <div class="min-w-[760px] flex items-center justify-between relative px-4">
+              <!-- Connecting Tracks SVG -->
+              <svg class="absolute left-6 right-6 top-6 w-[calc(100%-48px)] h-8 pointer-events-none overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 24">
+                <defs>
+                  <linearGradient id="mrtFeederGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#10b981" />
+                    <stop offset="100%" stop-color="#34d399" />
+                  </linearGradient>
+                  <linearGradient id="mrtRailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#0284c7" />
+                    <stop offset="50%" stop-color="#38bdf8" />
+                    <stop offset="100%" stop-color="#0284c7" />
+                  </linearGradient>
+                  <linearGradient id="mrtFeederGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#34d399" />
+                    <stop offset="100%" stop-color="#10b981" />
+                  </linearGradient>
+                </defs>
+                <!-- Segment 1: Feeder (Green dashed line) -->
+                <path d="M 10 12 Q 110 4 210 12" fill="none" stroke="url(#mrtFeederGrad1)" stroke-width="3" stroke-dasharray="5 5" class="journey-line-pulse" />
+                <!-- Segment 2: MRT Line (Vibrant Blue solid line with glow) -->
+                <path d="M 230 12 L 460 12" fill="none" stroke="url(#mrtRailGrad)" stroke-width="4" filter="drop-shadow(0 0 6px #0284c7)" />
+                <!-- Segment 3: Feeder (Green dashed line) -->
+                <path d="M 480 12 Q 580 20 680 12" fill="none" stroke="url(#mrtFeederGrad2)" stroke-width="3" stroke-dasharray="5 5" class="journey-line-pulse" />
+              </svg>
+
+              <!-- Node 1: Pickup Starting Point -->
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[130px]">
+                <div class="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.5)]">
+                  <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <span id="mrtJourneyNodePickup" class="mt-2 text-xs font-bold text-white leading-tight">Azimpur</span>
+                <span class="text-[10px] text-slate-400 mt-0.5" id="mrtJourneyStartLabel">Your starting point</span>
+              </div>
+
+              <!-- Feeder 1 Floating Badge -->
+              <div class="relative z-10 -mt-6 flex flex-col items-center">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d2a27] border border-emerald-500/50 shadow-md text-[11px] font-bold text-emerald-300">
+                  <span id="mrtFeeder1Icon">🚲</span>
+                  <span id="mrtFeeder1Badge">Feeder ~ 2.0 km | 10-15 mins</span>
+                </div>
+              </div>
+
+              <!-- Node 2: MRT Boarding Station -->
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[140px]">
+                <div class="w-10 h-10 rounded-full bg-sky-500/20 border-2 border-sky-400 flex items-center justify-center shadow-[0_0_12px_rgba(56,189,248,0.5)]">
+                  <span class="text-xs font-black text-sky-300">M6</span>
+                </div>
+                <span id="mrtJourneyNodeBoard" class="mt-2 text-xs font-bold text-white leading-tight">Dhaka University</span>
+                <span class="text-[10px] text-sky-400 mt-0.5" id="mrtJourneyBoardLabel">Metro Station (Board)</span>
+              </div>
+
+              <!-- MRT Cruising Badge -->
+              <div class="relative z-10 -mt-6 flex flex-col items-center">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0a2342] border border-sky-500/60 shadow-md text-[11px] font-bold text-sky-300">
+                  <span>🚅</span>
+                  <span id="mrtLine6Badge">MRT Line 6 ~ 8 mins</span>
+                </div>
+              </div>
+
+              <!-- Node 3: MRT Exit Station -->
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[140px]">
+                <div class="w-10 h-10 rounded-full bg-sky-500/20 border-2 border-sky-400 flex items-center justify-center shadow-[0_0_12px_rgba(56,189,248,0.5)]">
+                  <span class="text-xs font-black text-sky-300">M6</span>
+                </div>
+                <span id="mrtJourneyNodeExit" class="mt-2 text-xs font-bold text-white leading-tight">Bijoy Sarani</span>
+                <span class="text-[10px] text-sky-400 mt-0.5" id="mrtJourneyExitLabel">Metro Station (Exit)</span>
+              </div>
+
+              <!-- Feeder 2 Floating Badge -->
+              <div class="relative z-10 -mt-6 flex flex-col items-center">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d2a27] border border-emerald-500/50 shadow-md text-[11px] font-bold text-emerald-300">
+                  <span id="mrtFeeder2Icon">🚲</span>
+                  <span id="mrtFeeder2Badge">Feeder ~ 2.5 km | 10-15 mins</span>
+                </div>
+              </div>
+
+              <!-- Node 4: Destination -->
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[130px]">
+                <div class="w-10 h-10 rounded-full bg-rose-500/20 border-2 border-rose-400 flex items-center justify-center shadow-[0_0_12px_rgba(244,63,94,0.5)]">
+                  <i data-lucide="flag" class="w-5 h-5 text-rose-400"></i>
+                </div>
+                <span id="mrtJourneyNodeDest" class="mt-2 text-xs font-bold text-white leading-tight">BRAC University</span>
+                <span class="text-[10px] text-rose-400 mt-0.5" id="mrtJourneyDestLabel">Your destination</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 1: Choose your feeder option (First Mile) -->
+        <div class="mt-6">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-5 h-5 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+            <h3 class="text-sm md:text-base font-bold text-white" id="mrtStep1Title">Choose your feeder option</h3>
+          </div>
+          <p class="text-xs text-slate-400 mb-3 ml-7" id="mrtStep1Sub">From Azimpur Bus Stand → Dhaka University (first mile)</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <!-- 4 Feeder Vehicle Cards (cols 1-4) -->
+            <div id="mrtFirstMileCardsContainer" class="md:col-span-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <!-- Dynamically populated with Rickshaw, CNG, Bike, Car -->
+            </div>
+            <!-- Side Tip Card (col 5) -->
+            <div class="rounded-xl bg-[#0e1c3a]/70 border border-slate-700/60 p-3 flex flex-col justify-center text-slate-300 text-xs">
+              <div class="flex items-center gap-1.5 text-sky-400 font-bold mb-1">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                <span id="mrtFeederEstTitle">Feeder fare is an estimate</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-snug" id="mrtFeederEstDesc">Actual fare may vary based on traffic, time and your exact location.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: MRT Journey Card (Collapsible) -->
+        <div class="mt-5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-5 h-5 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+            <h3 class="text-sm md:text-base font-bold text-white" id="mrtStep2Title">MRT journey</h3>
+          </div>
+          <p class="text-xs text-slate-400 mb-3 ml-7" id="mrtStep2Sub">Dhaka University → Bijoy Sarani</p>
+
+          <div class="rounded-xl bg-[#0d1d3f] border border-sky-800/60 p-3.5 flex items-center justify-between gap-3 shadow-md">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-black text-sm shadow">
+                🚆
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm" id="mrtStep2CardHeading">MRT Line 6</h4>
+                  <span id="mrtStep2StationCountBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800">4 stations</span>
+                </div>
+                <p id="mrtStep2CardSub" class="text-xs text-slate-300 mt-0.5">8 mins • Dhaka University → Bijoy Sarani</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <span id="mrtStep2FareDisplay" class="text-lg font-black text-sky-400">৳30</span>
+                <span class="block text-[10px] text-slate-400" id="mrtStep2FareSub">MRT fare</span>
+              </div>
+              <button type="button" onclick="toggleMrtStationLightPathView()" id="mrtToggleTrackBtn" class="p-1.5 rounded-lg bg-sky-900/60 hover:bg-sky-800 text-sky-200 transition" aria-label="Toggle Station Details">
+                <i data-lucide="chevron-up" id="mrtToggleTrackIcon" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Choose your feeder option (Last Mile) -->
+        <div class="mt-5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-5 h-5 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+            <h3 class="text-sm md:text-base font-bold text-white" id="mrtStep3Title">Choose your feeder option (again)</h3>
+          </div>
+          <p class="text-xs text-slate-400 mb-3 ml-7" id="mrtStep3Sub">From Bijoy Sarani → BRAC University (last mile)</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <!-- 4 Feeder Vehicle Cards (cols 1-4) -->
+            <div id="mrtLastMileCardsContainer" class="md:col-span-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <!-- Dynamically populated with Rickshaw, CNG, Bike, Car -->
+            </div>
+            <!-- Side Tip Card (col 5) -->
+            <div class="rounded-xl bg-[#0e1c3a]/70 border border-slate-700/60 p-3 flex flex-col justify-center text-slate-300 text-xs">
+              <div class="flex items-center gap-1.5 text-amber-400 font-bold mb-1">
+                <i data-lucide="sun-medium" class="w-4 h-4"></i>
+                <span id="mrtWeatherEstTitle">Peak hours &amp; weather</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-snug" id="mrtWeatherEstDesc">Fares may increase during rush hours or in rainy weather.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERSISTENT / PROMINENT BOTTOM SUMMARY BAR -->
+        <div class="mt-6 rounded-2xl bg-[#091833] border-2 border-emerald-500/40 p-4 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <i data-lucide="wallet" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="block text-[11px] font-bold uppercase text-slate-400" id="mrtBotSummaryTotalLabel">Estimated total fare</span>
+              <span id="mrtBottomTotalFare" class="text-xl md:text-2xl font-black text-white">৳140 - ৳160</span>
+            </div>
+          </div>
+
+          <!-- Breakdown Columns -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2 px-3 rounded-xl bg-[#061124]/70 border border-slate-800 text-xs">
+            <div>
+              <span class="block text-[10px] text-slate-400" id="mrtBreakdownFeeder1Label">Feeder (1st mile)</span>
+              <span id="mrtBreakdownFeeder1" class="font-bold text-slate-200">৳40 - ৳50</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400" id="mrtBreakdownMrtLabel">MRT (line 6)</span>
+              <span id="mrtBreakdownMrt" class="font-bold text-sky-400">৳30</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400" id="mrtBreakdownFeeder2Label">Feeder (last mile)</span>
+              <span id="mrtBreakdownFeeder2" class="font-bold text-slate-200">৳40 - ৳50</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+              <div>
+                <span class="block text-[10px] text-slate-400" id="mrtBreakdownTimeLabel">Estimated journey time</span>
+                <span id="mrtBreakdownTime" class="font-bold text-white">~ 51 mins</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" onclick="scrollToRouteMap()" class="transit-cta-btn px-5 py-3 rounded-xl font-bold text-white text-xs md:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            <span id="mrtBottomViewMapBtn">View full route on map &gt;</span>
+          </button>
+        </div>
+
+        <!-- Direct Ride Comparison Bar -->
+        <div id="mrtDirectComparisonCallout" class="mt-3 flex flex-wrap items-center justify-between text-xs px-4 py-2.5 rounded-xl bg-[#0c1a38] border border-slate-700/60 text-slate-300 gap-2">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sky-400">VS Direct Ride:</span>
+            <span id="mrtDirectComparisonText">Save ৳60 compared to direct Car</span>
+          </div>
+          <span id="mrtTimeComparison" class="font-bold text-emerald-400">About 12 mins faster than direct ride</span>
+        </div>
+
+        <!-- Expandable How to make this trip -->
+        <div id="mrtJourneyPlan" class="mt-4 rounded-xl bg-[#0a1630] border border-slate-700/60 p-4">
+          <button type="button" onclick="toggleMrtStepsAccordion()" class="w-full flex items-center justify-between text-left text-sm font-bold text-white cursor-pointer">
+            <span id="mrtJourneyPlanHeading">How to make this trip</span>
+            <i data-lucide="chevron-down" id="mrtStepsChevron" class="w-4 h-4 text-slate-400 transition-transform"></i>
+          </button>
+          <div id="mrtStepsContainer" class="mt-3">
+            <ol id="mrtJourneySteps" class="list-decimal space-y-2 pl-5 text-xs text-slate-300 leading-relaxed"></ol>
+          </div>
+        </div>
+
+        <p id="mrtEstimateDisclaimer" class="mt-3 text-[11px] leading-relaxed text-slate-500">
+          Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance.
+        </p>
+
+        <!-- Hidden legacy hooks for compatibility -->
+        <div class="hidden" aria-hidden="true">
+          <span id="directRideLabel">Direct</span>
+          <span id="directRideMode">Bike</span>
+          <span id="directRideFareLabel">Estimated fare</span>
+          <span id="directRideFare">—</span>
+          <span id="directRideTimeLabel">Estimated time</span>
+          <span id="directRideDuration">—</span>
+          <span id="mrtHybridLabel">Metro + feeder</span>
+          <span id="mrtFareLabel">MRT fare</span>
+          <span id="mrtFare">—</span>
+          <span id="mrtFeederFareLabel">Feeder fare</span>
+          <span id="mrtFeederFare">—</span>
+          <span id="mrtHybridFareLabel">Estimated hybrid total</span>
+          <span id="mrtHybridFare">—</span>
+          <span id="mrtHybridDurationLabel">Estimated journey time</span>
+          <span id="mrtHybridDuration">—</span>
+          <div id="firstMileOptions"><div id="firstMileHeading"></div><div id="firstMileOptionList"></div></div>
+          <div id="lastMileOptions"><div id="lastMileHeading"></div><div id="lastMileOptionList"></div></div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: DHAKA LOCAL BUS FINDER (DIRECT BUS ROUTES) -->
+      <section aria-labelledby="localBusFinderHeading" class="border-t border-slate-100 pt-5 reveal-on-scroll">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">More ways to travel</p>
-            <h2 id="localBusFinderHeading" class="planner-section-title mt-1 font-extrabold text-slate-900">Dhaka local bus finder</h2>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs shadow-sm">
+                BUS
+              </span>
+              <p class="text-xs font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-400">Direct Transit</p>
+            </div>
+            <h2 id="localBusFinderHeading" class="planner-section-title mt-1 font-extrabold text-slate-900 dark:text-slate-100">Dhaka local bus finder</h2>
           </div>
-          <span id="busDraftBadge" class="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800">Draft route data — verify before travel</span>
+          <span id="busDraftBadge" class="rounded-full bg-amber-100 dark:bg-amber-950/80 px-2.5 py-1 text-[10px] font-bold text-amber-800 dark:text-amber-300">Draft route data — verify before travel</span>
         </div>
-        <p id="busFarePolicy" class="mt-1 text-xs text-slate-500">Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
-        <p id="busFinderStatus" class="mt-3 text-sm text-slate-600" aria-live="polite">Loading local bus routes…</p>
+        <p id="busFarePolicy" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
+        <p id="busFinderStatus" class="mt-3 text-sm text-slate-600 dark:text-slate-300 font-medium" aria-live="polite">Loading local bus routes…</p>
         <div id="busRouteResults" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-live="polite"></div>
-        <div id="busHybridResults" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-live="polite"></div>
-        <p id="busRouteDisclaimer" class="mt-3 text-xs leading-relaxed text-slate-500">Direct and bus + feeder suggestions use unverified draft routes and stop distances, not official BRTA route-distance records. Feeder fares and travel times are estimates; longer feeder legs may not be practical. Confirm the bus direction, stops, feeder availability, and fare locally before boarding.</p>
+      </section>
+
+      <!-- SECTION 4: LOCAL BUS + FEEDER COMBINATIONS (DARK NAVY DASHBOARD) -->
+      <section aria-labelledby="busHybridSectionHeading" class="mt-6 transit-navy-card p-5 md:p-6 reveal-on-scroll">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-[11px] font-bold tracking-wider uppercase mb-1.5">
+              <span>🚌</span>
+              <span id="busHybridKicker">MULTI-MODAL BUS</span>
+            </div>
+            <h2 id="busHybridSectionHeading" class="text-2xl md:text-3xl font-black text-white tracking-tight">Local Bus + Feeder</h2>
+            <p id="busHybridSub" class="mt-1 text-xs md:text-sm text-slate-400 max-w-2xl leading-relaxed">
+              Connect local buses with first-and-last-mile feeders for an economical and flexible journey across Dhaka.
+            </p>
+          </div>
+
+          <!-- Header Stat Badges for Bus Hybrid -->
+          <div class="flex flex-wrap items-center gap-2.5" id="busHybridHeaderBadges">
+            <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#0e1c3d]/90 border border-sky-900/60 shadow-sm">
+              <div class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-400">Total time</span>
+                <span id="busHybridTotalTimeBadge" class="text-xs md:text-sm font-extrabold text-white">—</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#0e1c3d]/90 border border-sky-900/60 shadow-sm">
+              <div class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">
+                ৳
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-400">Estimated fare</span>
+                <span id="busHybridTotalFareBadge" class="text-xs md:text-sm font-extrabold text-white">—</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#0e2c2f]/90 border border-emerald-900/60 shadow-sm">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="leaf" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-emerald-400">Eco friendly</span>
+                <span class="text-xs font-bold text-slate-300">High capacity</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="busHybridResults" class="mt-4 space-y-4" aria-live="polite"></div>
+
+        <p id="busRouteDisclaimer" class="mt-4 text-[11px] leading-relaxed text-slate-500">
+          Direct and bus + feeder suggestions use unverified draft routes and stop distances, not official BRTA route-distance records. Feeder fares and travel times are estimates; longer feeder legs may not be practical. Confirm the bus direction, stops, feeder availability, and fare locally before boarding.
+        </p>
       </section>
     </div>
 
@@ -2499,7 +2937,68 @@
       'AC Comfort': 'শীতাতপ নিয়ন্ত্রিত আরামদায়ক',
       'Live Radar': 'লাইভ রাডার',
       'Portfolio & Connect': 'পোর্টফোলিও ও যোগাযোগ',
-      'Creator of BharaDekhi · Full-Stack Software Engineer · Dhaka': 'ভাড়াদেখি-এর নির্মাতা · ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার · ঢাকা'
+      'Creator of BharaDekhi · Full-Stack Software Engineer · Dhaka': 'ভাড়াদেখি-এর নির্মাতা · ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার · ঢাকা',
+      'Metro + Feeder': 'মেট্রো + ফিডার',
+      'Fast, affordable and reliable. Take the MRT for the long route, then use a feeder (rickshaw, CNG, bike, etc.) for the first and last mile.': 'দ্রুত, সাশ্রয়ী ও নির্ভরযোগ্য। দীর্ঘ দূরত্বের জন্য মেট্রোরেল ব্যবহার করুন, এরপর প্রথম ও শেষ মাইলের জন্য ফিডার বাহন (রিকশা, সিএনজি, বাইক ইত্যাদি) বেছে নিন।',
+      'Total time': 'মোট সময়',
+      'Estimated fare': 'আনুমানিক ভাড়া',
+      'Eco friendly': 'পরিবেশবান্ধব',
+      'Lower carbon footprint': 'কম কার্বন নিঃসরণ',
+      'Selected route': 'নির্বাচিত রুট',
+      'View on map': 'মানচিত্রে দেখুন',
+      'View on map >': 'মানচিত্রে দেখুন >',
+      'View full route on map': 'মানচিত্রে সম্পূর্ণ রুট দেখুন',
+      'View full route on map >': 'মানচিত্রে সম্পূর্ণ রুট দেখুন >',
+      'Your starting point': 'আপনার যাত্রা শুরুর স্থান',
+      'Metro Station (Board)': 'মেট্রো স্টেশন (ওঠার স্থান)',
+      'Metro Station (Exit)': 'মেট্রো স্টেশন (নামার স্থান)',
+      'Your destination': 'আপনার গন্তব্য স্থান',
+      'Choose your feeder option': 'ফিডার বাহন নির্বাচন করুন',
+      'Choose your feeder option (again)': 'নামার পর ফিডার বাহন নির্বাচন করুন',
+      'first mile': 'প্রথম মাইল',
+      'last mile': 'শেষ মাইল',
+      'Feeder fare is an estimate': 'ফিডার ভাড়া আনুমানিক',
+      'Actual fare may vary based on traffic, time and your exact location.': 'ট্রাফিক, সময় ও আপনার অবস্থানের ওপর ভিত্তি করে প্রকৃত ভাড়া ভিন্ন হতে পারে।',
+      'MRT journey': 'মেট্রো রেল যাত্রা',
+      'MRT Line 6': 'এমআরটি লাইন ৬',
+      'Peak hours & weather': 'পিক আওয়ার ও আবহাওয়া',
+      'Fares may increase during rush hours or in rainy weather.': 'পিক আওয়ার বা বৃষ্টির সময় ভাড়া বৃদ্ধি পেতে পারে।',
+      'Estimated total fare': 'মোট আনুমানিক ভাড়া',
+      'Feeder (1st mile)': 'ফিডার (১ম মাইল)',
+      'MRT (line 6)': 'মেট্রো (লাইন ৬)',
+      'Feeder (last mile)': 'ফিডার (শেষ মাইল)',
+      'Estimated journey time': 'আনুমানিক যাত্রার সময়',
+      'Set as Boarding': 'ওঠার স্টেশন',
+      'Set as Exit': 'নামার স্টেশন',
+      'Reset to nearest': 'নিকটতম স্টেশনে রিসেট',
+      'Tap any station along the line to inspect & customize': 'বিবরণ দেখতে ও পরিবর্তন করতে যেকোনো স্টেশনে ট্যাপ করুন',
+      'Direct bus routes': 'সরাসরি বাস রুটসমূহ',
+      'Bus + feeder options': 'বাস + ফিডার বিকল্প',
+      'Local Bus + Feeder': 'লোকাল বাস + ফিডার',
+      'Lowest fare': 'সর্বনিম্ন ভাড়া',
+      'Fastest': 'দ্রুততম',
+      'Intermediate stops': 'মধ্যবর্তী স্টেশনসমূহ',
+      'View intermediate stops': 'মধ্যবর্তী স্টেশনগুলো দেখুন',
+      'Hide intermediate stops': 'মধ্যবর্তী স্টেশন লুকান',
+      'Metro Rail Route & Stations': 'মেট্রোরেল রুট ও স্টেশনসমূহ',
+      'Boarding Station': 'ওঠার স্টেশন',
+      'Exit Station': 'নামার স্টেশন',
+      'Transit Duration': 'মেট্রো ভ্রমণের সময়',
+      'Standard Fare': 'সাধারণ ভাড়া',
+      'Nearest to pickup': 'পিকআপের নিকটতম',
+      'Nearest to destination': 'গন্তব্যের নিকটতম',
+      '10% discount available': '১০% ছাড় প্রযোজ্য',
+      'Long feeder ride; check whether this connection is practical.': 'ফিডার পথটি বেশ দীর্ঘ; স্থানীয়ভাবে যাতায়াতের সুবিধা যাচাই করে নিন।',
+      'No direct route in the draft data; showing bus + feeder suggestions below.': 'সরাসরি কোনো বাস রুট পাওয়া যায়নি; নিচে বাস + ফিডার বিকল্পগুলো দেখানো হলো।',
+      'No direct bus route found between these stops. See optimized Bus + Feeder options below.': 'এই দুই স্থানের মধ্যে কোনো সরাসরি বাস রুট পাওয়া যায়নি। নিচে বাস + ফিডার বিকল্পগুলো দেখুন।',
+      'Connect local buses with first-and-last-mile feeders for an economical and flexible journey.': 'একটি সাশ্রয়ী ও সুবিধাজনক ভ্রমণের জন্য লোকাল বাসের সাথে প্রথম ও শেষ মাইলের ফিডার বাহন যুক্ত করুন।',
+      'Compare direct city bus routes across Dhaka with official BRTA fare estimates and stop progressions.': 'সরকারি বিআরটিএ ভাড়ার হিসাব ও স্টেশন তালিকা সহ ঢাকার সরাসরি বাস রুটগুলো তুলনা করুন।',
+      'Save': 'সাশ্রয়',
+      'compared to direct Car': 'সরাসরি প্রাইভেট কারের তুলনায়',
+      'compared to direct ride': 'সরাসরি যাত্রার তুলনায়',
+      'faster than direct ride': 'সরাসরি যাত্রার চেয়ে দ্রুত',
+      'slower than direct ride': 'সরাসরি যাত্রার চেয়ে ধীর',
+      'About the same time as direct ride': 'সরাসরি যাত্রার প্রায় সমান সময়'
     };
 
     const BENGALI_LOCATION_NAMES = {
@@ -3882,6 +4381,16 @@
       const pLoc = getLocationForKey(pKey);
       const dLoc = getLocationForKey(dKey);
       if (!pLoc || !dLoc) return;
+
+      customMrtPickupStationIdx = null;
+      customMrtDropoffStationIdx = null;
+      inspectedMrtStationIdx = null;
+      const actionsWrap = document.getElementById('mrtStationInspectorActions');
+      if (actionsWrap) {
+        actionsWrap.classList.add('hidden');
+        actionsWrap.classList.remove('flex');
+      }
+
       if (pKey === dKey || calculateDirectDistance(pLoc, dLoc) < 0.01) {
         document.getElementById('loadingOverlay').classList.add('hidden');
         showToast("Pickup and Destination cannot be the same!");
@@ -3982,32 +4491,129 @@
       }, { station: MRT_LINE_6_STATIONS[0], index: 0, distanceKm: Infinity });
     }
 
-    function getFeederOptions(accessDistanceKm, isPeak) {
-      const routeDistanceKm = accessDistanceKm * 1.25;
-      if (routeDistanceKm < 0.1) {
-        return [{
-          vehicle: 'Walk',
-          fare: 0,
-          fareMin: 0,
-          fareMax: 0,
-          distanceKm: routeDistanceKm,
-          durationMins: Math.ceil(routeDistanceKm / 4.5 * 60),
-          isWalking: true,
-          isAtStation: routeDistanceKm < 0.05
-        }];
+    const VEHICLE_RATES = {
+      Bike: { base: 30, perKm: 14, perMin: 0.5, durationFactor: 0.85 },
+      CNG: { base: 50, perKm: 18, perMin: 0.7, durationFactor: 1.15 },
+      Car: { base: 80, perKm: 24, perMin: 1.0, durationFactor: 1.0 }
+    };
+
+    let selectedMrtFirstMileMode = 'Rickshaw';
+    let selectedMrtLastMileMode = 'Rickshaw';
+    let selectedBusFirstMileMode = 'Rickshaw';
+    let selectedBusLastMileMode = 'Rickshaw';
+    let customMrtPickupStationIdx = null;
+    let customMrtDropoffStationIdx = null;
+    let inspectedMrtStationIdx = null;
+
+    function scrollToRouteMap() {
+      const mapElement = document.getElementById('map') || document.querySelector('.leaflet-container');
+      if (mapElement) {
+        mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof map !== 'undefined' && routePolyline && routePolyline.getLatLngs().length > 0) {
+          setTimeout(() => {
+            map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+          }, 350);
+        }
       }
+    }
+
+    function toggleMrtStationLightPathView() {
+      const container = document.getElementById('mrtStationLightPathContainer');
+      const icon = document.getElementById('mrtToggleTrackIcon');
+      if (container) {
+        const isHidden = container.classList.contains('hidden');
+        if (isHidden) {
+          container.classList.remove('hidden');
+          if (icon) icon.setAttribute('data-lucide', 'chevron-up');
+        } else {
+          container.classList.add('hidden');
+          if (icon) icon.setAttribute('data-lucide', 'chevron-down');
+        }
+        if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      }
+    }
+
+    function toggleMrtStepsAccordion() {
+      const container = document.getElementById('mrtStepsContainer');
+      const chevron = document.getElementById('mrtStepsChevron');
+      if (container) {
+        container.classList.toggle('hidden');
+        if (chevron) {
+          chevron.classList.toggle('rotate-180');
+        }
+      }
+    }
+
+    function selectMrtFirstMileMode(mode) {
+      selectedMrtFirstMileMode = mode;
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      renderMrtEstimate(isPeak);
+    }
+
+    function selectMrtLastMileMode(mode) {
+      selectedMrtLastMileMode = mode;
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      renderMrtEstimate(isPeak);
+    }
+
+    function selectBusFirstMileMode(mode) {
+      selectedBusFirstMileMode = mode;
+      renderBusRouteFinder();
+    }
+
+    function selectBusLastMileMode(mode) {
+      selectedBusLastMileMode = mode;
+      renderBusRouteFinder();
+    }
+
+    function setCustomMrtBoardingStation(idx) {
+      customMrtPickupStationIdx = idx;
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      renderMrtEstimate(isPeak);
+    }
+
+    function setCustomMrtExitStation(idx) {
+      customMrtDropoffStationIdx = idx;
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      renderMrtEstimate(isPeak);
+    }
+
+    function resetCustomMrtStations() {
+      customMrtPickupStationIdx = null;
+      customMrtDropoffStationIdx = null;
+      inspectedMrtStationIdx = null;
+      const actionsWrap = document.getElementById('mrtStationInspectorActions');
+      if (actionsWrap) {
+        actionsWrap.classList.add('hidden');
+        actionsWrap.classList.remove('flex');
+      }
+      const dhakaTime = getDhakaTimeInfo();
+      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      renderMrtEstimate(isPeak);
+    }
+
+    function getFeederOptions(accessDistanceKm, isPeak) {
+      const routeDistanceKm = Math.max(0.05, accessDistanceKm * 1.25);
+      const isWalkable = routeDistanceKm <= 0.6;
 
       const accessModes = [
         { vehicle: 'Rickshaw', base: 20, perKm: 12, perMin: 0, speedKmh: 12, maximumDistanceKm: 5 },
+        { vehicle: 'CNG', ...VEHICLE_RATES.CNG, speedKmh: 12 },
         { vehicle: 'Bike', ...VEHICLE_RATES.Bike, speedKmh: 18 },
-        { vehicle: 'CNG', ...VEHICLE_RATES.CNG, speedKmh: 12 }
+        { vehicle: 'Car', ...VEHICLE_RATES.Car, speedKmh: 16 }
       ];
 
-      return accessModes.map(({ vehicle, base, perKm, perMin, speedKmh, maximumDistanceKm }) => {
+      const options = accessModes.map(({ vehicle, base, perKm, perMin, speedKmh, maximumDistanceKm }) => {
         if (maximumDistanceKm && routeDistanceKm > maximumDistanceKm) {
           return {
             vehicle,
             fare: null,
+            fareMin: null,
+            fareMax: null,
             distanceKm: routeDistanceKm,
             durationMins: null,
             isWalking: false,
@@ -4015,10 +4621,10 @@
           };
         }
 
-        const durationMins = Math.ceil(routeDistanceKm / speedKmh * 60);
+        const durationMins = Math.max(2, Math.ceil(routeDistanceKm / speedKmh * 60));
         const fare = Math.ceil((base + routeDistanceKm * perKm + durationMins * perMin) / 10) * 10;
         if (vehicle === 'Rickshaw') {
-          const fareMin = Math.max(0, fare - 10);
+          const fareMin = Math.max(20, fare - 10);
           let fareMax = fare + (isPeak ? 10 : 0);
           let adjustedFareMin = fareMin;
           if (isHeavyRain) {
@@ -4048,23 +4654,153 @@
           isWalking: false,
           isAvailable: true
         };
-      }).sort((first, second) => {
-        if (!first.isAvailable) return 1;
-        if (!second.isAvailable) return -1;
-        return first.fare - second.fare || first.durationMins - second.durationMins;
+      });
+
+      if (isWalkable) {
+        options.unshift({
+          vehicle: 'Walk',
+          fare: 0,
+          fareMin: 0,
+          fareMax: 0,
+          distanceKm: routeDistanceKm,
+          durationMins: Math.max(1, Math.ceil(routeDistanceKm / 4.5 * 60)),
+          isWalking: true,
+          isAvailable: true,
+          isAtStation: routeDistanceKm < 0.1
+        });
+      }
+
+      return options;
+    }
+
+    function renderFeederVehicleGrid(containerId, options, selectedVehicle, onSelectCallback) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const VEHICLE_META = {
+        Rickshaw: {
+          iconBg: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40',
+          svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="18" r="3"/><circle cx="19" cy="18" r="3"/><path d="M12 18V8l3-3h4"/><path d="M5 18l5-8h6"/><circle cx="12" cy="7" r="1.5"/></svg>`
+        },
+        CNG: {
+          iconBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/40',
+          svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h18M5 17V9l3-4h8l3 4v8M7 17v2M17 17v2"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/></svg>`
+        },
+        Bike: {
+          iconBg: 'bg-sky-500/20 text-sky-400 border border-sky-500/40',
+          svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="16" r="3"/><circle cx="19" cy="16" r="3"/><path d="M5 16l4-7h4l3 7M12 9V5l3 2"/></svg>`
+        },
+        Car: {
+          iconBg: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40',
+          svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M4 11l2-5h12l2 5M4 11v6h16v-6M7 17v2M17 17v2"/><circle cx="7.5" cy="14" r="1"/><circle cx="16.5" cy="14" r="1"/></svg>`
+        },
+        Walk: {
+          iconBg: 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
+          svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="M10 22l3-7-2-3 3-3V5M6 13l4-2M15 15l3 7"/></svg>`
+        }
+      };
+
+      const validOptions = options.filter(o => o.isAvailable !== false);
+      const cheapestFare = validOptions.length ? Math.min(...validOptions.map(o => o.fareMin)) : Infinity;
+
+      const modesToRender = ['Rickshaw', 'CNG', 'Bike', 'Car'];
+      if (options.some(o => o.vehicle === 'Walk')) {
+        modesToRender.unshift('Walk');
+      }
+
+      modesToRender.forEach(modeName => {
+        const opt = options.find(o => o.vehicle === modeName) || {
+          vehicle: modeName,
+          isAvailable: false,
+          fareMin: null,
+          fareMax: null,
+          distanceKm: options[0]?.distanceKm || 2.0,
+          durationMins: null
+        };
+
+        const isSelected = opt.vehicle === selectedVehicle && opt.isAvailable !== false;
+        const isCheapest = opt.isAvailable !== false && opt.fareMin === cheapestFare && opt.vehicle !== 'Walk';
+        const meta = VEHICLE_META[opt.vehicle] || VEHICLE_META.Bike;
+
+        const card = document.createElement('div');
+        card.className = `feeder-card-item p-3 flex flex-col justify-between ${isSelected ? 'feeder-card-active' : ''} ${opt.isAvailable === false ? 'opacity-40 cursor-not-allowed' : ''}`;
+        
+        const topRow = document.createElement('div');
+        topRow.className = 'flex items-center justify-between gap-1 mb-2';
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = `w-8 h-8 rounded-full flex items-center justify-center ${meta.iconBg}`;
+        iconDiv.innerHTML = meta.svg;
+
+        const checkDiv = document.createElement('div');
+        if (isSelected) {
+          checkDiv.className = 'w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black shadow-sm';
+          checkDiv.innerHTML = '✓';
+        } else {
+          checkDiv.className = 'w-4 h-4 rounded-full border border-slate-500/70';
+        }
+
+        topRow.append(iconDiv, checkDiv);
+        card.appendChild(topRow);
+
+        const nameP = document.createElement('p');
+        nameP.className = 'font-bold text-white text-xs truncate';
+        nameP.textContent = getLocalizedText(opt.vehicle);
+        card.appendChild(nameP);
+
+        const infoP = document.createElement('p');
+        infoP.className = 'text-[10px] text-slate-400 mt-0.5 truncate';
+        if (opt.isAvailable === false) {
+          infoP.textContent = currentLanguage === 'bn' ? '>৫ কিমি অনুপলব্ধ' : '>5 km unavailable';
+        } else if (opt.vehicle === 'Walk') {
+          infoP.textContent = `${formatLocalizedNumber(opt.distanceKm, 1)} ${getLocalizedText('km')} • ${formatLocalizedNumber(opt.durationMins)} ${getLocalizedText('mins')}`;
+        } else {
+          infoP.textContent = `${formatLocalizedNumber(opt.distanceKm, 1)} ${getLocalizedText('km')} • ${formatLocalizedNumber(Math.max(1, opt.durationMins - 2))}-${formatLocalizedNumber(opt.durationMins + 3)} ${getLocalizedText('mins')}`;
+        }
+        card.appendChild(infoP);
+
+        const fareP = document.createElement('p');
+        fareP.className = 'text-xs md:text-sm font-black text-slate-100 mt-2 truncate flex items-center justify-between';
+        if (opt.isAvailable === false) {
+          fareP.innerHTML = `<span class="text-[10px] text-slate-500 font-medium">—</span>`;
+        } else if (opt.vehicle === 'Walk') {
+          fareP.innerHTML = `<span class="text-emerald-400 font-bold">${currentLanguage === 'bn' ? 'ফ্রি' : 'Free'}</span>`;
+        } else {
+          fareP.textContent = formatLocalizedFareRange(opt.fareMin, opt.fareMax);
+        }
+
+        if (isCheapest) {
+          const cheapBadge = document.createElement('span');
+          cheapBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          cheapBadge.textContent = currentLanguage === 'bn' ? 'সাশ্রয়ী' : 'Cheapest';
+          fareP.appendChild(cheapBadge);
+        }
+        card.appendChild(fareP);
+
+        if (opt.isAvailable !== false) {
+          card.addEventListener('click', () => {
+            onSelectCallback(opt.vehicle);
+          });
+        }
+
+        container.appendChild(card);
       });
     }
 
     function renderFeederOptions(containerId, options, locationName, stationName, headingId) {
       const container = document.getElementById(containerId);
       const heading = document.getElementById(headingId);
+      if (!container) return options[0];
       const localizedLocation = getLocalizedLocationName(locationName);
       const localizedStation = getLocalizedText(stationName);
       const isFirstMile = headingId === 'firstMileHeading';
 
-      heading.textContent = isFirstMile
-        ? `${getLocalizedText('To your boarding station')}: ${localizedLocation} → ${localizedStation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`
-        : `${getLocalizedText('From your exit station')}: ${localizedStation} → ${localizedLocation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`;
+      if (heading) {
+        heading.textContent = isFirstMile
+          ? `${getLocalizedText('To your boarding station')}: ${localizedLocation} → ${localizedStation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`
+          : `${getLocalizedText('From your exit station')}: ${localizedStation} → ${localizedLocation} (~${formatLocalizedNumber(options[0].distanceKm, 1)} ${getLocalizedText('km')})`;
+      }
       container.replaceChildren();
 
       const cheapestFare = Math.min(...options.filter(option => option.isAvailable !== false).map(option => option.fareMin));
@@ -4103,6 +4839,7 @@
 
     function renderMrtJourneySteps(steps) {
       const list = document.getElementById('mrtJourneySteps');
+      if (!list) return;
       list.replaceChildren();
       steps.forEach(step => {
         const item = document.createElement('li');
@@ -4146,8 +4883,8 @@
         renderBusRouteFinder();
       } catch (error) {
         console.error('Could not load local bus routes:', error);
-        status.textContent = getLocalizedText('Could not load local bus routes. Please refresh or check the route data file.');
-        document.getElementById('busRouteResults').replaceChildren();
+        if (status) status.textContent = getLocalizedText('Could not load local bus routes. Please refresh or check the route data file.');
+        document.getElementById('busRouteResults')?.replaceChildren();
       }
     }
 
@@ -4243,6 +4980,8 @@
               busFare,
               firstMile,
               lastMile,
+              firstMileDistanceKm,
+              lastMileDistanceKm,
               feederFareMin,
               feederFareMax,
               fareMin: busFare + feederFareMin,
@@ -4271,6 +5010,7 @@
       const status = document.getElementById('busFinderStatus');
       const results = document.getElementById('busRouteResults');
       const hybridResults = document.getElementById('busHybridResults');
+      if (!results || !hybridResults) return;
       results.replaceChildren();
       hybridResults.replaceChildren();
 
@@ -4279,7 +5019,7 @@
       const pickup = getLocationForKey(pickupKey);
       const destination = getLocationForKey(destinationKey);
       if (!pickup || !destination) {
-        status.textContent = getLocalizedText('Could not estimate a bus + feeder route for these locations.');
+        if (status) status.textContent = getLocalizedText('Could not estimate a bus + feeder route for these locations.');
         return;
       }
 
@@ -4287,121 +5027,341 @@
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
       const hybridMatches = getBusHybridMatches(pickup, destination, isPeak, matches);
-      const directStatus = matches.length
-        ? currentLanguage === 'bn'
-          ? `${formatLocalizedNumber(matches.length)}টি সরাসরি বাস রুট পাওয়া গেছে।`
-          : `${formatLocalizedNumber(matches.length)} direct bus route${matches.length === 1 ? '' : 's'} found.`
-        : getLocalizedText('No direct route in the draft data; showing bus + feeder suggestions below.');
-      const hybridStatus = currentLanguage === 'bn'
-        ? `${formatLocalizedNumber(hybridMatches.length)}টি বাস + ফিডার বিকল্প`
-        : `${formatLocalizedNumber(hybridMatches.length)} bus + feeder option${hybridMatches.length === 1 ? '' : 's'}`;
-      status.textContent = `${directStatus} ${hybridStatus}.`;
-      if (matches.length) {
-        const directHeading = document.createElement('h3');
-        directHeading.className = 'md:col-span-2 text-sm font-bold text-slate-800';
-        directHeading.textContent = getLocalizedText('Direct bus routes');
-        results.appendChild(directHeading);
+
+      if (status) {
+        const directStatus = matches.length
+          ? currentLanguage === 'bn'
+            ? `${formatLocalizedNumber(matches.length)}টি সরাসরি বাস রুট পাওয়া গেছে।`
+            : `${formatLocalizedNumber(matches.length)} direct bus route${matches.length === 1 ? '' : 's'} found.`
+          : getLocalizedText('No direct route in the draft data; showing bus + feeder suggestions below.');
+        const hybridStatus = currentLanguage === 'bn'
+          ? `${formatLocalizedNumber(hybridMatches.length)}টি বাস + ফিডার বিকল্প`
+          : `${formatLocalizedNumber(hybridMatches.length)} bus + feeder option${hybridMatches.length === 1 ? '' : 's'}`;
+        status.textContent = `${directStatus} ${hybridStatus}.`;
       }
-      matches.forEach(route => {
-        const card = document.createElement('article');
-        card.className = 'rounded-xl border border-slate-200 bg-white p-4';
 
-        const header = document.createElement('div');
-        header.className = 'flex items-start justify-between gap-2';
-        const title = document.createElement('h3');
-        title.className = 'font-bold text-slate-900';
-        title.textContent = `${getLocalizedText(route.service)} · ${getLocalizedText(route.type === 'ac' ? 'AC' : 'Non-AC')}`;
-        const draftTag = document.createElement('span');
-        draftTag.className = 'rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-800';
-        draftTag.textContent = getLocalizedText('Draft estimate — confirm locally');
-        header.append(title, draftTag);
-        card.appendChild(header);
+      // 1. Direct Bus Routes (Section 3)
+      if (matches.length > 0) {
+        const lowestFare = Math.min(...matches.map(m => m.fare));
+        const fastestDistance = Math.min(...matches.map(m => m.distanceKm));
 
-        const routeLine = document.createElement('p');
-        routeLine.className = 'mt-2 text-sm font-medium text-slate-700';
-        routeLine.textContent = route.journeyStops
-          .map(stop => getLocalizedLocationName(stop.name))
-          .join(' → ');
-        card.appendChild(routeLine);
+        matches.forEach(route => {
+          const card = document.createElement('article');
+          card.className = 'interactive-elevate rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-4 shadow-sm flex flex-col justify-between';
 
-        const distanceLine = document.createElement('p');
-        distanceLine.className = 'mt-3 text-xs text-slate-500';
-        distanceLine.textContent = `${getLocalizedText('Fare distance')}: ${formatLocalizedNumber(route.distanceKm, 1)} ${getLocalizedText('km')}`;
-        card.appendChild(distanceLine);
+          const isCheapest = route.fare === lowestFare;
+          const isFastest = route.distanceKm === fastestDistance;
 
-        const fareLine = document.createElement('p');
-        fareLine.className = 'mt-1 text-lg font-black text-blue-800';
-        fareLine.textContent = `${getLocalizedText('Estimated bus fare')}: ${formatLocalizedFare(route.fare)}`;
-        card.appendChild(fareLine);
+          const header = document.createElement('div');
+          header.className = 'flex items-start justify-between gap-2 mb-2';
+          
+          const titleWrap = document.createElement('div');
+          titleWrap.className = 'flex items-center gap-2 flex-wrap';
+          const title = document.createElement('h3');
+          title.className = 'font-bold text-slate-900 dark:text-white text-sm md:text-base';
+          title.textContent = `${getLocalizedText(route.service)}`;
+          
+          const typePill = document.createElement('span');
+          typePill.className = `px-2 py-0.5 rounded text-[10px] font-bold ${route.type === 'ac' ? 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`;
+          typePill.textContent = route.type === 'ac' ? 'AC' : 'Non-AC';
 
-        const stops = route.journeyStops.slice(1, -1).map(stop => getLocalizedLocationName(stop.name));
-        const stopsLine = document.createElement('p');
-        stopsLine.className = 'mt-1 text-xs text-slate-600';
-        stopsLine.textContent = `${getLocalizedText('Stops between')}: ${stops.length ? stops.join(', ') : getLocalizedText('No intermediate stop listed')}`;
-        card.appendChild(stopsLine);
-        results.appendChild(card);
-      });
+          titleWrap.append(title, typePill);
 
-      const heading = document.createElement('h3');
-      heading.className = 'md:col-span-2 text-sm font-bold text-slate-800';
-      heading.textContent = getLocalizedText('Bus + feeder options');
-      hybridResults.appendChild(heading);
-      hybridMatches.forEach(route => {
-        const card = document.createElement('article');
-        card.className = 'rounded-xl border border-blue-200 bg-blue-50 p-4';
+          const badgesWrap = document.createElement('div');
+          badgesWrap.className = 'flex items-center gap-1.5 flex-wrap';
+          if (isCheapest) {
+            const cheapBadge = document.createElement('span');
+            cheapBadge.className = 'rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-bold';
+            cheapBadge.textContent = getLocalizedText('Lowest fare');
+            badgesWrap.appendChild(cheapBadge);
+          }
+          if (isFastest) {
+            const fastBadge = document.createElement('span');
+            fastBadge.className = 'rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 px-2 py-0.5 text-[10px] font-bold';
+            fastBadge.textContent = getLocalizedText('Fastest');
+            badgesWrap.appendChild(fastBadge);
+          }
+          header.append(titleWrap, badgesWrap);
+          card.appendChild(header);
 
-        const header = document.createElement('div');
-        header.className = 'flex items-start justify-between gap-2';
-        const title = document.createElement('h3');
-        title.className = 'font-bold text-slate-900';
-        title.textContent = `${getLocalizedText('Bus + feeder')}: ${getLocalizedText(route.service)} · ${getLocalizedText(route.type === 'ac' ? 'AC' : 'Non-AC')}`;
-        const draftTag = document.createElement('span');
-        draftTag.className = 'rounded-full bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-800';
-        draftTag.textContent = getLocalizedText('Draft estimate — confirm locally');
-        header.append(title, draftTag);
-        card.appendChild(header);
+          const firstStop = route.journeyStops[0];
+          const lastStop = route.journeyStops[route.journeyStops.length - 1];
+          const stopCount = route.journeyStops.length;
 
-        const feederLines = [
-          [getLocalizedText('Ride to board'), pickup, route.journeyStops[0], route.firstMile],
-          [getLocalizedText('Ride from exit'), route.journeyStops[route.journeyStops.length - 1], destination, route.lastMile]
-        ];
-        feederLines.forEach(([label, from, to, feeder]) => {
-          const line = document.createElement('p');
-          line.className = 'mt-2 text-xs text-slate-700';
-          line.textContent = `${label}: ${getLocalizedLocationName(from.name)} → ${getLocalizedLocationName(to.name)} · ${getLocalizedText(feeder.vehicle)} · ${formatLocalizedNumber(feeder.distanceKm, 1)} ${getLocalizedText('km')}`;
-          card.appendChild(line);
+          const progression = document.createElement('div');
+          progression.className = 'flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 my-2 py-1.5 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800';
+          progression.innerHTML = `
+            <span class="text-emerald-600 dark:text-emerald-400">🟢 ${getLocalizedLocationName(firstStop.name)}</span>
+            <span class="text-slate-400">→</span>
+            <span class="text-rose-600 dark:text-rose-400">🏁 ${getLocalizedLocationName(lastStop.name)}</span>
+            <span class="ml-auto text-[10px] font-normal text-slate-500">${formatLocalizedNumber(stopCount)} ${currentLanguage === 'bn' ? 'স্টপ' : 'stops'}</span>
+          `;
+          card.appendChild(progression);
+
+          const stats = document.createElement('div');
+          stats.className = 'flex items-baseline justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800';
+          const fare = document.createElement('span');
+          fare.className = 'text-lg font-black text-blue-700 dark:text-blue-400';
+          fare.textContent = formatLocalizedFare(route.fare);
+          
+          const distance = document.createElement('span');
+          distance.className = 'text-xs text-slate-500 dark:text-slate-400';
+          const estTime = Math.round(route.distanceKm / (isPeak ? 15 : 22) * 60) + 5;
+          distance.textContent = `${formatLocalizedNumber(route.distanceKm, 1)} ${getLocalizedText('km')} · ~${formatLocalizedNumber(estTime)} ${getLocalizedText('mins')}`;
+
+          stats.append(fare, distance);
+          card.appendChild(stats);
+
+          const intermediateStops = route.journeyStops.slice(1, -1);
+          if (intermediateStops.length > 0) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'mt-2 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left cursor-pointer';
+            toggleBtn.textContent = `${getLocalizedText('View intermediate stops')} (${formatLocalizedNumber(intermediateStops.length)})`;
+            
+            const stopsList = document.createElement('div');
+            stopsList.className = 'hidden mt-1.5 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed';
+            stopsList.textContent = intermediateStops.map(s => getLocalizedLocationName(s.name)).join(', ');
+
+            toggleBtn.addEventListener('click', () => {
+              const isClosed = stopsList.classList.contains('hidden');
+              stopsList.classList.toggle('hidden');
+              toggleBtn.textContent = isClosed
+                ? `${getLocalizedText('Hide intermediate stops')}`
+                : `${getLocalizedText('View intermediate stops')} (${formatLocalizedNumber(intermediateStops.length)})`;
+            });
+
+            card.appendChild(toggleBtn);
+            card.appendChild(stopsList);
+          }
+
+          results.appendChild(card);
         });
+      } else {
+        const noDirectCard = document.createElement('div');
+        noDirectCard.className = 'md:col-span-2 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 text-xs text-center';
+        noDirectCard.textContent = getLocalizedText('No direct bus route found between these stops. See optimized Bus + Feeder options below.');
+        results.appendChild(noDirectCard);
+      }
 
-        const routeLine = document.createElement('p');
-        routeLine.className = 'mt-2 text-sm font-medium text-slate-700';
-        routeLine.textContent = route.journeyStops
-          .map(stop => getLocalizedLocationName(stop.name))
-          .join(' → ');
-        card.appendChild(routeLine);
+      // 2. Bus + Feeder Hybrid Options (Section 4)
+      if (hybridMatches.length > 0) {
+        const primaryRoute = hybridMatches[0];
 
-        const breakdown = document.createElement('p');
-        breakdown.className = 'mt-3 text-xs text-slate-600';
-        breakdown.textContent = `${getLocalizedText('Bus segment')}: ${formatLocalizedFare(route.busFare)} (${formatLocalizedNumber(route.busDistanceKm, 1)} ${getLocalizedText('km')}) · ${getLocalizedText('feeder leg')}: ${formatLocalizedFareRange(route.feederFareMin, route.feederFareMax)}`;
-        card.appendChild(breakdown);
+        const busFirstMileOptions = getFeederOptions(primaryRoute.firstMileDistanceKm || primaryRoute.firstMile.distanceKm, isPeak);
+        const busLastMileOptions = getFeederOptions(primaryRoute.lastMileDistanceKm || primaryRoute.lastMile.distanceKm, isPeak);
 
-        const fareLine = document.createElement('p');
-        fareLine.className = 'mt-1 text-lg font-black text-blue-800';
-        fareLine.textContent = `${getLocalizedText('Estimated total')}: ${formatLocalizedFareRange(route.fareMin, route.fareMax)}`;
-        card.appendChild(fareLine);
-
-        const durationLine = document.createElement('p');
-        durationLine.className = 'mt-1 text-xs text-slate-600';
-        durationLine.textContent = `${getLocalizedText('Estimated journey time')}: ~${formatLocalizedNumber(route.durationMins)} ${getLocalizedText('mins')}`;
-        card.appendChild(durationLine);
-
-        if (route.firstMile.distanceKm > 5 || route.lastMile.distanceKm > 5) {
-          const warning = document.createElement('p');
-          warning.className = 'mt-2 text-xs font-medium text-amber-800';
-          warning.textContent = getLocalizedText('Long feeder ride; check whether this connection is practical.');
-          card.appendChild(warning);
+        let bFirstMile = busFirstMileOptions.find(o => o.vehicle === selectedBusFirstMileMode && o.isAvailable !== false);
+        if (!bFirstMile) {
+          bFirstMile = busFirstMileOptions.find(o => o.isAvailable !== false) || busFirstMileOptions[0];
+          selectedBusFirstMileMode = bFirstMile.vehicle;
         }
-        hybridResults.appendChild(card);
-      });
+
+        let bLastMile = busLastMileOptions.find(o => o.vehicle === selectedBusLastMileMode && o.isAvailable !== false);
+        if (!bLastMile) {
+          bLastMile = busLastMileOptions.find(o => o.isAvailable !== false) || busLastMileOptions[0];
+          selectedBusLastMileMode = bLastMile.vehicle;
+        }
+
+        const busTotalMin = primaryRoute.busFare + bFirstMile.fareMin + bLastMile.fareMin;
+        const busTotalMax = primaryRoute.busFare + bFirstMile.fareMax + bLastMile.fareMax;
+        const busTotalDur = primaryRoute.busDistanceKm > 0
+          ? bFirstMile.durationMins + bLastMile.durationMins + Math.ceil(primaryRoute.busDistanceKm / (isPeak ? 15 : 22) * 60) + 10
+          : primaryRoute.durationMins;
+
+        const bTimeBadge = document.getElementById('busHybridTotalTimeBadge');
+        const bFareBadge = document.getElementById('busHybridTotalFareBadge');
+        if (bTimeBadge) bTimeBadge.textContent = `~ ${formatLocalizedNumber(busTotalDur)} ${getLocalizedText('mins')}`;
+        if (bFareBadge) bFareBadge.textContent = formatLocalizedFareRange(busTotalMin, busTotalMax);
+
+        const hybridWrapper = document.createElement('div');
+        hybridWrapper.className = 'space-y-5';
+
+        if (hybridMatches.length > 1) {
+          const switcherWrap = document.createElement('div');
+          switcherWrap.className = 'flex items-center gap-2 overflow-x-auto pb-1';
+          hybridMatches.forEach((hRoute, hIdx) => {
+            const pill = document.createElement('button');
+            pill.type = 'button';
+            pill.className = `px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition ${hIdx === 0 ? 'bg-emerald-600 text-white' : 'bg-[#0f2042] text-slate-300 hover:bg-[#152a55]'}`;
+            pill.textContent = `${getLocalizedText(hRoute.service)} (${formatLocalizedFare(hRoute.busFare)})`;
+            switcherWrap.appendChild(pill);
+          });
+          hybridWrapper.appendChild(switcherWrap);
+        }
+
+        const timelineBox = document.createElement('div');
+        timelineBox.className = 'rounded-2xl bg-[#0c1836]/90 border border-slate-700/60 p-4 shadow-inner';
+        
+        const boardStop = primaryRoute.journeyStops[0];
+        const exitStop = primaryRoute.journeyStops[primaryRoute.journeyStops.length - 1];
+
+        timelineBox.innerHTML = `
+          <div class="relative py-2 overflow-x-auto mrt-track-scroll select-none">
+            <div class="min-w-[760px] flex items-center justify-between relative px-4">
+              <svg class="absolute left-6 right-6 top-6 w-[calc(100%-48px)] h-8 pointer-events-none overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 24">
+                <path d="M 10 12 Q 110 4 210 12" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5 5" class="journey-line-pulse" />
+                <path d="M 230 12 L 460 12" fill="none" stroke="#3b82f6" stroke-width="4" filter="drop-shadow(0 0 6px #3b82f6)" />
+                <path d="M 480 12 Q 580 20 680 12" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5 5" class="journey-line-pulse" />
+              </svg>
+
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[130px]">
+                <div class="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.5)]">
+                  <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <span class="mt-2 text-xs font-bold text-white leading-tight">${getLocalizedLocationName(pickup.name)}</span>
+                <span class="text-[10px] text-slate-400 mt-0.5">${getLocalizedText('Your starting point')}</span>
+              </div>
+
+              <div class="relative z-10 -mt-6 flex flex-col items-center">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d2a27] border border-emerald-500/50 shadow-md text-[11px] font-bold text-emerald-300">
+                  <span>🚲</span>
+                  <span>Feeder (${getLocalizedText(bFirstMile.vehicle)}) ~ ${formatLocalizedNumber(bFirstMile.distanceKm, 1)} km</span>
+                </div>
+              </div>
+
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[140px]">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 border-2 border-blue-400 flex items-center justify-center shadow-[0_0_12px_rgba(59,130,246,0.5)]">
+                  <span class="text-xs font-black text-blue-300">BUS</span>
+                </div>
+                <span class="mt-2 text-xs font-bold text-white leading-tight">${getLocalizedLocationName(boardStop.name)}</span>
+                <span class="text-[10px] text-blue-400 mt-0.5">Bus Stop (Board)</span>
+              </div>
+
+              <div class="relative z-10 -mt-6 flex flex-col items-center">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0a2342] border border-blue-500/60 shadow-md text-[11px] font-bold text-blue-300">
+                  <span>🚌</span>
+                  <span>${getLocalizedText(primaryRoute.service)} · ${formatLocalizedFare(primaryRoute.busFare)}</span>
+                </div>
+              </div>
+
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[140px]">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 border-2 border-blue-400 flex items-center justify-center shadow-[0_0_12px_rgba(59,130,246,0.5)]">
+                  <span class="text-xs font-black text-blue-300">BUS</span>
+                </div>
+                <span class="mt-2 text-xs font-bold text-white leading-tight">${getLocalizedLocationName(exitStop.name)}</span>
+                <span class="text-[10px] text-blue-400 mt-0.5">Bus Stop (Exit)</span>
+              </div>
+
+              <div class="relative z-10 -mt-6 flex flex-col items-center">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d2a27] border border-emerald-500/50 shadow-md text-[11px] font-bold text-emerald-300">
+                  <span>🚲</span>
+                  <span>Feeder (${getLocalizedText(bLastMile.vehicle)}) ~ ${formatLocalizedNumber(bLastMile.distanceKm, 1)} km</span>
+                </div>
+              </div>
+
+              <div class="relative z-10 flex flex-col items-center text-center max-w-[130px]">
+                <div class="w-10 h-10 rounded-full bg-rose-500/20 border-2 border-rose-400 flex items-center justify-center shadow-[0_0_12px_rgba(244,63,94,0.5)]">
+                  <i data-lucide="flag" class="w-5 h-5 text-rose-400"></i>
+                </div>
+                <span class="mt-2 text-xs font-bold text-white leading-tight">${getLocalizedLocationName(destination.name)}</span>
+                <span class="text-[10px] text-rose-400 mt-0.5">${getLocalizedText('Your destination')}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        hybridWrapper.appendChild(timelineBox);
+
+        const step1Wrap = document.createElement('div');
+        step1Wrap.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+            <h4 class="text-sm font-bold text-white">${getLocalizedText('Choose your feeder option')}</h4>
+          </div>
+          <p class="text-xs text-slate-400 mb-2 ml-7">${getLocalizedText('From')} ${getLocalizedLocationName(pickup.name)} → ${getLocalizedLocationName(boardStop.name)} (${getLocalizedText('first mile')})</p>
+          <div id="busFirstMileContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+        `;
+        hybridWrapper.appendChild(step1Wrap);
+
+        const step2Wrap = document.createElement('div');
+        step2Wrap.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+            <h4 class="text-sm font-bold text-white">${getLocalizedText('Take local bus')}: ${getLocalizedText(primaryRoute.service)}</h4>
+          </div>
+          <div class="ml-7 p-3.5 rounded-xl bg-[#0d1d3f] border border-blue-900/60 flex items-center justify-between gap-3 shadow">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow">
+                🚌
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-white text-sm">${getLocalizedText(primaryRoute.service)} · ${primaryRoute.type === 'ac' ? 'AC' : 'Non-AC'}</span>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800">${formatLocalizedNumber(primaryRoute.journeyStops.length)} ${currentLanguage === 'bn' ? 'স্টপ' : 'stops'}</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-0.5">${getLocalizedLocationName(boardStop.name)} → ${getLocalizedLocationName(exitStop.name)} (~${formatLocalizedNumber(primaryRoute.busDistanceKm, 1)} ${getLocalizedText('km')})</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-base md:text-lg font-black text-blue-400">${formatLocalizedFare(primaryRoute.busFare)}</span>
+              <span class="block text-[10px] text-slate-400">${getLocalizedText('Bus fare')}</span>
+            </div>
+          </div>
+        `;
+        hybridWrapper.appendChild(step2Wrap);
+
+        const step3Wrap = document.createElement('div');
+        step3Wrap.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+            <h4 class="text-sm font-bold text-white">${getLocalizedText('Choose your feeder option (again)')}</h4>
+          </div>
+          <p class="text-xs text-slate-400 mb-2 ml-7">${getLocalizedText('From')} ${getLocalizedLocationName(exitStop.name)} → ${getLocalizedLocationName(destination.name)} (${getLocalizedText('last mile')})</p>
+          <div id="busLastMileContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+        `;
+        hybridWrapper.appendChild(step3Wrap);
+
+        const botBar = document.createElement('div');
+        botBar.className = 'mt-5 rounded-2xl bg-[#091833] border-2 border-emerald-500/40 p-4 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4';
+        botBar.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <i data-lucide="wallet" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="block text-[11px] font-bold uppercase text-slate-400">${getLocalizedText('Estimated total fare')}</span>
+              <span class="text-xl md:text-2xl font-black text-white">${formatLocalizedFareRange(busTotalMin, busTotalMax)}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2 px-3 rounded-xl bg-[#061124]/70 border border-slate-800 text-xs">
+            <div>
+              <span class="block text-[10px] text-slate-400">${getLocalizedText('Feeder (1st mile)')}</span>
+              <span class="font-bold text-slate-200">${formatLocalizedFareRange(bFirstMile.fareMin, bFirstMile.fareMax)}</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400">${getLocalizedText('Bus segment')}</span>
+              <span class="font-bold text-blue-400">${formatLocalizedFare(primaryRoute.busFare)}</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400">${getLocalizedText('Feeder (last mile)')}</span>
+              <span class="font-bold text-slate-200">${formatLocalizedFareRange(bLastMile.fareMin, bLastMile.fareMax)}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+              <div>
+                <span class="block text-[10px] text-slate-400">${getLocalizedText('Estimated journey time')}</span>
+                <span class="font-bold text-white">~ ${formatLocalizedNumber(busTotalDur)} ${getLocalizedText('mins')}</span>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" onclick="scrollToRouteMap()" class="transit-cta-btn px-5 py-3 rounded-xl font-bold text-white text-xs md:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            <span>${getLocalizedText('View full route on map >')}</span>
+          </button>
+        `;
+        hybridWrapper.appendChild(botBar);
+
+        hybridResults.appendChild(hybridWrapper);
+
+        renderFeederVehicleGrid('busFirstMileContainer', busFirstMileOptions, selectedBusFirstMileMode, selectBusFirstMileMode);
+        renderFeederVehicleGrid('busLastMileContainer', busLastMileOptions, selectedBusLastMileMode, selectBusLastMileMode);
+      }
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
     }
 
     function renderMrtStationLightPath(pickupStation, destinationStation, firstStationIndex, lastStationIndex) {
@@ -4410,6 +5370,10 @@
       const train = document.getElementById('mrtCruisingTrain');
       const countBadge = document.getElementById('mrtLightPathStationCount');
       const statusTip = document.getElementById('mrtStationStatusTip');
+      const actionsWrap = document.getElementById('mrtStationInspectorActions');
+      const setBoardBtn = document.getElementById('mrtSetBoardBtn');
+      const setExitBtn = document.getElementById('mrtSetExitBtn');
+      const resetBtn = document.getElementById('mrtResetStationsBtn');
       if (!container || !activeRail) return;
 
       const totalStations = MRT_LINE_6_STATIONS.length;
@@ -4437,28 +5401,37 @@
         }
       }
 
+      if (resetBtn) {
+        resetBtn.onclick = resetCustomMrtStations;
+      }
+
       container.innerHTML = '';
       MRT_LINE_6_STATIONS.forEach((st, idx) => {
         const isBoarding = idx === pickupStation.index;
         const isExit = idx === destinationStation.index;
         const isSegment = idx >= firstStationIndex && idx <= lastStationIndex && stationIntervals > 0;
+        const isInspected = inspectedMrtStationIdx === idx;
 
         const nodeWrapper = document.createElement('button');
         nodeWrapper.type = 'button';
-        nodeWrapper.className = 'mrt-node-btn relative flex flex-col items-center group focus:outline-none cursor-pointer';
+        nodeWrapper.className = `mrt-node-btn relative flex flex-col items-center group focus:outline-none cursor-pointer ${isSegment || isBoarding || isExit ? 'opacity-100' : 'opacity-40 hover:opacity-100'}`;
         nodeWrapper.setAttribute('aria-label', `${st.name} Station`);
 
         let nodeDotClass = 'w-4 h-4 rounded-full border-2 transition-all duration-300 ';
         if (isBoarding && isExit) {
-          nodeDotClass += 'bg-emerald-500 border-white ring-4 ring-emerald-400 shadow-[0_0_12px_#10b981] scale-125 z-30 animate-pulse';
+          nodeDotClass += 'bg-emerald-500 border-white ring-4 ring-emerald-400 shadow-[0_0_14px_#10b981] scale-125 z-30 animate-pulse';
         } else if (isBoarding) {
-          nodeDotClass += 'bg-emerald-500 border-white ring-4 ring-emerald-400 shadow-[0_0_12px_#10b981] scale-125 z-30 animate-pulse';
+          nodeDotClass += 'bg-emerald-500 border-white ring-4 ring-emerald-400 shadow-[0_0_14px_#10b981] scale-125 z-30 animate-pulse';
         } else if (isExit) {
-          nodeDotClass += 'bg-rose-500 border-white ring-4 ring-rose-400 shadow-[0_0_12px_#f43f5e] scale-125 z-30 animate-pulse';
+          nodeDotClass += 'bg-rose-500 border-white ring-4 ring-rose-400 shadow-[0_0_14px_#f43f5e] scale-125 z-30 animate-pulse';
         } else if (isSegment) {
-          nodeDotClass += 'bg-emerald-400 border-white ring-2 ring-emerald-200 z-20';
+          nodeDotClass += 'bg-sky-400 border-white ring-2 ring-sky-300 z-20';
         } else {
-          nodeDotClass += 'bg-slate-300 border-slate-100 text-transparent opacity-60 hover:opacity-100';
+          nodeDotClass += 'bg-slate-400 border-slate-200 text-transparent';
+        }
+
+        if (isInspected) {
+          nodeDotClass += ' ring-4 ring-amber-400 scale-125';
         }
 
         const localizedName = currentLanguage === 'bn' ? getLocalizedText(st.name) : st.name;
@@ -4475,15 +5448,26 @@
           <div class="relative flex flex-col items-center">
             ${badgeTag}
             <div class="${nodeDotClass}"></div>
-            <span class="mt-2 text-[10px] font-bold text-center leading-tight whitespace-nowrap transition-colors ${isBoarding || isExit ? 'text-slate-900 font-extrabold scale-105' : isSegment ? 'text-emerald-700 font-bold' : 'text-slate-400'}">
+            <span class="mt-2 text-[10px] font-bold text-center leading-tight whitespace-nowrap transition-colors ${isBoarding || isExit ? 'text-slate-900 dark:text-white font-extrabold scale-105' : isSegment ? 'text-sky-700 dark:text-sky-300 font-bold' : 'text-slate-400'}">
               ${localizedName}
             </span>
           </div>
         `;
 
         nodeWrapper.addEventListener('click', () => {
+          inspectedMrtStationIdx = idx;
           if (statusTip) {
-            statusTip.innerHTML = `<strong>${localizedName}</strong> · ${currentLanguage === 'bn' ? 'উত্তরা উত্তর থেকে ভাড়া' : 'Fare from Uttara North'}: ৳${st.fareFromUttara} · ${isBoarding ? (currentLanguage === 'bn' ? 'আপনার ওঠার স্টেশন' : 'Your boarding station') : isExit ? (currentLanguage === 'bn' ? 'আপনার নামার স্টেশন' : 'Your exit station') : (currentLanguage === 'bn' ? 'লাইন ৬ স্টেশন' : 'Line 6 Station')}`;
+            statusTip.innerHTML = `<strong>${localizedName}</strong> · ${currentLanguage === 'bn' ? 'উত্তরা উত্তর থেকে ভাড়া' : 'Fare from Uttara'}: ৳${st.fareFromUttara} · ${isBoarding ? (currentLanguage === 'bn' ? 'আপনার ওঠার স্টেশন' : 'Your boarding station') : isExit ? (currentLanguage === 'bn' ? 'আপনার নামার স্টেশন' : 'Your exit station') : isSegment ? (currentLanguage === 'bn' ? 'যাত্রাপথের স্টেশন' : 'Waypoint') : (currentLanguage === 'bn' ? 'বাইরের স্টেশন' : 'Station outside selected segment')}`;
+          }
+          if (actionsWrap) {
+            actionsWrap.classList.remove('hidden');
+            actionsWrap.classList.add('flex');
+          }
+          if (setBoardBtn) {
+            setBoardBtn.onclick = () => setCustomMrtBoardingStation(idx);
+          }
+          if (setExitBtn) {
+            setExitBtn.onclick = () => setCustomMrtExitStation(idx);
           }
         });
 
@@ -4498,105 +5482,174 @@
     }
 
     function renderMrtEstimate(isPeak) {
-      document.getElementById('mrtEstimatorHeading').textContent = getLocalizedText('MRT Line 6 hybrid estimate');
-      document.getElementById('mrtPassLabel').textContent = getLocalizedText('MRT Pass (10% off)');
-      document.getElementById('directRideLabel').textContent = getLocalizedText('Direct');
-      document.getElementById('directRideFareLabel').textContent = getLocalizedText('Estimated fare');
-      document.getElementById('directRideTimeLabel').textContent = getLocalizedText('Estimated time in traffic');
-      document.getElementById('mrtHybridLabel').textContent = getLocalizedText('Metro + feeder');
-      document.getElementById('mrtFareLabel').textContent = getLocalizedText('MRT fare');
-      document.getElementById('mrtFeederFareLabel').textContent = getLocalizedText('Feeder fare');
-      document.getElementById('mrtHybridFareLabel').textContent = getLocalizedText('Estimated hybrid total');
-      document.getElementById('mrtHybridDurationLabel').textContent = getLocalizedText('Estimated journey time');
-      document.getElementById('mrtEstimateDisclaimer').textContent = getLocalizedText(MRT_ESTIMATE_DISCLAIMER);
-
-      const pickup = getLocationForKey(document.getElementById('pickupSelect').value);
-      const destination = getLocationForKey(document.getElementById('dropoffSelect').value);
+      const pickupKey = document.getElementById('pickupSelect').value;
+      const destinationKey = document.getElementById('dropoffSelect').value;
+      const pickup = getLocationForKey(pickupKey);
+      const destination = getLocationForKey(destinationKey);
       if (!pickup || !destination) return;
 
-      const pickupStation = getNearestMrtStation(pickup);
-      const destinationStation = getNearestMrtStation(destination);
+      const defaultPickupStation = getNearestMrtStation(pickup);
+      const defaultDestinationStation = getNearestMrtStation(destination);
+
+      const pickupStation = customMrtPickupStationIdx !== null
+        ? {
+            station: MRT_LINE_6_STATIONS[customMrtPickupStationIdx],
+            index: customMrtPickupStationIdx,
+            distanceKm: calculateDirectDistance(pickup, MRT_LINE_6_STATIONS[customMrtPickupStationIdx])
+          }
+        : defaultPickupStation;
+
+      const destinationStation = customMrtDropoffStationIdx !== null
+        ? {
+            station: MRT_LINE_6_STATIONS[customMrtDropoffStationIdx],
+            index: customMrtDropoffStationIdx,
+            distanceKm: calculateDirectDistance(destination, MRT_LINE_6_STATIONS[customMrtDropoffStationIdx])
+          }
+        : defaultDestinationStation;
+
       const firstStationIndex = Math.min(pickupStation.index, destinationStation.index);
       const lastStationIndex = Math.max(pickupStation.index, destinationStation.index);
-      const stationIntervals = lastStationIndex - firstStationIndex;
-
-      // Update interactive MRT station light-path
-      renderMrtStationLightPath(pickupStation, destinationStation, firstStationIndex, lastStationIndex);
-      const directFare = getVehicleFareEstimate(selectedVehicle, isPeak);
-      const directDuration = getEstimatedRoadDuration(selectedVehicle, isPeak);
-      document.getElementById('directRideMode').textContent = getLocalizedText(selectedVehicle);
-      document.getElementById('directRideFare').textContent =
-        `${formatLocalizedFare(directFare.minimum)} - ${formatLocalizedFare(directFare.maximum)}`;
-      document.getElementById('directRideDuration').textContent = currentLanguage === 'bn'
-        ? `প্রায় ${formatLocalizedNumber(directDuration)} মিনিট`
-        : `About ${formatLocalizedNumber(directDuration)} mins`;
-
-      if (stationIntervals === 0) {
-        document.getElementById('mrtStationRoute').textContent = currentLanguage === 'bn'
-          ? `${getLocalizedText(pickupStation.station.name)} · ${getLocalizedText('Both locations are closest to the same MRT station; no Metro leg to estimate.')}`
-          : `${pickupStation.station.name} · ${getLocalizedText('Both locations are closest to the same MRT station; no Metro leg to estimate.')}`;
-        document.getElementById('mrtFare').textContent = '—';
-        document.getElementById('mrtFeederFare').textContent = '—';
-        document.getElementById('mrtHybridFare').textContent = '—';
-        document.getElementById('mrtHybridDuration').textContent = '—';
-        document.getElementById('mrtTimeComparison').textContent = '';
-        renderMrtJourneySteps([]);
-        document.getElementById('mrtJourneyPlan').classList.add('hidden');
-        document.getElementById('firstMileOptions').classList.add('hidden');
-        document.getElementById('lastMileOptions').classList.add('hidden');
-        return;
-      }
+      const stationIntervals = Math.abs(lastStationIndex - firstStationIndex);
 
       const stationFareDifference = Math.abs(
         MRT_LINE_6_STATIONS[lastStationIndex].fareFromUttara -
         MRT_LINE_6_STATIONS[firstStationIndex].fareFromUttara
       );
-      const standardMrtFare = Math.min(100, Math.max(20, stationFareDifference));
-      const hasMrtPass = document.getElementById('mrtPassToggle').checked;
+      const standardMrtFare = stationIntervals === 0 ? 0 : Math.min(100, Math.max(20, stationFareDifference));
+      const hasMrtPass = document.getElementById('mrtPassToggle')?.checked;
       const mrtFare = hasMrtPass ? Math.round(standardMrtFare * 0.9) : standardMrtFare;
+      const mrtDuration = stationIntervals * 2;
+
+      const mrtRouteText = stationIntervals === 0
+        ? (currentLanguage === 'bn' ? `${getLocalizedText(pickupStation.station.name)} · উভয় স্থানই একই স্টেশনের কাছে` : `${pickupStation.station.name} · Both locations closest to same station`)
+        : `${pickupStation.station.name} → ${destinationStation.station.name} (${stationIntervals} ${currentLanguage === 'bn' ? 'স্টেশন বিরতি' : 'station intervals'})`;
+      const mrtRouteEl = document.getElementById('mrtStationRoute');
+      if (mrtRouteEl) mrtRouteEl.textContent = getLocalizedText(mrtRouteText);
+
+      const sumBoard = document.getElementById('mrtSumBoardStation');
+      const sumExit = document.getElementById('mrtSumExitStation');
+      const sumDuration = document.getElementById('mrtSumDuration');
+      const sumIntervals = document.getElementById('mrtSumIntervals');
+      const sumFare = document.getElementById('mrtSumFare');
+      const sumPass = document.getElementById('mrtSumPassDiscount');
+      if (sumBoard) sumBoard.textContent = getLocalizedText(pickupStation.station.name);
+      if (sumExit) sumExit.textContent = getLocalizedText(destinationStation.station.name);
+      if (sumDuration) sumDuration.textContent = `~${formatLocalizedNumber(mrtDuration)} ${getLocalizedText('mins')}`;
+      if (sumIntervals) sumIntervals.textContent = `${formatLocalizedNumber(stationIntervals)} ${getLocalizedText('station intervals')}`;
+      if (sumFare) {
+        sumFare.textContent = hasMrtPass
+          ? `${formatLocalizedFare(mrtFare)} (${formatLocalizedFare(standardMrtFare)})`
+          : formatLocalizedFare(standardMrtFare);
+      }
+      if (sumPass) {
+        sumPass.textContent = hasMrtPass
+          ? (currentLanguage === 'bn' ? '১০% এমআরটি পাস ছাড় প্রযোজ্য' : '10% MRT Pass discount applied')
+          : (currentLanguage === 'bn' ? 'পাস ব্যবহারে ১০% ছাড় পাওয়া যাবে' : '10% discount with MRT Pass');
+      }
+
+      renderMrtStationLightPath(pickupStation, destinationStation, firstStationIndex, lastStationIndex);
+
       const firstMileOptions = getFeederOptions(pickupStation.distanceKm, isPeak);
       const lastMileOptions = getFeederOptions(destinationStation.distanceKm, isPeak);
-      const firstMile = renderFeederOptions(
-        'firstMileOptionList',
-        firstMileOptions,
-        pickup.name,
-        pickupStation.station.name,
-        'firstMileHeading'
-      );
-      const lastMile = renderFeederOptions(
-        'lastMileOptionList',
-        lastMileOptions,
-        destination.name,
-        destinationStation.station.name,
-        'lastMileHeading'
-      );
-      const feederFareMin = firstMile.fareMin + lastMile.fareMin;
-      const feederFareMax = firstMile.fareMax + lastMile.fareMax;
-      const hybridFareMin = mrtFare + feederFareMin;
-      const hybridFareMax = mrtFare + feederFareMax;
-      const hybridDuration = 5 + (stationIntervals * 2) +
-        firstMile.durationMins + lastMile.durationMins + 4;
-      const timeDifference = directDuration - hybridDuration;
 
-      document.getElementById('mrtStationRoute').textContent = currentLanguage === 'bn'
-        ? `${getLocalizedText(pickupStation.station.name)} → ${getLocalizedText(destinationStation.station.name)} · ${formatLocalizedNumber(stationIntervals)} ${getLocalizedText('station intervals')}`
-        : `${pickupStation.station.name} → ${destinationStation.station.name} · ${formatLocalizedNumber(stationIntervals)} station intervals`;
-      document.getElementById('mrtFare').textContent = hasMrtPass
-        ? `${formatLocalizedFare(mrtFare)} (${formatLocalizedFare(standardMrtFare)} ${getLocalizedText('without pass')})`
-        : formatLocalizedFare(mrtFare);
-      document.getElementById('mrtFeederFare').textContent = formatLocalizedFareRange(feederFareMin, feederFareMax);
-      document.getElementById('mrtHybridFare').textContent = formatLocalizedFareRange(hybridFareMin, hybridFareMax);
-      document.getElementById('mrtHybridDuration').textContent = currentLanguage === 'bn'
-        ? `প্রায় ${formatLocalizedNumber(hybridDuration)} মিনিট`
-        : `About ${formatLocalizedNumber(hybridDuration)} mins`;
-      document.getElementById('mrtTimeComparison').textContent = timeDifference === 0
-        ? (currentLanguage === 'bn' ? 'সরাসরি যাত্রার প্রায় সমান সময়' : 'About the same time as the direct ride')
-        : currentLanguage === 'bn'
-          ? `সরাসরি যাত্রার চেয়ে ${formatLocalizedNumber(Math.abs(timeDifference))} মিনিট ${timeDifference > 0 ? 'দ্রুত' : 'বেশি সময় লাগে'}`
-          : `About ${formatLocalizedNumber(Math.abs(timeDifference))} mins ${getLocalizedText(timeDifference > 0 ? 'faster than direct ride' : 'slower than direct ride')}`;
-      document.getElementById('mrtJourneyPlan').classList.remove('hidden');
-      document.getElementById('firstMileOptions').classList.remove('hidden');
-      document.getElementById('lastMileOptions').classList.remove('hidden');
+      let firstMile = firstMileOptions.find(o => o.vehicle === selectedMrtFirstMileMode && o.isAvailable !== false);
+      if (!firstMile) {
+        firstMile = firstMileOptions.find(o => o.isAvailable !== false) || firstMileOptions[0];
+        selectedMrtFirstMileMode = firstMile.vehicle;
+      }
+
+      let lastMile = lastMileOptions.find(o => o.vehicle === selectedMrtLastMileMode && o.isAvailable !== false);
+      if (!lastMile) {
+        lastMile = lastMileOptions.find(o => o.isAvailable !== false) || lastMileOptions[0];
+        selectedMrtLastMileMode = lastMile.vehicle;
+      }
+
+      renderFeederVehicleGrid('mrtFirstMileCardsContainer', firstMileOptions, selectedMrtFirstMileMode, selectMrtFirstMileMode);
+      renderFeederVehicleGrid('mrtLastMileCardsContainer', lastMileOptions, selectedMrtLastMileMode, selectMrtLastMileMode);
+
+      const s1Sub = document.getElementById('mrtStep1Sub');
+      if (s1Sub) {
+        s1Sub.textContent = `${getLocalizedText('From')} ${getLocalizedLocationName(pickup.name)} → ${getLocalizedText(pickupStation.station.name)} (${getLocalizedText('first mile')})`;
+      }
+
+      const s2Heading = document.getElementById('mrtStep2CardHeading');
+      const s2Badge = document.getElementById('mrtStep2StationCountBadge');
+      const s2Sub = document.getElementById('mrtStep2CardSub');
+      const s2Fare = document.getElementById('mrtStep2FareDisplay');
+      const s2TitleSub = document.getElementById('mrtStep2Sub');
+      if (s2Heading) s2Heading.textContent = getLocalizedText('MRT Line 6');
+      if (s2Badge) s2Badge.textContent = `${formatLocalizedNumber(stationIntervals)} ${getLocalizedText('stations')}`;
+      if (s2Sub) s2Sub.textContent = `~${formatLocalizedNumber(mrtDuration)} ${getLocalizedText('mins')} • ${getLocalizedText(pickupStation.station.name)} → ${getLocalizedText(destinationStation.station.name)}`;
+      if (s2Fare) s2Fare.textContent = formatLocalizedFare(mrtFare);
+      if (s2TitleSub) s2TitleSub.textContent = `${getLocalizedText(pickupStation.station.name)} → ${getLocalizedText(destinationStation.station.name)}`;
+
+      const s3Sub = document.getElementById('mrtStep3Sub');
+      if (s3Sub) {
+        s3Sub.textContent = `${getLocalizedText('From')} ${getLocalizedText(destinationStation.station.name)} → ${getLocalizedLocationName(destination.name)} (${getLocalizedText('last mile')})`;
+      }
+
+      const hybridDuration = 5 + mrtDuration + firstMile.durationMins + lastMile.durationMins + 4;
+      const totalMin = mrtFare + firstMile.fareMin + lastMile.fareMin;
+      const totalMax = mrtFare + firstMile.fareMax + lastMile.fareMax;
+
+      const hTimeBadge = document.getElementById('mrtTotalTimeBadge');
+      const hFareBadge = document.getElementById('mrtEstimatedFareBadge');
+      if (hTimeBadge) hTimeBadge.textContent = `~ ${formatLocalizedNumber(hybridDuration)} ${getLocalizedText('mins')}`;
+      if (hFareBadge) hFareBadge.textContent = formatLocalizedFareRange(totalMin, totalMax);
+
+      const pillRoute = document.getElementById('mrtSelectedRoutePill');
+      const nodePickup = document.getElementById('mrtJourneyNodePickup');
+      const f1Badge = document.getElementById('mrtFeeder1Badge');
+      const f1Icon = document.getElementById('mrtFeeder1Icon');
+      const nodeBoard = document.getElementById('mrtJourneyNodeBoard');
+      const line6Badge = document.getElementById('mrtLine6Badge');
+      const nodeExit = document.getElementById('mrtJourneyNodeExit');
+      const f2Badge = document.getElementById('mrtFeeder2Badge');
+      const f2Icon = document.getElementById('mrtFeeder2Icon');
+      const nodeDest = document.getElementById('mrtJourneyNodeDest');
+
+      if (pillRoute) pillRoute.textContent = `${getLocalizedLocationName(pickup.name)} → ${getLocalizedLocationName(destination.name)}`;
+      if (nodePickup) nodePickup.textContent = getLocalizedLocationName(pickup.name);
+      if (f1Badge) f1Badge.textContent = `Feeder (${getLocalizedText(firstMile.vehicle)}) ~ ${formatLocalizedNumber(firstMile.distanceKm, 1)} km | ${formatLocalizedNumber(firstMile.durationMins)} mins`;
+      if (f1Icon) f1Icon.textContent = firstMile.vehicle === 'Bike' ? '🏍️' : firstMile.vehicle === 'CNG' ? '🛺' : firstMile.vehicle === 'Car' ? '🚗' : firstMile.vehicle === 'Walk' ? '🚶' : '🚲';
+      if (nodeBoard) nodeBoard.textContent = getLocalizedText(pickupStation.station.name);
+      if (line6Badge) line6Badge.textContent = `MRT Line 6 ~ ${formatLocalizedNumber(mrtDuration)} mins`;
+      if (nodeExit) nodeExit.textContent = getLocalizedText(destinationStation.station.name);
+      if (f2Badge) f2Badge.textContent = `Feeder (${getLocalizedText(lastMile.vehicle)}) ~ ${formatLocalizedNumber(lastMile.distanceKm, 1)} km | ${formatLocalizedNumber(lastMile.durationMins)} mins`;
+      if (f2Icon) f2Icon.textContent = lastMile.vehicle === 'Bike' ? '🏍️' : lastMile.vehicle === 'CNG' ? '🛺' : lastMile.vehicle === 'Car' ? '🚗' : lastMile.vehicle === 'Walk' ? '🚶' : '🚲';
+      if (nodeDest) nodeDest.textContent = getLocalizedLocationName(destination.name);
+
+      const botTotalFare = document.getElementById('mrtBottomTotalFare');
+      const bF1 = document.getElementById('mrtBreakdownFeeder1');
+      const bMrt = document.getElementById('mrtBreakdownMrt');
+      const bF2 = document.getElementById('mrtBreakdownFeeder2');
+      const bTime = document.getElementById('mrtBreakdownTime');
+
+      if (botTotalFare) botTotalFare.textContent = formatLocalizedFareRange(totalMin, totalMax);
+      if (bF1) bF1.textContent = formatLocalizedFareRange(firstMile.fareMin, firstMile.fareMax);
+      if (bMrt) bMrt.textContent = formatLocalizedFare(mrtFare);
+      if (bF2) bF2.textContent = formatLocalizedFareRange(lastMile.fareMin, lastMile.fareMax);
+      if (bTime) bTime.textContent = `~ ${formatLocalizedNumber(hybridDuration)} ${getLocalizedText('mins')}`;
+
+      const directFare = getVehicleFareEstimate(selectedVehicle, isPeak);
+      const directDuration = getEstimatedRoadDuration(selectedVehicle, isPeak);
+      const timeDifference = directDuration - hybridDuration;
+      const fareSavings = Math.max(0, directFare.minimum - totalMin);
+
+      const compText = document.getElementById('mrtDirectComparisonText');
+      const compTime = document.getElementById('mrtTimeComparison');
+      if (compText) {
+        compText.textContent = fareSavings > 0
+          ? (currentLanguage === 'bn' ? `সরাসরি ${getLocalizedText(selectedVehicle)}-এর তুলনায় প্রায় ৳${formatLocalizedNumber(fareSavings)} সাশ্রয়` : `Save ~৳${formatLocalizedNumber(fareSavings)} compared to direct ${selectedVehicle}`)
+          : (currentLanguage === 'bn' ? `সরাসরি ${getLocalizedText(selectedVehicle)}-এর কাছাকাছি ভাড়া` : `Comparable fare to direct ${selectedVehicle}`);
+      }
+      if (compTime) {
+        compTime.textContent = timeDifference === 0
+          ? (currentLanguage === 'bn' ? 'সরাসরি যাত্রার সমান সময়' : 'About the same time as direct ride')
+          : currentLanguage === 'bn'
+            ? `সরাসরি যাত্রার চেয়ে ${formatLocalizedNumber(Math.abs(timeDifference))} মিনিট ${timeDifference > 0 ? 'দ্রুত' : 'বেশি সময়'}`
+            : `About ${formatLocalizedNumber(Math.abs(timeDifference))} mins ${getLocalizedText(timeDifference > 0 ? 'faster than direct ride' : 'slower than direct ride')}`;
+      }
 
       const firstMileStep = firstMile.isWalking
         ? firstMile.isAtStation
@@ -4609,18 +5662,30 @@
           ? getLocalizedText('Already at the station; no feeder needed.')
           : `${getLocalizedText('Walk to')} ${getLocalizedLocationName(destination.name)} (${formatLocalizedNumber(lastMile.distanceKm, 1)} ${getLocalizedText('km')}).`
         : `${getLocalizedText('Take')} ${getLocalizedText(lastMile.vehicle)}: ${getLocalizedText(destinationStation.station.name)} → ${getLocalizedLocationName(destination.name)} (${formatLocalizedFareRange(lastMile.fareMin, lastMile.fareMax)}).`;
+
       renderMrtJourneySteps([
         `${getLocalizedText('First mile')}: ${firstMileStep}`,
         `${getLocalizedText('MRT journey')}: ${metroStep}`,
         `${getLocalizedText('Last mile')}: ${lastMileStep}`
       ]);
-    }
 
-    const VEHICLE_RATES = {
-      Bike: { base: 30, perKm: 14, perMin: 0.5, durationFactor: 0.85 },
-      CNG: { base: 50, perKm: 18, perMin: 0.7, durationFactor: 1.15 },
-      Car: { base: 80, perKm: 24, perMin: 1.0, durationFactor: 1.0 }
-    };
+      const legacyDirectFare = document.getElementById('directRideFare');
+      if (legacyDirectFare) legacyDirectFare.textContent = `${formatLocalizedFare(directFare.minimum)} - ${formatLocalizedFare(directFare.maximum)}`;
+      const legacyDirectDur = document.getElementById('directRideDuration');
+      if (legacyDirectDur) legacyDirectDur.textContent = `About ${formatLocalizedNumber(directDuration)} mins`;
+      const legacyMrtFare = document.getElementById('mrtFare');
+      if (legacyMrtFare) legacyMrtFare.textContent = formatLocalizedFare(mrtFare);
+      const legacyFeederFare = document.getElementById('mrtFeederFare');
+      if (legacyFeederFare) legacyFeederFare.textContent = formatLocalizedFareRange(firstMile.fareMin + lastMile.fareMin, firstMile.fareMax + lastMile.fareMax);
+      const legacyHybridFare = document.getElementById('mrtHybridFare');
+      if (legacyHybridFare) legacyHybridFare.textContent = formatLocalizedFareRange(totalMin, totalMax);
+      const legacyHybridDur = document.getElementById('mrtHybridDuration');
+      if (legacyHybridDur) legacyHybridDur.textContent = `About ${formatLocalizedNumber(hybridDuration)} mins`;
+
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
 
     function getEstimatedRoadDuration(vehicle, isPeak) {
       const averageSpeedKmh = isPeak ? 15 : 22;
