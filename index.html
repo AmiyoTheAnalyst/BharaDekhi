@@ -534,6 +534,31 @@
       fill: #e0f2fe !important;
     }
 
+    /* Emergency Ambulance Strobe Lights & Sweeping Beacons */
+    @keyframes ambStrobeRed {
+      0%, 47% { opacity: 0.95; }
+      49%, 100% { opacity: 0.04; }
+    }
+    @keyframes ambStrobeBlue {
+      0%, 48% { opacity: 0.04; }
+      50%, 97% { opacity: 0.95; }
+      99%, 100% { opacity: 0.04; }
+    }
+    .amb-beacon-red {
+      animation: ambStrobeRed 0.22s infinite;
+    }
+    .amb-beacon-blue {
+      animation: ambStrobeBlue 0.22s infinite;
+    }
+    .amb-strobe-red {
+      animation: ambStrobeRed 0.22s infinite;
+      mix-blend-mode: screen;
+    }
+    .amb-strobe-blue {
+      animation: ambStrobeBlue 0.22s infinite;
+      mix-blend-mode: screen;
+    }
+
     /* Ultra-Crisp, High-Legibility Typography for Building & Shop Signboards */
     .cr-signboard-text {
       text-rendering: geometricPrecision;
@@ -2292,6 +2317,11 @@
           <p class="hidden sm:block text-xs sm:text-sm text-slate-300 font-medium max-w-sm sm:max-w-md drop-shadow">
             Mirpur 10 Crossroads · Multimodal Traffic Signals, Metro Rail &amp; Pedestrians
           </p>
+          <!-- Emergency Priority Wave Alert HUD Badge -->
+          <div id="emergencyWaveAlertBadge" class="hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/95 border border-rose-500/90 text-rose-200 text-[10px] sm:text-xs font-black backdrop-blur-md shadow-[0_0_20px_rgba(244,63,94,0.45)] animate-pulse transition-all w-fit mt-1">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+            <span class="truncate">🚑 EMERGENCY PRIORITY WAVE · LANE CLEARING</span>
+          </div>
         </div>
 
         <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
@@ -2305,6 +2335,12 @@
           <button type="button" id="crossroadsAudioToggleBtn" onclick="toggleCrossroadsAudio()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Toggle Dhaka Street Soundscape / সাউন্ড অন-অফ">
             <span id="crossroadsAudioIcon">🔇</span>
             <span id="crossroadsAudioText" class="hidden sm:inline">Street Audio: Off</span>
+          </button>
+
+          <!-- Emergency Wave Priority Trigger Button -->
+          <button type="button" id="crossroadsEmergencyBtn" onclick="triggerEmergencyWave()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-rose-950/80 text-rose-300 hover:text-rose-200 border border-rose-600/70 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1 cursor-pointer shrink-0" title="Spawn Emergency Ambulance / জরুরি অ্যাম্বুলেন্স পরীক্ষা">
+            <span>🚑</span>
+            <span class="hidden sm:inline">Emergency Wave</span>
           </button>
 
           <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
@@ -3314,6 +3350,43 @@
                ======================================================== -->
           <g id="dhakaVehiclesLayer">
             <!-- All vehicle elements are instantiated and driven dynamically by JS -->
+          </g>
+
+          <!-- Emergency Medical Response Ambulance (High-Speed Priority Unit) -->
+          <g id="emergencyAmbulanceVehicle" opacity="0" pointer-events="auto" style="cursor: pointer; will-change: transform;">
+            <!-- Alternating Asphalt Strobe Light Cones -->
+            <polygon class="amb-strobe-red" points="30,8 -65,-65 -20,-90" fill="#ef4444" opacity="0.6"/>
+            <polygon class="amb-strobe-blue" points="30,16 -65,85 -20,110" fill="#3b82f6" opacity="0.6"/>
+            <polygon class="amb-strobe-red" points="55,10 195,-35 225,35" fill="#ef4444" opacity="0.5"/>
+            <polygon class="amb-strobe-blue" points="55,14 225,-15 195,55" fill="#3b82f6" opacity="0.5"/>
+
+            <!-- High-Intensity Emergency Forward Headlight Beam -->
+            <polygon class="cr-headlight-beam" points="62,12 165,-8 165,32" fill="url(#crHeadlightBeamGradEB)" opacity="0.98"/>
+
+            <!-- Ambulance Chassis Body (Gloss White with Bold Red Emergency Livery) -->
+            <rect x="0" y="0" width="62" height="24" rx="4" fill="#ffffff" stroke="#ef4444" stroke-width="1.4"/>
+            <rect x="0" y="8" width="62" height="8" fill="#dc2626"/>
+
+            <!-- Cab Windows & Tinted Glass -->
+            <path d="M 44,2 L 56,2 L 54,8 L 44,8 Z" fill="#38bdf8" opacity="0.9"/>
+            <rect x="26" y="2" width="14" height="6" rx="1" fill="#bae6fd" opacity="0.9"/>
+            <rect x="8" y="2" width="14" height="6" rx="1" fill="#bae6fd" opacity="0.9"/>
+
+            <!-- Red Medical Cross Emblem (+) on Roof & Side Panel -->
+            <circle cx="17" cy="12" r="5" fill="#ffffff"/>
+            <rect x="14" y="11" width="6" height="2" fill="#dc2626"/>
+            <rect x="16" y="9" width="2" height="6" fill="#dc2626"/>
+
+            <!-- Roof Siren Lightbar with High-Speed Alternating Strobes -->
+            <rect x="22" y="-3" width="18" height="4" rx="1.5" fill="#0f172a" stroke="#64748b" stroke-width="0.8"/>
+            <circle class="amb-beacon-red" cx="26" cy="-1" r="2.5" fill="#ef4444"/>
+            <circle class="amb-beacon-blue" cx="36" cy="-1" r="2.5" fill="#3b82f6"/>
+
+            <!-- Headlights & Taillights -->
+            <circle cx="61" cy="5" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.4"/>
+            <circle cx="61" cy="19" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.4"/>
+            <circle cx="1" cy="5" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="1.0"/>
+            <circle cx="1" cy="19" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="1.0"/>
           </g>
 
 
@@ -9381,6 +9454,7 @@
     class CrossroadsSoundscapeEngine {
       constructor() {
         this.ctx = null;
+        this.compressor = null;
         this.masterGain = null;
         this.ambientGain = null;
         this.rainGain = null;
@@ -9389,7 +9463,7 @@
         this.wasEnabled = false;
         this.isRaining = false;
         this.distantTimer = null;
-        this.volume = 0.22; // Master gain subtle and pleasant
+        this.volume = 0.75; // Master gain boosted for punchy clarity
         this.lastHoverTime = 0;
       }
 
@@ -9399,15 +9473,34 @@
         if (!AudioCtx) return;
         this.ctx = new AudioCtx();
 
+        // Master Dynamics Compressor prevents clipping at high volume
+        this.compressor = this.ctx.createDynamicsCompressor();
+        this.compressor.threshold.setValueAtTime(-15, this.ctx.currentTime);
+        this.compressor.knee.setValueAtTime(22, this.ctx.currentTime);
+        this.compressor.ratio.setValueAtTime(4.8, this.ctx.currentTime);
+        this.compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+        this.compressor.release.setValueAtTime(0.24, this.ctx.currentTime);
+
         this.masterGain = this.ctx.createGain();
         this.masterGain.gain.setValueAtTime(this.volume, this.ctx.currentTime);
-        this.masterGain.connect(this.ctx.destination);
+        this.masterGain.connect(this.compressor);
+        this.compressor.connect(this.ctx.destination);
 
         // 1. Warm Ambient City Hum (low frequencies)
         this.initCityHum();
 
         // 2. Continuous Monsoon Rain Generator (Filtered Noise Loop)
         this.initRainGenerator();
+
+        // User canvas interaction listener to ensure AudioContext resumes
+        const container = document.getElementById('dhakaCrossroadsContainer');
+        if (container) {
+          container.addEventListener('pointerdown', () => {
+            if (this.isActive && this.ctx && this.ctx.state === 'suspended') {
+              this.ctx.resume();
+            }
+          }, { passive: true });
+        }
       }
 
       initCityHum() {
@@ -9417,9 +9510,9 @@
 
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(130, this.ctx.currentTime);
+        filter.frequency.setValueAtTime(140, this.ctx.currentTime);
 
-        [55, 82.4].forEach(f => {
+        [55, 82.4, 110].forEach(f => {
           const osc = this.ctx.createOscillator();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(f, this.ctx.currentTime);
@@ -9453,7 +9546,7 @@
 
         const rainLp = this.ctx.createBiquadFilter();
         rainLp.type = 'lowpass';
-        rainLp.frequency.setValueAtTime(920, this.ctx.currentTime);
+        rainLp.frequency.setValueAtTime(950, this.ctx.currentTime);
         rainLp.Q.setValueAtTime(1.2, this.ctx.currentTime);
 
         this.rainGain = this.ctx.createGain();
@@ -9465,17 +9558,21 @@
         this.rainSource.start();
       }
 
-      start() {
+      async start() {
         this.init();
         if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
+          try {
+            await this.ctx.resume();
+          } catch (e) {
+            console.warn('AudioContext resume pending interaction', e);
+          }
         }
         this.isActive = true;
         this.wasEnabled = true;
 
-        // Fade in city hum gently
+        // Fade in city hum
         if (this.ambientGain && this.ctx) {
-          this.ambientGain.gain.setTargetAtTime(0.024, this.ctx.currentTime, 0.5);
+          this.ambientGain.gain.setTargetAtTime(0.045, this.ctx.currentTime, 0.4);
         }
 
         // Apply current weather rain state
@@ -9532,8 +9629,8 @@
       setRainMode(isRain) {
         this.isRaining = !!isRain;
         if (!this.isActive || !this.ctx || !this.rainGain) return;
-        const target = this.isRaining ? 0.08 : 0.0001;
-        this.rainGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.7);
+        const target = this.isRaining ? 0.14 : 0.0001;
+        this.rainGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.5);
       }
 
       startDistantSoundsTimer() {
@@ -9562,7 +9659,7 @@
         osc.frequency.setValueAtTime(2350 + Math.random() * 180, t);
 
         gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.linearRampToValueAtTime(0.035 * this.volume, t + 0.01);
+        gain.gain.linearRampToValueAtTime(0.055 * this.volume, t + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
 
         osc.connect(filter);
@@ -9585,7 +9682,7 @@
         osc.frequency.setValueAtTime(310 + Math.random() * 50, t);
 
         gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.linearRampToValueAtTime(0.03 * this.volume, t + 0.035);
+        gain.gain.linearRampToValueAtTime(0.048 * this.volume, t + 0.035);
         gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
 
         osc.connect(filter);
@@ -9599,7 +9696,7 @@
       playRickshawBell() {
         if (!this.isActive || !this.ctx) return;
         const now = this.ctx.currentTime;
-        [0, 0.13].forEach((delay, idx) => {
+        [0, 0.12].forEach((delay, idx) => {
           const t = now + delay;
           const f1 = idx === 0 ? 2450 : 2520;
           const f2 = idx === 0 ? 2840 : 2920;
@@ -9610,7 +9707,7 @@
             osc.type = pIdx === 0 ? 'sine' : 'triangle';
             osc.frequency.setValueAtTime(freq, t);
 
-            const peak = (pIdx === 0 ? 0.16 : 0.09) * this.volume;
+            const peak = (pIdx === 0 ? 0.32 : 0.20) * this.volume;
             gain.gain.setValueAtTime(0.0001, t);
             gain.gain.exponentialRampToValueAtTime(peak, t + 0.004);
             gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
@@ -9636,7 +9733,7 @@
           filter.type = 'lowpass';
           filter.frequency.setValueAtTime(800, now);
 
-          const peak = 0.13 * this.volume;
+          const peak = 0.26 * this.volume;
           gain.gain.setValueAtTime(0.0001, now);
           gain.gain.linearRampToValueAtTime(peak, now + 0.03);
           gain.gain.setValueAtTime(peak, now + 0.28);
@@ -9663,7 +9760,7 @@
         hFilter.Q.setValueAtTime(1.5, hissTime);
 
         const hGain = this.ctx.createGain();
-        hGain.gain.setValueAtTime(0.05 * this.volume, hissTime);
+        hGain.gain.setValueAtTime(0.12 * this.volume, hissTime);
         hGain.gain.exponentialRampToValueAtTime(0.0001, hissTime + 0.13);
 
         noise.connect(hFilter);
@@ -9684,7 +9781,7 @@
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, t);
 
-            const peak = 0.14 * this.volume;
+            const peak = 0.26 * this.volume;
             gain.gain.setValueAtTime(0.0001, t);
             gain.gain.linearRampToValueAtTime(peak, t + 0.01);
             gain.gain.setValueAtTime(peak, t + 0.05);
@@ -9708,7 +9805,7 @@
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, t);
           gain.gain.setValueAtTime(0.0001, t);
-          gain.gain.linearRampToValueAtTime(0.12 * this.volume, t + 0.015);
+          gain.gain.linearRampToValueAtTime(0.24 * this.volume, t + 0.015);
           gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
           osc.connect(gain);
           gain.connect(this.masterGain);
@@ -9726,7 +9823,7 @@
         osc1.type = 'sine';
         osc1.frequency.setValueAtTime(783.99, now);
         gain1.gain.setValueAtTime(0.0001, now);
-        gain1.gain.linearRampToValueAtTime(0.18 * this.volume, now + 0.02);
+        gain1.gain.linearRampToValueAtTime(0.34 * this.volume, now + 0.02);
         gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
         osc1.connect(gain1);
         gain1.connect(this.masterGain);
@@ -9740,7 +9837,7 @@
         osc2.type = 'sine';
         osc2.frequency.setValueAtTime(659.25, t2);
         gain2.gain.setValueAtTime(0.0001, t2);
-        gain2.gain.linearRampToValueAtTime(0.20 * this.volume, t2 + 0.02);
+        gain2.gain.linearRampToValueAtTime(0.38 * this.volume, t2 + 0.02);
         gain2.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.95);
         osc2.connect(gain2);
         gain2.connect(this.masterGain);
@@ -9758,14 +9855,110 @@
         osc.frequency.exponentialRampToValueAtTime(460, now + 2.2);
 
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.065 * this.volume, now + 0.25);
-        gain.gain.setValueAtTime(0.065 * this.volume, now + 1.5);
+        gain.gain.linearRampToValueAtTime(0.15 * this.volume, now + 0.25);
+        gain.gain.setValueAtTime(0.15 * this.volume, now + 1.5);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
 
         osc.connect(gain);
         gain.connect(this.masterGain);
         osc.start(now);
         osc.stop(now + 2.5);
+      }
+
+      // --- Emergency Ambulance / VIP Siren Sound Generator ---
+      startAmbulanceSiren() {
+        if (!this.isActive || !this.ctx) return null;
+        try {
+          const now = this.ctx.currentTime;
+
+          // Main carrier siren oscillator
+          const carrier = this.ctx.createOscillator();
+          carrier.type = 'sawtooth';
+          carrier.frequency.setValueAtTime(780, now);
+
+          // Siren LFO for authentic Dhaka wail modulation (~1.75 Hz oscillation between 620Hz and 940Hz)
+          const lfo = this.ctx.createOscillator();
+          lfo.type = 'triangle';
+          lfo.frequency.setValueAtTime(1.75, now);
+
+          const lfoGain = this.ctx.createGain();
+          lfoGain.gain.setValueAtTime(160, now);
+          lfo.connect(lfoGain);
+          lfoGain.connect(carrier.frequency);
+
+          // Bandpass filter for loud loudspeaker horn character
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(860, now);
+          filter.Q.setValueAtTime(1.8, now);
+
+          // Stereo panner for acoustic spatialization across the 1200px viewport
+          let panner = null;
+          if (typeof this.ctx.createStereoPanner === 'function') {
+            panner = this.ctx.createStereoPanner();
+            panner.pan.setValueAtTime(-0.8, now);
+          }
+
+          // Siren dynamic gain
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.24 * this.volume, now + 0.3);
+
+          carrier.connect(filter);
+          if (panner) {
+            filter.connect(panner);
+            panner.connect(gain);
+          } else {
+            filter.connect(gain);
+          }
+          gain.connect(this.masterGain);
+
+          lfo.start(now);
+          carrier.start(now);
+
+          return { carrier, lfo, lfoGain, filter, panner, gain };
+        } catch (err) {
+          console.warn('Ambulance siren init error:', err);
+          return null;
+        }
+      }
+
+      updateAmbulanceSiren(siren, xPos) {
+        if (!siren || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // Pan from -0.85 (far left) to +0.85 (far right)
+          if (siren.panner) {
+            const panVal = Math.max(-0.9, Math.min(0.9, (xPos - 600) / 450));
+            siren.panner.pan.setTargetAtTime(panVal, now, 0.05);
+          }
+          // Distance gain falloff curve (peaks in intersection 300px - 850px)
+          let distFactor = 1.0;
+          if (xPos < 200) {
+            distFactor = Math.max(0.1, (xPos + 180) / 380);
+          } else if (xPos > 850) {
+            distFactor = Math.max(0.05, 1 - (xPos - 850) / 450);
+          }
+          const targetVol = (0.32 * distFactor) * this.volume;
+          siren.gain.gain.setTargetAtTime(targetVol, now, 0.05);
+        } catch (e) {}
+      }
+
+      stopAmbulanceSiren(siren) {
+        if (!siren || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          siren.gain.gain.setTargetAtTime(0.0001, now, 0.15);
+          setTimeout(() => {
+            try {
+              siren.lfo.stop();
+              siren.carrier.stop();
+              siren.lfo.disconnect();
+              siren.carrier.disconnect();
+              siren.gain.disconnect();
+            } catch (e) {}
+          }, 200);
+        } catch (e) {}
       }
 
       updateUi() {
@@ -9856,6 +10049,59 @@
       const mrtBoardingBadge = document.getElementById('mrtPlatformBoardingBadge');
       const vehiclesLayer = document.getElementById('dhakaVehiclesLayer');
       const pedsLayer = document.getElementById('dhakaPedestriansLayer');
+
+      // Emergency Ambulance Priority Wave State & Controls
+      let emergencyWaveActive = false;
+      let ambulanceX = -180;
+      const AMBULANCE_SPEED = 245; // px/sec - high-speed priority wave
+      const AMBULANCE_LANE_Y = 438;
+      let ambulanceSirenObj = null;
+      let emergencyTimer = null;
+      let prevEmergencyGreenWave = false;
+      const ambEl = document.getElementById('emergencyAmbulanceVehicle');
+      const emBadge = document.getElementById('emergencyWaveAlertBadge');
+      const emBtn = document.getElementById('crossroadsEmergencyBtn');
+
+      function triggerEmergencyWave() {
+        if (emergencyWaveActive) return;
+        emergencyWaveActive = true;
+        ambulanceX = -180;
+
+        if (ambEl) {
+          ambEl.setAttribute('opacity', '1');
+          ambEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
+        }
+        if (emBadge) {
+          emBadge.classList.remove('hidden');
+          emBadge.style.opacity = '1';
+        }
+
+        if (window.crossroadsAudio && crossroadsAudio.isActive) {
+          ambulanceSirenObj = crossroadsAudio.startAmbulanceSiren();
+        }
+      }
+      window.triggerEmergencyWave = triggerEmergencyWave;
+
+      window.triggerEmergencyAudioIfActive = function() {
+        if (emergencyWaveActive && !ambulanceSirenObj && window.crossroadsAudio && crossroadsAudio.isActive) {
+          ambulanceSirenObj = crossroadsAudio.startAmbulanceSiren();
+        }
+      };
+
+      if (emBtn) {
+        emBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          triggerEmergencyWave();
+        });
+      }
+
+      // Automatically trigger periodic emergency vehicle wave every ~33s
+      if (emergencyTimer) clearInterval(emergencyTimer);
+      emergencyTimer = setInterval(() => {
+        if (!emergencyWaveActive && dhakaCrossroadsRunning) {
+          triggerEmergencyWave();
+        }
+      }, 33000);
 
       // Colors for signal states with sharp vibrant neon saturation
       const LAMP_COLORS = {
@@ -10258,18 +10504,21 @@
           accumulated += PHASES[i].duration;
         }
 
-        // Traffic Light Signal States
-        const isNSGreen = activePhase.nsLight === 'green';
-        const isNSYellow = activePhase.nsLight === 'yellow';
-        const isNSRed = activePhase.nsLight === 'red';
+        // Traffic Light Signal States & Emergency Priority Wave Override
+        const isEmergencyGreenWave = emergencyWaveActive && ambulanceX >= -100 && ambulanceX <= 780;
 
-        const isEWGreen = activePhase.ewLight === 'green';
-        const isEWYellow = activePhase.ewLight === 'yellow';
-        const isEWRed = activePhase.ewLight === 'red';
+        const isNSGreen = !isEmergencyGreenWave && activePhase.nsLight === 'green';
+        const isNSYellow = !isEmergencyGreenWave && activePhase.nsLight === 'yellow';
+        const isNSRed = isEmergencyGreenWave || activePhase.nsLight === 'red';
 
-        // 1. Update Traffic Lights visual lamps (cached on phase change)
-        if (activePhase.id !== prevPhaseId) {
+        const isEWGreen = isEmergencyGreenWave || activePhase.ewLight === 'green';
+        const isEWYellow = !isEmergencyGreenWave && activePhase.ewLight === 'yellow';
+        const isEWRed = !isEmergencyGreenWave && activePhase.ewLight === 'red';
+
+        // 1. Update Traffic Lights visual lamps (cached on phase change or emergency wave state change)
+        if (activePhase.id !== prevPhaseId || isEmergencyGreenWave !== prevEmergencyGreenWave) {
           prevPhaseId = activePhase.id;
+          prevEmergencyGreenWave = isEmergencyGreenWave;
 
           // NW & NE control North-South approaches
           if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
@@ -10291,11 +10540,17 @@
 
           // Update Live Status Badge
           if (badgeText && badgeDot) {
-            badgeText.innerText = activePhase.label;
-            badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
+            if (isEmergencyGreenWave) {
+              const isBn = typeof currentLanguage !== 'undefined' && currentLanguage === 'bn';
+              badgeText.innerText = isBn ? '🚑 জরুরি গ্রিন ওয়েভ · লেন খালি হচ্ছে' : '🚑 EMERGENCY GREEN WAVE · CORRIDOR CLEARED';
+              badgeDot.className = 'w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 animate-ping shrink-0';
+            } else {
+              badgeText.innerText = activePhase.label;
+              badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
+            }
             const badgeContainer = document.getElementById('trafficSignalBadge');
             if (badgeContainer) {
-              badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
+              badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${isEmergencyGreenWave ? 'text-red-400 border-red-500/60' : activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
             }
           }
         }
@@ -10369,7 +10624,10 @@
                 v.pos = Math.min(-140, minPos - v.w - 65);
                 v.speed = v.maxSpeed * 0.7;
               }
-              const laneY = v.lane === 1 ? 438 : 468;
+              let laneY = v.lane === 1 ? 438 : 468;
+              if (emergencyWaveActive && v.pos > ambulanceX - 50 && v.pos < ambulanceX + 260) {
+                laneY += 6; // Proactively nudge +6px toward the curb to yield right-of-way corridor
+              }
               if (v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
 
             } else if (v.dir === 'WB') {
@@ -10519,10 +10777,31 @@
           }
         });
 
+        // 4. Update Emergency Ambulance Priority Wave & Siren Audio
+        if (emergencyWaveActive) {
+          ambulanceX += AMBULANCE_SPEED * dt;
+          if (ambEl) {
+            ambEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
+          }
+          if (window.crossroadsAudio && ambulanceSirenObj) {
+            crossroadsAudio.updateAmbulanceSiren(ambulanceSirenObj, ambulanceX);
+          }
+          if (ambulanceX > 1320) {
+            // Ambulance has cleared the screen
+            emergencyWaveActive = false;
+            if (ambEl) ambEl.setAttribute('opacity', '0');
+            if (emBadge) emBadge.style.opacity = '0';
+            if (window.crossroadsAudio && ambulanceSirenObj) {
+              crossroadsAudio.stopAmbulanceSiren(ambulanceSirenObj);
+              ambulanceSirenObj = null;
+            }
+          }
+        }
+
         dhakaCrossroadsAnimId = requestAnimationFrame(tick);
       }
 
-      // 4. Interactive Hover & Tooltips for Metro Train & Mirpur 10 Station
+      // 5. Interactive Hover & Tooltips for Vehicles, Metro Train & Mirpur 10 Station
       const vTooltip = document.getElementById('crossroadsVehicleTooltip');
       const vTooltipIcon = document.getElementById('crossroadsVehicleTooltipIcon');
       const vTooltipText = document.getElementById('crossroadsVehicleTooltipText');
@@ -10552,6 +10831,9 @@
         } else if (item.type === 'station') {
           vTooltipIcon.textContent = '🚉';
           vTooltipText.textContent = isBn ? 'মিরপুর ১০ মেট্রো স্টেশন' : 'Mirpur 10 Metro Station · মিরপুর ১০';
+        } else if (item.type === 'ambulance') {
+          vTooltipIcon.textContent = '🚑';
+          vTooltipText.textContent = isBn ? 'জরুরি মেডিকেল রেসপন্স · প্রায়োরিটি গ্রিন ওয়েভ সক্রিয় (Emergency Ambulance)' : 'Emergency Medical Response · Priority Green Wave Active · Speed: 65 km/h';
         }
 
         moveVehicleTooltip(e);
@@ -10606,6 +10888,14 @@
         stationGroup.addEventListener('mouseleave', () => hideVehicleTooltip());
       }
 
+      if (ambEl) {
+        ambEl.addEventListener('mouseenter', (e) => {
+          showVehicleTooltip(e, { type: 'ambulance' });
+        });
+        ambEl.addEventListener('mousemove', (e) => moveVehicleTooltip(e));
+        ambEl.addEventListener('mouseleave', () => hideVehicleTooltip());
+      }
+
       // Start animation loop
       dhakaCrossroadsAnimId = requestAnimationFrame(tick);
 
@@ -10624,6 +10914,10 @@
               if (dhakaCrossroadsAnimId) {
                 cancelAnimationFrame(dhakaCrossroadsAnimId);
                 dhakaCrossroadsAnimId = null;
+              }
+              if (window.crossroadsAudio && ambulanceSirenObj) {
+                crossroadsAudio.stopAmbulanceSiren(ambulanceSirenObj);
+                ambulanceSirenObj = null;
               }
             }
           });
