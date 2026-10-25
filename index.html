@@ -555,6 +555,30 @@
       filter: drop-shadow(0 0 5px #38bdf8) drop-shadow(0 0 12px rgba(56, 189, 248, 0.85)) !important;
     }
 
+    /* Crossroads Interactive Telemetry Targets & Hover Feedback */
+    .interactive-hud-target {
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: filter 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
+    }
+    .interactive-hud-target:hover {
+      filter: drop-shadow(0 0 8px #38bdf8) drop-shadow(0 0 18px rgba(56, 189, 248, 0.9)) !important;
+    }
+    #crossroadsHudTooltip {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #f8fafc;
+      font-size: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 15px rgba(56, 189, 248, 0.25);
+      pointer-events: none !important;
+      max-width: 290px;
+      z-index: 9999 !important;
+    }
+
     /* Puddle Ripples Animation (Expanding Concentric Circles) */
     @keyframes crPuddleRipple {
       0% {
@@ -2239,6 +2263,19 @@
     <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
     <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase relative w-full h-full min-h-[100svh] overflow-hidden text-white select-none">
         
+        <!-- Interactive Hover Telemetry HUD Tooltip (Feature 2) -->
+        <div id="crossroadsHudTooltip" class="fixed pointer-events-none z-50 transition-all duration-150 opacity-0 -translate-y-2 max-w-[290px]">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span id="hudBadgeIcon" class="text-base select-none">🚇</span>
+            <h4 id="hudBadgeTitle" class="text-xs font-bold text-sky-300 tracking-wide uppercase select-none">MRT Line-6 (Mirpur 10)</h4>
+          </div>
+          <p id="hudBadgeDetails" class="text-[11px] font-medium leading-relaxed text-slate-200 select-none">Next train: 4 mins · Base Fare: ৳20 · Status: On Time</p>
+          <div id="hudBadgeFooter" class="mt-2 flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-700/60 pt-1.5 font-mono select-none">
+            <span id="hudBadgeSpeed">Speed: 42 km/h</span>
+            <span id="hudBadgeZone" class="text-emerald-400 font-semibold">● Live Active</span>
+          </div>
+        </div>
+        
         <!-- Top-Left HUD Header: Transit Grid & Slogan -->
         <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-20 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
@@ -2297,59 +2334,59 @@
               <stop offset="100%" stop-color="#1e293b"/>
             </linearGradient>
 
-            <!-- Building Facade Gradients -->
+            <!-- High-Luminance Building Facade Gradients (Vibrant Architectural Hues) -->
             <linearGradient id="bldgTealGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#0d9488"/>
-              <stop offset="50%" stop-color="#115e59"/>
-              <stop offset="100%" stop-color="#042f2e"/>
+              <stop offset="0%" stop-color="#14b8a6"/>
+              <stop offset="45%" stop-color="#0d9488"/>
+              <stop offset="100%" stop-color="#115e59"/>
             </linearGradient>
 
             <linearGradient id="bldgOrangeGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#ea580c"/>
-              <stop offset="50%" stop-color="#9a3412"/>
-              <stop offset="100%" stop-color="#431407"/>
+              <stop offset="0%" stop-color="#fb923c"/>
+              <stop offset="45%" stop-color="#ea580c"/>
+              <stop offset="100%" stop-color="#9a3412"/>
             </linearGradient>
 
             <linearGradient id="bldgCreamGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#fef3c7"/>
-              <stop offset="50%" stop-color="#d97706"/>
-              <stop offset="100%" stop-color="#78350f"/>
+              <stop offset="0%" stop-color="#fef08a"/>
+              <stop offset="50%" stop-color="#fde047"/>
+              <stop offset="100%" stop-color="#d97706"/>
             </linearGradient>
 
             <linearGradient id="bldgRedGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#dc2626"/>
-              <stop offset="50%" stop-color="#991b1b"/>
-              <stop offset="100%" stop-color="#450a0a"/>
+              <stop offset="0%" stop-color="#f87171"/>
+              <stop offset="45%" stop-color="#dc2626"/>
+              <stop offset="100%" stop-color="#991b1b"/>
             </linearGradient>
 
             <linearGradient id="bldgBlueGrad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#38bdf8"/>
-              <stop offset="50%" stop-color="#0284c7"/>
-              <stop offset="100%" stop-color="#0c2340"/>
+              <stop offset="45%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0369a1"/>
             </linearGradient>
 
             <linearGradient id="bldgPurpleGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#c084fc"/>
-              <stop offset="50%" stop-color="#7e22ce"/>
-              <stop offset="100%" stop-color="#3b0764"/>
+              <stop offset="0%" stop-color="#d8b4fe"/>
+              <stop offset="45%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#6b21a8"/>
             </linearGradient>
 
             <linearGradient id="bldgCoralGrad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#fb7185"/>
-              <stop offset="50%" stop-color="#e11d48"/>
-              <stop offset="100%" stop-color="#881337"/>
+              <stop offset="45%" stop-color="#e11d48"/>
+              <stop offset="100%" stop-color="#9f1239"/>
             </linearGradient>
 
             <linearGradient id="bldgAmberGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#fbbf24"/>
-              <stop offset="50%" stop-color="#d97706"/>
-              <stop offset="100%" stop-color="#78350f"/>
+              <stop offset="0%" stop-color="#fde047"/>
+              <stop offset="45%" stop-color="#fbbf24"/>
+              <stop offset="100%" stop-color="#b45309"/>
             </linearGradient>
 
             <linearGradient id="bldgTurquoiseGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#2dd4bf"/>
-              <stop offset="50%" stop-color="#0d9488"/>
-              <stop offset="100%" stop-color="#134e4a"/>
+              <stop offset="0%" stop-color="#5eead4"/>
+              <stop offset="45%" stop-color="#14b8a6"/>
+              <stop offset="100%" stop-color="#0f766e"/>
             </linearGradient>
 
             <linearGradient id="stationRoofGrad" x1="0" y1="0" x2="0" y2="1">
