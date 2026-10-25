@@ -477,15 +477,6 @@
       }
     }
 
-    /* Monsoon Rain & Wet Asphalt Puddle Shimmer */
-    @keyframes wetPuddleShimmer {
-      0%, 100% { opacity: 0.45; }
-      50% { opacity: 0.85; }
-    }
-    .wet-puddle-shimmer {
-      animation: wetPuddleShimmer 3.2s ease-in-out infinite;
-    }
-
     /* =========================================================
        Interactive Map Animations (Route Snake, Vehicle & Pins)
        ========================================================= */
@@ -1731,11 +1722,6 @@
 
         <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
         <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2">
-          <!-- Dynamic Monsoon Weather Mode Toggle Button -->
-          <button type="button" id="landingWeatherToggleBtn" onclick="toggleCrossroadsWeather()" class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-sky-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1 cursor-pointer shrink-0" title="Toggle Monsoon Rain Mode / বৃষ্টির আবহাওয়া">
-            <span id="landingWeatherIcon">🌧️</span>
-            <span id="landingWeatherText" class="hidden sm:inline">Monsoon Rain</span>
-          </button>
           <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
             <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <span id="trafficSignalText" class="truncate">🚦 N-S GREEN · TRAFFIC FLOWING</span>
@@ -1853,42 +1839,6 @@
 
             <filter id="crHeadlightBeam" x="-30%" y="-30%" width="160%" height="160%">
               <feGaussianBlur stdDeviation="6"/>
-            </filter>
-
-            <!-- Monsoon Rain & Street Reflection Gradients -->
-            <radialGradient id="crWetPuddleGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
-              <stop offset="55%" stop-color="#0284c7" stop-opacity="0.2"/>
-              <stop offset="85%" stop-color="#0f172a" stop-opacity="0.5"/>
-              <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
-            </radialGradient>
-
-            <linearGradient id="crGreenReflectGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#22c55e" stop-opacity="0.6"/>
-              <stop offset="50%" stop-color="#16a34a" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
-            </linearGradient>
-
-            <linearGradient id="crRedReflectGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ef4444" stop-opacity="0.6"/>
-              <stop offset="50%" stop-color="#b91c1c" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
-            </linearGradient>
-
-            <linearGradient id="crYellowReflectGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#eab308" stop-opacity="0.6"/>
-              <stop offset="50%" stop-color="#ca8a04" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#eab308" stop-opacity="0"/>
-            </linearGradient>
-
-            <linearGradient id="crRainMistGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#0c4a6e" stop-opacity="0.4"/>
-              <stop offset="50%" stop-color="#082f49" stop-opacity="0.25"/>
-              <stop offset="100%" stop-color="#020617" stop-opacity="0.5"/>
-            </linearGradient>
-
-            <filter id="crWetReflectionBlur" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="8"/>
             </filter>
           </defs>
 
@@ -2421,40 +2371,6 @@
           <!-- Central Intersection Junction Box Area -->
           <rect x="490" y="340" width="220" height="160" fill="#172033"/>
 
-          <!-- ========================================================
-               4B. WET ASPHALT PUDDLES & TRAFFIC SIGNAL LIGHT REFLECTIONS
-               ======================================================== -->
-          <g id="dhakaWetAsphaltLayer" class="transition-opacity duration-700 pointer-events-none" opacity="0">
-            <!-- Glistening Water Puddle Patches across Intersection -->
-            <g fill="url(#crWetPuddleGrad)">
-              <!-- NW Quadrant Puddle -->
-              <ellipse cx="530" cy="385" rx="55" ry="24" transform="rotate(-5 530 385)" class="wet-puddle-shimmer" />
-              <!-- Center Crossroads Puddle -->
-              <ellipse cx="610" cy="425" rx="75" ry="32" transform="rotate(2 610 425)" class="wet-puddle-shimmer" />
-              <!-- Westbound Road Puddle -->
-              <ellipse cx="330" cy="385" rx="60" ry="18" class="wet-puddle-shimmer" />
-              <!-- Eastbound Road Puddle -->
-              <ellipse cx="880" cy="455" rx="70" ry="22" class="wet-puddle-shimmer" />
-              <!-- South Approach Puddle -->
-              <ellipse cx="605" cy="590" rx="48" ry="28" class="wet-puddle-shimmer" />
-              <!-- North Approach Puddle -->
-              <ellipse cx="595" cy="240" rx="42" ry="20" class="wet-puddle-shimmer" />
-            </g>
-
-            <!-- Dynamic Traffic Signal Wet Road Light Reflections -->
-            <!-- Vertically elongated diffuse light reflections mirroring active signal lamps onto wet asphalt -->
-            <g id="dhakaSignalReflectionsLayer" filter="url(#crWetReflectionBlur)" opacity="0.85">
-              <!-- North-South Signal Road Reflections (North, South, and Center approaches) -->
-              <ellipse id="reflect_ns_north" cx="545" cy="270" rx="22" ry="55" fill="url(#crGreenReflectGrad)" />
-              <ellipse id="reflect_ns_center" cx="600" cy="420" rx="30" ry="75" fill="url(#crGreenReflectGrad)" />
-              <ellipse id="reflect_ns_south" cx="655" cy="570" rx="22" ry="55" fill="url(#crGreenReflectGrad)" />
-
-              <!-- East-West Signal Road Reflections (West and East Approaches) -->
-              <ellipse id="reflect_ew_west" cx="420" cy="440" rx="55" ry="20" fill="url(#crRedReflectGrad)" />
-              <ellipse id="reflect_ew_east" cx="780" cy="400" rx="55" ry="20" fill="url(#crRedReflectGrad)" />
-            </g>
-          </g>
-
           <!-- Center Yellow Dividers -->
           <!-- East-West Center Line -->
           <line x1="0" y1="420" x2="450" y2="420" stroke="#f59e0b" stroke-width="2.5"/>
@@ -2657,24 +2573,6 @@
           <g id="dhakaPedestriansLayer">
             <!-- Pedestrian figures walking across zebra stripes or waiting at curbs -->
           </g>
-
-
-          <!-- ========================================================
-               10. DYNAMIC MONSOON WEATHER OVERLAYS: RAIN, SPLASHES & MIST
-               ======================================================== -->
-          <!-- Puddle Water Splash Ripples Layer (Expanding and fading circles on wet asphalt) -->
-          <g id="dhakaRainSplashesLayer" pointer-events-none>
-            <!-- Instantiated and updated dynamically in simulation tick -->
-          </g>
-
-          <!-- Slanted Monsoon Rain Streaks Layer -->
-          <g id="dhakaRainStreaksLayer" pointer-events-none opacity="0" class="transition-opacity duration-700">
-            <!-- Falling rain lines driven by requestAnimationFrame -->
-          </g>
-
-          <!-- Atmospheric Monsoon Storm Mist & Lightning Vignette -->
-          <rect id="dhakaRainMist" x="0" y="0" width="1200" height="700" fill="url(#crRainMistGrad)" opacity="0" class="transition-opacity duration-1000 pointer-events-none" />
-          <rect id="dhakaLightningFlash" x="0" y="0" width="1200" height="700" fill="#bae6fd" opacity="0" class="pointer-events-none transition-opacity duration-150" />
 
           </svg>
         </div>
@@ -5969,41 +5867,11 @@
       }
     }
 
-    function syncLandingWeatherButton() {
-      const btn = document.getElementById('landingWeatherToggleBtn');
-      const icon = document.getElementById('landingWeatherIcon');
-      const text = document.getElementById('landingWeatherText');
-      if (!btn) return;
-      const isRain = isHeavyRain || rainFareMode === 'rain' || (rainFareMode === 'auto' && dhakaRainDetected === true);
-      if (isRain) {
-        btn.className = 'px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-sky-950/90 hover:bg-sky-900 text-sky-200 border border-sky-400 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-[0_0_15px_rgba(56,189,248,0.4)] active:scale-95 flex items-center gap-1 cursor-pointer shrink-0';
-        if (icon) icon.innerText = '🌧️';
-        if (text) text.innerText = 'Rain Active';
-      } else {
-        btn.className = 'px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1 cursor-pointer shrink-0';
-        if (icon) icon.innerText = '☀️';
-        if (text) text.innerText = 'Clear Sky';
-      }
-    }
-
-    function toggleCrossroadsWeather() {
-      const isRain = isHeavyRain || rainFareMode === 'rain' || (rainFareMode === 'auto' && dhakaRainDetected === true);
-      if (isRain) {
-        rainFareMode = 'dry';
-      } else {
-        rainFareMode = 'rain';
-      }
-      const select = document.getElementById('rainModeSelect');
-      if (select) select.value = rainFareMode;
-      updateRainFareState();
-    }
-
     function updateRainFareState() {
       isHeavyRain = rainFareMode === 'rain' ||
         (rainFareMode === 'auto' && dhakaRainDetected === true);
       renderDhakaWeatherStatus();
       renderMetricsAndFares();
-      syncLandingWeatherButton();
     }
 
     async function refreshDhakaWeather() {
@@ -8432,65 +8300,6 @@
       const vehiclesLayer = document.getElementById('dhakaVehiclesLayer');
       const pedsLayer = document.getElementById('dhakaPedestriansLayer');
 
-      // Monsoon Weather Elements
-      const rainStreaksLayer = document.getElementById('dhakaRainStreaksLayer');
-      const splashesLayer = document.getElementById('dhakaRainSplashesLayer');
-      const wetAsphaltLayer = document.getElementById('dhakaWetAsphaltLayer');
-      const rainMistEl = document.getElementById('dhakaRainMist');
-      const lightningEl = document.getElementById('dhakaLightningFlash');
-
-      // Sync landing weather toggle button
-      if (typeof syncLandingWeatherButton === 'function') syncLandingWeatherButton();
-
-      // Initialize Rain Drops (70 slanted streaks for authentic Dhaka monsoon downpour)
-      const RAIN_COUNT = 70;
-      const rainDrops = [];
-      if (rainStreaksLayer) {
-        rainStreaksLayer.innerHTML = '';
-        for (let i = 0; i < RAIN_COUNT; i++) {
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          line.setAttribute('stroke', '#7dd3fc');
-          line.setAttribute('stroke-width', (1 + Math.random() * 0.8).toFixed(1));
-          line.setAttribute('opacity', (0.35 + Math.random() * 0.45).toFixed(2));
-          line.setAttribute('stroke-linecap', 'round');
-          rainStreaksLayer.appendChild(line);
-
-          rainDrops.push({
-            el: line,
-            x: Math.random() * 1350 - 100,
-            y: Math.random() * 750,
-            length: 16 + Math.random() * 14,
-            speed: 550 + Math.random() * 250,
-            slant: 0.35
-          });
-        }
-      }
-
-      // Initialize Water Splash Ripples (10 active ripple rings on wet asphalt & crosswalks)
-      const SPLASH_COUNT = 10;
-      const splashes = [];
-      if (splashesLayer) {
-        splashesLayer.innerHTML = '';
-        for (let i = 0; i < SPLASH_COUNT; i++) {
-          const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-          ellipse.setAttribute('stroke', '#38bdf8');
-          ellipse.setAttribute('stroke-width', '0.9');
-          ellipse.setAttribute('fill', 'none');
-          ellipse.setAttribute('opacity', '0');
-          splashesLayer.appendChild(ellipse);
-
-          splashes.push({
-            el: ellipse,
-            x: 0,
-            y: 0,
-            rx: 0,
-            ry: 0,
-            maxRx: 6 + Math.random() * 8,
-            progress: 1
-          });
-        }
-      }
-
       // Colors for signal states
       const LAMP_COLORS = {
         red_on: '#ef4444', red_off: '#3b0707',
@@ -8657,7 +8466,193 @@
               g.innerHTML = `
                 <polygon points="12,76 2,135 22,135" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
                 <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
-                <rect x="0" y="4" width="3" height="68" rx="1" fill="#fffff
+                <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
+                <rect x="4" y="56" width="16" height="4" fill="#fef08a"/>
+                <rect x="4" y="60" width="16" height="12" rx="1" fill="#7dd3fc"/>
+                <circle cx="6" cy="75" r="1.8" fill="#ffffff"/>
+                <circle cx="18" cy="75" r="1.8" fill="#ffffff"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ef4444"/>
+                <circle cx="18" cy="1" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'car') {
+              g.innerHTML = `
+                <polygon points="10,44 2,90 18,90" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="5" cy="43" r="1.8" fill="#ffffff"/>
+                <circle cx="15" cy="43" r="1.8" fill="#ffffff"/>
+                <circle cx="5" cy="1" r="1.8" fill="#ef4444"/>
+                <circle cx="15" cy="1" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'cng') {
+              g.innerHTML = `
+                <polygon points="8,32 0,70 16,70" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
+                <circle cx="8" cy="30" r="2" fill="#fef08a"/>
+                <circle cx="8" cy="1" r="1.5" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'rickshaw') {
+              g.innerHTML = `
+                <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
+                <circle cx="9" cy="28" r="2.5" fill="#fde047"/>
+                <circle cx="9" cy="32" r="3" fill="#0f172a"/>
+              `;
+            } else if (v.type === 'bike') {
+              g.innerHTML = `
+                <polygon points="6,23 1,60 11,60" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
+                <circle cx="6" cy="10" r="2.5" fill="#38bdf8"/>
+                <circle cx="6" cy="22" r="1.8" fill="#ffffff"/>
+              `;
+            }
+          } else if (v.dir === 'NB') {
+            // Northbound (Facing up)
+            if (v.type === 'bus') {
+              g.innerHTML = `
+                <polygon points="12,0 2,-60 22,-60" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
+                <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
+                <rect x="4" y="16" width="16" height="4" fill="#fef08a"/>
+                <rect x="4" y="4" width="16" height="12" rx="1" fill="#7dd3fc"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="18" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="6" cy="75" r="1.8" fill="#ef4444"/>
+                <circle cx="18" cy="75" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'car') {
+              g.innerHTML = `
+                <polygon points="10,0 2,-46 18,-46" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
+                <circle cx="5" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="15" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="5" cy="43" r="1.8" fill="#ef4444"/>
+                <circle cx="15" cy="43" r="1.8" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'cng') {
+              g.innerHTML = `
+                <polygon points="8,0 0,-38 16,-38" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
+                <circle cx="8" cy="1" r="2" fill="#fef08a"/>
+                <circle cx="8" cy="30" r="1.5" fill="#ef4444"/>
+              `;
+            } else if (v.type === 'rickshaw') {
+              g.innerHTML = `
+                <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
+                <circle cx="9" cy="6" r="2.5" fill="#fde047"/>
+                <circle cx="9" cy="2" r="3" fill="#0f172a"/>
+              `;
+            } else if (v.type === 'bike') {
+              g.innerHTML = `
+                <polygon points="6,1 1,-36 11,-36" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
+                <circle cx="6" cy="12" r="2.5" fill="#38bdf8"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ffffff"/>
+              `;
+            }
+          }
+          vehiclesLayer.appendChild(g);
+          v.el = g;
+        });
+      }
+
+      // 2. Initialize Pedestrians across the 4 Zebra Crossings
+      const pedestrians = [
+        // North Zebra (Horizontal, y=323, x: 505 -> 695)
+        { id: 'ped_n1', axis: 'H', y: 320, start: 505, end: 695, color: '#38bdf8' },
+        { id: 'ped_n2', axis: 'H', y: 327, start: 690, end: 510, color: '#facc15' },
+        // South Zebra (Horizontal, y=518, x: 505 -> 695)
+        { id: 'ped_s1', axis: 'H', y: 515, start: 505, end: 695, color: '#ec4899' },
+        { id: 'ped_s2', axis: 'H', y: 522, start: 690, end: 510, color: '#34d399' },
+        // West Zebra (Vertical, x=473, y: 350 -> 490)
+        { id: 'ped_w1', axis: 'V', x: 470, start: 350, end: 490, color: '#818cf8' },
+        { id: 'ped_w2', axis: 'V', x: 476, start: 485, end: 355, color: '#fb923c' },
+        // East Zebra (Vertical, x=727, y: 350 -> 490)
+        { id: 'ped_e1', axis: 'V', x: 724, start: 350, end: 490, color: '#38bdf8' },
+        { id: 'ped_e2', axis: 'V', x: 730, start: 485, end: 355, color: '#fef08a' }
+      ];
+
+      if (pedsLayer) {
+        pedsLayer.innerHTML = '';
+        pedestrians.forEach(p => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('id', p.id);
+          g.innerHTML = `
+            <circle cx="0" cy="-6" r="2.8" fill="#fed7aa"/>
+            <rect x="-2.2" y="-3.5" width="4.4" height="6.5" rx="1" fill="${p.color}"/>
+            <line x1="-1.2" y1="3" x2="-1.2" y2="7" stroke="#1e293b" stroke-width="1.2"/>
+            <line x1="1.2" y1="3" x2="1.2" y2="7" stroke="#1e293b" stroke-width="1.2"/>
+          `;
+          pedsLayer.appendChild(g);
+          p.el = g;
+        });
+      }
+
+      let lastTime = performance.now();
+      let cycleTimer = 0;
+      let trainX = 150;
+
+      // Animation Loop
+      function tick(currentTime) {
+        if (!dhakaCrossroadsRunning) return;
+        const dt = Math.min(0.08, (currentTime - lastTime) / 1000);
+        lastTime = currentTime;
+
+        if (!prefersReducedMotion) {
+          cycleTimer = (cycleTimer + dt * 1000) % TOTAL_CYCLE;
+          trainX += 62 * dt;
+          if (trainX > 1400) trainX = -320;
+          if (trainEl) {
+            trainEl.setAttribute('transform', `translate(${trainX.toFixed(1)}, 88)`);
+          }
+        }
+
+        // Determine current traffic phase
+        let accumulated = 0;
+        let activePhase = PHASES[0];
+        let phaseElapsed = 0;
+
+        for (let i = 0; i < PHASES.length; i++) {
+          if (cycleTimer >= accumulated && cycleTimer < accumulated + PHASES[i].duration) {
+            activePhase = PHASES[i];
+            phaseElapsed = cycleTimer - accumulated;
+            break;
+          }
+          accumulated += PHASES[i].duration;
+        }
+
+        // 1. Update Traffic Lights visual lamps
+        const isNSGreen = activePhase.nsLight === 'green';
+        const isNSYellow = activePhase.nsLight === 'yellow';
+        const isNSRed = activePhase.nsLight === 'red';
+
+        const isEWGreen = activePhase.ewLight === 'green';
+        const isEWYellow = activePhase.ewLight === 'yellow';
+        const isEWRed = activePhase.ewLight === 'red';
+
+        // NW & NE control North-South approaches
+        if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.nw_yellow) sigLamps.nw_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.nw_green) sigLamps.nw_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        if (sigLamps.ne_red) sigLamps.ne_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.ne_yellow) sigLamps.ne_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.ne_green) sigLamps.ne_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        // SW & SE control East-West approaches
+        if (sigLamps.sw_red) sigLamps.sw_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.sw_yellow) sigLamps.sw_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.sw_green) sigLamps.sw_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        if (sigLamps.se_red) sigLamps.se_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+        if (sigLamps.se_yellow) sigLamps.se_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+        if (sigLamps.se_green) sigLamps.se_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+        // Update Live Status Badge
+        if (badgeText && badgeDot) {
+          badgeText.innerText = activePhase.label;
+          badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
+          const badgeContainer = document.getElementById('trafficSignalBadge');
+          if (badgeContainer) {
+            badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
           }
         }
 
@@ -8812,78 +8807,6 @@
           }
         });
 
-        // 4. Update Monsoon Weather Simulation (Rain streaks, street puddles, splashes & reflections)
-        const isRainActive = isHeavyRain || rainFareMode === 'rain' || (rainFareMode === 'auto' && dhakaRainDetected === true);
-
-        if (wetAsphaltLayer) wetAsphaltLayer.setAttribute('opacity', isRainActive ? '1' : '0');
-        if (rainStreaksLayer) rainStreaksLayer.setAttribute('opacity', isRainActive ? '1' : '0');
-        if (rainMistEl) rainMistEl.setAttribute('opacity', isRainActive ? '0.22' : '0');
-
-        if (isRainActive) {
-          // (a) Animate Slanted Rain Streaks
-          for (let i = 0; i < rainDrops.length; i++) {
-            const d = rainDrops[i];
-            d.x += d.speed * d.slant * dt;
-            d.y += d.speed * dt;
-            if (d.y > 720 || d.x > 1250) {
-              d.y = -30 - Math.random() * 40;
-              d.x = Math.random() * 1400 - 150;
-            }
-            d.el.setAttribute('x1', d.x.toFixed(1));
-            d.el.setAttribute('y1', d.y.toFixed(1));
-            d.el.setAttribute('x2', (d.x - d.length * d.slant).toFixed(1));
-            d.el.setAttribute('y2', (d.y - d.length).toFixed(1));
-          }
-
-          // (b) Animate Expanding Water Splash Ripples on Wet Road
-          for (let i = 0; i < splashes.length; i++) {
-            const s = splashes[i];
-            s.progress += dt * 1.8;
-            if (s.progress >= 1) {
-              s.progress = 0;
-              if (Math.random() < 0.5) {
-                // Horizontal road surface
-                s.x = Math.random() * 1200;
-                s.y = 350 + Math.random() * 135;
-              } else {
-                // Vertical road / intersection
-                s.x = 500 + Math.random() * 200;
-                s.y = 180 + Math.random() * 500;
-              }
-            }
-            s.rx = s.maxRx * s.progress;
-            s.ry = s.rx * 0.42; // perspective foreshortening
-            const splashOpacity = Math.max(0, (1 - s.progress) * 0.75);
-            s.el.setAttribute('cx', s.x.toFixed(1));
-            s.el.setAttribute('cy', s.y.toFixed(1));
-            s.el.setAttribute('rx', s.rx.toFixed(1));
-            s.el.setAttribute('ry', s.ry.toFixed(1));
-            s.el.setAttribute('opacity', splashOpacity.toFixed(2));
-          }
-
-          // (c) Update Dynamic Traffic Signal Wet Road Light Reflections
-          const refNSNorth = document.getElementById('reflect_ns_north');
-          const refNSCenter = document.getElementById('reflect_ns_center');
-          const refNSSouth = document.getElementById('reflect_ns_south');
-          const refEWWest = document.getElementById('reflect_ew_west');
-          const refEWEast = document.getElementById('reflect_ew_east');
-
-          const nsGrad = isNSGreen ? 'url(#crGreenReflectGrad)' : (isNSYellow ? 'url(#crYellowReflectGrad)' : 'url(#crRedReflectGrad)');
-          const ewGrad = isEWGreen ? 'url(#crGreenReflectGrad)' : (isEWYellow ? 'url(#crYellowReflectGrad)' : 'url(#crRedReflectGrad)');
-
-          if (refNSNorth) refNSNorth.setAttribute('fill', nsGrad);
-          if (refNSCenter) refNSCenter.setAttribute('fill', nsGrad);
-          if (refNSSouth) refNSSouth.setAttribute('fill', nsGrad);
-          if (refEWWest) refEWWest.setAttribute('fill', ewGrad);
-          if (refEWEast) refEWEast.setAttribute('fill', ewGrad);
-
-          // (d) Subtle Occasional Monsoon Soft Lightning Flash (approx every 20-30s)
-          if (lightningEl && Math.random() < dt * 0.04) {
-            lightningEl.setAttribute('opacity', '0.14');
-            setTimeout(() => { if (lightningEl) lightningEl.setAttribute('opacity', '0'); }, 140);
-          }
-        }
-
         dhakaCrossroadsAnimId = requestAnimationFrame(tick);
       }
 
@@ -8954,9 +8877,6 @@
         }
         if (typeof initDhakaCrossroadsSimulation === 'function') {
           initDhakaCrossroadsSimulation();
-        }
-        if (typeof syncLandingWeatherButton === 'function') {
-          syncLandingWeatherButton();
         }
         if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       }
