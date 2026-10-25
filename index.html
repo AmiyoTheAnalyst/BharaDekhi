@@ -8584,41 +8584,6 @@
             dashArray: '6, 8',
             opacity: 0.95
           }).addTo(transitMapLayerGroup);
-          feeder2.bindTooltip(getLocalizedText('Last-Mile Feeder'), { sticky: true });
-        }
-
-        allLatLngs.push([destination.lat, destination.lng]);
-        if (allLatLngs.length > 1) {
-          map.fitBounds(L.latLngBounds(allLatLngs), { padding: [45, 45] });
-        }
-      } else if (mode === 'bus' && pickup && destination) {
-        if (routePolyline) {
-          routePolyline.setStyle({ opacity: 0.15, dashArray: '4, 8' });
-        }
-        if (vehicleMarker) {
-          vehicleMarker.setOpacity(0.15);
-        }
-
-        const allLatLngs = [];
-        allLatLngs.push([pickup.lat, pickup.lng]);
-
-        const dhakaTime = getDhakaTimeInfo();
-        const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
-        const matches = typeof getBusRouteMatches === 'function' ? getBusRouteMatches(pickupKey, dropoffKey) : [];
-        const hybridMatches = typeof getBusHybridMatches === 'function' ? getBusHybridMatches(pickup, destination, isPeak, matches) : [];
-
-        if (matches.length > 0) {
-          const busRoute = L.polyline([[pickup.lat, pickup.lng], [destination.lat, destination.lng]], {
-            color: '#10b981',
-            weight: 6,
-            opacity: 0.95,
-            lineCap: 'round',
-            lineJoin: 'round'
-          }).addTo(transitMapLayerGroup);
-          busRoute.bindTooltip(`🚌 Bus Corridor: ${matches[0].service}`, { sticky: true });
-
-          const busIcon = L.divIcon({
-            className: 'bus-map-marker-pin',
             html: `
               <div style="background: linear-gradient(135deg, #059669, #047857); color: #fff; border: 2px solid #ffffff; border-radius: 9999px; padding: 4px 10px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.6); white-space: nowrap; transform: translate(-50%, -100%);">
                 <span>🚌</span>
