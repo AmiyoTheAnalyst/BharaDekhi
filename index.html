@@ -1449,10 +1449,15 @@
     .star-twinkle-3 { animation: starTwinkle 2.8s ease-in-out infinite 0.7s; }
 
     @keyframes windowGlowPulse {
-      0%, 100% { opacity: 0.92; }
-      50% { opacity: 1; }
+      0%, 100% { opacity: 1; }
     }
-    .window-glow-pulse { animation: windowGlowPulse 3s ease-in-out infinite; }
+    .window-glow-pulse { opacity: 1 !important; }
+    #dhakaCrossroadsSvg {
+      transform: translateZ(0);
+    }
+    #dhakaVehiclesLayer, #crossroadsMetroTrain, #dhakaPedestriansLayer {
+      will-change: transform;
+    }
 
     @keyframes beaconBlink {
       0%, 100% { opacity: 0.2; }
@@ -2395,29 +2400,25 @@
               <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#059669" flood-opacity="0.7"/>
             </filter>
 
-            <!-- Super-Bright Dhaka Building Window Bloom Filters -->
-            <filter id="crWindowGlowAmber" x="-60%" y="-60%" width="220%" height="220%">
+            <!-- Super-Bright Dhaka Building Window Bloom Filters (Optimized for 60/120fps GPU performance) -->
+            <filter id="crWindowGlowAmber" x="-30%" y="-30%" width="160%" height="160%">
               <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#ffffff" flood-opacity="0.95"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#fde047" flood-opacity="0.95"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#f59e0b" flood-opacity="0.8"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="4.5" flood-color="#fde047" flood-opacity="0.95"/>
             </filter>
-            <filter id="crWindowGlowCyan" x="-60%" y="-60%" width="220%" height="220%">
+            <filter id="crWindowGlowCyan" x="-30%" y="-30%" width="160%" height="160%">
               <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#ffffff" flood-opacity="0.95"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#67e8f9" flood-opacity="0.95"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#0284c7" flood-opacity="0.8"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="4.5" flood-color="#67e8f9" flood-opacity="0.95"/>
             </filter>
-            <filter id="crWindowGlowMagenta" x="-60%" y="-60%" width="220%" height="220%">
+            <filter id="crWindowGlowMagenta" x="-30%" y="-30%" width="160%" height="160%">
               <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#ffffff" flood-opacity="0.95"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#f0abfc" flood-opacity="0.95"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#a855f7" flood-opacity="0.8"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="4.5" flood-color="#f0abfc" flood-opacity="0.95"/>
             </filter>
 
-            <filter id="crTaillightGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <filter id="crTaillightGlow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#ff2a54" flood-opacity="1"/>
-              <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#ff1744" flood-opacity="0.8"/>
             </filter>
 
-            <filter id="crSignalGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <filter id="crSignalGlow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2.5" result="blur"/>
               <feMerge>
                 <feMergeNode in="blur"/>
@@ -2426,15 +2427,15 @@
             </filter>
 
             <filter id="crStreetlampGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="18"/>
+              <feGaussianBlur stdDeviation="12"/>
             </filter>
 
-            <filter id="crHeadlightBeam" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="6"/>
+            <filter id="crHeadlightBeam" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3.5"/>
             </filter>
 
-            <filter id="crHeadlightBeamGlow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="4.5" result="beamBlur"/>
+            <filter id="crHeadlightBeamGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="2.5" result="beamBlur"/>
               <feMerge>
                 <feMergeNode in="beamBlur"/>
                 <feMergeNode in="SourceGraphic"/>
@@ -2612,9 +2613,9 @@
             <!-- Metro Logo Icon (M) -->
             <circle cx="55" cy="59" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
             <text x="55" y="63" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle">M</text>
-            <!-- Station Name in Bengali and English -->
-            <text x="72" y="56" fill="#ffffff" font-size="11" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">মিরপুর ১০</text>
-            <text x="72" y="68" fill="#00f2fe" font-size="9" font-weight="700" class="cr-neon-cyan">Mirpur 10</text>
+            <!-- Station Name in Bengali and English (Crisp High-Contrast Typography) -->
+            <text x="72" y="56" fill="#ffffff" font-size="12" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #020617; stroke-width: 0.8px; letter-spacing: 0.3px;">মিরপুর ১০</text>
+            <text x="72" y="68" fill="#38bdf8" font-size="9.5" font-weight="800" style="paint-order: stroke fill; stroke: #020617; stroke-width: 0.6px; letter-spacing: 0.3px;">Mirpur 10</text>
 
             <!-- Escalators & Stairs Connecting Station to Street Sidewalk -->
             <polygon points="50,115 110,215 130,215 70,115" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
@@ -2733,15 +2734,15 @@
                 <rect x="165" y="215" width="18" height="20" rx="1"/>
                 <rect x="200" y="215" width="18" height="20" rx="1"/>
               </g>
-              <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") with Vivid Neon Glow -->
+              <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") with Crisp Signboards & Radiant Light -->
               <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
-              <rect x="55" y="263" width="90" height="14" fill="#d97706"/>
-              <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা বেকারি</text>
+              <rect x="54" y="262" width="92" height="16" rx="2" fill="#1c1917" stroke="#fbbf24" stroke-width="1.2"/>
+              <text x="100" y="274" fill="#ffffff" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.3px;">ঢাকা বেকারি</text>
               <rect x="58" y="280" width="84" height="26" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
 
               <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
-              <rect x="165" y="263" width="90" height="14" fill="#059669"/>
-              <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">গ্রীন ফার্মেসি</text>
+              <rect x="164" y="262" width="92" height="16" rx="2" fill="#022c22" stroke="#10b981" stroke-width="1.2"/>
+              <text x="210" y="274" fill="#ffffff" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.3px;">গ্রীন ফার্মেসি</text>
               <rect x="168" y="280" width="84" height="26" fill="#6ee7b7" opacity="0.95" class="cr-neon-green"/>
 
               <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" with Neon Halo -->
@@ -2749,9 +2750,9 @@
                 <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="2.5" filter="url(#crNeonGreenGlow)"/>
                 <rect x="5" y="-80" width="160" height="70" rx="4" fill="#065f46"/>
                 <path d="M 10,-20 L 30,-20 L 30,-45 L 45,-45 L 45,-20 L 70,-20 L 70,-55 L 90,-55 L 90,-20 L 120,-20 L 120,-40 L 140,-40 L 140,-20 L 160,-20 Z" fill="#022c22" opacity="0.6"/>
-                <text x="20" y="-55" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা</text>
-                <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">আমাদের</text>
-                <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">শহর</text>
+                <text x="20" y="-55" fill="#fde047" font-size="16" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #022c22; stroke-width: 0.8px;">ঢাকা</text>
+                <text x="20" y="-38" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #022c22; stroke-width: 0.8px;">আমাদের</text>
+                <text x="20" y="-22" fill="#34d399" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #022c22; stroke-width: 0.8px;">শহর</text>
                 <circle cx="40" cy="-86" r="3.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
                 <circle cx="130" cy="-86" r="3.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
               </g>
@@ -2800,8 +2801,8 @@
               </g>
               <!-- Ground Shopfront: ঢাকা বুক ডিপো -->
               <rect x="382" y="262" width="75" height="54" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
-              <rect x="386" y="265" width="67" height="14" fill="#b45309"/>
-              <text x="419" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা বুক ডিপো</text>
+              <rect x="385" y="263" width="70" height="16" rx="2" fill="#1c1917" stroke="#fbbf24" stroke-width="1.2"/>
+              <text x="420" y="275" fill="#fef08a" font-size="9" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.2px;">ঢাকা বুক ডিপো</text>
               <rect x="388" y="282" width="63" height="30" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
             </g>
 
@@ -2825,8 +2826,8 @@
               </g>
               <!-- Boutique Shopfront: ফ্যাশন কর্নার with Electric Magenta Halo -->
               <rect x="738" y="262" width="72" height="54" fill="#0f172a" stroke="#d946ef" stroke-width="1.8" class="cr-neon-magenta"/>
-              <rect x="742" y="265" width="64" height="13" fill="#7e22ce"/>
-              <text x="774" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-magenta">ফ্যাশন কর্নার</text>
+              <rect x="740" y="263" width="68" height="16" rx="2" fill="#2e1065" stroke="#e879f9" stroke-width="1.2"/>
+              <text x="774" y="275" fill="#f5d0fe" font-size="9" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.2px;">ফ্যাশন কর্নার</text>
               <rect x="744" y="281" width="60" height="30" fill="#f5d0fe" opacity="0.95" class="cr-neon-magenta" filter="url(#crWindowGlowMagenta)"/>
 
               <!-- NE-2: Turquoise Commercial & Tech ("বাংলা টেক") with Vivid Cyan Glow -->
@@ -2847,8 +2848,8 @@
               </g>
               <!-- Tech Shopfront: বাংলা টেক -->
               <rect x="830" y="264" width="74" height="52" fill="#0f172a" stroke="#00f2fe" stroke-width="1.8" class="cr-neon-cyan"/>
-              <rect x="834" y="267" width="66" height="13" fill="#0f766e"/>
-              <text x="867" y="277" fill="#00f2fe" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">বাংলা টেক</text>
+              <rect x="832" y="263" width="70" height="16" rx="2" fill="#042f2e" stroke="#00f2fe" stroke-width="1.2"/>
+              <text x="867" y="275" fill="#a5f3fc" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.3px;">বাংলা টেক</text>
               <rect x="836" y="283" width="62" height="28" fill="#a5f3fc" opacity="0.95" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
 
               <!-- NE-3: Coral & Rose 5-Story Residential -->
@@ -2874,8 +2875,8 @@
               </g>
               <!-- Ground Super Shop -->
               <rect x="926" y="266" width="84" height="50" fill="#0f172a" stroke="#ff2a54" stroke-width="1.8" class="cr-neon-red"/>
-              <rect x="930" y="269" width="76" height="13" fill="#be123c"/>
-              <text x="968" y="279" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-red">সুপার শপ</text>
+              <rect x="928" y="264" width="80" height="16" rx="2" fill="#4c0519" stroke="#ff2a54" stroke-width="1.2"/>
+              <text x="968" y="276" fill="#fef08a" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.3px;">সুপার শপ</text>
               <rect x="932" y="285" width="72" height="26" fill="#fecdd3" opacity="0.95" class="cr-neon-red"/>
 
               <!-- NE-4: "মিরপুর প্লাজা" (Mirpur Plaza) Landmark Glass & Indigo High-Rise -->
@@ -2886,8 +2887,8 @@
               <circle cx="1110" cy="56" r="3" fill="#ef4444" class="beacon-blink"/>
               <!-- Glowing Rooftop Billboard: "মিরপুর প্লাজা" with High-Contrast Neon -->
               <g transform="translate(1045, 92)">
-                <rect x="0" y="0" width="125" height="24" rx="4" fill="#0369a1" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
-                <text x="62" y="16" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">মিরপুর প্লাজা</text>
+                <rect x="0" y="0" width="125" height="24" rx="4" fill="#061f38" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
+                <text x="62" y="17" fill="#ffffff" font-size="12" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #021224; stroke-width: 0.8px; letter-spacing: 0.4px;">মিরপুর প্লাজা</text>
               </g>
               <!-- 5 Floors of Expansive Panoramic Glass Windows with Cyan & Amber Neon -->
               <g class="window-glow-pulse">
@@ -2962,8 +2963,9 @@
 
               <!-- Ground-floor Traditional Tea Stall (টং দোকান) with Warm Amber Lantern -->
               <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#fbbf24" stroke-width="1.5" class="cr-neon-amber"/>
-              <text x="340" y="542" fill="#fbbf24" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">চায়ের টং</text>
-              <circle cx="340" cy="552" r="4.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
+              <rect x="306" y="530" width="68" height="16" rx="2" fill="#1c1917" stroke="#f59e0b" stroke-width="1.2"/>
+              <text x="340" y="542" fill="#fde047" font-size="10" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.3px;">চায়ের টং</text>
+              <circle cx="340" cy="554" r="4.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
 
               <!-- SW-4: Amber & Cream Corner Building with Shop ("সোনালী জুয়েলার্স") -->
               <rect x="368" y="518" width="100" height="172" rx="4" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
@@ -2983,8 +2985,8 @@
               </g>
               <!-- Ground Shop: সোনালী জুয়েলার্স with Gold Neon Glow -->
               <rect x="374" y="626" width="88" height="52" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
-              <rect x="378" y="629" width="80" height="14" fill="#b45309"/>
-              <text x="418" y="640" fill="#fbbf24" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">সোনালী জুয়েলার্স</text>
+              <rect x="376" y="628" width="84" height="16" rx="2" fill="#1c1917" stroke="#f59e0b" stroke-width="1.2"/>
+              <text x="418" y="640" fill="#fde047" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #000; stroke-width: 0.6px; letter-spacing: 0.2px;">সোনালী জুয়েলার্স</text>
               <rect x="380" y="646" width="76" height="26" fill="#fef08a" opacity="1" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
             </g>
 
@@ -3011,8 +3013,8 @@
               </g>
               <!-- Clinic / Pharmacy Shopfront with Glowing Medical Green Cross -->
               <rect x="740" y="626" width="126" height="52" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
-              <rect x="745" y="629" width="116" height="14" fill="#065f46"/>
-              <text x="803" y="640" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">জনতা ফার্মেসি</text>
+              <rect x="744" y="628" width="118" height="16" rx="2" fill="#022c22" stroke="#10b981" stroke-width="1.2"/>
+              <text x="803" y="640" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #022c22; stroke-width: 0.6px; letter-spacing: 0.3px;">জনতা ফার্মেসি</text>
               <rect x="748" y="646" width="110" height="26" fill="#a7f3d0" opacity="0.95" class="cr-neon-green"/>
               <!-- Radiant Green Medical Cross -->
               <rect x="758" y="652" width="14" height="4" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
@@ -3026,9 +3028,9 @@
               <g transform="translate(890, 530)">
                 <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
                 <rect x="5" y="5" width="220" height="85" rx="4" fill="#172554"/>
-                <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-blue">সবাই মিলে</text>
-                <text x="18" y="52" fill="#00f2fe" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">একটি ভালো</text>
-                <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা</text>
+                <text x="18" y="32" fill="#ffffff" font-size="14.5" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #0f172a; stroke-width: 0.8px; letter-spacing: 0.3px;">সবাই মিলে</text>
+                <text x="18" y="52" fill="#38bdf8" font-size="14.5" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #0f172a; stroke-width: 0.8px; letter-spacing: 0.3px;">একটি ভালো</text>
+                <text x="18" y="73" fill="#fde047" font-size="16" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" style="paint-order: stroke fill; stroke: #0f172a; stroke-width: 0.8px; letter-spacing: 0.3px;">ঢাকা</text>
                 <path d="M 140,75 L 155,50 L 170,60 L 190,35 L 210,75 Z" fill="#3b82f6" opacity="0.4"/>
               </g>
 
@@ -9653,11 +9655,25 @@
       let lastTime = performance.now();
       let cycleTimer = 0;
       let trainX = 150;
+      let lastActivePhaseId = null;
+      let pedsCrossed = false;
 
-      // Animation Loop
+      // Pre-group vehicle fleet into dedicated lane queues to eliminate GC pauses & array churn
+      const laneQueues = [
+        { dir: 'EB', lane: 1, vehicles: vehicles.filter(v => v.dir === 'EB' && v.lane === 1) },
+        { dir: 'EB', lane: 2, vehicles: vehicles.filter(v => v.dir === 'EB' && v.lane === 2) },
+        { dir: 'WB', lane: 1, vehicles: vehicles.filter(v => v.dir === 'WB' && v.lane === 1) },
+        { dir: 'WB', lane: 2, vehicles: vehicles.filter(v => v.dir === 'WB' && v.lane === 2) },
+        { dir: 'SB', lane: 1, vehicles: vehicles.filter(v => v.dir === 'SB' && v.lane === 1) },
+        { dir: 'SB', lane: 2, vehicles: vehicles.filter(v => v.dir === 'SB' && v.lane === 2) },
+        { dir: 'NB', lane: 1, vehicles: vehicles.filter(v => v.dir === 'NB' && v.lane === 1) },
+        { dir: 'NB', lane: 2, vehicles: vehicles.filter(v => v.dir === 'NB' && v.lane === 2) }
+      ];
+
+      // Highly Optimized 60/120 FPS Animation Loop
       function tick(currentTime) {
         if (!dhakaCrossroadsRunning) return;
-        const dt = Math.min(0.08, (currentTime - lastTime) / 1000);
+        const dt = Math.min(0.045, Math.max(0.001, (currentTime - lastTime) / 1000));
         lastTime = currentTime;
 
         if (!prefersReducedMotion) {
@@ -9683,61 +9699,59 @@
           accumulated += PHASES[i].duration;
         }
 
-        // 1. Update Traffic Lights visual lamps
-        const isNSGreen = activePhase.nsLight === 'green';
-        const isNSYellow = activePhase.nsLight === 'yellow';
-        const isNSRed = activePhase.nsLight === 'red';
+        // 1. Update Traffic Lights visual lamps (ONLY on phase transition to avoid DOM mutation overhead)
+        if (activePhase.id !== lastActivePhaseId) {
+          lastActivePhaseId = activePhase.id;
+          const isNSRed = activePhase.nsLight === 'red';
+          const isNSYellow = activePhase.nsLight === 'yellow';
+          const isNSGreen = activePhase.nsLight === 'green';
+          const isEWRed = activePhase.ewLight === 'red';
+          const isEWYellow = activePhase.ewLight === 'yellow';
+          const isEWGreen = activePhase.ewLight === 'green';
 
-        const isEWGreen = activePhase.ewLight === 'green';
-        const isEWYellow = activePhase.ewLight === 'yellow';
-        const isEWRed = activePhase.ewLight === 'red';
+          if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.nw_yellow) sigLamps.nw_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.nw_green) sigLamps.nw_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        // NW & NE control North-South approaches
-        if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.nw_yellow) sigLamps.nw_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.nw_green) sigLamps.nw_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+          if (sigLamps.ne_red) sigLamps.ne_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.ne_yellow) sigLamps.ne_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.ne_green) sigLamps.ne_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        if (sigLamps.ne_red) sigLamps.ne_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.ne_yellow) sigLamps.ne_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.ne_green) sigLamps.ne_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+          if (sigLamps.sw_red) sigLamps.sw_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.sw_yellow) sigLamps.sw_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.sw_green) sigLamps.sw_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        // SW & SE control East-West approaches
-        if (sigLamps.sw_red) sigLamps.sw_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.sw_yellow) sigLamps.sw_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.sw_green) sigLamps.sw_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+          if (sigLamps.se_red) sigLamps.se_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.se_yellow) sigLamps.se_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.se_green) sigLamps.se_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        if (sigLamps.se_red) sigLamps.se_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.se_yellow) sigLamps.se_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.se_green) sigLamps.se_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
-
-        // Update Live Status Badge
-        if (badgeText && badgeDot) {
-          badgeText.innerText = activePhase.label;
-          badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
-          const badgeContainer = document.getElementById('trafficSignalBadge');
-          if (badgeContainer) {
-            badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
+          if (badgeText && badgeDot) {
+            badgeText.innerText = activePhase.label;
+            badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
+            const badgeContainer = document.getElementById('trafficSignalBadge');
+            if (badgeContainer) {
+              badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
+            }
           }
         }
 
         // 2. Update Vehicles Physics, Queueing & Movements
-        // Group vehicles by direction and lane to ensure collision-free queueing
-        const groups = {
-          'EB_1': vehicles.filter(v => v.dir === 'EB' && v.lane === 1).sort((a,b) => b.pos - a.pos),
-          'EB_2': vehicles.filter(v => v.dir === 'EB' && v.lane === 2).sort((a,b) => b.pos - a.pos),
-          'WB_1': vehicles.filter(v => v.dir === 'WB' && v.lane === 1).sort((a,b) => a.pos - b.pos),
-          'WB_2': vehicles.filter(v => v.dir === 'WB' && v.lane === 2).sort((a,b) => a.pos - b.pos),
-          'SB_1': vehicles.filter(v => v.dir === 'SB' && v.lane === 1).sort((a,b) => b.pos - a.pos),
-          'SB_2': vehicles.filter(v => v.dir === 'SB' && v.lane === 2).sort((a,b) => b.pos - a.pos),
-          'NB_1': vehicles.filter(v => v.dir === 'NB' && v.lane === 1).sort((a,b) => a.pos - b.pos),
-          'NB_2': vehicles.filter(v => v.dir === 'NB' && v.lane === 2).sort((a,b) => a.pos - b.pos),
-        };
-
+        const isNSGreen = activePhase.nsLight === 'green';
+        const isEWGreen = activePhase.ewLight === 'green';
         const MIN_FOLLOW_GAP = 20; // Safe bumper-to-bumper gap (px)
         const SLOW_FOLLOW_GAP = 95; // Proactive deceleration distance (px)
 
-        Object.keys(groups).forEach(key => {
-          const laneVehicles = groups[key];
+        for (let g = 0; g < laneQueues.length; g++) {
+          const lq = laneQueues[g];
+          const laneVehicles = lq.vehicles;
+
+          // In-place sort (zero memory churn)
+          if (lq.dir === 'EB' || lq.dir === 'SB') {
+            laneVehicles.sort((a, b) => b.pos - a.pos);
+          } else {
+            laneVehicles.sort((a, b) => a.pos - b.pos);
+          }
+
           for (let i = 0; i < laneVehicles.length; i++) {
             const v = laneVehicles[i];
             const leader = i > 0 ? laneVehicles[i - 1] : null;
@@ -9776,11 +9790,13 @@
               v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
               v.pos += v.speed * dt;
 
-              // Collision-free wrap-around respawn
+              // Zero-allocation wrap-around respawn
               if (v.pos > 1280) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos);
-                const minPos = otherPositions.length ? Math.min(...otherPositions) : -140;
-                v.pos = Math.min(-140, minPos - v.w - 65);
+                let minPos = 9999;
+                for (let k = 0; k < laneVehicles.length; k++) {
+                  if (laneVehicles[k] !== v && laneVehicles[k].pos < minPos) minPos = laneVehicles[k].pos;
+                }
+                v.pos = Math.min(-140, (minPos === 9999 ? -140 : minPos) - v.w - 65);
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneY = v.lane === 1 ? 438 : 468;
@@ -9818,9 +9834,12 @@
               v.pos -= v.speed * dt;
 
               if (v.pos < -140) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos + o.w);
-                const maxPos = otherPositions.length ? Math.max(...otherPositions) : 1340;
-                v.pos = Math.max(1340, maxPos + 65);
+                let maxPos = -9999;
+                for (let k = 0; k < laneVehicles.length; k++) {
+                  const rear = laneVehicles[k].pos + laneVehicles[k].w;
+                  if (laneVehicles[k] !== v && rear > maxPos) maxPos = rear;
+                }
+                v.pos = Math.max(1340, (maxPos === -9999 ? 1340 : maxPos) + 65);
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneY = v.lane === 1 ? 405 : 368;
@@ -9858,9 +9877,11 @@
               v.pos += v.speed * dt;
 
               if (v.pos > 730) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos);
-                const minPos = otherPositions.length ? Math.min(...otherPositions) : 100;
-                v.pos = Math.min(100, minPos - v.h - 65);
+                let minPos = 9999;
+                for (let k = 0; k < laneVehicles.length; k++) {
+                  if (laneVehicles[k] !== v && laneVehicles[k].pos < minPos) minPos = laneVehicles[k].pos;
+                }
+                v.pos = Math.min(100, (minPos === 9999 ? 100 : minPos) - v.h - 65);
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneX = v.lane === 1 ? 580 : 542;
@@ -9898,40 +9919,51 @@
               v.pos -= v.speed * dt;
 
               if (v.pos < 120) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos + o.h);
-                const maxPos = otherPositions.length ? Math.max(...otherPositions) : 760;
-                v.pos = Math.max(760, maxPos + 65);
+                let maxPos = -9999;
+                for (let k = 0; k < laneVehicles.length; k++) {
+                  const rear = laneVehicles[k].pos + laneVehicles[k].h;
+                  if (laneVehicles[k] !== v && rear > maxPos) maxPos = rear;
+                }
+                v.pos = Math.max(760, (maxPos === -9999 ? 760 : maxPos) + 65);
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneX = v.lane === 1 ? 618 : 656;
               if (v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
             }
           }
-        });
+        }
 
-        // 3. Update Pedestrians: Cross ONLY during ALL_RED_PED phase
+        // 3. Update Pedestrians (Cross ONLY during ALL_RED_PED phase, zero mutation when waiting)
         const isPedPhase = activePhase.id === 'ALL_RED_PED';
-        pedestrians.forEach(p => {
-          let currentCoord = p.start;
-          let bob = 0;
-
-          if (isPedPhase) {
-            const progress = Math.min(1, Math.max(0, phaseElapsed / (activePhase.duration - 400)));
-            currentCoord = p.start + (p.end - p.start) * progress;
-            bob = Math.abs(Math.sin(progress * Math.PI * 8)) * 2;
-          } else {
-            // Standing waiting safely at curb
-            currentCoord = p.start;
-          }
-
-          if (p.el) {
-            if (p.axis === 'H') {
-              p.el.setAttribute('transform', `translate(${currentCoord.toFixed(1)}, ${(p.y - bob).toFixed(1)})`);
-            } else {
-              p.el.setAttribute('transform', `translate(${(p.x - bob).toFixed(1)}, ${currentCoord.toFixed(1)})`);
+        if (isPedPhase) {
+          pedsCrossed = true;
+          const progress = Math.min(1, Math.max(0, phaseElapsed / (activePhase.duration - 400)));
+          for (let pIdx = 0; pIdx < pedestrians.length; pIdx++) {
+            const p = pedestrians[pIdx];
+            const currentCoord = p.start + (p.end - p.start) * progress;
+            const bob = Math.abs(Math.sin(progress * Math.PI * 8)) * 2;
+            if (p.el) {
+              if (p.axis === 'H') {
+                p.el.setAttribute('transform', `translate(${currentCoord.toFixed(1)}, ${(p.y - bob).toFixed(1)})`);
+              } else {
+                p.el.setAttribute('transform', `translate(${(p.x - bob).toFixed(1)}, ${currentCoord.toFixed(1)})`);
+              }
             }
           }
-        });
+        } else if (pedsCrossed) {
+          // Reset to curb safely once when pedestrian crossing cycle finishes
+          pedsCrossed = false;
+          for (let pIdx = 0; pIdx < pedestrians.length; pIdx++) {
+            const p = pedestrians[pIdx];
+            if (p.el) {
+              if (p.axis === 'H') {
+                p.el.setAttribute('transform', `translate(${p.start}, ${p.y})`);
+              } else {
+                p.el.setAttribute('transform', `translate(${p.x}, ${p.start})`);
+              }
+            }
+          }
+        }
 
         dhakaCrossroadsAnimId = requestAnimationFrame(tick);
       }
