@@ -560,10 +560,12 @@
       transform: translateZ(0);
     }
     #dhakaVehiclesLayer,
-    #crossroadsMetroTrain,
     #dhakaPedestriansLayer,
     #crAtmosphereOverlays {
       transform: translateZ(0);
+      will-change: transform;
+    }
+    #crossroadsMetroTrain {
       will-change: transform;
     }
 
@@ -2647,6 +2649,14 @@
             <!-- Station Name in Bengali and English (Ultra-Crisp Typography) -->
             <text x="74" y="56" fill="#ffffff" font-size="12" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">মিরপুর ১০</text>
             <text x="74" y="68" fill="#38bdf8" font-size="9.5" font-weight="700" class="cr-signboard-text">Mirpur 10</text>
+
+            <!-- Dynamic Station Platform Boarding Indicator Badge (MRT Line 6) -->
+            <g id="mrtPlatformBoardingBadge" opacity="0" style="transition: opacity 0.35s ease; pointer-events: none;">
+              <rect x="224" y="48" width="90" height="22" rx="4" fill="#020617" stroke="#22c55e" stroke-width="1.2"/>
+              <circle cx="236" cy="59" r="3.5" fill="#22c55e" class="animate-ping"/>
+              <circle cx="236" cy="59" r="3" fill="#4ade80"/>
+              <text x="246" y="63" fill="#4ade80" font-size="9" font-weight="700" letter-spacing="0.04em" class="cr-signboard-text">BOARDING</text>
+            </g>
 
             <!-- Escalators & Stairs Connecting Station to Street Sidewalk -->
             <polygon points="50,115 110,215 130,215 70,115" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
@@ -9387,6 +9397,7 @@
       const badgeText = document.getElementById('trafficSignalText');
       const badgeDot = document.getElementById('trafficSignalDot');
       const trainEl = document.getElementById('crossroadsMetroTrain');
+      const mrtBoardingBadge = document.getElementById('mrtPlatformBoardingBadge');
       const vehiclesLayer = document.getElementById('dhakaVehiclesLayer');
       const pedsLayer = document.getElementById('dhakaPedestriansLayer');
 
@@ -9685,6 +9696,9 @@
       let lastTime = performance.now();
       let cycleTimer = 0;
       let trainX = 150;
+      let trainSpeed = 75;
+      let trainState = 'cruising'; // 'cruising', 'decelerating', 'boarding', 'accelerating'
+      let trainBoardingTimer = 0;
       let prevPhaseId = null;
 
       // Pre-allocated lane groups to avoid array allocations during animation tick
@@ -9704,10 +9718,50 @@
 
         if (!prefersReducedMotion) {
           cycleTimer = (cycleTimer + dt * 1000) % TOTAL_CYCLE;
-          trainX += 62 * dt;
-          if (trainX > 1400) trainX = -320;
+
+          // Metro Rail Train Movement & Mirpur 10 Station Boarding Cycle
+          const CRUISE_SPEED = 78; // px/sec
+          const DOCK_X = 720; // Docked squarely inside Mirpur 10 Station
+          const APPROACH_X = 490; // Begin smooth deceleration as train enters platform approach
+
+          if (trainState === 'cruising') {
+            trainSpeed = CRUISE_SPEED;
+            trainX += trainSpeed * dt;
+            if (trainX >= APPROACH_X && trainX < DOCK_X) {
+              trainState = 'decelerating';
+            } else if (trainX > 1420) {
+              trainX = -320;
+            }
+          } else if (trainState === 'decelerating') {
+            const dist = DOCK_X - trainX;
+            if (dist <= 3) {
+              trainX = DOCK_X;
+              trainSpeed = 0;
+              trainState = 'boarding';
+              trainBoardingTimer = 3.2; // 3.2s station dwell / passenger boarding
+              if (mrtBoardingBadge) mrtBoardingBadge.style.opacity = '1';
+            } else {
+              const targetSpeed = Math.max(14, (dist / (DOCK_X - APPROACH_X)) * CRUISE_SPEED);
+              trainSpeed += (targetSpeed - trainSpeed) * Math.min(1, dt * 3.5);
+              trainX += trainSpeed * dt;
+            }
+          } else if (trainState === 'boarding') {
+            trainBoardingTimer -= dt;
+            if (trainBoardingTimer <= 0) {
+              trainState = 'accelerating';
+              if (mrtBoardingBadge) mrtBoardingBadge.style.opacity = '0';
+            }
+          } else if (trainState === 'accelerating') {
+            trainSpeed += (CRUISE_SPEED - trainSpeed) * Math.min(1, dt * 2.2);
+            trainX += trainSpeed * dt;
+            if (trainSpeed >= CRUISE_SPEED * 0.96) {
+              trainState = 'cruising';
+            }
+          }
+
           if (trainEl) {
             trainEl.setAttribute('transform', `translate(${trainX.toFixed(1)}, 88)`);
+            trainEl.style.transform = `translate3d(${trainX.toFixed(1)}px, 88px, 0)`;
           }
         }
 
