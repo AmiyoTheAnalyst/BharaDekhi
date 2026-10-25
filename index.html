@@ -386,10 +386,12 @@
       position: fixed;
       inset: 0;
       width: 100vw;
+      width: 100%;
       height: 100vh;
       height: 100svh;
+      height: 100dvh;
       min-height: 100svh;
-      overflow: hidden;
+      overflow: hidden !important;
       background: #030712;
       z-index: 35;
     }
@@ -400,17 +402,78 @@
       border-radius: 0 !important;
       border: none !important;
       box-shadow: none !important;
+      overflow: hidden !important;
     }
-    .landing-cta-container {
-      position: absolute;
-      bottom: max(1.25rem, env(safe-area-inset-bottom, 1.25rem));
-      right: max(1.25rem, env(safe-area-inset-right, 1.25rem));
-      z-index: 40;
-    }
-    @media (min-width: 640px) {
+
+    /* Mobile Viewport (< 768px): Prominent Viewport Height, Center-Crop & Zero Horizontal Scroll */
+    @media (max-width: 767.98px) {
+      #dhakaCrossroadsContainer {
+        overflow: hidden !important;
+      }
+      #dhakaCrossroadsStageWrapper {
+        position: absolute !important;
+        top: 54px !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: calc(100vh - 140px) !important;
+        height: calc(100svh - 140px) !important;
+        height: calc(100dvh - 140px) !important;
+        min-height: 68vh !important;
+        max-height: 80vh !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        pointer-events: none !important;
+      }
+      #dhakaCrossroadsSvg {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        object-fit: cover !important;
+        display: block !important;
+        pointer-events: auto !important;
+      }
       .landing-cta-container {
+        position: absolute !important;
+        bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem)) !important;
+        right: max(0.75rem, env(safe-area-inset-right, 0.75rem)) !important;
+        z-index: 40 !important;
+      }
+    }
+
+    /* Desktop & Tablet Viewport (>= 768px): Panoramic Contain Layout */
+    @media (min-width: 768px) {
+      #dhakaCrossroadsStageWrapper {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        overflow: hidden !important;
+        pointer-events: none;
+      }
+      #dhakaCrossroadsSvg {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: block;
+        pointer-events: auto;
+      }
+      .landing-cta-container {
+        position: absolute;
         bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
         right: max(2rem, env(safe-area-inset-right, 2rem));
+        z-index: 40;
       }
     }
 
@@ -1644,12 +1707,12 @@
     <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase relative w-full h-full min-h-[100svh] overflow-hidden text-white select-none">
         
         <!-- Top-Left HUD Header: Transit Grid & Slogan -->
-        <div class="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[55%] sm:max-w-md">
+        <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-20 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[55%] sm:max-w-md">
           <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg w-fit">
             <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-ping"></span>
             <span class="truncate">DHAKA TRANSIT GRID · LIVING CROSSROADS</span>
           </div>
-          <h2 class="text-base sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md leading-tight">
+          <h2 class="text-sm sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md leading-tight">
             Dhaka, Moving Smarter
           </h2>
           <p class="hidden sm:block text-xs sm:text-sm text-slate-300 font-medium max-w-sm sm:max-w-md drop-shadow">
@@ -1658,21 +1721,21 @@
         </div>
 
         <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
-        <div class="absolute top-3 right-3 sm:top-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2">
-          <div id="trafficSignalBadge" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none">
-            <span id="trafficSignalDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="trafficSignalText">🚦 N-S GREEN · TRAFFIC FLOWING</span>
+        <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2">
+          <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
+            <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span id="trafficSignalText" class="truncate">🚦 N-S GREEN · TRAFFIC FLOWING</span>
           </div>
-          <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer" title="Switch language / ভাষা পরিবর্তন">
+          <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
             বাংলা
           </button>
-          <button type="button" onclick="logout()" class="px-2.5 py-1.5 rounded-full bg-slate-900/85 hover:bg-rose-950/80 hover:border-rose-700 text-slate-200 hover:text-rose-300 border border-slate-700 text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer" title="Logout">
+          <button type="button" onclick="logout()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-rose-950/80 hover:border-rose-700 text-slate-200 hover:text-rose-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Logout">
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Logout</span>
           </button>
         </div>
 
-        <!-- Responsive Stage Wrapper: Proportional Scaling without Any Cropping -->
+        <!-- Responsive Stage Wrapper: Mobile Prominent Height (< 768px) & Desktop Contain (>= 768px) -->
         <div id="dhakaCrossroadsStageWrapper" class="absolute inset-0 w-full h-full flex items-center justify-center p-1 sm:p-4 md:p-6 overflow-hidden pointer-events-none">
           <!-- 3D / 2.5D Isometric Miniature Dhaka Crossroads SVG Canvas -->
           <svg id="dhakaCrossroadsSvg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" class="w-full h-full max-w-full max-h-full object-contain pointer-events-auto">
@@ -2514,6 +2577,16 @@
           </svg>
         </div>
 
+        <!-- Instant Aspect Ratio Synchronizer for Mobile (< 768px: slice) vs Desktop (>= 768px: meet) -->
+        <script>
+          (function() {
+            var svg = document.getElementById('dhakaCrossroadsSvg');
+            if (svg) {
+              svg.setAttribute('preserveAspectRatio', window.innerWidth < 768 ? 'xMidYMid slice' : 'xMidYMid meet');
+            }
+          })();
+        </script>
+
         <!-- Bottom-Left Legend: Transport Modes (Matching User Reference Image) -->
         <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-20 hidden md:flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-950/90 border border-slate-800 backdrop-blur-md text-xs font-semibold text-slate-300 shadow-xl pointer-events-none">
           <div class="flex items-center gap-2">
@@ -2539,14 +2612,14 @@
         </div>
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
-        <div class="landing-cta-container absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30" style="bottom: max(1rem, env(safe-area-inset-bottom)); right: max(1rem, env(safe-area-inset-right));">
-          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/plan-trip')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2.5 sm:gap-3 px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
-            <div class="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300">
-              <i data-lucide="compass" class="w-4 h-4 sm:w-5 sm:h-5 text-white"></i>
+        <div class="landing-cta-container absolute bottom-3 right-3 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30" style="bottom: max(0.75rem, env(safe-area-inset-bottom)); right: max(0.75rem, env(safe-area-inset-right));">
+          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/plan-trip')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
+            <div class="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300 shrink-0">
+              <i data-lucide="compass" class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white"></i>
             </div>
             <div class="text-left">
-              <span class="block text-[9px] sm:text-[10px] font-bold text-sky-200 uppercase tracking-widest leading-none">Ready to commute?</span>
-              <span class="block font-black text-white text-xs sm:text-base leading-tight mt-0.5">Plan your trip &rarr;</span>
+              <span class="block text-[8px] sm:text-[10px] font-bold text-sky-200 uppercase tracking-widest leading-none">Ready to commute?</span>
+              <span class="block font-black text-white text-[11px] sm:text-base leading-tight mt-0.5">Plan your trip &rarr;</span>
             </div>
           </button>
         </div>
@@ -8171,10 +8244,25 @@
     let dhakaCrossroadsRunning = false;
     let dhakaCrossroadsObserver = null;
 
+    // Mobile (< 768px: slice / center-crop) vs Desktop (>= 768px: meet / contain) Aspect Ratio Controller
+    function updateCrossroadsAspectRatio() {
+      const svg = document.getElementById('dhakaCrossroadsSvg');
+      if (!svg) return;
+      const isMobile = window.innerWidth < 768;
+      const targetAspect = isMobile ? 'xMidYMid slice' : 'xMidYMid meet';
+      if (svg.getAttribute('preserveAspectRatio') !== targetAspect) {
+        svg.setAttribute('preserveAspectRatio', targetAspect);
+      }
+    }
+    window.addEventListener('resize', updateCrossroadsAspectRatio);
+    window.addEventListener('orientationchange', updateCrossroadsAspectRatio);
+
     function initDhakaCrossroadsSimulation() {
       const container = document.getElementById('dhakaCrossroadsContainer');
       const svg = document.getElementById('dhakaCrossroadsSvg');
       if (!container || !svg) return;
+
+      updateCrossroadsAspectRatio();
 
       if (dhakaCrossroadsRunning) return;
       dhakaCrossroadsRunning = true;
@@ -8561,10 +8649,10 @@
         // Update Live Status Badge
         if (badgeText && badgeDot) {
           badgeText.innerText = activePhase.label;
-          badgeDot.className = `w-2.5 h-2.5 rounded-full ${activePhase.dotColor} animate-pulse`;
+          badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
           const badgeContainer = document.getElementById('trafficSignalBadge');
           if (badgeContainer) {
-            badgeContainer.className = `flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors`;
+            badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
           }
         }
 
@@ -8784,6 +8872,9 @@
         }
         // Start or resume simulation
         dhakaCrossroadsRunning = false;
+        if (typeof updateCrossroadsAspectRatio === 'function') {
+          updateCrossroadsAspectRatio();
+        }
         if (typeof initDhakaCrossroadsSimulation === 'function') {
           initDhakaCrossroadsSimulation();
         }
