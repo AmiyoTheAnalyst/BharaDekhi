@@ -517,21 +517,42 @@
     [data-crossroads-weather="rain"] #crNightLayer { opacity: 0.45 !important; }
     [data-crossroads-weather="rain"] #crRainLayer { opacity: 1 !important; }
 
-    /* Dynamic Vehicle Headlights */
+    /* Dynamic Vehicle Headlights & Vivid Night Illumination */
     .cr-headlight-beam {
       transition: opacity 0.8s ease, fill 0.8s ease;
+      mix-blend-mode: screen;
     }
     [data-crossroads-weather="sun"] .cr-headlight-beam {
       opacity: 0.08 !important;
     }
     [data-crossroads-weather="night"] .cr-headlight-beam {
-      opacity: 0.85 !important;
-      fill: #fef08a !important;
+      opacity: 0.98 !important;
+      filter: url(#crHeadlightBeamGlow) !important;
     }
     [data-crossroads-weather="rain"] .cr-headlight-beam {
-      opacity: 0.82 !important;
+      opacity: 0.92 !important;
       fill: #e0f2fe !important;
-      filter: drop-shadow(0 0 6px rgba(186, 230, 253, 0.75)) !important;
+      filter: drop-shadow(0 0 10px rgba(186, 230, 253, 0.95)) !important;
+    }
+
+    /* Vibrant Neon Drop-Shadow Effects for Buildings, Shops, Metro & Signals */
+    .cr-neon-cyan {
+      filter: drop-shadow(0 0 4px #00f2fe) drop-shadow(0 0 10px rgba(0, 242, 254, 0.85)) !important;
+    }
+    .cr-neon-amber {
+      filter: drop-shadow(0 0 4px #fbbf24) drop-shadow(0 0 10px rgba(251, 191, 36, 0.85)) !important;
+    }
+    .cr-neon-magenta {
+      filter: drop-shadow(0 0 4px #e879f9) drop-shadow(0 0 10px rgba(217, 70, 239, 0.85)) !important;
+    }
+    .cr-neon-green {
+      filter: drop-shadow(0 0 4px #10b981) drop-shadow(0 0 10px rgba(16, 185, 129, 0.85)) !important;
+    }
+    .cr-neon-red {
+      filter: drop-shadow(0 0 4px #ff2a54) drop-shadow(0 0 10px rgba(255, 42, 84, 0.9)) !important;
+    }
+    .cr-neon-blue {
+      filter: drop-shadow(0 0 5px #38bdf8) drop-shadow(0 0 12px rgba(56, 189, 248, 0.85)) !important;
     }
 
     /* Puddle Ripples Animation (Expanding Concentric Circles) */
@@ -2343,22 +2364,102 @@
               <stop offset="100%" stop-color="#0ea5e9"/>
             </linearGradient>
 
-            <!-- Glow Filters -->
-            <filter id="crLightGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
+            <!-- High-Intensity Vivid Neon & Glow Filters -->
+            <filter id="crLightGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="blur1"/>
+              <feGaussianBlur stdDeviation="8" result="blur2"/>
+              <feMerge>
+                <feMergeNode in="blur2"/>
+                <feMergeNode in="blur1"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+
+            <filter id="crNeonCyanGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#00f2fe" flood-opacity="0.95"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#0284c7" flood-opacity="0.75"/>
+            </filter>
+
+            <filter id="crNeonAmberGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#fbbf24" flood-opacity="0.95"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#d97706" flood-opacity="0.7"/>
+            </filter>
+
+            <filter id="crNeonMagentaGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#e879f9" flood-opacity="0.95"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#a855f7" flood-opacity="0.7"/>
+            </filter>
+
+            <filter id="crNeonGreenGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#10b981" flood-opacity="0.95"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#059669" flood-opacity="0.7"/>
+            </filter>
+
+            <filter id="crTaillightGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#ff2a54" flood-opacity="1"/>
+              <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#ff1744" flood-opacity="0.8"/>
+            </filter>
+
+            <filter id="crSignalGlow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
               <feMerge>
                 <feMergeNode in="blur"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
 
-            <filter id="crStreetlampGlow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="16"/>
+            <filter id="crStreetlampGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="18"/>
             </filter>
 
-            <filter id="crHeadlightBeam" x="-30%" y="-30%" width="160%" height="160%">
+            <filter id="crHeadlightBeam" x="-40%" y="-40%" width="180%" height="180%">
               <feGaussianBlur stdDeviation="6"/>
             </filter>
+
+            <filter id="crHeadlightBeamGlow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="4.5" result="beamBlur"/>
+              <feMerge>
+                <feMergeNode in="beamBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+
+            <!-- Directional Headlight Beam Gradients with Bright White/Gold Core -->
+            <linearGradient id="crHeadlightBeamGradEB" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+              <stop offset="20%" stop-color="#fef08a" stop-opacity="0.95"/>
+              <stop offset="65%" stop-color="#fde047" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </linearGradient>
+
+            <linearGradient id="crHeadlightBeamGradWB" x1="100%" y1="50%" x2="0%" y2="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+              <stop offset="20%" stop-color="#fef08a" stop-opacity="0.95"/>
+              <stop offset="65%" stop-color="#fde047" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </linearGradient>
+
+            <linearGradient id="crHeadlightBeamGradSB" x1="50%" y1="0%" x2="50%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+              <stop offset="20%" stop-color="#fef08a" stop-opacity="0.95"/>
+              <stop offset="65%" stop-color="#fde047" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </linearGradient>
+
+            <linearGradient id="crHeadlightBeamGradNB" x1="50%" y1="100%" x2="50%" y2="0%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+              <stop offset="20%" stop-color="#fef08a" stop-opacity="0.95"/>
+              <stop offset="65%" stop-color="#fde047" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </linearGradient>
+
+            <!-- Streetlight Radial Illumination Pool Gradient -->
+            <radialGradient id="streetlampPoolGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+              <stop offset="25%" stop-color="#fef08a" stop-opacity="0.7"/>
+              <stop offset="60%" stop-color="#fde047" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+            </radialGradient>
 
             <!-- Dynamic Atmosphere Gradients (Night, Sun, Rain) -->
             <linearGradient id="crSkyNightGrad" x1="0" y1="0" x2="0" y2="1">
@@ -2466,22 +2567,22 @@
           </g>
 
           <!-- Viaduct Track Deck -->
-          <rect x="-100" y="98" width="1400" height="14" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
-          <!-- Dual Steel Rails with Glowing Cyan Core -->
-          <line x1="-100" y1="102" x2="1300" y2="102" stroke="url(#viaductTrackGrad)" stroke-width="3" filter="url(#crLightGlow)"/>
-          <line x1="-100" y1="108" x2="1300" y2="108" stroke="url(#viaductTrackGrad)" stroke-width="3" filter="url(#crLightGlow)"/>
+          <rect x="-100" y="98" width="1400" height="14" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
+          <!-- Dual Steel Rails with Radiant Electric Cyan Core -->
+          <line x1="-100" y1="102" x2="1300" y2="102" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
+          <line x1="-100" y1="108" x2="1300" y2="108" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
 
           <!-- Mirpur 10 Metro Station Structure (Upper Right) -->
           <g id="mirpur10StationGroup" transform="translate(710, 30)">
-            <!-- Glass Canopy Arched Roof -->
-            <path d="M 0,55 Q 160,0 330,55 L 320,85 L 10,85 Z" fill="url(#stationRoofGrad)" stroke="#38bdf8" stroke-width="2" filter="url(#crLightGlow)"/>
+            <!-- Glass Canopy Arched Roof with Electric Cyan Neon Outline -->
+            <path d="M 0,55 Q 160,0 330,55 L 320,85 L 10,85 Z" fill="url(#stationRoofGrad)" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
             <!-- Roof Truss Ribs -->
-            <path d="M 40,43 L 40,85 M 95,30 L 95,85 M 165,22 L 165,85 M 235,30 L 235,85 M 285,43 L 285,85" stroke="#7dd3fc" stroke-width="1.5" stroke-opacity="0.6"/>
+            <path d="M 40,43 L 40,85 M 95,30 L 95,85 M 165,22 L 165,85 M 235,30 L 235,85 M 285,43 L 285,85" stroke="#38bdf8" stroke-width="1.8" stroke-opacity="0.85"/>
             <!-- Station Main Concourse Body -->
-            <rect x="10" y="80" width="310" height="35" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
-            <!-- Platform Lighting & Commuter Silhouettes -->
-            <line x1="20" y1="84" x2="310" y2="84" stroke="#ffffff" stroke-width="3" opacity="0.9" filter="url(#crLightGlow)"/>
-            <g fill="#93c5fd" opacity="0.85">
+            <rect x="10" y="80" width="310" height="35" rx="4" fill="#0f172a" stroke="#00f2fe" stroke-width="1.8"/>
+            <!-- Platform Lighting & Commuter Silhouettes with Bright Halo -->
+            <line x1="20" y1="84" x2="310" y2="84" stroke="#ffffff" stroke-width="3.5" opacity="1" filter="url(#crNeonCyanGlow)"/>
+            <g fill="#bae6fd" opacity="0.95">
               <circle cx="50" cy="74" r="3.5"/><rect x="48" y="78" width="4" height="6"/>
               <circle cx="80" cy="74" r="3.5"/><rect x="78" y="78" width="4" height="6"/>
               <circle cx="120" cy="74" r="3.5"/><rect x="118" y="78" width="4" height="6"/>
@@ -2489,53 +2590,53 @@
               <circle cx="240" cy="74" r="3.5"/><rect x="238" y="78" width="4" height="6"/>
               <circle cx="280" cy="74" r="3.5"/><rect x="278" y="78" width="4" height="6"/>
             </g>
-            <!-- Large Prominent Mirpur 10 Station Signboard (As in Reference Picture) -->
-            <rect x="35" y="45" width="180" height="28" rx="6" fill="#020617" stroke="#38bdf8" stroke-width="1.8" filter="url(#crLightGlow)"/>
+            <!-- Large Prominent Mirpur 10 Station Signboard with Vibrant Cyan Halo -->
+            <rect x="35" y="45" width="180" height="28" rx="6" fill="#020617" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
             <!-- Metro Logo Icon (M) -->
             <circle cx="55" cy="59" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
             <text x="55" y="63" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle">M</text>
             <!-- Station Name in Bengali and English -->
-            <text x="72" y="56" fill="#ffffff" font-size="11" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">মিরপুর ১০</text>
-            <text x="72" y="68" fill="#38bdf8" font-size="9" font-weight="700">Mirpur 10</text>
+            <text x="72" y="56" fill="#ffffff" font-size="11" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">মিরপুর ১০</text>
+            <text x="72" y="68" fill="#00f2fe" font-size="9" font-weight="700" class="cr-neon-cyan">Mirpur 10</text>
 
             <!-- Escalators & Stairs Connecting Station to Street Sidewalk -->
             <polygon points="50,115 110,215 130,215 70,115" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
-            <line x1="55" y1="120" x2="115" y2="210" stroke="#38bdf8" stroke-width="2" opacity="0.8" filter="url(#crLightGlow)"/>
+            <line x1="55" y1="120" x2="115" y2="210" stroke="#00f2fe" stroke-width="2.5" opacity="0.9" filter="url(#crNeonCyanGlow)"/>
             <!-- Station Support Columns to Ground -->
             <rect x="30" y="115" width="12" height="100" fill="#334155"/>
             <rect x="280" y="115" width="12" height="100" fill="#334155"/>
           </g>
 
-          <!-- Continuous Moving Dhaka Metro Rail Train (MRT Line 6) -->
+          <!-- Continuous Moving Dhaka Metro Rail Train (MRT Line 6) with Electric Cyan Windows -->
           <g id="crossroadsMetroTrain" transform="translate(150, 88)">
             <!-- High-Beam Headlight Cone -->
-            <polygon points="260,14 360,2 360,26" fill="#7dd3fc" opacity="0.45" filter="url(#crHeadlightBeam)"/>
+            <polygon points="260,14 380,0 380,28" fill="url(#crHeadlightBeamGradEB)" opacity="0.85" filter="url(#crHeadlightBeamGlow)"/>
             
             <!-- Lead Car -->
-            <path d="M 195,3 L 245,3 Q 262,14 245,23 L 195,23 Z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <path d="M 195,3 L 245,3 Q 262,14 245,23 L 195,23 Z" fill="#f8fafc" stroke="#00f2fe" stroke-width="1.5"/>
             <!-- MRT Green & Red Ribbon Livery -->
             <rect x="195" y="11" width="58" height="2.5" fill="#16a34a"/>
             <rect x="195" y="13.5" width="58" height="2" fill="#dc2626"/>
-            <!-- Aerodynamic Windshield & Windows -->
-            <polygon points="244,6 256,12 244,18" fill="#0284c7" filter="url(#crLightGlow)"/>
-            <rect x="200" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="214" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="228" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <!-- Headlights -->
-            <circle cx="258" cy="10" r="2.2" fill="#ffffff"/>
-            <circle cx="258" cy="18" r="2.2" fill="#ffffff"/>
+            <!-- Aerodynamic Windshield & Glowing Cyan Windows -->
+            <polygon points="244,6 256,12 244,18" fill="#00f2fe" filter="url(#crNeonCyanGlow)"/>
+            <rect x="200" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="214" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="228" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <!-- Headlights with Warm White Glow -->
+            <circle cx="258" cy="10" r="2.5" fill="#ffffff" filter="url(#crLightGlow)"/>
+            <circle cx="258" cy="18" r="2.5" fill="#ffffff" filter="url(#crLightGlow)"/>
 
             <!-- Gangway 1 -->
             <rect x="190" y="8" width="5" height="10" fill="#475569"/>
 
             <!-- Coach 2 -->
-            <rect x="130" y="3" width="60" height="20" rx="2" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <rect x="130" y="3" width="60" height="20" rx="2" fill="#f8fafc" stroke="#00f2fe" stroke-width="1.5"/>
             <rect x="130" y="11" width="60" height="2.5" fill="#16a34a"/>
             <rect x="130" y="13.5" width="60" height="2" fill="#dc2626"/>
-            <rect x="135" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="149" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="163" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="177" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="135" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="149" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="163" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="177" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
             <!-- Roof Pantograph -->
             <path d="M 155,3 L 160,-4 L 165,3" stroke="#cbd5e1" stroke-width="1.2" fill="none"/>
 
@@ -2543,27 +2644,27 @@
             <rect x="125" y="8" width="5" height="10" fill="#475569"/>
 
             <!-- Coach 3 -->
-            <rect x="65" y="3" width="60" height="20" rx="2" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <rect x="65" y="3" width="60" height="20" rx="2" fill="#f8fafc" stroke="#00f2fe" stroke-width="1.5"/>
             <rect x="65" y="11" width="60" height="2.5" fill="#16a34a"/>
             <rect x="65" y="13.5" width="60" height="2" fill="#dc2626"/>
-            <rect x="70" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="84" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="98" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="112" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
+            <rect x="70" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="84" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="98" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="112" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
 
             <!-- Gangway 3 -->
             <rect x="60" y="8" width="5" height="10" fill="#475569"/>
 
             <!-- Trail Car -->
-            <path d="M 60,3 L 15,3 Q 0,14 15,23 L 60,23 Z" fill="#f8fafc" stroke="#38bdf8" stroke-width="1.4"/>
+            <path d="M 60,3 L 15,3 Q 0,14 15,23 L 60,23 Z" fill="#f8fafc" stroke="#00f2fe" stroke-width="1.5"/>
             <rect x="10" y="11" width="50" height="2.5" fill="#16a34a"/>
             <rect x="10" y="13.5" width="50" height="2" fill="#dc2626"/>
-            <rect x="20" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="34" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <rect x="48" y="6" width="9" height="5" rx="1" fill="#38bdf8"/>
-            <!-- Red Taillights -->
-            <circle cx="4" cy="9" r="2" fill="#ef4444"/>
-            <circle cx="4" cy="17" r="2" fill="#ef4444"/>
+            <rect x="20" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="34" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <rect x="48" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
+            <!-- Glowing Red Taillights -->
+            <circle cx="4" cy="9" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+            <circle cx="4" cy="17" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
           </g>
 
 
@@ -2589,7 +2690,7 @@
               <polygon points="4,135 38,135 34,125 8,125" fill="#082f49"/>
               <line x1="20" y1="125" x2="20" y2="105" stroke="#94a3b8" stroke-width="1.2"/>
               <circle cx="20" cy="104" r="2" fill="#ef4444" class="beacon-blink"/>
-              <g fill="#bae6fd" opacity="0.85">
+              <g fill="#22d3ee" opacity="0.95" class="cr-neon-cyan">
                 <rect x="11" y="145" width="8" height="12" rx="1"/>
                 <rect x="22" y="145" width="8" height="12" rx="1"/>
                 <rect x="11" y="170" width="8" height="12" rx="1"/>
@@ -2600,10 +2701,10 @@
                 <rect x="22" y="220" width="8" height="12" rx="1"/>
               </g>
 
-              <!-- NW-2: 4-Story Terracotta Complex with Balconies & Billboard (Preserved Existing) -->
+              <!-- NW-2: 4-Story Terracotta Complex with Balconies & Billboard -->
               <rect x="40" y="165" width="230" height="150" rx="4" fill="url(#bldgOrangeGrad)" stroke="#f97316" stroke-width="1.2"/>
               <polygon points="35,165 275,165 265,155 45,155" fill="#431407"/>
-              <g fill="#fef08a" opacity="0.85">
+              <g fill="#fbbf24" opacity="0.95" class="cr-neon-amber window-glow-pulse">
                 <rect x="60" y="180" width="18" height="20" rx="1"/>
                 <rect x="95" y="180" width="18" height="20" rx="1"/>
                 <rect x="130" y="180" width="18" height="20" rx="1"/>
@@ -2615,27 +2716,27 @@
                 <rect x="165" y="215" width="18" height="20" rx="1"/>
                 <rect x="200" y="215" width="18" height="20" rx="1"/>
               </g>
-              <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") -->
-              <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+              <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") with Vivid Neon Glow -->
+              <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
               <rect x="55" y="263" width="90" height="14" fill="#d97706"/>
-              <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ঢাকা বেকারি</text>
-              <rect x="58" y="280" width="84" height="26" fill="#fef08a" opacity="0.75"/>
+              <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা বেকারি</text>
+              <rect x="58" y="280" width="84" height="26" fill="#fbbf24" opacity="0.9" class="cr-neon-amber"/>
 
-              <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+              <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
               <rect x="165" y="263" width="90" height="14" fill="#059669"/>
-              <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">গ্রীন ফার্মেসি</text>
-              <rect x="168" y="280" width="84" height="26" fill="#a7f3d0" opacity="0.75"/>
+              <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">গ্রীন ফার্মেসি</text>
+              <rect x="168" y="280" width="84" height="26" fill="#34d399" opacity="0.9" class="cr-neon-green"/>
 
-              <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" (Preserved Existing) -->
+              <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" with Neon Halo -->
               <g transform="translate(50, 160)">
-                <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="1.8" filter="url(#crLightGlow)"/>
+                <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="2.5" filter="url(#crNeonGreenGlow)"/>
                 <rect x="5" y="-80" width="160" height="70" rx="4" fill="#065f46"/>
                 <path d="M 10,-20 L 30,-20 L 30,-45 L 45,-45 L 45,-20 L 70,-20 L 70,-55 L 90,-55 L 90,-20 L 120,-20 L 120,-40 L 140,-40 L 140,-20 L 160,-20 Z" fill="#022c22" opacity="0.6"/>
-                <text x="20" y="-55" fill="#fef08a" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
-                <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">আমাদের</text>
-                <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">শহর</text>
-                <circle cx="40" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
-                <circle cx="130" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
+                <text x="20" y="-55" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা</text>
+                <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">আমাদের</text>
+                <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">শহর</text>
+                <circle cx="40" cy="-86" r="3.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
+                <circle cx="130" cy="-86" r="3.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
               </g>
 
               <!-- NW-3: Turquoise 5-Story Residential Tower with Water Tank & Balconies -->
@@ -2645,8 +2746,8 @@
               <text x="304" y="111" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
               <line x1="345" y1="118" x2="345" y2="92" stroke="#94a3b8" stroke-width="1.5"/>
               <line x1="340" y1="98" x2="350" y2="98" stroke="#94a3b8" stroke-width="1.5"/>
-              <!-- Illuminated Balconies and Windows -->
-              <g fill="#fef08a" opacity="0.85" class="window-glow-pulse">
+              <!-- Illuminated Balconies and Windows in Warm Amber -->
+              <g fill="#fbbf24" opacity="0.95" class="cr-neon-amber window-glow-pulse">
                 <rect x="286" y="140" width="20" height="18" rx="1"/>
                 <rect x="316" y="140" width="20" height="18" rx="1"/>
                 <rect x="344" y="140" width="18" height="18" rx="1"/>
@@ -2661,15 +2762,15 @@
                 <rect x="344" y="236" width="18" height="18" rx="1"/>
               </g>
               <!-- Modern Corner Entrance -->
-              <rect x="282" y="275" width="82" height="42" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
-              <rect x="288" y="285" width="70" height="28" fill="#5eead4" opacity="0.6"/>
+              <rect x="282" y="275" width="82" height="42" fill="#042f2e" stroke="#2dd4bf" stroke-width="1.5" class="cr-neon-cyan"/>
+              <rect x="288" y="285" width="70" height="28" fill="#22d3ee" opacity="0.75" class="cr-neon-cyan"/>
 
               <!-- NW-4: Amber Commercial Building & Corner Shop ("ঢাকা বুক ডিপো") -->
               <rect x="376" y="145" width="86" height="180" rx="4" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
               <polygon points="372,145 466,145 458,135 380,135" fill="#451a03"/>
               <line x1="420" y1="135" x2="420" y2="115" stroke="#94a3b8" stroke-width="1.4"/>
               <circle cx="420" cy="114" r="2.5" fill="#ef4444" class="beacon-blink"/>
-              <g fill="#fde68a" opacity="0.85">
+              <g fill="#fbbf24" opacity="0.95" class="cr-neon-amber">
                 <rect x="388" y="158" width="18" height="18" rx="1"/>
                 <rect x="416" y="158" width="18" height="18" rx="1"/>
                 <rect x="438" y="158" width="16" height="18" rx="1"/>
@@ -2681,20 +2782,20 @@
                 <rect x="438" y="218" width="16" height="18" rx="1"/>
               </g>
               <!-- Ground Shopfront: ঢাকা বুক ডিপো -->
-              <rect x="382" y="262" width="75" height="54" fill="#0f172a" stroke="#d97706" stroke-width="1"/>
+              <rect x="382" y="262" width="75" height="54" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
               <rect x="386" y="265" width="67" height="14" fill="#b45309"/>
-              <text x="419" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ঢাকা বুক ডিপো</text>
-              <rect x="388" y="282" width="63" height="30" fill="#fef08a" opacity="0.8"/>
+              <text x="419" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা বুক ডিপো</text>
+              <rect x="388" y="282" width="63" height="30" fill="#fbbf24" opacity="0.9" class="cr-neon-amber"/>
             </g>
 
             <!-- Quadrant B: Top-Right (NE) Dhaka Architecture -->
             <g id="neBuildingsGroup">
-              <!-- NE-1: Violet / Purple Modern Mid-Rise -->
+              <!-- NE-1: Violet / Purple Modern Mid-Rise with Electric Magenta Windows -->
               <rect x="732" y="145" width="84" height="180" rx="4" fill="url(#bldgPurpleGrad)" stroke="#a855f7" stroke-width="1.2"/>
               <polygon points="728,145 820,145 812,133 736,133" fill="#2e1065"/>
               <line x1="774" y1="133" x2="774" y2="108" stroke="#cbd5e1" stroke-width="1.5"/>
               <circle cx="774" cy="107" r="2.5" fill="#ef4444" class="beacon-blink"/>
-              <g fill="#e9d5ff" opacity="0.85">
+              <g fill="#e879f9" opacity="0.95" class="cr-neon-magenta">
                 <rect x="744" y="158" width="18" height="18" rx="1"/>
                 <rect x="770" y="158" width="18" height="18" rx="1"/>
                 <rect x="794" y="158" width="16" height="18" rx="1"/>
@@ -2705,18 +2806,18 @@
                 <rect x="770" y="218" width="18" height="18" rx="1"/>
                 <rect x="794" y="218" width="16" height="18" rx="1"/>
               </g>
-              <!-- Boutique Shopfront -->
-              <rect x="738" y="262" width="72" height="54" fill="#0f172a" stroke="#c084fc" stroke-width="1"/>
+              <!-- Boutique Shopfront: ফ্যাশন কর্নার with Electric Magenta Halo -->
+              <rect x="738" y="262" width="72" height="54" fill="#0f172a" stroke="#d946ef" stroke-width="1.8" class="cr-neon-magenta"/>
               <rect x="742" y="265" width="64" height="13" fill="#7e22ce"/>
-              <text x="774" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ফ্যাশন কর্নার</text>
-              <rect x="744" y="281" width="60" height="30" fill="#f3e8ff" opacity="0.75"/>
+              <text x="774" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-magenta">ফ্যাশন কর্নার</text>
+              <rect x="744" y="281" width="60" height="30" fill="#f0abfc" opacity="0.9" class="cr-neon-magenta"/>
 
-              <!-- NE-2: Turquoise Commercial & Tech ("বাংলা টেক") -->
+              <!-- NE-2: Turquoise Commercial & Tech ("বাংলা টেক") with Vivid Cyan Glow -->
               <rect x="824" y="152" width="86" height="173" rx="4" fill="url(#bldgTurquoiseGrad)" stroke="#14b8a6" stroke-width="1.2"/>
               <polygon points="820,152 914,152 906,142 828,142" fill="#042f2e"/>
               <rect x="850" y="122" width="28" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
               <text x="864" y="135" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
-              <g fill="#a7f3d0" opacity="0.85">
+              <g fill="#22d3ee" opacity="0.95" class="cr-neon-cyan">
                 <rect x="836" y="166" width="18" height="18" rx="1"/>
                 <rect x="862" y="166" width="18" height="18" rx="1"/>
                 <rect x="886" y="166" width="16" height="18" rx="1"/>
@@ -2727,11 +2828,11 @@
                 <rect x="862" y="226" width="18" height="18" rx="1"/>
                 <rect x="886" y="226" width="16" height="18" rx="1"/>
               </g>
-              <!-- Tech Shopfront -->
-              <rect x="830" y="264" width="74" height="52" fill="#0f172a" stroke="#0d9488" stroke-width="1"/>
+              <!-- Tech Shopfront: বাংলা টেক -->
+              <rect x="830" y="264" width="74" height="52" fill="#0f172a" stroke="#00f2fe" stroke-width="1.8" class="cr-neon-cyan"/>
               <rect x="834" y="267" width="66" height="13" fill="#0f766e"/>
-              <text x="867" y="277" fill="#2dd4bf" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">বাংলা টেক</text>
-              <rect x="836" y="283" width="62" height="28" fill="#5eead4" opacity="0.75"/>
+              <text x="867" y="277" fill="#00f2fe" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">বাংলা টেক</text>
+              <rect x="836" y="283" width="62" height="28" fill="#67e8f9" opacity="0.9" class="cr-neon-cyan"/>
 
               <!-- NE-3: Coral & Rose 5-Story Residential -->
               <rect x="918" y="126" width="100" height="199" rx="4" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
@@ -2740,7 +2841,7 @@
               <text x="953" y="107" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
               <line x1="990" y1="114" x2="990" y2="88" stroke="#cbd5e1" stroke-width="1.5"/>
               <line x1="985" y1="94" x2="995" y2="94" stroke="#cbd5e1" stroke-width="1.5"/>
-              <g fill="#fde047" opacity="0.85" class="window-glow-pulse">
+              <g fill="#fbbf24" opacity="0.95" class="cr-neon-amber window-glow-pulse">
                 <rect x="930" y="138" width="20" height="18" rx="1"/>
                 <rect x="958" y="138" width="20" height="18" rx="1"/>
                 <rect x="986" y="138" width="20" height="18" rx="1"/>
@@ -2755,10 +2856,10 @@
                 <rect x="986" y="228" width="20" height="18" rx="1"/>
               </g>
               <!-- Ground Super Shop -->
-              <rect x="926" y="266" width="84" height="50" fill="#0f172a" stroke="#e11d48" stroke-width="1"/>
+              <rect x="926" y="266" width="84" height="50" fill="#0f172a" stroke="#ff2a54" stroke-width="1.8" class="cr-neon-red"/>
               <rect x="930" y="269" width="76" height="13" fill="#be123c"/>
-              <text x="968" y="279" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">সুপার শপ</text>
-              <rect x="932" y="285" width="72" height="26" fill="#fef08a" opacity="0.8"/>
+              <text x="968" y="279" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-red">সুপার শপ</text>
+              <rect x="932" y="285" width="72" height="26" fill="#fecdd3" opacity="0.9" class="cr-neon-red"/>
 
               <!-- NE-4: "মিরপুর প্লাজা" (Mirpur Plaza) Landmark Glass & Indigo High-Rise -->
               <rect x="1026" y="100" width="166" height="225" rx="5" fill="url(#bldgBlueGrad)" stroke="#38bdf8" stroke-width="1.5"/>
@@ -2766,38 +2867,38 @@
               <!-- Tower Mast with Hazard Beacon -->
               <line x1="1110" y1="86" x2="1110" y2="58" stroke="#e2e8f0" stroke-width="2"/>
               <circle cx="1110" cy="56" r="3" fill="#ef4444" class="beacon-blink"/>
-              <!-- Glowing Rooftop Billboard: "মিরপুর প্লাজা" -->
+              <!-- Glowing Rooftop Billboard: "মিরপুর প্লাজা" with High-Contrast Neon -->
               <g transform="translate(1045, 92)">
-                <rect x="0" y="0" width="125" height="24" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="1.2" filter="url(#crLightGlow)"/>
-                <text x="62" y="16" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">মিরপুর প্লাজা</text>
+                <rect x="0" y="0" width="125" height="24" rx="4" fill="#0369a1" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
+                <text x="62" y="16" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">মিরপুর প্লাজা</text>
               </g>
-              <!-- 5 Floors of Expansive Panoramic Glass Windows -->
-              <g fill="#7dd3fc" opacity="0.85" class="window-glow-pulse">
-                <rect x="1040" y="128" width="34" height="20" rx="1"/>
-                <rect x="1084" y="128" width="46" height="20" rx="1" fill="#fef08a"/>
-                <rect x="1140" y="128" width="38" height="20" rx="1"/>
-                <rect x="1040" y="158" width="34" height="20" rx="1" fill="#fef08a"/>
-                <rect x="1084" y="158" width="46" height="20" rx="1"/>
-                <rect x="1140" y="158" width="38" height="20" rx="1" fill="#fef08a"/>
-                <rect x="1040" y="188" width="34" height="20" rx="1"/>
-                <rect x="1084" y="188" width="46" height="20" rx="1"/>
-                <rect x="1140" y="188" width="38" height="20" rx="1"/>
-                <rect x="1040" y="218" width="34" height="20" rx="1" fill="#fef08a"/>
-                <rect x="1084" y="218" width="46" height="20" rx="1"/>
-                <rect x="1140" y="218" width="38" height="20" rx="1" fill="#fef08a"/>
+              <!-- 5 Floors of Expansive Panoramic Glass Windows with Cyan & Amber Neon -->
+              <g class="window-glow-pulse">
+                <rect x="1040" y="128" width="34" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1084" y="128" width="46" height="20" rx="1" fill="#fbbf24" opacity="0.95" class="cr-neon-amber"/>
+                <rect x="1140" y="128" width="38" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1040" y="158" width="34" height="20" rx="1" fill="#fbbf24" opacity="0.95" class="cr-neon-amber"/>
+                <rect x="1084" y="158" width="46" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1140" y="158" width="38" height="20" rx="1" fill="#fbbf24" opacity="0.95" class="cr-neon-amber"/>
+                <rect x="1040" y="188" width="34" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1084" y="188" width="46" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1140" y="188" width="38" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1040" y="218" width="34" height="20" rx="1" fill="#fbbf24" opacity="0.95" class="cr-neon-amber"/>
+                <rect x="1084" y="218" width="46" height="20" rx="1" fill="#22d3ee" opacity="0.95" class="cr-neon-cyan"/>
+                <rect x="1140" y="218" width="38" height="20" rx="1" fill="#fbbf24" opacity="0.95" class="cr-neon-amber"/>
               </g>
               <!-- Grand Double-Height Glass Entrance Lobby -->
-              <rect x="1046" y="255" width="126" height="65" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
-              <rect x="1054" y="262" width="110" height="52" fill="#38bdf8" opacity="0.4"/>
-              <rect x="1086" y="280" width="46" height="34" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
-              <text x="1109" y="296" fill="#fde68a" font-size="7.5" font-weight="900" text-anchor="middle">ENTRANCE</text>
+              <rect x="1046" y="255" width="126" height="65" fill="#082f49" stroke="#00f2fe" stroke-width="1.8" class="cr-neon-cyan"/>
+              <rect x="1054" y="262" width="110" height="52" fill="#38bdf8" opacity="0.55"/>
+              <rect x="1086" y="280" width="46" height="34" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5" class="cr-neon-amber"/>
+              <text x="1109" y="296" fill="#fde68a" font-size="7.5" font-weight="900" text-anchor="middle" class="cr-neon-amber">ENTRANCE</text>
             </g>
 
             <!-- Quadrant C: Bottom-Left (SW) Architecture -->
             <g id="swBuildingsGroup">
               <!-- SW-1: Far Left Slice in Coral -->
               <rect x="4" y="520" width="32" height="175" rx="3" fill="url(#bldgCoralGrad)" stroke="#fb7185" stroke-width="1"/>
-              <g fill="#fed7aa" opacity="0.8">
+              <g fill="#fbbf24" opacity="0.9" class="cr-neon-amber">
                 <rect x="8" y="535" width="10" height="14" rx="1"/>
                 <rect x="20" y="535" width="10" height="14" rx="1"/>
                 <rect x="8" y="565" width="10" height="14" rx="1"/>
@@ -2808,14 +2909,14 @@
                 <rect x="20" y="625" width="10" height="14" rx="1"/>
               </g>
 
-              <!-- SW-2: Multistory Residential Block in Teal & Cream (Preserved Existing) -->
+              <!-- SW-2: Multistory Residential Block in Teal & Cream -->
               <rect x="40" y="525" width="240" height="155" rx="4" fill="url(#bldgTealGrad)" stroke="#14b8a6" stroke-width="1.2"/>
               <polygon points="35,525 285,525 275,515 45,515" fill="#042f2e"/>
               <rect x="70" y="495" width="30" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
               <text x="85" y="508" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
               <line x1="140" y1="515" x2="140" y2="490" stroke="#94a3b8" stroke-width="1.5"/>
               <line x1="135" y1="495" x2="145" y2="495" stroke="#94a3b8" stroke-width="1.5"/>
-              <g fill="#fde68a" opacity="0.8">
+              <g fill="#fbbf24" opacity="0.9" class="cr-neon-amber">
                 <rect x="65" y="540" width="22" height="22" rx="1"/>
                 <rect x="110" y="540" width="22" height="22" rx="1"/>
                 <rect x="155" y="540" width="22" height="22" rx="1"/>
@@ -2830,7 +2931,7 @@
               <rect x="282" y="516" width="82" height="176" rx="4" fill="url(#bldgPurpleGrad)" stroke="#8b5cf6" stroke-width="1.2"/>
               <polygon points="278,516 368,516 360,505 286,505" fill="#2e1065"/>
               <line x1="324" y1="505" x2="324" y2="480" stroke="#94a3b8" stroke-width="1.5"/>
-              <g fill="#ddd6fe" opacity="0.85">
+              <g fill="#e879f9" opacity="0.95" class="cr-neon-magenta">
                 <rect x="292" y="528" width="16" height="18" rx="1"/>
                 <rect x="316" y="528" width="16" height="18" rx="1"/>
                 <rect x="340" y="528" width="16" height="18" rx="1"/>
@@ -2842,17 +2943,17 @@
                 <rect x="340" y="584" width="16" height="18" rx="1"/>
               </g>
 
-              <!-- Ground-floor Traditional Tea Stall (টং দোকান - Preserved Existing) -->
-              <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#b45309" stroke-width="1"/>
-              <text x="340" y="542" fill="#fef08a" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">চায়ের টং</text>
-              <circle cx="340" cy="552" r="3.5" fill="#f59e0b" filter="url(#crLightGlow)"/>
+              <!-- Ground-floor Traditional Tea Stall (টং দোকান) with Warm Amber Lantern -->
+              <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#fbbf24" stroke-width="1.5" class="cr-neon-amber"/>
+              <text x="340" y="542" fill="#fbbf24" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">চায়ের টং</text>
+              <circle cx="340" cy="552" r="4.5" fill="#fbbf24" filter="url(#crNeonAmberGlow)"/>
 
               <!-- SW-4: Amber & Cream Corner Building with Shop ("সোনালী জুয়েলার্স") -->
               <rect x="368" y="518" width="100" height="172" rx="4" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
               <polygon points="364,518 472,518 464,506 372,506" fill="#451a03"/>
               <rect x="390" y="486" width="28" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
               <text x="404" y="499" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
-              <g fill="#fef08a" opacity="0.85">
+              <g fill="#fbbf24" opacity="0.95" class="cr-neon-amber">
                 <rect x="380" y="532" width="20" height="18" rx="1"/>
                 <rect x="410" y="532" width="20" height="18" rx="1"/>
                 <rect x="438" y="532" width="18" height="18" rx="1"/>
@@ -2863,11 +2964,11 @@
                 <rect x="410" y="592" width="20" height="18" rx="1"/>
                 <rect x="438" y="592" width="18" height="18" rx="1"/>
               </g>
-              <!-- Ground Shop: সোনালী জুয়েলার্স -->
-              <rect x="374" y="626" width="88" height="52" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+              <!-- Ground Shop: সোনালী জুয়েলার্স with Gold Neon Glow -->
+              <rect x="374" y="626" width="88" height="52" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
               <rect x="378" y="629" width="80" height="14" fill="#b45309"/>
-              <text x="418" y="640" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">সোনালী জুয়েলার্স</text>
-              <rect x="380" y="646" width="76" height="26" fill="#fde68a" opacity="0.85"/>
+              <text x="418" y="640" fill="#fbbf24" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">সোনালী জুয়েলার্স</text>
+              <rect x="380" y="646" width="76" height="26" fill="#fde047" opacity="0.95" class="cr-neon-amber"/>
             </g>
 
             <!-- Quadrant D: Bottom-Right (SE) Architecture -->
@@ -2877,7 +2978,7 @@
               <polygon points="727,518 878,518 868,506 737,506" fill="#4c0519"/>
               <line x1="802" y1="506" x2="802" y2="478" stroke="#94a3b8" stroke-width="1.5"/>
               <circle cx="802" cy="477" r="2.5" fill="#ef4444" class="beacon-blink"/>
-              <g fill="#fde68a" opacity="0.85">
+              <g fill="#fbbf24" opacity="0.95" class="cr-neon-amber">
                 <rect x="746" y="532" width="22" height="18" rx="1"/>
                 <rect x="778" y="532" width="22" height="18" rx="1"/>
                 <rect x="810" y="532" width="22" height="18" rx="1"/>
@@ -2891,35 +2992,35 @@
                 <rect x="810" y="592" width="22" height="18" rx="1"/>
                 <rect x="842" y="592" width="20" height="18" rx="1"/>
               </g>
-              <!-- Clinic / Pharmacy Shopfront with Green Cross -->
-              <rect x="740" y="626" width="126" height="52" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+              <!-- Clinic / Pharmacy Shopfront with Glowing Medical Green Cross -->
+              <rect x="740" y="626" width="126" height="52" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
               <rect x="745" y="629" width="116" height="14" fill="#065f46"/>
-              <text x="803" y="640" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">জনতা ফার্মেসি</text>
-              <rect x="748" y="646" width="110" height="26" fill="#a7f3d0" opacity="0.8"/>
-              <!-- Green Medical Cross -->
-              <rect x="758" y="652" width="14" height="4" fill="#059669"/>
-              <rect x="763" y="647" width="4" height="14" fill="#059669"/>
+              <text x="803" y="640" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">জনতা ফার্মেসি</text>
+              <rect x="748" y="646" width="110" height="26" fill="#a7f3d0" opacity="0.9" class="cr-neon-green"/>
+              <!-- Radiant Green Medical Cross -->
+              <rect x="758" y="652" width="14" height="4" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
+              <rect x="763" y="647" width="4" height="14" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
 
-              <!-- SE-2: Modern Commercial Building & Authentic Billboard (Preserved Existing) -->
+              <!-- SE-2: Modern Commercial Building & Authentic Billboard ("সবাই মিলে একটি ভালো ঢাকা") -->
               <rect x="880" y="525" width="260" height="155" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
               <rect x="910" y="495" width="32" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
               <line x1="980" y1="525" x2="980" y2="485" stroke="#ef4444" stroke-width="2"/>
               <circle cx="980" cy="484" r="2.5" fill="#ef4444" class="beacon-blink"/>
               <g transform="translate(890, 530)">
-                <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#38bdf8" stroke-width="2" filter="url(#crLightGlow)"/>
+                <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
                 <rect x="5" y="5" width="220" height="85" rx="4" fill="#172554"/>
-                <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">সবাই মিলে</text>
-                <text x="18" y="52" fill="#38bdf8" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">একটি ভালো</text>
-                <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
+                <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-blue">সবাই মিলে</text>
+                <text x="18" y="52" fill="#00f2fe" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">একটি ভালো</text>
+                <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা</text>
                 <path d="M 140,75 L 155,50 L 170,60 L 190,35 L 210,75 Z" fill="#3b82f6" opacity="0.4"/>
               </g>
 
-              <!-- SE-3: Far-Right Modern Sapphire Tower -->
+              <!-- SE-3: Far-Right Modern Sapphire Tower with Radiant Cyan Windows -->
               <rect x="1144" y="515" width="52" height="178" rx="4" fill="url(#bldgBlueGrad)" stroke="#0ea5e9" stroke-width="1.2"/>
               <polygon points="1140,515 1200,515 1195,502 1145,502" fill="#0c4a6e"/>
               <line x1="1170" y1="502" x2="1170" y2="480" stroke="#94a3b8" stroke-width="1.4"/>
               <circle cx="1170" cy="479" r="2.5" fill="#ef4444" class="beacon-blink"/>
-              <g fill="#7dd3fc" opacity="0.85">
+              <g fill="#22d3ee" opacity="0.95" class="cr-neon-cyan">
                 <rect x="1152" y="525" width="16" height="24" rx="1"/>
                 <rect x="1174" y="525" width="16" height="24" rx="1"/>
                 <rect x="1152" y="560" width="16" height="24" rx="1"/>
@@ -3055,36 +3156,44 @@
 
 
           <!-- ========================================================
+               5.5 ATMOSPHERIC NIGHT SHADOW OVERLAY (Darkens Base Roads & Scenery)
+               ======================================================== -->
+          <g id="crNightLayer" class="cr-atmos-layer pointer-events-none" opacity="1">
+            <!-- Deep Midnight Ambient Tone (Base Scenery Only - Leaves Lights Vivid Above) -->
+            <rect width="1200" height="700" fill="#020617" opacity="0.32"/>
+          </g>
+
+          <!-- ========================================================
                6. WARM STREETLIGHTS & TREES (Dhaka Evening Ambience)
                ======================================================== -->
 
-          <!-- Ambient Streetlight Radial Illumination Pools -->
-          <ellipse cx="460" cy="320" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
-          <ellipse cx="740" cy="320" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
-          <ellipse cx="460" cy="520" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
-          <ellipse cx="740" cy="520" rx="90" ry="70" fill="#fef08a" opacity="0.12" filter="url(#crStreetlampGlow)"/>
+          <!-- Enhanced Streetlight Radial Illumination Pools on Asphalt (High Luminance) -->
+          <ellipse cx="460" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="740" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="460" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="740" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
 
-          <!-- Streetlight Poles & Fixtures -->
+          <!-- Streetlight Poles & Fixtures with Glowing Warm Lantern Heads -->
           <g stroke="#64748b" stroke-width="2">
             <!-- NW Streetlamp -->
             <line x1="465" y1="320" x2="465" y2="295"/>
             <path d="M 465,295 Q 465,285 455,288" fill="none"/>
-            <circle cx="454" cy="289" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+            <circle cx="454" cy="289" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
 
             <!-- NE Streetlamp -->
             <line x1="735" y1="320" x2="735" y2="295"/>
             <path d="M 735,295 Q 735,285 745,288" fill="none"/>
-            <circle cx="746" cy="289" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+            <circle cx="746" cy="289" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
 
             <!-- SW Streetlamp -->
             <line x1="465" y1="520" x2="465" y2="545"/>
             <path d="M 465,545 Q 465,555 455,552" fill="none"/>
-            <circle cx="454" cy="551" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+            <circle cx="454" cy="551" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
 
             <!-- SE Streetlamp -->
             <line x1="735" y1="520" x2="735" y2="545"/>
             <path d="M 735,545 Q 735,555 745,552" fill="none"/>
-            <circle cx="746" cy="551" r="4" fill="#fef08a" stroke="#f59e0b" filter="url(#crLightGlow)"/>
+            <circle cx="746" cy="551" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
           </g>
 
           <!-- Lush Green Roadside Trees & Shrubbery -->
@@ -3110,39 +3219,39 @@
 
 
           <!-- ========================================================
-               7. THE 4 INTERSECTION TRAFFIC LIGHT SIGNAL HEADS
+               7. THE 4 INTERSECTION TRAFFIC LIGHT SIGNAL HEADS (Sharp Neon Halo)
                ======================================================== -->
           <g id="crossroadsSignals">
             <!-- 1. Northwest Corner Signal Pole (x=480, y=325) -->
             <g transform="translate(476, 305)">
               <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-              <circle id="sig_nw_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
-              <circle id="sig_nw_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
-              <circle id="sig_nw_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+              <circle id="sig_nw_red" cx="4" cy="4" r="2.8" fill="#ff1744" filter="url(#crSignalGlow)"/>
+              <circle id="sig_nw_yellow" cx="4" cy="12" r="2.8" fill="#261a02" filter="url(#crSignalGlow)"/>
+              <circle id="sig_nw_green" cx="4" cy="20" r="2.8" fill="#02210f" filter="url(#crSignalGlow)"/>
             </g>
 
             <!-- 2. Northeast Corner Signal Pole (x=716, y=305) -->
             <g transform="translate(716, 305)">
               <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-              <circle id="sig_ne_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
-              <circle id="sig_ne_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
-              <circle id="sig_ne_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+              <circle id="sig_ne_red" cx="4" cy="4" r="2.8" fill="#ff1744" filter="url(#crSignalGlow)"/>
+              <circle id="sig_ne_yellow" cx="4" cy="12" r="2.8" fill="#261a02" filter="url(#crSignalGlow)"/>
+              <circle id="sig_ne_green" cx="4" cy="20" r="2.8" fill="#02210f" filter="url(#crSignalGlow)"/>
             </g>
 
             <!-- 3. Southwest Corner Signal Pole (x=476, y=510) -->
             <g transform="translate(476, 510)">
               <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-              <circle id="sig_sw_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
-              <circle id="sig_sw_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
-              <circle id="sig_sw_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+              <circle id="sig_sw_red" cx="4" cy="4" r="2.8" fill="#ff1744" filter="url(#crSignalGlow)"/>
+              <circle id="sig_sw_yellow" cx="4" cy="12" r="2.8" fill="#261a02" filter="url(#crSignalGlow)"/>
+              <circle id="sig_sw_green" cx="4" cy="20" r="2.8" fill="#02210f" filter="url(#crSignalGlow)"/>
             </g>
 
             <!-- 4. Southeast Corner Signal Pole (x=716, y=510) -->
             <g transform="translate(716, 510)">
               <rect x="0" y="0" width="8" height="24" rx="3" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-              <circle id="sig_se_red" cx="4" cy="4" r="2.8" fill="#ef4444" filter="url(#crLightGlow)"/>
-              <circle id="sig_se_yellow" cx="4" cy="12" r="2.8" fill="#422006"/>
-              <circle id="sig_se_green" cx="4" cy="20" r="2.8" fill="#052e16"/>
+              <circle id="sig_se_red" cx="4" cy="4" r="2.8" fill="#ff1744" filter="url(#crSignalGlow)"/>
+              <circle id="sig_se_yellow" cx="4" cy="12" r="2.8" fill="#261a02" filter="url(#crSignalGlow)"/>
+              <circle id="sig_se_green" cx="4" cy="20" r="2.8" fill="#02210f" filter="url(#crSignalGlow)"/>
             </g>
           </g>
 
@@ -3163,7 +3272,7 @@
           </g>
 
           <!-- ========================================================
-               10. DYNAMIC ATMOSPHERE OVERLAYS (Sun, Night, Rain & Street Reflections)
+               10. DYNAMIC ATMOSPHERE OVERLAYS (Sun, Rain & Street Reflections)
                ======================================================== -->
           <g id="crAtmosphereOverlays" pointer-events="none">
             <!-- Sun / Clear Day Glare & Volumetric Beams -->
@@ -3176,12 +3285,6 @@
               <polygon points="280,0 620,0 1140,700 800,700" fill="url(#sunRayGrad1)" opacity="0.14" class="cr-sun-beam-anim" style="animation-delay: -1s;"/>
               <!-- Warm Sunny Daylight Ambience Wash -->
               <rect width="1200" height="700" fill="url(#sunWarmthGrad)" opacity="0.25" style="mix-blend-mode: overlay;"/>
-            </g>
-
-            <!-- Night Ambient Shadow / Darkness Layer -->
-            <g id="crNightLayer" class="cr-atmos-layer pointer-events-none" opacity="1">
-              <!-- Deep Midnight Shadow Overlay -->
-              <rect width="1200" height="700" fill="#020617" opacity="0.32" style="mix-blend-mode: multiply;"/>
             </g>
 
             <!-- Rain & Wet Street Reflections Layer -->
@@ -9257,11 +9360,11 @@
       const vehiclesLayer = document.getElementById('dhakaVehiclesLayer');
       const pedsLayer = document.getElementById('dhakaPedestriansLayer');
 
-      // Colors for signal states
+      // Colors for signal states with sharp vibrant neon saturation
       const LAMP_COLORS = {
-        red_on: '#ef4444', red_off: '#3b0707',
-        yellow_on: '#eab308', yellow_off: '#422006',
-        green_on: '#22c55e', green_off: '#052e16'
+        red_on: '#ff1744', red_off: '#200508',
+        yellow_on: '#ffea00', yellow_off: '#261a02',
+        green_on: '#00e676', green_off: '#02210f'
       };
 
       // 1. Initialize Vehicle fleet across 4 directions
@@ -9296,7 +9399,7 @@
         { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536 }
       ];
 
-      // Build Vehicle SVG Elements
+      // Build Vehicle SVG Elements with Bright Warm Gold/White Headlights & Glowing Red Taillights
       if (vehiclesLayer) {
         vehiclesLayer.innerHTML = '';
         vehicles.forEach(v => {
@@ -9306,7 +9409,7 @@
           if (v.dir === 'EB') {
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="76,12 135,2 135,22" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="76,12 145,0 145,24" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="0" y="0" width="76" height="24" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="4" y="0" width="68" height="3" rx="1" fill="#ffffff"/>
                 <rect x="56" y="4" width="16" height="4" fill="#fef08a"/>
@@ -9315,36 +9418,36 @@
                 <rect x="30" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="42" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="56" y="9" width="16" height="12" rx="1" fill="#7dd3fc"/>
-                <circle cx="75" cy="6" r="1.8" fill="#ffffff"/>
-                <circle cx="75" cy="18" r="1.8" fill="#ffffff"/>
-                <circle cx="1" cy="6" r="1.8" fill="#ef4444"/>
-                <circle cx="1" cy="18" r="1.8" fill="#ef4444"/>
+                <circle cx="75" cy="6" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="75" cy="18" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="1" cy="6" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="1" cy="18" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="44,10 90,2 90,18" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="44,10 98,0 98,20" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="0" y="1" width="44" height="18" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
                 <path d="M 10,1 L 15,-1 L 30,-1 L 35,1 Z" fill="#38bdf8" opacity="0.8"/>
-                <circle cx="43" cy="5" r="1.8" fill="#ffffff"/>
-                <circle cx="43" cy="15" r="1.8" fill="#ffffff"/>
-                <circle cx="1" cy="5" r="1.8" fill="#ef4444"/>
-                <circle cx="1" cy="15" r="1.8" fill="#ef4444"/>
+                <circle cx="43" cy="5" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="43" cy="15" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="1" cy="5" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="1" cy="15" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="32,8 70,0 70,16" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="32,8 78,-2 78,18" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="2" y="2" width="28" height="14" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
                 <path d="M 2,5 Q 14,0 26,5 L 24,7 L 4,7 Z" fill="#facc15"/>
                 <rect x="6" y="6" width="10" height="7" rx="1" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
-                <circle cx="30" cy="8" r="2" fill="#fef08a"/>
-                <circle cx="1" cy="9" r="1.5" fill="#ef4444"/>
+                <circle cx="30" cy="8" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="1" cy="9" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <circle cx="4" cy="12" r="4.5" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
                 <circle cx="4" cy="12" r="1.5" fill="#f59e0b"/>
                 <circle cx="28" cy="12" r="4" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
-                <rect x="-1" y="7" width="3" height="6" fill="#ef4444"/>
+                <rect x="-1" y="7" width="3" height="6" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
                 <path d="M 2,10 L 11,10 L 14,4 L 6,4 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <path d="M 4,4 Q 6,-3 14,1 L 13,5 Z" fill="#f59e0b" stroke="#fde047" stroke-width="1"/>
                 <circle cx="21" cy="2" r="2.5" fill="#fde047"/>
@@ -9352,18 +9455,19 @@
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="23,6 60,1 60,11" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="23,6 68,0 68,12" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
                 <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <path d="M 3,6 L 10,2 L 16,2 L 20,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
                 <circle cx="12" cy="1" r="2.5" fill="#38bdf8"/>
-                <circle cx="1" cy="5" r="1.5" fill="#ef4444"/>
+                <circle cx="23" cy="6" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="1" cy="5" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             }
           } else if (v.dir === 'WB') {
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="0,12 -60,2 -60,22" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="0,12 -70,0 -70,24" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="0" y="0" width="76" height="24" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="4" y="0" width="68" height="3" rx="1" fill="#ffffff"/>
                 <rect x="4" y="4" width="16" height="4" fill="#fef08a"/>
@@ -9372,36 +9476,36 @@
                 <rect x="38" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="50" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="62" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
-                <circle cx="1" cy="6" r="1.8" fill="#ffffff"/>
-                <circle cx="1" cy="18" r="1.8" fill="#ffffff"/>
-                <circle cx="75" cy="6" r="1.8" fill="#ef4444"/>
-                <circle cx="75" cy="18" r="1.8" fill="#ef4444"/>
+                <circle cx="1" cy="6" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="1" cy="18" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="75" cy="6" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="75" cy="18" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="0,10 -46,2 -46,18" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="0,10 -54,0 -54,20" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="0" y="1" width="44" height="18" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
                 <path d="M 34,1 L 29,-1 L 14,-1 L 9,1 Z" fill="#38bdf8" opacity="0.8"/>
-                <circle cx="1" cy="5" r="1.8" fill="#ffffff"/>
-                <circle cx="1" cy="15" r="1.8" fill="#ffffff"/>
-                <circle cx="43" cy="5" r="1.8" fill="#ef4444"/>
-                <circle cx="43" cy="15" r="1.8" fill="#ef4444"/>
+                <circle cx="1" cy="5" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="1" cy="15" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="43" cy="5" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="43" cy="15" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="0,8 -38,0 -38,16" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="0,8 -46,-2 -46,18" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="2" y="2" width="28" height="14" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
                 <path d="M 28,5 Q 16,0 4,5 L 6,7 L 26,7 Z" fill="#facc15"/>
                 <rect x="14" y="6" width="10" height="7" rx="1" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
-                <circle cx="1" cy="8" r="2" fill="#fef08a"/>
-                <circle cx="29" cy="9" r="1.5" fill="#ef4444"/>
+                <circle cx="1" cy="8" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="29" cy="9" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <circle cx="28" cy="12" r="4.5" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
                 <circle cx="28" cy="12" r="1.5" fill="#f59e0b"/>
                 <circle cx="4" cy="12" r="4" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
-                <rect x="30" y="7" width="3" height="6" fill="#ef4444"/>
+                <rect x="30" y="7" width="3" height="6" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
                 <path d="M 30,10 L 21,10 L 18,4 L 26,4 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <path d="M 28,4 Q 26,-3 18,1 L 19,5 Z" fill="#f59e0b" stroke="#fde047" stroke-width="1"/>
                 <circle cx="11" cy="2" r="2.5" fill="#fde047"/>
@@ -9409,100 +9513,105 @@
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="1,6 -36,1 -36,11" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="1,6 -45,0 -45,12" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
                 <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <path d="M 20,6 L 13,2 L 7,2 L 3,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
                 <circle cx="11" cy="1" r="2.5" fill="#38bdf8"/>
-                <circle cx="22" cy="5" r="1.5" fill="#ef4444"/>
+                <circle cx="1" cy="6" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="22" cy="5" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             }
           } else if (v.dir === 'SB') {
             // Southbound (Facing down)
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="12,76 2,135 22,135" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="12,76 0,145 24,145" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
                 <rect x="4" y="56" width="16" height="4" fill="#fef08a"/>
                 <rect x="4" y="60" width="16" height="12" rx="1" fill="#7dd3fc"/>
-                <circle cx="6" cy="75" r="1.8" fill="#ffffff"/>
-                <circle cx="18" cy="75" r="1.8" fill="#ffffff"/>
-                <circle cx="6" cy="1" r="1.8" fill="#ef4444"/>
-                <circle cx="18" cy="1" r="1.8" fill="#ef4444"/>
+                <circle cx="6" cy="75" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="18" cy="75" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="6" cy="1" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="18" cy="1" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="10,44 2,90 18,90" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="10,44 0,98 20,98" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
-                <circle cx="5" cy="43" r="1.8" fill="#ffffff"/>
-                <circle cx="15" cy="43" r="1.8" fill="#ffffff"/>
-                <circle cx="5" cy="1" r="1.8" fill="#ef4444"/>
-                <circle cx="15" cy="1" r="1.8" fill="#ef4444"/>
+                <circle cx="5" cy="43" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="15" cy="43" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="5" cy="1" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="15" cy="1" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="8,32 0,70 16,70" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="8,32 -2,78 18,78" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
-                <circle cx="8" cy="30" r="2" fill="#fef08a"/>
-                <circle cx="8" cy="1" r="1.5" fill="#ef4444"/>
+                <circle cx="8" cy="30" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="8" cy="1" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <circle cx="9" cy="28" r="2.5" fill="#fde047"/>
                 <circle cx="9" cy="32" r="3" fill="#0f172a"/>
+                <circle cx="9" cy="1" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="6,23 1,60 11,60" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="6,23 0,68 12,68" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
                 <circle cx="6" cy="10" r="2.5" fill="#38bdf8"/>
-                <circle cx="6" cy="22" r="1.8" fill="#ffffff"/>
+                <circle cx="6" cy="22" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             }
           } else if (v.dir === 'NB') {
             // Northbound (Facing up)
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="12,0 2,-60 22,-60" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="12,0 0,-70 24,-70" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
                 <rect x="4" y="16" width="16" height="4" fill="#fef08a"/>
                 <rect x="4" y="4" width="16" height="12" rx="1" fill="#7dd3fc"/>
-                <circle cx="6" cy="1" r="1.8" fill="#ffffff"/>
-                <circle cx="18" cy="1" r="1.8" fill="#ffffff"/>
-                <circle cx="6" cy="75" r="1.8" fill="#ef4444"/>
-                <circle cx="18" cy="75" r="1.8" fill="#ef4444"/>
+                <circle cx="6" cy="1" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="18" cy="1" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="6" cy="75" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="18" cy="75" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="10,0 2,-46 18,-46" fill="#fef08a" opacity="0.3" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="10,0 0,-54 20,-54" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
-                <circle cx="5" cy="1" r="1.8" fill="#ffffff"/>
-                <circle cx="15" cy="1" r="1.8" fill="#ffffff"/>
-                <circle cx="5" cy="43" r="1.8" fill="#ef4444"/>
-                <circle cx="15" cy="43" r="1.8" fill="#ef4444"/>
+                <circle cx="5" cy="1" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="15" cy="1" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="5" cy="43" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="15" cy="43" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="8,0 0,-38 16,-38" fill="#fef08a" opacity="0.35" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="8,0 -2,-46 18,-46" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
-                <circle cx="8" cy="1" r="2" fill="#fef08a"/>
-                <circle cx="8" cy="30" r="1.5" fill="#ef4444"/>
+                <circle cx="8" cy="1" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="8" cy="30" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <circle cx="9" cy="6" r="2.5" fill="#fde047"/>
                 <circle cx="9" cy="2" r="3" fill="#0f172a"/>
+                <circle cx="9" cy="31" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="6,1 1,-36 11,-36" fill="#38bdf8" opacity="0.4" filter="url(#crHeadlightBeam)"/>
+                <polygon class="cr-headlight-beam" points="6,1 0,-45 12,-45" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
                 <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
                 <circle cx="6" cy="12" r="2.5" fill="#38bdf8"/>
-                <circle cx="6" cy="1" r="1.8" fill="#ffffff"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
+                <circle cx="6" cy="22" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
               `;
             }
           }
