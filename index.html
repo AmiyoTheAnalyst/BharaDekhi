@@ -1743,6 +1743,36 @@
               <stop offset="100%" stop-color="#450a0a"/>
             </linearGradient>
 
+            <linearGradient id="bldgBlueGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="50%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0c2340"/>
+            </linearGradient>
+
+            <linearGradient id="bldgPurpleGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c084fc"/>
+              <stop offset="50%" stop-color="#7e22ce"/>
+              <stop offset="100%" stop-color="#3b0764"/>
+            </linearGradient>
+
+            <linearGradient id="bldgCoralGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fb7185"/>
+              <stop offset="50%" stop-color="#e11d48"/>
+              <stop offset="100%" stop-color="#881337"/>
+            </linearGradient>
+
+            <linearGradient id="bldgAmberGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fbbf24"/>
+              <stop offset="50%" stop-color="#d97706"/>
+              <stop offset="100%" stop-color="#78350f"/>
+            </linearGradient>
+
+            <linearGradient id="bldgTurquoiseGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#2dd4bf"/>
+              <stop offset="50%" stop-color="#0d9488"/>
+              <stop offset="100%" stop-color="#134e4a"/>
+            </linearGradient>
+
             <linearGradient id="stationRoofGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
               <stop offset="50%" stop-color="#0284c7" stop-opacity="0.6"/>
@@ -1911,117 +1941,375 @@
 
 
           <!-- ========================================================
-               3. 2.5D SURROUNDING DHAKA BUILDINGS & BILLBOARDS
+               3. SIDEWALK BASE & SURROUNDING DHAKA MULTISTORY BUILDINGS
                ======================================================== -->
 
-          <!-- Quadrant A: Top-Left (NW) Dhaka Architecture -->
-          <g id="nwBuildingsGroup">
-            <!-- 4-Story Terracotta Building with Balconies -->
-            <rect x="40" y="165" width="230" height="150" rx="4" fill="url(#bldgOrangeGrad)" stroke="#f97316" stroke-width="1.2"/>
-            <!-- 3D Roof Ledge -->
-            <polygon points="35,165 275,165 265,155 45,155" fill="#431407"/>
-            <!-- Illuminated Windows & Balconies -->
-            <g fill="#fef08a" opacity="0.85">
-              <rect x="60" y="180" width="18" height="20" rx="1"/>
-              <rect x="95" y="180" width="18" height="20" rx="1"/>
-              <rect x="130" y="180" width="18" height="20" rx="1"/>
-              <rect x="165" y="180" width="18" height="20" rx="1"/>
-              <rect x="200" y="180" width="18" height="20" rx="1"/>
-              <rect x="60" y="215" width="18" height="20" rx="1"/>
-              <rect x="95" y="215" width="18" height="20" rx="1"/>
-              <rect x="130" y="215" width="18" height="20" rx="1"/>
-              <rect x="165" y="215" width="18" height="20" rx="1"/>
-              <rect x="200" y="215" width="18" height="20" rx="1"/>
-            </g>
-            <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") -->
-            <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
-            <rect x="55" y="263" width="90" height="14" fill="#d97706"/>
-            <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ঢাকা বেকারি</text>
-            <rect x="58" y="280" width="84" height="26" fill="#fef08a" opacity="0.75"/>
-
-            <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
-            <rect x="165" y="263" width="90" height="14" fill="#059669"/>
-            <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">গ্রীন ফার্মেসি</text>
-            <rect x="168" y="280" width="84" height="26" fill="#a7f3d0" opacity="0.75"/>
-
-            <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" (As in Reference Image) -->
-            <g transform="translate(50, 160)">
-              <!-- Billboard Frame & Lighting Pillars -->
-              <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="1.8" filter="url(#crLightGlow)"/>
-              <!-- Green Graphic Background -->
-              <rect x="5" y="-80" width="160" height="70" rx="4" fill="#065f46"/>
-              <!-- City Silhouette Graphic inside Billboard -->
-              <path d="M 10,-20 L 30,-20 L 30,-45 L 45,-45 L 45,-20 L 70,-20 L 70,-55 L 90,-55 L 90,-20 L 120,-20 L 120,-40 L 140,-40 L 140,-20 L 160,-20 Z" fill="#022c22" opacity="0.6"/>
-              <!-- Bengali Text Calligraphy -->
-              <text x="20" y="-55" fill="#fef08a" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
-              <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">আমাদের</text>
-              <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">শহর</text>
-              <!-- Spotlight Tubes -->
-              <circle cx="40" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
-              <circle cx="130" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
-            </g>
+          <!-- 4 Sidewalk Corner Ground Slabs (Paved base for the 4 quadrants) -->
+          <g id="sidewalkGroundSlabs">
+            <path d="M 0,165 L 490,165 L 490,320 Q 490,340 470,340 L 0,340 Z" fill="url(#crSidewalkGrad)"/>
+            <path d="M 0,500 L 470,500 Q 490,500 490,520 L 490,700 L 0,700 Z" fill="url(#crSidewalkGrad)"/>
+            <path d="M 710,165 L 1200,165 L 1200,340 L 730,340 Q 710,340 710,320 Z" fill="url(#crSidewalkGrad)"/>
+            <path d="M 730,500 L 1200,500 L 1200,700 L 710,700 L 710,520 Q 710,500 730,500 Z" fill="url(#crSidewalkGrad)"/>
           </g>
 
-          <!-- Quadrant B: Bottom-Left (SW) Architecture -->
-          <g id="swBuildingsGroup">
-            <!-- Multistory Residential Block in Teal & Cream -->
-            <rect x="40" y="525" width="240" height="155" rx="4" fill="url(#bldgTealGrad)" stroke="#14b8a6" stroke-width="1.2"/>
-            <!-- 3D Roof -->
-            <polygon points="35,525 285,525 275,515 45,515" fill="#042f2e"/>
-            <!-- Rooftop Water Tank (Iconic Dhaka Detail) -->
-            <rect x="70" y="495" width="30" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
-            <text x="85" y="508" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
-            <!-- TV Antennas -->
-            <line x1="140" y1="515" x2="140" y2="490" stroke="#94a3b8" stroke-width="1.5"/>
-            <line x1="135" y1="495" x2="145" y2="495" stroke="#94a3b8" stroke-width="1.5"/>
-            <!-- Balcony Windows -->
-            <g fill="#fde68a" opacity="0.8">
-              <rect x="65" y="540" width="22" height="22" rx="1"/>
-              <rect x="110" y="540" width="22" height="22" rx="1"/>
-              <rect x="155" y="540" width="22" height="22" rx="1"/>
-              <rect x="200" y="540" width="22" height="22" rx="1"/>
-              <rect x="65" y="580" width="22" height="22" rx="1"/>
-              <rect x="110" y="580" width="22" height="22" rx="1"/>
-              <rect x="155" y="580" width="22" height="22" rx="1"/>
-              <rect x="200" y="580" width="22" height="22" rx="1"/>
-            </g>
-            <!-- Ground-floor Traditional Tea Stall (টং দোকান) -->
-            <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#b45309" stroke-width="1"/>
-            <text x="340" y="542" fill="#fef08a" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">চায়ের টং</text>
-            <circle cx="340" cy="552" r="3.5" fill="#f59e0b" filter="url(#crLightGlow)"/>
-          </g>
+          <!-- Layer of Dhaka City Multistory Buildings (Quadrant NW, NE, SW, SE) -->
+          <g id="surroundingBuildingsLayer">
 
-          <!-- Quadrant C: Bottom-Right (SE) Architecture -->
-          <g id="seBuildingsGroup">
-            <!-- Modern Commercial Building in Slate Blue -->
-            <rect x="880" y="525" width="260" height="155" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
-            <!-- Rooftop Water Tank & Antenna -->
-            <rect x="910" y="495" width="32" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
-            <line x1="980" y1="525" x2="980" y2="485" stroke="#ef4444" stroke-width="2"/>
-            <circle cx="980" cy="484" r="2.5" fill="#ef4444" class="beacon-blink"/>
+            <!-- Quadrant A: Top-Left (NW) Dhaka Architecture -->
+            <g id="nwBuildingsGroup">
+              <!-- NW-1: Far Left Edge Narrow Indigo Tower -->
+              <rect x="6" y="135" width="30" height="190" rx="3" fill="url(#bldgBlueGrad)" stroke="#0284c7" stroke-width="1"/>
+              <polygon points="4,135 38,135 34,125 8,125" fill="#082f49"/>
+              <line x1="20" y1="125" x2="20" y2="105" stroke="#94a3b8" stroke-width="1.2"/>
+              <circle cx="20" cy="104" r="2" fill="#ef4444" class="beacon-blink"/>
+              <g fill="#bae6fd" opacity="0.85">
+                <rect x="11" y="145" width="8" height="12" rx="1"/>
+                <rect x="22" y="145" width="8" height="12" rx="1"/>
+                <rect x="11" y="170" width="8" height="12" rx="1"/>
+                <rect x="22" y="170" width="8" height="12" rx="1"/>
+                <rect x="11" y="195" width="8" height="12" rx="1"/>
+                <rect x="22" y="195" width="8" height="12" rx="1"/>
+                <rect x="11" y="220" width="8" height="12" rx="1"/>
+                <rect x="22" y="220" width="8" height="12" rx="1"/>
+              </g>
 
-            <!-- Large Authentic Billboard: "সবাই মিলে একটি ভালো ঢাকা" (As in Reference Image) -->
-            <g transform="translate(890, 530)">
-              <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#38bdf8" stroke-width="2" filter="url(#crLightGlow)"/>
-              <rect x="5" y="5" width="220" height="85" rx="4" fill="#172554"/>
-              <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">সবাই মিলে</text>
-              <text x="18" y="52" fill="#38bdf8" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">একটি ভালো</text>
-              <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
-              <!-- Decorative City Graph Graphic -->
-              <path d="M 140,75 L 155,50 L 170,60 L 190,35 L 210,75 Z" fill="#3b82f6" opacity="0.4"/>
+              <!-- NW-2: 4-Story Terracotta Complex with Balconies & Billboard (Preserved Existing) -->
+              <rect x="40" y="165" width="230" height="150" rx="4" fill="url(#bldgOrangeGrad)" stroke="#f97316" stroke-width="1.2"/>
+              <polygon points="35,165 275,165 265,155 45,155" fill="#431407"/>
+              <g fill="#fef08a" opacity="0.85">
+                <rect x="60" y="180" width="18" height="20" rx="1"/>
+                <rect x="95" y="180" width="18" height="20" rx="1"/>
+                <rect x="130" y="180" width="18" height="20" rx="1"/>
+                <rect x="165" y="180" width="18" height="20" rx="1"/>
+                <rect x="200" y="180" width="18" height="20" rx="1"/>
+                <rect x="60" y="215" width="18" height="20" rx="1"/>
+                <rect x="95" y="215" width="18" height="20" rx="1"/>
+                <rect x="130" y="215" width="18" height="20" rx="1"/>
+                <rect x="165" y="215" width="18" height="20" rx="1"/>
+                <rect x="200" y="215" width="18" height="20" rx="1"/>
+              </g>
+              <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") -->
+              <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+              <rect x="55" y="263" width="90" height="14" fill="#d97706"/>
+              <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ঢাকা বেকারি</text>
+              <rect x="58" y="280" width="84" height="26" fill="#fef08a" opacity="0.75"/>
+
+              <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+              <rect x="165" y="263" width="90" height="14" fill="#059669"/>
+              <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">গ্রীন ফার্মেসি</text>
+              <rect x="168" y="280" width="84" height="26" fill="#a7f3d0" opacity="0.75"/>
+
+              <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" (Preserved Existing) -->
+              <g transform="translate(50, 160)">
+                <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="1.8" filter="url(#crLightGlow)"/>
+                <rect x="5" y="-80" width="160" height="70" rx="4" fill="#065f46"/>
+                <path d="M 10,-20 L 30,-20 L 30,-45 L 45,-45 L 45,-20 L 70,-20 L 70,-55 L 90,-55 L 90,-20 L 120,-20 L 120,-40 L 140,-40 L 140,-20 L 160,-20 Z" fill="#022c22" opacity="0.6"/>
+                <text x="20" y="-55" fill="#fef08a" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
+                <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">আমাদের</text>
+                <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">শহর</text>
+                <circle cx="40" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
+                <circle cx="130" cy="-86" r="3" fill="#fef08a" filter="url(#crLightGlow)"/>
+              </g>
+
+              <!-- NW-3: Turquoise 5-Story Residential Tower with Water Tank & Balconies -->
+              <rect x="275" y="130" width="95" height="195" rx="4" fill="url(#bldgTurquoiseGrad)" stroke="#0d9488" stroke-width="1.2"/>
+              <polygon points="270,130 375,130 365,118 280,118" fill="#134e4a"/>
+              <rect x="290" y="98" width="28" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+              <text x="304" y="111" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
+              <line x1="345" y1="118" x2="345" y2="92" stroke="#94a3b8" stroke-width="1.5"/>
+              <line x1="340" y1="98" x2="350" y2="98" stroke="#94a3b8" stroke-width="1.5"/>
+              <!-- Illuminated Balconies and Windows -->
+              <g fill="#fef08a" opacity="0.85" class="window-glow-pulse">
+                <rect x="286" y="140" width="20" height="18" rx="1"/>
+                <rect x="316" y="140" width="20" height="18" rx="1"/>
+                <rect x="344" y="140" width="18" height="18" rx="1"/>
+                <rect x="286" y="172" width="20" height="18" rx="1"/>
+                <rect x="316" y="172" width="20" height="18" rx="1"/>
+                <rect x="344" y="172" width="18" height="18" rx="1"/>
+                <rect x="286" y="204" width="20" height="18" rx="1"/>
+                <rect x="316" y="204" width="20" height="18" rx="1"/>
+                <rect x="344" y="204" width="18" height="18" rx="1"/>
+                <rect x="286" y="236" width="20" height="18" rx="1"/>
+                <rect x="316" y="236" width="20" height="18" rx="1"/>
+                <rect x="344" y="236" width="18" height="18" rx="1"/>
+              </g>
+              <!-- Modern Corner Entrance -->
+              <rect x="282" y="275" width="82" height="42" fill="#042f2e" stroke="#2dd4bf" stroke-width="1"/>
+              <rect x="288" y="285" width="70" height="28" fill="#5eead4" opacity="0.6"/>
+
+              <!-- NW-4: Amber Commercial Building & Corner Shop ("ঢাকা বুক ডিপো") -->
+              <rect x="376" y="145" width="86" height="180" rx="4" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
+              <polygon points="372,145 466,145 458,135 380,135" fill="#451a03"/>
+              <line x1="420" y1="135" x2="420" y2="115" stroke="#94a3b8" stroke-width="1.4"/>
+              <circle cx="420" cy="114" r="2.5" fill="#ef4444" class="beacon-blink"/>
+              <g fill="#fde68a" opacity="0.85">
+                <rect x="388" y="158" width="18" height="18" rx="1"/>
+                <rect x="416" y="158" width="18" height="18" rx="1"/>
+                <rect x="438" y="158" width="16" height="18" rx="1"/>
+                <rect x="388" y="188" width="18" height="18" rx="1"/>
+                <rect x="416" y="188" width="18" height="18" rx="1"/>
+                <rect x="438" y="188" width="16" height="18" rx="1"/>
+                <rect x="388" y="218" width="18" height="18" rx="1"/>
+                <rect x="416" y="218" width="18" height="18" rx="1"/>
+                <rect x="438" y="218" width="16" height="18" rx="1"/>
+              </g>
+              <!-- Ground Shopfront: ঢাকা বুক ডিপো -->
+              <rect x="382" y="262" width="75" height="54" fill="#0f172a" stroke="#d97706" stroke-width="1"/>
+              <rect x="386" y="265" width="67" height="14" fill="#b45309"/>
+              <text x="419" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ঢাকা বুক ডিপো</text>
+              <rect x="388" y="282" width="63" height="30" fill="#fef08a" opacity="0.8"/>
             </g>
+
+            <!-- Quadrant B: Top-Right (NE) Dhaka Architecture -->
+            <g id="neBuildingsGroup">
+              <!-- NE-1: Violet / Purple Modern Mid-Rise -->
+              <rect x="732" y="145" width="84" height="180" rx="4" fill="url(#bldgPurpleGrad)" stroke="#a855f7" stroke-width="1.2"/>
+              <polygon points="728,145 820,145 812,133 736,133" fill="#2e1065"/>
+              <line x1="774" y1="133" x2="774" y2="108" stroke="#cbd5e1" stroke-width="1.5"/>
+              <circle cx="774" cy="107" r="2.5" fill="#ef4444" class="beacon-blink"/>
+              <g fill="#e9d5ff" opacity="0.85">
+                <rect x="744" y="158" width="18" height="18" rx="1"/>
+                <rect x="770" y="158" width="18" height="18" rx="1"/>
+                <rect x="794" y="158" width="16" height="18" rx="1"/>
+                <rect x="744" y="188" width="18" height="18" rx="1"/>
+                <rect x="770" y="188" width="18" height="18" rx="1"/>
+                <rect x="794" y="188" width="16" height="18" rx="1"/>
+                <rect x="744" y="218" width="18" height="18" rx="1"/>
+                <rect x="770" y="218" width="18" height="18" rx="1"/>
+                <rect x="794" y="218" width="16" height="18" rx="1"/>
+              </g>
+              <!-- Boutique Shopfront -->
+              <rect x="738" y="262" width="72" height="54" fill="#0f172a" stroke="#c084fc" stroke-width="1"/>
+              <rect x="742" y="265" width="64" height="13" fill="#7e22ce"/>
+              <text x="774" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">ফ্যাশন কর্নার</text>
+              <rect x="744" y="281" width="60" height="30" fill="#f3e8ff" opacity="0.75"/>
+
+              <!-- NE-2: Turquoise Commercial & Tech ("বাংলা টেক") -->
+              <rect x="824" y="152" width="86" height="173" rx="4" fill="url(#bldgTurquoiseGrad)" stroke="#14b8a6" stroke-width="1.2"/>
+              <polygon points="820,152 914,152 906,142 828,142" fill="#042f2e"/>
+              <rect x="850" y="122" width="28" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+              <text x="864" y="135" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
+              <g fill="#a7f3d0" opacity="0.85">
+                <rect x="836" y="166" width="18" height="18" rx="1"/>
+                <rect x="862" y="166" width="18" height="18" rx="1"/>
+                <rect x="886" y="166" width="16" height="18" rx="1"/>
+                <rect x="836" y="196" width="18" height="18" rx="1"/>
+                <rect x="862" y="196" width="18" height="18" rx="1"/>
+                <rect x="886" y="196" width="16" height="18" rx="1"/>
+                <rect x="836" y="226" width="18" height="18" rx="1"/>
+                <rect x="862" y="226" width="18" height="18" rx="1"/>
+                <rect x="886" y="226" width="16" height="18" rx="1"/>
+              </g>
+              <!-- Tech Shopfront -->
+              <rect x="830" y="264" width="74" height="52" fill="#0f172a" stroke="#0d9488" stroke-width="1"/>
+              <rect x="834" y="267" width="66" height="13" fill="#0f766e"/>
+              <text x="867" y="277" fill="#2dd4bf" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">বাংলা টেক</text>
+              <rect x="836" y="283" width="62" height="28" fill="#5eead4" opacity="0.75"/>
+
+              <!-- NE-3: Coral & Rose 5-Story Residential -->
+              <rect x="918" y="126" width="100" height="199" rx="4" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
+              <polygon points="913,126 1023,126 1013,114 923,114" fill="#4c0519"/>
+              <rect x="940" y="94" width="26" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+              <text x="953" y="107" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
+              <line x1="990" y1="114" x2="990" y2="88" stroke="#cbd5e1" stroke-width="1.5"/>
+              <line x1="985" y1="94" x2="995" y2="94" stroke="#cbd5e1" stroke-width="1.5"/>
+              <g fill="#fde047" opacity="0.85" class="window-glow-pulse">
+                <rect x="930" y="138" width="20" height="18" rx="1"/>
+                <rect x="958" y="138" width="20" height="18" rx="1"/>
+                <rect x="986" y="138" width="20" height="18" rx="1"/>
+                <rect x="930" y="168" width="20" height="18" rx="1"/>
+                <rect x="958" y="168" width="20" height="18" rx="1"/>
+                <rect x="986" y="168" width="20" height="18" rx="1"/>
+                <rect x="930" y="198" width="20" height="18" rx="1"/>
+                <rect x="958" y="198" width="20" height="18" rx="1"/>
+                <rect x="986" y="198" width="20" height="18" rx="1"/>
+                <rect x="930" y="228" width="20" height="18" rx="1"/>
+                <rect x="958" y="228" width="20" height="18" rx="1"/>
+                <rect x="986" y="228" width="20" height="18" rx="1"/>
+              </g>
+              <!-- Ground Super Shop -->
+              <rect x="926" y="266" width="84" height="50" fill="#0f172a" stroke="#e11d48" stroke-width="1"/>
+              <rect x="930" y="269" width="76" height="13" fill="#be123c"/>
+              <text x="968" y="279" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">সুপার শপ</text>
+              <rect x="932" y="285" width="72" height="26" fill="#fef08a" opacity="0.8"/>
+
+              <!-- NE-4: "মিরপুর প্লাজা" (Mirpur Plaza) Landmark Glass & Indigo High-Rise -->
+              <rect x="1026" y="100" width="166" height="225" rx="5" fill="url(#bldgBlueGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+              <polygon points="1020,100 1198,100 1188,86 1030,86" fill="#082f49"/>
+              <!-- Tower Mast with Hazard Beacon -->
+              <line x1="1110" y1="86" x2="1110" y2="58" stroke="#e2e8f0" stroke-width="2"/>
+              <circle cx="1110" cy="56" r="3" fill="#ef4444" class="beacon-blink"/>
+              <!-- Glowing Rooftop Billboard: "মিরপুর প্লাজা" -->
+              <g transform="translate(1045, 92)">
+                <rect x="0" y="0" width="125" height="24" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="1.2" filter="url(#crLightGlow)"/>
+                <text x="62" y="16" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">মিরপুর প্লাজা</text>
+              </g>
+              <!-- 5 Floors of Expansive Panoramic Glass Windows -->
+              <g fill="#7dd3fc" opacity="0.85" class="window-glow-pulse">
+                <rect x="1040" y="128" width="34" height="20" rx="1"/>
+                <rect x="1084" y="128" width="46" height="20" rx="1" fill="#fef08a"/>
+                <rect x="1140" y="128" width="38" height="20" rx="1"/>
+                <rect x="1040" y="158" width="34" height="20" rx="1" fill="#fef08a"/>
+                <rect x="1084" y="158" width="46" height="20" rx="1"/>
+                <rect x="1140" y="158" width="38" height="20" rx="1" fill="#fef08a"/>
+                <rect x="1040" y="188" width="34" height="20" rx="1"/>
+                <rect x="1084" y="188" width="46" height="20" rx="1"/>
+                <rect x="1140" y="188" width="38" height="20" rx="1"/>
+                <rect x="1040" y="218" width="34" height="20" rx="1" fill="#fef08a"/>
+                <rect x="1084" y="218" width="46" height="20" rx="1"/>
+                <rect x="1140" y="218" width="38" height="20" rx="1" fill="#fef08a"/>
+              </g>
+              <!-- Grand Double-Height Glass Entrance Lobby -->
+              <rect x="1046" y="255" width="126" height="65" fill="#082f49" stroke="#38bdf8" stroke-width="1.2"/>
+              <rect x="1054" y="262" width="110" height="52" fill="#38bdf8" opacity="0.4"/>
+              <rect x="1086" y="280" width="46" height="34" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+              <text x="1109" y="296" fill="#fde68a" font-size="7.5" font-weight="900" text-anchor="middle">ENTRANCE</text>
+            </g>
+
+            <!-- Quadrant C: Bottom-Left (SW) Architecture -->
+            <g id="swBuildingsGroup">
+              <!-- SW-1: Far Left Slice in Coral -->
+              <rect x="4" y="520" width="32" height="175" rx="3" fill="url(#bldgCoralGrad)" stroke="#fb7185" stroke-width="1"/>
+              <g fill="#fed7aa" opacity="0.8">
+                <rect x="8" y="535" width="10" height="14" rx="1"/>
+                <rect x="20" y="535" width="10" height="14" rx="1"/>
+                <rect x="8" y="565" width="10" height="14" rx="1"/>
+                <rect x="20" y="565" width="10" height="14" rx="1"/>
+                <rect x="8" y="595" width="10" height="14" rx="1"/>
+                <rect x="20" y="595" width="10" height="14" rx="1"/>
+                <rect x="8" y="625" width="10" height="14" rx="1"/>
+                <rect x="20" y="625" width="10" height="14" rx="1"/>
+              </g>
+
+              <!-- SW-2: Multistory Residential Block in Teal & Cream (Preserved Existing) -->
+              <rect x="40" y="525" width="240" height="155" rx="4" fill="url(#bldgTealGrad)" stroke="#14b8a6" stroke-width="1.2"/>
+              <polygon points="35,525 285,525 275,515 45,515" fill="#042f2e"/>
+              <rect x="70" y="495" width="30" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+              <text x="85" y="508" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
+              <line x1="140" y1="515" x2="140" y2="490" stroke="#94a3b8" stroke-width="1.5"/>
+              <line x1="135" y1="495" x2="145" y2="495" stroke="#94a3b8" stroke-width="1.5"/>
+              <g fill="#fde68a" opacity="0.8">
+                <rect x="65" y="540" width="22" height="22" rx="1"/>
+                <rect x="110" y="540" width="22" height="22" rx="1"/>
+                <rect x="155" y="540" width="22" height="22" rx="1"/>
+                <rect x="200" y="540" width="22" height="22" rx="1"/>
+                <rect x="65" y="580" width="22" height="22" rx="1"/>
+                <rect x="110" y="580" width="22" height="22" rx="1"/>
+                <rect x="155" y="580" width="22" height="22" rx="1"/>
+                <rect x="200" y="580" width="22" height="22" rx="1"/>
+              </g>
+
+              <!-- SW-3: Purple / Indigo Mid-Rise Behind Tea Stall -->
+              <rect x="282" y="516" width="82" height="176" rx="4" fill="url(#bldgPurpleGrad)" stroke="#8b5cf6" stroke-width="1.2"/>
+              <polygon points="278,516 368,516 360,505 286,505" fill="#2e1065"/>
+              <line x1="324" y1="505" x2="324" y2="480" stroke="#94a3b8" stroke-width="1.5"/>
+              <g fill="#ddd6fe" opacity="0.85">
+                <rect x="292" y="528" width="16" height="18" rx="1"/>
+                <rect x="316" y="528" width="16" height="18" rx="1"/>
+                <rect x="340" y="528" width="16" height="18" rx="1"/>
+                <rect x="292" y="556" width="16" height="18" rx="1"/>
+                <rect x="316" y="556" width="16" height="18" rx="1"/>
+                <rect x="340" y="556" width="16" height="18" rx="1"/>
+                <rect x="292" y="584" width="16" height="18" rx="1"/>
+                <rect x="316" y="584" width="16" height="18" rx="1"/>
+                <rect x="340" y="584" width="16" height="18" rx="1"/>
+              </g>
+
+              <!-- Ground-floor Traditional Tea Stall (টং দোকান - Preserved Existing) -->
+              <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#b45309" stroke-width="1"/>
+              <text x="340" y="542" fill="#fef08a" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">চায়ের টং</text>
+              <circle cx="340" cy="552" r="3.5" fill="#f59e0b" filter="url(#crLightGlow)"/>
+
+              <!-- SW-4: Amber & Cream Corner Building with Shop ("সোনালী জুয়েলার্স") -->
+              <rect x="368" y="518" width="100" height="172" rx="4" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
+              <polygon points="364,518 472,518 464,506 372,506" fill="#451a03"/>
+              <rect x="390" y="486" width="28" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+              <text x="404" y="499" fill="#ffffff" font-size="7" font-weight="800" text-anchor="middle">TANK</text>
+              <g fill="#fef08a" opacity="0.85">
+                <rect x="380" y="532" width="20" height="18" rx="1"/>
+                <rect x="410" y="532" width="20" height="18" rx="1"/>
+                <rect x="438" y="532" width="18" height="18" rx="1"/>
+                <rect x="380" y="562" width="20" height="18" rx="1"/>
+                <rect x="410" y="562" width="20" height="18" rx="1"/>
+                <rect x="438" y="562" width="18" height="18" rx="1"/>
+                <rect x="380" y="592" width="20" height="18" rx="1"/>
+                <rect x="410" y="592" width="20" height="18" rx="1"/>
+                <rect x="438" y="592" width="18" height="18" rx="1"/>
+              </g>
+              <!-- Ground Shop: সোনালী জুয়েলার্স -->
+              <rect x="374" y="626" width="88" height="52" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+              <rect x="378" y="629" width="80" height="14" fill="#b45309"/>
+              <text x="418" y="640" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">সোনালী জুয়েলার্স</text>
+              <rect x="380" y="646" width="76" height="26" fill="#fde68a" opacity="0.85"/>
+            </g>
+
+            <!-- Quadrant D: Bottom-Right (SE) Architecture -->
+            <g id="seBuildingsGroup">
+              <!-- SE-1: Rose & Coral 4-Story with Clinic ("জনতা ফার্মেসি") -->
+              <rect x="732" y="518" width="142" height="172" rx="4" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
+              <polygon points="727,518 878,518 868,506 737,506" fill="#4c0519"/>
+              <line x1="802" y1="506" x2="802" y2="478" stroke="#94a3b8" stroke-width="1.5"/>
+              <circle cx="802" cy="477" r="2.5" fill="#ef4444" class="beacon-blink"/>
+              <g fill="#fde68a" opacity="0.85">
+                <rect x="746" y="532" width="22" height="18" rx="1"/>
+                <rect x="778" y="532" width="22" height="18" rx="1"/>
+                <rect x="810" y="532" width="22" height="18" rx="1"/>
+                <rect x="842" y="532" width="20" height="18" rx="1"/>
+                <rect x="746" y="562" width="22" height="18" rx="1"/>
+                <rect x="778" y="562" width="22" height="18" rx="1"/>
+                <rect x="810" y="562" width="22" height="18" rx="1"/>
+                <rect x="842" y="562" width="20" height="18" rx="1"/>
+                <rect x="746" y="592" width="22" height="18" rx="1"/>
+                <rect x="778" y="592" width="22" height="18" rx="1"/>
+                <rect x="810" y="592" width="22" height="18" rx="1"/>
+                <rect x="842" y="592" width="20" height="18" rx="1"/>
+              </g>
+              <!-- Clinic / Pharmacy Shopfront with Green Cross -->
+              <rect x="740" y="626" width="126" height="52" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+              <rect x="745" y="629" width="116" height="14" fill="#065f46"/>
+              <text x="803" y="640" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif">জনতা ফার্মেসি</text>
+              <rect x="748" y="646" width="110" height="26" fill="#a7f3d0" opacity="0.8"/>
+              <!-- Green Medical Cross -->
+              <rect x="758" y="652" width="14" height="4" fill="#059669"/>
+              <rect x="763" y="647" width="4" height="14" fill="#059669"/>
+
+              <!-- SE-2: Modern Commercial Building & Authentic Billboard (Preserved Existing) -->
+              <rect x="880" y="525" width="260" height="155" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+              <rect x="910" y="495" width="32" height="20" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+              <line x1="980" y1="525" x2="980" y2="485" stroke="#ef4444" stroke-width="2"/>
+              <circle cx="980" cy="484" r="2.5" fill="#ef4444" class="beacon-blink"/>
+              <g transform="translate(890, 530)">
+                <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#38bdf8" stroke-width="2" filter="url(#crLightGlow)"/>
+                <rect x="5" y="5" width="220" height="85" rx="4" fill="#172554"/>
+                <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">সবাই মিলে</text>
+                <text x="18" y="52" fill="#38bdf8" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">একটি ভালো</text>
+                <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif">ঢাকা</text>
+                <path d="M 140,75 L 155,50 L 170,60 L 190,35 L 210,75 Z" fill="#3b82f6" opacity="0.4"/>
+              </g>
+
+              <!-- SE-3: Far-Right Modern Sapphire Tower -->
+              <rect x="1144" y="515" width="52" height="178" rx="4" fill="url(#bldgBlueGrad)" stroke="#0ea5e9" stroke-width="1.2"/>
+              <polygon points="1140,515 1200,515 1195,502 1145,502" fill="#0c4a6e"/>
+              <line x1="1170" y1="502" x2="1170" y2="480" stroke="#94a3b8" stroke-width="1.4"/>
+              <circle cx="1170" cy="479" r="2.5" fill="#ef4444" class="beacon-blink"/>
+              <g fill="#7dd3fc" opacity="0.85">
+                <rect x="1152" y="525" width="16" height="24" rx="1"/>
+                <rect x="1174" y="525" width="16" height="24" rx="1"/>
+                <rect x="1152" y="560" width="16" height="24" rx="1"/>
+                <rect x="1174" y="560" width="16" height="24" rx="1"/>
+                <rect x="1152" y="595" width="16" height="24" rx="1"/>
+                <rect x="1174" y="595" width="16" height="24" rx="1"/>
+                <rect x="1152" y="630" width="16" height="24" rx="1"/>
+                <rect x="1174" y="630" width="16" height="24" rx="1"/>
+              </g>
+            </g>
+
           </g>
 
 
           <!-- ========================================================
                4. ROADS, ASPHALT, CURBS & ROAD MARKINGS
                ======================================================== -->
-
-          <!-- 4 Sidewalk Corner Slabs -->
-          <path d="M 0,165 L 490,165 L 490,320 Q 490,340 470,340 L 0,340 Z" fill="url(#crSidewalkGrad)"/>
-          <path d="M 0,500 L 470,500 Q 490,500 490,520 L 490,700 L 0,700 Z" fill="url(#crSidewalkGrad)"/>
-          <path d="M 710,165 L 1200,165 L 1200,340 L 730,340 Q 710,340 710,320 Z" fill="url(#crSidewalkGrad)"/>
-          <path d="M 730,500 L 1200,500 L 1200,700 L 710,700 L 710,520 Q 710,500 730,500 Z" fill="url(#crSidewalkGrad)"/>
 
           <!-- Yellow & Black Dhaka Curb Markings at the 4 Corners -->
           <g stroke="#f59e0b" stroke-width="3.5" fill="none">
