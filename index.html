@@ -124,7 +124,7 @@
     header {
       box-shadow: 0 1px 0 rgb(15 23 42 / 5%);
     }
-    header > div {
+    header > div:not(#headerWeatherBackdrop) {
       max-width: 76rem;
       min-height: 4.75rem;
     }
@@ -1535,17 +1535,65 @@
       position: sticky !important;
       top: 0 !important;
       z-index: 30 !important;
+      width: 100% !important;
+      max-width: none !important;
       overflow: hidden !important;
       contain: paint !important;
       transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.8s ease;
       background-color: transparent !important;
     }
 
-    /* 1. Unmistakable Sky Gradients (High Visibility on PC, Laptop & Mobile) */
+    #headerWeatherBackdrop {
+      position: absolute !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: 100% !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .header-weather-layer {
+      position: absolute !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: 100% !important;
+      pointer-events: none !important;
+      overflow: hidden !important;
+      opacity: 0;
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #headerRainCanvas {
+      position: absolute !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: 100% !important;
+      pointer-events: none !important;
+    }
+
+    /* 1. Unmistakable Sky Gradients (Full 100% Visibility across PC, Laptop & Mobile) */
     #mainHeader[data-header-weather="sun"] {
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%) !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.35) !important;
-      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.25);
+      background:
+        radial-gradient(ellipse 65% 90% at 75% 20%, rgba(254, 240, 138, 0.45) 0%, rgba(253, 224, 71, 0.2) 35%, transparent 75%),
+        linear-gradient(135deg, #0284c7 0%, #0284c7 25%, #38bdf8 65%, #7dd3fc 100%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.35);
     }
     #mainHeader[data-header-weather="night"] {
       background: linear-gradient(135deg, #020617 0%, #0f172a 100%) !important;
@@ -1576,10 +1624,10 @@
     #mainHeader[data-header-weather="sun"] #themeToggle,
     #mainHeader[data-header-weather="sun"] #headerWeatherPill,
     #mainHeader[data-header-weather="sun"] #headerSurgeCapsule {
-      background: rgba(15, 23, 42, 0.45) !important;
+      background: rgba(15, 23, 42, 0.55) !important;
       color: #ffffff !important;
       border-color: rgba(255, 255, 255, 0.35) !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
     #mainHeader[data-header-weather="sun"] #rainModeSelect {
       color: #ffffff !important;
@@ -1591,15 +1639,15 @@
     }
     #mainHeader[data-header-weather="sun"] .header-brand-title {
       color: #ffffff !important;
-      text-shadow: 0 2px 4px rgba(2, 44, 84, 0.75);
+      text-shadow: 0 2px 5px rgba(2, 44, 84, 0.85);
     }
     #mainHeader[data-header-weather="sun"] .header-brand-title span {
       color: #fde047 !important;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
     }
     #mainHeader[data-header-weather="sun"] .header-brand-subtext {
-      color: #f1f5f9 !important;
-      text-shadow: 0 1px 3px rgba(2, 44, 84, 0.6);
+      color: #f0fdf4 !important;
+      text-shadow: 0 1px 3px rgba(2, 44, 84, 0.7);
     }
 
     /* Night & Rain Mode Contrast */
@@ -1640,14 +1688,6 @@
     }
 
     /* 3. Layer Visibility Transitions */
-    .header-weather-layer {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-    }
     #mainHeader[data-header-weather="sun"] #headerWeatherSunLayer {
       opacity: 1;
     }
@@ -1659,9 +1699,13 @@
     }
 
     /* 4. Sun & Moon Core & Rays */
+    .header-sun-glare {
+      background: radial-gradient(circle, rgba(254, 240, 138, 0.7) 0%, rgba(251, 191, 36, 0.35) 40%, rgba(2, 132, 199, 0) 70%);
+      animation: headerSunPulse 4s ease-in-out infinite;
+    }
     .header-sun-core {
       background: radial-gradient(circle, #fef08a 25%, #f59e0b 80%, #d97706 100%);
-      box-shadow: 0 0 22px rgba(251, 191, 36, 0.95), 0 0 45px rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 25px #fbbf24, 0 0 50px rgba(245, 158, 11, 0.6);
       animation: headerSunPulse 4s ease-in-out infinite;
     }
     .header-sun-rays {
@@ -1702,10 +1746,10 @@
       50% { opacity: 1; transform: scale(1.3); }
     }
 
-    /* 5. Volumetric Upper Zone Clouds */
+    /* 5. Volumetric Upper Zone Clouds (Spanning full width) */
     @keyframes headerCloudDriftSlow {
-      from { transform: translateX(-220px); }
-      to { transform: translateX(calc(100vw + 220px)); }
+      from { transform: translateX(-240px); }
+      to { transform: translateX(calc(100vw + 240px)); }
     }
     .header-vcloud-1 {
       animation: headerCloudDriftSlow 42s linear infinite;
@@ -1737,7 +1781,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .header-sun-rays, .header-sun-core, .header-vcloud-1, .header-vcloud-2, .header-vcloud-3,
+      .header-sun-rays, .header-sun-core, .header-sun-glare, .header-vcloud-1, .header-vcloud-2, .header-vcloud-3,
       .header-star, .header-sparkle-star, .header-moon-svg, .header-lightning-cloud-flash {
         animation: none !important;
       }
@@ -1747,16 +1791,19 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
 
   <!-- Header with Strictly Contained Weather Animation -->
-  <header id="mainHeader" class="sticky top-0 z-30 relative overflow-hidden transition-all duration-700 shadow-sm" data-header-weather="night">
+  <header id="mainHeader" class="sticky top-0 z-30 relative overflow-hidden transition-all duration-700 shadow-sm w-full max-w-none" data-header-weather="night">
     <!-- Strictly Contained Weather Scene (Sky, Clouds, Sun, Moon, Falling Rain) -->
-    <div id="headerWeatherBackdrop" class="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+    <div id="headerWeatherBackdrop" class="absolute inset-0 pointer-events-none z-0 overflow-hidden w-full max-w-none" aria-hidden="true">
       <!-- Sun Mode Layer -->
-      <div id="headerWeatherSunLayer" class="header-weather-layer">
-        <!-- Glowing Sun with Rotating Corona Rays in Upper Zone -->
-        <div class="absolute right-[20%] sm:right-[26%] top-1 w-14 h-14 sm:w-16 sm:h-16 pointer-events-none">
+      <div id="headerWeatherSunLayer" class="header-weather-layer w-full max-w-none">
+        <!-- Radiant Golden Sun with Pulsing Glare in Upper Zone -->
+        <div class="absolute right-[16%] sm:right-[22%] top-0.5 w-14 h-14 sm:w-16 sm:h-16 pointer-events-none">
+          <!-- Outer Sunlight Radiance Beam Glow -->
+          <div class="header-sun-glare absolute -inset-6 rounded-full pointer-events-none"></div>
+          <!-- Rotating Sun Rays -->
           <div class="header-sun-rays absolute inset-0">
             <svg viewBox="0 0 80 80" class="w-full h-full">
-              <g stroke="rgba(254, 240, 138, 0.85)" stroke-width="2.5" stroke-linecap="round">
+              <g stroke="rgba(254, 240, 138, 0.9)" stroke-width="2.5" stroke-linecap="round">
                 <line x1="40" y1="10" x2="40" y2="2" />
                 <line x1="40" y1="70" x2="40" y2="78" />
                 <line x1="10" y1="40" x2="2" y2="40" />
@@ -1768,32 +1815,33 @@
               </g>
             </svg>
           </div>
+          <!-- Inner Glowing Core -->
           <div class="header-sun-core absolute inset-[20%] rounded-full"></div>
         </div>
 
-        <!-- Upper Zone Drifting Volumetric White Clouds -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-          <!-- Volumetric Cloud 1 -->
-          <div class="header-vcloud-1 absolute top-0.5 left-0 w-44 sm:w-56 h-10 sm:h-12 opacity-95">
+        <!-- Upper Zone Drifting Volumetric White Clouds (Spanning 100% full width) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none w-full max-w-none">
+          <!-- Volumetric Cloud 1 (Center-left) -->
+          <div class="header-vcloud-1 absolute top-0.5 left-0 w-48 sm:w-64 h-10 sm:h-12 opacity-95">
             <svg viewBox="0 0 160 55" class="w-full h-full filter drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)]">
               <defs>
                 <linearGradient id="dayCloudGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#ffffff" />
-                  <stop offset="85%" stop-color="#e0f2fe" />
+                  <stop offset="80%" stop-color="#f0f9ff" />
                   <stop offset="100%" stop-color="#bae6fd" />
                 </linearGradient>
               </defs>
               <path d="M 22,46 A 15,15 0 0,1 15,22 A 20,20 0 0,1 44,12 A 30,30 0 0,1 90,8 A 24,24 0 0,1 126,18 A 18,18 0 0,1 142,35 A 15,15 0 0,1 136,46 Z" fill="url(#dayCloudGrad1)" />
             </svg>
           </div>
-          <!-- Volumetric Cloud 2 -->
-          <div class="header-vcloud-2 absolute top-2 left-0 w-48 sm:w-64 h-11 sm:h-13 opacity-85">
+          <!-- Volumetric Cloud 2 (Mid-right) -->
+          <div class="header-vcloud-2 absolute top-2 left-0 w-56 sm:w-72 h-11 sm:h-13 opacity-90">
             <svg viewBox="0 0 180 58" class="w-full h-full filter drop-shadow-[0_2px_5px_rgba(0,0,0,0.15)]">
               <path d="M 25,48 A 16,16 0 0,1 18,24 A 22,22 0 0,1 50,14 A 32,32 0 0,1 100,8 A 26,26 0 0,1 140,18 A 20,20 0 0,1 160,36 A 16,16 0 0,1 154,48 Z" fill="url(#dayCloudGrad1)" />
             </svg>
           </div>
-          <!-- Volumetric Cloud 3 -->
-          <div class="header-vcloud-3 absolute top-1 left-0 w-36 sm:w-44 h-9 sm:h-11 opacity-75">
+          <!-- Volumetric Cloud 3 (Far right) -->
+          <div class="header-vcloud-3 absolute top-1 left-0 w-40 sm:w-52 h-9 sm:h-11 opacity-80">
             <svg viewBox="0 0 130 48" class="w-full h-full filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.12)]">
               <path d="M 20,40 A 13,13 0 0,1 14,20 A 18,18 0 0,1 40,11 A 26,26 0 0,1 80,7 A 22,22 0 0,1 112,16 A 16,16 0 0,1 120,32 A 13,13 0 0,1 116,40 Z" fill="url(#dayCloudGrad1)" />
             </svg>
@@ -1802,7 +1850,7 @@
       </div>
 
       <!-- Night Mode Layer -->
-      <div id="headerWeatherNightLayer" class="header-weather-layer">
+      <div id="headerWeatherNightLayer" class="header-weather-layer w-full max-w-none">
         <!-- Glowing Crescent Moon in Upper Zone -->
         <div class="absolute right-[18%] sm:right-[24%] top-1.5 w-11 h-11 sm:w-13 sm:h-13 pointer-events-none">
           <svg viewBox="0 0 50 50" class="w-full h-full header-moon-svg">
@@ -1818,36 +1866,45 @@
           </svg>
         </div>
 
-        <!-- Twinkling Stars in Upper Sky -->
-        <div class="absolute inset-0 pointer-events-none">
-          <div class="header-star" style="top: 18%; left: 8%; animation-delay: 0s;"></div>
-          <div class="header-star" style="top: 38%; left: 18%; animation-delay: 1.2s;"></div>
-          <div class="header-star" style="top: 15%; left: 32%; animation-delay: 2.4s;"></div>
-          <div class="header-star" style="top: 45%; left: 45%; animation-delay: 0.7s;"></div>
-          <div class="header-star" style="top: 20%; left: 60%; animation-delay: 1.8s;"></div>
-          <div class="header-star" style="top: 35%; left: 74%; animation-delay: 0.4s;"></div>
+        <!-- Twinkling Stars across full 100% width (0% to 100%) -->
+        <div class="absolute inset-0 pointer-events-none w-full max-w-none">
+          <div class="header-star" style="top: 18%; left: 4%; animation-delay: 0s;"></div>
+          <div class="header-star" style="top: 36%; left: 12%; animation-delay: 1.2s;"></div>
+          <div class="header-star" style="top: 15%; left: 22%; animation-delay: 2.4s;"></div>
+          <div class="header-star" style="top: 45%; left: 34%; animation-delay: 0.7s;"></div>
+          <div class="header-star" style="top: 20%; left: 46%; animation-delay: 1.8s;"></div>
+          <div class="header-star" style="top: 40%; left: 58%; animation-delay: 2.7s;"></div>
+          <div class="header-star" style="top: 22%; left: 68%; animation-delay: 1.1s;"></div>
+          <div class="header-star" style="top: 35%; left: 78%; animation-delay: 0.4s;"></div>
           <div class="header-star" style="top: 18%; left: 88%; animation-delay: 1.5s;"></div>
+          <div class="header-star" style="top: 42%; left: 95%; animation-delay: 2.2s;"></div>
+          <div class="header-star" style="top: 15%; left: 98%; animation-delay: 0.9s;"></div>
           <!-- Sparkle Stars -->
-          <div class="header-sparkle-star" style="top: 25%; left: 24%; animation-delay: 0.5s;">
+          <div class="header-sparkle-star" style="top: 25%; left: 16%; animation-delay: 0.5s;">
             <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 fill-sky-200">
               <path d="M12,2 L14,10 L22,12 L14,14 L12,22 L10,14 L2,12 L10,10 Z" />
             </svg>
           </div>
-          <div class="header-sparkle-star" style="top: 16%; left: 68%; animation-delay: 1.9s;">
+          <div class="header-sparkle-star" style="top: 16%; left: 62%; animation-delay: 1.9s;">
             <svg viewBox="0 0 24 24" class="w-3 h-3 fill-amber-100">
+              <path d="M12,2 L14,10 L22,12 L14,14 L12,22 L10,14 L2,12 L10,10 Z" />
+            </svg>
+          </div>
+          <div class="header-sparkle-star" style="top: 28%; left: 84%; animation-delay: 2.5s;">
+            <svg viewBox="0 0 24 24" class="w-3 h-3 fill-sky-100">
               <path d="M12,2 L14,10 L22,12 L14,14 L12,22 L10,14 L2,12 L10,10 Z" />
             </svg>
           </div>
         </div>
 
-        <!-- Drifting Night Clouds -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-          <div class="header-vcloud-1 absolute top-1 left-0 w-52 h-11 opacity-45">
+        <!-- Drifting Night Clouds across full width -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none w-full max-w-none">
+          <div class="header-vcloud-1 absolute top-1 left-0 w-52 sm:w-64 h-11 opacity-45">
             <svg viewBox="0 0 160 55" class="w-full h-full">
               <path d="M 22,46 A 15,15 0 0,1 15,22 A 20,20 0 0,1 44,12 A 30,30 0 0,1 90,8 A 24,24 0 0,1 126,18 A 18,18 0 0,1 142,35 A 15,15 0 0,1 136,46 Z" fill="#334155" />
             </svg>
           </div>
-          <div class="header-vcloud-2 absolute top-3 left-0 w-64 h-12 opacity-35">
+          <div class="header-vcloud-2 absolute top-3 left-0 w-64 sm:w-80 h-12 opacity-35">
             <svg viewBox="0 0 180 58" class="w-full h-full">
               <path d="M 25,48 A 16,16 0 0,1 18,24 A 22,22 0 0,1 50,14 A 32,32 0 0,1 100,8 A 26,26 0 0,1 140,18 A 20,20 0 0,1 160,36 A 16,16 0 0,1 154,48 Z" fill="#1e293b" />
             </svg>
@@ -1856,9 +1913,9 @@
       </div>
 
       <!-- Rain Mode Layer -->
-      <div id="headerWeatherRainLayer" class="header-weather-layer">
-        <!-- Heavy Storm Shelf Clouds Anchored at Top of Header -->
-        <div class="absolute top-0 left-0 right-0 h-10 overflow-hidden pointer-events-none">
+      <div id="headerWeatherRainLayer" class="header-weather-layer w-full max-w-none">
+        <!-- Heavy Storm Shelf Clouds Anchored at Top across 100% full width -->
+        <div class="absolute top-0 left-0 right-0 w-full h-10 overflow-hidden pointer-events-none max-w-none">
           <svg viewBox="0 0 1200 50" preserveAspectRatio="none" class="w-full h-full fill-slate-900/90 filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]">
             <defs>
               <linearGradient id="stormShelfGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -1872,7 +1929,7 @@
         </div>
 
         <!-- Drifting Storm Clouds Across Logo Zone -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none w-full max-w-none">
           <div class="header-vcloud-1 absolute top-0.5 left-0 w-56 sm:w-68 h-11 sm:h-13 opacity-70">
             <svg viewBox="0 0 180 58" class="w-full h-full filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
               <path d="M 25,48 A 16,16 0 0,1 18,24 A 22,22 0 0,1 50,14 A 32,32 0 0,1 100,8 A 26,26 0 0,1 140,18 A 20,20 0 0,1 160,36 A 16,16 0 0,1 154,48 Z" fill="#0f172a" />
@@ -1885,12 +1942,12 @@
           </div>
         </div>
 
-        <!-- Cloud Lightning Flash -->
-        <div class="header-lightning-cloud-flash"></div>
+        <!-- Cloud Lightning Flash across full width -->
+        <div class="header-lightning-cloud-flash w-full max-w-none"></div>
       </div>
 
-      <!-- HTML5 Realistic Falling Rain Canvas (Strictly confined inside header) -->
-      <canvas id="headerRainCanvas" class="absolute inset-0 pointer-events-none w-full h-full z-0"></canvas>
+      <!-- HTML5 Realistic Falling Rain Canvas (Strictly confined inside header, spanning 100% width) -->
+      <canvas id="headerRainCanvas" class="absolute inset-0 pointer-events-none w-full h-full z-0 max-w-none"></canvas>
     </div>
 
     <!-- Header UI Content (relative z-10) -->
@@ -1927,6 +1984,7 @@
           <label for="rainModeSelect" class="sr-only">Rain fare mode</label>
           <select id="rainModeSelect" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 border-none outline-none cursor-pointer focus:ring-0 py-0.5 pr-1" title="Select Rain Fare Calculation Mode">
             <option value="auto" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Auto Weather</option>
+            <option value="sun" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunny / Day</option>
             <option value="rain" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Rain (+30%)</option>
             <option value="dry" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Dry / Normal</option>
           </select>
@@ -4956,6 +5014,7 @@
       '⭐ Best Value': '⭐ সেরা সাশ্রয়ী',
       'Surge': 'সার্জ',
       'Auto Weather': 'আবহাওয়া (Auto)',
+      'Force Sunny / Day': 'রৌদ্রোজ্জ্বল দিন (Sunny)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
       'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। Open-Meteo মধ্য ঢাকার বর্তমান আবহাওয়ার তথ্য থেকে বৃষ্টি স্বয়ংক্রিয়ভাবে অনুমান করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% অতিরিক্ত যোগ করে, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
@@ -5133,6 +5192,7 @@
       'Live Route & Fare Engine': 'লাইভ রুট ও ভাড়ার হিসাব',
       'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
       'Auto Weather': 'আবহাওয়া (Auto)',
+      'Force Sunny / Day': 'রৌদ্রোজ্জ্বল দিন (Sunny)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
       'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
@@ -8966,8 +9026,8 @@
         const header = document.getElementById('mainHeader') || canvas.parentElement;
         if (!header) return;
         const rect = header.getBoundingClientRect();
-        width = canvas.width = rect.width;
-        height = canvas.height = rect.height;
+        width = canvas.width = Math.max(rect.width, window.innerWidth, 1200);
+        height = canvas.height = Math.max(rect.height, 72);
         initDrops();
       }
 
@@ -9077,13 +9137,20 @@
 
     // Dynamic Weather and Time-of-Day Atmosphere Engine (Rain, Night, Sun)
     function updateCrossroadsAtmosphere() {
-      // 1. Determine Rain State from app's existing weather engine
-      const isRainingNow = (typeof isHeavyRain !== 'undefined' && isHeavyRain) ||
-        (typeof rainFareMode !== 'undefined' && rainFareMode === 'rain') ||
-        (typeof rainFareMode !== 'undefined' && rainFareMode === 'auto' && typeof dhakaRainDetected !== 'undefined' && dhakaRainDetected === true);
+      // 1. Determine Rain and Sun/Day Mode State
+      const isExplicitSun = typeof rainFareMode !== 'undefined' && rainFareMode === 'sun';
+      const isExplicitRain = typeof rainFareMode !== 'undefined' && rainFareMode === 'rain';
+      const isExplicitDry = typeof rainFareMode !== 'undefined' && rainFareMode === 'dry';
+      const isRainingNow = !isExplicitSun && (
+        isExplicitRain ||
+        (typeof isHeavyRain !== 'undefined' && isHeavyRain) ||
+        (typeof rainFareMode !== 'undefined' && rainFareMode === 'auto' && typeof dhakaRainDetected !== 'undefined' && dhakaRainDetected === true)
+      );
 
       let mode = 'night';
-      if (isRainingNow) {
+      if (isExplicitSun) {
+        mode = 'sun';
+      } else if (isRainingNow) {
         mode = 'rain';
       } else {
         // 2. Determine Day/Night from theme preference and Dhaka local hour
@@ -9094,10 +9161,14 @@
           isDhakaNightTime = dhakaHours < 6 || dhakaHours >= 18;
         } catch (e) {}
 
-        if (isDarkTheme || isDhakaNightTime) {
+        if (isExplicitDry) {
+          mode = isDarkTheme ? 'night' : 'sun';
+        } else if (isDarkTheme) {
           mode = 'night';
-        } else {
+        } else if (document.documentElement.dataset.theme === 'light') {
           mode = 'sun';
+        } else {
+          mode = isDhakaNightTime ? 'night' : 'sun';
         }
       }
 
