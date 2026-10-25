@@ -517,22 +517,54 @@
     [data-crossroads-weather="rain"] #crNightLayer { opacity: 0.45 !important; }
     [data-crossroads-weather="rain"] #crRainLayer { opacity: 1 !important; }
 
-    /* Dynamic Vehicle Headlights & Vivid Night Illumination */
+    /* Dynamic Vehicle Headlights & Vivid Night Illumination (Zero GPU Filter Overhead) */
     .cr-headlight-beam {
       transition: opacity 0.8s ease, fill 0.8s ease;
       mix-blend-mode: screen;
+      will-change: opacity;
     }
     [data-crossroads-weather="sun"] .cr-headlight-beam {
       opacity: 0.08 !important;
     }
     [data-crossroads-weather="night"] .cr-headlight-beam {
       opacity: 0.98 !important;
-      filter: url(#crHeadlightBeamGlow) !important;
     }
     [data-crossroads-weather="rain"] .cr-headlight-beam {
       opacity: 0.92 !important;
       fill: #e0f2fe !important;
-      filter: drop-shadow(0 0 10px rgba(186, 230, 253, 0.95)) !important;
+    }
+
+    /* Ultra-Crisp, High-Legibility Typography for Building & Shop Signboards */
+    .cr-signboard-text {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      paint-order: stroke fill;
+      stroke: #020617;
+      stroke-width: 2px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      letter-spacing: 0.02em;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95));
+      pointer-events: none;
+    }
+
+    /* GPU Layer Isolation & Promotion for Buttery-Smooth 60/120fps Rendering */
+    #surroundingBuildingsLayer,
+    #crossroadsRoadbeds,
+    #crossroadsSidewalks,
+    #crossroadsPavementMarkings,
+    #crossroadsSignals,
+    #metroViaductPillarsGroup,
+    #metroViaductTrackGroup {
+      contain: paint layout;
+      transform: translateZ(0);
+    }
+    #dhakaVehiclesLayer,
+    #crossroadsMetroTrain,
+    #dhakaPedestriansLayer,
+    #crAtmosphereOverlays {
+      transform: translateZ(0);
+      will-change: transform;
     }
 
     /* Vibrant Neon Drop-Shadow Effects for Buildings, Shops, Metro & Signals */
@@ -2612,9 +2644,9 @@
             <!-- Metro Logo Icon (M) -->
             <circle cx="55" cy="59" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
             <text x="55" y="63" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle">M</text>
-            <!-- Station Name in Bengali and English -->
-            <text x="72" y="56" fill="#ffffff" font-size="11" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">মিরপুর ১০</text>
-            <text x="72" y="68" fill="#00f2fe" font-size="9" font-weight="700" class="cr-neon-cyan">Mirpur 10</text>
+            <!-- Station Name in Bengali and English (Ultra-Crisp Typography) -->
+            <text x="74" y="56" fill="#ffffff" font-size="12" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">মিরপুর ১০</text>
+            <text x="74" y="68" fill="#38bdf8" font-size="9.5" font-weight="700" class="cr-signboard-text">Mirpur 10</text>
 
             <!-- Escalators & Stairs Connecting Station to Street Sidewalk -->
             <polygon points="50,115 110,215 130,215 70,115" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
@@ -2626,8 +2658,8 @@
 
           <!-- Continuous Moving Dhaka Metro Rail Train (MRT Line 6) with Electric Cyan Windows -->
           <g id="crossroadsMetroTrain" transform="translate(150, 88)">
-            <!-- High-Beam Headlight Cone -->
-            <polygon points="260,14 380,0 380,28" fill="url(#crHeadlightBeamGradEB)" opacity="0.85" filter="url(#crHeadlightBeamGlow)"/>
+            <!-- High-Beam Headlight Cone (Hardware-accelerated gradient with zero filter lag) -->
+            <polygon points="260,14 380,0 380,28" fill="url(#crHeadlightBeamGradEB)" opacity="0.85"/>
             
             <!-- Lead Car -->
             <path d="M 195,3 L 245,3 Q 262,14 245,23 L 195,23 Z" fill="#f8fafc" stroke="#00f2fe" stroke-width="1.5"/>
@@ -2640,8 +2672,8 @@
             <rect x="214" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
             <rect x="228" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
             <!-- Headlights with Warm White Glow -->
-            <circle cx="258" cy="10" r="2.5" fill="#ffffff" filter="url(#crLightGlow)"/>
-            <circle cx="258" cy="18" r="2.5" fill="#ffffff" filter="url(#crLightGlow)"/>
+            <circle cx="258" cy="10" r="2.5" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+            <circle cx="258" cy="18" r="2.5" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
 
             <!-- Gangway 1 -->
             <rect x="190" y="8" width="5" height="10" fill="#475569"/>
@@ -2680,8 +2712,8 @@
             <rect x="34" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
             <rect x="48" y="6" width="9" height="5" rx="1" fill="#00f2fe" class="cr-neon-cyan"/>
             <!-- Glowing Red Taillights -->
-            <circle cx="4" cy="9" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-            <circle cx="4" cy="17" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+            <circle cx="4" cy="9" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+            <circle cx="4" cy="17" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
           </g>
 
 
@@ -2735,13 +2767,13 @@
               </g>
               <!-- Ground-floor Shopfronts ("ঢাকা বেকারি / ফার্মেসি") with Vivid Neon Glow -->
               <rect x="50" y="260" width="100" height="50" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
-              <rect x="55" y="263" width="90" height="14" fill="#d97706"/>
-              <text x="100" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা বেকারি</text>
+              <rect x="53" y="263" width="94" height="15" rx="2" fill="#090d16" stroke="#d97706" stroke-width="0.8"/>
+              <text x="100" y="274" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা বেকারি</text>
               <rect x="58" y="280" width="84" height="26" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
 
               <rect x="160" y="260" width="100" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
-              <rect x="165" y="263" width="90" height="14" fill="#059669"/>
-              <text x="210" y="274" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">গ্রীন ফার্মেসি</text>
+              <rect x="163" y="263" width="94" height="15" rx="2" fill="#090d16" stroke="#059669" stroke-width="0.8"/>
+              <text x="210" y="274" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">গ্রীন ফার্মেসি</text>
               <rect x="168" y="280" width="84" height="26" fill="#6ee7b7" opacity="0.95" class="cr-neon-green"/>
 
               <!-- Large Authentic Billboard: "ঢাকা আমাদের শহর" with Neon Halo -->
@@ -2749,9 +2781,9 @@
                 <rect x="0" y="-85" width="170" height="80" rx="6" fill="#042f2e" stroke="#10b981" stroke-width="2.5" filter="url(#crNeonGreenGlow)"/>
                 <rect x="5" y="-80" width="160" height="70" rx="4" fill="#065f46"/>
                 <path d="M 10,-20 L 30,-20 L 30,-45 L 45,-45 L 45,-20 L 70,-20 L 70,-55 L 90,-55 L 90,-20 L 120,-20 L 120,-40 L 140,-40 L 140,-20 L 160,-20 Z" fill="#022c22" opacity="0.6"/>
-                <text x="20" y="-55" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা</text>
-                <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">আমাদের</text>
-                <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">শহর</text>
+                <text x="20" y="-55" fill="#fde047" font-size="15" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা</text>
+                <text x="20" y="-38" fill="#ffffff" font-size="13" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">আমাদের</text>
+                <text x="20" y="-22" fill="#34d399" font-size="13" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">শহর</text>
                 <circle cx="40" cy="-86" r="3.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
                 <circle cx="130" cy="-86" r="3.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
               </g>
@@ -2800,8 +2832,8 @@
               </g>
               <!-- Ground Shopfront: ঢাকা বুক ডিপো -->
               <rect x="382" y="262" width="75" height="54" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
-              <rect x="386" y="265" width="67" height="14" fill="#b45309"/>
-              <text x="419" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা বুক ডিপো</text>
+              <rect x="385" y="264" width="69" height="15" rx="2" fill="#090d16" stroke="#b45309" stroke-width="0.8"/>
+              <text x="419" y="275" fill="#ffffff" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা বুক ডিপো</text>
               <rect x="388" y="282" width="63" height="30" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
             </g>
 
@@ -2825,8 +2857,8 @@
               </g>
               <!-- Boutique Shopfront: ফ্যাশন কর্নার with Electric Magenta Halo -->
               <rect x="738" y="262" width="72" height="54" fill="#0f172a" stroke="#d946ef" stroke-width="1.8" class="cr-neon-magenta"/>
-              <rect x="742" y="265" width="64" height="13" fill="#7e22ce"/>
-              <text x="774" y="275" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-magenta">ফ্যাশন কর্নার</text>
+              <rect x="741" y="264" width="66" height="15" rx="2" fill="#090d16" stroke="#7e22ce" stroke-width="0.8"/>
+              <text x="774" y="275" fill="#ffffff" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ফ্যাশন কর্নার</text>
               <rect x="744" y="281" width="60" height="30" fill="#f5d0fe" opacity="0.95" class="cr-neon-magenta" filter="url(#crWindowGlowMagenta)"/>
 
               <!-- NE-2: Turquoise Commercial & Tech ("বাংলা টেক") with Vivid Cyan Glow -->
@@ -2847,8 +2879,8 @@
               </g>
               <!-- Tech Shopfront: বাংলা টেক -->
               <rect x="830" y="264" width="74" height="52" fill="#0f172a" stroke="#00f2fe" stroke-width="1.8" class="cr-neon-cyan"/>
-              <rect x="834" y="267" width="66" height="13" fill="#0f766e"/>
-              <text x="867" y="277" fill="#00f2fe" font-size="7.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">বাংলা টেক</text>
+              <rect x="833" y="265" width="68" height="15" rx="2" fill="#090d16" stroke="#0f766e" stroke-width="0.8"/>
+              <text x="867" y="277" fill="#00f2fe" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">বাংলা টেক</text>
               <rect x="836" y="283" width="62" height="28" fill="#a5f3fc" opacity="0.95" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
 
               <!-- NE-3: Coral & Rose 5-Story Residential -->
@@ -2874,8 +2906,8 @@
               </g>
               <!-- Ground Super Shop -->
               <rect x="926" y="266" width="84" height="50" fill="#0f172a" stroke="#ff2a54" stroke-width="1.8" class="cr-neon-red"/>
-              <rect x="930" y="269" width="76" height="13" fill="#be123c"/>
-              <text x="968" y="279" fill="#fef08a" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-red">সুপার শপ</text>
+              <rect x="929" y="267" width="78" height="15" rx="2" fill="#090d16" stroke="#be123c" stroke-width="0.8"/>
+              <text x="968" y="279" fill="#fef08a" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সুপার শপ</text>
               <rect x="932" y="285" width="72" height="26" fill="#fecdd3" opacity="0.95" class="cr-neon-red"/>
 
               <!-- NE-4: "মিরপুর প্লাজা" (Mirpur Plaza) Landmark Glass & Indigo High-Rise -->
@@ -2887,7 +2919,7 @@
               <!-- Glowing Rooftop Billboard: "মিরপুর প্লাজা" with High-Contrast Neon -->
               <g transform="translate(1045, 92)">
                 <rect x="0" y="0" width="125" height="24" rx="4" fill="#0369a1" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
-                <text x="62" y="16" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">মিরপুর প্লাজা</text>
+                <text x="62" y="17" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">মিরপুর প্লাজা</text>
               </g>
               <!-- 5 Floors of Expansive Panoramic Glass Windows with Cyan & Amber Neon -->
               <g class="window-glow-pulse">
@@ -2962,7 +2994,7 @@
 
               <!-- Ground-floor Traditional Tea Stall (টং দোকান) with Warm Amber Lantern -->
               <rect x="300" y="525" width="80" height="45" rx="3" fill="#78350f" stroke="#fbbf24" stroke-width="1.5" class="cr-neon-amber"/>
-              <text x="340" y="542" fill="#fbbf24" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">চায়ের টং</text>
+              <text x="340" y="542" fill="#fef08a" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">চায়ের টং</text>
               <circle cx="340" cy="552" r="4.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
 
               <!-- SW-4: Amber & Cream Corner Building with Shop ("সোনালী জুয়েলার্স") -->
@@ -2983,8 +3015,8 @@
               </g>
               <!-- Ground Shop: সোনালী জুয়েলার্স with Gold Neon Glow -->
               <rect x="374" y="626" width="88" height="52" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
-              <rect x="378" y="629" width="80" height="14" fill="#b45309"/>
-              <text x="418" y="640" fill="#fbbf24" font-size="8" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">সোনালী জুয়েলার্স</text>
+              <rect x="377" y="628" width="82" height="16" rx="2" fill="#090d16" stroke="#b45309" stroke-width="0.8"/>
+              <text x="418" y="640" fill="#fde047" font-size="9" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সোনালী জুয়েলার্স</text>
               <rect x="380" y="646" width="76" height="26" fill="#fef08a" opacity="1" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
             </g>
 
@@ -3011,8 +3043,8 @@
               </g>
               <!-- Clinic / Pharmacy Shopfront with Glowing Medical Green Cross -->
               <rect x="740" y="626" width="126" height="52" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
-              <rect x="745" y="629" width="116" height="14" fill="#065f46"/>
-              <text x="803" y="640" fill="#ffffff" font-size="8.5" font-weight="900" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-green">জনতা ফার্মেসি</text>
+              <rect x="744" y="628" width="118" height="16" rx="2" fill="#090d16" stroke="#065f46" stroke-width="0.8"/>
+              <text x="803" y="640" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">জনতা ফার্মেসি</text>
               <rect x="748" y="646" width="110" height="26" fill="#a7f3d0" opacity="0.95" class="cr-neon-green"/>
               <!-- Radiant Green Medical Cross -->
               <rect x="758" y="652" width="14" height="4" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
@@ -3026,9 +3058,9 @@
               <g transform="translate(890, 530)">
                 <rect x="0" y="0" width="230" height="95" rx="6" fill="#1e3a8a" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
                 <rect x="5" y="5" width="220" height="85" rx="4" fill="#172554"/>
-                <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-blue">সবাই মিলে</text>
-                <text x="18" y="52" fill="#00f2fe" font-size="14" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-cyan">একটি ভালো</text>
-                <text x="18" y="72" fill="#fde047" font-size="15" font-weight="900" font-family="'Noto Sans Bengali', sans-serif" class="cr-neon-amber">ঢাকা</text>
+                <text x="18" y="32" fill="#ffffff" font-size="14" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সবাই মিলে</text>
+                <text x="18" y="52" fill="#38bdf8" font-size="14" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">একটি ভালো</text>
+                <text x="18" y="72" fill="#fde047" font-size="15" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা</text>
                 <path d="M 140,75 L 155,50 L 170,60 L 190,35 L 210,75 Z" fill="#3b82f6" opacity="0.4"/>
               </g>
 
@@ -9407,7 +9439,7 @@
           if (v.dir === 'EB') {
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="76,12 145,0 145,24" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="76,12 145,0 145,24" fill="url(#crHeadlightBeamGradEB)"/>
                 <rect x="0" y="0" width="76" height="24" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="4" y="0" width="68" height="3" rx="1" fill="#ffffff"/>
                 <rect x="56" y="4" width="16" height="4" fill="#fef08a"/>
@@ -9416,36 +9448,36 @@
                 <rect x="30" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="42" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="56" y="9" width="16" height="12" rx="1" fill="#7dd3fc"/>
-                <circle cx="75" cy="6" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="75" cy="18" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="1" cy="6" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="1" cy="18" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="75" cy="6" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="75" cy="18" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="1" cy="6" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="1" cy="18" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="44,10 98,0 98,20" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="44,10 98,0 98,20" fill="url(#crHeadlightBeamGradEB)"/>
                 <rect x="0" y="1" width="44" height="18" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
                 <path d="M 10,1 L 15,-1 L 30,-1 L 35,1 Z" fill="#38bdf8" opacity="0.8"/>
-                <circle cx="43" cy="5" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="43" cy="15" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="1" cy="5" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="1" cy="15" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="43" cy="5" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="43" cy="15" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="1" cy="5" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="1" cy="15" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="32,8 78,-2 78,18" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="32,8 78,-2 78,18" fill="url(#crHeadlightBeamGradEB)"/>
                 <rect x="2" y="2" width="28" height="14" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
                 <path d="M 2,5 Q 14,0 26,5 L 24,7 L 4,7 Z" fill="#facc15"/>
                 <rect x="6" y="6" width="10" height="7" rx="1" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
-                <circle cx="30" cy="8" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="1" cy="9" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="30" cy="8" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="1" cy="9" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <circle cx="4" cy="12" r="4.5" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
                 <circle cx="4" cy="12" r="1.5" fill="#f59e0b"/>
                 <circle cx="28" cy="12" r="4" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
-                <rect x="-1" y="7" width="3" height="6" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <rect x="-1" y="7" width="3" height="6" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
                 <path d="M 2,10 L 11,10 L 14,4 L 6,4 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <path d="M 4,4 Q 6,-3 14,1 L 13,5 Z" fill="#f59e0b" stroke="#fde047" stroke-width="1"/>
                 <circle cx="21" cy="2" r="2.5" fill="#fde047"/>
@@ -9453,19 +9485,19 @@
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="23,6 68,0 68,12" fill="url(#crHeadlightBeamGradEB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="23,6 68,0 68,12" fill="url(#crHeadlightBeamGradEB)"/>
                 <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <path d="M 3,6 L 10,2 L 16,2 L 20,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
                 <circle cx="12" cy="1" r="2.5" fill="#38bdf8"/>
-                <circle cx="23" cy="6" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="1" cy="5" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="23" cy="6" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="1" cy="5" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             }
           } else if (v.dir === 'WB') {
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="0,12 -70,0 -70,24" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="0,12 -70,0 -70,24" fill="url(#crHeadlightBeamGradWB)"/>
                 <rect x="0" y="0" width="76" height="24" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="4" y="0" width="68" height="3" rx="1" fill="#ffffff"/>
                 <rect x="4" y="4" width="16" height="4" fill="#fef08a"/>
@@ -9474,36 +9506,36 @@
                 <rect x="38" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="50" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
                 <rect x="62" y="5" width="8" height="5" rx="1" fill="#bae6fd"/>
-                <circle cx="1" cy="6" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="1" cy="18" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="75" cy="6" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="75" cy="18" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="1" cy="6" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="1" cy="18" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="75" cy="6" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="75" cy="18" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="0,10 -54,0 -54,20" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="0,10 -54,0 -54,20" fill="url(#crHeadlightBeamGradWB)"/>
                 <rect x="0" y="1" width="44" height="18" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
                 <path d="M 34,1 L 29,-1 L 14,-1 L 9,1 Z" fill="#38bdf8" opacity="0.8"/>
-                <circle cx="1" cy="5" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="1" cy="15" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="43" cy="5" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="43" cy="15" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="1" cy="5" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="1" cy="15" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="43" cy="5" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="43" cy="15" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="0,8 -46,-2 -46,18" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="0,8 -46,-2 -46,18" fill="url(#crHeadlightBeamGradWB)"/>
                 <rect x="2" y="2" width="28" height="14" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
                 <path d="M 28,5 Q 16,0 4,5 L 6,7 L 26,7 Z" fill="#facc15"/>
                 <rect x="14" y="6" width="10" height="7" rx="1" fill="#0f172a" stroke="#22c55e" stroke-width="0.8"/>
-                <circle cx="1" cy="8" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="29" cy="9" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="1" cy="8" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="29" cy="9" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <circle cx="28" cy="12" r="4.5" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
                 <circle cx="28" cy="12" r="1.5" fill="#f59e0b"/>
                 <circle cx="4" cy="12" r="4" stroke="#f59e0b" stroke-width="1.2" fill="none"/>
-                <rect x="30" y="7" width="3" height="6" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <rect x="30" y="7" width="3" height="6" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
                 <path d="M 30,10 L 21,10 L 18,4 L 26,4 Z" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <path d="M 28,4 Q 26,-3 18,1 L 19,5 Z" fill="#f59e0b" stroke="#fde047" stroke-width="1"/>
                 <circle cx="11" cy="2" r="2.5" fill="#fde047"/>
@@ -9511,105 +9543,105 @@
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="1,6 -45,0 -45,12" fill="url(#crHeadlightBeamGradWB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="1,6 -45,0 -45,12" fill="url(#crHeadlightBeamGradWB)"/>
                 <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
                 <path d="M 20,6 L 13,2 L 7,2 L 3,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
                 <circle cx="11" cy="1" r="2.5" fill="#38bdf8"/>
-                <circle cx="1" cy="6" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="22" cy="5" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="1" cy="6" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="22" cy="5" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             }
           } else if (v.dir === 'SB') {
             // Southbound (Facing down)
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="12,76 0,145 24,145" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="12,76 0,145 24,145" fill="url(#crHeadlightBeamGradSB)"/>
                 <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
                 <rect x="4" y="56" width="16" height="4" fill="#fef08a"/>
                 <rect x="4" y="60" width="16" height="12" rx="1" fill="#7dd3fc"/>
-                <circle cx="6" cy="75" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="18" cy="75" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="6" cy="1" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="18" cy="1" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="6" cy="75" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="18" cy="75" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="6" cy="1" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="18" cy="1" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="10,44 0,98 20,98" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="10,44 0,98 20,98" fill="url(#crHeadlightBeamGradSB)"/>
                 <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
-                <circle cx="5" cy="43" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="15" cy="43" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="5" cy="1" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="15" cy="1" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="5" cy="43" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="15" cy="43" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="5" cy="1" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="15" cy="1" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="8,32 -2,78 18,78" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="8,32 -2,78 18,78" fill="url(#crHeadlightBeamGradSB)"/>
                 <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
-                <circle cx="8" cy="30" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="8" cy="1" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="8" cy="30" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="8" cy="1" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <circle cx="9" cy="28" r="2.5" fill="#fde047"/>
                 <circle cx="9" cy="32" r="3" fill="#0f172a"/>
-                <circle cx="9" cy="1" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="9" cy="1" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="6,23 0,68 12,68" fill="url(#crHeadlightBeamGradSB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="6,23 0,68 12,68" fill="url(#crHeadlightBeamGradSB)"/>
                 <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
                 <circle cx="6" cy="10" r="2.5" fill="#38bdf8"/>
-                <circle cx="6" cy="22" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="6" cy="1" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="6" cy="22" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             }
           } else if (v.dir === 'NB') {
             // Northbound (Facing up)
             if (v.type === 'bus') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="12,0 0,-70 24,-70" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="12,0 0,-70 24,-70" fill="url(#crHeadlightBeamGradNB)"/>
                 <rect x="0" y="0" width="24" height="76" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
                 <rect x="0" y="4" width="3" height="68" rx="1" fill="#ffffff"/>
                 <rect x="4" y="16" width="16" height="4" fill="#fef08a"/>
                 <rect x="4" y="4" width="16" height="12" rx="1" fill="#7dd3fc"/>
-                <circle cx="6" cy="1" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="18" cy="1" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="6" cy="75" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="18" cy="75" r="2.2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="6" cy="1" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="18" cy="1" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="6" cy="75" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="18" cy="75" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'car') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="10,0 0,-54 20,-54" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="10,0 0,-54 20,-54" fill="url(#crHeadlightBeamGradNB)"/>
                 <rect x="1" y="0" width="18" height="44" rx="4" fill="${v.color}" stroke="#94a3b8" stroke-width="1"/>
-                <circle cx="5" cy="1" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="15" cy="1" r="2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="5" cy="43" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
-                <circle cx="15" cy="43" r="2" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="5" cy="1" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="15" cy="1" r="2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="5" cy="43" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <circle cx="15" cy="43" r="2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'cng') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="8,0 -2,-46 18,-46" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="8,0 -2,-46 18,-46" fill="url(#crHeadlightBeamGradNB)"/>
                 <rect x="1" y="2" width="14" height="28" rx="4" fill="#15803d" stroke="#34d399" stroke-width="1.2"/>
-                <circle cx="8" cy="1" r="2.2" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="8" cy="30" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="8" cy="1" r="2.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="8" cy="30" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'rickshaw') {
               g.innerHTML = `
                 <rect x="1" y="2" width="16" height="30" rx="3" fill="#b45309" stroke="#f59e0b" stroke-width="1"/>
                 <circle cx="9" cy="6" r="2.5" fill="#fde047"/>
                 <circle cx="9" cy="2" r="3" fill="#0f172a"/>
-                <circle cx="9" cy="31" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="9" cy="31" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'bike') {
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="6,1 0,-45 12,-45" fill="url(#crHeadlightBeamGradNB)" filter="url(#crHeadlightBeamGlow)"/>
+                <polygon class="cr-headlight-beam" points="6,1 0,-45 12,-45" fill="url(#crHeadlightBeamGradNB)"/>
                 <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
                 <circle cx="6" cy="12" r="2.5" fill="#38bdf8"/>
-                <circle cx="6" cy="1" r="1.8" fill="#ffffff" filter="url(#crLightGlow)"/>
-                <circle cx="6" cy="22" r="1.8" fill="#ff2a54" filter="url(#crTaillightGlow)"/>
+                <circle cx="6" cy="1" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
+                <circle cx="6" cy="22" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             }
           }
@@ -9653,6 +9685,16 @@
       let lastTime = performance.now();
       let cycleTimer = 0;
       let trainX = 150;
+      let prevPhaseId = null;
+
+      // Pre-allocated lane groups to avoid array allocations during animation tick
+      const laneGroups = {
+        'EB_1': [], 'EB_2': [],
+        'WB_1': [], 'WB_2': [],
+        'SB_1': [], 'SB_2': [],
+        'NB_1': [], 'NB_2': []
+      };
+      const laneGroupKeys = Object.keys(laneGroups);
 
       // Animation Loop
       function tick(currentTime) {
@@ -9683,7 +9725,7 @@
           accumulated += PHASES[i].duration;
         }
 
-        // 1. Update Traffic Lights visual lamps
+        // Traffic Light Signal States
         const isNSGreen = activePhase.nsLight === 'green';
         const isNSYellow = activePhase.nsLight === 'yellow';
         const isNSRed = activePhase.nsLight === 'red';
@@ -9692,52 +9734,63 @@
         const isEWYellow = activePhase.ewLight === 'yellow';
         const isEWRed = activePhase.ewLight === 'red';
 
-        // NW & NE control North-South approaches
-        if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.nw_yellow) sigLamps.nw_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.nw_green) sigLamps.nw_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+        // 1. Update Traffic Lights visual lamps (cached on phase change)
+        if (activePhase.id !== prevPhaseId) {
+          prevPhaseId = activePhase.id;
 
-        if (sigLamps.ne_red) sigLamps.ne_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.ne_yellow) sigLamps.ne_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.ne_green) sigLamps.ne_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+          // NW & NE control North-South approaches
+          if (sigLamps.nw_red) sigLamps.nw_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.nw_yellow) sigLamps.nw_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.nw_green) sigLamps.nw_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        // SW & SE control East-West approaches
-        if (sigLamps.sw_red) sigLamps.sw_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.sw_yellow) sigLamps.sw_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.sw_green) sigLamps.sw_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+          if (sigLamps.ne_red) sigLamps.ne_red.setAttribute('fill', isNSRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.ne_yellow) sigLamps.ne_yellow.setAttribute('fill', isNSYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.ne_green) sigLamps.ne_green.setAttribute('fill', isNSGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        if (sigLamps.se_red) sigLamps.se_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
-        if (sigLamps.se_yellow) sigLamps.se_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
-        if (sigLamps.se_green) sigLamps.se_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+          // SW & SE control East-West approaches
+          if (sigLamps.sw_red) sigLamps.sw_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.sw_yellow) sigLamps.sw_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.sw_green) sigLamps.sw_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
 
-        // Update Live Status Badge
-        if (badgeText && badgeDot) {
-          badgeText.innerText = activePhase.label;
-          badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
-          const badgeContainer = document.getElementById('trafficSignalBadge');
-          if (badgeContainer) {
-            badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
+          if (sigLamps.se_red) sigLamps.se_red.setAttribute('fill', isEWRed ? LAMP_COLORS.red_on : LAMP_COLORS.red_off);
+          if (sigLamps.se_yellow) sigLamps.se_yellow.setAttribute('fill', isEWYellow ? LAMP_COLORS.yellow_on : LAMP_COLORS.yellow_off);
+          if (sigLamps.se_green) sigLamps.se_green.setAttribute('fill', isEWGreen ? LAMP_COLORS.green_on : LAMP_COLORS.green_off);
+
+          // Update Live Status Badge
+          if (badgeText && badgeDot) {
+            badgeText.innerText = activePhase.label;
+            badgeDot.className = `w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${activePhase.dotColor} animate-pulse shrink-0`;
+            const badgeContainer = document.getElementById('trafficSignalBadge');
+            if (badgeContainer) {
+              badgeContainer.className = `flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl ${activePhase.badgeColor} transition-colors pointer-events-none max-w-[155px] sm:max-w-none`;
+            }
           }
         }
 
         // 2. Update Vehicles Physics, Queueing & Movements
-        // Group vehicles by direction and lane to ensure collision-free queueing
-        const groups = {
-          'EB_1': vehicles.filter(v => v.dir === 'EB' && v.lane === 1).sort((a,b) => b.pos - a.pos),
-          'EB_2': vehicles.filter(v => v.dir === 'EB' && v.lane === 2).sort((a,b) => b.pos - a.pos),
-          'WB_1': vehicles.filter(v => v.dir === 'WB' && v.lane === 1).sort((a,b) => a.pos - b.pos),
-          'WB_2': vehicles.filter(v => v.dir === 'WB' && v.lane === 2).sort((a,b) => a.pos - b.pos),
-          'SB_1': vehicles.filter(v => v.dir === 'SB' && v.lane === 1).sort((a,b) => b.pos - a.pos),
-          'SB_2': vehicles.filter(v => v.dir === 'SB' && v.lane === 2).sort((a,b) => b.pos - a.pos),
-          'NB_1': vehicles.filter(v => v.dir === 'NB' && v.lane === 1).sort((a,b) => a.pos - b.pos),
-          'NB_2': vehicles.filter(v => v.dir === 'NB' && v.lane === 2).sort((a,b) => a.pos - b.pos),
-        };
+        // Reset and populate pre-allocated lane groups without GC churn
+        for (let k = 0; k < laneGroupKeys.length; k++) {
+          laneGroups[laneGroupKeys[k]].length = 0;
+        }
+        for (let i = 0; i < vehicles.length; i++) {
+          const v = vehicles[i];
+          const groupKey = v.dir + '_' + v.lane;
+          if (laneGroups[groupKey]) laneGroups[groupKey].push(v);
+        }
+        laneGroups['EB_1'].sort((a,b) => b.pos - a.pos);
+        laneGroups['EB_2'].sort((a,b) => b.pos - a.pos);
+        laneGroups['WB_1'].sort((a,b) => a.pos - b.pos);
+        laneGroups['WB_2'].sort((a,b) => a.pos - b.pos);
+        laneGroups['SB_1'].sort((a,b) => b.pos - a.pos);
+        laneGroups['SB_2'].sort((a,b) => b.pos - a.pos);
+        laneGroups['NB_1'].sort((a,b) => a.pos - b.pos);
+        laneGroups['NB_2'].sort((a,b) => a.pos - b.pos);
 
         const MIN_FOLLOW_GAP = 20; // Safe bumper-to-bumper gap (px)
         const SLOW_FOLLOW_GAP = 95; // Proactive deceleration distance (px)
 
-        Object.keys(groups).forEach(key => {
-          const laneVehicles = groups[key];
+        laneGroupKeys.forEach(key => {
+          const laneVehicles = laneGroups[key];
           for (let i = 0; i < laneVehicles.length; i++) {
             const v = laneVehicles[i];
             const leader = i > 0 ? laneVehicles[i - 1] : null;
@@ -10292,26 +10345,43 @@
       });
     });
 
-    // Hero 3D interactive tilt
+    // Hero 3D interactive tilt (High-Performance Throttled RAF with Passive Listeners)
     const heroVisual = document.getElementById('heroVisualStage');
     if (heroVisual) {
+      let heroRect = null;
+      let tiltRaf = null;
+      let lastEvent = null;
+
+      const updateHeroRect = () => { heroRect = heroVisual.getBoundingClientRect(); };
+      window.addEventListener('resize', updateHeroRect, { passive: true });
+      window.addEventListener('scroll', updateHeroRect, { passive: true });
+
+      heroVisual.addEventListener('mouseenter', updateHeroRect, { passive: true });
       heroVisual.addEventListener('mousemove', (e) => {
-        const rect = heroVisual.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        const tiltX = (y / (rect.height / 2)) * -6;
-        const tiltY = (x / (rect.width / 2)) * 6;
-        const card = heroVisual.querySelector('.hero-stage-card');
-        if (card) {
-          card.style.transform = `perspective(800px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+        lastEvent = e;
+        if (!tiltRaf) {
+          tiltRaf = requestAnimationFrame(() => {
+            tiltRaf = null;
+            if (!lastEvent) return;
+            if (!heroRect) heroRect = heroVisual.getBoundingClientRect();
+            const x = lastEvent.clientX - heroRect.left - heroRect.width / 2;
+            const y = lastEvent.clientY - heroRect.top - heroRect.height / 2;
+            const tiltX = (y / (heroRect.height / 2)) * -6;
+            const tiltY = (x / (heroRect.width / 2)) * 6;
+            const card = heroVisual.querySelector('.hero-stage-card');
+            if (card) {
+              card.style.transform = `perspective(800px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+            }
+          });
         }
-      });
+      }, { passive: true });
       heroVisual.addEventListener('mouseleave', () => {
+        if (tiltRaf) { cancelAnimationFrame(tiltRaf); tiltRaf = null; }
         const card = heroVisual.querySelector('.hero-stage-card');
         if (card) {
           card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
         }
-      });
+      }, { passive: true });
     }
     document.getElementById('savePlaceForm')?.addEventListener('submit', handleSavePlace);
     document.getElementById('savedPlacesList')?.addEventListener('click', handleSavedPlacesClick);
