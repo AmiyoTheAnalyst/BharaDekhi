@@ -1530,103 +1530,448 @@
         transform: none;
       }
     }
+
+    /* ========================================================
+       TOP HEADER & SUB-HEADER ANIMATED SKY SYSTEM (Rain, Night, Sun)
+       ======================================================== */
+    #topHeaderSkyWrapper {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.8s ease;
+    }
+    @media (max-width: 640px) {
+      #topHeaderSkyWrapper {
+        position: static !important;
+      }
+    }
+
+    /* 1. Theme-Aware Sky Gradients */
+    #topHeaderSkyWrapper[data-header-weather="sun"] {
+      background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 35%, #38bdf8 70%, #7dd3fc 100%);
+      border-bottom: 1px solid rgba(125, 211, 252, 0.4);
+    }
+    #topHeaderSkyWrapper[data-header-weather="night"] {
+      background: linear-gradient(135deg, #030712 0%, #0b1329 40%, #111e38 75%, #080f1d 100%);
+      border-bottom: 1px solid rgba(30, 41, 59, 0.7);
+    }
+    #topHeaderSkyWrapper[data-header-weather="rain"] {
+      background: linear-gradient(135deg, #090d16 0%, #151e2e 35%, #1e293b 70%, #0f172a 100%);
+      border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+    }
+
+    /* 2. Glassmorphic header & sub-header panels */
+    #topHeaderSkyWrapper header {
+      background-color: rgba(255, 255, 255, 0.22) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    html[data-theme="dark"] #topHeaderSkyWrapper header {
+      background-color: rgba(15, 23, 42, 0.38) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #topHeaderSkyWrapper #amiyoModeNav {
+      background-color: rgba(255, 255, 255, 0.25) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    html[data-theme="dark"] #topHeaderSkyWrapper #amiyoModeNav {
+      background-color: rgba(15, 23, 42, 0.45) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 3. Layer Visibility Transitions */
+    .header-sky-layer {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #topHeaderSkyWrapper[data-header-weather="sun"] #headerSkySunLayer {
+      opacity: 1;
+    }
+    #topHeaderSkyWrapper[data-header-weather="night"] #headerSkyNightLayer {
+      opacity: 1;
+    }
+    #topHeaderSkyWrapper[data-header-weather="rain"] #headerSkyRainLayer {
+      opacity: 1;
+    }
+
+    /* 4. Sun & Rays Keyframes */
+    .header-sun-corona {
+      background: radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, rgba(251, 191, 36, 0.18) 50%, transparent 75%);
+      animation: headerSunPulse 5s ease-in-out infinite;
+    }
+    .header-sun-rays {
+      animation: headerSunSpin 45s linear infinite;
+    }
+    @keyframes headerSunSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes headerSunPulse {
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.12); opacity: 1; }
+    }
+
+    /* 5. Cloud Drifting Keyframes */
+    @keyframes headerCloudMove {
+      from { transform: translateX(-160px); }
+      to { transform: translateX(calc(100vw + 160px)); }
+    }
+    .header-cloud-1 {
+      animation: headerCloudMove 40s linear infinite;
+    }
+    .header-cloud-2 {
+      animation: headerCloudMove 58s linear infinite -20s;
+    }
+    .header-cloud-3 {
+      animation: headerCloudMove 76s linear infinite -42s;
+    }
+    .header-night-cloud-1 {
+      animation: headerCloudMove 50s linear infinite -12s;
+    }
+    .header-night-cloud-2 {
+      animation: headerCloudMove 72s linear infinite -38s;
+    }
+    .header-storm-cloud-1 {
+      animation: headerCloudMove 34s linear infinite;
+    }
+    .header-storm-cloud-2 {
+      animation: headerCloudMove 52s linear infinite -24s;
+    }
+
+    /* 6. Night Moon & Stars */
+    .header-moon-svg {
+      filter: drop-shadow(0 0 10px rgba(254, 240, 138, 0.55)) drop-shadow(0 0 20px rgba(186, 230, 253, 0.35));
+      animation: headerMoonGlow 6s ease-in-out infinite;
+    }
+    @keyframes headerMoonGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(254, 240, 138, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 16px rgba(254, 240, 138, 0.8)) drop-shadow(0 0 24px rgba(186, 230, 253, 0.5)); }
+    }
+    .header-star {
+      position: absolute;
+      width: 2.5px;
+      height: 2.5px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 4px #bae6fd;
+      animation: headerStarTwinkle 3s ease-in-out infinite;
+    }
+    .header-sparkle-star {
+      position: absolute;
+      animation: headerStarTwinkle 4s ease-in-out infinite;
+    }
+    @keyframes headerStarTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* 7. Rain Streaks & Lightning */
+    .header-rain-canvas {
+      background-image: repeating-linear-gradient(
+        110deg,
+        transparent 0px,
+        transparent 15px,
+        rgba(186, 230, 253, 0.4) 16px,
+        rgba(186, 230, 253, 0) 18px
+      );
+      background-size: 80px 140px;
+      animation: headerRainFall 0.65s linear infinite;
+      opacity: 0.8;
+    }
+    @keyframes headerRainFall {
+      from { background-position: 0 0; }
+      to { background-position: -40px 140px; }
+    }
+    .header-lightning-overlay {
+      background: radial-gradient(circle at 65% 25%, rgba(224, 242, 254, 0.6) 0%, rgba(186, 230, 253, 0.15) 45%, transparent 70%);
+      animation: headerLightningFlash 11s infinite ease-in-out;
+    }
+    @keyframes headerLightningFlash {
+      0%, 93%, 100% { opacity: 0; }
+      94% { opacity: 0.35; }
+      95% { opacity: 0.08; }
+      96% { opacity: 0.65; }
+      97% { opacity: 0; }
+    }
+
+    /* 8. Text & UI Contrast Enhancements */
+    #topHeaderSkyWrapper[data-header-weather="sun"] .header-brand-title {
+      color: #0f172a;
+    }
+    #topHeaderSkyWrapper[data-header-weather="sun"] .header-brand-title span {
+      color: #1d4ed8;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    }
+    #topHeaderSkyWrapper[data-header-weather="sun"] .header-brand-subtext {
+      color: #1e293b;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    }
+    #topHeaderSkyWrapper[data-header-weather="night"] .header-brand-title,
+    #topHeaderSkyWrapper[data-header-weather="rain"] .header-brand-title {
+      color: #f8fafc;
+    }
+    #topHeaderSkyWrapper[data-header-weather="night"] .header-brand-title span,
+    #topHeaderSkyWrapper[data-header-weather="rain"] .header-brand-title span {
+      color: #60a5fa;
+      text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+    }
+    #topHeaderSkyWrapper[data-header-weather="night"] .header-brand-subtext,
+    #topHeaderSkyWrapper[data-header-weather="rain"] .header-brand-subtext {
+      color: #cbd5e1;
+    }
+    #topHeaderSkyWrapper[data-header-weather="sun"] #amiyoModeNav span {
+      color: #0f172a !important;
+    }
+    #topHeaderSkyWrapper[data-header-weather="night"] #amiyoModeNav span,
+    #topHeaderSkyWrapper[data-header-weather="rain"] #amiyoModeNav span {
+      color: #f1f5f9 !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .header-sun-rays, .header-sun-corona, .header-cloud,
+      .header-star, .header-sparkle-star, .header-moon-svg,
+      .header-rain-canvas, .header-lightning-overlay {
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
 
-  <!-- Header -->
-  <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2 shrink-0">
-        <a href="#/home" onclick="if (localStorage.getItem('commuteHubLoggedIn') === 'true') { event.preventDefault(); navigateToRoute('#/home'); }" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
-          <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
-          <span class="block">
-            <h1 class="text-base sm:text-lg font-bold leading-tight text-slate-900 dark:text-white">Bhara<span class="text-blue-700 dark:text-blue-400">Dekhi</span></h1>
-            <span class="block text-[9px] font-bold tracking-[0.13em] text-slate-500 dark:text-slate-400">Route Planner &amp; Fare Estimator</span>
-          </span>
-        </a>
+  <!-- Header & Sub-Header Sky Wrapper -->
+  <div id="topHeaderSkyWrapper" class="sticky top-0 z-30 relative overflow-hidden transition-all duration-700 shadow-sm" data-header-weather="night">
+    <!-- Animated Sky Backdrop Canvas across Header & Sub-Header -->
+    <div id="headerSkyBackdrop" class="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+      <!-- Sun Mode Layer -->
+      <div id="headerSkySunLayer" class="header-sky-layer absolute inset-0 transition-opacity duration-700 ease-in-out pointer-events-none">
+        <!-- Glowing Sun with Rotating Rays -->
+        <div class="header-sun-anchor absolute right-[18%] sm:right-[26%] -top-6 sm:-top-8 w-28 sm:w-36 h-28 sm:h-36 pointer-events-none">
+          <div class="header-sun-corona absolute inset-0 rounded-full"></div>
+          <div class="header-sun-rays absolute inset-0">
+            <svg viewBox="0 0 100 100" class="w-full h-full opacity-60">
+              <g stroke="rgba(254, 240, 138, 0.65)" stroke-width="2" stroke-linecap="round">
+                <line x1="50" y1="12" x2="50" y2="2" />
+                <line x1="50" y1="88" x2="50" y2="98" />
+                <line x1="12" y1="50" x2="2" y2="50" />
+                <line x1="88" y1="50" x2="98" y2="50" />
+                <line x1="23" y1="23" x2="16" y2="16" />
+                <line x1="77" y1="77" x2="84" y2="84" />
+                <line x1="23" y1="77" x2="16" y2="84" />
+                <line x1="77" y1="23" x2="84" y2="16" />
+              </g>
+            </svg>
+          </div>
+          <div class="header-sun-core absolute inset-[22%] rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-100 shadow-[0_0_24px_rgba(251,191,36,0.85)]"></div>
+        </div>
+
+        <!-- Fluffy Drifting Day Clouds -->
+        <div class="header-clouds-container absolute inset-0 overflow-hidden pointer-events-none">
+          <div class="header-cloud header-cloud-1 absolute -top-1 left-0 w-36 h-12 opacity-80">
+            <svg viewBox="0 0 120 40" class="w-full h-full fill-white/85 filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]">
+              <path d="M 20,35 Q 20,25 30,22 Q 35,12 50,15 Q 65,8 80,18 Q 95,15 105,25 Q 115,28 115,35 Z" />
+            </svg>
+          </div>
+          <div class="header-cloud header-cloud-2 absolute top-4 left-0 w-48 h-14 opacity-70">
+            <svg viewBox="0 0 150 45" class="w-full h-full fill-white/75 filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]">
+              <path d="M 25,40 Q 20,28 35,24 Q 45,10 65,14 Q 85,6 105,16 Q 120,12 135,26 Q 145,30 145,40 Z" />
+            </svg>
+          </div>
+          <div class="header-cloud header-cloud-3 absolute top-8 left-0 w-32 h-10 opacity-60">
+            <svg viewBox="0 0 100 35" class="w-full h-full fill-white/60">
+              <path d="M 15,30 Q 15,20 25,18 Q 32,10 45,12 Q 58,8 70,16 Q 82,14 90,22 Q 95,26 95,30 Z" />
+            </svg>
+          </div>
+        </div>
       </div>
-      
-      <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
-      <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
-        <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm shrink-0 whitespace-nowrap" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
-          <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
-          <span>FAQ</span>
-        </a>
-        <button id="languageToggle" type="button" class="rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Switch language">বাংলা</button>
-        <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Switch to dark mode" aria-pressed="false">
-          <span id="themeToggleIconContainer" class="flex items-center justify-center">
-            <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
-          </span>
-          <span id="themeToggleLabel">Dark mode</span>
-        </button>
 
-        <!-- Weather Console Pill with Tooltip Popover -->
-        <div id="headerWeatherPill" class="relative group inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0">
-          <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500">
-            <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
-          </span>
-          <label for="rainModeSelect" class="sr-only">Rain fare mode</label>
-          <select id="rainModeSelect" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 border-none outline-none cursor-pointer focus:ring-0 py-0.5 pr-1" title="Select Rain Fare Calculation Mode">
-            <option value="auto" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Auto Weather</option>
-            <option value="rain" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Rain (+30%)</option>
-            <option value="dry" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Dry / Normal</option>
-          </select>
+      <!-- Night Mode Layer -->
+      <div id="headerSkyNightLayer" class="header-sky-layer absolute inset-0 transition-opacity duration-700 ease-in-out pointer-events-none">
+        <!-- Glowing Crescent Moon -->
+        <div class="header-moon-anchor absolute right-[15%] sm:right-[22%] top-2 w-12 sm:w-14 h-12 sm:h-14 pointer-events-none">
+          <svg viewBox="0 0 50 50" class="w-full h-full header-moon-svg">
+            <defs>
+              <radialGradient id="moonGlowGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fffbeb" stop-opacity="0.9" />
+                <stop offset="60%" stop-color="#fef08a" stop-opacity="0.5" />
+                <stop offset="100%" stop-color="#bae6fd" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="25" cy="25" r="22" fill="url(#moonGlowGrad)" opacity="0.35" class="animate-pulse" />
+            <path d="M 32,8 A 18,18 0 1,0 42,34 A 15,15 0 1,1 32,8 Z" fill="#fef9c3" stroke="#fef08a" stroke-width="0.5" filter="drop-shadow(0 0 8px rgba(254,240,138,0.7))" />
+          </svg>
+        </div>
 
-          <!-- Interactive Info Tooltip Beacon -->
-          <div class="relative flex items-center">
-            <button type="button" id="weatherInfoBtn" class="text-slate-400 hover:text-sky-500 transition-colors p-0.5 rounded-full focus:outline-none" aria-label="Dhaka weather info and source">
-              <i data-lucide="info" class="w-3 h-3"></i>
-            </button>
-            <div id="weatherTooltipCard" class="absolute right-0 top-full mt-2 w-72 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-700 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-50 pointer-events-auto">
-              <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex items-center gap-2">
-                  <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
-                  <span class="text-[11px] font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Dhaka Live Weather</span>
+        <!-- Twinkling Night Stars -->
+        <div class="header-stars-container absolute inset-0 pointer-events-none">
+          <div class="header-star" style="top: 15%; left: 8%; animation-delay: 0s;"></div>
+          <div class="header-star" style="top: 35%; left: 16%; animation-delay: 1.2s;"></div>
+          <div class="header-star" style="top: 18%; left: 28%; animation-delay: 2.4s;"></div>
+          <div class="header-star" style="top: 48%; left: 38%; animation-delay: 0.7s;"></div>
+          <div class="header-star" style="top: 22%; left: 52%; animation-delay: 1.8s;"></div>
+          <div class="header-star" style="top: 52%; left: 62%; animation-delay: 2.9s;"></div>
+          <div class="header-star" style="top: 14%; left: 74%; animation-delay: 0.4s;"></div>
+          <div class="header-star" style="top: 42%; left: 86%; animation-delay: 1.5s;"></div>
+          <div class="header-star" style="top: 25%; left: 94%; animation-delay: 2.1s;"></div>
+          <div class="header-sparkle-star" style="top: 28%; left: 22%; animation-delay: 0.5s;">
+            <svg viewBox="0 0 24 24" class="w-3 h-3 fill-sky-200">
+              <path d="M12,2 L14,10 L22,12 L14,14 L12,22 L10,14 L2,12 L10,10 Z" />
+            </svg>
+          </div>
+          <div class="header-sparkle-star" style="top: 18%; left: 68%; animation-delay: 1.7s;">
+            <svg viewBox="0 0 24 24" class="w-2.5 h-2.5 fill-amber-100">
+              <path d="M12,2 L14,10 L22,12 L14,14 L12,22 L10,14 L2,12 L10,10 Z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Soft Midnight Drifting Clouds -->
+        <div class="header-clouds-container absolute inset-0 overflow-hidden pointer-events-none">
+          <div class="header-cloud header-night-cloud-1 absolute top-1 left-0 w-44 h-12 opacity-40">
+            <svg viewBox="0 0 140 40" class="w-full h-full fill-slate-700/60 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+              <path d="M 20,35 Q 20,25 32,22 Q 40,12 55,15 Q 70,8 88,18 Q 105,14 118,25 Q 128,28 128,35 Z" />
+            </svg>
+          </div>
+          <div class="header-cloud header-night-cloud-2 absolute top-6 left-0 w-56 h-14 opacity-30">
+            <svg viewBox="0 0 160 45" class="w-full h-full fill-slate-800/50">
+              <path d="M 25,40 Q 20,28 35,24 Q 48,10 70,14 Q 92,6 115,16 Q 130,12 145,26 Q 155,30 155,40 Z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rain Mode Layer -->
+      <div id="headerSkyRainLayer" class="header-sky-layer absolute inset-0 transition-opacity duration-700 ease-in-out pointer-events-none">
+        <!-- Heavy Storm Clouds at Header Top -->
+        <div class="header-storm-clouds absolute -top-3 left-0 right-0 h-14 overflow-hidden pointer-events-none">
+          <svg viewBox="0 0 1200 60" preserveAspectRatio="none" class="w-full h-full fill-slate-800/80 filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
+            <path d="M 0,0 L 1200,0 L 1200,28 Q 1150,45 1100,32 Q 1040,55 980,36 Q 910,58 840,34 Q 780,52 710,35 Q 640,56 570,33 Q 500,54 430,34 Q 360,55 290,32 Q 220,53 150,33 Q 80,50 0,30 Z" />
+          </svg>
+        </div>
+
+        <!-- Drifting Heavy Storm Clouds -->
+        <div class="header-clouds-container absolute inset-0 overflow-hidden pointer-events-none">
+          <div class="header-cloud header-storm-cloud-1 absolute top-1 left-0 w-52 h-14 opacity-60">
+            <svg viewBox="0 0 150 45" class="w-full h-full fill-slate-900/80 filter drop-shadow-[0_3px_6px_rgba(0,0,0,0.7)]">
+              <path d="M 20,38 Q 20,22 35,20 Q 45,8 65,12 Q 85,5 105,15 Q 122,12 135,24 Q 145,28 145,38 Z" />
+            </svg>
+          </div>
+          <div class="header-cloud header-storm-cloud-2 absolute top-5 left-0 w-64 h-16 opacity-50">
+            <svg viewBox="0 0 180 50" class="w-full h-full fill-slate-950/70">
+              <path d="M 25,45 Q 20,28 38,24 Q 52,10 75,14 Q 100,5 125,16 Q 145,12 165,26 Q 175,30 175,45 Z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Animated Continuous Diagonal Rain Streaks Canvas/CSS -->
+        <div class="header-rain-canvas absolute inset-0 pointer-events-none"></div>
+
+        <!-- Sheet Lightning Flash -->
+        <div class="header-lightning-overlay absolute inset-0 pointer-events-none"></div>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="border-b border-white/20 dark:border-slate-800/60 transition-colors duration-500">
+      <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="#/home" onclick="if (localStorage.getItem('commuteHubLoggedIn') === 'true') { event.preventDefault(); navigateToRoute('#/home'); }" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
+            <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
+            <span class="block">
+              <h1 class="text-base sm:text-lg font-bold leading-tight text-slate-900 dark:text-white header-brand-title">Bhara<span class="text-blue-700 dark:text-blue-400">Dekhi</span></h1>
+              <span class="block text-[9px] font-bold tracking-[0.13em] text-slate-500 dark:text-slate-400 header-brand-subtext">Route Planner &amp; Fare Estimator</span>
+            </span>
+          </a>
+        </div>
+        
+        <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
+        <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+          <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm shrink-0 whitespace-nowrap" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
+            <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
+            <span>FAQ</span>
+          </a>
+          <button id="languageToggle" type="button" class="rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Switch language">বাংলা</button>
+          <button id="themeToggle" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Switch to dark mode" aria-pressed="false">
+            <span id="themeToggleIconContainer" class="flex items-center justify-center">
+              <i id="themeToggleIcon" data-lucide="moon" class="h-3.5 w-3.5" aria-hidden="true"></i>
+            </span>
+            <span id="themeToggleLabel">Dark mode</span>
+          </button>
+
+          <!-- Weather Console Pill with Tooltip Popover -->
+          <div id="headerWeatherPill" class="relative group inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0">
+            <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500">
+              <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            </span>
+            <label for="rainModeSelect" class="sr-only">Rain fare mode</label>
+            <select id="rainModeSelect" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 border-none outline-none cursor-pointer focus:ring-0 py-0.5 pr-1" title="Select Rain Fare Calculation Mode">
+              <option value="auto" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Auto Weather</option>
+              <option value="rain" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Rain (+30%)</option>
+              <option value="dry" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Dry / Normal</option>
+            </select>
+
+            <!-- Interactive Info Tooltip Beacon -->
+            <div class="relative flex items-center">
+              <button type="button" id="weatherInfoBtn" class="text-slate-400 hover:text-sky-500 transition-colors p-0.5 rounded-full focus:outline-none" aria-label="Dhaka weather info and source">
+                <i data-lucide="info" class="w-3 h-3"></i>
+              </button>
+              <div id="weatherTooltipCard" class="absolute right-0 top-full mt-2 w-72 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-700 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-50 pointer-events-auto">
+                <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+                    <span class="text-[11px] font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Dhaka Live Weather</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/70 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800/60">Live Radar</span>
                 </div>
-                <span class="text-[10px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/70 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800/60">Live Radar</span>
-              </div>
-              <p id="weatherStatus" class="text-xs text-slate-600 dark:text-slate-300 leading-snug mb-2.5" aria-live="polite">Checking Dhaka weather…</p>
-              <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
-                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-sky-400"></i> Central Dhaka (23.81° N)</span>
-                <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="text-blue-500 dark:text-blue-400 font-semibold hover:underline flex items-center gap-0.5">Open-Meteo <i data-lucide="external-link" class="w-2.5 h-2.5"></i></a>
+                <p id="weatherStatus" class="text-xs text-slate-600 dark:text-slate-300 leading-snug mb-2.5" aria-live="polite">Checking Dhaka weather…</p>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500">
+                  <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-sky-400"></i> Central Dhaka (23.81° N)</span>
+                  <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="text-blue-500 dark:text-blue-400 font-semibold hover:underline flex items-center gap-0.5">Open-Meteo <i data-lucide="external-link" class="w-2.5 h-2.5"></i></a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Sleek Hardware Micro Switch for Surge -->
-        <label id="headerSurgeCapsule" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white dark:border-slate-700/80 dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer hover:border-amber-400/80 transition group shrink-0 whitespace-nowrap">
-          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
-          <span>Surge</span>
-          <span class="relative inline-flex items-center w-7 h-4 rounded-full bg-slate-200 dark:bg-slate-700 transition-colors surge-switch-track">
-            <input type="checkbox" id="surgeToggle" class="sr-only peer" onchange="toggleSurgeSimulation()">
-            <span class="w-3 h-3 rounded-full bg-white shadow-sm transform transition-transform duration-200 translate-x-0.5 peer-checked:translate-x-3.5 peer-checked:bg-amber-400"></span>
-          </span>
-        </label>
+          <!-- Sleek Hardware Micro Switch for Surge -->
+          <label id="headerSurgeCapsule" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white dark:border-slate-700/80 dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm cursor-pointer hover:border-amber-400/80 transition group shrink-0 whitespace-nowrap">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
+            <span>Surge</span>
+            <span class="relative inline-flex items-center w-7 h-4 rounded-full bg-slate-200 dark:bg-slate-700 transition-colors surge-switch-track">
+              <input type="checkbox" id="surgeToggle" class="sr-only peer" onchange="toggleSurgeSimulation()">
+              <span class="w-3 h-3 rounded-full bg-white shadow-sm transform transition-transform duration-200 translate-x-0.5 peer-checked:translate-x-3.5 peer-checked:bg-amber-400"></span>
+            </span>
+          </label>
 
-        <!-- Dhaka Live Time & Peak Radar Badge -->
-        <div id="surgeBadge" class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/70 shadow-sm transition-all duration-300 shrink-0 whitespace-nowrap" aria-live="polite">
-          <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
-          <div class="flex items-center gap-1.5 leading-none">
-            <span id="surgeStatusText" class="font-bold">Non-Peak</span>
-            <span class="opacity-40">·</span>
-            <span id="dhakaTimeText" class="font-normal opacity-90">Dhaka --:--</span>
+          <!-- Dhaka Live Time & Peak Radar Badge -->
+          <div id="surgeBadge" class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/70 shadow-sm transition-all duration-300 shrink-0 whitespace-nowrap" aria-live="polite">
+            <span id="surgeStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></span>
+            <div class="flex items-center gap-1.5 leading-none">
+              <span id="surgeStatusText" class="font-bold">Non-Peak</span>
+              <span class="opacity-40">·</span>
+              <span id="dhakaTimeText" class="font-normal opacity-90">Dhaka --:--</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <nav id="amiyoModeNav" class="hidden bg-white border-b border-slate-200" aria-label="BharaDekhi admin account mode">
-    <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
-      <span class="text-sm font-semibold text-slate-700">BharaDekhi Admin</span>
-      <div class="flex items-center rounded-lg border border-slate-200 p-1" role="group" aria-label="Choose account mode">
-        <button id="chooseUserModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">User</button>
-        <button id="chooseAdminModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">Admin</button>
+    <nav id="amiyoModeNav" class="hidden border-b border-white/20 dark:border-slate-800/60 transition-colors duration-500" aria-label="BharaDekhi admin account mode">
+      <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
+        <span class="text-sm font-semibold text-slate-700">BharaDekhi Admin</span>
+        <div class="flex items-center rounded-lg border border-slate-200 p-1" role="group" aria-label="Choose account mode">
+          <button id="chooseUserModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">User</button>
+          <button id="chooseAdminModeBtn" type="button" aria-pressed="false" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-md transition">Admin</button>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
+  </div>
 
   <!-- Auth Landing -->
   <section id="authView" class="max-w-5xl mx-auto px-4 pt-2 pb-2 reveal-on-scroll revealed">
@@ -8615,9 +8960,6 @@
 
     // Dynamic Weather and Time-of-Day Atmosphere Engine (Rain, Night, Sun)
     function updateCrossroadsAtmosphere() {
-      const container = document.getElementById('dhakaCrossroadsContainer');
-      if (!container) return;
-
       // 1. Determine Rain State from app's existing weather engine
       const isRainingNow = (typeof isHeavyRain !== 'undefined' && isHeavyRain) ||
         (typeof rainFareMode !== 'undefined' && rainFareMode === 'rain') ||
@@ -8642,8 +8984,15 @@
         }
       }
 
-      // Update container data attribute for CSS hardware-accelerated transitions
-      if (container.dataset.crossroadsWeather !== mode) {
+      // Update Top Header & Sub-Header Sky Wrapper
+      const headerSky = document.getElementById('topHeaderSkyWrapper');
+      if (headerSky && headerSky.dataset.headerWeather !== mode) {
+        headerSky.dataset.headerWeather = mode;
+      }
+
+      // Update Crossroads simulation container if present
+      const container = document.getElementById('dhakaCrossroadsContainer');
+      if (container && container.dataset.crossroadsWeather !== mode) {
         container.dataset.crossroadsWeather = mode;
       }
 
@@ -8669,6 +9018,7 @@
       }
     }
     window.updateCrossroadsAtmosphere = updateCrossroadsAtmosphere;
+    try { updateCrossroadsAtmosphere(); } catch (e) {}
 
     function initDhakaCrossroadsSimulation() {
       const container = document.getElementById('dhakaCrossroadsContainer');
@@ -9256,7 +9606,7 @@
       const userLandingView = document.getElementById('userLandingView');
       const userPlannerView = document.getElementById('userPlannerView') || document.getElementById('userDashboardView');
       const adminPanel = document.getElementById('adminPanel');
-      const mainHeader = document.querySelector('header');
+      const mainHeader = document.getElementById('topHeaderSkyWrapper') || document.querySelector('header');
 
       const isLanding = view === 'user-landing' || view === 'landing';
       const isPlanner = view === 'user-planner' || view === 'planner' || view === 'user';
