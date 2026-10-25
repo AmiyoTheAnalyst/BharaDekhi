@@ -2300,6 +2300,13 @@
             <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <span id="trafficSignalText" class="truncate">🚦 N-S GREEN · TRAFFIC FLOWING</span>
           </div>
+
+          <!-- Street Audio Soundscape Engine Toggle Button -->
+          <button type="button" id="crossroadsAudioToggleBtn" onclick="toggleCrossroadsAudio()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Toggle Dhaka Street Soundscape / সাউন্ড অন-অফ">
+            <span id="crossroadsAudioIcon">🔇</span>
+            <span id="crossroadsAudioText" class="hidden sm:inline">Street Audio: Off</span>
+          </button>
+
           <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
             বাংলা
           </button>
@@ -2307,6 +2314,12 @@
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Logout</span>
           </button>
+        </div>
+
+        <!-- Floating Interactive Vehicle & Transit Micro-Tooltip -->
+        <div id="crossroadsVehicleTooltip" class="absolute z-40 pointer-events-none opacity-0 transition-opacity duration-150 px-2.5 py-1.5 rounded-xl bg-slate-950/95 border border-sky-500/50 text-white text-[11px] font-bold shadow-2xl backdrop-blur-md flex items-center gap-1.5 transform -translate-x-1/2 -translate-y-full">
+          <span id="crossroadsVehicleTooltipIcon">🛺</span>
+          <span id="crossroadsVehicleTooltipText">Cycle Rickshaw · রিকশা</span>
         </div>
 
         <!-- Responsive Stage Wrapper: Mobile Prominent Height (< 768px) & Desktop Contain (>= 768px) -->
@@ -5602,6 +5615,7 @@
       if (typeof updateVehicleSlidingPill === 'function') requestAnimationFrame(updateVehicleSlidingPill);
       if (typeof renderBusRouteFinder === 'function') renderBusRouteFinder();
       if (typeof applyTheme === 'function') applyTheme();
+      if (window.crossroadsAudio && typeof crossroadsAudio.updateUi === 'function') crossroadsAudio.updateUi();
     }
 
     function toggleLanguage() {
@@ -9352,9 +9366,451 @@
           badgeText.textContent = '🌙 DHAKA NIGHTFALL · NEON & HEADLIGHTS';
         }
       }
+
+      if (window.crossroadsAudio) {
+        crossroadsAudio.setRainMode(mode === 'rain');
+      }
     }
     window.updateCrossroadsAtmosphere = updateCrossroadsAtmosphere;
     try { updateCrossroadsAtmosphere(); } catch (e) {}
+
+    // =========================================================
+    // Procedural Web Audio API Dhaka Crossroads Soundscape Engine
+    // Synthesizes authentic Dhaka street sounds, vehicles & MRT-6 chimes with zero external assets
+    // =========================================================
+    class CrossroadsSoundscapeEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.ambientGain = null;
+        this.rainGain = null;
+        this.rainSource = null;
+        this.isActive = false;
+        this.wasEnabled = false;
+        this.isRaining = false;
+        this.distantTimer = null;
+        this.volume = 0.22; // Master gain subtle and pleasant
+        this.lastHoverTime = 0;
+      }
+
+      init() {
+        if (this.ctx) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.setValueAtTime(this.volume, this.ctx.currentTime);
+        this.masterGain.connect(this.ctx.destination);
+
+        // 1. Warm Ambient City Hum (low frequencies)
+        this.initCityHum();
+
+        // 2. Continuous Monsoon Rain Generator (Filtered Noise Loop)
+        this.initRainGenerator();
+      }
+
+      initCityHum() {
+        if (!this.ctx) return;
+        this.ambientGain = this.ctx.createGain();
+        this.ambientGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(130, this.ctx.currentTime);
+
+        [55, 82.4].forEach(f => {
+          const osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime);
+          osc.connect(filter);
+          osc.start();
+        });
+
+        filter.connect(this.ambientGain);
+        this.ambientGain.connect(this.masterGain);
+      }
+
+      initRainGenerator() {
+        if (!this.ctx) return;
+        const sampleRate = this.ctx.sampleRate;
+        const bufferSize = sampleRate * 2.5; // 2.5-second loop
+        const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+        const data = buffer.getChannelData(0);
+
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          data[i] = (b0 + b1 + b2) * 0.4;
+        }
+
+        this.rainSource = this.ctx.createBufferSource();
+        this.rainSource.buffer = buffer;
+        this.rainSource.loop = true;
+
+        const rainLp = this.ctx.createBiquadFilter();
+        rainLp.type = 'lowpass';
+        rainLp.frequency.setValueAtTime(920, this.ctx.currentTime);
+        rainLp.Q.setValueAtTime(1.2, this.ctx.currentTime);
+
+        this.rainGain = this.ctx.createGain();
+        this.rainGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+
+        this.rainSource.connect(rainLp);
+        rainLp.connect(this.rainGain);
+        this.rainGain.connect(this.masterGain);
+        this.rainSource.start();
+      }
+
+      start() {
+        this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        this.isActive = true;
+        this.wasEnabled = true;
+
+        // Fade in city hum gently
+        if (this.ambientGain && this.ctx) {
+          this.ambientGain.gain.setTargetAtTime(0.024, this.ctx.currentTime, 0.5);
+        }
+
+        // Apply current weather rain state
+        const container = document.getElementById('dhakaCrossroadsContainer');
+        const isRain = container ? container.dataset.crossroadsWeather === 'rain' : false;
+        this.setRainMode(isRain);
+
+        // Start distant random city soundscape timer
+        this.startDistantSoundsTimer();
+        this.updateUi();
+      }
+
+      stop() {
+        this.isActive = false;
+        this.wasEnabled = false;
+        if (this.ctx) {
+          if (this.ambientGain) this.ambientGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.2);
+          if (this.rainGain) this.rainGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.2);
+        }
+        if (this.distantTimer) {
+          clearInterval(this.distantTimer);
+          this.distantTimer = null;
+        }
+        this.updateUi();
+      }
+
+      pause() {
+        if (!this.isActive) return;
+        this.isActive = false;
+        if (this.ctx) {
+          if (this.ambientGain) this.ambientGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.2);
+          if (this.rainGain) this.rainGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.2);
+        }
+        if (this.distantTimer) {
+          clearInterval(this.distantTimer);
+          this.distantTimer = null;
+        }
+        this.updateUi();
+      }
+
+      resume() {
+        if (!this.wasEnabled) return;
+        this.start();
+      }
+
+      toggle() {
+        if (this.isActive) {
+          this.stop();
+        } else {
+          this.start();
+        }
+      }
+
+      setRainMode(isRain) {
+        this.isRaining = !!isRain;
+        if (!this.isActive || !this.ctx || !this.rainGain) return;
+        const target = this.isRaining ? 0.08 : 0.0001;
+        this.rainGain.gain.setTargetAtTime(target, this.ctx.currentTime, 0.7);
+      }
+
+      startDistantSoundsTimer() {
+        if (this.distantTimer) clearInterval(this.distantTimer);
+        this.distantTimer = setInterval(() => {
+          if (!this.isActive || !this.ctx) return;
+          const r = Math.random();
+          if (r < 0.45) {
+            this.playDistantRickshaw();
+          } else if (r < 0.85) {
+            this.playDistantHorn();
+          }
+        }, 7000 + Math.random() * 3000);
+      }
+
+      playDistantRickshaw() {
+        if (!this.isActive || !this.ctx) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1750, t);
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(2350 + Math.random() * 180, t);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(0.035 * this.volume, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.16);
+      }
+
+      playDistantHorn() {
+        if (!this.isActive || !this.ctx) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(680, t);
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(310 + Math.random() * 50, t);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(0.03 * this.volume, t + 0.035);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(t);
+        osc.stop(t + 0.24);
+      }
+
+      // --- Interactive Vehicle Synthesizers ---
+      playRickshawBell() {
+        if (!this.isActive || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [0, 0.13].forEach((delay, idx) => {
+          const t = now + delay;
+          const f1 = idx === 0 ? 2450 : 2520;
+          const f2 = idx === 0 ? 2840 : 2920;
+
+          [f1, f2].forEach((freq, pIdx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = pIdx === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(freq, t);
+
+            const peak = (pIdx === 0 ? 0.16 : 0.09) * this.volume;
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(peak, t + 0.004);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(t);
+            osc.stop(t + 0.12);
+          });
+        });
+      }
+
+      playBusHorn() {
+        if (!this.isActive || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [185, 222].forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now);
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(800, now);
+
+          const peak = 0.13 * this.volume;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.linearRampToValueAtTime(peak, now + 0.03);
+          gain.gain.setValueAtTime(peak, now + 0.28);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(now);
+          osc.stop(now + 0.40);
+        });
+
+        const hissTime = now + 0.35;
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.14);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const hFilter = this.ctx.createBiquadFilter();
+        hFilter.type = 'bandpass';
+        hFilter.frequency.setValueAtTime(2200, hissTime);
+        hFilter.Q.setValueAtTime(1.5, hissTime);
+
+        const hGain = this.ctx.createGain();
+        hGain.gain.setValueAtTime(0.05 * this.volume, hissTime);
+        hGain.gain.exponentialRampToValueAtTime(0.0001, hissTime + 0.13);
+
+        noise.connect(hFilter);
+        hFilter.connect(hGain);
+        hGain.connect(this.masterGain);
+        noise.start(hissTime);
+        noise.stop(hissTime + 0.14);
+      }
+
+      playCarHorn() {
+        if (!this.isActive || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [0, 0.11].forEach(delay => {
+          const t = now + delay;
+          [420, 525].forEach(freq => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, t);
+
+            const peak = 0.14 * this.volume;
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.linearRampToValueAtTime(peak, t + 0.01);
+            gain.gain.setValueAtTime(peak, t + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(t);
+            osc.stop(t + 0.09);
+          });
+        });
+      }
+
+      playMetroHoverChime() {
+        if (!this.isActive || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [1046.5, 1318.5, 1568.0].forEach((freq, idx) => {
+          const t = now + idx * 0.07;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.linearRampToValueAtTime(0.12 * this.volume, t + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(t);
+          osc.stop(t + 0.35);
+        });
+      }
+
+      playStationArrivalChime() {
+        if (!this.isActive || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Ding (G5 784Hz)
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(783.99, now);
+        gain1.gain.setValueAtTime(0.0001, now);
+        gain1.gain.linearRampToValueAtTime(0.18 * this.volume, now + 0.02);
+        gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
+        osc1.connect(gain1);
+        gain1.connect(this.masterGain);
+        osc1.start(now);
+        osc1.stop(now + 0.70);
+
+        // Dong (E5 659Hz)
+        const t2 = now + 0.42;
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(659.25, t2);
+        gain2.gain.setValueAtTime(0.0001, t2);
+        gain2.gain.linearRampToValueAtTime(0.20 * this.volume, t2 + 0.02);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.95);
+        osc2.connect(gain2);
+        gain2.connect(this.masterGain);
+        osc2.start(t2);
+        osc2.stop(t2 + 1.0);
+      }
+
+      playTrainTractionHum() {
+        if (!this.isActive || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(460, now + 2.2);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(0.065 * this.volume, now + 0.25);
+        gain.gain.setValueAtTime(0.065 * this.volume, now + 1.5);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 2.5);
+      }
+
+      updateUi() {
+        const btn = document.getElementById('crossroadsAudioToggleBtn');
+        const icon = document.getElementById('crossroadsAudioIcon');
+        const text = document.getElementById('crossroadsAudioText');
+        if (!btn || !icon || !text) return;
+
+        const isBn = typeof currentLanguage !== 'undefined' && currentLanguage === 'bn';
+        if (this.isActive) {
+          btn.className = 'px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/95 text-emerald-300 border border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.35)] text-[11px] sm:text-xs font-bold backdrop-blur-md transition active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0';
+          icon.textContent = '🔊';
+          text.textContent = isBn ? 'সাউন্ড: চালু' : 'Street Audio: Live';
+          btn.title = isBn ? 'সাউন্ড বন্ধ করুন' : 'Mute Street Audio';
+        } else {
+          btn.className = 'px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0';
+          icon.textContent = '🔇';
+          text.textContent = isBn ? 'সাউন্ড: বন্ধ' : 'Street Audio: Off';
+          btn.title = isBn ? 'সাউন্ড চালু করুন' : 'Enable Live Street Audio';
+        }
+      }
+    }
+
+    const crossroadsAudio = new CrossroadsSoundscapeEngine();
+    window.crossroadsAudio = crossroadsAudio;
+    function toggleCrossroadsAudio() {
+      crossroadsAudio.toggle();
+    }
+    window.toggleCrossroadsAudio = toggleCrossroadsAudio;
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (window.crossroadsAudio && crossroadsAudio.isActive) {
+          crossroadsAudio.pause();
+          crossroadsAudio.wasEnabled = true;
+        }
+      } else {
+        const userLanding = document.getElementById('userLandingView');
+        if (userLanding && !userLanding.classList.contains('hidden')) {
+          if (window.crossroadsAudio && crossroadsAudio.wasEnabled) {
+            crossroadsAudio.resume();
+          }
+        }
+      }
+    });
 
     function initDhakaCrossroadsSimulation() {
       const container = document.getElementById('dhakaCrossroadsContainer');
@@ -9658,6 +10114,27 @@
           }
           vehiclesLayer.appendChild(g);
           v.el = g;
+
+          // Interactive Vehicle Hover Sound & Tooltip
+          g.style.cursor = 'pointer';
+          g.addEventListener('mouseenter', (e) => {
+            if (window.crossroadsAudio) {
+              const now = Date.now();
+              if (now - crossroadsAudio.lastHoverTime > 160) {
+                crossroadsAudio.lastHoverTime = now;
+                if (v.type === 'rickshaw') crossroadsAudio.playRickshawBell();
+                else if (v.type === 'bus') crossroadsAudio.playBusHorn();
+                else crossroadsAudio.playCarHorn();
+              }
+            }
+            if (typeof showVehicleTooltip === 'function') showVehicleTooltip(e, v);
+          });
+          g.addEventListener('mousemove', (e) => {
+            if (typeof moveVehicleTooltip === 'function') moveVehicleTooltip(e);
+          });
+          g.addEventListener('mouseleave', () => {
+            if (typeof hideVehicleTooltip === 'function') hideVehicleTooltip();
+          });
         });
       }
 
@@ -9740,6 +10217,7 @@
               trainState = 'boarding';
               trainBoardingTimer = 3.2; // 3.2s station dwell / passenger boarding
               if (mrtBoardingBadge) mrtBoardingBadge.style.opacity = '1';
+              if (window.crossroadsAudio) crossroadsAudio.playStationArrivalChime();
             } else {
               const targetSpeed = Math.max(14, (dist / (DOCK_X - APPROACH_X)) * CRUISE_SPEED);
               trainSpeed += (targetSpeed - trainSpeed) * Math.min(1, dt * 3.5);
@@ -9750,6 +10228,7 @@
             if (trainBoardingTimer <= 0) {
               trainState = 'accelerating';
               if (mrtBoardingBadge) mrtBoardingBadge.style.opacity = '0';
+              if (window.crossroadsAudio) crossroadsAudio.playTrainTractionHum();
             }
           } else if (trainState === 'accelerating') {
             trainSpeed += (CRUISE_SPEED - trainSpeed) * Math.min(1, dt * 2.2);
@@ -10043,6 +10522,90 @@
         dhakaCrossroadsAnimId = requestAnimationFrame(tick);
       }
 
+      // 4. Interactive Hover & Tooltips for Metro Train & Mirpur 10 Station
+      const vTooltip = document.getElementById('crossroadsVehicleTooltip');
+      const vTooltipIcon = document.getElementById('crossroadsVehicleTooltipIcon');
+      const vTooltipText = document.getElementById('crossroadsVehicleTooltipText');
+
+      function showVehicleTooltip(e, item) {
+        if (!vTooltip || !vTooltipIcon || !vTooltipText) return;
+        const isBn = typeof currentLanguage !== 'undefined' && currentLanguage === 'bn';
+
+        if (item.type === 'rickshaw') {
+          vTooltipIcon.textContent = '🛺';
+          vTooltipText.textContent = isBn ? 'সাইকেল রিকশা (Dhaka Rickshaw)' : 'Cycle Rickshaw · রিকশা';
+        } else if (item.type === 'bus') {
+          vTooltipIcon.textContent = '🚌';
+          vTooltipText.textContent = isBn ? 'ঢাকা সিটি বাস (Dhaka City Bus)' : 'Dhaka City Bus · বাস';
+        } else if (item.type === 'cng') {
+          vTooltipIcon.textContent = '🛺';
+          vTooltipText.textContent = isBn ? 'সিএনজি অটো-রিকশা (CNG Auto)' : 'CNG Auto-Rickshaw · সিএনজি';
+        } else if (item.type === 'car') {
+          vTooltipIcon.textContent = '🚗';
+          vTooltipText.textContent = isBn ? 'প্রাইভেট কার / রাইড (Car)' : 'Ride / Private Car · প্রাইভেট কার';
+        } else if (item.type === 'bike') {
+          vTooltipIcon.textContent = '🏍️';
+          vTooltipText.textContent = isBn ? 'মোটরসাইকেল (Motorbike)' : 'Motorbike · মোটরসাইকেল';
+        } else if (item.type === 'metro') {
+          vTooltipIcon.textContent = '🚇';
+          vTooltipText.textContent = isBn ? 'এমআরটি লাইন ৬ (MRT Line 6)' : 'MRT Line 6 Metro Rail · মেট্রোরেল';
+        } else if (item.type === 'station') {
+          vTooltipIcon.textContent = '🚉';
+          vTooltipText.textContent = isBn ? 'মিরপুর ১০ মেট্রো স্টেশন' : 'Mirpur 10 Metro Station · মিরপুর ১০';
+        }
+
+        moveVehicleTooltip(e);
+        vTooltip.style.opacity = '1';
+      }
+
+      function moveVehicleTooltip(e) {
+        if (!vTooltip) return;
+        const container = document.getElementById('dhakaCrossroadsContainer');
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        vTooltip.style.left = `${x}px`;
+        vTooltip.style.top = `${y - 14}px`;
+      }
+
+      function hideVehicleTooltip() {
+        if (vTooltip) vTooltip.style.opacity = '0';
+      }
+
+      if (trainEl) {
+        trainEl.style.cursor = 'pointer';
+        trainEl.addEventListener('mouseenter', (e) => {
+          if (window.crossroadsAudio) {
+            const now = Date.now();
+            if (now - crossroadsAudio.lastHoverTime > 250) {
+              crossroadsAudio.lastHoverTime = now;
+              crossroadsAudio.playMetroHoverChime();
+            }
+          }
+          showVehicleTooltip(e, { type: 'metro' });
+        });
+        trainEl.addEventListener('mousemove', (e) => moveVehicleTooltip(e));
+        trainEl.addEventListener('mouseleave', () => hideVehicleTooltip());
+      }
+
+      const stationGroup = document.getElementById('mirpur10StationGroup');
+      if (stationGroup) {
+        stationGroup.style.cursor = 'pointer';
+        stationGroup.addEventListener('mouseenter', (e) => {
+          if (window.crossroadsAudio) {
+            const now = Date.now();
+            if (now - crossroadsAudio.lastHoverTime > 300) {
+              crossroadsAudio.lastHoverTime = now;
+              crossroadsAudio.playMetroHoverChime();
+            }
+          }
+          showVehicleTooltip(e, { type: 'station' });
+        });
+        stationGroup.addEventListener('mousemove', (e) => moveVehicleTooltip(e));
+        stationGroup.addEventListener('mouseleave', () => hideVehicleTooltip());
+      }
+
       // Start animation loop
       dhakaCrossroadsAnimId = requestAnimationFrame(tick);
 
@@ -10098,6 +10661,10 @@
 
       if (isAdmin) loadAdminAccounts();
 
+      if (!isLanding && window.crossroadsAudio && crossroadsAudio.isActive) {
+        crossroadsAudio.pause();
+      }
+
       if (isLanding) {
         // Sync URL hash
         if (window.location.hash !== '#/home' && window.location.hash !== '#home') {
@@ -10113,6 +10680,9 @@
         }
         if (typeof updateCrossroadsAtmosphere === 'function') {
           updateCrossroadsAtmosphere();
+        }
+        if (window.crossroadsAudio && crossroadsAudio.wasEnabled) {
+          crossroadsAudio.resume();
         }
         if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       }
