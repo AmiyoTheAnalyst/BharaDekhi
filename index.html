@@ -9451,23 +9451,31 @@
       } else if (isRainingNow) {
         mode = 'rain';
       } else {
-        // 2. Determine Day/Night from theme preference and Dhaka local hour
-        const isDarkTheme = document.documentElement.dataset.theme === 'dark' || document.documentElement.classList.contains('dark');
-        let isDhakaNightTime = false;
+        // 2. Prioritize Live Dhaka Local Time (Asia/Dhaka timezone)
+        // Daytime (6:00 AM - 5:59 PM Dhaka time, hour >= 6 && hour < 18): Sunny / Clear Day Mode
+        // Nighttime (6:00 PM - 5:59 AM Dhaka time, hour >= 18 || hour < 6): Night Mode
+        let dhakaHour = 12;
         try {
-          const dhakaHours = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" })).getHours();
-          isDhakaNightTime = dhakaHours < 6 || dhakaHours >= 18;
-        } catch (e) {}
-
-        if (isExplicitDry) {
-          mode = isDarkTheme ? 'night' : 'sun';
-        } else if (isDarkTheme) {
-          mode = 'night';
-        } else if (document.documentElement.dataset.theme === 'light') {
-          mode = 'sun';
-        } else {
-          mode = isDhakaNightTime ? 'night' : 'sun';
+          const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Dhaka',
+            hour: 'numeric',
+            hour12: false
+          }).formatToParts(new Date());
+          const hourPart = parts.find(p => p.type === 'hour');
+          if (hourPart) {
+            dhakaHour = parseInt(hourPart.value, 10);
+            if (dhakaHour === 24) dhakaHour = 0;
+          }
+        } catch (e) {
+          try {
+            const dhakaStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+            dhakaHour = new Date(dhakaStr).getHours();
+          } catch (err) {
+            dhakaHour = new Date().getHours();
+          }
         }
+        const isDhakaDaytime = dhakaHour >= 6 && dhakaHour < 18;
+        mode = isDhakaDaytime ? 'sun' : 'night';
       }
 
       // Update Top Header Weather Mode & Rain Canvas
@@ -9810,66 +9818,65 @@
         }
         try {
           const now = this.ctx.currentTime;
-
-          // 1. Loud Noise Burst (sweeping 900Hz down to 140Hz over 2.2s)
           const sampleRate = this.ctx.sampleRate;
-          const bufferSize = Math.floor(sampleRate * 2.5);
+          const duration = 3.5;
+          const bufferSize = Math.floor(sampleRate * duration);
+
+          // 1. Natural Multi-Burst Filtered Brownian Noise (True Acoustic Lightning Channel)
+          // Real thunder has zero musical/oscillator pitch - it is pure acoustic air displacement
           const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
           const data = buffer.getChannelData(0);
+          let lastOut = 0.0;
           for (let i = 0; i < bufferSize; i++) {
-            data[i] = (Math.random() * 2 - 1);
+            const white = Math.random() * 2 - 1;
+            lastOut = (lastOut + 0.02 * white) / 1.02;
+            data[i] = lastOut * 3.6;
           }
 
-          const noise = this.ctx.createBufferSource();
-          noise.buffer = buffer;
+          const noiseSource = this.ctx.createBufferSource();
+          noiseSource.buffer = buffer;
 
-          const noiseFilter = this.ctx.createBiquadFilter();
-          noiseFilter.type = 'lowpass';
-          noiseFilter.Q.setValueAtTime(2.4, now);
-          noiseFilter.frequency.setValueAtTime(900, now);
-          noiseFilter.frequency.exponentialRampToValueAtTime(140, now + 2.2);
+          // 2. Soft-Clipping WaveShaper for the initial sharp sonic crack (no synth buzz)
+          const distortion = this.ctx.createWaveShaper();
+          const curve = new Float32Array(256);
+          for (let i = 0; i < 256; i++) {
+            const x = (i * 2) / 256 - 1;
+            curve[i] = Math.tanh(x * 2.4);
+          }
+          distortion.curve = curve;
+          distortion.oversample = '2x';
 
-          const noiseGain = this.ctx.createGain();
-          noiseGain.gain.setValueAtTime(0.0001, now);
-          // Initial sharp crack peaking at 0.95
-          noiseGain.gain.linearRampToValueAtTime(0.95, now + 0.015);
-          noiseGain.gain.setValueAtTime(0.85, now + 0.12);
-          // Rolling rumble surges
-          noiseGain.gain.linearRampToValueAtTime(0.88, now + 0.32);
-          noiseGain.gain.setValueAtTime(0.65, now + 0.65);
-          noiseGain.gain.linearRampToValueAtTime(0.68, now + 0.95);
-          noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.45);
+          // 3. Dynamic Lowpass Filter (320Hz sharp strike crack sweeping to low rolling 110Hz rumble)
+          const thunderFilter = this.ctx.createBiquadFilter();
+          thunderFilter.type = 'lowpass';
+          thunderFilter.Q.setValueAtTime(1.8, now);
+          thunderFilter.frequency.setValueAtTime(320, now);
+          thunderFilter.frequency.exponentialRampToValueAtTime(220, now + 0.35);
+          thunderFilter.frequency.exponentialRampToValueAtTime(110, now + 2.8);
 
-          noise.connect(noiseFilter);
-          noiseFilter.connect(noiseGain);
-          noiseGain.connect(this.masterGain);
-          noise.start(now);
-          noise.stop(now + 2.5);
+          // 4. Authentic Multi-Peak Amplitude Envelope (Crack -> Rebound -> Heavy Rumble Echo)
+          const thunderGain = this.ctx.createGain();
+          thunderGain.gain.setValueAtTime(0.0001, now);
+          // Initial explosive crack peaking at 0.95 within 40ms
+          thunderGain.gain.linearRampToValueAtTime(0.95, now + 0.04);
+          thunderGain.gain.setValueAtTime(0.68, now + 0.12);
+          // Secondary rumble swell from ground reflection
+          thunderGain.gain.linearRampToValueAtTime(0.85, now + 0.38);
+          thunderGain.gain.setValueAtTime(0.62, now + 0.75);
+          thunderGain.gain.linearRampToValueAtTime(0.55, now + 1.15);
+          // Long echoing atmospheric decay over 3.2s
+          thunderGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
 
-          // 2. Punchy Low-Mid Sawtooth Oscillator (160Hz dropping to 65Hz over 1.5s)
-          const subOsc = this.ctx.createOscillator();
-          subOsc.type = 'sawtooth';
-          subOsc.frequency.setValueAtTime(160, now);
-          subOsc.frequency.exponentialRampToValueAtTime(65, now + 1.5);
+          // Connect pure acoustic noise path directly to master gain (ZERO oscillators)
+          noiseSource.connect(distortion);
+          distortion.connect(thunderFilter);
+          thunderFilter.connect(thunderGain);
+          thunderGain.connect(this.masterGain);
 
-          const subFilter = this.ctx.createBiquadFilter();
-          subFilter.type = 'lowpass';
-          subFilter.frequency.setValueAtTime(340, now);
+          noiseSource.start(now);
+          noiseSource.stop(now + 3.4);
 
-          const subGain = this.ctx.createGain();
-          subGain.gain.setValueAtTime(0.0001, now);
-          subGain.gain.linearRampToValueAtTime(0.92, now + 0.02);
-          subGain.gain.setValueAtTime(0.80, now + 0.18);
-          subGain.gain.linearRampToValueAtTime(0.72, now + 0.45);
-          subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
-
-          subOsc.connect(subFilter);
-          subFilter.connect(subGain);
-          subGain.connect(this.masterGain);
-          subOsc.start(now);
-          subOsc.stop(now + 2.5);
-
-          // 3. Synchronized Lightning Flash across Crossroads & Header Sky
+          // 5. Synchronized Lightning Flash across Crossroads & Header Sky
           this.triggerLightningFlash();
         } catch (e) {
           console.warn('Thunderclap synthesis error:', e);
