@@ -10844,24 +10844,50 @@
       }
 
       // 2. Initialize Pedestrians across the 4 Zebra Crossings & Sidewalks
+      // Strict layout clamp: Pedestrians stay strictly within gray sidewalks and white zebra crossings
       const pedestrians = [
-        // North Zebra (Horizontal, y=320, x: 505 -> 695)
-        { id: 'ped_n1', axis: 'H', y: 320, start: 505, end: 695, color: '#38bdf8', umbrellaColor: '#ef4444', umbrellaRim: '#fecaca' },
-        { id: 'ped_n2', axis: 'H', y: 327, start: 690, end: 510, color: '#facc15', umbrellaColor: '#0284c7', umbrellaRim: '#bae6fd' },
-        // South Zebra (Horizontal, y=515, x: 505 -> 695)
-        { id: 'ped_s1', axis: 'H', y: 515, start: 505, end: 695, color: '#ec4899', umbrellaColor: '#eab308', umbrellaRim: '#fef08a' },
-        { id: 'ped_s2', axis: 'H', y: 522, start: 690, end: 510, color: '#34d399', umbrellaColor: '#10b981', umbrellaRim: '#a7f3d0' },
-        // West Zebra (Vertical, x=470, y: 350 -> 490)
-        { id: 'ped_w1', axis: 'V', x: 470, start: 350, end: 490, color: '#818cf8', umbrellaColor: '#0f172a', umbrellaRim: '#38bdf8' },
-        { id: 'ped_w2', axis: 'V', x: 476, start: 485, end: 355, color: '#fb923c', umbrellaColor: '#a855f7', umbrellaRim: '#e9d5ff' },
-        // East Zebra (Vertical, x=724, y: 350 -> 490)
-        { id: 'ped_e1', axis: 'V', x: 724, start: 350, end: 490, color: '#38bdf8', umbrellaColor: '#ef4444', umbrellaRim: '#fca5a5' },
-        { id: 'ped_e2', axis: 'V', x: 730, start: 485, end: 355, color: '#fef08a', umbrellaColor: '#eab308', umbrellaRim: '#fef9c3' },
-        // Sidewalk Pedestrians (Continuous strolling under shop awnings and streetlights)
-        { id: 'ped_sw1', axis: 'H', y: 295, start: 270, end: 440, speed: 18, isSidewalk: true, color: '#60a5fa', umbrellaColor: '#38bdf8', umbrellaRim: '#e0f2fe' },
-        { id: 'ped_sw2', axis: 'H', y: 295, start: 760, end: 930, speed: 16, isSidewalk: true, color: '#34d399', umbrellaColor: '#10b981', umbrellaRim: '#d1fae5' },
-        { id: 'ped_sw3', axis: 'H', y: 545, start: 430, end: 270, speed: 17, isSidewalk: true, color: '#f472b6', umbrellaColor: '#ef4444', umbrellaRim: '#fecaca' },
-        { id: 'ped_sw4', axis: 'H', y: 545, start: 920, end: 770, speed: 19, isSidewalk: true, color: '#fbbf24', umbrellaColor: '#0f172a', umbrellaRim: '#facc15' }
+        // ----------------------------------------------------
+        // Zebra Crossing Pedestrians (Cross during ALL_RED_PED phase, wait safely at sidewalk curb during traffic flow)
+        // ----------------------------------------------------
+        // North Zebra (Horizontal across vertical road: y ≈ 312..334, curb-to-curb x: 490 -> 710)
+        { id: 'ped_n1', axis: 'H', y: 320, start: 490, end: 710, color: '#38bdf8', umbrellaColor: '#ef4444', umbrellaRim: '#fecaca' },
+        { id: 'ped_n2', axis: 'H', y: 327, start: 710, end: 490, color: '#facc15', umbrellaColor: '#0284c7', umbrellaRim: '#bae6fd' },
+
+        // South Zebra (Horizontal across vertical road: y ≈ 508..530, curb-to-curb x: 490 -> 710)
+        { id: 'ped_s1', axis: 'H', y: 515, start: 490, end: 710, color: '#ec4899', umbrellaColor: '#eab308', umbrellaRim: '#fef08a' },
+        { id: 'ped_s2', axis: 'H', y: 522, start: 710, end: 490, color: '#34d399', umbrellaColor: '#10b981', umbrellaRim: '#a7f3d0' },
+
+        // West Zebra (Vertical across horizontal road: x ≈ 462..484, curb-to-curb y: 338 -> 502)
+        { id: 'ped_w1', axis: 'V', x: 470, start: 338, end: 502, color: '#818cf8', umbrellaColor: '#0f172a', umbrellaRim: '#38bdf8' },
+        { id: 'ped_w2', axis: 'V', x: 476, start: 502, end: 338, color: '#fb923c', umbrellaColor: '#a855f7', umbrellaRim: '#e9d5ff' },
+
+        // East Zebra (Vertical across horizontal road: x ≈ 716..738, curb-to-curb y: 338 -> 502)
+        { id: 'ped_e1', axis: 'V', x: 722, start: 338, end: 502, color: '#38bdf8', umbrellaColor: '#ef4444', umbrellaRim: '#fca5a5' },
+        { id: 'ped_e2', axis: 'V', x: 726, start: 502, end: 338, color: '#fef08a', umbrellaColor: '#eab308', umbrellaRim: '#fef9c3' },
+
+        // ----------------------------------------------------
+        // Horizontal Sidewalk Pedestrians (Continuous stroll along narrow gray pavement between building curbs and road)
+        // ----------------------------------------------------
+        // NW Sidewalk: between building facade (y=325) and road curb (y=340) -> y=333
+        { id: 'ped_sw1', axis: 'H', y: 333, start: 260, end: 440, speed: 18, isSidewalk: true, color: '#60a5fa', umbrellaColor: '#38bdf8', umbrellaRim: '#e0f2fe' },
+        // NE Sidewalk: between shopfronts (y=325) and road curb (y=340) -> y=333
+        { id: 'ped_sw2', axis: 'H', y: 333, start: 760, end: 940, speed: 16, isSidewalk: true, color: '#34d399', umbrellaColor: '#10b981', umbrellaRim: '#d1fae5' },
+        // SW Sidewalk: between road curb (y=500) and building facade (y=518) -> y=508
+        { id: 'ped_sw3', axis: 'H', y: 508, start: 435, end: 270, speed: 17, isSidewalk: true, color: '#f472b6', umbrellaColor: '#ef4444', umbrellaRim: '#fecaca' },
+        // SE Sidewalk: between road curb (y=500) and building facade (y=518) -> y=508
+        { id: 'ped_sw4', axis: 'H', y: 508, start: 925, end: 765, speed: 19, isSidewalk: true, color: '#fbbf24', umbrellaColor: '#0f172a', umbrellaRim: '#facc15' },
+
+        // ----------------------------------------------------
+        // Vertical Sidewalk Pedestrians (Continuous stroll along vertical sidewalk strips between building walls and vertical road curb)
+        // ----------------------------------------------------
+        // NW Vertical Sidewalk: between NW building wall (x=466) and vertical curb (x=490) -> x=478
+        { id: 'ped_vsw1', axis: 'V', x: 478, start: 195, end: 308, speed: 15, isSidewalk: true, color: '#a78bfa', umbrellaColor: '#c084fc', umbrellaRim: '#f3e8ff' },
+        // NE Vertical Sidewalk: between vertical curb (x=710) and NE building wall (x=730) -> x=720
+        { id: 'ped_vsw2', axis: 'V', x: 720, start: 308, end: 195, speed: 16, isSidewalk: true, color: '#f87171', umbrellaColor: '#fb923c', umbrellaRim: '#ffedd5' },
+        // SW Vertical Sidewalk: between SW building wall (x=468) and vertical curb (x=490) -> x=478
+        { id: 'ped_vsw3', axis: 'V', x: 478, start: 535, end: 655, speed: 17, isSidewalk: true, color: '#38bdf8', umbrellaColor: '#0ea5e9', umbrellaRim: '#e0f2fe' },
+        // SE Vertical Sidewalk: between vertical curb (x=710) and SE building wall (x=730) -> x=720
+        { id: 'ped_vsw4', axis: 'V', x: 720, start: 655, end: 535, speed: 18, isSidewalk: true, color: '#4ade80', umbrellaColor: '#16a34a', umbrellaRim: '#dcfce7' }
       ];
 
       if (pedsLayer) {
