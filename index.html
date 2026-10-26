@@ -2333,15 +2333,38 @@
           </div>
 
           <div class="auth-form-wrap">
-            <form id="loginForm" class="auth-form space-y-2.5 auth-form-fade">
+            <form id="loginForm" class="auth-form space-y-2.5 auth-form-fade" novalidate>
               <div>
                 <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Email</label>
-                <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+                <input type="email" id="loginEmailInput" placeholder="you@example.com" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Password</label>
-                <input type="password" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
+                <div class="relative" style="position: relative;">
+                  <input type="password" id="loginPasswordInput" placeholder="Enter your password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" style="padding-right: 40px;" required>
+                  <button type="button" id="loginTogglePasswordBtn" aria-label="Toggle password visibility" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #94a3b8; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                    <!-- Eye Open Icon (Visible when password is obscured) -->
+                    <svg id="loginEyeIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <!-- Eye Off / Slashed Eye Icon (Visible when password is shown) -->
+                    <svg id="loginEyeOffIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                      <line x1="2" y1="2" x2="22" y2="22"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
+
+              <!-- Sleek Login Error Banner -->
+              <div id="loginErrorBanner" class="hidden" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; display: none; align-items: center; gap: 8px;">
+                <span class="shrink-0 text-base leading-none">⚠️</span>
+                <span id="loginErrorMessage" class="leading-snug"></span>
+              </div>
+
               <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Login</button>
             </form>
 
@@ -9370,6 +9393,10 @@
           form.classList.add('auth-form-fade');
         }
       });
+
+      if (typeof clearLoginError === 'function') {
+        clearLoginError();
+      }
     }
 
     // =========================================================
@@ -11661,14 +11688,96 @@
       }
     }
 
+    function showLoginError(message, target = 'both') {
+      const banner = document.getElementById('loginErrorBanner');
+      const msgEl = document.getElementById('loginErrorMessage');
+      const emailInput = document.getElementById('loginEmailInput');
+      const passwordInput = document.getElementById('loginPasswordInput');
+
+      if (banner && msgEl) {
+        msgEl.textContent = message;
+        banner.style.display = 'flex';
+        banner.classList.remove('hidden');
+      }
+
+      // Reset previous highlights
+      if (emailInput) {
+        emailInput.style.borderColor = '';
+        emailInput.style.boxShadow = '';
+      }
+      if (passwordInput) {
+        passwordInput.style.borderColor = '';
+        passwordInput.style.boxShadow = '';
+      }
+
+      // Highlight input border in red (#ef4444)
+      if (target === 'email' && emailInput) {
+        emailInput.style.borderColor = '#ef4444';
+        emailInput.style.boxShadow = '0 0 0 1px #ef4444';
+        emailInput.focus();
+      } else if (target === 'password' && passwordInput) {
+        passwordInput.style.borderColor = '#ef4444';
+        passwordInput.style.boxShadow = '0 0 0 1px #ef4444';
+        passwordInput.focus();
+      } else {
+        if (emailInput) {
+          emailInput.style.borderColor = '#ef4444';
+          emailInput.style.boxShadow = '0 0 0 1px #ef4444';
+        }
+        if (passwordInput) {
+          passwordInput.style.borderColor = '#ef4444';
+          passwordInput.style.boxShadow = '0 0 0 1px #ef4444';
+        }
+      }
+
+      showToast(message);
+    }
+
+    function clearLoginError() {
+      const banner = document.getElementById('loginErrorBanner');
+      const emailInput = document.getElementById('loginEmailInput');
+      const passwordInput = document.getElementById('loginPasswordInput');
+
+      if (banner) {
+        banner.style.display = 'none';
+        banner.classList.add('hidden');
+      }
+      if (emailInput) {
+        emailInput.style.borderColor = '';
+        emailInput.style.boxShadow = '';
+      }
+      if (passwordInput) {
+        passwordInput.style.borderColor = '';
+        passwordInput.style.boxShadow = '';
+      }
+    }
+    window.clearLoginError = clearLoginError;
+
     async function handleLogin(event) {
       event.preventDefault();
+      clearLoginError();
+
       const form = event.target;
-      const email = form.querySelector('input[type="email"]').value.trim().toLowerCase();
-      const password = form.querySelector('input[type="password"]').value;
+      const emailInput = document.getElementById('loginEmailInput') || form.querySelector('input[type="email"]');
+      const passwordInput = document.getElementById('loginPasswordInput') || form.querySelector('input[type="password"], input[type="text"]');
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+      const password = passwordInput ? passwordInput.value : '';
+
+      // 1. Client-side email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        showLoginError('Please enter a correct email', 'email');
+        return;
+      }
+
+      // 2. Client-side password validation
+      if (!password) {
+        showLoginError('Please enter a correct password', 'password');
+        return;
+      }
 
       if (!supabaseClient) {
-        showToast('Shared authentication is not configured yet.');
+        showLoginError('Shared authentication is not configured yet.', 'both');
         return;
       }
 
@@ -11680,15 +11789,38 @@
           await supabaseClient.auth.signOut();
           throw new Error('The admin account must have a confirmed email address.');
         }
+
+        clearLoginError();
         form.reset();
+
+        // Reset password toggle view
+        if (passwordInput) passwordInput.type = 'password';
+        const eyeIcon = document.getElementById('loginEyeIcon');
+        const eyeOffIcon = document.getElementById('loginEyeOffIcon');
+        const toggleBtn = document.getElementById('loginTogglePasswordBtn');
+        if (eyeIcon) eyeIcon.classList.remove('hidden');
+        if (eyeOffIcon) eyeOffIcon.classList.add('hidden');
+        if (toggleBtn) toggleBtn.style.color = '#94a3b8';
+
         await completeLogin(data.user);
       } catch (error) {
         console.error('Sign-in failed:', error);
-        if (error.code === 'invalid_credentials' || error.message?.toLowerCase() === 'invalid login credentials') {
-          showToast('Email or password is incorrect. Please check your details and try again.');
-          return;
+        const errMsg = (error.message || '').toLowerCase();
+        const errCode = (error.code || '').toLowerCase();
+
+        // Target error text matching exact user specifications:
+        // - Wrong password: "Please enter a correct password"
+        // - Email not found / invalid: "Please enter a correct email"
+        // - Combined credentials error: "Please enter a correct email or password"
+        if (errCode === 'invalid_password' || (errMsg.includes('password') && (errMsg.includes('wrong') || errMsg.includes('incorrect') || errMsg.includes('invalid password')))) {
+          showLoginError('Please enter a correct password', 'password');
+        } else if (errMsg.includes('user not found') || errMsg.includes('email not found') || errMsg.includes('no user') || (errMsg.includes('invalid email') && !errMsg.includes('credentials'))) {
+          showLoginError('Please enter a correct email', 'email');
+        } else if (errCode === 'invalid_credentials' || errMsg.includes('invalid login credentials') || errMsg.includes('invalid credentials')) {
+          showLoginError('Please enter a correct email or password', 'both');
+        } else {
+          showLoginError(error.message || 'Please enter a correct email or password', 'both');
         }
-        showToast(error.message || 'Could not sign in. Please try again.');
       }
     }
 
@@ -11762,6 +11894,34 @@
     });
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     document.getElementById('signupForm').addEventListener('submit', handleSignup);
+
+    // Login Form: Show / Hide Password Eye Toggle
+    const loginTogglePasswordBtn = document.getElementById('loginTogglePasswordBtn');
+    if (loginTogglePasswordBtn) {
+      loginTogglePasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const pwdInput = document.getElementById('loginPasswordInput');
+        const eyeIcon = document.getElementById('loginEyeIcon');
+        const eyeOffIcon = document.getElementById('loginEyeOffIcon');
+        if (!pwdInput) return;
+        const isPassword = pwdInput.type === 'password';
+        pwdInput.type = isPassword ? 'text' : 'password';
+        if (eyeIcon) eyeIcon.classList.toggle('hidden', isPassword);
+        if (eyeOffIcon) eyeOffIcon.classList.toggle('hidden', !isPassword);
+        loginTogglePasswordBtn.style.color = isPassword ? '#38bdf8' : '#94a3b8';
+      });
+    }
+
+    // Login Form: Auto-clear error banner on typing
+    const loginEmailInput = document.getElementById('loginEmailInput');
+    const loginPasswordInput = document.getElementById('loginPasswordInput');
+    if (loginEmailInput) {
+      loginEmailInput.addEventListener('input', clearLoginError);
+    }
+    if (loginPasswordInput) {
+      loginPasswordInput.addEventListener('input', clearLoginError);
+    }
     document.getElementById('logoutBtn').addEventListener('click', logoutUser);
     document.getElementById('adminLogoutBtn').addEventListener('click', logoutAdmin);
     document.getElementById('useCurrentLocationBtn').addEventListener('click', useCurrentLocation);
