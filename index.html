@@ -598,6 +598,12 @@
       mix-blend-mode: screen;
     }
 
+    /* Dedicated Emergency Ambulance Movement Container */
+    .ambulance-mover {
+      will-change: transform;
+      pointer-events: auto;
+    }
+
     /* Ultra-Crisp, High-Legibility Typography for Building & Shop Signboards */
     .cr-signboard-text {
       text-rendering: geometricPrecision;
@@ -3494,53 +3500,55 @@
           </g>
 
           <!-- Emergency Medical Response Ambulance (High-Speed Priority Unit) -->
-          <g id="emergencyAmbulanceVehicle" opacity="0" pointer-events="auto" style="cursor: pointer; will-change: transform;">
-            <!-- Wide Volumetric Asphalt & Curb Illumination Pools (Mix-Blend Screen) -->
-            <ellipse class="amb-strobe-red" cx="24" cy="12" rx="110" ry="72" fill="url(#ambRoadPoolRed)" pointer-events="none"/>
-            <ellipse class="amb-strobe-blue" cx="38" cy="12" rx="110" ry="72" fill="url(#ambRoadPoolBlue)" pointer-events="none"/>
+          <g id="emergencyAmbulanceMover" class="ambulance-mover" opacity="0" pointer-events="auto" style="cursor: pointer; will-change: transform;">
+            <g id="emergencyAmbulanceVehicle">
+              <!-- Wide Volumetric Asphalt & Curb Illumination Pools (Mix-Blend Screen) -->
+              <ellipse class="amb-strobe-red" cx="24" cy="12" rx="110" ry="72" fill="url(#ambRoadPoolRed)" pointer-events="none"/>
+              <ellipse class="amb-strobe-blue" cx="38" cy="12" rx="110" ry="72" fill="url(#ambRoadPoolBlue)" pointer-events="none"/>
 
-            <!-- Sweeping Volumetric Side & Forward Strobe Light Cones -->
-            <polygon class="amb-strobe-red" points="26,6 -65,-55 160,-40" fill="url(#ambFlareConeRed)" pointer-events="none"/>
-            <polygon class="amb-strobe-blue" points="36,18 -65,75 160,60" fill="url(#ambFlareConeBlue)" pointer-events="none"/>
-            <polygon class="amb-strobe-red" points="22,12 -55,4 40,-45" fill="url(#ambFlareConeRed)" opacity="0.6" pointer-events="none"/>
-            <polygon class="amb-strobe-blue" points="40,12 -55,20 40,65" fill="url(#ambFlareConeBlue)" opacity="0.6" pointer-events="none"/>
+              <!-- Sweeping Volumetric Side & Forward Strobe Light Cones -->
+              <polygon class="amb-strobe-red" points="26,6 -65,-55 160,-40" fill="url(#ambFlareConeRed)" pointer-events="none"/>
+              <polygon class="amb-strobe-blue" points="36,18 -65,75 160,60" fill="url(#ambFlareConeBlue)" pointer-events="none"/>
+              <polygon class="amb-strobe-red" points="22,12 -55,4 40,-45" fill="url(#ambFlareConeRed)" opacity="0.6" pointer-events="none"/>
+              <polygon class="amb-strobe-blue" points="40,12 -55,20 40,65" fill="url(#ambFlareConeBlue)" opacity="0.6" pointer-events="none"/>
 
-            <!-- High-Intensity Forward Headlight Beam (Pulsing with Emergency Flasher) -->
-            <polygon class="amb-headlight-pulse" points="62,12 215,-16 215,40" fill="url(#ambHighBeamGrad)" pointer-events="none"/>
+              <!-- High-Intensity Forward Headlight Beam (Pulsing with Emergency Flasher) -->
+              <polygon class="amb-headlight-pulse" points="62,12 215,-16 215,40" fill="url(#ambHighBeamGrad)" pointer-events="none"/>
 
-            <!-- Ambulance Chassis Body (Gloss White with Bold Red Emergency Livery) -->
-            <rect x="0" y="0" width="62" height="24" rx="4" fill="#ffffff" stroke="#ef4444" stroke-width="1.4"/>
-            <rect x="0" y="8" width="62" height="8" fill="#dc2626"/>
+              <!-- Ambulance Chassis Body (Gloss White with Bold Red Emergency Livery) -->
+              <rect x="0" y="0" width="62" height="24" rx="4" fill="#ffffff" stroke="#ef4444" stroke-width="1.4"/>
+              <rect x="0" y="8" width="62" height="8" fill="#dc2626"/>
 
-            <!-- Cab Windows & Tinted Glass -->
-            <path d="M 44,2 L 56,2 L 54,8 L 44,8 Z" fill="#38bdf8" opacity="0.9"/>
-            <rect x="26" y="2" width="14" height="6" rx="1" fill="#bae6fd" opacity="0.9"/>
-            <rect x="8" y="2" width="14" height="6" rx="1" fill="#bae6fd" opacity="0.9"/>
+              <!-- Cab Windows & Tinted Glass -->
+              <path d="M 44,2 L 56,2 L 54,8 L 44,8 Z" fill="#38bdf8" opacity="0.9"/>
+              <rect x="26" y="2" width="14" height="6" rx="1" fill="#bae6fd" opacity="0.9"/>
+              <rect x="8" y="2" width="14" height="6" rx="1" fill="#bae6fd" opacity="0.9"/>
 
-            <!-- Red Medical Cross Emblem (+) on Roof & Side Panel -->
-            <circle cx="17" cy="12" r="5" fill="#ffffff"/>
-            <rect x="14" y="11" width="6" height="2" fill="#dc2626"/>
-            <rect x="16" y="9" width="2" height="6" fill="#dc2626"/>
+              <!-- Red Medical Cross Emblem (+) on Roof & Side Panel -->
+              <circle cx="17" cy="12" r="5" fill="#ffffff"/>
+              <rect x="14" y="11" width="6" height="2" fill="#dc2626"/>
+              <rect x="16" y="9" width="2" height="6" fill="#dc2626"/>
 
-            <!-- Roof-Mounted Dual LED Lightbar with Red/Blue Double-Pulse Modules -->
-            <rect x="18" y="-5.5" width="26" height="5.5" rx="2" fill="#0f172a" stroke="#475569" stroke-width="0.8"/>
-            <line x1="31" y1="-5.5" x2="31" y2="0" stroke="#1e293b" stroke-width="1.2"/>
+              <!-- Roof-Mounted Dual LED Lightbar with Red/Blue Double-Pulse Modules -->
+              <rect x="18" y="-5.5" width="26" height="5.5" rx="2" fill="#0f172a" stroke="#475569" stroke-width="0.8"/>
+              <line x1="31" y1="-5.5" x2="31" y2="0" stroke="#1e293b" stroke-width="1.2"/>
 
-            <!-- Left Red LED Strobe Module (with White-Hot Core) -->
-            <rect class="amb-beacon-red" x="19.5" y="-4.5" width="10.5" height="3.8" rx="1.2" fill="#ef4444"/>
-            <rect class="amb-beacon-red" x="22" y="-3.7" width="5.5" height="2" rx="0.8" fill="#fecaca"/>
-            <circle class="amb-beacon-red" cx="24.8" cy="-2.7" r="1.1" fill="#ffffff"/>
+              <!-- Left Red LED Strobe Module (with White-Hot Core) -->
+              <rect class="amb-beacon-red" x="19.5" y="-4.5" width="10.5" height="3.8" rx="1.2" fill="#ef4444"/>
+              <rect class="amb-beacon-red" x="22" y="-3.7" width="5.5" height="2" rx="0.8" fill="#fecaca"/>
+              <circle class="amb-beacon-red" cx="24.8" cy="-2.7" r="1.1" fill="#ffffff"/>
 
-            <!-- Right Blue LED Strobe Module (with White-Hot Core) -->
-            <rect class="amb-beacon-blue" x="32" y="-4.5" width="10.5" height="3.8" rx="1.2" fill="#3b82f6"/>
-            <rect class="amb-beacon-blue" x="34.5" y="-3.7" width="5.5" height="2" rx="0.8" fill="#bfdbfe"/>
-            <circle class="amb-beacon-blue" cx="37.2" cy="-2.7" r="1.1" fill="#ffffff"/>
+              <!-- Right Blue LED Strobe Module (with White-Hot Core) -->
+              <rect class="amb-beacon-blue" x="32" y="-4.5" width="10.5" height="3.8" rx="1.2" fill="#3b82f6"/>
+              <rect class="amb-beacon-blue" x="34.5" y="-3.7" width="5.5" height="2" rx="0.8" fill="#bfdbfe"/>
+              <circle class="amb-beacon-blue" cx="37.2" cy="-2.7" r="1.1" fill="#ffffff"/>
 
-            <!-- Front Bumper Headlights (Crisp White/Blue High Beams) & Taillights -->
-            <circle class="cr-headlight-bulb" cx="61" cy="5" r="2.4" fill="#ffffff" stroke="#e0f2fe" stroke-width="1.6"/>
-            <circle class="cr-headlight-bulb" cx="61" cy="19" r="2.4" fill="#ffffff" stroke="#e0f2fe" stroke-width="1.6"/>
-            <circle cx="1" cy="5" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="1.0"/>
-            <circle cx="1" cy="19" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="1.0"/>
+              <!-- Front Bumper Headlights (Crisp White/Blue High Beams) & Taillights -->
+              <circle class="cr-headlight-bulb" cx="61" cy="5" r="2.4" fill="#ffffff" stroke="#e0f2fe" stroke-width="1.6"/>
+              <circle class="cr-headlight-bulb" cx="61" cy="19" r="2.4" fill="#ffffff" stroke="#e0f2fe" stroke-width="1.6"/>
+              <circle cx="1" cy="5" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="1.0"/>
+              <circle cx="1" cy="19" r="2.2" fill="#ff2a54" stroke="#ff1744" stroke-width="1.0"/>
+            </g>
           </g>
 
 
@@ -10465,23 +10473,53 @@
       // Emergency Ambulance Priority Wave State & Controls
       let emergencyWaveActive = false;
       let ambulanceX = -180;
-      const AMBULANCE_SPEED = 245; // px/sec - high-speed priority wave
+      const AMBULANCE_SPEED = 280; // px/sec - high-speed priority wave
       const AMBULANCE_LANE_Y = 438;
       let ambulanceSirenObj = null;
       let emergencyTimer = null;
+      let ambulanceFailSafeTimer = null;
       let prevEmergencyGreenWave = false;
-      const ambEl = document.getElementById('emergencyAmbulanceVehicle');
+      const ambMoverEl = document.getElementById('emergencyAmbulanceMover') || document.getElementById('emergencyAmbulanceVehicle');
+      const ambEl = ambMoverEl;
       const emBadge = document.getElementById('emergencyWaveAlertBadge');
       const emBtn = document.getElementById('crossroadsEmergencyBtn');
 
-      function triggerEmergencyWave() {
-        if (emergencyWaveActive) return;
-        emergencyWaveActive = true;
+      function endEmergencyWave() {
+        if (ambulanceFailSafeTimer) {
+          clearTimeout(ambulanceFailSafeTimer);
+          ambulanceFailSafeTimer = null;
+        }
+        emergencyWaveActive = false;
         ambulanceX = -180;
+        if (ambMoverEl) {
+          ambMoverEl.setAttribute('opacity', '0');
+          ambMoverEl.setAttribute('transform', `translate(-180, ${AMBULANCE_LANE_Y})`);
+        }
+        if (emBadge) {
+          emBadge.classList.add('hidden');
+          emBadge.style.opacity = '0';
+        }
+        if (window.crossroadsAudio && ambulanceSirenObj) {
+          crossroadsAudio.stopAmbulanceSiren(ambulanceSirenObj);
+          ambulanceSirenObj = null;
+        }
+      }
+      window.endEmergencyWave = endEmergencyWave;
 
-        if (ambEl) {
-          ambEl.setAttribute('opacity', '1');
-          ambEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
+      function triggerEmergencyWave() {
+        if (ambulanceFailSafeTimer) {
+          clearTimeout(ambulanceFailSafeTimer);
+          ambulanceFailSafeTimer = null;
+        }
+        if (emergencyWaveActive) {
+          endEmergencyWave();
+        }
+        emergencyWaveActive = true;
+        ambulanceX = -140;
+
+        if (ambMoverEl) {
+          ambMoverEl.setAttribute('opacity', '1');
+          ambMoverEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
         }
         if (emBadge) {
           emBadge.classList.remove('hidden');
@@ -10489,8 +10527,13 @@
         }
 
         if (window.crossroadsAudio && crossroadsAudio.isActive) {
-          ambulanceSirenObj = crossroadsAudio.startAmbulanceSiren();
+          if (!ambulanceSirenObj) {
+            ambulanceSirenObj = crossroadsAudio.startAmbulanceSiren();
+          }
         }
+
+        // Strict fail-safe completion timer: guarantees cleanup after ~5.5s even if interrupted
+        ambulanceFailSafeTimer = setTimeout(endEmergencyWave, 5500);
       }
       window.triggerEmergencyWave = triggerEmergencyWave;
 
@@ -10508,8 +10551,8 @@
       }
 
       // Automatically trigger periodic emergency vehicle wave every ~33s
-      if (emergencyTimer) clearInterval(emergencyTimer);
-      emergencyTimer = setInterval(() => {
+      if (window._dhakaEmergencyInterval) clearInterval(window._dhakaEmergencyInterval);
+      window._dhakaEmergencyInterval = setInterval(() => {
         if (!emergencyWaveActive && dhakaCrossroadsRunning) {
           triggerEmergencyWave();
         }
@@ -11230,24 +11273,19 @@
           }
         });
 
-        // 4. Update Emergency Ambulance Priority Wave & Siren Audio
+        // 4. Update Emergency Ambulance Priority Wave & Siren Audio (Continuous Priority Movement)
         if (emergencyWaveActive) {
           ambulanceX += AMBULANCE_SPEED * dt;
-          if (ambEl) {
-            ambEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
+          if (ambMoverEl) {
+            ambMoverEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
+            ambMoverEl.setAttribute('opacity', '1');
           }
           if (window.crossroadsAudio && ambulanceSirenObj) {
             crossroadsAudio.updateAmbulanceSiren(ambulanceSirenObj, ambulanceX);
           }
-          if (ambulanceX > 1320) {
+          if (ambulanceX >= 1350) {
             // Ambulance has cleared the screen
-            emergencyWaveActive = false;
-            if (ambEl) ambEl.setAttribute('opacity', '0');
-            if (emBadge) emBadge.style.opacity = '0';
-            if (window.crossroadsAudio && ambulanceSirenObj) {
-              crossroadsAudio.stopAmbulanceSiren(ambulanceSirenObj);
-              ambulanceSirenObj = null;
-            }
+            endEmergencyWave();
           }
         }
 
@@ -11440,6 +11478,9 @@
           history.replaceState(null, '', '#/plan-trip');
         }
         // Pause simulation while on planner page to save CPU
+        if (typeof window.endEmergencyWave === 'function') {
+          window.endEmergencyWave();
+        }
         if (dhakaCrossroadsAnimId) {
           cancelAnimationFrame(dhakaCrossroadsAnimId);
           dhakaCrossroadsAnimId = null;
