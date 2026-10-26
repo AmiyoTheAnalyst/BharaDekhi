@@ -4466,7 +4466,11 @@
                     <p class="text-[11px] text-slate-400 font-medium">Affordable city buses & feeder connections</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-2">
+                  <label class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/70 hover:bg-emerald-900/60 px-2.5 py-1 text-[11px] font-bold text-emerald-300 hover:border-emerald-400/60 cursor-pointer transition shadow-sm select-none" onclick="event.stopPropagation();" title="Toggle Dhaka student 50% bus fare concession">
+                    <input id="busStudentPassToggle" type="checkbox" onchange="toggleStudentBusPass(event)" class="h-3.5 w-3.5 rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-emerald-400/50 cursor-pointer">
+                    <span class="whitespace-nowrap">🎓 Student (50% Bus Fare)</span>
+                  </label>
                   <span id="busCardSelectedBadge" class="hidden rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm">
                     Active
                   </span>
@@ -4970,9 +4974,15 @@
             </div>
             <h2 id="localBusFinderHeading" class="planner-section-title mt-1 font-extrabold text-slate-900 dark:text-slate-100">Dhaka local bus finder</h2>
           </div>
-          <span id="busDraftBadge" class="rounded-full bg-amber-100 dark:bg-amber-950/80 px-2.5 py-1 text-[10px] font-bold text-amber-800 dark:text-amber-300">Draft route data — verify before travel</span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <label class="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-50 dark:bg-blue-950/70 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-1 text-[11px] font-bold text-blue-800 dark:text-blue-300 hover:border-blue-400/50 cursor-pointer transition shadow-sm select-none" title="Toggle Dhaka student 50% bus fare concession">
+              <input id="busStudentPassToggleSec" type="checkbox" onchange="toggleStudentBusPass(event)" class="h-3.5 w-3.5 rounded border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-400/50 cursor-pointer">
+              <span class="whitespace-nowrap">🎓 Student (50% Bus Fare)</span>
+            </label>
+            <span id="busDraftBadge" class="rounded-full bg-amber-100 dark:bg-amber-950/80 px-2.5 py-1 text-[10px] font-bold text-amber-800 dark:text-amber-300">Draft route data — verify before travel</span>
+          </div>
         </div>
-        <p id="busFarePolicy" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
+        <p id="busFarePolicy" class="mt-1 text-xs text-slate-500 dark:text-slate-400">Estimated fare: ৳2.70/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.</p>
         <p id="busFinderStatus" class="mt-3 text-sm text-slate-600 dark:text-slate-300 font-medium" aria-live="polite">Loading local bus routes…</p>
         <div id="busRouteResults" class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2" aria-live="polite"></div>
       </section>
@@ -5412,7 +5422,7 @@
                   <span>Rate:</span>
                   <div class="flex items-center gap-1 font-mono text-white">
                     <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="bus-perkm" data-delta="-0.2">-</button>
-                    <span id="bdSimBusPerKmVal">৳2.45/km</span>
+                    <span id="bdSimBusPerKmVal">৳2.70/km</span>
                     <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="bus-perkm" data-delta="0.2">+</button>
                   </div>
                 </div>
@@ -5810,7 +5820,12 @@
       'MRT Line 6 hybrid estimate': 'এমআরটি লাইন ৬ হাইব্রিড ভাড়া',
       'Dhaka local bus finder': 'ঢাকার লোকাল বাস খুঁজুন',
       'Draft route data — verify before travel': 'খসড়া রুট তথ্য — যাওয়ার আগে যাচাই করুন',
-      'Estimated fare: ৳2.45/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.': 'আনুমানিক ভাড়া: প্রতি কিমি ৳২.৪৫, পরবর্তী টাকায় পূর্ণ; নন-এসি সর্বনিম্ন ৳১০, এসি সর্বনিম্ন ৳২০।',
+      'Estimated fare: ৳2.70/km, rounded up to the next taka; ৳10 non-AC minimum, ৳20 AC minimum.': 'আনুমানিক ভাড়া: প্রতি কিমি ৳২.৭০, পরবর্তী টাকায় পূর্ণ; নন-এসি সর্বনিম্ন ৳১০, এসি সর্বনিম্ন ৳২০।',
+      '🎓 Student (50% Bus Fare)': '🎓 শিক্ষার্থী (৫০% বাস ভাড়া)',
+      '🎓 Student 50% Applied': '🎓 শিক্ষার্থী ৫০% প্রযোজ্য',
+      'Student (50% Bus Fare)': 'শিক্ষার্থী (৫০% বাস ভাড়া)',
+      'Student 50% Applied': 'শিক্ষার্থী ৫০% প্রযোজ্য',
+      'Student concession applied (min ৳10)': 'শিক্ষার্থী ছাড় প্রযোজ্য (সর্বনিম্ন ৳১০)',
       'Loading local bus routes…': 'লোকাল বাসের রুট লোড হচ্ছে…',
       'Route and stoppage data are unverified draft suggestions, not official BRTA route-distance records. Fares use approximate route distances and the selected minimum; confirm bus direction, stops, and fare locally before boarding.': 'রুট ও স্টপেজের তথ্য যাচাই না করা খসড়া; এগুলো BRTA-র সরকারি দূরত্বের রেকর্ড নয়। আনুমানিক রুট দূরত্ব ও নির্ধারিত সর্বনিম্ন ভাড়ায় হিসাব করা হয়েছে; ওঠার আগে বাসের দিক, স্টপ ও ভাড়া স্থানীয়ভাবে নিশ্চিত করুন।',
       'Could not load local bus routes. Please refresh or check the route data file.': 'লোকাল বাসের রুট লোড করা যায়নি। আবার লোড করুন অথবা রুটের তথ্য ফাইল পরীক্ষা করুন।',
@@ -8085,8 +8100,31 @@
       }
     }
 
+    function isStudentBusFareActive() {
+      const toggle1 = document.getElementById('busStudentPassToggle');
+      const toggle2 = document.getElementById('busStudentPassToggleSec');
+      return Boolean((toggle1 && toggle1.checked) || (toggle2 && toggle2.checked));
+    }
+
+    function toggleStudentBusPass(sourceEvent) {
+      const isChecked = sourceEvent && sourceEvent.target ? sourceEvent.target.checked : !isStudentBusFareActive();
+      const toggle1 = document.getElementById('busStudentPassToggle');
+      const toggle2 = document.getElementById('busStudentPassToggleSec');
+      if (toggle1) toggle1.checked = isChecked;
+      if (toggle2) toggle2.checked = isChecked;
+
+      // Immediately update local bus fares in real-time without re-fetching map routes or resetting inputs
+      if (typeof updateMoreWaysToTravelCards === 'function') {
+        updateMoreWaysToTravelCards();
+      }
+      if (typeof renderBusRouteFinder === 'function') {
+        renderBusRouteFinder();
+      }
+    }
+
     function getBusRouteMatches(pickupKey, destinationKey) {
       const { farePolicy, routes } = busRouteData;
+      const isStudent = isStudentBusFareActive();
       return routes.flatMap(route => {
         const pickupIndex = route.stops.findIndex(stop => stop.locationKey === pickupKey);
         const destinationIndex = route.stops.findIndex(stop => stop.locationKey === destinationKey);
@@ -8110,9 +8148,11 @@
         if (!Number.isFinite(distanceKm) || distanceKm <= 0 || !Number.isFinite(minimumFare)) {
           throw new Error(`Invalid bus fare data for route ${route.id}.`);
         }
-        const fare = Math.max(minimumFare, Math.ceil(distanceKm * farePolicy.farePerKm));
+        const regularFare = Math.max(minimumFare, Math.ceil(distanceKm * farePolicy.farePerKm));
+        // Standard Dhaka 50% student discount respecting Tk 10 minimum student fare floor
+        const fare = isStudent ? Math.max(10, Math.round(regularFare * 0.5)) : regularFare;
 
-        return [{ ...route, journeyStops, distanceKm, fare }];
+        return [{ ...route, journeyStops, distanceKm, fare, regularFare, isStudent }];
       }).sort((first, second) => first.fare - second.fare || first.distanceKm - second.distanceKm);
     }
 
@@ -8159,10 +8199,13 @@
               busDistanceKm += route.stops[index].distanceKmFromPrevious;
             }
             if (!Number.isFinite(busDistanceKm) || busDistanceKm <= 0) continue;
-            const busFare = Math.max(
+            const regularBusFare = Math.max(
               farePolicy.minimumFareByType[route.type],
               Math.ceil(busDistanceKm * farePolicy.farePerKm)
             );
+            const isStudent = isStudentBusFareActive();
+            // Discount strictly applies to bus segment; feeders (Rickshaw/CNG/Walk) remain untouched
+            const busFare = isStudent ? Math.max(10, Math.round(regularBusFare * 0.5)) : regularBusFare;
             const feederFareMin = firstMile.fareMin + lastMile.fareMin;
             const feederFareMax = firstMile.fareMax + lastMile.fareMax;
             const busSpeedKmh = isPeak ? 15 : 22;
@@ -8175,6 +8218,8 @@
               endIndex,
               busDistanceKm,
               busFare,
+              regularBusFare,
+              isStudent,
               firstMile,
               lastMile,
               firstMileDistanceKm,
@@ -8298,8 +8343,14 @@
           const stats = document.createElement('div');
           stats.className = 'flex items-baseline justify-between mt-3 pt-2 border-t border-slate-100 dark:border-slate-800';
           const fare = document.createElement('span');
-          fare.className = 'text-lg font-black text-blue-700 dark:text-blue-400';
+          fare.className = 'text-lg font-black text-blue-700 dark:text-blue-400 inline-flex items-center gap-1.5 flex-wrap';
           fare.textContent = formatLocalizedFare(route.fare);
+          if (route.isStudent) {
+            const studentBadge = document.createElement('span');
+            studentBadge.className = 'rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold tracking-tight';
+            studentBadge.textContent = '🎓 Student 50% Applied';
+            fare.appendChild(studentBadge);
+          }
           
           const distance = document.createElement('span');
           distance.className = 'text-xs text-slate-500 dark:text-slate-400';
@@ -9075,6 +9126,7 @@
       } else {
         const matches = typeof getBusRouteMatches === 'function' ? getBusRouteMatches(pickupKey, dropoffKey) : [];
         const hybridMatches = typeof getBusHybridMatches === 'function' ? getBusHybridMatches(pickup, destination, isPeak, matches) : [];
+        const isStudent = typeof isStudentBusFareActive === 'function' && isStudentBusFareActive();
 
         if (matches.length > 0) {
           const minFare = Math.min(...matches.map(m => m.fare));
@@ -9083,12 +9135,19 @@
           const minTime = Math.min(...matches.map(m => Math.max(15, Math.round((m.distanceKm / speedKmh) * 60))));
 
           if (cardBusFare) {
-            cardBusFare.textContent = minFare === maxFare
+            const fareText = minFare === maxFare
               ? formatLocalizedFare(minFare)
               : `${formatLocalizedFare(minFare)} - ${formatLocalizedFare(maxFare)}`;
+            if (isStudent) {
+              cardBusFare.innerHTML = `<span class="inline-flex items-center gap-1.5 flex-wrap">${fareText} <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold">🎓 Student 50% Applied</span></span>`;
+            } else {
+              cardBusFare.textContent = fareText;
+            }
           }
           if (cardBusFareBreakdown) {
-            cardBusFareBreakdown.textContent = getLocalizedText('Direct city corridor');
+            cardBusFareBreakdown.textContent = isStudent
+              ? getLocalizedText('Student concession applied (min ৳10)')
+              : getLocalizedText('Direct city corridor');
           }
           if (cardBusDuration) {
             cardBusDuration.textContent = `~${formatLocalizedNumber(minTime)} ${getLocalizedText('mins')}`;
@@ -9103,10 +9162,15 @@
         } else if (hybridMatches.length > 0) {
           const primary = hybridMatches[0];
           if (cardBusFare) {
-            cardBusFare.textContent = `${formatLocalizedFare(primary.fareMin)} - ${formatLocalizedFare(primary.fareMax)}`;
+            const fareText = `${formatLocalizedFare(primary.fareMin)} - ${formatLocalizedFare(primary.fareMax)}`;
+            if (isStudent) {
+              cardBusFare.innerHTML = `<span class="inline-flex items-center gap-1.5 flex-wrap">${fareText} <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold">🎓 Student 50% Applied</span></span>`;
+            } else {
+              cardBusFare.textContent = fareText;
+            }
           }
           if (cardBusFareBreakdown) {
-            cardBusFareBreakdown.textContent = `${getLocalizedText('Bus')} ${formatLocalizedFare(primary.busFare)} + ${getLocalizedText('Feeder from')} ${formatLocalizedFare(primary.feederFareMin)}`;
+            cardBusFareBreakdown.textContent = `${getLocalizedText('Bus')} ${formatLocalizedFare(primary.busFare)}${isStudent ? ' (50%)' : ''} + ${getLocalizedText('Feeder from')} ${formatLocalizedFare(primary.feederFareMin)}`;
           }
           if (cardBusDuration) {
             cardBusDuration.textContent = `~${formatLocalizedNumber(primary.durationMins)} ${getLocalizedText('mins')}`;
@@ -12544,7 +12608,7 @@
         rates: {
           rickshaw: { base: 30, perKm: 18 },
           cng: { base: 50, perKm: 24 },
-          bus: { base: 10, perKm: 2.45 },
+          bus: { base: 10, perKm: 2.70 },
           metro: { base: 20, perKm: 5.0 }
         }
       };

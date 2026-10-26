@@ -1,7 +1,7 @@
 {
   "notice": "Unverified draft routes and estimated segment distances; not official BRTA records.",
   "farePolicy": {
-    "farePerKm": 2.45,
+    "farePerKm": 2.70,
     "rounding": "ceil-to-taka",
     "minimumFareByType": {
       "non-ac": 10,
