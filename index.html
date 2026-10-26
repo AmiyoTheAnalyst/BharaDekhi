@@ -1951,6 +1951,102 @@
         animation: none !important;
       }
     }
+
+    /* =========================================================
+       ⚡ Admin Live Fare & Surge Simulator Scoped Styles (.bd-admin-sim-*)
+       Strictly isolated to #adminPanel - zero effect on user views
+       ========================================================= */
+    .bd-admin-sim-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      box-shadow: 0 20px 40px -10px rgba(2, 6, 23, 0.7), 0 0 25px -4px rgba(56, 189, 248, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 1.25rem;
+      color: #f8fafc;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bd-admin-sim-card input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 9999px;
+      background: #334155;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .bd-admin-sim-card input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .bd-admin-sim-card input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #00f2fe;
+    }
+
+    .bd-admin-sim-card input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    }
+
+    .bd-admin-sim-bar {
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: width, transform;
+    }
+
+    .bd-admin-sim-bar-base {
+      background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .bd-admin-sim-bar-surged {
+      background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+    }
+
+    .bd-admin-sim-bar-fixed {
+      background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+    }
+
+    .bd-admin-sim-pill-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .bd-admin-sim-pill-btn.active {
+      background: rgba(56, 189, 248, 0.25) !important;
+      border-color: #38bdf8 !important;
+      color: #e0f2fe !important;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+    }
+
+    .bd-admin-sim-stepper-btn {
+      transition: all 0.15s ease;
+    }
+    .bd-admin-sim-stepper-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+      color: #38bdf8;
+    }
+    .bd-admin-sim-stepper-btn:active {
+      transform: scale(0.92);
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
@@ -5148,6 +5244,341 @@
             <span class="text-rose-600 font-bold">Watch</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ⚡ Live Fare & Surge Impact Simulator (Admin Only) -->
+    <div id="bdAdminFareSimulator" class="bd-admin-sim-card p-5 sm:p-6 space-y-6">
+      <!-- Card Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-[10px] font-bold uppercase tracking-wider mb-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+            Admin Intelligence · Surge Lab
+          </div>
+          <h3 class="text-xl font-black text-white flex items-center gap-2">
+            <span>⚡ Live Fare &amp; Surge Impact Simulator</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Simulate dynamic weather surges, peak traffic multipliers, and multi-modal fare disparities in real time.
+          </p>
+        </div>
+        <button type="button" id="bdSimResetBtn" class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-600/60 text-xs font-semibold transition active:scale-95 cursor-pointer shadow-sm">
+          <span>↺</span>
+          <span>Reset to Default Dhaka Rates</span>
+        </button>
+      </div>
+
+      <!-- Quick Corridor Presets -->
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+          Quick Corridor Presets
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="bd-admin-sim-pill-btn active px-3 py-1.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/60 border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer" data-corridor-dist="6.5">
+            Mirpur 10 ➔ Dhanmondi <span class="text-sky-400 font-bold ml-1">6.5 km</span>
+          </button>
+          <button type="button" class="bd-admin-sim-pill-btn px-3 py-1.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/60 border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer" data-corridor-dist="8.2">
+            Azimpur ➔ BRAC University <span class="text-sky-400 font-bold ml-1">8.2 km</span>
+          </button>
+          <button type="button" class="bd-admin-sim-pill-btn px-3 py-1.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/60 border border-slate-700 text-slate-300 text-xs font-semibold cursor-pointer" data-corridor-dist="20.1">
+            Uttara ➔ Motijheel <span class="text-sky-400 font-bold ml-1">20.1 km</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Grid: Sliders on Left, Chart on Right -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column: Interactive Sliders & Base Rate Steppers (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <!-- Distance Slider -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-slate-300 flex items-center gap-1.5">
+                <span>📍</span> Sample Trip Distance
+              </span>
+              <span id="bdSimDistVal" class="text-sky-400 font-bold bg-sky-950/60 px-2 py-0.5 rounded border border-sky-500/30 font-mono">6.5 km</span>
+            </div>
+            <input type="range" id="bdSimDistInput" min="1" max="25" step="0.5" value="6.5" class="w-full">
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>1.0 km</span>
+              <span>12.5 km</span>
+              <span>25.0 km</span>
+            </div>
+          </div>
+
+          <!-- Monsoon Rain Surge Slider -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-slate-300 flex items-center gap-1.5">
+                <span>🌧️</span> Monsoon Rain Surge Multiplier
+              </span>
+              <span id="bdSimRainVal" class="text-amber-400 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30 font-mono">+30%</span>
+            </div>
+            <input type="range" id="bdSimRainInput" min="0" max="60" step="5" value="30" class="w-full">
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>0% (Dry)</span>
+              <span>+30% (Standard)</span>
+              <span>+60% (Downpour)</span>
+            </div>
+          </div>
+
+          <!-- Evening Peak Traffic Slider -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-slate-300 flex items-center gap-1.5">
+                <span>🚦</span> Evening Peak Traffic Surge
+              </span>
+              <span id="bdSimPeakVal" class="text-rose-400 font-bold bg-rose-950/60 px-2 py-0.5 rounded border border-rose-500/30 font-mono">+20%</span>
+            </div>
+            <input type="range" id="bdSimPeakInput" min="0" max="50" step="5" value="20" class="w-full">
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>0% (Normal)</span>
+              <span>+25% (Rush Hour)</span>
+              <span>+50% (Gridlock)</span>
+            </div>
+          </div>
+
+          <!-- Base Rate Fine-Tuning Controls -->
+          <div class="space-y-2 pt-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Base Rates &amp; Per-KM Fine Tuning</span>
+              <span class="text-[10px] text-slate-500">Dhaka Standards</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <!-- Rickshaw -->
+              <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-2.5">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-bold text-slate-200">🚲 Rickshaw</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">Surgeable</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Base:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="rickshaw-base" data-delta="-5">-</button>
+                    <span id="bdSimRickshawBaseVal">৳30</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="rickshaw-base" data-delta="5">+</button>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Rate:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="rickshaw-perkm" data-delta="-1">-</button>
+                    <span id="bdSimRickshawPerKmVal">৳18/km</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="rickshaw-perkm" data-delta="1">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CNG Auto -->
+              <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-2.5">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-bold text-slate-200">🛺 CNG Auto</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300">Surgeable</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Base:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="cng-base" data-delta="-5">-</button>
+                    <span id="bdSimCngBaseVal">৳50</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="cng-base" data-delta="5">+</button>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Rate:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="cng-perkm" data-delta="-1">-</button>
+                    <span id="bdSimCngPerKmVal">৳24/km</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="cng-perkm" data-delta="1">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Local Bus -->
+              <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-2.5">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-bold text-slate-200">🚌 Local Bus</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">Govt Fixed</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Min:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="bus-base" data-delta="-1">-</button>
+                    <span id="bdSimBusBaseVal">৳10</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="bus-base" data-delta="1">+</button>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Rate:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="bus-perkm" data-delta="-0.2">-</button>
+                    <span id="bdSimBusPerKmVal">৳2.45/km</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="bus-perkm" data-delta="0.2">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MRT-6 Metro -->
+              <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-2.5">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-bold text-slate-200">🚇 MRT-6 Metro</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">Official Fixed</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Min:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="metro-base" data-delta="-2">-</button>
+                    <span id="bdSimMetroBaseVal">৳20</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="metro-base" data-delta="2">+</button>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Rate:</span>
+                  <div class="flex items-center gap-1 font-mono text-white">
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="metro-perkm" data-delta="-0.5">-</button>
+                    <span id="bdSimMetroPerKmVal">৳5.0/km</span>
+                    <button type="button" class="bd-admin-sim-stepper-btn w-4 h-4 rounded bg-slate-800 flex items-center justify-center font-bold" data-adjust="metro-perkm" data-delta="0.5">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Dual-Bar Animated Comparison Chart (7 cols) -->
+        <div class="lg:col-span-7 bg-slate-900/70 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <span>📊</span> 120Hz Multi-Modal Dynamic Comparison
+              </span>
+              <!-- Legend -->
+              <div class="flex items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1 text-sky-400 font-semibold">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-sky-400"></span> Normal Dry
+                </span>
+                <span class="flex items-center gap-1 text-amber-400 font-semibold">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-amber-500 to-rose-500"></span> Surged Projected
+                </span>
+              </div>
+            </div>
+
+            <!-- 4 Transport Mode Rows -->
+            <div class="space-y-4 pt-1">
+              <!-- Mode 1: Cycle Rickshaw -->
+              <div class="space-y-1.5" id="bdSimRowRickshaw">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                    <span>🚲</span> Cycle Rickshaw
+                  </span>
+                  <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="text-sky-400 font-semibold" id="bdSimRickshawBaseTxt">৳147</span>
+                    <span class="text-slate-500">➔</span>
+                    <span class="text-amber-400 font-bold" id="bdSimRickshawSurgeTxt">৳221</span>
+                  </div>
+                </div>
+                <!-- Dual Bar Track -->
+                <div class="space-y-1 bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+                  <div class="flex items-center gap-2">
+                    <span class="w-12 text-[10px] text-sky-300 font-mono">Dry</span>
+                    <div class="flex-1 bg-slate-800/80 rounded-full h-3 overflow-hidden">
+                      <div id="bdSimRickshawBarBase" class="bd-admin-sim-bar bd-admin-sim-bar-base h-full rounded-full" style="width: 47%;"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-12 text-[10px] text-amber-300 font-mono">Surged</span>
+                    <div class="flex-1 bg-slate-800/80 rounded-full h-3 overflow-hidden">
+                      <div id="bdSimRickshawBarSurged" class="bd-admin-sim-bar bd-admin-sim-bar-surged h-full rounded-full" style="width: 71%;"></div>
+                    </div>
+                    <span id="bdSimRickshawDeltaBadge" class="text-[10px] font-bold text-amber-300 bg-amber-950/80 border border-amber-500/40 px-1.5 py-0.5 rounded shadow-sm shrink-0">+৳74</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode 2: CNG Auto -->
+              <div class="space-y-1.5" id="bdSimRowCng">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                    <span>🛺</span> CNG Auto-Rickshaw
+                  </span>
+                  <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="text-sky-400 font-semibold" id="bdSimCngBaseTxt">৳206</span>
+                    <span class="text-slate-500">➔</span>
+                    <span class="text-rose-400 font-bold" id="bdSimCngSurgeTxt">৳309</span>
+                  </div>
+                </div>
+                <!-- Dual Bar Track -->
+                <div class="space-y-1 bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+                  <div class="flex items-center gap-2">
+                    <span class="w-12 text-[10px] text-sky-300 font-mono">Dry</span>
+                    <div class="flex-1 bg-slate-800/80 rounded-full h-3 overflow-hidden">
+                      <div id="bdSimCngBarBase" class="bd-admin-sim-bar bd-admin-sim-bar-base h-full rounded-full" style="width: 66%;"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-12 text-[10px] text-rose-300 font-mono">Surged</span>
+                    <div class="flex-1 bg-slate-800/80 rounded-full h-3 overflow-hidden">
+                      <div id="bdSimCngBarSurged" class="bd-admin-sim-bar bd-admin-sim-bar-surged h-full rounded-full" style="width: 100%;"></div>
+                    </div>
+                    <span id="bdSimCngDeltaBadge" class="text-[10px] font-bold text-rose-300 bg-rose-950/80 border border-rose-500/40 px-1.5 py-0.5 rounded shadow-sm shrink-0">+৳103</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode 3: Local Bus -->
+              <div class="space-y-1.5" id="bdSimRowBus">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                    <span>🚌</span> Local Bus
+                  </span>
+                  <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="text-emerald-400 font-bold" id="bdSimBusBaseTxt">৳26 (Fixed)</span>
+                  </div>
+                </div>
+                <!-- Single/Dual Track (Zero surge) -->
+                <div class="space-y-1 bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+                  <div class="flex items-center gap-2">
+                    <span class="w-12 text-[10px] text-emerald-300 font-mono">Govt</span>
+                    <div class="flex-1 bg-slate-800/80 rounded-full h-3 overflow-hidden">
+                      <div id="bdSimBusBar" class="bd-admin-sim-bar bd-admin-sim-bar-fixed h-full rounded-full" style="width: 9%;"></div>
+                    </div>
+                    <span class="text-[10px] font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-500/30 px-1.5 py-0.5 rounded shrink-0">Govt Fixed Tariff (0% Surge)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mode 4: MRT-6 Metro Rail -->
+              <div class="space-y-1.5" id="bdSimRowMetro">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                    <span>🚇</span> MRT Line 6 Metro Rail
+                  </span>
+                  <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="text-emerald-400 font-bold" id="bdSimMetroBaseTxt">৳53 (Fixed)</span>
+                  </div>
+                </div>
+                <!-- Single/Dual Track (Zero surge) -->
+                <div class="space-y-1 bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+                  <div class="flex items-center gap-2">
+                    <span class="w-12 text-[10px] text-emerald-300 font-mono">Metro</span>
+                    <div class="flex-1 bg-slate-800/80 rounded-full h-3 overflow-hidden">
+                      <div id="bdSimMetroBar" class="bd-admin-sim-bar bd-admin-sim-bar-fixed h-full rounded-full" style="width: 17%;"></div>
+                    </div>
+                    <span class="text-[10px] font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-500/30 px-1.5 py-0.5 rounded shrink-0">Official Tariff (0% Surge)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Commuter Savings Insight Banner -->
+      <div class="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-emerald-500/35 text-emerald-300 text-xs sm:text-sm font-medium flex items-center gap-3 shadow-inner">
+        <span class="text-xl shrink-0">💡</span>
+        <span id="bdSimInsightText" class="leading-relaxed">
+          Admin Insight: During +30% Rain &amp; +20% Peak Surge on a 6.5 km trip, MRT-6 Metro saves commuters ৳256 (83%) compared to a surged CNG.
+        </span>
       </div>
     </div>
     </div>
@@ -12100,10 +12531,262 @@
       }
     }
 
+    // =========================================================
+    // ⚡ Isolated Admin Live Fare & Surge Impact Simulator Engine
+    // Strictly scoped to #adminPanel - zero global variable mutations
+    // =========================================================
+    function initAdminFareSimulator() {
+      // Default parameters
+      const DEFAULTS = {
+        distance: 6.5,
+        rainSurge: 30,
+        peakSurge: 20,
+        rates: {
+          rickshaw: { base: 30, perKm: 18 },
+          cng: { base: 50, perKm: 24 },
+          bus: { base: 10, perKm: 2.45 },
+          metro: { base: 20, perKm: 5.0 }
+        }
+      };
+
+      // State clone
+      const state = {
+        distance: DEFAULTS.distance,
+        rainSurge: DEFAULTS.rainSurge,
+        peakSurge: DEFAULTS.peakSurge,
+        rates: {
+          rickshaw: { ...DEFAULTS.rates.rickshaw },
+          cng: { ...DEFAULTS.rates.cng },
+          bus: { ...DEFAULTS.rates.bus },
+          metro: { ...DEFAULTS.rates.metro }
+        }
+      };
+
+      // DOM Handles within simulator card only
+      const container = document.getElementById('bdAdminFareSimulator');
+      if (!container) return;
+
+      const distInput = document.getElementById('bdSimDistInput');
+      const distVal = document.getElementById('bdSimDistVal');
+      const rainInput = document.getElementById('bdSimRainInput');
+      const rainVal = document.getElementById('bdSimRainVal');
+      const peakInput = document.getElementById('bdSimPeakInput');
+      const peakVal = document.getElementById('bdSimPeakVal');
+      const resetBtn = document.getElementById('bdSimResetBtn');
+      const insightText = document.getElementById('bdSimInsightText');
+
+      // Rate value display handles
+      const rickshawBaseVal = document.getElementById('bdSimRickshawBaseVal');
+      const rickshawPerKmVal = document.getElementById('bdSimRickshawPerKmVal');
+      const cngBaseVal = document.getElementById('bdSimCngBaseVal');
+      const cngPerKmVal = document.getElementById('bdSimCngPerKmVal');
+      const busBaseVal = document.getElementById('bdSimBusBaseVal');
+      const busPerKmVal = document.getElementById('bdSimBusPerKmVal');
+      const metroBaseVal = document.getElementById('bdSimMetroBaseVal');
+      const metroPerKmVal = document.getElementById('bdSimMetroPerKmVal');
+
+      // Chart handles
+      const rickshawBaseTxt = document.getElementById('bdSimRickshawBaseTxt');
+      const rickshawSurgeTxt = document.getElementById('bdSimRickshawSurgeTxt');
+      const rickshawBarBase = document.getElementById('bdSimRickshawBarBase');
+      const rickshawBarSurged = document.getElementById('bdSimRickshawBarSurged');
+      const rickshawDeltaBadge = document.getElementById('bdSimRickshawDeltaBadge');
+
+      const cngBaseTxt = document.getElementById('bdSimCngBaseTxt');
+      const cngSurgeTxt = document.getElementById('bdSimCngSurgeTxt');
+      const cngBarBase = document.getElementById('bdSimCngBarBase');
+      const cngBarSurged = document.getElementById('bdSimCngBarSurged');
+      const cngDeltaBadge = document.getElementById('bdSimCngDeltaBadge');
+
+      const busBaseTxt = document.getElementById('bdSimBusBaseTxt');
+      const busBar = document.getElementById('bdSimBusBar');
+
+      const metroBaseTxt = document.getElementById('bdSimMetroBaseTxt');
+      const metroBar = document.getElementById('bdSimMetroBar');
+
+      function calculateFares() {
+        const d = state.distance;
+        const totalSurgeMultiplier = 1 + (state.rainSurge / 100) + (state.peakSurge / 100);
+
+        // Rickshaw
+        const rickshawBase = Math.round(state.rates.rickshaw.base + state.rates.rickshaw.perKm * d);
+        const rickshawSurged = Math.round(rickshawBase * totalSurgeMultiplier);
+        const rickshawDelta = rickshawSurged - rickshawBase;
+
+        // CNG
+        const cngBase = Math.round(state.rates.cng.base + state.rates.cng.perKm * d);
+        const cngSurged = Math.round(cngBase * totalSurgeMultiplier);
+        const cngDelta = cngSurged - cngBase;
+
+        // Bus (0% surge - Govt fixed)
+        const busBase = Math.max(state.rates.bus.base, Math.round(state.rates.bus.base + state.rates.bus.perKm * d));
+
+        // Metro (0% surge - Official fixed)
+        const metroBase = Math.max(state.rates.metro.base, Math.round(state.rates.metro.base + state.rates.metro.perKm * d));
+
+        // Max fare for scaling bars relative to 100%
+        const maxFare = Math.max(rickshawSurged, cngSurged, busBase, metroBase, 1);
+
+        return {
+          d,
+          totalSurgeMultiplier,
+          rickshaw: { base: rickshawBase, surged: rickshawSurged, delta: rickshawDelta, pctBase: (rickshawBase / maxFare) * 100, pctSurged: (rickshawSurged / maxFare) * 100 },
+          cng: { base: cngBase, surged: cngSurged, delta: cngDelta, pctBase: (cngBase / maxFare) * 100, pctSurged: (cngSurged / maxFare) * 100 },
+          bus: { base: busBase, pct: (busBase / maxFare) * 100 },
+          metro: { base: metroBase, pct: (metroBase / maxFare) * 100 }
+        };
+      }
+
+      function updateUI() {
+        const data = calculateFares();
+
+        // Update slider labels
+        if (distVal) distVal.textContent = `${state.distance.toFixed(1)} km`;
+        if (rainVal) rainVal.textContent = `+${state.rainSurge}%`;
+        if (peakVal) peakVal.textContent = `+${state.peakSurge}%`;
+
+        // Update rate steppers labels
+        if (rickshawBaseVal) rickshawBaseVal.textContent = `৳${state.rates.rickshaw.base}`;
+        if (rickshawPerKmVal) rickshawPerKmVal.textContent = `৳${state.rates.rickshaw.perKm}/km`;
+        if (cngBaseVal) cngBaseVal.textContent = `৳${state.rates.cng.base}`;
+        if (cngPerKmVal) cngPerKmVal.textContent = `৳${state.rates.cng.perKm}/km`;
+        if (busBaseVal) busBaseVal.textContent = `৳${state.rates.bus.base}`;
+        if (busPerKmVal) busPerKmVal.textContent = `৳${state.rates.bus.perKm}/km`;
+        if (metroBaseVal) metroBaseVal.textContent = `৳${state.rates.metro.base}`;
+        if (metroPerKmVal) metroPerKmVal.textContent = `৳${state.rates.metro.perKm}/km`;
+
+        // Update Rickshaw Row
+        if (rickshawBaseTxt) rickshawBaseTxt.textContent = `৳${data.rickshaw.base}`;
+        if (rickshawSurgeTxt) rickshawSurgeTxt.textContent = `৳${data.rickshaw.surged}`;
+        if (rickshawBarBase) rickshawBarBase.style.width = `${Math.max(6, data.rickshaw.pctBase).toFixed(1)}%`;
+        if (rickshawBarSurged) rickshawBarSurged.style.width = `${Math.max(8, data.rickshaw.pctSurged).toFixed(1)}%`;
+        if (rickshawDeltaBadge) rickshawDeltaBadge.textContent = `+৳${data.rickshaw.delta}`;
+
+        // Update CNG Row
+        if (cngBaseTxt) cngBaseTxt.textContent = `৳${data.cng.base}`;
+        if (cngSurgeTxt) cngSurgeTxt.textContent = `৳${data.cng.surged}`;
+        if (cngBarBase) cngBarBase.style.width = `${Math.max(6, data.cng.pctBase).toFixed(1)}%`;
+        if (cngBarSurged) cngBarSurged.style.width = `${Math.max(8, data.cng.pctSurged).toFixed(1)}%`;
+        if (cngDeltaBadge) cngDeltaBadge.textContent = `+৳${data.cng.delta}`;
+
+        // Update Bus Row
+        if (busBaseTxt) busBaseTxt.textContent = `৳${data.bus.base} (Fixed)`;
+        if (busBar) busBar.style.width = `${Math.max(6, data.bus.pct).toFixed(1)}%`;
+
+        // Update Metro Row
+        if (metroBaseTxt) metroBaseTxt.textContent = `৳${data.metro.base} (Fixed)`;
+        if (metroBar) metroBar.style.width = `${Math.max(6, data.metro.pct).toFixed(1)}%`;
+
+        // Live Insight Banner
+        if (insightText) {
+          const savings = Math.max(0, data.cng.surged - data.metro.base);
+          const savingsPct = data.cng.surged > 0 ? Math.round((savings / data.cng.surged) * 100) : 0;
+          insightText.innerHTML = `Admin Insight: During <strong>+${state.rainSurge}% Rain</strong> &amp; <strong>+${state.peakSurge}% Peak Surge</strong> on a <strong>${state.distance.toFixed(1)} km</strong> trip, MRT-6 Metro / Bus saves commuters <span class="text-sky-300 font-bold">৳${savings} (${savingsPct}%)</span> compared to a surged CNG.`;
+        }
+      }
+
+      // Event listeners
+      if (distInput) {
+        distInput.addEventListener('input', (e) => {
+          state.distance = parseFloat(e.target.value) || 6.5;
+          container.querySelectorAll('.bd-admin-sim-pill-btn').forEach(btn => {
+            const d = parseFloat(btn.dataset.corridorDist);
+            btn.classList.toggle('active', Math.abs(d - state.distance) < 0.1);
+          });
+          updateUI();
+        });
+      }
+
+      if (rainInput) {
+        rainInput.addEventListener('input', (e) => {
+          state.rainSurge = parseInt(e.target.value, 10) || 0;
+          updateUI();
+        });
+      }
+
+      if (peakInput) {
+        peakInput.addEventListener('input', (e) => {
+          state.peakSurge = parseInt(e.target.value, 10) || 0;
+          updateUI();
+        });
+      }
+
+      // Corridor Preset Pills
+      container.querySelectorAll('.bd-admin-sim-pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.bd-admin-sim-pill-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const d = parseFloat(btn.dataset.corridorDist);
+          if (!isNaN(d)) {
+            state.distance = d;
+            if (distInput) distInput.value = d;
+            updateUI();
+          }
+        });
+      });
+
+      // Steppers (+ / -)
+      container.querySelectorAll('.bd-admin-sim-stepper-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const adj = btn.dataset.adjust;
+          const delta = parseFloat(btn.dataset.delta) || 0;
+          if (adj === 'rickshaw-base') {
+            state.rates.rickshaw.base = Math.max(10, Math.min(100, state.rates.rickshaw.base + delta));
+          } else if (adj === 'rickshaw-perkm') {
+            state.rates.rickshaw.perKm = Math.max(5, Math.min(50, state.rates.rickshaw.perKm + delta));
+          } else if (adj === 'cng-base') {
+            state.rates.cng.base = Math.max(20, Math.min(150, state.rates.cng.base + delta));
+          } else if (adj === 'cng-perkm') {
+            state.rates.cng.perKm = Math.max(10, Math.min(60, state.rates.cng.perKm + delta));
+          } else if (adj === 'bus-base') {
+            state.rates.bus.base = Math.max(5, Math.min(30, state.rates.bus.base + delta));
+          } else if (adj === 'bus-perkm') {
+            state.rates.bus.perKm = Math.max(1, Math.min(10, parseFloat((state.rates.bus.perKm + delta).toFixed(2))));
+          } else if (adj === 'metro-base') {
+            state.rates.metro.base = Math.max(10, Math.min(50, state.rates.metro.base + delta));
+          } else if (adj === 'metro-perkm') {
+            state.rates.metro.perKm = Math.max(2, Math.min(20, parseFloat((state.rates.metro.perKm + delta).toFixed(1))));
+          }
+          updateUI();
+        });
+      });
+
+      // Reset Button
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          state.distance = DEFAULTS.distance;
+          state.rainSurge = DEFAULTS.rainSurge;
+          state.peakSurge = DEFAULTS.peakSurge;
+          state.rates.rickshaw = { ...DEFAULTS.rates.rickshaw };
+          state.rates.cng = { ...DEFAULTS.rates.cng };
+          state.rates.bus = { ...DEFAULTS.rates.bus };
+          state.rates.metro = { ...DEFAULTS.rates.metro };
+
+          if (distInput) distInput.value = state.distance;
+          if (rainInput) rainInput.value = state.rainSurge;
+          if (peakInput) peakInput.value = state.peakSurge;
+
+          container.querySelectorAll('.bd-admin-sim-pill-btn').forEach((b, idx) => {
+            b.classList.toggle('active', idx === 0);
+          });
+
+          updateUI();
+        });
+      }
+
+      // Initial draw
+      updateUI();
+    }
+    window.initAdminFareSimulator = initAdminFareSimulator;
+
     if (document.readyState === 'loading') {
-      window.addEventListener('DOMContentLoaded', bootApp);
+      window.addEventListener('DOMContentLoaded', () => {
+        bootApp();
+        initAdminFareSimulator();
+      });
     } else {
       bootApp();
+      initAdminFareSimulator();
     }
   </script>
 </body>
