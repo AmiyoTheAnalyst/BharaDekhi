@@ -1570,6 +1570,32 @@
       transform: translateZ(18px);
     }
 
+    /* Responsive Proportional Scaling for Vehicle Mini-Preview Containers */
+    .bd-card-vehicle-preview {
+      width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 5 / 1;
+      min-height: 52px;
+      max-height: 68px;
+      position: relative;
+      overflow: hidden;
+      pointer-events: none;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .feeder-card-item .bd-card-vehicle-preview {
+      aspect-ratio: 4.2 / 1;
+      min-height: 48px;
+      max-height: 58px;
+    }
+    .bd-card-vehicle-preview svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     /* Sweeping Holographic Glare Layer */
     .bd-holo-glare {
       pointer-events: none;
@@ -1595,47 +1621,50 @@
       opacity: 1;
     }
 
-    /* 🚇 MRT-6 Mini-Preview Speed Lines Animation */
+    /* 🚇 MRT-6 Metro Continuous Gliding & Speed Lines */
+    @keyframes metroTrainCruise {
+      0% { transform: translate3d(-10%, 0, 0); }
+      50% { transform: translate3d(10%, -1px, 0); }
+      100% { transform: translate3d(-10%, 0, 0); }
+    }
+    .metro-train-cruise {
+      animation: metroTrainCruise 4.5s ease-in-out infinite;
+      will-change: transform;
+    }
+
     @keyframes metroSpeedLines {
-      0% { transform: translateX(180px); opacity: 0; }
-      20% { opacity: 0.95; }
-      80% { opacity: 0.95; }
-      100% { transform: translateX(-180px); opacity: 0; }
+      0% { transform: translateX(260px); opacity: 0; }
+      15% { opacity: 0.95; }
+      85% { opacity: 0.95; }
+      100% { transform: translateX(-260px); opacity: 0; }
     }
-    .metro-speed-line-1 {
-      animation: metroSpeedLines 1.1s linear infinite;
+    .metro-speed-line-1 { animation: metroSpeedLines 1s linear infinite; }
+    .metro-speed-line-2 { animation: metroSpeedLines 0.75s linear infinite -0.3s; }
+    .metro-speed-line-3 { animation: metroSpeedLines 1.25s linear infinite -0.6s; }
+
+    @keyframes metroPillarPass {
+      0% { transform: translateX(220px); opacity: 0; }
+      15% { opacity: 0.4; }
+      85% { opacity: 0.4; }
+      100% { transform: translateX(-220px); opacity: 0; }
     }
-    .metro-speed-line-2 {
-      animation: metroSpeedLines 0.85s linear infinite -0.35s;
+    .metro-pillar-1 { animation: metroPillarPass 2.2s linear infinite; }
+    .metro-pillar-2 { animation: metroPillarPass 2.2s linear infinite -1.1s; }
+
+    /* 🚌 Local Bus Double-Decker Cruise, Wheel Spin, & Route Ticker */
+    @keyframes busCruise {
+      0% { transform: translate3d(-8%, 0px, 0); }
+      50% { transform: translate3d(8%, -1.5px, 0); }
+      100% { transform: translate3d(-8%, 0px, 0); }
     }
-    .metro-speed-line-3 {
-      animation: metroSpeedLines 1.4s linear infinite -0.7s;
+    .bus-cruise-group {
+      animation: busCruise 4s ease-in-out infinite;
+      will-change: transform;
     }
 
-    /* 🚲 Rickshaw & 🚌 Bus Wheel Spin & Bounce Animations */
-    @keyframes wheelSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .wheel-spoke-spin {
-      animation: wheelSpin 0.9s linear infinite;
-      transform-box: fill-box;
-      transform-origin: center;
-    }
-
-    @keyframes rickshawBounce {
-      0%, 100% { transform: translate(42px, 6px); }
-      50% { transform: translate(42px, 4px) rotate(-0.5deg); }
-    }
-    .rickshaw-bounce-group {
-      animation: rickshawBounce 0.9s ease-in-out infinite;
-      transform-origin: 26px 34px;
-    }
-
-    /* 🚌 Bus Route Ticker & Road Animation */
     @keyframes busTickerScroll {
-      0% { transform: translateX(65px); }
-      100% { transform: translateX(-160px); }
+      0% { transform: translateX(70px); }
+      100% { transform: translateX(-200px); }
     }
     .bus-ticker-text {
       animation: busTickerScroll 7.5s linear infinite;
@@ -1643,23 +1672,46 @@
     }
 
     @keyframes busRoadMove {
-      0% { transform: translateX(60px); }
-      100% { transform: translateX(-60px); }
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-70px); }
     }
     .bus-road-dashes-group {
-      animation: busRoadMove 0.8s linear infinite;
+      animation: busRoadMove 0.75s linear infinite;
+    }
+
+    @keyframes wheelSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .wheel-spoke-spin {
+      animation: wheelSpin 0.85s linear infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    /* 🚲 Rickshaw Suspension Bounce */
+    @keyframes rickshawBounce {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -1.8px, 0) rotate(-0.5deg); }
+    }
+    .rickshaw-bounce-group {
+      animation: rickshawBounce 0.85s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: 26px 34px;
+      will-change: transform;
     }
 
     /* 🛺 CNG Idle Vibration & Digital Meter Animations */
     @keyframes cngIdleVibe {
-      0%, 100% { transform: translate(45px, 6px); }
-      20% { transform: translate(45.5px, 5.4px); }
-      40% { transform: translate(44.6px, 6.5px); }
-      60% { transform: translate(45.4px, 6.2px); }
-      80% { transform: translate(44.8px, 5.6px); }
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      20% { transform: translate3d(0.5px, -0.6px, 0); }
+      40% { transform: translate3d(-0.4px, 0.5px, 0); }
+      60% { transform: translate3d(0.4px, 0.2px, 0); }
+      80% { transform: translate3d(-0.2px, -0.4px, 0); }
     }
     .cng-idle-vibe {
       animation: cngIdleVibe 0.12s infinite ease-in-out;
+      will-change: transform;
     }
 
     @keyframes meterPulse {
@@ -1688,21 +1740,103 @@
     .cng-meter-bar-2 { animation: meterBarTick2 0.5s infinite alternate ease-in-out -0.2s; }
     .cng-meter-bar-3 { animation: meterBarTick3 0.9s infinite alternate ease-in-out -0.4s; }
 
-    @media (prefers-reduced-motion: reduce) {
-      .metro-speed-line-1,
-      .metro-speed-line-2,
-      .metro-speed-line-3,
-      .wheel-spoke-spin,
-      .rickshaw-bounce-group,
-      .bus-ticker-text,
-      .bus-road-dashes-group,
-      .cng-idle-vibe,
-      .cng-meter-led,
-      .cng-meter-bar-1,
-      .cng-meter-bar-2,
-      .cng-meter-bar-3 {
-        animation: none !important;
-      }
+    /* 🚶 Walk Pedestrian Stride & Sidewalk Scroll */
+    @keyframes walkArmLeft {
+      0%, 100% { transform: rotate(-24deg); }
+      50% { transform: rotate(24deg); }
+    }
+    @keyframes walkArmRight {
+      0%, 100% { transform: rotate(24deg); }
+      50% { transform: rotate(-24deg); }
+    }
+    @keyframes walkLegLeft {
+      0%, 100% { transform: rotate(-26deg); }
+      50% { transform: rotate(26deg); }
+    }
+    @keyframes walkLegRight {
+      0%, 100% { transform: rotate(26deg); }
+      50% { transform: rotate(-26deg); }
+    }
+    @keyframes walkBobbing {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      25% { transform: translate3d(0, -1.5px, 0); }
+      50% { transform: translate3d(0, 0, 0); }
+      75% { transform: translate3d(0, -1.5px, 0); }
+    }
+    @keyframes sidewalkTileScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-40px); }
+    }
+    @keyframes stepPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+    .walk-person-bob {
+      animation: walkBobbing 0.7s ease-in-out infinite;
+      will-change: transform;
+    }
+    .walk-arm-left {
+      animation: walkArmLeft 0.7s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: top center;
+    }
+    .walk-arm-right {
+      animation: walkArmRight 0.7s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: top center;
+    }
+    .walk-leg-left {
+      animation: walkLegLeft 0.7s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: top center;
+    }
+    .walk-leg-right {
+      animation: walkLegRight 0.7s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: top center;
+    }
+    .walk-sidewalk-scroll {
+      animation: sidewalkTileScroll 1.1s linear infinite;
+    }
+    .walk-step-pulse {
+      animation: stepPulse 1s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    /* 🏍️ Bike Motorcycle Cruise & Speed Streaks */
+    @keyframes motoCruiseBounce {
+      0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+      50% { transform: translate3d(0, -1.2px, 0) rotate(-0.4deg); }
+    }
+    .moto-cruise-group {
+      animation: motoCruiseBounce 0.8s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes motoSpeedStreaks {
+      0% { transform: translateX(160px); opacity: 0; }
+      15% { opacity: 0.85; }
+      85% { opacity: 0.85; }
+      100% { transform: translateX(-160px); opacity: 0; }
+    }
+    .moto-streak-1 { animation: motoSpeedStreaks 0.75s linear infinite; }
+    .moto-streak-2 { animation: motoSpeedStreaks 0.75s linear infinite -0.38s; }
+
+    /* 🚗 Car Sedan Glide & Highway Dashes */
+    @keyframes carGlideBounce {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -1px, 0); }
+    }
+    .car-glide-group {
+      animation: carGlideBounce 1.4s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes carHighwayDashes {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-60px); }
+    }
+    .car-highway-scroll {
+      animation: carHighwayDashes 0.7s linear infinite;
     }
 
     /* 3D Futuristic Dhaka City Routes Animation Showcase (Picture 5) */
@@ -4481,34 +4615,56 @@
             </div>
 
             <!-- 🏍️ Animated Bike Mini-Preview -->
-            <div class="bd-card-vehicle-preview bd-card-bike-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#06172a] to-sky-950/80 border border-sky-500/30 relative pointer-events-none select-none shadow-inner" style="height: 50px;">
-              <svg class="w-full h-full" viewBox="0 0 280 50" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0" y="42" width="280" height="8" fill="#091122" />
-                <line x1="0" y1="42" x2="280" y2="42" stroke="#1e293b" stroke-width="1.8" />
-                <g transform="translate(95, 10)">
-                  <polygon points="68,18 135,10 135,26" fill="rgba(56, 189, 248, 0.3)" />
-                  <path d="M 12 24 L 28 10 L 46 10 L 58 24 L 38 24 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1" />
-                  <circle cx="34" cy="7" r="3" fill="#cbd5e1" />
-                  <line x1="48" y1="12" x2="54" y2="10" stroke="#f1f5f9" stroke-width="1.5" />
-                  <circle cx="60" cy="18" r="2" fill="#ffffff" filter="drop-shadow(0 0 3px #38bdf8)" />
-                  <g transform="translate(56, 26)">
-                    <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+            <div class="bd-card-vehicle-preview bd-card-bike-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#06172a] to-sky-950/80 border border-sky-500/30 relative pointer-events-none select-none shadow-inner">
+              <svg class="w-full h-full" viewBox="0 0 280 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="bikeBeamDirect" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
+                    <stop offset="50%" stop-color="#0284c7" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="#0369a1" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="44" width="280" height="12" fill="#091122" />
+                <line x1="0" y1="44" x2="280" y2="44" stroke="#1e293b" stroke-width="1.8" />
+                <g>
+                  <line x1="10" y1="48" x2="80" y2="48" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="moto-streak-1" opacity="0.75" />
+                  <line x1="110" y1="52" x2="190" y2="52" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" class="moto-streak-2" opacity="0.85" />
+                  <line x1="210" y1="48" x2="270" y2="48" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="moto-streak-1" opacity="0.75" />
+                </g>
+                <g class="moto-cruise-group" transform="translate(98, 10)">
+                  <polygon points="68,20 165,12 165,28" fill="url(#bikeBeamDirect)" />
+                  <path d="M 20 20 L 36 12 L 46 16 L 40 27 L 24 27 Z" fill="#0369a1" stroke="#0284c7" stroke-width="0.8" />
+                  <circle cx="36" cy="9" r="5" fill="#0f172a" stroke="#38bdf8" stroke-width="1" />
+                  <path d="M 37 8 Q 41 9 40 12 L 36 12 Z" fill="#38bdf8" opacity="0.9" />
+                  <line x1="42" y1="16" x2="53" y2="19" stroke="#f1f5f9" stroke-width="1.8" stroke-linecap="round" />
+                  <path d="M 26 26 L 34 32 L 38 32" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round" />
+                  <path d="M 26 22 L 40 16 L 54 18 L 63 24 L 50 27 L 28 27 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1" />
+                  <rect x="34" y="26" width="14" height="8" rx="1.5" fill="#334155" stroke="#475569" stroke-width="0.8" />
+                  <path d="M 42 32 L 18 33 L 12 31" stroke="#94a3b8" stroke-width="1.8" fill="none" stroke-linecap="round" />
+                  <circle cx="65" cy="22" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 3px #38bdf8)" />
+                  <rect x="12" y="22" width="2" height="3.5" rx="0.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+                  <g transform="translate(58, 34)">
+                    <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
                     <g class="wheel-spoke-spin">
-                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="-3.5" y1="0" x2="3.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3.5" x2="0" y2="3.5" stroke="#94a3b8" stroke-width="0.8" />
                     </g>
                   </g>
-                  <g transform="translate(14, 26)">
-                    <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                  <g transform="translate(16, 34)">
+                    <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
                     <g class="wheel-spoke-spin">
-                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="-3.5" y1="0" x2="3.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3.5" x2="0" y2="3.5" stroke="#94a3b8" stroke-width="0.8" />
                     </g>
                   </g>
                 </g>
-                <g transform="translate(10, 6)">
-                  <rect x="0" y="0" width="56" height="14" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
-                  <text x="6" y="10.5" fill="#38bdf8" font-family="monospace" font-size="7.5" font-weight="900">SOLO RIDE</text>
+                <g transform="translate(8, 5)">
+                  <rect x="0" y="0" width="70" height="13" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
+                  <text x="5" y="9.5" fill="#38bdf8" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">RIDE SHARE</text>
+                </g>
+                <g transform="translate(186, 5)">
+                  <rect x="0" y="0" width="86" height="13" rx="3" fill="#0369a1" fill-opacity="0.35" stroke="#0ea5e9" stroke-width="0.8" />
+                  <text x="5" y="9.5" fill="#7dd3fc" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">⚡ EXPRESS MOTO</text>
                 </g>
               </svg>
             </div>
@@ -4538,8 +4694,8 @@
             </div>
 
             <!-- 🛺 Animated 3D-Style CNG Mini-Preview -->
-            <div class="bd-card-vehicle-preview bd-card-cng-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#071d18] to-teal-950/80 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner" style="height: 50px;">
-              <svg class="w-full h-full" viewBox="0 0 280 50" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="bd-card-vehicle-preview bd-card-cng-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#071d18] to-teal-950/80 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner">
+              <svg class="w-full h-full" viewBox="0 0 280 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="cngBeamStatic" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9" />
@@ -4555,11 +4711,11 @@
                   </filter>
                 </defs>
 
-                <rect x="0" y="42" width="280" height="8" fill="#091413" />
-                <line x1="0" y1="42" x2="280" y2="42" stroke="#1e293b" stroke-width="1.8" />
+                <rect x="0" y="44" width="280" height="12" fill="#091413" />
+                <line x1="0" y1="44" x2="280" y2="44" stroke="#1e293b" stroke-width="1.8" />
 
                 <!-- 🛺 CNG Body with 2-Stroke Idle Vibration -->
-                <g class="cng-idle-vibe" transform="translate(45, 6)">
+                <g class="cng-idle-vibe" transform="translate(45, 8)">
                   <polygon points="98,24 185,12 185,36" fill="url(#cngBeamStatic)" />
                   <path d="M 12 18 L 22 7 Q 28 5 48 5 L 80 5 Q 86 6 88 12 L 98 25 L 98 34 L 12 34 Z" fill="#15803d" stroke="#166534" stroke-width="1" />
                   <path d="M 12 25 L 98 25 L 98 28 L 12 28 Z" fill="#eab308" />
@@ -4575,35 +4731,35 @@
                   <circle cx="98" cy="25" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 3px #fde047)" />
 
                   <g transform="translate(86, 34)">
-                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <circle cx="0" cy="0" r="5.5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
                     <g class="wheel-spoke-spin">
-                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
                     </g>
                   </g>
                   <g transform="translate(24, 34)">
-                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <circle cx="0" cy="0" r="5.5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
                     <g class="wheel-spoke-spin">
-                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
                     </g>
                   </g>
                 </g>
 
                 <!-- 🌟 Floating Holographic Digital Fare Meter Badge -->
-                <g transform="translate(175, 5)">
-                  <rect x="0" y="0" width="85" height="24" rx="4" fill="#022c22" fill-opacity="0.85" stroke="#10b981" stroke-width="1" filter="drop-shadow(0 0 6px rgba(16,185,129,0.4))" />
+                <g transform="translate(182, 5)">
+                  <rect x="0" y="0" width="88" height="24" rx="4" fill="#022c22" fill-opacity="0.85" stroke="#10b981" stroke-width="1" filter="drop-shadow(0 0 6px rgba(16,185,129,0.4))" />
                   <circle cx="9" cy="8" r="2.5" fill="#10b981" class="cng-meter-led" filter="url(#meterGlowStatic)" />
                   <text x="16" y="10" fill="#34d399" font-family="monospace" font-size="7" font-weight="900" letter-spacing="0.5">METER HI</text>
                   <text x="8" y="20" fill="#fef08a" font-family="monospace" font-size="8.5" font-weight="900">৳ FARE ON</text>
-                  <rect x="66" y="6" width="3" height="12" rx="0.5" fill="#10b981" class="cng-meter-bar-1" />
-                  <rect x="71" y="9" width="3" height="9" rx="0.5" fill="#10b981" class="cng-meter-bar-2" />
-                  <rect x="76" y="4" width="3" height="14" rx="0.5" fill="#34d399" class="cng-meter-bar-3" />
+                  <rect x="68" y="6" width="3" height="12" rx="0.5" fill="#10b981" class="cng-meter-bar-1" />
+                  <rect x="73" y="9" width="3" height="9" rx="0.5" fill="#10b981" class="cng-meter-bar-2" />
+                  <rect x="78" y="4" width="3" height="14" rx="0.5" fill="#34d399" class="cng-meter-bar-3" />
                 </g>
 
-                <g transform="translate(10, 6)">
-                  <rect x="0" y="0" width="48" height="14" rx="3" fill="#16a34a" fill-opacity="0.25" stroke="#34d399" stroke-width="0.8" />
-                  <text x="5" y="10.5" fill="#34d399" font-family="monospace" font-size="7.5" font-weight="900">4-STROKE</text>
+                <g transform="translate(8, 5)">
+                  <rect x="0" y="0" width="56" height="13" rx="3" fill="#16a34a" fill-opacity="0.25" stroke="#34d399" stroke-width="0.8" />
+                  <text x="5" y="9.5" fill="#34d399" font-family="monospace" font-size="7.5" font-weight="900">4-STROKE</text>
                 </g>
               </svg>
             </div>
@@ -4633,34 +4789,56 @@
             </div>
 
             <!-- 🚗 Animated Car Mini-Preview -->
-            <div class="bd-card-vehicle-preview bd-card-car-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#0d1233] to-indigo-950/80 border border-indigo-500/30 relative pointer-events-none select-none shadow-inner" style="height: 50px;">
-              <svg class="w-full h-full" viewBox="0 0 280 50" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0" y="42" width="280" height="8" fill="#070c1d" />
-                <line x1="0" y1="42" x2="280" y2="42" stroke="#1e293b" stroke-width="1.8" />
-                <g transform="translate(90, 10)">
-                  <polygon points="76,20 145,12 145,30" fill="rgba(254, 240, 138, 0.35)" />
-                  <path d="M 6 22 L 20 10 L 52 10 L 72 20 L 76 27 L 6 27 Z" fill="#4338ca" stroke="#6366f1" stroke-width="1" />
-                  <rect x="24" y="12" width="12" height="7" rx="1" fill="#93c5fd" opacity="0.8" />
-                  <rect x="40" y="12" width="12" height="7" rx="1" fill="#93c5fd" opacity="0.8" />
-                  <circle cx="75" cy="22" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #fde047)" />
-                  <g transform="translate(62, 27)">
-                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+            <div class="bd-card-vehicle-preview bd-card-car-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#0d1233] to-indigo-950/80 border border-indigo-500/30 relative pointer-events-none select-none shadow-inner">
+              <svg class="w-full h-full" viewBox="0 0 280 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="carBeamDirect" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85" />
+                    <stop offset="50%" stop-color="#93c5fd" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="44" width="280" height="12" fill="#070c1d" />
+                <line x1="0" y1="44" x2="280" y2="44" stroke="#1e293b" stroke-width="1.8" />
+                <g class="car-highway-scroll">
+                  <line x1="0" y1="50" x2="30" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                  <line x1="60" y1="50" x2="90" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                  <line x1="120" y1="50" x2="150" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                  <line x1="180" y1="50" x2="210" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                  <line x1="240" y1="50" x2="270" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                  <line x1="300" y1="50" x2="330" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                </g>
+                <g class="car-glide-group" transform="translate(90, 10)">
+                  <polygon points="86,22 180,14 180,30" fill="url(#carBeamDirect)" />
+                  <path d="M 6 24 L 20 12 L 56 12 L 76 20 L 82 26 L 6 26 Z" fill="#4338ca" stroke="#6366f1" stroke-width="1" />
+                  <path d="M 4 26 L 84 26 L 82 32 L 6 32 Z" fill="#312e81" />
+                  <polygon points="22,14 34,14 34,22 18,22" fill="#93c5fd" opacity="0.85" />
+                  <rect x="37" y="14" width="15" height="8" rx="1" fill="#93c5fd" opacity="0.85" />
+                  <polygon points="55,14 70,20 55,20" fill="#93c5fd" opacity="0.85" />
+                  <circle cx="81" cy="23" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #93c5fd)" />
+                  <rect x="4.5" y="22" width="2" height="4" rx="0.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+                  <g transform="translate(68, 32)">
+                    <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#6366f1" stroke-width="1.5" />
                     <g class="wheel-spoke-spin">
-                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
                     </g>
                   </g>
-                  <g transform="translate(18, 27)">
-                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                  <g transform="translate(20, 32)">
+                    <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#6366f1" stroke-width="1.5" />
                     <g class="wheel-spoke-spin">
-                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
                     </g>
                   </g>
                 </g>
-                <g transform="translate(10, 6)">
-                  <rect x="0" y="0" width="56" height="14" rx="3" fill="#4338ca" fill-opacity="0.25" stroke="#818cf8" stroke-width="0.8" />
-                  <text x="6" y="10.5" fill="#a5b4fc" font-family="monospace" font-size="7.5" font-weight="900">AC CABIN</text>
+                <g transform="translate(8, 5)">
+                  <rect x="0" y="0" width="80" height="13" rx="3" fill="#4338ca" fill-opacity="0.25" stroke="#6366f1" stroke-width="0.8" />
+                  <text x="5" y="9.5" fill="#a5b4fc" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">SEDAN COMFORT</text>
+                </g>
+                <g transform="translate(188, 5)">
+                  <rect x="0" y="0" width="84" height="13" rx="3" fill="#1e1b4b" fill-opacity="0.85" stroke="#818cf8" stroke-width="0.8" filter="drop-shadow(0 0 4px rgba(99,102,241,0.3))" />
+                  <text x="5" y="9.5" fill="#c7d2fe" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">❄️ AC CAB · LIVE</text>
                 </g>
               </svg>
             </div>
@@ -4723,8 +4901,8 @@
               </div>
 
               <!-- 🚇 Animated 3D-Style MRT-6 Metro Mini-Preview -->
-              <div class="bd-card-vehicle-preview bd-card-metro-preview mb-3 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#06142a] to-sky-950/80 border border-sky-500/30 relative pointer-events-none select-none shadow-inner" style="height: 52px;">
-                <svg class="w-full h-full" viewBox="0 0 320 52" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <div class="bd-card-vehicle-preview bd-card-metro-preview mb-3 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#06142a] to-sky-950/80 border border-sky-500/30 relative pointer-events-none select-none shadow-inner">
+                <svg class="w-full h-full" viewBox="0 0 320 64" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <filter id="mrtGlow" x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -4749,55 +4927,68 @@
                     </linearGradient>
                   </defs>
 
-                  <path d="M 0 10 L 320 10 M 0 42 L 320 42" stroke="#1e293b" stroke-width="0.8" stroke-dasharray="8 6" />
-                  <path d="M 0 5 L 320 12 M 0 47 L 320 40" stroke="#0f172a" stroke-width="1.2" />
+                  <!-- Elevated Viaduct Track Structure -->
+                  <rect x="0" y="52" width="320" height="12" fill="#091122" />
+                  <line x1="0" y1="52" x2="320" y2="52" stroke="#334155" stroke-width="2" />
+                  <line x1="0" y1="55" x2="320" y2="55" stroke="#475569" stroke-width="1" stroke-dasharray="14 6" />
+                  <line x1="0" y1="12" x2="320" y2="12" stroke="#1e293b" stroke-width="0.8" stroke-dasharray="10 8" />
 
-                  <!-- Animated Horizontal Cyan Viaduct Speed Lines -->
+                  <!-- Passing Viaduct Pillars in Background -->
+                  <g>
+                    <rect x="150" y="16" width="6" height="36" fill="#1e293b" opacity="0.4" class="metro-pillar-1" />
+                    <rect x="270" y="16" width="6" height="36" fill="#1e293b" opacity="0.4" class="metro-pillar-2" />
+                  </g>
+
+                  <!-- Animated Full-Width Horizontal Cyan Viaduct Speed Lines -->
                   <g class="metro-speed-lines-group">
-                    <line x1="20" y1="8" x2="90" y2="8" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="metro-speed-line-1" opacity="0.7" />
-                    <line x1="80" y1="14" x2="170" y2="14" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" class="metro-speed-line-2" opacity="0.9" />
-                    <line x1="140" y1="38" x2="240" y2="38" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="metro-speed-line-3" opacity="0.6" />
-                    <line x1="200" y1="44" x2="280" y2="44" stroke="#00f0ff" stroke-width="1" stroke-linecap="round" class="metro-speed-line-1" opacity="0.8" />
-                    <line x1="30" y1="26" x2="110" y2="26" stroke="#10b981" stroke-width="1" stroke-linecap="round" class="metro-speed-line-2" opacity="0.5" />
+                    <line x1="20" y1="10" x2="110" y2="10" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" class="metro-speed-line-1" opacity="0.8" />
+                    <line x1="80" y1="18" x2="190" y2="18" stroke="#00f0ff" stroke-width="2.2" stroke-linecap="round" class="metro-speed-line-2" opacity="0.95" />
+                    <line x1="160" y1="46" x2="270" y2="46" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" class="metro-speed-line-3" opacity="0.75" />
+                    <line x1="220" y1="50" x2="310" y2="50" stroke="#00f0ff" stroke-width="1.2" stroke-linecap="round" class="metro-speed-line-1" opacity="0.9" />
+                    <line x1="40" y1="32" x2="130" y2="32" stroke="#10b981" stroke-width="1.2" stroke-linecap="round" class="metro-speed-line-2" opacity="0.6" />
                   </g>
 
-                  <rect x="0" y="44" width="320" height="8" fill="#091122" />
-                  <line x1="0" y1="44" x2="320" y2="44" stroke="#334155" stroke-width="2" />
-                  <line x1="0" y1="46" x2="320" y2="46" stroke="#475569" stroke-width="1" stroke-dasharray="12 4" />
+                  <!-- 🚇 MRT-6 Train Group with Continuous Hardware-Accelerated Gliding & Track Oscillation -->
+                  <g class="metro-train-cruise">
+                    <g transform="translate(100, 16)">
+                      <!-- Headlight Forward Beam Cone -->
+                      <polygon points="108,18 250,6 250,30" fill="url(#mrtBeam)" />
+                      <!-- Aerodynamic Nose & Silver Train Car -->
+                      <path d="M 0 10 L 40 10 L 40 32 L 0 32 Z" fill="#1e293b" />
+                      <path d="M 40 8 L 85 8 L 85 33 L 40 33 Z" fill="url(#mrtSilver)" />
+                      <path d="M 85 8 L 105 13 Q 112 18 108 26 L 102 33 L 85 33 Z" fill="url(#mrtSilver)" stroke="#94a3b8" stroke-width="0.5" />
+                      <path d="M 40 17 L 90 17 L 107 20 Q 110 23 105 26 L 85 26 L 40 26 Z" fill="#059669" filter="drop-shadow(0 0 2px #059669)" />
+                      <path d="M 38 27 L 85 27 L 104 27" stroke="#00f0ff" stroke-width="1.8" filter="url(#mrtGlow)" />
+                      <path d="M 38 7 L 85 7 L 104 12" stroke="#10b981" stroke-width="1.2" />
 
-                  <!-- 🚇 MRT-6 Train Group -->
-                  <g transform="translate(100, 11)">
-                    <polygon points="108,18 215,8 215,28" fill="url(#mrtBeam)" />
-                    <path d="M 0 10 L 40 10 L 40 32 L 0 32 Z" fill="#1e293b" />
-                    <path d="M 40 8 L 85 8 L 85 33 L 40 33 Z" fill="url(#mrtSilver)" />
-                    <path d="M 85 8 L 105 13 Q 112 18 108 26 L 102 33 L 85 33 Z" fill="url(#mrtSilver)" stroke="#94a3b8" stroke-width="0.5" />
-                    <path d="M 40 17 L 90 17 L 107 20 Q 110 23 105 26 L 85 26 L 40 26 Z" fill="#059669" filter="drop-shadow(0 0 2px #059669)" />
-                    <path d="M 38 27 L 85 27 L 104 27" stroke="#00f0ff" stroke-width="1.8" filter="url(#mrtGlow)" />
-                    <path d="M 38 7 L 85 7 L 104 12" stroke="#10b981" stroke-width="1.2" />
+                      <path d="M 88 10 L 102 14 Q 106 17 104 22 L 88 22 Z" fill="url(#mrtGlass)" stroke="#38bdf8" stroke-width="0.8" />
+                      <line x1="90" y1="12" x2="100" y2="15" stroke="#ffffff" stroke-width="0.8" opacity="0.8" />
 
-                    <path d="M 88 10 L 102 14 Q 106 17 104 22 L 88 22 Z" fill="url(#mrtGlass)" stroke="#38bdf8" stroke-width="0.8" />
-                    <line x1="90" y1="12" x2="100" y2="15" stroke="#ffffff" stroke-width="0.8" opacity="0.8" />
+                      <rect x="45" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
+                      <rect x="58" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
+                      <rect x="71" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
 
-                    <rect x="45" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
-                    <rect x="58" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
-                    <rect x="71" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
+                      <!-- LED Dual Headlights -->
+                      <circle cx="106" cy="24" r="2.2" fill="#ffffff" filter="url(#mrtGlow)" />
+                      <circle cx="103" cy="28" r="1.8" fill="#38bdf8" filter="url(#mrtGlow)" />
 
-                    <circle cx="106" cy="24" r="2.2" fill="#ffffff" filter="url(#mrtGlow)" />
-                    <circle cx="103" cy="28" r="1.8" fill="#38bdf8" filter="url(#mrtGlow)" />
+                      <!-- Bogie & Wheels -->
+                      <rect x="46" y="32" width="16" height="3" fill="#0f172a" rx="1" />
+                      <circle cx="50" cy="34" r="2" fill="#475569" />
+                      <circle cx="58" cy="34" r="2" fill="#475569" />
+                      <rect x="78" y="32" width="16" height="3" fill="#0f172a" rx="1" />
+                      <circle cx="82" cy="34" r="2" fill="#475569" />
+                      <circle cx="90" cy="34" r="2" fill="#475569" />
 
-                    <rect x="46" y="32" width="16" height="3" fill="#0f172a" rx="1" />
-                    <circle cx="50" cy="34" r="2" fill="#475569" />
-                    <circle cx="58" cy="34" r="2" fill="#475569" />
-                    <rect x="78" y="32" width="16" height="3" fill="#0f172a" rx="1" />
-                    <circle cx="82" cy="34" r="2" fill="#475569" />
-                    <circle cx="90" cy="34" r="2" fill="#475569" />
-
-                    <path d="M 45 7 L 50 2 L 60 2 L 64 7" stroke="#94a3b8" stroke-width="0.8" fill="none" />
-                    <line x1="48" y1="2" x2="62" y2="2" stroke="#38bdf8" stroke-width="1.2" filter="url(#mrtGlow)" />
+                      <!-- Roof Pantograph -->
+                      <path d="M 45 7 L 50 2 L 60 2 L 64 7" stroke="#94a3b8" stroke-width="0.8" fill="none" />
+                      <line x1="48" y1="2" x2="62" y2="2" stroke="#38bdf8" stroke-width="1.2" filter="url(#mrtGlow)" />
+                    </g>
                   </g>
 
+                  <!-- Telemetry Badge -->
                   <g transform="translate(14, 6)">
-                    <rect x="0" y="0" width="82" height="15" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
+                    <rect x="0" y="0" width="86" height="15" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
                     <text x="6" y="11" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="900" letter-spacing="0.5">MRT-6 100km/h</text>
                   </g>
                 </svg>
@@ -4859,8 +5050,8 @@
               </div>
 
               <!-- 🚌 Animated 3D-Style Local Bus Mini-Preview -->
-              <div class="bd-card-vehicle-preview bd-card-bus-preview mb-3 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#071a17] to-emerald-950/80 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner" style="height: 52px;">
-                <svg class="w-full h-full" viewBox="0 0 320 52" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <div class="bd-card-vehicle-preview bd-card-bus-preview mb-3 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#071a17] to-emerald-950/80 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner">
+                <svg class="w-full h-full" viewBox="0 0 320 64" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <filter id="busWindowGlow" x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="1.5" result="blur" />
@@ -4870,8 +5061,8 @@
                       </feMerge>
                     </filter>
                     <linearGradient id="busHeadlightBeam" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stop-color="#fde047" stop-opacity="0.8" />
-                      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.2" />
+                      <stop offset="0%" stop-color="#fde047" stop-opacity="0.85" />
+                      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.25" />
                       <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
                     </linearGradient>
                     <clipPath id="busTickerClip">
@@ -4879,78 +5070,87 @@
                     </clipPath>
                   </defs>
 
-                  <rect x="0" y="44" width="320" height="8" fill="#091312" />
-                  <line x1="0" y1="44" x2="320" y2="44" stroke="#1e293b" stroke-width="2" />
+                  <!-- Road Surface & Kerb -->
+                  <rect x="0" y="52" width="320" height="12" fill="#091312" />
+                  <line x1="0" y1="52" x2="320" y2="52" stroke="#1e293b" stroke-width="2" />
                   <g class="bus-road-dashes-group">
-                    <line x1="10" y1="48" x2="40" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
-                    <line x1="80" y1="48" x2="110" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
-                    <line x1="150" y1="48" x2="180" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
-                    <line x1="220" y1="48" x2="250" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
-                    <line x1="290" y1="48" x2="320" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
+                    <line x1="0" y1="57" x2="30" y2="57" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                    <line x1="70" y1="57" x2="100" y2="57" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                    <line x1="140" y1="57" x2="170" y2="57" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                    <line x1="210" y1="57" x2="240" y2="57" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                    <line x1="280" y1="57" x2="310" y2="57" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+                    <line x1="350" y1="57" x2="380" y2="57" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
                   </g>
 
-                  <!-- 🚌 Stylized 3D Red & Green BRTC Double-Decker City Bus -->
-                  <g transform="translate(68, 6)">
-                    <polygon points="180,31 270,22 270,44" fill="url(#busHeadlightBeam)" />
+                  <!-- 🚌 Double-Decker Bus Cruising with Suspension Bounce -->
+                  <g class="bus-cruise-group">
+                    <g transform="translate(68, 12)">
+                      <!-- Forward Headlight Beam Cone -->
+                      <polygon points="180,31 290,20 290,44" fill="url(#busHeadlightBeam)" />
 
-                    <rect x="10" y="22" width="166" height="18" rx="2" fill="#dc2626" />
-                    <path d="M 12 7 L 168 7 Q 174 7 174 13 L 174 22 L 10 22 Q 10 13 12 7 Z" fill="#047857" />
-                    <rect x="10" y="21" width="166" height="2" fill="#f1f5f9" />
-                    <rect x="172" y="32" width="4" height="7" rx="1" fill="#475569" />
-                    
-                    <g fill="#fde047" opacity="0.9" filter="url(#busWindowGlow)">
-                      <rect x="18" y="10" width="16" height="8" rx="1" />
-                      <rect x="38" y="10" width="16" height="8" rx="1" />
-                      <rect x="58" y="10" width="16" height="8" rx="1" />
-                      <rect x="78" y="10" width="16" height="8" rx="1" />
-                      <rect x="98" y="10" width="16" height="8" rx="1" />
-                      <rect x="118" y="10" width="16" height="8" rx="1" />
-                      <rect x="138" y="10" width="16" height="8" rx="1" />
-                      <path d="M 158 10 L 169 10 Q 172 10 171 14 L 170 18 L 158 18 Z" />
-                    </g>
-
-                    <g fill="#fef08a" opacity="0.92" filter="url(#busWindowGlow)">
-                      <rect x="24" y="24" width="16" height="8" rx="1" />
-                      <rect x="44" y="24" width="16" height="8" rx="1" />
-                      <rect x="64" y="24" width="16" height="8" rx="1" />
-                      <rect x="84" y="24" width="16" height="8" rx="1" />
-                      <rect x="104" y="24" width="16" height="8" rx="1" />
-                      <rect x="124" y="24" width="16" height="8" rx="1" />
-                      <path d="M 148 24 L 168 24 Q 171 24 171 28 L 170 32 L 148 32 Z" />
-                    </g>
-
-                    <circle cx="173" cy="33" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #fde047)" />
-                    <circle cx="173" cy="37" r="1.5" fill="#f59e0b" />
-
-                    <rect x="8.5" y="24" width="2" height="4" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
-                    <rect x="8.5" y="32" width="2" height="3" fill="#f59e0b" />
-
-                    <g transform="translate(142, 39)">
-                      <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#475569" stroke-width="1.8" />
-                      <circle cx="0" cy="0" r="3.5" fill="#334155" />
-                      <g class="wheel-spoke-spin">
-                        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="1" />
-                        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1" />
+                      <rect x="10" y="22" width="166" height="18" rx="2" fill="#dc2626" />
+                      <path d="M 12 7 L 168 7 Q 174 7 174 13 L 174 22 L 10 22 Q 10 13 12 7 Z" fill="#047857" />
+                      <rect x="10" y="21" width="166" height="2" fill="#f1f5f9" />
+                      <rect x="172" y="32" width="4" height="7" rx="1" fill="#475569" />
+                      
+                      <!-- Upper Deck Windows -->
+                      <g fill="#fde047" opacity="0.9" filter="url(#busWindowGlow)">
+                        <rect x="18" y="10" width="16" height="8" rx="1" />
+                        <rect x="38" y="10" width="16" height="8" rx="1" />
+                        <rect x="58" y="10" width="16" height="8" rx="1" />
+                        <rect x="78" y="10" width="16" height="8" rx="1" />
+                        <rect x="98" y="10" width="16" height="8" rx="1" />
+                        <rect x="118" y="10" width="16" height="8" rx="1" />
+                        <rect x="138" y="10" width="16" height="8" rx="1" />
+                        <path d="M 158 10 L 169 10 Q 172 10 171 14 L 170 18 L 158 18 Z" />
                       </g>
-                    </g>
-                    <g transform="translate(42, 39)">
-                      <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#475569" stroke-width="1.8" />
-                      <circle cx="0" cy="0" r="3.5" fill="#334155" />
-                      <g class="wheel-spoke-spin">
-                        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="1" />
-                        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1" />
-                      </g>
-                    </g>
 
-                    <!-- 🌟 Miniature Digital LED Matrix Route Ticker Box -->
-                    <g transform="translate(-10, -1)">
-                      <rect x="180" y="8" width="66" height="11" rx="2" fill="#020617" stroke="#10b981" stroke-width="0.8" filter="drop-shadow(0 0 3px rgba(16,185,129,0.5))" />
-                      <g clip-path="url(#busTickerClip)">
-                        <text id="bdBusTickerText" x="184" y="16.5" fill="#10b981" font-family="monospace" font-size="7.5" font-weight="900" class="bus-ticker-text">DHAKA CITY EXPRESS • MIRPUR ➔ MOTIJHEEL</text>
+                      <!-- Lower Deck Windows -->
+                      <g fill="#fef08a" opacity="0.92" filter="url(#busWindowGlow)">
+                        <rect x="24" y="24" width="16" height="8" rx="1" />
+                        <rect x="44" y="24" width="16" height="8" rx="1" />
+                        <rect x="64" y="24" width="16" height="8" rx="1" />
+                        <rect x="84" y="24" width="16" height="8" rx="1" />
+                        <rect x="104" y="24" width="16" height="8" rx="1" />
+                        <rect x="124" y="24" width="16" height="8" rx="1" />
+                        <path d="M 148 24 L 168 24 Q 171 24 171 28 L 170 32 L 148 32 Z" />
+                      </g>
+
+                      <circle cx="173" cy="33" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #fde047)" />
+                      <circle cx="173" cy="37" r="1.5" fill="#f59e0b" />
+
+                      <rect x="8.5" y="24" width="2" height="4" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+                      <rect x="8.5" y="32" width="2" height="3" fill="#f59e0b" />
+
+                      <!-- Rotating Spoked Wheels -->
+                      <g transform="translate(142, 39)">
+                        <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#475569" stroke-width="1.8" />
+                        <circle cx="0" cy="0" r="3.5" fill="#334155" />
+                        <g class="wheel-spoke-spin">
+                          <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="1" />
+                          <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1" />
+                        </g>
+                      </g>
+                      <g transform="translate(42, 39)">
+                        <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#475569" stroke-width="1.8" />
+                        <circle cx="0" cy="0" r="3.5" fill="#334155" />
+                        <g class="wheel-spoke-spin">
+                          <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="1" />
+                          <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1" />
+                        </g>
+                      </g>
+
+                      <!-- 🌟 Miniature Digital LED Matrix Route Ticker Box -->
+                      <g transform="translate(-10, -1)">
+                        <rect x="180" y="8" width="66" height="11" rx="2" fill="#020617" stroke="#10b981" stroke-width="0.8" filter="drop-shadow(0 0 3px rgba(16,185,129,0.5))" />
+                        <g clip-path="url(#busTickerClip)">
+                          <text id="bdBusTickerText" x="184" y="16.5" fill="#10b981" font-family="monospace" font-size="7.5" font-weight="900" class="bus-ticker-text">DHAKA CITY EXPRESS • MIRPUR ➔ MOTIJHEEL</text>
+                        </g>
                       </g>
                     </g>
                   </g>
 
+                  <!-- Telemetry Badge -->
                   <g transform="translate(14, 6)">
                     <rect x="0" y="0" width="76" height="15" rx="3" fill="#059669" fill-opacity="0.25" stroke="#10b981" stroke-width="0.8" />
                     <text x="6" y="11" fill="#34d399" font-family="monospace" font-size="8.5" font-weight="900" letter-spacing="0.5">CITY CORRIDOR</text>
@@ -8369,8 +8569,76 @@
     // =========================================================
     // ✨ 3D Holographic "Flip & Tilt" Cards & Vehicle Mini-Previews
     // =========================================================
+    function getWalkMiniPreviewSvg() {
+      return `<svg class="w-full h-full" viewBox="0 0 240 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="walkTileGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#292524" />
+      <stop offset="50%" stop-color="#44403c" />
+      <stop offset="100%" stop-color="#292524" />
+    </linearGradient>
+  </defs>
+  <!-- Sidewalk & Zebra Crossing Surface -->
+  <rect x="0" y="44" width="240" height="12" fill="#1c1917" />
+  <line x1="0" y1="44" x2="240" y2="44" stroke="#44403c" stroke-width="1.5" />
+  <g class="walk-sidewalk-scroll">
+    <line x1="0" y1="48" x2="20" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="40" y1="48" x2="60" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="80" y1="48" x2="100" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="120" y1="48" x2="140" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="160" y1="48" x2="180" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="200" y1="48" x2="220" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="240" y1="48" x2="260" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="280" y1="48" x2="300" y2="48" stroke="#fef08a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+  </g>
+  <!-- 🚶 Stylized 3D Pedestrian in Active Stride -->
+  <g class="walk-person-bob" transform="translate(108, 10)">
+    <!-- Back Arm -->
+    <g class="walk-arm-left" style="transform-origin: 12px 14px;">
+      <line x1="12" y1="14" x2="6" y2="23" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" />
+      <line x1="6" y1="23" x2="3" y2="28" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+    </g>
+    <!-- Back Leg -->
+    <g class="walk-leg-left" style="transform-origin: 12px 27px;">
+      <line x1="12" y1="27" x2="6" y2="35" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" />
+      <line x1="6" y1="35" x2="2" y2="42" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" />
+      <rect x="0" y="41" width="6" height="2.5" rx="1" fill="#f59e0b" />
+    </g>
+    <!-- Backpack -->
+    <rect x="5" y="14" width="4.5" height="11" rx="1.5" fill="#d97706" stroke="#b45309" stroke-width="0.5" />
+    <!-- Torso -->
+    <path d="M 10 13 L 18 13 L 20 27 L 8 27 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="0.8" />
+    <!-- Head & Cap -->
+    <circle cx="14" cy="7.5" r="4.5" fill="#fde047" stroke="#f59e0b" stroke-width="0.8" />
+    <path d="M 11 6.5 Q 14 3.5 17 6.5" stroke="#38bdf8" stroke-width="1.2" fill="none" />
+    <path d="M 17 6.5 L 20 7" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round" />
+    <!-- Front Leg -->
+    <g class="walk-leg-right" style="transform-origin: 16px 27px;">
+      <line x1="16" y1="27" x2="22" y2="35" stroke="#334155" stroke-width="2.5" stroke-linecap="round" />
+      <line x1="22" y1="35" x2="26" y2="42" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round" />
+      <rect x="24" y="41" width="6" height="2.5" rx="1" fill="#f59e0b" />
+    </g>
+    <!-- Front Arm -->
+    <g class="walk-arm-right" style="transform-origin: 16px 14px;">
+      <line x1="16" y1="14" x2="22" y2="23" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" />
+      <line x1="22" y1="23" x2="25" y2="28" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+    </g>
+  </g>
+  <!-- Badges -->
+  <g transform="translate(6, 4)">
+    <rect x="0" y="0" width="82" height="13" rx="3" fill="#d97706" fill-opacity="0.25" stroke="#f59e0b" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#fbbf24" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">PEDESTRIAN PATH</text>
+  </g>
+  <g transform="translate(138, 4)">
+    <rect x="0" y="0" width="96" height="13" rx="3" fill="#047857" fill-opacity="0.35" stroke="#10b981" stroke-width="0.8" />
+    <circle cx="7" cy="6.5" r="2.2" fill="#34d399" class="walk-step-pulse" />
+    <text x="13" y="9.5" fill="#6ee7b7" font-family="monospace" font-size="7" font-weight="900" letter-spacing="0.3">STEP TRACKER · LIVE</text>
+  </g>
+</svg>`;
+    }
+
     function getRickshawMiniPreviewSvg() {
-      return `<svg class="w-full h-full" viewBox="0 0 200 46" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+      return `<svg class="w-full h-full" viewBox="0 0 240 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="hoodGradMini" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#ec4899" />
@@ -8378,11 +8646,9 @@
       <stop offset="100%" stop-color="#06b6d4" />
     </linearGradient>
   </defs>
-  <line x1="0" y1="40" x2="200" y2="40" stroke="#334155" stroke-width="1.5" />
-  <line x1="10" y1="40" x2="40" y2="40" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
-  <line x1="70" y1="40" x2="100" y2="40" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
-  <line x1="130" y1="40" x2="160" y2="40" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
-  <g class="rickshaw-bounce-group" transform="translate(42, 6)">
+  <rect x="0" y="44" width="240" height="12" fill="#091413" />
+  <line x1="0" y1="44" x2="240" y2="44" stroke="#1e293b" stroke-width="1.8" />
+  <g class="rickshaw-bounce-group" transform="translate(62, 8)">
     <path d="M 10 18 Q 12 5 28 4 Q 42 4 45 16 L 38 28 L 8 28 Z" fill="url(#hoodGradMini)" stroke="#ec4899" stroke-width="0.8" />
     <path d="M 14 12 L 20 8 L 26 12 L 32 8 L 38 12" stroke="#fef08a" stroke-width="1.2" stroke-linecap="round" fill="none" />
     <path d="M 12 18 L 18 15 L 24 18 L 30 15 L 36 18" stroke="#06b6d4" stroke-width="1.2" stroke-linecap="round" fill="none" />
@@ -8422,14 +8688,18 @@
     </g>
   </g>
   <g transform="translate(6, 4)">
-    <rect x="0" y="0" width="30" height="12" rx="2" fill="#ec4899" fill-opacity="0.2" stroke="#ec4899" stroke-width="0.8" />
-    <text x="3" y="9" fill="#f472b6" font-family="monospace" font-size="7" font-weight="900">FOLK ART</text>
+    <rect x="0" y="0" width="58" height="13" rx="3" fill="#ec4899" fill-opacity="0.25" stroke="#ec4899" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#f472b6" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">FOLK ART</text>
+  </g>
+  <g transform="translate(162, 4)">
+    <rect x="0" y="0" width="72" height="13" rx="3" fill="#10b981" fill-opacity="0.25" stroke="#10b981" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#34d399" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">ECO RICKSHAW</text>
   </g>
 </svg>`;
     }
 
     function getCngMiniPreviewSvg() {
-      return `<svg class="w-full h-full" viewBox="0 0 280 46" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+      return `<svg class="w-full h-full" viewBox="0 0 240 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="cngBeamFeeder" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9" />
@@ -8437,10 +8707,10 @@
       <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
     </linearGradient>
   </defs>
-  <rect x="0" y="38" width="280" height="8" fill="#091413" />
-  <line x1="0" y1="38" x2="280" y2="38" stroke="#1e293b" stroke-width="1.8" />
-  <g class="cng-idle-vibe" transform="translate(45, 4)">
-    <polygon points="98,24 185,12 185,36" fill="url(#cngBeamFeeder)" />
+  <rect x="0" y="44" width="240" height="12" fill="#091413" />
+  <line x1="0" y1="44" x2="240" y2="44" stroke="#1e293b" stroke-width="1.8" />
+  <g class="cng-idle-vibe" transform="translate(25, 8)">
+    <polygon points="98,24 165,14 165,34" fill="url(#cngBeamFeeder)" />
     <path d="M 12 18 L 22 7 Q 28 5 48 5 L 80 5 Q 86 6 88 12 L 98 25 L 98 34 L 12 34 Z" fill="#15803d" stroke="#166534" stroke-width="1" />
     <path d="M 12 25 L 98 25 L 98 28 L 12 28 Z" fill="#eab308" />
     <path d="M 32 10 L 64 10 L 64 25 L 32 25 Z" fill="#022c22" />
@@ -8452,28 +8722,148 @@
     <line x1="72" y1="23" x2="78" y2="21" stroke="#f1f5f9" stroke-width="1.5" stroke-linecap="round" />
     <circle cx="98" cy="25" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 3px #fde047)" />
     <g transform="translate(86, 34)">
-      <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="5.5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
       <g class="wheel-spoke-spin">
-        <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-        <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
       </g>
     </g>
     <g transform="translate(24, 34)">
-      <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="5.5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
       <g class="wheel-spoke-spin">
-        <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
-        <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
       </g>
     </g>
   </g>
-  <g transform="translate(175, 4)">
-    <rect x="0" y="0" width="85" height="24" rx="4" fill="#022c22" fill-opacity="0.85" stroke="#10b981" stroke-width="1" filter="drop-shadow(0 0 6px rgba(16,185,129,0.4))" />
+  <g transform="translate(148, 4)">
+    <rect x="0" y="0" width="86" height="24" rx="4" fill="#022c22" fill-opacity="0.85" stroke="#10b981" stroke-width="1" filter="drop-shadow(0 0 6px rgba(16,185,129,0.4))" />
     <circle cx="9" cy="8" r="2.5" fill="#10b981" class="cng-meter-led" />
     <text x="16" y="10" fill="#34d399" font-family="monospace" font-size="7" font-weight="900" letter-spacing="0.5">METER HI</text>
     <text x="8" y="20" fill="#fef08a" font-family="monospace" font-size="8.5" font-weight="900">৳ FARE ON</text>
-    <rect x="66" y="6" width="3" height="12" rx="0.5" fill="#10b981" class="cng-meter-bar-1" />
-    <rect x="71" y="9" width="3" height="9" rx="0.5" fill="#10b981" class="cng-meter-bar-2" />
-    <rect x="76" y="4" width="3" height="14" rx="0.5" fill="#34d399" class="cng-meter-bar-3" />
+    <rect x="67" y="6" width="3" height="12" rx="0.5" fill="#10b981" class="cng-meter-bar-1" />
+    <rect x="72" y="9" width="3" height="9" rx="0.5" fill="#10b981" class="cng-meter-bar-2" />
+    <rect x="77" y="4" width="3" height="14" rx="0.5" fill="#34d399" class="cng-meter-bar-3" />
+  </g>
+</svg>`;
+    }
+
+    function getBikeMiniPreviewSvg() {
+      return `<svg class="w-full h-full" viewBox="0 0 240 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bikeBeamFeeder" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#0284c7" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#0369a1" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Road Surface & Speed Streaks -->
+  <rect x="0" y="44" width="240" height="12" fill="#091122" />
+  <line x1="0" y1="44" x2="240" y2="44" stroke="#1e293b" stroke-width="1.8" />
+  <g>
+    <line x1="10" y1="48" x2="70" y2="48" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="moto-streak-1" opacity="0.75" />
+    <line x1="90" y1="52" x2="160" y2="52" stroke="#00f0ff" stroke-width="1.5" stroke-linecap="round" class="moto-streak-2" opacity="0.85" />
+    <line x1="170" y1="48" x2="230" y2="48" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="moto-streak-1" opacity="0.75" />
+  </g>
+  <!-- 🏍️ Cruising Motorcycle & Helmeted Rider -->
+  <g class="moto-cruise-group" transform="translate(78, 10)">
+    <polygon points="68,20 155,12 155,28" fill="url(#bikeBeamFeeder)" />
+    <!-- Rider -->
+    <path d="M 20 20 L 36 12 L 46 16 L 40 27 L 24 27 Z" fill="#0369a1" stroke="#0284c7" stroke-width="0.8" />
+    <circle cx="36" cy="9" r="5" fill="#0f172a" stroke="#38bdf8" stroke-width="1" />
+    <path d="M 37 8 Q 41 9 40 12 L 36 12 Z" fill="#38bdf8" opacity="0.9" />
+    <line x1="42" y1="16" x2="53" y2="19" stroke="#f1f5f9" stroke-width="1.8" stroke-linecap="round" />
+    <path d="M 26 26 L 34 32 L 38 32" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round" />
+    <!-- Motorcycle Body -->
+    <path d="M 26 22 L 40 16 L 54 18 L 63 24 L 50 27 L 28 27 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1" />
+    <rect x="34" y="26" width="14" height="8" rx="1.5" fill="#334155" stroke="#475569" stroke-width="0.8" />
+    <path d="M 42 32 L 18 33 L 12 31" stroke="#94a3b8" stroke-width="1.8" fill="none" stroke-linecap="round" />
+    <circle cx="65" cy="22" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 3px #38bdf8)" />
+    <rect x="12" y="22" width="2" height="3.5" rx="0.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+    <!-- Spinning Wheels -->
+    <g transform="translate(58, 34)">
+      <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+      <g class="wheel-spoke-spin">
+        <line x1="-3.5" y1="0" x2="3.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-3.5" x2="0" y2="3.5" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+    <g transform="translate(16, 34)">
+      <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+      <g class="wheel-spoke-spin">
+        <line x1="-3.5" y1="0" x2="3.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-3.5" x2="0" y2="3.5" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+  </g>
+  <!-- Badges -->
+  <g transform="translate(6, 4)">
+    <rect x="0" y="0" width="66" height="13" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#38bdf8" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">RIDE SHARE</text>
+  </g>
+  <g transform="translate(148, 4)">
+    <rect x="0" y="0" width="86" height="13" rx="3" fill="#0369a1" fill-opacity="0.35" stroke="#0ea5e9" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#7dd3fc" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">⚡ EXPRESS MOTO</text>
+  </g>
+</svg>`;
+    }
+
+    function getCarMiniPreviewSvg() {
+      return `<svg class="w-full h-full" viewBox="0 0 240 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="carBeamFeeder" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#93c5fd" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Highway Road Surface & Dashes -->
+  <rect x="0" y="44" width="240" height="12" fill="#070c1d" />
+  <line x1="0" y1="44" x2="240" y2="44" stroke="#1e293b" stroke-width="1.8" />
+  <g class="car-highway-scroll">
+    <line x1="0" y1="50" x2="25" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="50" y1="50" x2="75" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="100" y1="50" x2="125" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="150" y1="50" x2="175" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="200" y1="50" x2="225" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <line x1="250" y1="50" x2="275" y2="50" stroke="#818cf8" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+  </g>
+  <!-- 🚗 Modern 3D-Styled Sedan Gliding Smoothly -->
+  <g class="car-glide-group" transform="translate(74, 10)">
+    <polygon points="86,22 170,14 170,30" fill="url(#carBeamFeeder)" />
+    <!-- Sedan Car Body -->
+    <path d="M 6 24 L 20 12 L 56 12 L 76 20 L 82 26 L 6 26 Z" fill="#4338ca" stroke="#6366f1" stroke-width="1" />
+    <path d="M 4 26 L 84 26 L 82 32 L 6 32 Z" fill="#312e81" />
+    <!-- Windows -->
+    <polygon points="22,14 34,14 34,22 18,22" fill="#93c5fd" opacity="0.85" />
+    <rect x="37" y="14" width="15" height="8" rx="1" fill="#93c5fd" opacity="0.85" />
+    <polygon points="55,14 70,20 55,20" fill="#93c5fd" opacity="0.85" />
+    <circle cx="81" cy="23" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #93c5fd)" />
+    <rect x="4.5" y="22" width="2" height="4" rx="0.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+    <!-- Wheels -->
+    <g transform="translate(68, 32)">
+      <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#6366f1" stroke-width="1.5" />
+      <g class="wheel-spoke-spin">
+        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+    <g transform="translate(20, 32)">
+      <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#6366f1" stroke-width="1.5" />
+      <g class="wheel-spoke-spin">
+        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+  </g>
+  <!-- Badges -->
+  <g transform="translate(6, 4)">
+    <rect x="0" y="0" width="80" height="13" rx="3" fill="#4338ca" fill-opacity="0.25" stroke="#6366f1" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#a5b4fc" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">SEDAN COMFORT</text>
+  </g>
+  <g transform="translate(150, 4)">
+    <rect x="0" y="0" width="84" height="13" rx="3" fill="#1e1b4b" fill-opacity="0.85" stroke="#818cf8" stroke-width="0.8" filter="drop-shadow(0 0 4px rgba(99,102,241,0.3))" />
+    <text x="5" y="9.5" fill="#c7d2fe" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">❄️ AC CAB · LIVE</text>
   </g>
 </svg>`;
     }
@@ -8627,18 +9017,27 @@
         }
         card.appendChild(infoP);
 
-        // 🚲 Rickshaw & 🛺 CNG Mini-Preview Inside Feeder Cards
-        if (opt.vehicle === 'Rickshaw') {
-          const previewDiv = document.createElement('div');
+        // 🚶 Walk, 🚲 Rickshaw, 🛺 CNG, 🏍️ Bike, & 🚗 Car Mini-Previews Inside Feeder Cards
+        const previewDiv = document.createElement('div');
+        if (opt.vehicle === 'Walk') {
+          previewDiv.className = 'bd-card-vehicle-preview bd-card-walk-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#1a1406] to-amber-950/70 border border-amber-500/30 relative pointer-events-none select-none shadow-inner';
+          previewDiv.innerHTML = getWalkMiniPreviewSvg();
+          card.appendChild(previewDiv);
+        } else if (opt.vehicle === 'Rickshaw') {
           previewDiv.className = 'bd-card-vehicle-preview bd-card-rickshaw-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#0a1b24] to-emerald-950/70 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner';
-          previewDiv.style.height = '48px';
           previewDiv.innerHTML = getRickshawMiniPreviewSvg();
           card.appendChild(previewDiv);
         } else if (opt.vehicle === 'CNG') {
-          const previewDiv = document.createElement('div');
           previewDiv.className = 'bd-card-vehicle-preview bd-card-cng-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#071d18] to-teal-950/70 border border-teal-500/30 relative pointer-events-none select-none shadow-inner';
-          previewDiv.style.height = '48px';
           previewDiv.innerHTML = getCngMiniPreviewSvg();
+          card.appendChild(previewDiv);
+        } else if (opt.vehicle === 'Bike') {
+          previewDiv.className = 'bd-card-vehicle-preview bd-card-bike-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#06172a] to-sky-950/70 border border-sky-500/30 relative pointer-events-none select-none shadow-inner';
+          previewDiv.innerHTML = getBikeMiniPreviewSvg();
+          card.appendChild(previewDiv);
+        } else if (opt.vehicle === 'Car') {
+          previewDiv.className = 'bd-card-vehicle-preview bd-card-car-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#0d1233] to-indigo-950/70 border border-indigo-500/30 relative pointer-events-none select-none shadow-inner';
+          previewDiv.innerHTML = getCarMiniPreviewSvg();
           card.appendChild(previewDiv);
         }
 
