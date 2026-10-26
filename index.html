@@ -1477,50 +1477,44 @@
       background-color: rgba(14, 36, 71, 0.5) !important;
     }
 
-    /* Desktop Hover: Subtle Fluid Lift (-2px) & Soft Glow */
+    /* Desktop Hover: 3D Holographic Perspective Lift & Soft Specular Glow */
     @media (hover: hover) and (pointer: fine) {
       .ride-option-hover-card:hover {
-        transform: translateY(-2px);
         z-index: 10;
       }
 
       #comparisonBike:hover {
-        transform: translateY(-2px) !important;
         border-color: #38bdf8 !important;
-        box-shadow: 0 12px 24px -6px rgba(14, 165, 233, 0.35), 0 0 20px rgba(56, 189, 248, 0.25) !important;
+        box-shadow: 0 16px 32px -6px rgba(14, 165, 233, 0.35), 0 0 20px rgba(56, 189, 248, 0.25) !important;
       }
       html[data-theme="dark"] #comparisonBike:hover {
         background-color: #0e2447 !important;
       }
 
       #comparisonCNG:hover {
-        transform: translateY(-2px) !important;
         border-color: #34d399 !important;
-        box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.35), 0 0 20px rgba(52, 211, 153, 0.25) !important;
+        box-shadow: 0 16px 32px -6px rgba(16, 185, 129, 0.35), 0 0 20px rgba(52, 211, 153, 0.25) !important;
       }
       html[data-theme="dark"] #comparisonCNG:hover {
         background-color: #092e22 !important;
       }
 
       #comparisonCar:hover {
-        transform: translateY(-2px) !important;
         border-color: #818cf8 !important;
-        box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.35), 0 0 20px rgba(129, 140, 248, 0.25) !important;
+        box-shadow: 0 16px 32px -6px rgba(99, 102, 241, 0.35), 0 0 20px rgba(129, 140, 248, 0.25) !important;
       }
       html[data-theme="dark"] #comparisonCar:hover {
         background-color: #1d1f4b !important;
       }
 
       #cardMetroOption.ride-option-hover-card:hover {
-        transform: translateY(-2px);
         border-color: #38bdf8 !important;
-        box-shadow: 0 12px 24px -6px rgba(14, 165, 233, 0.3), 0 0 18px rgba(56, 189, 248, 0.2) !important;
+        box-shadow: 0 16px 32px -6px rgba(14, 165, 233, 0.3), 0 0 18px rgba(56, 189, 248, 0.2) !important;
       }
 
       #cardBusOption.ride-option-hover-card:hover {
-        transform: translateY(-2px);
         border-color: #34d399 !important;
-        box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.3), 0 0 18px rgba(52, 211, 153, 0.2) !important;
+        box-shadow: 0 16px 32px -6px rgba(16, 185, 129, 0.3), 0 0 18px rgba(52, 211, 153, 0.2) !important;
       }
 
       .ride-option-hover-card:hover .ride-icon-badge {
@@ -1542,6 +1536,173 @@
     #selectCarVehicle:active {
       transform: scale(0.98);
       transition: transform 0.1s ease;
+    }
+
+    /* ========================================================
+       ✨ 3D Holographic "Flip & Tilt" Cards & Vehicle Mini-Previews
+       Strictly scoped to #/plan-trip transport fare result cards
+       ======================================================== */
+    .ride-option-hover-card,
+    .feeder-card-item {
+      transform-style: preserve-3d !important;
+      perspective: 1000px !important;
+      will-change: transform;
+      position: relative;
+    }
+
+    /* 3D Depth Pop on Inner Card Elements */
+    .ride-option-hover-card > div,
+    .ride-option-hover-card .bd-card-vehicle-preview,
+    .ride-option-hover-card .ride-icon-badge,
+    .ride-option-hover-card [id$="Fare"],
+    .feeder-card-item > div,
+    .feeder-card-item .bd-card-vehicle-preview,
+    .feeder-card-item .feeder-icon-badge {
+      transform-style: preserve-3d;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ride-option-hover-card:hover .bd-card-vehicle-preview,
+    .ride-option-hover-card:hover .ride-icon-badge,
+    .ride-option-hover-card:hover [id$="Fare"],
+    .feeder-card-item:hover .bd-card-vehicle-preview,
+    .feeder-card-item:hover .feeder-icon-badge {
+      transform: translateZ(18px);
+    }
+
+    /* Sweeping Holographic Glare Layer */
+    .bd-holo-glare {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      background: radial-gradient(
+        circle at var(--glare-x, 50%) var(--glare-y, 50%),
+        rgba(255, 255, 255, 0.16),
+        rgba(56, 189, 248, 0.06) 40%,
+        transparent 70%
+      );
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+                  0 0 20px -4px rgba(56, 189, 248, 0.15);
+    }
+
+    .ride-option-hover-card:hover .bd-holo-glare,
+    .feeder-card-item:hover .bd-holo-glare {
+      opacity: 1;
+    }
+
+    /* 🚇 MRT-6 Mini-Preview Speed Lines Animation */
+    @keyframes metroSpeedLines {
+      0% { transform: translateX(180px); opacity: 0; }
+      20% { opacity: 0.95; }
+      80% { opacity: 0.95; }
+      100% { transform: translateX(-180px); opacity: 0; }
+    }
+    .metro-speed-line-1 {
+      animation: metroSpeedLines 1.1s linear infinite;
+    }
+    .metro-speed-line-2 {
+      animation: metroSpeedLines 0.85s linear infinite -0.35s;
+    }
+    .metro-speed-line-3 {
+      animation: metroSpeedLines 1.4s linear infinite -0.7s;
+    }
+
+    /* 🚲 Rickshaw & 🚌 Bus Wheel Spin & Bounce Animations */
+    @keyframes wheelSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .wheel-spoke-spin {
+      animation: wheelSpin 0.9s linear infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    @keyframes rickshawBounce {
+      0%, 100% { transform: translate(42px, 6px); }
+      50% { transform: translate(42px, 4px) rotate(-0.5deg); }
+    }
+    .rickshaw-bounce-group {
+      animation: rickshawBounce 0.9s ease-in-out infinite;
+      transform-origin: 26px 34px;
+    }
+
+    /* 🚌 Bus Route Ticker & Road Animation */
+    @keyframes busTickerScroll {
+      0% { transform: translateX(65px); }
+      100% { transform: translateX(-160px); }
+    }
+    .bus-ticker-text {
+      animation: busTickerScroll 7.5s linear infinite;
+      text-shadow: 0 0 4px rgba(16, 185, 129, 0.8);
+    }
+
+    @keyframes busRoadMove {
+      0% { transform: translateX(60px); }
+      100% { transform: translateX(-60px); }
+    }
+    .bus-road-dashes-group {
+      animation: busRoadMove 0.8s linear infinite;
+    }
+
+    /* 🛺 CNG Idle Vibration & Digital Meter Animations */
+    @keyframes cngIdleVibe {
+      0%, 100% { transform: translate(45px, 6px); }
+      20% { transform: translate(45.5px, 5.4px); }
+      40% { transform: translate(44.6px, 6.5px); }
+      60% { transform: translate(45.4px, 6.2px); }
+      80% { transform: translate(44.8px, 5.6px); }
+    }
+    .cng-idle-vibe {
+      animation: cngIdleVibe 0.12s infinite ease-in-out;
+    }
+
+    @keyframes meterPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.85); }
+    }
+    .cng-meter-led {
+      animation: meterPulse 0.9s infinite ease-in-out;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    @keyframes meterBarTick1 {
+      0%, 100% { height: 12px; }
+      50% { height: 4px; }
+    }
+    @keyframes meterBarTick2 {
+      0%, 100% { height: 9px; }
+      50% { height: 13px; }
+    }
+    @keyframes meterBarTick3 {
+      0%, 100% { height: 14px; }
+      50% { height: 6px; }
+    }
+    .cng-meter-bar-1 { animation: meterBarTick1 0.7s infinite alternate ease-in-out; }
+    .cng-meter-bar-2 { animation: meterBarTick2 0.5s infinite alternate ease-in-out -0.2s; }
+    .cng-meter-bar-3 { animation: meterBarTick3 0.9s infinite alternate ease-in-out -0.4s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .metro-speed-line-1,
+      .metro-speed-line-2,
+      .metro-speed-line-3,
+      .wheel-spoke-spin,
+      .rickshaw-bounce-group,
+      .bus-ticker-text,
+      .bus-road-dashes-group,
+      .cng-idle-vibe,
+      .cng-meter-led,
+      .cng-meter-bar-1,
+      .cng-meter-bar-2,
+      .cng-meter-bar-3 {
+        animation: none !important;
+      }
     }
 
     /* 3D Futuristic Dhaka City Routes Animation Showcase (Picture 5) */
@@ -1623,7 +1784,6 @@
       position: relative;
     }
     .feeder-card-item:hover {
-      transform: translateY(-5px) scale(1.03) !important;
       border-color: #38bdf8 !important;
       outline: 2px solid #38bdf8 !important;
       outline-offset: -1px;
@@ -4319,7 +4479,41 @@
                 <span id="comparisonBikeSelected" class="hidden rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">Selected</span>
               </div>
             </div>
-            <p class="mt-3 text-xs text-slate-500">Estimated fare</p>
+
+            <!-- 🏍️ Animated Bike Mini-Preview -->
+            <div class="bd-card-vehicle-preview bd-card-bike-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#06172a] to-sky-950/80 border border-sky-500/30 relative pointer-events-none select-none shadow-inner" style="height: 50px;">
+              <svg class="w-full h-full" viewBox="0 0 280 50" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="42" width="280" height="8" fill="#091122" />
+                <line x1="0" y1="42" x2="280" y2="42" stroke="#1e293b" stroke-width="1.8" />
+                <g transform="translate(95, 10)">
+                  <polygon points="68,18 135,10 135,26" fill="rgba(56, 189, 248, 0.3)" />
+                  <path d="M 12 24 L 28 10 L 46 10 L 58 24 L 38 24 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="1" />
+                  <circle cx="34" cy="7" r="3" fill="#cbd5e1" />
+                  <line x1="48" y1="12" x2="54" y2="10" stroke="#f1f5f9" stroke-width="1.5" />
+                  <circle cx="60" cy="18" r="2" fill="#ffffff" filter="drop-shadow(0 0 3px #38bdf8)" />
+                  <g transform="translate(56, 26)">
+                    <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <g class="wheel-spoke-spin">
+                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
+                    </g>
+                  </g>
+                  <g transform="translate(14, 26)">
+                    <circle cx="0" cy="0" r="6" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <g class="wheel-spoke-spin">
+                      <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="0.8" />
+                    </g>
+                  </g>
+                </g>
+                <g transform="translate(10, 6)">
+                  <rect x="0" y="0" width="56" height="14" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
+                  <text x="6" y="10.5" fill="#38bdf8" font-family="monospace" font-size="7.5" font-weight="900">SOLO RIDE</text>
+                </g>
+              </svg>
+            </div>
+
+            <p class="mt-2 text-xs text-slate-500">Estimated fare</p>
             <p id="comparisonBikeFare" class="text-xl font-black text-slate-900">—</p>
             <p class="mt-2 text-xs text-slate-500">Estimated travel time</p>
             <p id="comparisonBikeDuration" class="font-semibold text-slate-800">—</p>
@@ -4342,7 +4536,79 @@
                 <span id="comparisonCNGSelected" class="hidden rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">Selected</span>
               </div>
             </div>
-            <p class="mt-3 text-xs text-slate-500">Estimated fare</p>
+
+            <!-- 🛺 Animated 3D-Style CNG Mini-Preview -->
+            <div class="bd-card-vehicle-preview bd-card-cng-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#071d18] to-teal-950/80 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner" style="height: 50px;">
+              <svg class="w-full h-full" viewBox="0 0 280 50" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="cngBeamStatic" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9" />
+                    <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+                  </linearGradient>
+                  <filter id="meterGlowStatic" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="1" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <rect x="0" y="42" width="280" height="8" fill="#091413" />
+                <line x1="0" y1="42" x2="280" y2="42" stroke="#1e293b" stroke-width="1.8" />
+
+                <!-- 🛺 CNG Body with 2-Stroke Idle Vibration -->
+                <g class="cng-idle-vibe" transform="translate(45, 6)">
+                  <polygon points="98,24 185,12 185,36" fill="url(#cngBeamStatic)" />
+                  <path d="M 12 18 L 22 7 Q 28 5 48 5 L 80 5 Q 86 6 88 12 L 98 25 L 98 34 L 12 34 Z" fill="#15803d" stroke="#166534" stroke-width="1" />
+                  <path d="M 12 25 L 98 25 L 98 28 L 12 28 Z" fill="#eab308" />
+
+                  <path d="M 32 10 L 64 10 L 64 25 L 32 25 Z" fill="#022c22" />
+                  <line x1="32" y1="12" x2="64" y2="24" stroke="#eab308" stroke-width="0.7" opacity="0.6" />
+                  <line x1="32" y1="20" x2="52" y2="10" stroke="#eab308" stroke-width="0.7" opacity="0.6" />
+                  <line x1="44" y1="25" x2="64" y2="15" stroke="#eab308" stroke-width="0.7" opacity="0.6" />
+
+                  <path d="M 78 8 L 92 20 L 78 20 Z" fill="#38bdf8" fill-opacity="0.6" stroke="#0284c7" stroke-width="0.8" />
+                  <circle cx="58" cy="15" r="3" fill="#cbd5e1" opacity="0.7" />
+                  <line x1="72" y1="23" x2="78" y2="21" stroke="#f1f5f9" stroke-width="1.5" stroke-linecap="round" />
+                  <circle cx="98" cy="25" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 3px #fde047)" />
+
+                  <g transform="translate(86, 34)">
+                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <g class="wheel-spoke-spin">
+                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                    </g>
+                  </g>
+                  <g transform="translate(24, 34)">
+                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <g class="wheel-spoke-spin">
+                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                    </g>
+                  </g>
+                </g>
+
+                <!-- 🌟 Floating Holographic Digital Fare Meter Badge -->
+                <g transform="translate(175, 5)">
+                  <rect x="0" y="0" width="85" height="24" rx="4" fill="#022c22" fill-opacity="0.85" stroke="#10b981" stroke-width="1" filter="drop-shadow(0 0 6px rgba(16,185,129,0.4))" />
+                  <circle cx="9" cy="8" r="2.5" fill="#10b981" class="cng-meter-led" filter="url(#meterGlowStatic)" />
+                  <text x="16" y="10" fill="#34d399" font-family="monospace" font-size="7" font-weight="900" letter-spacing="0.5">METER HI</text>
+                  <text x="8" y="20" fill="#fef08a" font-family="monospace" font-size="8.5" font-weight="900">৳ FARE ON</text>
+                  <rect x="66" y="6" width="3" height="12" rx="0.5" fill="#10b981" class="cng-meter-bar-1" />
+                  <rect x="71" y="9" width="3" height="9" rx="0.5" fill="#10b981" class="cng-meter-bar-2" />
+                  <rect x="76" y="4" width="3" height="14" rx="0.5" fill="#34d399" class="cng-meter-bar-3" />
+                </g>
+
+                <g transform="translate(10, 6)">
+                  <rect x="0" y="0" width="48" height="14" rx="3" fill="#16a34a" fill-opacity="0.25" stroke="#34d399" stroke-width="0.8" />
+                  <text x="5" y="10.5" fill="#34d399" font-family="monospace" font-size="7.5" font-weight="900">4-STROKE</text>
+                </g>
+              </svg>
+            </div>
+
+            <p class="mt-2 text-xs text-slate-500">Estimated fare</p>
             <p id="comparisonCNGFare" class="text-xl font-black text-slate-900">—</p>
             <p class="mt-2 text-xs text-slate-500">Estimated travel time</p>
             <p id="comparisonCNGDuration" class="font-semibold text-slate-800">—</p>
@@ -4365,7 +4631,41 @@
                 <span id="comparisonCarSelected" class="hidden rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-700">Selected</span>
               </div>
             </div>
-            <p class="mt-3 text-xs text-slate-500">Estimated fare</p>
+
+            <!-- 🚗 Animated Car Mini-Preview -->
+            <div class="bd-card-vehicle-preview bd-card-car-preview my-2.5 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#0d1233] to-indigo-950/80 border border-indigo-500/30 relative pointer-events-none select-none shadow-inner" style="height: 50px;">
+              <svg class="w-full h-full" viewBox="0 0 280 50" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="42" width="280" height="8" fill="#070c1d" />
+                <line x1="0" y1="42" x2="280" y2="42" stroke="#1e293b" stroke-width="1.8" />
+                <g transform="translate(90, 10)">
+                  <polygon points="76,20 145,12 145,30" fill="rgba(254, 240, 138, 0.35)" />
+                  <path d="M 6 22 L 20 10 L 52 10 L 72 20 L 76 27 L 6 27 Z" fill="#4338ca" stroke="#6366f1" stroke-width="1" />
+                  <rect x="24" y="12" width="12" height="7" rx="1" fill="#93c5fd" opacity="0.8" />
+                  <rect x="40" y="12" width="12" height="7" rx="1" fill="#93c5fd" opacity="0.8" />
+                  <circle cx="75" cy="22" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #fde047)" />
+                  <g transform="translate(62, 27)">
+                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <g class="wheel-spoke-spin">
+                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                    </g>
+                  </g>
+                  <g transform="translate(18, 27)">
+                    <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+                    <g class="wheel-spoke-spin">
+                      <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+                      <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+                    </g>
+                  </g>
+                </g>
+                <g transform="translate(10, 6)">
+                  <rect x="0" y="0" width="56" height="14" rx="3" fill="#4338ca" fill-opacity="0.25" stroke="#818cf8" stroke-width="0.8" />
+                  <text x="6" y="10.5" fill="#a5b4fc" font-family="monospace" font-size="7.5" font-weight="900">AC CABIN</text>
+                </g>
+              </svg>
+            </div>
+
+            <p class="mt-2 text-xs text-slate-500">Estimated fare</p>
             <p id="comparisonCarFare" class="text-xl font-black text-slate-900">—</p>
             <p class="mt-2 text-xs text-slate-500">Estimated travel time</p>
             <p id="comparisonCarDuration" class="font-semibold text-slate-800">—</p>
@@ -4422,6 +4722,87 @@
                 </div>
               </div>
 
+              <!-- 🚇 Animated 3D-Style MRT-6 Metro Mini-Preview -->
+              <div class="bd-card-vehicle-preview bd-card-metro-preview mb-3 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#06142a] to-sky-950/80 border border-sky-500/30 relative pointer-events-none select-none shadow-inner" style="height: 52px;">
+                <svg class="w-full h-full" viewBox="0 0 320 52" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <filter id="mrtGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="2.5" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                    <linearGradient id="mrtSilver" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="60%" stop-color="#cbd5e1" />
+                      <stop offset="100%" stop-color="#64748b" />
+                    </linearGradient>
+                    <linearGradient id="mrtGlass" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#0284c7" />
+                      <stop offset="100%" stop-color="#0c4a6e" />
+                    </linearGradient>
+                    <linearGradient id="mrtBeam" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+                      <stop offset="40%" stop-color="#38bdf8" stop-opacity="0.3" />
+                      <stop offset="100%" stop-color="#00f0ff" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+
+                  <path d="M 0 10 L 320 10 M 0 42 L 320 42" stroke="#1e293b" stroke-width="0.8" stroke-dasharray="8 6" />
+                  <path d="M 0 5 L 320 12 M 0 47 L 320 40" stroke="#0f172a" stroke-width="1.2" />
+
+                  <!-- Animated Horizontal Cyan Viaduct Speed Lines -->
+                  <g class="metro-speed-lines-group">
+                    <line x1="20" y1="8" x2="90" y2="8" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="metro-speed-line-1" opacity="0.7" />
+                    <line x1="80" y1="14" x2="170" y2="14" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" class="metro-speed-line-2" opacity="0.9" />
+                    <line x1="140" y1="38" x2="240" y2="38" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" class="metro-speed-line-3" opacity="0.6" />
+                    <line x1="200" y1="44" x2="280" y2="44" stroke="#00f0ff" stroke-width="1" stroke-linecap="round" class="metro-speed-line-1" opacity="0.8" />
+                    <line x1="30" y1="26" x2="110" y2="26" stroke="#10b981" stroke-width="1" stroke-linecap="round" class="metro-speed-line-2" opacity="0.5" />
+                  </g>
+
+                  <rect x="0" y="44" width="320" height="8" fill="#091122" />
+                  <line x1="0" y1="44" x2="320" y2="44" stroke="#334155" stroke-width="2" />
+                  <line x1="0" y1="46" x2="320" y2="46" stroke="#475569" stroke-width="1" stroke-dasharray="12 4" />
+
+                  <!-- 🚇 MRT-6 Train Group -->
+                  <g transform="translate(100, 11)">
+                    <polygon points="108,18 215,8 215,28" fill="url(#mrtBeam)" />
+                    <path d="M 0 10 L 40 10 L 40 32 L 0 32 Z" fill="#1e293b" />
+                    <path d="M 40 8 L 85 8 L 85 33 L 40 33 Z" fill="url(#mrtSilver)" />
+                    <path d="M 85 8 L 105 13 Q 112 18 108 26 L 102 33 L 85 33 Z" fill="url(#mrtSilver)" stroke="#94a3b8" stroke-width="0.5" />
+                    <path d="M 40 17 L 90 17 L 107 20 Q 110 23 105 26 L 85 26 L 40 26 Z" fill="#059669" filter="drop-shadow(0 0 2px #059669)" />
+                    <path d="M 38 27 L 85 27 L 104 27" stroke="#00f0ff" stroke-width="1.8" filter="url(#mrtGlow)" />
+                    <path d="M 38 7 L 85 7 L 104 12" stroke="#10b981" stroke-width="1.2" />
+
+                    <path d="M 88 10 L 102 14 Q 106 17 104 22 L 88 22 Z" fill="url(#mrtGlass)" stroke="#38bdf8" stroke-width="0.8" />
+                    <line x1="90" y1="12" x2="100" y2="15" stroke="#ffffff" stroke-width="0.8" opacity="0.8" />
+
+                    <rect x="45" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
+                    <rect x="58" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
+                    <rect x="71" y="10" width="10" height="5" rx="1" fill="#0284c7" opacity="0.9" filter="drop-shadow(0 0 3px #38bdf8)" />
+
+                    <circle cx="106" cy="24" r="2.2" fill="#ffffff" filter="url(#mrtGlow)" />
+                    <circle cx="103" cy="28" r="1.8" fill="#38bdf8" filter="url(#mrtGlow)" />
+
+                    <rect x="46" y="32" width="16" height="3" fill="#0f172a" rx="1" />
+                    <circle cx="50" cy="34" r="2" fill="#475569" />
+                    <circle cx="58" cy="34" r="2" fill="#475569" />
+                    <rect x="78" y="32" width="16" height="3" fill="#0f172a" rx="1" />
+                    <circle cx="82" cy="34" r="2" fill="#475569" />
+                    <circle cx="90" cy="34" r="2" fill="#475569" />
+
+                    <path d="M 45 7 L 50 2 L 60 2 L 64 7" stroke="#94a3b8" stroke-width="0.8" fill="none" />
+                    <line x1="48" y1="2" x2="62" y2="2" stroke="#38bdf8" stroke-width="1.2" filter="url(#mrtGlow)" />
+                  </g>
+
+                  <g transform="translate(14, 6)">
+                    <rect x="0" y="0" width="82" height="15" rx="3" fill="#0284c7" fill-opacity="0.25" stroke="#38bdf8" stroke-width="0.8" />
+                    <text x="6" y="11" fill="#38bdf8" font-family="monospace" font-size="8.5" font-weight="900" letter-spacing="0.5">MRT-6 100km/h</text>
+                  </g>
+                </svg>
+              </div>
+
               <!-- Metric Grid -->
               <div class="grid grid-cols-2 gap-2 bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 mb-3">
                 <div>
@@ -4475,6 +4856,106 @@
                     Active
                   </span>
                 </div>
+              </div>
+
+              <!-- 🚌 Animated 3D-Style Local Bus Mini-Preview -->
+              <div class="bd-card-vehicle-preview bd-card-bus-preview mb-3 overflow-hidden rounded-xl bg-gradient-to-r from-slate-950 via-[#071a17] to-emerald-950/80 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner" style="height: 52px;">
+                <svg class="w-full h-full" viewBox="0 0 320 52" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <filter id="busWindowGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="1.5" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                    <linearGradient id="busHeadlightBeam" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#fde047" stop-opacity="0.8" />
+                      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.2" />
+                      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+                    </linearGradient>
+                    <clipPath id="busTickerClip">
+                      <rect x="182" y="9" width="62" height="9" rx="1.5" />
+                    </clipPath>
+                  </defs>
+
+                  <rect x="0" y="44" width="320" height="8" fill="#091312" />
+                  <line x1="0" y1="44" x2="320" y2="44" stroke="#1e293b" stroke-width="2" />
+                  <g class="bus-road-dashes-group">
+                    <line x1="10" y1="48" x2="40" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
+                    <line x1="80" y1="48" x2="110" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
+                    <line x1="150" y1="48" x2="180" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
+                    <line x1="220" y1="48" x2="250" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
+                    <line x1="290" y1="48" x2="320" y2="48" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round" opacity="0.6" class="bus-road-dash" />
+                  </g>
+
+                  <!-- 🚌 Stylized 3D Red & Green BRTC Double-Decker City Bus -->
+                  <g transform="translate(68, 6)">
+                    <polygon points="180,31 270,22 270,44" fill="url(#busHeadlightBeam)" />
+
+                    <rect x="10" y="22" width="166" height="18" rx="2" fill="#dc2626" />
+                    <path d="M 12 7 L 168 7 Q 174 7 174 13 L 174 22 L 10 22 Q 10 13 12 7 Z" fill="#047857" />
+                    <rect x="10" y="21" width="166" height="2" fill="#f1f5f9" />
+                    <rect x="172" y="32" width="4" height="7" rx="1" fill="#475569" />
+                    
+                    <g fill="#fde047" opacity="0.9" filter="url(#busWindowGlow)">
+                      <rect x="18" y="10" width="16" height="8" rx="1" />
+                      <rect x="38" y="10" width="16" height="8" rx="1" />
+                      <rect x="58" y="10" width="16" height="8" rx="1" />
+                      <rect x="78" y="10" width="16" height="8" rx="1" />
+                      <rect x="98" y="10" width="16" height="8" rx="1" />
+                      <rect x="118" y="10" width="16" height="8" rx="1" />
+                      <rect x="138" y="10" width="16" height="8" rx="1" />
+                      <path d="M 158 10 L 169 10 Q 172 10 171 14 L 170 18 L 158 18 Z" />
+                    </g>
+
+                    <g fill="#fef08a" opacity="0.92" filter="url(#busWindowGlow)">
+                      <rect x="24" y="24" width="16" height="8" rx="1" />
+                      <rect x="44" y="24" width="16" height="8" rx="1" />
+                      <rect x="64" y="24" width="16" height="8" rx="1" />
+                      <rect x="84" y="24" width="16" height="8" rx="1" />
+                      <rect x="104" y="24" width="16" height="8" rx="1" />
+                      <rect x="124" y="24" width="16" height="8" rx="1" />
+                      <path d="M 148 24 L 168 24 Q 171 24 171 28 L 170 32 L 148 32 Z" />
+                    </g>
+
+                    <circle cx="173" cy="33" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 4px #fde047)" />
+                    <circle cx="173" cy="37" r="1.5" fill="#f59e0b" />
+
+                    <rect x="8.5" y="24" width="2" height="4" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+                    <rect x="8.5" y="32" width="2" height="3" fill="#f59e0b" />
+
+                    <g transform="translate(142, 39)">
+                      <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#475569" stroke-width="1.8" />
+                      <circle cx="0" cy="0" r="3.5" fill="#334155" />
+                      <g class="wheel-spoke-spin">
+                        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="1" />
+                        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1" />
+                      </g>
+                    </g>
+                    <g transform="translate(42, 39)">
+                      <circle cx="0" cy="0" r="6.5" fill="#0f172a" stroke="#475569" stroke-width="1.8" />
+                      <circle cx="0" cy="0" r="3.5" fill="#334155" />
+                      <g class="wheel-spoke-spin">
+                        <line x1="-3" y1="0" x2="3" y2="0" stroke="#94a3b8" stroke-width="1" />
+                        <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1" />
+                      </g>
+                    </g>
+
+                    <!-- 🌟 Miniature Digital LED Matrix Route Ticker Box -->
+                    <g transform="translate(-10, -1)">
+                      <rect x="180" y="8" width="66" height="11" rx="2" fill="#020617" stroke="#10b981" stroke-width="0.8" filter="drop-shadow(0 0 3px rgba(16,185,129,0.5))" />
+                      <g clip-path="url(#busTickerClip)">
+                        <text id="bdBusTickerText" x="184" y="16.5" fill="#10b981" font-family="monospace" font-size="7.5" font-weight="900" class="bus-ticker-text">DHAKA CITY EXPRESS • MIRPUR ➔ MOTIJHEEL</text>
+                      </g>
+                    </g>
+                  </g>
+
+                  <g transform="translate(14, 6)">
+                    <rect x="0" y="0" width="76" height="15" rx="3" fill="#059669" fill-opacity="0.25" stroke="#10b981" stroke-width="0.8" />
+                    <text x="6" y="11" fill="#34d399" font-family="monospace" font-size="8.5" font-weight="900" letter-spacing="0.5">CITY CORRIDOR</text>
+                  </g>
+                </svg>
               </div>
 
               <!-- Metric Grid -->
@@ -6369,6 +6850,8 @@
       if (typeof updateVehicleSlidingPill === 'function') requestAnimationFrame(updateVehicleSlidingPill);
       if (typeof renderBusRouteFinder === 'function') renderBusRouteFinder();
       if (typeof applyTheme === 'function') applyTheme();
+      if (typeof updateBusTickerText === 'function') updateBusTickerText();
+      if (typeof initHolographicFareCards === 'function') initHolographicFareCards();
       if (window.crossroadsAudio && typeof crossroadsAudio.updateUi === 'function') crossroadsAudio.updateUi();
     }
 
@@ -7883,6 +8366,179 @@
       return options;
     }
 
+    // =========================================================
+    // ✨ 3D Holographic "Flip & Tilt" Cards & Vehicle Mini-Previews
+    // =========================================================
+    function getRickshawMiniPreviewSvg() {
+      return `<svg class="w-full h-full" viewBox="0 0 200 46" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hoodGradMini" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <line x1="0" y1="40" x2="200" y2="40" stroke="#334155" stroke-width="1.5" />
+  <line x1="10" y1="40" x2="40" y2="40" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
+  <line x1="70" y1="40" x2="100" y2="40" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
+  <line x1="130" y1="40" x2="160" y2="40" stroke="#10b981" stroke-width="1.5" opacity="0.6" />
+  <g class="rickshaw-bounce-group" transform="translate(42, 6)">
+    <path d="M 10 18 Q 12 5 28 4 Q 42 4 45 16 L 38 28 L 8 28 Z" fill="url(#hoodGradMini)" stroke="#ec4899" stroke-width="0.8" />
+    <path d="M 14 12 L 20 8 L 26 12 L 32 8 L 38 12" stroke="#fef08a" stroke-width="1.2" stroke-linecap="round" fill="none" />
+    <path d="M 12 18 L 18 15 L 24 18 L 30 15 L 36 18" stroke="#06b6d4" stroke-width="1.2" stroke-linecap="round" fill="none" />
+    <line x1="12" y1="28" x2="12" y2="31" stroke="#fbbf24" stroke-width="1.2" />
+    <line x1="18" y1="28" x2="18" y2="31" stroke="#ec4899" stroke-width="1.2" />
+    <line x1="24" y1="28" x2="24" y2="31" stroke="#06b6d4" stroke-width="1.2" />
+    <line x1="30" y1="28" x2="30" y2="31" stroke="#fbbf24" stroke-width="1.2" />
+    <line x1="36" y1="28" x2="36" y2="31" stroke="#ec4899" stroke-width="1.2" />
+    <rect x="22" y="22" width="22" height="6" rx="2" fill="#ef4444" stroke="#f59e0b" stroke-width="0.8" />
+    <path d="M 34 28 L 34 35 L 56 35 L 72 26" stroke="#eab308" stroke-width="1.8" fill="none" />
+    <line x1="68" y1="26" x2="88" y2="26" stroke="#94a3b8" stroke-width="1.8" />
+    <line x1="88" y1="26" x2="98" y2="12" stroke="#94a3b8" stroke-width="1.8" />
+    <path d="M 94 12 L 102 12 Q 105 12 105 15" stroke="#f1f5f9" stroke-width="1.5" fill="none" stroke-linecap="round" />
+    <circle cx="96" cy="11" r="1.5" fill="#facc15" />
+    <ellipse cx="68" cy="23" rx="4" ry="1.5" fill="#1e293b" />
+    <circle cx="70" cy="33" r="3" fill="#64748b" />
+    <line x1="70" y1="33" x2="74" y2="36" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" />
+    <g transform="translate(104, 34)">
+      <circle cx="0" cy="0" r="7" fill="none" stroke="#64748b" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="2" fill="#cbd5e1" />
+      <g class="wheel-spoke-spin">
+        <line x1="-6" y1="0" x2="6" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-6" x2="0" y2="6" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="-4.2" y1="-4.2" x2="4.2" y2="4.2" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="-4.2" y1="4.2" x2="4.2" y2="-4.2" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+    <g transform="translate(26, 34)">
+      <circle cx="0" cy="0" r="7" fill="none" stroke="#64748b" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="2" fill="#cbd5e1" />
+      <g class="wheel-spoke-spin">
+        <line x1="-6" y1="0" x2="6" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-6" x2="0" y2="6" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="-4.2" y1="-4.2" x2="4.2" y2="4.2" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="-4.2" y1="4.2" x2="4.2" y2="-4.2" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+  </g>
+  <g transform="translate(6, 4)">
+    <rect x="0" y="0" width="30" height="12" rx="2" fill="#ec4899" fill-opacity="0.2" stroke="#ec4899" stroke-width="0.8" />
+    <text x="3" y="9" fill="#f472b6" font-family="monospace" font-size="7" font-weight="900">FOLK ART</text>
+  </g>
+</svg>`;
+    }
+
+    function getCngMiniPreviewSvg() {
+      return `<svg class="w-full h-full" viewBox="0 0 280 46" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cngBeamFeeder" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="38" width="280" height="8" fill="#091413" />
+  <line x1="0" y1="38" x2="280" y2="38" stroke="#1e293b" stroke-width="1.8" />
+  <g class="cng-idle-vibe" transform="translate(45, 4)">
+    <polygon points="98,24 185,12 185,36" fill="url(#cngBeamFeeder)" />
+    <path d="M 12 18 L 22 7 Q 28 5 48 5 L 80 5 Q 86 6 88 12 L 98 25 L 98 34 L 12 34 Z" fill="#15803d" stroke="#166534" stroke-width="1" />
+    <path d="M 12 25 L 98 25 L 98 28 L 12 28 Z" fill="#eab308" />
+    <path d="M 32 10 L 64 10 L 64 25 L 32 25 Z" fill="#022c22" />
+    <line x1="32" y1="12" x2="64" y2="24" stroke="#eab308" stroke-width="0.7" opacity="0.6" />
+    <line x1="32" y1="20" x2="52" y2="10" stroke="#eab308" stroke-width="0.7" opacity="0.6" />
+    <line x1="44" y1="25" x2="64" y2="15" stroke="#eab308" stroke-width="0.7" opacity="0.6" />
+    <path d="M 78 8 L 92 20 L 78 20 Z" fill="#38bdf8" fill-opacity="0.6" stroke="#0284c7" stroke-width="0.8" />
+    <circle cx="58" cy="15" r="3" fill="#cbd5e1" opacity="0.7" />
+    <line x1="72" y1="23" x2="78" y2="21" stroke="#f1f5f9" stroke-width="1.5" stroke-linecap="round" />
+    <circle cx="98" cy="25" r="2.2" fill="#ffffff" filter="drop-shadow(0 0 3px #fde047)" />
+    <g transform="translate(86, 34)">
+      <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+      <g class="wheel-spoke-spin">
+        <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+    <g transform="translate(24, 34)">
+      <circle cx="0" cy="0" r="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+      <g class="wheel-spoke-spin">
+        <line x1="-2.5" y1="0" x2="2.5" y2="0" stroke="#94a3b8" stroke-width="0.8" />
+        <line x1="0" y1="-2.5" x2="0" y2="2.5" stroke="#94a3b8" stroke-width="0.8" />
+      </g>
+    </g>
+  </g>
+  <g transform="translate(175, 4)">
+    <rect x="0" y="0" width="85" height="24" rx="4" fill="#022c22" fill-opacity="0.85" stroke="#10b981" stroke-width="1" filter="drop-shadow(0 0 6px rgba(16,185,129,0.4))" />
+    <circle cx="9" cy="8" r="2.5" fill="#10b981" class="cng-meter-led" />
+    <text x="16" y="10" fill="#34d399" font-family="monospace" font-size="7" font-weight="900" letter-spacing="0.5">METER HI</text>
+    <text x="8" y="20" fill="#fef08a" font-family="monospace" font-size="8.5" font-weight="900">৳ FARE ON</text>
+    <rect x="66" y="6" width="3" height="12" rx="0.5" fill="#10b981" class="cng-meter-bar-1" />
+    <rect x="71" y="9" width="3" height="9" rx="0.5" fill="#10b981" class="cng-meter-bar-2" />
+    <rect x="76" y="4" width="3" height="14" rx="0.5" fill="#34d399" class="cng-meter-bar-3" />
+  </g>
+</svg>`;
+    }
+
+    function updateBusTickerText() {
+      const tickerEl = document.getElementById('bdBusTickerText');
+      if (!tickerEl) return;
+      const destKey = document.getElementById('dropoffSelect')?.value;
+      const destLoc = destKey && typeof getLocationForKey === 'function' ? getLocationForKey(destKey) : null;
+      if (destLoc && destLoc.name) {
+        const destName = typeof getLocalizedLocationName === 'function' ? getLocalizedLocationName(destLoc.name) : destLoc.name;
+        tickerEl.textContent = `DHAKA ➔ ${destName.toUpperCase()} • BRTC EXPRESS • LOCAL ROUTE`;
+      } else {
+        tickerEl.textContent = 'DHAKA CITY EXPRESS • MIRPUR ➔ MOTIJHEEL';
+      }
+    }
+
+    function initHolographicFareCards() {
+      const cards = document.querySelectorAll('.ride-option-hover-card, .feeder-card-item');
+      cards.forEach(card => {
+        if (!card.querySelector('.bd-holo-glare')) {
+          const glare = document.createElement('div');
+          glare.className = 'bd-holo-glare';
+          card.appendChild(glare);
+        }
+
+        if (card.dataset.holoInit === 'true') return;
+        card.dataset.holoInit = 'true';
+
+        let isHovered = false;
+        let rafId = null;
+
+        card.addEventListener('mouseenter', () => {
+          isHovered = true;
+          card.style.transition = 'transform 0.08s ease-out, box-shadow 0.2s ease-out';
+        });
+
+        card.addEventListener('mousemove', (e) => {
+          if (!isHovered) return;
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            const rect = card.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+
+            const rotX = Math.max(-8, Math.min(8, (0.5 - y) * 16));
+            const rotY = Math.max(-8, Math.min(8, (x - 0.5) * 16));
+
+            card.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+
+            card.style.setProperty('--glare-x', `${(x * 100).toFixed(1)}%`);
+            card.style.setProperty('--glare-y', `${(y * 100).toFixed(1)}%`);
+          });
+        });
+
+        card.addEventListener('mouseleave', () => {
+          isHovered = false;
+          if (rafId) cancelAnimationFrame(rafId);
+          card.style.transition = 'transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease';
+          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+      });
+    }
+
     function renderFeederVehicleGrid(containerId, options, selectedVehicle, onSelectCallback) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -7971,6 +8627,21 @@
         }
         card.appendChild(infoP);
 
+        // 🚲 Rickshaw & 🛺 CNG Mini-Preview Inside Feeder Cards
+        if (opt.vehicle === 'Rickshaw') {
+          const previewDiv = document.createElement('div');
+          previewDiv.className = 'bd-card-vehicle-preview bd-card-rickshaw-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#0a1b24] to-emerald-950/70 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner';
+          previewDiv.style.height = '48px';
+          previewDiv.innerHTML = getRickshawMiniPreviewSvg();
+          card.appendChild(previewDiv);
+        } else if (opt.vehicle === 'CNG') {
+          const previewDiv = document.createElement('div');
+          previewDiv.className = 'bd-card-vehicle-preview bd-card-cng-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#071d18] to-teal-950/70 border border-teal-500/30 relative pointer-events-none select-none shadow-inner';
+          previewDiv.style.height = '48px';
+          previewDiv.innerHTML = getCngMiniPreviewSvg();
+          card.appendChild(previewDiv);
+        }
+
         const fareP = document.createElement('p');
         fareP.className = 'text-xs md:text-sm font-black text-slate-100 mt-2 truncate flex items-center justify-between';
         if (opt.isAvailable === false) {
@@ -7997,6 +8668,10 @@
 
         container.appendChild(card);
       });
+
+      if (typeof initHolographicFareCards === 'function') {
+        initHolographicFareCards();
+      }
     }
 
     function renderFeederOptions(containerId, options, locationName, stationName, headingId) {
@@ -9026,6 +9701,9 @@
           selectButton.className = `mt-4 w-full rounded-lg px-3 py-2 text-sm font-semibold transition ${isSelected ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`;
         }
       });
+      if (typeof initHolographicFareCards === 'function') {
+        initHolographicFareCards();
+      }
     }
 
     // --- More Ways to Travel (Public Transit Comparison & Modes) ---
@@ -9205,6 +9883,13 @@
         updateMapTransitVisualization('metro');
       } else if (activePublicTransportMode === 'bus') {
         updateMapTransitVisualization('bus');
+      }
+
+      if (typeof updateBusTickerText === 'function') {
+        updateBusTickerText();
+      }
+      if (typeof initHolographicFareCards === 'function') {
+        initHolographicFareCards();
       }
     }
 
@@ -9844,6 +10529,7 @@
       }
       updateRoute();
       renderBusRouteFinder();
+      if (typeof updateBusTickerText === 'function') updateBusTickerText();
     }
 
     function toggleSurgeSimulation() {
@@ -12847,10 +13533,14 @@
       window.addEventListener('DOMContentLoaded', () => {
         bootApp();
         initAdminFareSimulator();
+        initHolographicFareCards();
+        updateBusTickerText();
       });
     } else {
       bootApp();
       initAdminFareSimulator();
+      initHolographicFareCards();
+      updateBusTickerText();
     }
   </script>
 </body>
