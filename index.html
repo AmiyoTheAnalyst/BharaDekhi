@@ -497,53 +497,127 @@
     }
 
     /* =========================================================
-       Mirpur 10 Crossroads: 2D Flat vs. 3D Drone Isometric View
+       Mirpur 10 Crossroads: Cinematic 3D Aerial Drone Camera View
        ========================================================= */
     #dhakaCrossroadsContainer {
-      perspective: 1400px;
+      perspective: 1100px;
+      perspective-origin: 50% 55%;
     }
     #dhakaCrossroadsStageWrapper {
-      transform-origin: center center;
+      transform-origin: 50% 55%;
       transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: transform;
     }
     #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroadsStageWrapper {
       transform: none;
     }
+
+    /* Cinematic Drone Camera Pose: Elevated Downward Pitch, Isometric Axonometric Yaw & Receding Perspective */
     #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
-      transform: perspective(1400px) rotateX(26deg) rotateZ(-6deg) scale3d(0.94, 0.94, 0.94);
+      transform: perspective(1100px) rotateX(38deg) rotateY(5deg) rotateZ(-10deg) scale3d(0.95, 0.95, 0.95) translateY(-1%);
       overflow: visible !important;
     }
     @media (max-width: 767.98px) {
       #dhakaCrossroadsContainer {
-        perspective: 1000px;
+        perspective: 950px;
+        perspective-origin: 50% 52%;
+      }
+      #dhakaCrossroadsStageWrapper {
+        transform-origin: 50% 52%;
       }
       #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
-        transform: perspective(1000px) rotateX(24deg) rotateZ(-4deg) scale3d(0.92, 0.92, 0.92);
+        transform: perspective(950px) rotateX(32deg) rotateY(3deg) rotateZ(-6deg) scale3d(0.92, 0.92, 0.92);
       }
     }
 
-    /* 3D Drone Mode Elevation Drop-Shadows for Elevated Metro & Multistory Architecture */
+    /* 3D Drone Mode Transitions for All Structural Layers */
     #nwBuildingsGroup,
     #neBuildingsGroup,
     #swBuildingsGroup,
     #seBuildingsGroup,
     #metroViaductStructureGroup,
     #mirpur10StationGroup,
-    #crossroadsMetroTrain {
-      transition: filter 0.6s ease;
+    #crossroadsMetroTrain,
+    #sidewalkGroundSlabs,
+    #dhakaVehiclesLayer > g,
+    #emergencyAmbulanceVehicle,
+    #dhakaPedestriansLayer > g,
+    #crossroadsSignals,
+    #crSkylineSilhouettes,
+    #crStarsLayer,
+    #surroundingBuildingsLayer polygon {
+      transition: filter 0.65s ease, opacity 0.65s ease;
     }
+
+    /* Multistory Building Height & Dimensionality: Two-tier directional cast shadows + contact ambient occlusion */
     #dhakaCrossroadsContainer.is-3d-drone-mode #nwBuildingsGroup,
     #dhakaCrossroadsContainer.is-3d-drone-mode #neBuildingsGroup,
     #dhakaCrossroadsContainer.is-3d-drone-mode #swBuildingsGroup,
     #dhakaCrossroadsContainer.is-3d-drone-mode #seBuildingsGroup {
-      filter: drop-shadow(0px 18px 14px rgba(0, 0, 0, 0.65));
+      filter: drop-shadow(-8px 16px 6px rgba(0, 0, 0, 0.8))
+              drop-shadow(-20px 36px 22px rgba(0, 0, 0, 0.65));
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #metroViaductStructureGroup,
-    #dhakaCrossroadsContainer.is-3d-drone-mode #mirpur10StationGroup,
+
+    /* Building Rooftop Parapets & Architectural Bevel Highlights */
+    #dhakaCrossroadsContainer.is-3d-drone-mode #surroundingBuildingsLayer polygon {
+      filter: drop-shadow(0px -1px 0px rgba(255, 255, 255, 0.35))
+              drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.7));
+    }
+
+    /* Elevated MRT-6 Metro Viaduct Superstructure, Station Canopy & Train: High-altitude ground separation shadow */
+    #dhakaCrossroadsContainer.is-3d-drone-mode #metroViaductStructureGroup {
+      filter: drop-shadow(-10px 42px 18px rgba(0, 0, 0, 0.82))
+              drop-shadow(-3px 14px 6px rgba(0, 0, 0, 0.6));
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #mirpur10StationGroup {
+      filter: drop-shadow(-14px 46px 22px rgba(0, 0, 0, 0.78))
+              drop-shadow(-4px 16px 8px rgba(0, 0, 0, 0.55));
+    }
     #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsMetroTrain {
-      filter: drop-shadow(0px 22px 18px rgba(0, 0, 0, 0.75));
+      filter: drop-shadow(-10px 40px 16px rgba(0, 0, 0, 0.85))
+              drop-shadow(-2px 10px 5px rgba(0, 0, 0, 0.65));
+    }
+
+    /* Raised Sidewalk Corner Slabs: Elevated above recessed asphalt road surface */
+    #dhakaCrossroadsContainer.is-3d-drone-mode #sidewalkGroundSlabs {
+      filter: drop-shadow(0px 8px 6px rgba(0, 0, 0, 0.72))
+              drop-shadow(-2px 3px 2px rgba(0, 0, 0, 0.5));
+    }
+
+    /* Grounded Vehicles & Pedestrians: Directional contact shadows */
+    #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaVehiclesLayer > g,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #emergencyAmbulanceVehicle {
+      filter: drop-shadow(-3px 6px 3px rgba(0, 0, 0, 0.7));
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaPedestriansLayer > g {
+      filter: drop-shadow(-2px 4px 2px rgba(0, 0, 0, 0.6));
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsSignals {
+      filter: drop-shadow(-2px 4px 2px rgba(0, 0, 0, 0.6));
+    }
+
+    /* Distant Skyline & Stars: Soft atmospheric optical depth falloff (aerial haze) */
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crSkylineSilhouettes,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crStarsLayer {
+      opacity: 0.55;
+      filter: blur(1px);
+    }
+
+    /* Volumetric Warm Streetlight Road Surface Illumination */
+    #dhakaCrossroadsContainer.is-3d-drone-mode ellipse[fill="url(#streetlampPoolGrad)"] {
+      opacity: 0.72;
+      filter: url(#crStreetlampGlow) drop-shadow(0 0 16px rgba(254, 240, 138, 0.3));
+    }
+
+    /* Cinematic Drone Atmosphere Overlay Fade In/Out */
+    #crossroads3dDroneAtmosphere {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.7s ease;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroads3dDroneAtmosphere {
+      opacity: 1;
     }
 
     /* =========================================================
@@ -2937,6 +3011,16 @@
         <div id="crossroadsVehicleTooltip" class="absolute z-40 pointer-events-none opacity-0 transition-opacity duration-150 px-2.5 py-1.5 rounded-xl bg-slate-950/95 border border-sky-500/50 text-white text-[11px] font-bold shadow-2xl backdrop-blur-md flex items-center gap-1.5 transform -translate-x-1/2 -translate-y-full">
           <span id="crossroadsVehicleTooltipIcon">🛺</span>
           <span id="crossroadsVehicleTooltipText">Cycle Rickshaw · রিকশা</span>
+        </div>
+
+        <!-- Cinematic Drone Camera Atmospheric Vignette & Depth-of-Field Overlay (Active in 3D Mode Only) -->
+        <div id="crossroads3dDroneAtmosphere" class="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+          <!-- 1. Distant Atmospheric Depth Haze (Top Horizon Aerial Perspective) -->
+          <div class="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-slate-950/75 via-slate-900/35 to-transparent"></div>
+          <!-- 2. Cinematic Lens Vignette (Soft Drone Optical Falloff) -->
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,transparent_48%,rgba(2,6,23,0.45)_82%,rgba(2,6,23,0.85)_100%)]"></div>
+          <!-- 3. Soft Ambient City Glow Bloom -->
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_52%,rgba(56,189,248,0.05)_0%,transparent_65%)] mix-blend-screen"></div>
         </div>
 
         <!-- Responsive Stage Wrapper: Mobile Prominent Height (< 768px) & Desktop Contain (>= 768px) -->
@@ -12135,7 +12219,7 @@
         container.classList.toggle('is-3d-drone-mode', crossroads3DMode);
       }
       if (stageWrapper) {
-        stageWrapper.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+        stageWrapper.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
         stageWrapper.style.transform = '';
       }
       updateCrossroadsViewModeUI();
@@ -12156,27 +12240,34 @@
 
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       const isMobile = window.matchMedia('(max-width: 767.98px)');
+      const isCoarse = window.matchMedia('(pointer: coarse)');
 
       container.addEventListener('mousemove', (e) => {
-        if (!crossroads3DMode || prefersReducedMotion.matches) return;
+        if (!crossroads3DMode || prefersReducedMotion.matches || isCoarse.matches) return;
         const rect = container.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
         const relX = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
         const relY = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
-        const baseRotX = isMobile.matches ? 24 : 26;
-        const baseRotZ = isMobile.matches ? -4 : -6;
-        const baseScale = isMobile.matches ? 0.92 : 0.94;
-        const persp = isMobile.matches ? 1000 : 1400;
-        const tiltX = -relY * 6; // max +-3 deg shift
-        const tiltY = relX * 6;  // max +-3 deg shift
 
-        stageWrapper.style.transition = 'transform 0.15s ease-out';
-        stageWrapper.style.transform = `perspective(${persp}px) rotateX(${baseRotX + tiltX}deg) rotateY(${tiltY}deg) rotateZ(${baseRotZ}deg) scale3d(${baseScale}, ${baseScale}, ${baseScale})`;
+        const baseRotX = isMobile.matches ? 32 : 38;
+        const baseRotY = isMobile.matches ? 3 : 5;
+        const baseRotZ = isMobile.matches ? -6 : -10;
+        const baseScale = isMobile.matches ? 0.92 : 0.95;
+        const persp = isMobile.matches ? 950 : 1100;
+        const translateShift = isMobile.matches ? '' : 'translateY(-1%)';
+
+        // Controlled, natural aerial drone camera banking & pitching (max ~2.5 deg)
+        const tiltPitch = -relY * 4.5;
+        const tiltYaw = relX * 4.0;
+        const tiltRoll = relX * 1.5;
+
+        stageWrapper.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+        stageWrapper.style.transform = `perspective(${persp}px) rotateX(${baseRotX + tiltPitch}deg) rotateY(${baseRotY + tiltYaw}deg) rotateZ(${baseRotZ + tiltRoll}deg) scale3d(${baseScale}, ${baseScale}, ${baseScale}) ${translateShift}`.trim();
       });
 
       container.addEventListener('mouseleave', () => {
         if (!crossroads3DMode) return;
-        stageWrapper.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+        stageWrapper.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
         stageWrapper.style.transform = '';
       });
     }
