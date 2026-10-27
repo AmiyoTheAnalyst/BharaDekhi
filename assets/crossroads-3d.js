@@ -52,10 +52,18 @@
   let treeFoliageGeo = null, treeFoliageMat = null;
   let vehicleHeadlightMat = null;
   let vehicleTaillightMat = null;
+  let vehicleIndicatorMat = null;
+  let vehicleGlassMat = null;
+  let vehicleBumperMat = null;
   let sharedWheelMat = null;
+  let sharedRimMat = null;
   let sharedWheelGeos = {};
   let sharedBuildingDepthMat = null;
   let lastSignalStateKey = '';
+  let roadMaterial = null;
+  let rainSpeeds = null;
+  let rainLengths = null;
+  const rainCount = 1200;
 
   function getSharedBuildingDepthMat() {
     if (!sharedBuildingDepthMat) {
@@ -452,106 +460,186 @@
 
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
-    if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.8 });
+    if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    if (!sharedRimMat) sharedRimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.35, metalness: 0.75 });
     if (!vehicleHeadlightMat) vehicleHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xfff08a });
     if (!vehicleTaillightMat) vehicleTaillightMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
+    if (!vehicleIndicatorMat) vehicleIndicatorMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    if (!vehicleGlassMat) vehicleGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.6 });
+    if (!vehicleBumperMat) vehicleBumperMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
 
     const group = new THREE.Group();
 
     if (type === 'bus') {
-      const length = 72;
+      const length = 74;
       const width = 22;
-      const height = 18;
+      const height = 20;
 
-      const bodyGeo = new THREE.BoxGeometry(length, height, width);
+      // Lower Chassis Body
+      const bodyGeo = new THREE.BoxGeometry(length, 10, width);
       const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xdc2626, roughness: 0.4 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = height / 2 + 3;
+      body.position.y = 8;
       body.castShadow = true;
       group.add(body);
 
-      // White Roof Cap
+      // Dhaka Transit Green Accent Stripe
+      const strGeo = new THREE.BoxGeometry(length + 0.2, 1.8, width + 0.2);
+      const strMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
+      const str = new THREE.Mesh(strGeo, strMat);
+      str.position.y = 12.2;
+      group.add(str);
+
+      // Upper Passenger Cabin with Windows
+      const cabGeo = new THREE.BoxGeometry(length * 0.98, 7.5, width * 0.96);
+      const cabMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
+      const cab = new THREE.Mesh(cabGeo, cabMat);
+      cab.position.y = 16.5;
+      group.add(cab);
+
+      // White Aerodynamic Roof Cap
       const roofGeo = new THREE.BoxGeometry(length, 2.5, width);
       const roofMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
       const roof = new THREE.Mesh(roofGeo, roofMat);
-      roof.position.y = height + 3.5;
+      roof.position.y = 20.8;
       group.add(roof);
 
-      // Passenger Windows
-      const winGeo = new THREE.BoxGeometry(length * 0.9, 5, width + 0.4);
+      // Passenger Side Glass Windows
+      const winGeo = new THREE.BoxGeometry(length * 0.88, 5, width + 0.4);
       const winMat = new THREE.MeshBasicMaterial({ color: 0x7dd3fc });
       const win = new THREE.Mesh(winGeo, winMat);
-      win.position.y = height * 0.72 + 3;
+      win.position.y = 16.5;
       group.add(win);
 
-      // Front Destination Board
+      // Front Windshield
+      const fWinGeo = new THREE.BoxGeometry(1.4, 7.0, width * 0.9);
+      const fWin = new THREE.Mesh(fWinGeo, winMat);
+      fWin.position.set(length / 2 - 0.2, 16.5, 0);
+      group.add(fWin);
+
+      // Front Destination LED Route Board (Mirpur 10)
       const destTex = createSignboardTexture('মিরপুর ১০', 'MIRPUR 10', '#0f172a', '#fef08a', '#38bdf8', '#facc15', 128, 48);
-      const destGeo = new THREE.BoxGeometry(1.5, 4.5, 14);
+      const destGeo = new THREE.BoxGeometry(1.5, 4.2, 14);
       const dest = new THREE.Mesh(destGeo, new THREE.MeshBasicMaterial({ map: destTex }));
-      dest.position.set(length / 2 + 0.5, height * 0.8 + 3, 0);
+      dest.position.set(length / 2 + 0.4, 19.5, 0);
       group.add(dest);
 
-      // 4 Rubber Wheels
-      const wheelGeo = getSharedWheelGeo(4, 2.5, 12);
+      // Heavy Duty Bumpers & License Plate
+      const fBumpGeo = new THREE.BoxGeometry(2.0, 3.6, width + 0.8);
+      const fBump = new THREE.Mesh(fBumpGeo, vehicleBumperMat);
+      fBump.position.set(length / 2 + 0.8, 4.0, 0);
+      group.add(fBump);
+
+      const rBumpGeo = new THREE.BoxGeometry(2.0, 3.6, width + 0.8);
+      const rBump = new THREE.Mesh(rBumpGeo, vehicleBumperMat);
+      rBump.position.set(-length / 2 - 0.8, 4.0, 0);
+      group.add(rBump);
+
+      // Left & Right Side Mirrors
+      const mirrorGeo = new THREE.BoxGeometry(1.6, 3.2, 1.2);
+      [-1, 1].forEach(side => {
+        const mirror = new THREE.Mesh(mirrorGeo, vehicleBumperMat);
+        mirror.position.set(length / 2 - 2, 15, side * (width / 2 + 1.6));
+        group.add(mirror);
+      });
+
+      // 4 Wheels
+      const wheelGeo = getSharedWheelGeo(4.0, 2.2, 12);
+      const rimGeo = getSharedWheelGeo(2.2, 2.3, 10);
+
       [-1, 1].forEach(wz => {
         [-22, 22].forEach(wx => {
           const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
           wheel.rotation.x = Math.PI / 2;
-          wheel.position.set(wx, 4, wz * (width / 2));
+          wheel.position.set(wx, 4.0, wz * (width / 2));
           group.add(wheel);
+
+          const rim = new THREE.Mesh(rimGeo, sharedRimMat);
+          rim.rotation.x = Math.PI / 2;
+          rim.position.set(wx, 4.0, wz * (width / 2));
+          group.add(rim);
         });
       });
 
-      // Warm Front Headlights (Facing +X)
-      const hlGeo = new THREE.BoxGeometry(1.2, 3, 4);
-      [-5, 5].forEach(hz => {
+      // Front Headlight Clusters (White beam + Amber Indicator)
+      const hlGeo = new THREE.BoxGeometry(1.2, 2.8, 3.6);
+      [-6, 6].forEach(hz => {
         const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-        hl.position.set(length / 2 + 0.6, 6.5, hz);
+        hl.position.set(length / 2 + 0.7, 6.5, hz);
         group.add(hl);
       });
 
-      // Red Taillights (Facing -X)
-      [-6, 6].forEach(tz => {
-        const tlGeo = new THREE.SphereGeometry(1.2, 6, 6);
+      // Red Taillight Bars
+      const tlGeo = new THREE.BoxGeometry(1.2, 4.5, 2.5);
+      [-7, 7].forEach(tz => {
         const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
-        tl.position.set(-length / 2 - 0.5, 6, tz);
+        tl.position.set(-length / 2 - 0.7, 7.5, tz);
         group.add(tl);
       });
 
     } else if (type === 'car') {
-      const length = 42;
+      const length = 44;
       const width = 18;
-      const height = 12;
+      const height = 13;
 
-      const bodyGeo = new THREE.BoxGeometry(length, height * 0.6, width);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xf8fafc, roughness: 0.3, metalness: 0.2 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = height * 0.3 + 3;
-      body.castShadow = true;
-      group.add(body);
+      // Sedan Aerodynamic Contoured Body: Hood, Cabin, Trunk
+      const hoodGeo = new THREE.BoxGeometry(14, 4.5, width - 0.4);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xf8fafc, roughness: 0.3, metalness: 0.25 });
+      const hood = new THREE.Mesh(hoodGeo, bodyMat);
+      hood.position.set(13, 4.8, 0);
+      group.add(hood);
 
-      // Cabin Top
-      const cabGeo = new THREE.BoxGeometry(length * 0.55, height * 0.55, width * 0.85);
-      const cabMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
-      const cab = new THREE.Mesh(cabGeo, cabMat);
-      cab.position.set(-2, height * 0.75 + 3, 0);
-      group.add(cab);
+      const cabinGeo = new THREE.BoxGeometry(18, 6.2, width - 1.2);
+      const cabin = new THREE.Mesh(cabinGeo, bodyMat);
+      cabin.position.set(-2, 8.8, 0);
+      cabin.castShadow = true;
+      group.add(cabin);
 
-      // Glass Windshields
-      const glassGeo = new THREE.BoxGeometry(length * 0.52, height * 0.45, width * 0.86);
-      const glassMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-      const glass = new THREE.Mesh(glassGeo, glassMat);
-      glass.position.set(-2, height * 0.75 + 3, 0);
-      group.add(glass);
+      const trunkGeo = new THREE.BoxGeometry(11, 4.2, width - 0.4);
+      const trunk = new THREE.Mesh(trunkGeo, bodyMat);
+      trunk.position.set(-15, 4.8, 0);
+      group.add(trunk);
+
+      // Glass Windshields & Windows
+      const winGeo = new THREE.BoxGeometry(17, 4.2, width - 0.8);
+      const winMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+      const win = new THREE.Mesh(winGeo, winMat);
+      win.position.set(-2, 9.2, 0);
+      group.add(win);
+
+      // Front Grille & Bumpers
+      const fBumpGeo = new THREE.BoxGeometry(1.6, 2.8, width);
+      const fBump = new THREE.Mesh(fBumpGeo, vehicleBumperMat);
+      fBump.position.set(length / 2 - 1, 3.5, 0);
+      group.add(fBump);
+
+      const rBumpGeo = new THREE.BoxGeometry(1.6, 2.8, width);
+      const rBump = new THREE.Mesh(rBumpGeo, vehicleBumperMat);
+      rBump.position.set(-length / 2 + 1, 3.5, 0);
+      group.add(rBump);
+
+      // Side Mirrors
+      const mirrorGeo = new THREE.BoxGeometry(1.2, 1.8, 1.4);
+      [-1, 1].forEach(side => {
+        const mirror = new THREE.Mesh(mirrorGeo, vehicleBumperMat);
+        mirror.position.set(5.5, 8.0, side * (width / 2 + 0.8));
+        group.add(mirror);
+      });
 
       // 4 Wheels
-      const wheelGeo = getSharedWheelGeo(3, 1.8, 10);
+      const wheelGeo = getSharedWheelGeo(3.0, 1.8, 10);
+      const rimGeo = getSharedWheelGeo(1.6, 1.9, 8);
       [-1, 1].forEach(wz => {
         [-13, 13].forEach(wx => {
           const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
           wheel.rotation.x = Math.PI / 2;
-          wheel.position.set(wx, 3, wz * (width / 2));
+          wheel.position.set(wx, 3.0, wz * (width / 2));
           group.add(wheel);
+
+          const rim = new THREE.Mesh(rimGeo, sharedRimMat);
+          rim.rotation.x = Math.PI / 2;
+          rim.position.set(wx, 3.0, wz * (width / 2));
+          group.add(rim);
         });
       });
 
@@ -559,213 +647,339 @@
       const hlGeo = new THREE.BoxGeometry(1.0, 2.2, 3.2);
       [-5, 5].forEach(hz => {
         const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-        hl.position.set(length / 2 + 0.5, 4.5, hz);
+        hl.position.set(length / 2 - 0.8, 5.0, hz);
         group.add(hl);
+      });
+
+      // Rear Taillights
+      const tlGeo = new THREE.BoxGeometry(1.0, 2.0, 3.0);
+      [-5, 5].forEach(tz => {
+        const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
+        tl.position.set(-length / 2 + 0.8, 5.2, tz);
+        group.add(tl);
       });
 
     } else if (type === 'cng') {
       const length = 28;
       const width = 15;
-      const height = 14;
+      const height = 16;
 
-      const bodyGeo = new THREE.BoxGeometry(length, height * 0.7, width);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x16a34a, roughness: 0.5 });
+      // Dark Green Metal Lower Cabin
+      const bodyGeo = new THREE.BoxGeometry(20, 6.5, width);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x15803d, roughness: 0.45 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = height * 0.35 + 2.5;
+      body.position.set(-2, 5.5, 0);
       body.castShadow = true;
       group.add(body);
 
-      // Yellow Curved Roof
-      const roofGeo = new THREE.CylinderGeometry(width * 0.5, width * 0.5, length, 12, 1, false, 0, Math.PI);
+      // Yellow Curved Canvas Dome Roof
+      const roofGeo = new THREE.CylinderGeometry(width * 0.52, width * 0.52, 22, 12, 1, false, 0, Math.PI);
       const roofMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.6 });
       const roof = new THREE.Mesh(roofGeo, roofMat);
       roof.rotation.z = Math.PI / 2;
-      roof.position.y = height + 1;
+      roof.position.set(-2, 12.8, 0);
       group.add(roof);
 
+      // Side Wire Safety Grill Mesh (Dark Bars)
+      const grillGeo = new THREE.BoxGeometry(14, 5.5, width + 0.2);
+      const grillMat = new THREE.MeshBasicMaterial({ color: 0x1e293b, wireframe: true });
+      const grill = new THREE.Mesh(grillGeo, grillMat);
+      grill.position.set(-2, 10.0, 0);
+      group.add(grill);
+
+      // Front Single Wheel Fork & Handlebars
+      const forkGeo = new THREE.CylinderGeometry(0.7, 0.7, 6, 8);
+      const fork = new THREE.Mesh(forkGeo, vehicleBumperMat);
+      fork.position.set(9.5, 5.5, 0);
+      group.add(fork);
+
+      const hbarGeo = new THREE.BoxGeometry(1.0, 0.8, 8);
+      const hbar = new THREE.Mesh(hbarGeo, vehicleBumperMat);
+      hbar.position.set(9.0, 8.5, 0);
+      group.add(hbar);
+
       // 3 Wheels (1 front at +X, 2 rear at -X)
-      const wheelGeo = getSharedWheelGeo(2.5, 1.5, 8);
+      const wheelGeo = getSharedWheelGeo(2.6, 1.4, 8);
+      const rimGeo = getSharedWheelGeo(1.4, 1.5, 8);
+
+      // Front Wheel
+      const fWheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
+      fWheel.rotation.x = Math.PI / 2;
+      fWheel.position.set(9.5, 2.6, 0);
+      group.add(fWheel);
+
+      // Rear Wheels
       [-1, 1].forEach(wz => {
         const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
         wheel.rotation.x = Math.PI / 2;
-        wheel.position.set(-length / 3, 2.5, wz * (width / 2));
+        wheel.position.set(-7.5, 2.6, wz * (width / 2));
         group.add(wheel);
-      });
-      const fWheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
-      fWheel.rotation.x = Math.PI / 2;
-      fWheel.position.set(length / 3, 2.5, 0);
-      group.add(fWheel);
 
-      const hlGeo = new THREE.BoxGeometry(1.0, 2.2, 3.0);
+        const rim = new THREE.Mesh(rimGeo, sharedRimMat);
+        rim.rotation.x = Math.PI / 2;
+        rim.position.set(-7.5, 2.6, wz * (width / 2));
+        group.add(rim);
+      });
+
+      // Front Round Headlight
+      const hlGeo = new THREE.CylinderGeometry(1.2, 1.2, 1.2, 8);
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-      hl.position.set(length / 2 + 0.5, 4.5, 0);
+      hl.rotation.z = Math.PI / 2;
+      hl.position.set(11.0, 6.2, 0);
       group.add(hl);
+
+      // Rear Taillight
+      const tlGeo = new THREE.BoxGeometry(0.8, 1.8, 2.5);
+      const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
+      tl.position.set(-12.2, 5.5, 0);
+      group.add(tl);
 
     } else if (type === 'rickshaw') {
       const length = 32;
       const width = 16;
 
-      // Passenger Hood Canopy (Rear at -X)
-      const hoodGeo = new THREE.CylinderGeometry(6, 6, 12, 10, 1, false, 0, Math.PI);
-      const hoodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
-      const hood = new THREE.Mesh(hoodGeo, hoodMat);
-      hood.rotation.z = Math.PI / 2;
-      hood.position.set(-length * 0.25, 10, 0);
-      group.add(hood);
-
-      // Passenger Seat Box
-      const seatGeo = new THREE.BoxGeometry(length * 0.45, 6, width);
-      const seatMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
+      // Rear Passenger Wooden Seat Box
+      const seatGeo = new THREE.BoxGeometry(13, 5, width - 1);
+      const seatMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.6 });
       const seat = new THREE.Mesh(seatGeo, seatMat);
-      seat.position.set(-length * 0.25, 5, 0);
+      seat.position.set(-7.5, 5.8, 0);
       group.add(seat);
 
-      // Pedaler Figure (Front at +X)
-      const pedBodyGeo = new THREE.CylinderGeometry(1.5, 1.8, 8, 8);
+      // Decorative Folk Art Backplate
+      const plateGeo = new THREE.BoxGeometry(0.8, 6.5, width - 1.5);
+      const plateMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
+      const plate = new THREE.Mesh(plateGeo, plateMat);
+      plate.position.set(-14.2, 8.5, 0);
+      group.add(plate);
+
+      // Passenger Curved Folding Hood Canopy (Rear at -X)
+      const hoodGeo = new THREE.CylinderGeometry(6.8, 6.8, 13.5, 12, 1, false, 0, Math.PI);
+      const hoodMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.7 });
+      const hood = new THREE.Mesh(hoodGeo, hoodMat);
+      hood.rotation.z = Math.PI / 2;
+      hood.position.set(-8.5, 12.5, 0);
+      group.add(hood);
+
+      // Bicycle Frame & Pedaler
+      const frameGeo = new THREE.CylinderGeometry(0.6, 0.6, 12, 6);
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+      const frame = new THREE.Mesh(frameGeo, frameMat);
+      frame.rotation.z = Math.PI / 3;
+      frame.position.set(4.5, 5.5, 0);
+      group.add(frame);
+
+      // Pedaler Figure (Torso & Head with Gamcha)
+      const pedBodyGeo = new THREE.BoxGeometry(2.2, 4.0, 2.2);
       const pedBodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7 });
       const pedBody = new THREE.Mesh(pedBodyGeo, pedBodyMat);
-      pedBody.position.set(length * 0.15, 8, 0);
+      pedBody.position.set(3.5, 9.2, 0);
       group.add(pedBody);
 
-      const headGeo = new THREE.SphereGeometry(1.6, 8, 8);
+      const headGeo = new THREE.SphereGeometry(1.4, 8, 8);
       const headMat = new THREE.MeshStandardMaterial({ color: 0xfde047 });
       const head = new THREE.Mesh(headGeo, headMat);
-      head.position.set(length * 0.15, 13, 0);
+      head.position.set(3.5, 13.0, 0);
       group.add(head);
 
-      // 3 Spoke Wheels (1 front at +X, 2 rear at -X)
-      const spkGeo = getSharedWheelGeo(3.5, 1.2, 10);
-      [-1, 1].forEach(wz => {
-        const w = new THREE.Mesh(spkGeo, sharedWheelMat);
-        w.rotation.x = Math.PI / 2;
-        w.position.set(-length * 0.3, 3.5, wz * (width / 2));
-        group.add(w);
-      });
-      const fw = new THREE.Mesh(spkGeo, sharedWheelMat);
+      // Handlebars
+      const barGeo = new THREE.BoxGeometry(0.8, 0.8, 7.5);
+      const bar = new THREE.Mesh(barGeo, vehicleBumperMat);
+      bar.position.set(8.5, 8.5, 0);
+      group.add(bar);
+
+      // 3 Spoke Wheels (1 front bicycle wheel at +X, 2 large rear carriage wheels at -X)
+      const fWheelGeo = getSharedWheelGeo(3.5, 0.9, 10);
+      const fw = new THREE.Mesh(fWheelGeo, sharedWheelMat);
       fw.rotation.x = Math.PI / 2;
-      fw.position.set(length * 0.35, 3.5, 0);
+      fw.position.set(11.0, 3.5, 0);
       group.add(fw);
 
-      const hlGeo = new THREE.BoxGeometry(1.0, 2.0, 2.0);
+      const rWheelGeo = getSharedWheelGeo(4.5, 1.1, 12);
+      [-1, 1].forEach(wz => {
+        const w = new THREE.Mesh(rWheelGeo, sharedWheelMat);
+        w.rotation.x = Math.PI / 2;
+        w.position.set(-7.5, 4.5, wz * (width / 2));
+        group.add(w);
+      });
+
+      // Front Brass Lamp & Rear Reflector
+      const hlGeo = new THREE.BoxGeometry(1.0, 1.8, 1.8);
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-      hl.position.set(length * 0.45, 5, 0);
+      hl.position.set(12.2, 5.0, 0);
       group.add(hl);
+
+      const tlGeo = new THREE.BoxGeometry(0.6, 1.5, 1.5);
+      const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
+      tl.position.set(-14.8, 5.5, 0);
+      group.add(tl);
 
     } else if (type === 'bike') {
       const length = 24;
       const width = 8;
 
-      const frameGeo = new THREE.BoxGeometry(length, 4, width);
-      const frameMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x38bdf8 });
-      const frame = new THREE.Mesh(frameGeo, frameMat);
-      frame.position.y = 5;
-      group.add(frame);
+      // Streamlined Fuel Tank & Engine Block
+      const tankGeo = new THREE.BoxGeometry(9, 3.2, 4.5);
+      const tankMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x38bdf8, roughness: 0.3 });
+      const tank = new THREE.Mesh(tankGeo, tankMat);
+      tank.position.set(1.5, 6.0, 0);
+      group.add(tank);
 
-      // Rider
-      const riderGeo = new THREE.CylinderGeometry(1.2, 1.5, 7, 8);
+      const engGeo = new THREE.BoxGeometry(6, 3.0, 4.0);
+      const eng = new THREE.Mesh(engGeo, vehicleBumperMat);
+      eng.position.set(0, 3.8, 0);
+      group.add(eng);
+
+      // Commuter Rider with Helmet
+      const riderGeo = new THREE.BoxGeometry(2.4, 4.5, 2.4);
       const riderMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
       const rider = new THREE.Mesh(riderGeo, riderMat);
-      rider.position.set(0, 8.5, 0);
+      rider.position.set(-1.0, 9.0, 0);
+      rider.rotation.z = -0.15; // Natural lean forward
       group.add(rider);
 
-      const helmGeo = new THREE.SphereGeometry(1.6, 8, 8);
-      const helmMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x38bdf8 });
+      const helmGeo = new THREE.SphereGeometry(1.5, 8, 8);
+      const helmMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x38bdf8, roughness: 0.2 });
       const helm = new THREE.Mesh(helmGeo, helmMat);
-      helm.position.set(0, 13, 0);
+      helm.position.set(-0.5, 13.0, 0);
       group.add(helm);
 
-      // 2 Wheels (Front at +X, Rear at -X)
-      const wheelGeo = getSharedWheelGeo(3, 1.2, 8);
-      [-length / 3, length / 3].forEach(px => {
+      // Front Handlebars with Mirror
+      const barGeo = new THREE.BoxGeometry(0.8, 0.8, 6.5);
+      const bar = new THREE.Mesh(barGeo, vehicleBumperMat);
+      bar.position.set(6.0, 8.5, 0);
+      group.add(bar);
+
+      // 2 Spoked Wheels with Mudguards
+      const wheelGeo = getSharedWheelGeo(3.0, 1.1, 10);
+      [-7.5, 7.5].forEach(px => {
         const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
         wheel.rotation.x = Math.PI / 2;
-        wheel.position.set(px, 3, 0);
+        wheel.position.set(px, 3.0, 0);
         group.add(wheel);
       });
 
-      const hlGeo = new THREE.BoxGeometry(1.0, 2.0, 2.0);
+      const hlGeo = new THREE.BoxGeometry(1.0, 1.8, 1.8);
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-      hl.position.set(length / 2 + 0.5, 6, 0);
+      hl.position.set(8.5, 6.0, 0);
       group.add(hl);
+
+      const tlGeo = new THREE.BoxGeometry(0.8, 1.4, 1.4);
+      const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
+      tl.position.set(-8.5, 5.0, 0);
+      group.add(tl);
     }
 
     scene.add(group);
     return group;
   }
 
-  // 3D Ambulance Builder (Facing +X)
+  // 3D Ambulance Builder (High-Roof Emergency Van facing +X)
   function create3DAmbulance() {
     const ambGroup = new THREE.Group();
-    const length = 52;
-    const width = 20;
-    const height = 18;
+    const length = 54;
+    const width = 22;
+    const height = 20;
 
-    // White Van Body
-    const bodyGeo = new THREE.BoxGeometry(length, height, width);
+    // White High-Roof Van Body
+    const bodyGeo = new THREE.BoxGeometry(length, 14, width);
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = height / 2 + 3;
+    body.position.y = 10;
     body.castShadow = true;
     ambGroup.add(body);
 
-    // Red Stripe
-    const strGeo = new THREE.BoxGeometry(length, 3, width + 0.3);
+    // Aerodynamic High-Roof Cap
+    const capGeo = new THREE.BoxGeometry(length - 2, 2.5, width - 0.8);
+    const cap = new THREE.Mesh(capGeo, bodyMat);
+    cap.position.y = 18.2;
+    ambGroup.add(cap);
+
+    // Bold Reflective Red Emergency Stripes
+    const strGeo = new THREE.BoxGeometry(length + 0.3, 3.2, width + 0.3);
     const strMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     const str = new THREE.Mesh(strGeo, strMat);
-    str.position.y = height * 0.45 + 3;
+    str.position.y = 10.5;
     ambGroup.add(str);
 
-    // Red Cross Decals
+    // Red Crescent / Medical Cross Decals on Sides
     const cross1Geo = new THREE.BoxGeometry(8, 2.5, width + 0.5);
     const cross1 = new THREE.Mesh(cross1Geo, strMat);
-    cross1.position.set(-5, height * 0.5 + 3, 0);
+    cross1.position.set(-4, 11, 0);
     ambGroup.add(cross1);
 
     const cross2Geo = new THREE.BoxGeometry(2.5, 8, width + 0.5);
     const cross2 = new THREE.Mesh(cross2Geo, strMat);
-    cross2.position.set(-5, height * 0.5 + 3, 0);
+    cross2.position.set(-4, 11, 0);
     ambGroup.add(cross2);
 
-    // Windshield (Front at +X)
-    const winGeo = new THREE.BoxGeometry(10, 6, width + 0.2);
+    // Sloped Front Windshield
+    const winGeo = new THREE.BoxGeometry(2.0, 6.5, width - 1.2);
     const winMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
     const win = new THREE.Mesh(winGeo, winMat);
-    win.position.set(length * 0.35, height * 0.65 + 3, 0);
+    win.position.set(length / 2 - 2, 13.5, 0);
     ambGroup.add(win);
 
-    // Rooftop Lightbar
-    const barGeo = new THREE.BoxGeometry(14, 3, 8);
-    const barMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+    // Front Chrome Grille & Bumper
+    const fBumpGeo = new THREE.BoxGeometry(2.2, 3.5, width + 0.6);
+    const fBump = new THREE.Mesh(fBumpGeo, vehicleBumperMat);
+    fBump.position.set(length / 2 + 0.8, 4.0, 0);
+    ambGroup.add(fBump);
+
+    // Side Mirrors
+    const mirrorGeo = new THREE.BoxGeometry(1.4, 2.5, 1.2);
+    [-1, 1].forEach(side => {
+      const mirror = new THREE.Mesh(mirrorGeo, vehicleBumperMat);
+      mirror.position.set(length / 2 - 3, 12, side * (width / 2 + 1.2));
+      ambGroup.add(mirror);
+    });
+
+    // Rooftop Emergency Lightbar
+    const barGeo = new THREE.BoxGeometry(16, 2.2, 9);
+    const barMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4 });
     const bar = new THREE.Mesh(barGeo, barMat);
-    bar.position.set(0, height + 4.5, 0);
+    bar.position.set(0, 20.2, 0);
     ambGroup.add(bar);
 
-    // Dual Flashing Strobes: Red & Blue (Active emergency only)
+    // Dual High-Intensity Flashing Strobes (Red & Blue)
     ambStrobeRed = new THREE.PointLight(0xff0000, 2.5, 120);
-    ambStrobeRed.position.set(-4, height + 7, 0);
+    ambStrobeRed.position.set(-4, 22.5, 0);
     ambGroup.add(ambStrobeRed);
 
     ambStrobeBlue = new THREE.PointLight(0x0066ff, 2.5, 120);
-    ambStrobeBlue.position.set(4, height + 7, 0);
+    ambStrobeBlue.position.set(4, 22.5, 0);
     ambGroup.add(ambStrobeBlue);
 
-    // Wheels
-    const wheelGeo = getSharedWheelGeo(3.5, 2, 10);
+    // 4 Heavy-Duty Wheels
+    const wheelGeo = getSharedWheelGeo(3.5, 2.0, 10);
+    const rimGeo = getSharedWheelGeo(1.8, 2.1, 8);
     [-1, 1].forEach(wz => {
       [-16, 16].forEach(wx => {
         const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
         wheel.rotation.x = Math.PI / 2;
         wheel.position.set(wx, 3.5, wz * (width / 2));
         ambGroup.add(wheel);
+
+        const rim = new THREE.Mesh(rimGeo, sharedRimMat);
+        rim.rotation.x = Math.PI / 2;
+        rim.position.set(wx, 3.5, wz * (width / 2));
+        ambGroup.add(rim);
       });
     });
 
     // Front Headlights
-    const hlGeo = new THREE.BoxGeometry(1.2, 3, 4);
-    [-5, 5].forEach(hz => {
+    const hlGeo = new THREE.BoxGeometry(1.2, 2.8, 3.8);
+    [-6, 6].forEach(hz => {
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-      hl.position.set(length / 2 + 0.6, 6, hz);
+      hl.position.set(length / 2 + 0.8, 6.5, hz);
       ambGroup.add(hl);
+    });
+
+    // Rear Taillights
+    const tlGeo = new THREE.BoxGeometry(1.0, 4.5, 2.0);
+    [-7, 7].forEach(tz => {
+      const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
+      tl.position.set(-length / 2 - 0.2, 8.0, tz);
+      ambGroup.add(tl);
     });
 
     ambGroup.visible = false;
@@ -773,32 +987,77 @@
     return ambGroup;
   }
 
-  // 3D Pedestrian Builder
+  // 3D Human Pedestrian Builder (Articulated Torso, Head, Limbs, Umbrella)
   function create3DPedestrian(p) {
     const group = new THREE.Group();
 
-    // Body Cylinder
-    const bodyGeo = new THREE.CylinderGeometry(1.2, 1.5, 6, 8);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: p.color ? parseInt(p.color.replace('#', '0x'), 16) : 0x38bdf8 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 5;
-    group.add(body);
+    // Clothed Torso (Shirt / Kurta / Top)
+    const torsoGeo = new THREE.BoxGeometry(2.4, 4.0, 1.8);
+    const torsoMat = new THREE.MeshStandardMaterial({
+      color: p.color ? parseInt(p.color.replace('#', '0x'), 16) : 0x38bdf8,
+      roughness: 0.6
+    });
+    const torso = new THREE.Mesh(torsoGeo, torsoMat);
+    torso.position.y = 6.2;
+    group.add(torso);
 
-    // Head Sphere
-    const headGeo = new THREE.SphereGeometry(1.3, 8, 8);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xfde047 });
+    // Human Head with Flesh Tone
+    const headGeo = new THREE.SphereGeometry(1.2, 8, 8);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.5 });
     const head = new THREE.Mesh(headGeo, headMat);
-    head.position.y = 9;
+    head.position.y = 9.4;
     group.add(head);
 
-    // Umbrella Canopy (for Rainy Atmosphere)
-    const umbGeo = new THREE.CylinderGeometry(0.5, 6.5, 3, 12, 1, false, 0, Math.PI * 2);
+    // Articulated Legs (Dark Trousers / Jeans)
+    const legGeo = new THREE.BoxGeometry(0.9, 4.2, 1.0);
+    const legMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+
+    const leftLegGroup = new THREE.Group();
+    leftLegGroup.position.set(-0.7, 4.2, 0);
+    const leftLeg = new THREE.Mesh(legGeo, legMat);
+    leftLeg.position.y = -2.1;
+    leftLegGroup.add(leftLeg);
+    group.add(leftLegGroup);
+
+    const rightLegGroup = new THREE.Group();
+    rightLegGroup.position.set(0.7, 4.2, 0);
+    const rightLeg = new THREE.Mesh(legGeo, legMat);
+    rightLeg.position.y = -2.1;
+    rightLegGroup.add(rightLeg);
+    group.add(rightLegGroup);
+
+    // Articulated Arms
+    const armGeo = new THREE.BoxGeometry(0.7, 3.8, 0.8);
+    const armMat = torsoMat;
+
+    const leftArmGroup = new THREE.Group();
+    leftArmGroup.position.set(-1.6, 7.8, 0);
+    const leftArm = new THREE.Mesh(armGeo, armMat);
+    leftArm.position.y = -1.9;
+    leftArmGroup.add(leftArm);
+    group.add(leftArmGroup);
+
+    const rightArmGroup = new THREE.Group();
+    rightArmGroup.position.set(1.6, 7.8, 0);
+    const rightArm = new THREE.Mesh(armGeo, armMat);
+    rightArm.position.y = -1.9;
+    rightArmGroup.add(rightArm);
+    group.add(rightArmGroup);
+
+    // Store references for walking animation
+    group.userData.leftLeg = leftLegGroup;
+    group.userData.rightLeg = rightLegGroup;
+    group.userData.leftArm = leftArmGroup;
+    group.userData.rightArm = rightArmGroup;
+
+    // Colorful Rain Umbrella Canopy
+    const umbGeo = new THREE.CylinderGeometry(0.4, 6.5, 3.2, 12, 1, false, 0, Math.PI * 2);
     const umbMat = new THREE.MeshStandardMaterial({
       color: p.umbrellaColor ? parseInt(p.umbrellaColor.replace('#', '0x'), 16) : 0xdc2626,
       roughness: 0.3
     });
     const umb = new THREE.Mesh(umbGeo, umbMat);
-    umb.position.y = 12.5;
+    umb.position.y = 12.8;
     umb.visible = false;
     group.add(umb);
     group.userData.umbrella = umb;
@@ -945,6 +1204,7 @@
 
     // 5. Ground & Road Network
     const roadMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.85 });
+    roadMaterial = roadMat;
     const groundGeo = new THREE.PlaneGeometry(1600, 1200);
     const ground = new THREE.Mesh(groundGeo, roadMat);
     ground.rotation.x = -Math.PI / 2;
@@ -1347,23 +1607,42 @@
       });
     }
 
-    // 13. Subtle Rain Particle System (Ready for toggling)
-    const rainCount = 600;
-    const rainGeo = new THREE.BufferGeometry();
-    const rainPositions = new Float32Array(rainCount * 3);
-    for (let i = 0; i < rainCount * 3; i += 3) {
-      rainPositions[i] = (Math.random() - 0.5) * 1200;
-      rainPositions[i + 1] = Math.random() * 300;
-      rainPositions[i + 2] = (Math.random() - 0.5) * 800;
+    // 13. Realistic Slanted Rain Line Segments System (Pooled & Lightweight)
+    const rainPositions = new Float32Array(rainCount * 6); // 2 vertices per streak = 6 floats
+    rainSpeeds = new Float32Array(rainCount);
+    rainLengths = new Float32Array(rainCount);
+    const windSlantX = -3.5;
+    const windSlantZ = -1.8;
+
+    for (let i = 0; i < rainCount; i++) {
+      const idx = i * 6;
+      const rx = (Math.random() - 0.5) * 1250;
+      const ry = Math.random() * 320;
+      const rz = (Math.random() - 0.5) * 850;
+      const rlen = 16 + Math.random() * 8;
+      rainSpeeds[i] = 340 + Math.random() * 120;
+      rainLengths[i] = rlen;
+
+      // Vertex 1: Top
+      rainPositions[idx] = rx;
+      rainPositions[idx + 1] = ry;
+      rainPositions[idx + 2] = rz;
+
+      // Vertex 2: Slanted Bottom
+      rainPositions[idx + 3] = rx + windSlantX;
+      rainPositions[idx + 4] = ry - rlen;
+      rainPositions[idx + 5] = rz + windSlantZ;
     }
+
+    const rainGeo = new THREE.BufferGeometry();
     rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
-    const rainMat = new THREE.PointsMaterial({
-      color: 0x38bdf8,
-      size: 1.5,
+    const rainMat = new THREE.LineBasicMaterial({
+      color: 0x93c5fd,
       transparent: true,
-      opacity: 0.5
+      opacity: 0.36,
+      depthWrite: false
     });
-    rainParticles = new THREE.Points(rainGeo, rainMat);
+    rainParticles = new THREE.LineSegments(rainGeo, rainMat);
     rainParticles.visible = false;
     scene.add(rainParticles);
 
@@ -1474,19 +1753,16 @@
       if (!v || !vm.mesh) continue;
 
       if (v.dir === 'EB') {
-        let laneZ = v.lane === 1 ? 18 : 48;
-        if (emergencyWaveActive && v.pos > ambulanceX - 50 && v.pos < ambulanceX + 260) {
-          laneZ += 6; // nudge toward curb for ambulance corridor
-        }
+        const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? 18 : 48);
         vm.mesh.position.set(v.pos - 600, 0, laneZ);
       } else if (v.dir === 'WB') {
-        const laneZ = v.lane === 1 ? -15 : -52;
+        const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? -15 : -52);
         vm.mesh.position.set(v.pos - 600, 0, laneZ);
       } else if (v.dir === 'SB') {
-        const laneX = v.lane === 1 ? -20 : -58;
+        const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? -20 : -58);
         vm.mesh.position.set(laneX, 0, v.pos - 420);
       } else if (v.dir === 'NB') {
-        const laneX = v.lane === 1 ? 18 : 56;
+        const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? 18 : 56);
         vm.mesh.position.set(laneX, 0, v.pos - 420);
       }
     }
@@ -1509,7 +1785,7 @@
       }
     }
 
-    // 4. Update Pedestrians
+    // 4. Update Pedestrians with Coordinated Arm/Leg Walking Animations
     for (const key in pedMeshMap) {
       const pm = pedMeshMap[key];
       const p = pm.data;
@@ -1517,11 +1793,20 @@
 
       if (p.isSidewalk) {
         const coord = typeof p.pos !== 'undefined' ? p.pos : p.start;
+        const walkPhase = coord * 0.22;
+        const legAngle = Math.sin(walkPhase) * 0.45;
+        const armAngle = Math.sin(walkPhase) * 0.4;
+        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = legAngle;
+        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -legAngle;
+        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armAngle;
+        if (pm.mesh.userData.rightArm) pm.mesh.userData.rightArm.rotation.x = armAngle;
+        const bob = Math.abs(Math.sin(walkPhase * 2)) * 0.5;
+
         if (p.axis === 'H') {
-          pm.mesh.position.set(coord - 600, 1, p.y - 420);
+          pm.mesh.position.set(coord - 600, 1 + bob, p.y - 420);
           pm.mesh.rotation.y = (p.dirForward !== false) ? 0 : Math.PI;
         } else {
-          pm.mesh.position.set(p.x - 600, 1, coord - 420);
+          pm.mesh.position.set(p.x - 600, 1 + bob, coord - 420);
           pm.mesh.rotation.y = (p.dirForward !== false) ? Math.PI / 2 : -Math.PI / 2;
         }
       } else {
@@ -1529,12 +1814,29 @@
         if (pm.mesh.userData && pm.mesh.userData.umbrella) {
           pm.mesh.userData.umbrella.visible = !!isRain;
         }
-        if (p.axis === 'H') {
-          const coord = (typeof p.currentCoord !== 'undefined') ? p.currentCoord : p.start;
-          pm.mesh.position.set(coord - 600, 1, p.y - 420);
+        const coord = (typeof p.currentCoord !== 'undefined') ? p.currentCoord : p.start;
+        const isMoving = Math.abs(coord - p.start) > 2;
+        if (isMoving) {
+          const walkPhase = coord * 0.22;
+          const legAngle = Math.sin(walkPhase) * 0.45;
+          const armAngle = Math.sin(walkPhase) * 0.4;
+          if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = legAngle;
+          if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -legAngle;
+          if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armAngle;
+          if (pm.mesh.userData.rightArm) pm.mesh.userData.rightArm.rotation.x = armAngle;
         } else {
-          const coord = (typeof p.currentCoord !== 'undefined') ? p.currentCoord : p.start;
-          pm.mesh.position.set(p.x - 600, 1, coord - 420);
+          if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = 0;
+          if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = 0;
+          if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = 0;
+          if (pm.mesh.userData.rightArm) pm.mesh.userData.rightArm.rotation.x = 0;
+        }
+        const bob = isMoving ? Math.abs(Math.sin(coord * 0.44)) * 0.5 : 0;
+        if (p.axis === 'H') {
+          pm.mesh.position.set(coord - 600, 1 + bob, p.y - 420);
+          pm.mesh.rotation.y = (p.end > p.start) ? 0 : Math.PI;
+        } else {
+          pm.mesh.position.set(p.x - 600, 1 + bob, coord - 420);
+          pm.mesh.rotation.y = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
         }
       }
     }
@@ -1576,17 +1878,40 @@
       }
     }
 
-    // 6. Rain Particle System
+    // 6. Realistic Slanted Rain Streaks & Wet Asphalt Transition
     if (rainParticles) {
       rainParticles.visible = !!isRain;
-      if (isRain) {
+      if (isRain && rainSpeeds && rainLengths) {
         const positions = rainParticles.geometry.attributes.position.array;
-        for (let i = 1; i < positions.length; i += 3) {
-          positions[i] -= 350 * dt;
-          if (positions[i] < 0) positions[i] = 300;
+        const windSlantX = -3.5;
+        const windSlantZ = -1.8;
+        for (let i = 0; i < rainCount; i++) {
+          const idx = i * 6;
+          const fallDist = rainSpeeds[i] * dt;
+          positions[idx + 1] -= fallDist;
+          positions[idx + 4] = positions[idx + 1] - rainLengths[i];
+          if (positions[idx + 1] < 0) {
+            const rx = (Math.random() - 0.5) * 1250;
+            const ry = 280 + Math.random() * 40;
+            const rz = (Math.random() - 0.5) * 850;
+            positions[idx] = rx;
+            positions[idx + 1] = ry;
+            positions[idx + 2] = rz;
+            positions[idx + 3] = rx + windSlantX;
+            positions[idx + 4] = ry - rainLengths[i];
+            positions[idx + 5] = rz + windSlantZ;
+          }
         }
         rainParticles.geometry.attributes.position.needsUpdate = true;
       }
+    }
+
+    // Dynamic Road Wetness & Specular Sheen during Rain
+    if (roadMaterial) {
+      const targetRoughness = isRain ? 0.28 : 0.85;
+      const targetMetalness = isRain ? 0.18 : 0.04;
+      roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * Math.min(1, dt * 3.0);
+      roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, dt * 3.0);
     }
 
     // 7. Interactive Drone Camera Banking & Pitching (Optimized convergence)

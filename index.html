@@ -13086,7 +13086,8 @@
       // Emergency Ambulance Priority Wave State & Controls
       let emergencyWaveActive = false;
       let ambulanceX = -180;
-      const AMBULANCE_SPEED = 280; // px/sec - high-speed priority wave
+      let ambulanceSpeed = 260;
+      const AMBULANCE_SPEED = 260; // px/sec - high-speed priority wave
       const AMBULANCE_LANE_Y = 438;
       let ambulanceSirenObj = null;
       let emergencyTimer = null;
@@ -13104,6 +13105,7 @@
         }
         emergencyWaveActive = false;
         ambulanceX = -180;
+        ambulanceSpeed = AMBULANCE_SPEED;
         if (ambMoverEl) {
           ambMoverEl.setAttribute('opacity', '0');
           ambMoverEl.setAttribute('transform', `translate(-180, ${AMBULANCE_LANE_Y})`);
@@ -13129,6 +13131,7 @@
         }
         emergencyWaveActive = true;
         ambulanceX = -140;
+        ambulanceSpeed = AMBULANCE_SPEED;
 
         if (ambMoverEl) {
           ambMoverEl.setAttribute('opacity', '1');
@@ -13145,8 +13148,8 @@
           }
         }
 
-        // Strict fail-safe completion timer: guarantees cleanup after ~5.5s even if interrupted
-        ambulanceFailSafeTimer = setTimeout(endEmergencyWave, 5500);
+        // Failsafe timer: clean up after extended run if blocked too long
+        ambulanceFailSafeTimer = setTimeout(endEmergencyWave, 22000);
       }
       window.triggerEmergencyWave = triggerEmergencyWave;
 
@@ -13182,32 +13185,32 @@
       // Stop lines: EB: x=446, WB: x=752, SB: y=304, NB: y=536
       const vehicles = [
         // Eastbound (Horizontal, moving Right, Y=435 inner, Y=470 outer)
-        { id: 'v_eb_car', dir: 'EB', lane: 1, type: 'car', color: '#f8fafc', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446 },
-        { id: 'v_eb_bike', dir: 'EB', lane: 1, type: 'bike', color: '#38bdf8', w: 24, h: 12, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446 },
-        { id: 'v_eb_bus', dir: 'EB', lane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446 },
-        { id: 'v_eb_cng', dir: 'EB', lane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: -80, speed: 40, maxSpeed: 48, stopLine: 446 },
-        { id: 'v_eb_rickshaw', dir: 'EB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: -210, speed: 25, maxSpeed: 28, stopLine: 446 },
+        { id: 'v_eb_car', dir: 'EB', lane: 1, defaultLane: 1, type: 'car', color: '#f8fafc', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446, currentLaneY: 438 },
+        { id: 'v_eb_bike', dir: 'EB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 24, h: 12, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 438 },
+        { id: 'v_eb_bus', dir: 'EB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446, currentLaneY: 468 },
+        { id: 'v_eb_cng', dir: 'EB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: -80, speed: 40, maxSpeed: 48, stopLine: 446, currentLaneY: 468 },
+        { id: 'v_eb_rickshaw', dir: 'EB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: -210, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 468 },
 
         // Westbound (Horizontal, moving Left, Y=405 inner, Y=370 outer)
-        { id: 'v_wb_car', dir: 'WB', lane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752 },
-        { id: 'v_wb_bike', dir: 'WB', lane: 1, type: 'bike', color: '#f43f5e', w: 24, h: 12, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752 },
-        { id: 'v_wb_bus', dir: 'WB', lane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752 },
-        { id: 'v_wb_cng', dir: 'WB', lane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: 1270, speed: 40, maxSpeed: 48, stopLine: 752 },
-        { id: 'v_wb_rickshaw', dir: 'WB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: 1420, speed: 25, maxSpeed: 28, stopLine: 752 },
+        { id: 'v_wb_car', dir: 'WB', lane: 1, defaultLane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 405 },
+        { id: 'v_wb_bike', dir: 'WB', lane: 1, defaultLane: 1, type: 'bike', color: '#f43f5e', w: 24, h: 12, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 405 },
+        { id: 'v_wb_bus', dir: 'WB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752, currentLaneY: 368 },
+        { id: 'v_wb_cng', dir: 'WB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: 1270, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 368 },
+        { id: 'v_wb_rickshaw', dir: 'WB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: 1420, speed: 25, maxSpeed: 28, stopLine: 752, currentLaneY: 368 },
 
         // Southbound (Vertical, moving Down, X=580 inner, X=544 outer)
-        { id: 'v_sb_car', dir: 'SB', lane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304 },
-        { id: 'v_sb_bike', dir: 'SB', lane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304 },
-        { id: 'v_sb_bus', dir: 'SB', lane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304 },
-        { id: 'v_sb_cng', dir: 'SB', lane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 30, speed: 40, maxSpeed: 48, stopLine: 304 },
-        { id: 'v_sb_rickshaw', dir: 'SB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: -120, speed: 25, maxSpeed: 28, stopLine: 304 },
+        { id: 'v_sb_car', dir: 'SB', lane: 1, defaultLane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304, currentLaneX: 580 },
+        { id: 'v_sb_bike', dir: 'SB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 580 },
+        { id: 'v_sb_bus', dir: 'SB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304, currentLaneX: 542 },
+        { id: 'v_sb_cng', dir: 'SB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 30, speed: 40, maxSpeed: 48, stopLine: 304, currentLaneX: 542 },
+        { id: 'v_sb_rickshaw', dir: 'SB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: -120, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 542 },
 
         // Northbound (Vertical, moving Up, X=620 inner, X=656 outer)
-        { id: 'v_nb_car', dir: 'NB', lane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536 },
-        { id: 'v_nb_bike', dir: 'NB', lane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536 },
-        { id: 'v_nb_bus', dir: 'NB', lane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536 },
-        { id: 'v_nb_cng', dir: 'NB', lane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 680, speed: 40, maxSpeed: 48, stopLine: 536 },
-        { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536 }
+        { id: 'v_nb_car', dir: 'NB', lane: 1, defaultLane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 618 },
+        { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
+        { id: 'v_nb_bus', dir: 'NB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536, currentLaneX: 656 },
+        { id: 'v_nb_cng', dir: 'NB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 680, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 656 },
+        { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536, currentLaneX: 656 }
       ];
 
       // Build Vehicle SVG Elements with Bright Warm Gold/White Headlights & Glowing Red Taillights
@@ -13691,7 +13694,12 @@
           }
         }
 
-        // 2. Update Vehicles Physics, Queueing & Movements
+        // 2. Authoritative Intersection Conflict & Anti-Gridlock Detection
+        // Perpendicular conflict zones: NS inside [320, 520], EW inside [450, 750]
+        const isNSInIntersection = vehicles.some(v => (v.dir === 'SB' && v.pos + v.h >= 320 && v.pos <= 520) || (v.dir === 'NB' && v.pos <= 520 && v.pos + v.h >= 320));
+        const isEWInIntersection = (emergencyWaveActive && ambulanceX + 54 >= 440 && ambulanceX <= 750) ||
+          vehicles.some(v => (v.dir === 'EB' && v.pos + v.w >= 450 && v.pos <= 745) || (v.dir === 'WB' && v.pos <= 745 && v.pos + v.w >= 450));
+
         // Reset and populate pre-allocated lane groups without GC churn
         for (let k = 0; k < laneGroupKeys.length; k++) {
           laneGroups[laneGroupKeys[k]].length = 0;
@@ -13710,8 +13718,8 @@
         laneGroups['NB_1'].sort((a,b) => a.pos - b.pos);
         laneGroups['NB_2'].sort((a,b) => a.pos - b.pos);
 
-        const MIN_FOLLOW_GAP = 20; // Safe bumper-to-bumper gap (px)
-        const SLOW_FOLLOW_GAP = 95; // Proactive deceleration distance (px)
+        const MIN_FOLLOW_GAP = 22; // Safe bumper-to-bumper gap (px)
+        const SLOW_FOLLOW_GAP = 110; // Proactive deceleration distance (px)
 
         laneGroupKeys.forEach(key => {
           const laneVehicles = laneGroups[key];
@@ -13725,14 +13733,28 @@
               const distToStop = v.stopLine - front;
               const beforeIntersection = front <= v.stopLine + 8;
 
-              // Strictly obey Red/Yellow signal: hard clamp before stop line
-              if (!isEWGreen && beforeIntersection) {
+              // Check West Zebra Crosswalk Pedestrians (crossing around x ≈ 470)
+              const laneY = v.currentLaneY || (v.lane === 1 ? 438 : 468);
+              const pedCrossing = pedestrians.some(p => (p.id === 'ped_w1' || p.id === 'ped_w2') && Math.abs(p.currentCoord - laneY) < 24);
+              const approachingCrosswalk = front <= 476 + 8 && front >= 360;
+
+              // Strictly obey Red/Yellow signal, occupied intersection box, or pedestrian on crosswalk
+              if ((!isEWGreen || isNSInIntersection) && beforeIntersection) {
                 if (distToStop <= 4) {
                   targetSpeed = 0;
                   v.speed = 0;
                   v.pos = v.stopLine - v.w;
-                } else if (distToStop < 180) {
-                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 180) * v.maxSpeed * 0.85));
+                } else if (distToStop < 170) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 170) * v.maxSpeed * 0.82));
+                }
+              } else if (pedCrossing && approachingCrosswalk) {
+                const distToPed = 466 - front;
+                if (distToPed <= 4) {
+                  targetSpeed = 0;
+                  v.speed = 0;
+                  v.pos = 466 - v.w;
+                } else {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToPed / 120) * v.maxSpeed * 0.7));
                 }
               }
 
@@ -13752,32 +13774,75 @@
 
               v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
               v.pos += v.speed * dt;
+              if (leader) v.pos = Math.min(v.pos, leader.pos - v.w - MIN_FOLLOW_GAP);
+              if ((!isEWGreen || isNSInIntersection) && beforeIntersection) v.pos = Math.min(v.pos, v.stopLine - v.w);
+              if (pedCrossing && approachingCrosswalk) v.pos = Math.min(v.pos, 466 - v.w);
 
               // Collision-free wrap-around respawn
               if (v.pos > 1280) {
                 const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos);
                 const minPos = otherPositions.length ? Math.min(...otherPositions) : -140;
-                v.pos = Math.min(-140, minPos - v.w - 65);
+                v.pos = Math.min(-140, minPos - v.w - 70);
                 v.speed = v.maxSpeed * 0.7;
               }
-              let laneY = v.lane === 1 ? 438 : 468;
-              if (emergencyWaveActive && v.pos > ambulanceX - 50 && v.pos < ambulanceX + 260) {
-                laneY += 6; // Proactively nudge +6px toward the curb to yield right-of-way corridor
+
+              // Emergency Wave Lane Yielding Logic (Lane 1 vehicles yield to Lane 2 if safe)
+              if (emergencyWaveActive && ambulanceX > -120 && ambulanceX < 1250) {
+                const distFromAmb = v.pos - (ambulanceX + 54);
+                if (v.lane === 1 && distFromAmb >= -20 && distFromAmb < 260) {
+                  // Check if lane 2 has an open gap
+                  const lane2Blocked = vehicles.some(o => o.dir === 'EB' && o.lane === 2 && Math.abs(o.pos - v.pos) < (v.w + 45));
+                  if (!lane2Blocked) {
+                    v.currentLaneY = (v.currentLaneY || 438) + (468 - (v.currentLaneY || 438)) * Math.min(1, dt * 4.5);
+                    if (v.currentLaneY >= 464) {
+                      v.lane = 2;
+                      v.currentLaneY = 468;
+                    }
+                  }
+                }
+              } else if (!emergencyWaveActive && v.defaultLane === 1 && v.lane === 2) {
+                // Return safely to lane 1 when clear
+                const lane1Blocked = vehicles.some(o => o.dir === 'EB' && o.lane === 1 && Math.abs(o.pos - v.pos) < (v.w + 45));
+                if (!lane1Blocked) {
+                  v.currentLaneY = (v.currentLaneY || 468) + (438 - (v.currentLaneY || 468)) * Math.min(1, dt * 3.5);
+                  if (v.currentLaneY <= 442) {
+                    v.lane = 1;
+                    v.currentLaneY = 438;
+                  }
+                }
+              } else {
+                const targetLaneY = v.lane === 1 ? 438 : 468;
+                v.currentLaneY = (v.currentLaneY || targetLaneY) + (targetLaneY - (v.currentLaneY || targetLaneY)) * Math.min(1, dt * 5.0);
               }
-              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
+
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${v.currentLaneY.toFixed(1)})`);
 
             } else if (v.dir === 'WB') {
               const front = v.pos;
               const distToStop = front - v.stopLine;
               const beforeIntersection = front >= v.stopLine - 8;
 
-              if (!isEWGreen && beforeIntersection) {
+              // Check East Zebra Crosswalk Pedestrians (crossing around x ≈ 724)
+              const laneY = v.lane === 1 ? 405 : 368;
+              const pedCrossing = pedestrians.some(p => (p.id === 'ped_e1' || p.id === 'ped_e2') && Math.abs(p.currentCoord - laneY) < 24);
+              const approachingCrosswalk = front >= 720 - 8 && front <= 840;
+
+              if ((!isEWGreen || isNSInIntersection) && beforeIntersection) {
                 if (distToStop <= 4) {
                   targetSpeed = 0;
                   v.speed = 0;
                   v.pos = v.stopLine;
-                } else if (distToStop < 180) {
-                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 180) * v.maxSpeed * 0.85));
+                } else if (distToStop < 170) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 170) * v.maxSpeed * 0.82));
+                }
+              } else if (pedCrossing && approachingCrosswalk) {
+                const distToPed = front - 732;
+                if (distToPed <= 4) {
+                  targetSpeed = 0;
+                  v.speed = 0;
+                  v.pos = 732;
+                } else {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToPed / 120) * v.maxSpeed * 0.7));
                 }
               }
 
@@ -13796,28 +13861,46 @@
 
               v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
               v.pos -= v.speed * dt;
+              if (leader) v.pos = Math.max(v.pos, leader.pos + leader.w + MIN_FOLLOW_GAP);
+              if ((!isEWGreen || isNSInIntersection) && beforeIntersection) v.pos = Math.max(v.pos, v.stopLine);
+              if (pedCrossing && approachingCrosswalk) v.pos = Math.max(v.pos, 732);
 
               if (v.pos < -140) {
                 const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos + o.w);
                 const maxPos = otherPositions.length ? Math.max(...otherPositions) : 1340;
-                v.pos = Math.max(1340, maxPos + 65);
+                v.pos = Math.max(1340, maxPos + 70);
                 v.speed = v.maxSpeed * 0.7;
               }
-              const laneY = v.lane === 1 ? 405 : 368;
-              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
+              const targetLaneY = v.lane === 1 ? 405 : 368;
+              v.currentLaneY = targetLaneY;
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${targetLaneY})`);
 
             } else if (v.dir === 'SB') {
               const front = v.pos + v.h;
               const distToStop = v.stopLine - front;
               const beforeIntersection = front <= v.stopLine + 8;
 
-              if (!isNSGreen && beforeIntersection) {
+              // Check North Zebra Crosswalk Pedestrians (crossing around y ≈ 320)
+              const laneX = v.lane === 1 ? 580 : 542;
+              const pedCrossing = pedestrians.some(p => (p.id === 'ped_n1' || p.id === 'ped_n2') && Math.abs(p.currentCoord - laneX) < 24);
+              const approachingCrosswalk = front <= 326 + 8 && front >= 210;
+
+              if ((!isNSGreen || isEWInIntersection) && beforeIntersection) {
                 if (distToStop <= 4) {
                   targetSpeed = 0;
                   v.speed = 0;
                   v.pos = v.stopLine - v.h;
-                } else if (distToStop < 180) {
-                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 180) * v.maxSpeed * 0.85));
+                } else if (distToStop < 170) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 170) * v.maxSpeed * 0.82));
+                }
+              } else if (pedCrossing && approachingCrosswalk) {
+                const distToPed = 314 - front;
+                if (distToPed <= 4) {
+                  targetSpeed = 0;
+                  v.speed = 0;
+                  v.pos = 314 - v.h;
+                } else {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToPed / 120) * v.maxSpeed * 0.7));
                 }
               }
 
@@ -13836,28 +13919,46 @@
 
               v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
               v.pos += v.speed * dt;
+              if (leader) v.pos = Math.min(v.pos, leader.pos - v.h - MIN_FOLLOW_GAP);
+              if ((!isNSGreen || isEWInIntersection) && beforeIntersection) v.pos = Math.min(v.pos, v.stopLine - v.h);
+              if (pedCrossing && approachingCrosswalk) v.pos = Math.min(v.pos, 314 - v.h);
 
               if (v.pos > 730) {
                 const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos);
                 const minPos = otherPositions.length ? Math.min(...otherPositions) : 100;
-                v.pos = Math.min(100, minPos - v.h - 65);
+                v.pos = Math.min(100, minPos - v.h - 70);
                 v.speed = v.maxSpeed * 0.7;
               }
-              const laneX = v.lane === 1 ? 580 : 542;
-              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
+              const targetLaneX = v.lane === 1 ? 580 : 542;
+              v.currentLaneX = targetLaneX;
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${targetLaneX}, ${v.pos.toFixed(1)})`);
 
             } else if (v.dir === 'NB') {
               const front = v.pos;
               const distToStop = front - v.stopLine;
               const beforeIntersection = front >= v.stopLine - 8;
 
-              if (!isNSGreen && beforeIntersection) {
+              // Check South Zebra Crosswalk Pedestrians (crossing around y ≈ 520)
+              const laneX = v.lane === 1 ? 618 : 656;
+              const pedCrossing = pedestrians.some(p => (p.id === 'ped_s1' || p.id === 'ped_s2') && Math.abs(p.currentCoord - laneX) < 24);
+              const approachingCrosswalk = front >= 514 - 8 && front <= 630;
+
+              if ((!isNSGreen || isEWInIntersection) && beforeIntersection) {
                 if (distToStop <= 4) {
                   targetSpeed = 0;
                   v.speed = 0;
                   v.pos = v.stopLine;
-                } else if (distToStop < 180) {
-                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 180) * v.maxSpeed * 0.85));
+                } else if (distToStop < 170) {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToStop / 170) * v.maxSpeed * 0.82));
+                }
+              } else if (pedCrossing && approachingCrosswalk) {
+                const distToPed = front - 528;
+                if (distToPed <= 4) {
+                  targetSpeed = 0;
+                  v.speed = 0;
+                  v.pos = 528;
+                } else {
+                  targetSpeed = Math.min(targetSpeed, Math.max(0, (distToPed / 120) * v.maxSpeed * 0.7));
                 }
               }
 
@@ -13876,15 +13977,19 @@
 
               v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
               v.pos -= v.speed * dt;
+              if (leader) v.pos = Math.max(v.pos, leader.pos + leader.h + MIN_FOLLOW_GAP);
+              if ((!isNSGreen || isEWInIntersection) && beforeIntersection) v.pos = Math.max(v.pos, v.stopLine);
+              if (pedCrossing && approachingCrosswalk) v.pos = Math.max(v.pos, 528);
 
               if (v.pos < 120) {
                 const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos + o.h);
                 const maxPos = otherPositions.length ? Math.max(...otherPositions) : 760;
-                v.pos = Math.max(760, maxPos + 65);
+                v.pos = Math.max(760, maxPos + 70);
                 v.speed = v.maxSpeed * 0.7;
               }
-              const laneX = v.lane === 1 ? 618 : 656;
-              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
+              const targetLaneX = v.lane === 1 ? 618 : 656;
+              v.currentLaneX = targetLaneX;
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${targetLaneX}, ${v.pos.toFixed(1)})`);
             }
           }
         });
@@ -13930,9 +14035,74 @@
           }
         });
 
-        // 4. Update Emergency Ambulance Priority Wave & Siren Audio (Continuous Priority Movement)
+        // 4. Update Emergency Ambulance Priority Wave & Siren Audio (Realistic Priority Movement without Phasing)
         if (emergencyWaveActive) {
-          ambulanceX += AMBULANCE_SPEED * dt;
+          let ambTargetSpeed = AMBULANCE_SPEED;
+
+          // Check for any obstacle in Lane 1 ahead of ambulance (EB vehicles with currentLaneY < 452)
+          let obstacle = null;
+          let minObstacleDist = 9999;
+          for (let i = 0; i < vehicles.length; i++) {
+            const v = vehicles[i];
+            if (v.dir === 'EB') {
+              const vLaneY = (typeof v.currentLaneY !== 'undefined') ? v.currentLaneY : (v.lane === 1 ? 438 : 468);
+              if (vLaneY < 452) { // In Lane 1
+                const dist = v.pos - (ambulanceX + 54);
+                if (dist >= -15 && dist < minObstacleDist) {
+                  minObstacleDist = dist;
+                  obstacle = v;
+                }
+              }
+            }
+          }
+
+          if (obstacle) {
+            if (minObstacleDist <= MIN_FOLLOW_GAP) {
+              ambTargetSpeed = 0;
+              ambulanceSpeed = 0;
+              ambulanceX = obstacle.pos - 54 - MIN_FOLLOW_GAP;
+            } else if (minObstacleDist < 160) {
+              const factor = (minObstacleDist - MIN_FOLLOW_GAP) / (160 - MIN_FOLLOW_GAP);
+              ambTargetSpeed = Math.min(ambTargetSpeed, Math.max(0, obstacle.speed * factor));
+            }
+          }
+
+          // Check intersection conflict: hold if NS vehicles are clearing [320, 520]
+          if (isNSInIntersection && ambulanceX + 54 <= 446 + 8 && ambulanceX + 54 >= 340) {
+            const distToStop = 446 - (ambulanceX + 54);
+            if (distToStop <= 4) {
+              ambTargetSpeed = 0;
+              ambulanceSpeed = 0;
+              ambulanceX = 446 - 54;
+            } else {
+              ambTargetSpeed = Math.min(ambTargetSpeed, Math.max(0, (distToStop / 160) * AMBULANCE_SPEED * 0.85));
+            }
+          }
+
+          // Check West Crosswalk: hold if pedestrian is in Lane 1
+          const westPedInLane1 = pedestrians.some(p => (p.id === 'ped_w1' || p.id === 'ped_w2') && Math.abs(p.currentCoord - 438) < 24);
+          if (westPedInLane1 && ambulanceX + 54 <= 470 + 8 && ambulanceX + 54 >= 360) {
+            const distToZebra = 466 - (ambulanceX + 54);
+            if (distToZebra <= 4) {
+              ambTargetSpeed = 0;
+              ambulanceSpeed = 0;
+              ambulanceX = 466 - 54;
+            } else {
+              ambTargetSpeed = Math.min(ambTargetSpeed, Math.max(0, (distToZebra / 120) * AMBULANCE_SPEED * 0.7));
+            }
+          }
+
+          ambulanceSpeed += (ambTargetSpeed - ambulanceSpeed) * Math.min(1, dt * 6.0);
+          if (ambulanceSpeed < 0.05) ambulanceSpeed = 0;
+          ambulanceX += ambulanceSpeed * dt;
+          if (obstacle) ambulanceX = Math.min(ambulanceX, obstacle.pos - 54 - MIN_FOLLOW_GAP);
+          if (isNSInIntersection && ambulanceX + 54 <= 446 + 8 && ambulanceX + 54 >= 340) {
+            ambulanceX = Math.min(ambulanceX, 446 - 54);
+          }
+          if (westPedInLane1 && ambulanceX + 54 <= 470 + 8 && ambulanceX + 54 >= 360) {
+            ambulanceX = Math.min(ambulanceX, 466 - 54);
+          }
+
           if (!crossroads3DMode && ambMoverEl) {
             ambMoverEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
             ambMoverEl.setAttribute('opacity', '1');
