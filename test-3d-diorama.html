@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BharaDekhi 3D Miniature City Prototype</title>
+  <style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #030712; font-family: sans-serif; }
+    #canvas3d { width: 100%; height: 100%; display: block; }
+    #hudInfo {
+      position: absolute; top: 16px; left: 16px; color: #38bdf8;
+      background: rgba(2, 6, 23, 0.85); border: 1px solid #1e293b;
+      border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: bold;
+      pointer-events: none; z-index: 10;
+    }
+  </style>
+  <script src="assets/three.min.js"></script>
+</head>
+<body>
+  <div id="hudInfo">
+    <div>Dhaka 3D Crossroads · Real Three.js Geometry</div>
+    <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Standing Extruded Buildings · Elevated Metro Viaduct · Live 3D Vehicles</div>
+  </div>
+  <canvas id="canvas3d"></canvas>
+
+  <script>
+    function createSignboardTexture(title, subtitle, bgColor, textColor, subColor, borderColor, width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width || 256;
+      canvas.height = height || 64;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (borderColor) {
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 5;
+        ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+      }
+
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold ' + Math.floor(canvas.height * 0.44) + "px 'Noto Sans Bengali', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(title, canvas.width / 2, subtitle ? canvas.height * 0.38 : canvas.height / 2);
+
+      if (subtitle) {
+        ctx.fillStyle = subColor || '#38bdf8';
+        ctx.font = 'bold ' + Math.floor(canvas.height * 0.28) + "px sans-serif";
+        ctx.fillText(subtitle, canvas.width / 2, canvas.height * 0.76);
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      return texture;
+    }
+
+    function createWindowFacadeTexture(floors, cols, winColor, wallColor) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = wallColor;
+      ctx.fillRect(0, 0, 256, 256);
+
+      const floorH = 256 / floors;
+      const colW = 256 / cols;
+
+      for (let f = 0; f < floors; f++) {
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(0, f * floorH + floorH - 4, 256, 4);
+
+        for (let c = 0; c < cols; c++) {
+          const x = c * colW + colW * 0.18;
+          const y = f * floorH + floorH * 0.22;
+          const w = colW * 0.64;
+          const h = floorH * 0.52;
+
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+
+          ctx.fillStyle = winColor;
+          ctx.fillRect(x, y, w, h);
+
+          ctx.fillStyle = 'rgba(0,0,0,0.3)';
+          ctx.fillRect(x + w / 2 - 1, y, 2, h);
+        }
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      return texture;
+    }
+
+    const canvas = document.getElementById('canvas3d');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x040814);
+    scene.fog = new THREE.FogExp2(0x060e20, 0.0005);
+
+    // Optimized isometric drone camera viewpoint
+    const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 10, 4000);
+    camera.position.set(-20, 420, 500);
+    camera.lookAt(0, 25, -35);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const ambientLight = new THREE.AmbientLight(0x38bdf8, 0.7);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffeedd, 1.4);
+    sunLight.position.set(-260, 500, 320);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 50;
+    sunLight.shadow.camera.far = 1400;
+    const d = 550;
+    sunLight.shadow.camera.left = -d;
+    sunLight.shadow.camera.right = d;
+    sunLight.shadow.camera.top = d;
+    sunLight.shadow.camera.bottom = -d;
+    scene.add(sunLight);
+
+    // Streetlights at 4 intersection corners
+    const cornerLights = [
+      [-135, 26, -100],
+      [135, 26, -100],
+      [-135, 26, 100],
+      [135, 26, 100]
+    ];
+    cornerLights.forEach(pos => {
+      const pl = new THREE.PointLight(0xfef08a, 1.5, 260);
+      pl.position.set(pos[0], pos[1], pos[2]);
+      scene.add(pl);
+
+      const poleGeo = new THREE.CylinderGeometry(1.2, 1.5, 26, 8);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(pos[0], 13, pos[2]);
+      scene.add(pole);
+
+      const lampHeadGeo = new THREE.BoxGeometry(7, 3, 7);
+      const lampHeadMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+      const head = new THREE.Mesh(lampHeadGeo, lampHeadMat);
+      head.position.set(pos[0], 26, pos[2]);
+      scene.add(head);
+    });
+
+    // Ground & Roads
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.85 });
+    const groundGeo = new THREE.PlaneGeometry(1600, 1200);
+    const ground = new THREE.Mesh(groundGeo, roadMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    function addRoadMarking(w, l, x, z, color) {
+      const markGeo = new THREE.PlaneGeometry(w, l);
+      const markMat = new THREE.MeshBasicMaterial({ color: color || 0xffffff });
+      const m = new THREE.Mesh(markGeo, markMat);
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(x, 0.25, z);
+      scene.add(m);
+    }
+
+    // Lane Dividers
+    for (let x = -600; x < 600; x += 32) {
+      if (Math.abs(x) > 115) {
+        addRoadMarking(16, 2.5, x, 0, 0xfacc15);
+        addRoadMarking(14, 1.8, x, 40, 0xffffff);
+        addRoadMarking(14, 1.8, x, -40, 0xffffff);
+      }
+    }
+    for (let z = -450; z < 350; z += 32) {
+      if (Math.abs(z) > 85) {
+        addRoadMarking(2.5, 16, 0, z, 0xfacc15);
+        addRoadMarking(1.8, 14, 55, z, 0xffffff);
+        addRoadMarking(1.8, 14, -55, z, 0xffffff);
+      }
+    }
+
+    addRoadMarking(160, 4, -135, 0, 0xffffff);
+    addRoadMarking(160, 4, 135, 0, 0xffffff);
+    addRoadMarking(4, 220, 0, -105, 0xffffff);
+    addRoadMarking(4, 220, 0, 105, 0xffffff);
+
+    function addCrosswalk(isVertical, cx, cz, length, width) {
+      const stripes = 12;
+      for (let i = 0; i < stripes; i++) {
+        if (isVertical) {
+          const z = cz - length / 2 + (i + 0.5) * (length / stripes);
+          addRoadMarking(width, (length / stripes) * 0.6, cx, z, 0xffffff);
+        } else {
+          const x = cx - length / 2 + (i + 0.5) * (length / stripes);
+          addRoadMarking((length / stripes) * 0.6, width, x, cz, 0xffffff);
+        }
+      }
+    }
+    addCrosswalk(true, -120, 0, 160, 20);
+    addCrosswalk(true, 120, 0, 160, 20);
+    addCrosswalk(false, 0, -92, 220, 20);
+    addCrosswalk(false, 0, 92, 220, 20);
+
+    const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+    const curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+
+    function addSidewalkCorner(w, d, x, z) {
+      const swGeo = new THREE.BoxGeometry(w, 2, d);
+      const sw = new THREE.Mesh(swGeo, sidewalkMat);
+      sw.position.set(x, 1, z);
+      sw.receiveShadow = true;
+      scene.add(sw);
+
+      const curbGeo = new THREE.BoxGeometry(w, 2.5, 3);
+      const curb = new THREE.Mesh(curbGeo, curbMat);
+      curb.position.set(x, 1.25, z > 0 ? z - d / 2 : z + d / 2);
+      scene.add(curb);
+    }
+    addSidewalkCorner(480, 260, -350, -210);
+    addSidewalkCorner(480, 260, 350, -210);
+    addSidewalkCorner(480, 260, -350, 210);
+    addSidewalkCorner(480, 260, 350, 210);
+
+    // Miniature Trees along sidewalks
+    function addTree(x, z) {
+      const treeGroup = new THREE.Group();
+      treeGroup.position.set(x, 2, z);
+
+      const trunkGeo = new THREE.CylinderGeometry(1.2, 1.8, 10, 8);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.9 });
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.y = 5;
+      trunk.castShadow = true;
+      treeGroup.add(trunk);
+
+      const foliageGeo = new THREE.SphereGeometry(7.5, 10, 10);
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+      const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+      foliage.position.y = 12;
+      foliage.scale.set(1, 1.2, 1);
+      foliage.castShadow = true;
+      treeGroup.add(foliage);
+
+      scene.add(treeGroup);
+    }
+    [-460, -310, -170, 170, 310, 460].forEach(tx => {
+      addTree(tx, -88);
+      addTree(tx, 88);
+    });
+    [-220, -140, 140, 220].forEach(tz => {
+      addTree(-118, tz);
+      addTree(118, tz);
+    });
+
+    // Elevated Metro Rail Viaduct Superstructure
+    const viaductZ = -332;
+    const viaductY = 42;
+
+    const pierXCoords = [-520, -350, -180, 0, 480];
+    const pierMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+    pierXCoords.forEach(px => {
+      const colGeo = new THREE.BoxGeometry(18, viaductY, 18);
+      const col = new THREE.Mesh(colGeo, pierMat);
+      col.position.set(px, viaductY / 2, viaductZ);
+      col.castShadow = true;
+      col.receiveShadow = true;
+      scene.add(col);
+
+      const capGeo = new THREE.BoxGeometry(32, 6, 28);
+      const cap = new THREE.Mesh(capGeo, pierMat);
+      cap.position.set(px, viaductY - 3, viaductZ);
+      cap.castShadow = true;
+      scene.add(cap);
+    });
+
+    const beamGeo = new THREE.BoxGeometry(1400, 7, 26);
+    const beamMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.position.set(0, viaductY + 3.5, viaductZ);
+    beam.castShadow = true;
+    beam.receiveShadow = true;
+    scene.add(beam);
+
+    const greenRibbonGeo = new THREE.BoxGeometry(1400, 2, 0.6);
+    const greenRibbonMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
+    const greenRibbon = new THREE.Mesh(greenRibbonGeo, greenRibbonMat);
+    greenRibbon.position.set(0, viaductY + 5, viaductZ + 13.3);
+    scene.add(greenRibbon);
+
+    const redRibbonGeo = new THREE.BoxGeometry(1400, 1.5, 0.6);
+    const redRibbonMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+    const redRibbon = new THREE.Mesh(redRibbonGeo, redRibbonMat);
+    redRibbon.position.set(0, viaductY + 3, viaductZ + 13.3);
+    scene.add(redRibbon);
+
+    const railMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+    const rail1Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
+    const rail1 = new THREE.Mesh(rail1Geo, railMat);
+    rail1.position.set(0, viaductY + 7.6, viaductZ - 4);
+    scene.add(rail1);
+
+    const rail2Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
+    const rail2 = new THREE.Mesh(rail2Geo, railMat);
+    rail2.position.set(0, viaductY + 7.6, viaductZ + 4);
+    scene.add(rail2);
+
+    // Mirpur 10 Station Structure (x: 180 .. 440)
+    const stationGroup = new THREE.Group();
+    stationGroup.position.set(310, viaductY, viaductZ);
+
+    const stFloorGeo = new THREE.BoxGeometry(260, 8, 54);
+    const stFloorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
+    const stFloor = new THREE.Mesh(stFloorGeo, stFloorMat);
+    stFloor.position.set(0, 4, 0);
+    stFloor.castShadow = true;
+    stationGroup.add(stFloor);
+
+    const platLightGeo = new THREE.BoxGeometry(240, 1.5, 2);
+    const platLightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const platLight = new THREE.Mesh(platLightGeo, platLightMat);
+    platLight.position.set(0, 8.5, 10);
+    stationGroup.add(platLight);
+
+    const canopyGeo = new THREE.CylinderGeometry(28, 28, 260, 32, 1, false, 0, Math.PI);
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.15,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.75,
+      side: THREE.DoubleSide
+    });
+    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+    canopy.rotation.z = Math.PI / 2;
+    canopy.rotation.y = Math.PI / 2;
+    canopy.position.set(0, 14, 0);
+    canopy.castShadow = true;
+    stationGroup.add(canopy);
+
+    const stSignTex = createSignboardTexture('মিরপুর ১০', 'Mirpur 10', '#020617', '#ffffff', '#38bdf8', '#00f2fe', 380, 80);
+    const stSignGeo = new THREE.BoxGeometry(160, 24, 3);
+    const stSignMat = new THREE.MeshBasicMaterial({ map: stSignTex });
+    const stSign = new THREE.Mesh(stSignGeo, stSignMat);
+    stSign.position.set(-20, 22, 28);
+    stationGroup.add(stSign);
+
+    const boardingTex = createSignboardTexture('● BOARDING', 'MRT LINE 6', '#020617', '#4ade80', '#22c55e', '#22c55e', 256, 64);
+    const boardingGeo = new THREE.BoxGeometry(75, 18, 2);
+    const boardingMat = new THREE.MeshBasicMaterial({ map: boardingTex });
+    const boardingBadge = new THREE.Mesh(boardingGeo, boardingMat);
+    boardingBadge.position.set(95, 22, 28);
+    stationGroup.add(boardingBadge);
+
+    const stairsGeo = new THREE.BoxGeometry(16, 2, 70);
+    const stairsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+    const stairs = new THREE.Mesh(stairsGeo, stairsMat);
+    stairs.position.set(-110, -18, 55);
+    stairs.rotation.x = 0.55;
+    stationGroup.add(stairs);
+
+    scene.add(stationGroup);
+
+    // 3D Metro Rail Train
+    const trainGroup = new THREE.Group();
+    trainGroup.position.set(-200, viaductY + 7.5, viaductZ);
+
+    function createTrainCoach(isLead) {
+      const coach = new THREE.Group();
+      const bodyGeo = new THREE.BoxGeometry(68, 16, 14);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.y = 8;
+      body.castShadow = true;
+      coach.add(body);
+
+      const grGeo = new THREE.BoxGeometry(68, 2.5, 14.3);
+      const grMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
+      const gr = new THREE.Mesh(grGeo, grMat);
+      gr.position.y = 7;
+      coach.add(gr);
+
+      const rdGeo = new THREE.BoxGeometry(68, 1.8, 14.3);
+      const rdMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+      const rd = new THREE.Mesh(rdGeo, rdMat);
+      rd.position.y = 5;
+      coach.add(rd);
+
+      const winGeo = new THREE.BoxGeometry(60, 4.5, 14.4);
+      const winMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+      const win = new THREE.Mesh(winGeo, winMat);
+      win.position.y = 11;
+      coach.add(win);
+
+      if (isLead) {
+        const hl1 = new THREE.PointLight(0xfef08a, 1.8, 140);
+        hl1.position.set(36, 6, 4);
+        coach.add(hl1);
+        const hl2 = new THREE.PointLight(0xfef08a, 1.8, 140);
+        hl2.position.set(36, 6, -4);
+        coach.add(hl2);
+      }
+      return coach;
+    }
+
+    const coach1 = createTrainCoach(true);
+    coach1.position.x = 75;
+    trainGroup.add(coach1);
+
+    const coach2 = createTrainCoach(false);
+    coach2.position.x = 0;
+    trainGroup.add(coach2);
+
+    const coach3 = createTrainCoach(false);
+    coach3.position.x = -75;
+    trainGroup.add(coach3);
+
+    scene.add(trainGroup);
+
+    // 3D Extruded Building Geometry Builder
+    function create3DBuilding(config) {
+      const {
+        x, z, width, depth, height,
+        wallColor, sideColor, roofColor,
+        floors, cols, winColor,
+        signboard, waterTank, antenna
+      } = config;
+
+      const group = new THREE.Group();
+      group.position.set(x, 0, z);
+
+      const frontTex = createWindowFacadeTexture(floors || 4, cols || 4, winColor || '#fef08a', wallColor);
+      const sideTex = createWindowFacadeTexture(floors || 4, Math.max(2, Math.floor((cols || 4) * 0.6)), winColor || '#fef08a', sideColor || wallColor);
+
+      // Emissive material makes windows visibly glow
+      const frontMat = new THREE.MeshStandardMaterial({
+        map: frontTex,
+        roughness: 0.6,
+        metalness: 0.1,
+        emissive: new THREE.Color(winColor || 0xfef08a),
+        emissiveMap: frontTex,
+        emissiveIntensity: 0.45
+      });
+      const sideMat = new THREE.MeshStandardMaterial({
+        map: sideTex,
+        roughness: 0.7,
+        metalness: 0.1,
+        emissive: new THREE.Color(winColor || 0xfef08a),
+        emissiveMap: sideTex,
+        emissiveIntensity: 0.35
+      });
+      const roofMat = new THREE.MeshStandardMaterial({
+        color: roofColor || 0x1e293b,
+        roughness: 0.8
+      });
+      const bottomMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+      const materials = [
+        sideMat,   // px
+        sideMat,   // nx
+        roofMat,   // py (Roof)
+        bottomMat, // ny
+        frontMat,  // pz (Front)
+        sideMat    // nz
+      ];
+
+      const bldgGeo = new THREE.BoxGeometry(width, height, depth);
+      const bldg = new THREE.Mesh(bldgGeo, materials);
+      bldg.position.y = height / 2;
+      bldg.castShadow = true;
+      bldg.receiveShadow = true;
+      group.add(bldg);
+
+      const rimGeo = new THREE.BoxGeometry(width + 2, 3, depth + 2);
+      const rimMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6 });
+      const rim = new THREE.Mesh(rimGeo, rimMat);
+      rim.position.y = height + 1.5;
+      group.add(rim);
+
+      if (waterTank) {
+        const tankGeo = new THREE.CylinderGeometry(8, 8, 14, 16);
+        const tankMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.4 });
+        const tank = new THREE.Mesh(tankGeo, tankMat);
+        tank.position.set(-width * 0.25, height + 10, -depth * 0.15);
+        tank.castShadow = true;
+        group.add(tank);
+
+        const legGeo = new THREE.CylinderGeometry(0.8, 0.8, 6, 6);
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+        [-4, 4].forEach(lx => {
+          [-4, 4].forEach(lz => {
+            const leg = new THREE.Mesh(legGeo, legMat);
+            leg.position.set(-width * 0.25 + lx, height + 3, -depth * 0.15 + lz);
+            group.add(leg);
+          });
+        });
+      }
+
+      if (antenna) {
+        const antGeo = new THREE.CylinderGeometry(0.6, 1.2, 28, 8);
+        const antMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
+        const ant = new THREE.Mesh(antGeo, antMat);
+        ant.position.set(width * 0.25, height + 14, -depth * 0.15);
+        group.add(ant);
+
+        const beaconGeo = new THREE.SphereGeometry(1.8, 8, 8);
+        const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+        const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+        beacon.position.set(width * 0.25, height + 28, -depth * 0.15);
+        group.add(beacon);
+      }
+
+      if (signboard) {
+        const sTex = createSignboardTexture(signboard.text, signboard.sub, signboard.bg, signboard.textCol, signboard.subCol, signboard.border, signboard.tw, signboard.th);
+        const sGeo = new THREE.BoxGeometry(signboard.w, signboard.h, 2.5);
+        const sMat = new THREE.MeshBasicMaterial({ map: sTex });
+        const signMesh = new THREE.Mesh(sGeo, sMat);
+        signMesh.position.set(signboard.ox || 0, signboard.y || 16, (depth / 2) + 1.5);
+        group.add(signMesh);
+
+        const awnGeo = new THREE.BoxGeometry(signboard.w + 4, 3, 10);
+        const awnMat = new THREE.MeshStandardMaterial({ color: signboard.awnCol || 0xb45309, roughness: 0.5 });
+        const awn = new THREE.Mesh(awnGeo, awnMat);
+        awn.position.set(signboard.ox || 0, (signboard.y || 16) + signboard.h / 2 + 1.5, (depth / 2) + 5);
+        awn.rotation.x = 0.25;
+        group.add(awn);
+      }
+
+      scene.add(group);
+      return group;
+    }
+
+    // Northwest Quadrant (Positioned cleanly inside camera frustum)
+    create3DBuilding({
+      x: -490, z: -210, width: 34, depth: 40, height: 115,
+      wallColor: '#0284c7', sideColor: '#082f49',
+      floors: 6, cols: 2, winColor: '#a5f3fc',
+      antenna: true
+    });
+
+    const nwComplex = create3DBuilding({
+      x: -360, z: -210, width: 200, depth: 65, height: 90,
+      wallColor: '#ea580c', sideColor: '#431407',
+      floors: 4, cols: 6, winColor: '#fef08a',
+      signboard: { text: 'ঢাকা বেকারি', sub: 'Dhaka Bakery', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 85, h: 18, ox: -45, y: 15, awnCol: 0xb45309 }
+    });
+    const pharmTex = createSignboardTexture('গ্রীন ফার্মেসি', 'Pharmacy', '#0f172a', '#ffffff', '#6ee7b7', '#10b981', 256, 64);
+    const pharmGeo = new THREE.BoxGeometry(85, 18, 2.5);
+    const pharmMesh = new THREE.Mesh(pharmGeo, new THREE.MeshBasicMaterial({ map: pharmTex }));
+    pharmMesh.position.set(45, 15, (65 / 2) + 1.5);
+    nwComplex.add(pharmMesh);
+
+    // Large Standing 3D Billboard: "ঢাকা আমাদের শহর"
+    const bbTex = createSignboardTexture('ঢাকা আমাদের শহর', 'DHAKA OUR CITY', '#042f2e', '#fde047', '#34d399', '#10b981', 512, 128);
+    const bbGeo = new THREE.BoxGeometry(150, 46, 4);
+    const bbMat = new THREE.MeshBasicMaterial({ map: bbTex });
+    const billboard = new THREE.Mesh(bbGeo, bbMat);
+    billboard.position.set(0, 90 + 32, 0);
+    billboard.castShadow = true;
+    nwComplex.add(billboard);
+
+    const bbLegGeo = new THREE.CylinderGeometry(1.2, 1.2, 28, 8);
+    const bbLegMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+    [-60, -20, 20, 60].forEach(lx => {
+      const leg = new THREE.Mesh(bbLegGeo, bbLegMat);
+      leg.position.set(lx, 90 + 14, 0);
+      nwComplex.add(leg);
+    });
+
+    create3DBuilding({
+      x: -225, z: -210, width: 80, depth: 60, height: 110,
+      wallColor: '#0d9488', sideColor: '#134e4a',
+      floors: 5, cols: 3, winColor: '#fef08a',
+      waterTank: true, antenna: true
+    });
+
+    create3DBuilding({
+      x: -150, z: -205, width: 68, depth: 55, height: 95,
+      wallColor: '#f59e0b', sideColor: '#451a03',
+      floors: 4, cols: 3, winColor: '#fef08a',
+      antenna: true,
+      signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 62, h: 16, y: 14 }
+    });
+
+    // Northeast Quadrant
+    create3DBuilding({
+      x: 150, z: -205, width: 68, depth: 55, height: 95,
+      wallColor: '#a855f7', sideColor: '#2e1065',
+      floors: 4, cols: 3, winColor: '#f5d0fe',
+      antenna: true,
+      signboard: { text: 'ফ্যাশন কর্নার', sub: 'Fashion Corner', bg: '#0f172a', textCol: '#ffffff', border: '#d946ef', w: 62, h: 16, y: 14, awnCol: 0x701a75 }
+    });
+
+    create3DBuilding({
+      x: 230, z: -210, width: 75, depth: 60, height: 100,
+      wallColor: '#14b8a6', sideColor: '#042f2e',
+      floors: 4, cols: 3, winColor: '#a5f3fc',
+      waterTank: true,
+      signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f766e }
+    });
+
+    create3DBuilding({
+      x: 315, z: -215, width: 85, depth: 60, height: 115,
+      wallColor: '#f43f5e', sideColor: '#4c0519',
+      floors: 5, cols: 4, winColor: '#fef08a',
+      waterTank: true, antenna: true,
+      signboard: { text: 'সুপার শপ', sub: 'Super Shop', bg: '#0f172a', textCol: '#fef08a', border: '#ff2a54', w: 76, h: 16, y: 14, awnCol: 0xbe123c }
+    });
+
+    // NE-4 Mirpur Plaza Landmark High-Rise
+    const plaza = create3DBuilding({
+      x: 430, z: -200, width: 130, depth: 75, height: 135,
+      wallColor: '#0284c7', sideColor: '#082f49',
+      floors: 6, cols: 5, winColor: '#67e8f9',
+      antenna: true
+    });
+    const plTex = createSignboardTexture('মিরপুর প্লাজা', 'MIRPUR PLAZA', '#0369a1', '#ffffff', '#00f2fe', '#00f2fe', 380, 80);
+    const plGeo = new THREE.BoxGeometry(105, 22, 3);
+    const plSign = new THREE.Mesh(plGeo, new THREE.MeshBasicMaterial({ map: plTex }));
+    plSign.position.set(0, 135 + 12, (75 / 2) - 10);
+    plaza.add(plSign);
+
+    // Southwest Quadrant
+    create3DBuilding({
+      x: -490, z: 185, width: 34, depth: 40, height: 85,
+      wallColor: '#fb7185', sideColor: '#4c0519',
+      floors: 4, cols: 2, winColor: '#fef08a'
+    });
+
+    create3DBuilding({
+      x: -360, z: 185, width: 200, depth: 65, height: 80,
+      wallColor: '#14b8a6', sideColor: '#042f2e',
+      floors: 3, cols: 6, winColor: '#fef08a',
+      waterTank: true, antenna: true
+    });
+
+    create3DBuilding({
+      x: -225, z: 180, width: 75, depth: 55, height: 85,
+      wallColor: '#8b5cf6', sideColor: '#2e1065',
+      floors: 3, cols: 3, winColor: '#f5d0fe',
+      antenna: true,
+      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
+    });
+
+    create3DBuilding({
+      x: -150, z: 175, width: 75, depth: 55, height: 82,
+      wallColor: '#f59e0b', sideColor: '#451a03',
+      floors: 3, cols: 3, winColor: '#fef08a',
+      waterTank: true,
+      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
+    });
+
+    // Southeast Quadrant
+    create3DBuilding({
+      x: 165, z: 175, width: 110, depth: 60, height: 85,
+      wallColor: '#f43f5e', sideColor: '#4c0519',
+      floors: 3, cols: 4, winColor: '#fef08a',
+      antenna: true,
+      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#065f46', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x047857 }
+    });
+
+    const seBillboardBldg = create3DBuilding({
+      x: 320, z: 185, width: 180, depth: 65, height: 85,
+      wallColor: '#1e3a8a', sideColor: '#0f172a',
+      floors: 3, cols: 5, winColor: '#38bdf8',
+      waterTank: true, antenna: true
+    });
+    const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#172554', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
+    const seBbGeo = new THREE.BoxGeometry(160, 42, 3);
+    const seBbSign = new THREE.Mesh(seBbGeo, new THREE.MeshBasicMaterial({ map: seBbTex }));
+    seBbSign.position.set(0, 46, (65 / 2) + 2);
+    seBillboardBldg.add(seBbSign);
+
+    create3DBuilding({
+      x: 450, z: 185, width: 45, depth: 45, height: 95,
+      wallColor: '#0ea5e9', sideColor: '#082f49',
+      floors: 4, cols: 2, winColor: '#a5f3fc',
+      antenna: true
+    });
+
+    // 3D Vehicles
+    function createVehicleMesh(type, color, w, l, isVertical) {
+      const vGroup = new THREE.Group();
+
+      const bodyGeo = new THREE.BoxGeometry(isVertical ? l : w, 14, isVertical ? w : l);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: color || 0xdc2626, roughness: 0.4 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.y = 7;
+      body.castShadow = true;
+      vGroup.add(body);
+
+      if (type === 'bus') {
+        const roofGeo = new THREE.BoxGeometry(isVertical ? l : w, 2, isVertical ? w : l);
+        const roofMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const roof = new THREE.Mesh(roofGeo, roofMat);
+        roof.position.y = 15;
+        vGroup.add(roof);
+
+        const winGeo = new THREE.BoxGeometry(isVertical ? l + 0.2 : w * 0.9, 4, isVertical ? w * 0.9 : l + 0.2);
+        const winMat = new THREE.MeshBasicMaterial({ color: 0x7dd3fc });
+        const win = new THREE.Mesh(winGeo, winMat);
+        win.position.y = 10;
+        vGroup.add(win);
+      }
+
+      const wheelGeo = new THREE.CylinderGeometry(3.5, 3.5, 2, 8);
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+      [-1, 1].forEach(wx => {
+        [-1, 1].forEach(wz => {
+          const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+          wheel.rotation.z = Math.PI / 2;
+          wheel.position.set(
+            isVertical ? wx * (l / 2 - 2) : wx * (w / 3),
+            3.5,
+            isVertical ? wz * (w / 3) : wz * (l / 2 - 1)
+          );
+          vGroup.add(wheel);
+        });
+      });
+
+      const hl = new THREE.PointLight(0xfef08a, 1.4, 55);
+      if (isVertical) {
+        hl.position.set(0, 5, w / 2 + 2);
+      } else {
+        hl.position.set(w / 2 + 2, 5, 0);
+      }
+      vGroup.add(hl);
+
+      scene.add(vGroup);
+      return vGroup;
+    }
+
+    const vehiclesData = [
+      { mesh: createVehicleMesh('bus', 0xdc2626, 68, 22, false), dir: 'EB', laneZ: 42, x: -350, speed: 70 },
+      { mesh: createVehicleMesh('car', 0xf8fafc, 40, 18, false), dir: 'EB', laneZ: 16, x: -120, speed: 95 },
+      { mesh: createVehicleMesh('cng', 0x15803d, 28, 16, false), dir: 'EB', laneZ: 42, x: 80, speed: 60 },
+      { mesh: createVehicleMesh('bus', 0xdc2626, 68, 22, false), dir: 'WB', laneZ: -42, x: 380, speed: -70 },
+      { mesh: createVehicleMesh('car', 0x38bdf8, 40, 18, false), dir: 'WB', laneZ: -16, x: 140, speed: -95 },
+      { mesh: createVehicleMesh('rickshaw', 0xf59e0b, 30, 16, false), dir: 'WB', laneZ: -42, x: -50, speed: -45 },
+      { mesh: createVehicleMesh('bus', 0xdc2626, 68, 22, true), dir: 'SB', laneX: -45, z: -320, speed: 65, isVert: true },
+      { mesh: createVehicleMesh('car', 0xf8fafc, 40, 18, true), dir: 'SB', laneX: -18, z: -140, speed: 90, isVert: true },
+      { mesh: createVehicleMesh('car', 0xef4444, 40, 18, true), dir: 'NB', laneX: 45, z: 280, speed: -90, isVert: true },
+      { mesh: createVehicleMesh('cng', 0x15803d, 28, 16, true), dir: 'NB', laneX: 18, z: 120, speed: -60, isVert: true }
+    ];
+
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth) - 0.5;
+      mouseY = (e.clientY / window.innerHeight) - 0.5;
+    });
+
+    let trainX = -320;
+    let lastTime = performance.now();
+
+    function animate(time) {
+      requestAnimationFrame(animate);
+      const dt = (time - lastTime) / 1000;
+      lastTime = time;
+
+      trainX += 85 * dt;
+      if (trainX > 650) trainX = -650;
+      trainGroup.position.x = trainX;
+
+      boardingBadge.visible = (trainX > 180 && trainX < 440);
+
+      vehiclesData.forEach(v => {
+        if (v.isVert) {
+          v.z += v.speed * dt;
+          if (v.speed > 0 && v.z > 450) v.z = -450;
+          if (v.speed < 0 && v.z < -450) v.z = 450;
+          v.mesh.position.set(v.laneX, 0, v.z);
+        } else {
+          v.x += v.speed * dt;
+          if (v.speed > 0 && v.x > 650) v.x = -650;
+          if (v.speed < 0 && v.x < -650) v.x = 650;
+          v.mesh.position.set(v.x, 0, v.laneZ);
+        }
+      });
+
+      const targetCamX = -20 + mouseX * 50;
+      const targetCamY = 420 - mouseY * 35;
+      camera.position.x += (targetCamX - camera.position.x) * 0.05;
+      camera.position.y += (targetCamY - camera.position.y) * 0.05;
+      camera.lookAt(0, 25, -35);
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
+
