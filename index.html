@@ -13620,7 +13620,7 @@
             }
           }
 
-          if (trainEl) {
+          if (!crossroads3DMode && trainEl) {
             trainEl.setAttribute('transform', `translate(${trainX.toFixed(1)}, 88)`);
             trainEl.style.transform = `translate3d(${trainX.toFixed(1)}px, 88px, 0)`;
           }
@@ -13764,7 +13764,7 @@
               if (emergencyWaveActive && v.pos > ambulanceX - 50 && v.pos < ambulanceX + 260) {
                 laneY += 6; // Proactively nudge +6px toward the curb to yield right-of-way corridor
               }
-              if (v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
 
             } else if (v.dir === 'WB') {
               const front = v.pos;
@@ -13804,7 +13804,7 @@
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneY = v.lane === 1 ? 405 : 368;
-              if (v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${laneY})`);
 
             } else if (v.dir === 'SB') {
               const front = v.pos + v.h;
@@ -13844,7 +13844,7 @@
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneX = v.lane === 1 ? 580 : 542;
-              if (v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
 
             } else if (v.dir === 'NB') {
               const front = v.pos;
@@ -13884,7 +13884,7 @@
                 v.speed = v.maxSpeed * 0.7;
               }
               const laneX = v.lane === 1 ? 618 : 656;
-              if (v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
+              if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${laneX}, ${v.pos.toFixed(1)})`);
             }
           }
         });
@@ -13921,7 +13921,7 @@
           }
           p.currentCoord = currentCoord;
 
-          if (p.el) {
+          if (!crossroads3DMode && p.el) {
             if (p.axis === 'H') {
               p.el.setAttribute('transform', `translate(${currentCoord.toFixed(1)}, ${(p.y - bob).toFixed(1)})`);
             } else {
@@ -13933,7 +13933,7 @@
         // 4. Update Emergency Ambulance Priority Wave & Siren Audio (Continuous Priority Movement)
         if (emergencyWaveActive) {
           ambulanceX += AMBULANCE_SPEED * dt;
-          if (ambMoverEl) {
+          if (!crossroads3DMode && ambMoverEl) {
             ambMoverEl.setAttribute('transform', `translate(${ambulanceX.toFixed(1)}, ${AMBULANCE_LANE_Y})`);
             ambMoverEl.setAttribute('opacity', '1');
           }

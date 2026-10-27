@@ -43,6 +43,53 @@
   const CAM_DEFAULT_POS = { x: -20, y: 420, z: 500 };
   const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
 
+  // Performance caches & 120 FPS optimization resources
+  let whiteMarkMat = null;
+  let yellowMarkMat = null;
+  let sidewalkMat = null;
+  let curbMat = null;
+  let treeTrunkGeo = null, treeTrunkMat = null;
+  let treeFoliageGeo = null, treeFoliageMat = null;
+  let vehicleHeadlightMat = null;
+  let vehicleTaillightMat = null;
+  let sharedWheelMat = null;
+  let sharedWheelGeos = {};
+  let sharedBuildingDepthMat = null;
+  let lastSignalStateKey = '';
+
+  function getSharedBuildingDepthMat() {
+    if (!sharedBuildingDepthMat) {
+      sharedBuildingDepthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+    }
+    return sharedBuildingDepthMat;
+  }
+
+  // Performance telemetry & adaptive quality regulator
+  let perfFrameCount = 0;
+  let perfTotalCpuMs = 0;
+  let perfLastSampleTime = performance.now();
+  let currentFps = 120;
+  let avgFrameTimeMs = 8.33;
+
+  function getSharedWheelGeo(radius, height, segments) {
+    const key = `${radius}_${height}_${segments}`;
+    if (!sharedWheelGeos[key]) {
+      sharedWheelGeos[key] = new THREE.CylinderGeometry(radius, radius, height, segments);
+    }
+    return sharedWheelGeos[key];
+  }
+
+  function freezeStatic(obj) {
+    if (!obj) return;
+    obj.matrixAutoUpdate = false;
+    obj.updateMatrix();
+    if (obj.children && obj.children.length > 0) {
+      for (let i = 0; i < obj.children.length; i++) {
+        freezeStatic(obj.children[i]);
+      }
+    }
+  }
+
   // Texture generator helpers
   function createSignboardTexture(title, subtitle, bgColor, textColor, subColor, borderColor, width, height) {
     const canvas = document.createElement('canvas');
@@ -115,13 +162,60 @@
     return texture;
   }
 
+  // Road Marking Batcher: Combines all static lane dashes, stop lines, and zebra crosswalks into 2 unified draw calls
+  class RoadMarkingBatcher {
+    constructor() {
+      this.positions = [];
+      this.indices = [];
+      this.vertCount = 0;
+    }
+
+    addRect(w, l, cx, cz) {
+      const hw = w / 2;
+      const hl = l / 2;
+      const y = 0.25;
+      const baseIdx = this.vertCount;
+
+      this.positions.push(
+        cx - hw, y, cz - hl,
+        cx + hw, y, cz - hl,
+        cx + hw, y, cz + hl,
+        cx - hw, y, cz + hl
+      );
+
+      this.indices.push(
+        baseIdx, baseIdx + 2, baseIdx + 1,
+        baseIdx, baseIdx + 3, baseIdx + 2
+      );
+
+      this.vertCount += 4;
+    }
+
+    buildMesh(material) {
+      if (this.positions.length === 0) return null;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3));
+      geo.setIndex(this.indices);
+      geo.computeVertexNormals();
+
+      const mesh = new THREE.Mesh(geo, material);
+      mesh.matrixAutoUpdate = false;
+      mesh.updateMatrix();
+      return mesh;
+    }
+  }
+
   // Road Markings Helper
   function addRoadMarking(w, l, x, z, color) {
+    if (!whiteMarkMat) whiteMarkMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    if (!yellowMarkMat) yellowMarkMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
     const markGeo = new THREE.PlaneGeometry(w, l);
-    const markMat = new THREE.MeshBasicMaterial({ color: color || 0xffffff });
+    const markMat = color === 0xfacc15 ? yellowMarkMat : whiteMarkMat;
     const m = new THREE.Mesh(markGeo, markMat);
     m.rotation.x = -Math.PI / 2;
     m.position.set(x, 0.25, z);
+    m.matrixAutoUpdate = false;
+    m.updateMatrix();
     scene.add(m);
     return m;
   }
@@ -141,41 +235,45 @@
 
   // Sidewalk Corners with Curbs
   function addSidewalkCorner(w, d, x, z) {
-    const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
-    const curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+    if (!sidewalkMat) sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+    if (!curbMat) curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
 
     const swGeo = new THREE.BoxGeometry(w, 2, d);
     const sw = new THREE.Mesh(swGeo, sidewalkMat);
     sw.position.set(x, 1, z);
     sw.receiveShadow = true;
+    sw.matrixAutoUpdate = false;
+    sw.updateMatrix();
     scene.add(sw);
 
     const curbGeo = new THREE.BoxGeometry(w, 2.5, 3);
     const curb = new THREE.Mesh(curbGeo, curbMat);
     curb.position.set(x, 1.25, z > 0 ? z - d / 2 : z + d / 2);
+    curb.matrixAutoUpdate = false;
+    curb.updateMatrix();
     scene.add(curb);
   }
 
   // Miniature Trees
   function addTree(x, z) {
+    if (!treeTrunkGeo) treeTrunkGeo = new THREE.CylinderGeometry(1.2, 1.8, 10, 8);
+    if (!treeTrunkMat) treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.9 });
+    if (!treeFoliageGeo) treeFoliageGeo = new THREE.SphereGeometry(7.5, 10, 10);
+    if (!treeFoliageMat) treeFoliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+
     const treeGroup = new THREE.Group();
     treeGroup.position.set(x, 2, z);
 
-    const trunkGeo = new THREE.CylinderGeometry(1.2, 1.8, 10, 8);
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.9 });
-    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    const trunk = new THREE.Mesh(treeTrunkGeo, treeTrunkMat);
     trunk.position.y = 5;
-    trunk.castShadow = true;
     treeGroup.add(trunk);
 
-    const foliageGeo = new THREE.SphereGeometry(7.5, 10, 10);
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
-    const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+    const foliage = new THREE.Mesh(treeFoliageGeo, treeFoliageMat);
     foliage.position.y = 12;
     foliage.scale.set(1, 1.2, 1);
-    foliage.castShadow = true;
     treeGroup.add(foliage);
 
+    freezeStatic(treeGroup);
     scene.add(treeGroup);
   }
 
@@ -230,6 +328,7 @@
     bldg.position.y = height / 2;
     bldg.castShadow = true;
     bldg.receiveShadow = true;
+    bldg.customDepthMaterial = getSharedBuildingDepthMat();
     group.add(bldg);
 
     // Rooftop Parapet Rim
@@ -245,7 +344,6 @@
       const tankMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.4 });
       const tank = new THREE.Mesh(tankGeo, tankMat);
       tank.position.set(-width * 0.25, height + 10, -depth * 0.15);
-      tank.castShadow = true;
       group.add(tank);
 
       const legGeo = new THREE.CylinderGeometry(0.8, 0.8, 6, 6);
@@ -291,6 +389,7 @@
       group.add(awn);
     }
 
+    freezeStatic(group);
     scene.add(group);
     return group;
   }
@@ -346,12 +445,17 @@
     gHood.position.set(0, 22.5, 2.5);
     sigGroup.add(gHood);
 
+    freezeStatic(sigGroup);
     scene.add(sigGroup);
     return { group: sigGroup, red: rMat, yellow: yMat, green: gMat };
   }
 
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
+    if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.8 });
+    if (!vehicleHeadlightMat) vehicleHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xfff08a });
+    if (!vehicleTaillightMat) vehicleTaillightMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
+
     const group = new THREE.Group();
 
     if (type === 'bus') {
@@ -388,11 +492,10 @@
       group.add(dest);
 
       // 4 Rubber Wheels
-      const wheelGeo = new THREE.CylinderGeometry(4, 4, 2.5, 12);
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+      const wheelGeo = getSharedWheelGeo(4, 2.5, 12);
       [-1, 1].forEach(wz => {
         [-22, 22].forEach(wx => {
-          const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+          const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
           wheel.rotation.x = Math.PI / 2;
           wheel.position.set(wx, 4, wz * (width / 2));
           group.add(wheel);
@@ -400,15 +503,17 @@
       });
 
       // Warm Front Headlights (Facing +X)
-      const hl = new THREE.PointLight(0xfef08a, 1.4, 65);
-      hl.position.set(length / 2 + 3, 7, 0);
-      group.add(hl);
+      const hlGeo = new THREE.BoxGeometry(1.2, 3, 4);
+      [-5, 5].forEach(hz => {
+        const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+        hl.position.set(length / 2 + 0.6, 6.5, hz);
+        group.add(hl);
+      });
 
       // Red Taillights (Facing -X)
       [-6, 6].forEach(tz => {
         const tlGeo = new THREE.SphereGeometry(1.2, 6, 6);
-        const tlMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
-        const tl = new THREE.Mesh(tlGeo, tlMat);
+        const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
         tl.position.set(-length / 2 - 0.5, 6, tz);
         group.add(tl);
       });
@@ -440,20 +545,23 @@
       group.add(glass);
 
       // 4 Wheels
-      const wheelGeo = new THREE.CylinderGeometry(3, 3, 1.8, 10);
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+      const wheelGeo = getSharedWheelGeo(3, 1.8, 10);
       [-1, 1].forEach(wz => {
         [-13, 13].forEach(wx => {
-          const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+          const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
           wheel.rotation.x = Math.PI / 2;
           wheel.position.set(wx, 3, wz * (width / 2));
           group.add(wheel);
         });
       });
 
-      const hl = new THREE.PointLight(0xfef08a, 1.2, 50);
-      hl.position.set(length / 2 + 2, 5, 0);
-      group.add(hl);
+      // Front Headlights
+      const hlGeo = new THREE.BoxGeometry(1.0, 2.2, 3.2);
+      [-5, 5].forEach(hz => {
+        const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+        hl.position.set(length / 2 + 0.5, 4.5, hz);
+        group.add(hl);
+      });
 
     } else if (type === 'cng') {
       const length = 28;
@@ -476,21 +584,21 @@
       group.add(roof);
 
       // 3 Wheels (1 front at +X, 2 rear at -X)
-      const wheelGeo = new THREE.CylinderGeometry(2.5, 2.5, 1.5, 8);
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+      const wheelGeo = getSharedWheelGeo(2.5, 1.5, 8);
       [-1, 1].forEach(wz => {
-        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+        const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
         wheel.rotation.x = Math.PI / 2;
         wheel.position.set(-length / 3, 2.5, wz * (width / 2));
         group.add(wheel);
       });
-      const fWheel = new THREE.Mesh(wheelGeo, wheelMat);
+      const fWheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
       fWheel.rotation.x = Math.PI / 2;
       fWheel.position.set(length / 3, 2.5, 0);
       group.add(fWheel);
 
-      const hl = new THREE.PointLight(0xfef08a, 1.1, 40);
-      hl.position.set(length / 2 + 1, 5, 0);
+      const hlGeo = new THREE.BoxGeometry(1.0, 2.2, 3.0);
+      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+      hl.position.set(length / 2 + 0.5, 4.5, 0);
       group.add(hl);
 
     } else if (type === 'rickshaw') {
@@ -526,20 +634,20 @@
       group.add(head);
 
       // 3 Spoke Wheels (1 front at +X, 2 rear at -X)
-      const spkGeo = new THREE.CylinderGeometry(3.5, 3.5, 1.2, 12);
-      const spkMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+      const spkGeo = getSharedWheelGeo(3.5, 1.2, 10);
       [-1, 1].forEach(wz => {
-        const w = new THREE.Mesh(spkGeo, spkMat);
+        const w = new THREE.Mesh(spkGeo, sharedWheelMat);
         w.rotation.x = Math.PI / 2;
         w.position.set(-length * 0.3, 3.5, wz * (width / 2));
         group.add(w);
       });
-      const fw = new THREE.Mesh(spkGeo, spkMat);
+      const fw = new THREE.Mesh(spkGeo, sharedWheelMat);
       fw.rotation.x = Math.PI / 2;
       fw.position.set(length * 0.35, 3.5, 0);
       group.add(fw);
 
-      const hl = new THREE.PointLight(0xfef08a, 0.9, 30);
+      const hlGeo = new THREE.BoxGeometry(1.0, 2.0, 2.0);
+      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.position.set(length * 0.45, 5, 0);
       group.add(hl);
 
@@ -567,17 +675,17 @@
       group.add(helm);
 
       // 2 Wheels (Front at +X, Rear at -X)
-      const wheelGeo = new THREE.CylinderGeometry(3, 3, 1.2, 8);
-      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+      const wheelGeo = getSharedWheelGeo(3, 1.2, 8);
       [-length / 3, length / 3].forEach(px => {
-        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+        const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
         wheel.rotation.x = Math.PI / 2;
         wheel.position.set(px, 3, 0);
         group.add(wheel);
       });
 
-      const hl = new THREE.PointLight(0xfef08a, 1.0, 35);
-      hl.position.set(length / 2 + 1, 6, 0);
+      const hlGeo = new THREE.BoxGeometry(1.0, 2.0, 2.0);
+      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+      hl.position.set(length / 2 + 0.5, 6, 0);
       group.add(hl);
     }
 
@@ -632,7 +740,7 @@
     bar.position.set(0, height + 4.5, 0);
     ambGroup.add(bar);
 
-    // Dual Flashing Strobes: Red & Blue
+    // Dual Flashing Strobes: Red & Blue (Active emergency only)
     ambStrobeRed = new THREE.PointLight(0xff0000, 2.5, 120);
     ambStrobeRed.position.set(-4, height + 7, 0);
     ambGroup.add(ambStrobeRed);
@@ -642,11 +750,10 @@
     ambGroup.add(ambStrobeBlue);
 
     // Wheels
-    const wheelGeo = new THREE.CylinderGeometry(3.5, 3.5, 2, 10);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+    const wheelGeo = getSharedWheelGeo(3.5, 2, 10);
     [-1, 1].forEach(wz => {
       [-16, 16].forEach(wx => {
-        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+        const wheel = new THREE.Mesh(wheelGeo, sharedWheelMat);
         wheel.rotation.x = Math.PI / 2;
         wheel.position.set(wx, 3.5, wz * (width / 2));
         ambGroup.add(wheel);
@@ -654,9 +761,12 @@
     });
 
     // Front Headlights
-    const hl = new THREE.PointLight(0xfef08a, 1.5, 60);
-    hl.position.set(length / 2 + 2, 6, 0);
-    ambGroup.add(hl);
+    const hlGeo = new THREE.BoxGeometry(1.2, 3, 4);
+    [-5, 5].forEach(hz => {
+      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+      hl.position.set(length / 2 + 0.6, 6, hz);
+      ambGroup.add(hl);
+    });
 
     ambGroup.visible = false;
     scene.add(ambGroup);
@@ -726,12 +836,17 @@
     coach.add(win);
 
     if (isLead) {
-      const hl1 = new THREE.PointLight(0xfef08a, 1.8, 140);
-      hl1.position.set(36, 6, 4);
-      coach.add(hl1);
-      const hl2 = new THREE.PointLight(0xfef08a, 1.8, 140);
-      hl2.position.set(36, 6, -4);
-      coach.add(hl2);
+      const hl = new THREE.PointLight(0xfef08a, 1.6, 120);
+      hl.position.set(36, 6, 0);
+      coach.add(hl);
+
+      const hlMat = new THREE.MeshBasicMaterial({ color: 0xfff08a });
+      const hlGeo = new THREE.BoxGeometry(1.2, 3, 3);
+      [-4, 4].forEach(hz => {
+        const hlMesh = new THREE.Mesh(hlGeo, hlMat);
+        hlMesh.position.set(35, 6, hz);
+        coach.add(hlMesh);
+      });
     }
     return coach;
   }
@@ -774,12 +889,12 @@
     camera.position.set(CAM_DEFAULT_POS.x, CAM_DEFAULT_POS.y, CAM_DEFAULT_POS.z);
     camera.lookAt(CAM_DEFAULT_LOOK.x, CAM_DEFAULT_LOOK.y, CAM_DEFAULT_LOOK.z);
 
-    // 3. Renderer
-    renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false });
+    // 3. Renderer (High performance WebGL with optimal pixel ratio for 120 FPS)
+    renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     // 4. Lighting: Ambient + Directional Sun + Corner Streetlights
     ambientLight = new THREE.AmbientLight(0x38bdf8, 0.7);
@@ -788,10 +903,11 @@
     sunLight = new THREE.DirectionalLight(0xffeedd, 1.4);
     sunLight.position.set(-260, 500, 320);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.camera.near = 50;
     sunLight.shadow.camera.far = 1400;
+    sunLight.shadow.bias = -0.0005;
     const d = 550;
     sunLight.shadow.camera.left = -d;
     sunLight.shadow.camera.right = d;
@@ -816,12 +932,14 @@
       const poleMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6 });
       const pole = new THREE.Mesh(poleGeo, poleMat);
       pole.position.set(pos[0], 13, pos[2]);
+      freezeStatic(pole);
       scene.add(pole);
 
       const lampHeadGeo = new THREE.BoxGeometry(7, 3, 7);
       const lampHeadMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
       const head = new THREE.Mesh(lampHeadGeo, lampHeadMat);
       head.position.set(pos[0], 26, pos[2]);
+      freezeStatic(head);
       scene.add(head);
     });
 
@@ -831,35 +949,60 @@
     const ground = new THREE.Mesh(groundGeo, roadMat);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
+    ground.matrixAutoUpdate = false;
+    ground.updateMatrix();
     scene.add(ground);
 
-    // Lane Dividers
+    // Lane Dividers & Crosswalks (Batched into 2 draw calls for 120 FPS performance)
+    const yellowBatcher = new RoadMarkingBatcher();
+    const whiteBatcher = new RoadMarkingBatcher();
+
     for (let x = -600; x < 600; x += 32) {
       if (Math.abs(x) > 115) {
-        addRoadMarking(16, 2.5, x, 0, 0xfacc15);  // Center yellow
-        addRoadMarking(14, 1.8, x, 38, 0xffffff); // White outer
-        addRoadMarking(14, 1.8, x, -38, 0xffffff); // White outer
+        yellowBatcher.addRect(16, 2.5, x, 0);   // Center yellow
+        whiteBatcher.addRect(14, 1.8, x, 38);   // White outer
+        whiteBatcher.addRect(14, 1.8, x, -38);  // White outer
       }
     }
     for (let z = -450; z < 350; z += 32) {
       if (Math.abs(z) > 85) {
-        addRoadMarking(2.5, 16, 0, z, 0xfacc15);
-        addRoadMarking(1.8, 14, 45, z, 0xffffff);
-        addRoadMarking(1.8, 14, -45, z, 0xffffff);
+        yellowBatcher.addRect(2.5, 16, 0, z);   // Center yellow
+        whiteBatcher.addRect(1.8, 14, 45, z);   // White outer
+        whiteBatcher.addRect(1.8, 14, -45, z);  // White outer
       }
     }
 
     // Stop Lines (EB: x=-135, WB: x=135, SB: z=-105, NB: z=105)
-    addRoadMarking(160, 4, -135, 0, 0xffffff);
-    addRoadMarking(160, 4, 135, 0, 0xffffff);
-    addRoadMarking(4, 220, 0, -105, 0xffffff);
-    addRoadMarking(4, 220, 0, 105, 0xffffff);
+    whiteBatcher.addRect(160, 4, -135, 0);
+    whiteBatcher.addRect(160, 4, 135, 0);
+    whiteBatcher.addRect(4, 220, 0, -105);
+    whiteBatcher.addRect(4, 220, 0, 105);
 
     // 4 Zebra Crosswalks
-    addCrosswalk(true, -120, 0, 160, 20);
-    addCrosswalk(true, 120, 0, 160, 20);
-    addCrosswalk(false, 0, -92, 220, 20);
-    addCrosswalk(false, 0, 92, 220, 20);
+    function addBatchCrosswalk(isVertical, cx, cz, length, width) {
+      const stripes = 12;
+      for (let i = 0; i < stripes; i++) {
+        if (isVertical) {
+          const z = cz - length / 2 + (i + 0.5) * (length / stripes);
+          whiteBatcher.addRect(width, (length / stripes) * 0.6, cx, z);
+        } else {
+          const x = cx - length / 2 + (i + 0.5) * (length / stripes);
+          whiteBatcher.addRect((length / stripes) * 0.6, width, x, cz);
+        }
+      }
+    }
+    addBatchCrosswalk(true, -120, 0, 160, 20);
+    addBatchCrosswalk(true, 120, 0, 160, 20);
+    addBatchCrosswalk(false, 0, -92, 220, 20);
+    addBatchCrosswalk(false, 0, 92, 220, 20);
+
+    if (!whiteMarkMat) whiteMarkMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    if (!yellowMarkMat) yellowMarkMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+
+    const yellowMesh = yellowBatcher.buildMesh(yellowMarkMat);
+    const whiteMesh = whiteBatcher.buildMesh(whiteMarkMat);
+    if (yellowMesh) scene.add(yellowMesh);
+    if (whiteMesh) scene.add(whiteMesh);
 
     // Sidewalk Corners
     addSidewalkCorner(480, 260, -350, -210);
@@ -889,6 +1032,7 @@
       col.position.set(px, viaductY / 2, viaductZ);
       col.castShadow = true;
       col.receiveShadow = true;
+      freezeStatic(col);
       scene.add(col);
 
       // Cantilever Hammerhead Cap
@@ -896,6 +1040,7 @@
       const cap = new THREE.Mesh(capGeo, pierMat);
       cap.position.set(px, viaductY - 3, viaductZ);
       cap.castShadow = true;
+      freezeStatic(cap);
       scene.add(cap);
     });
 
@@ -906,6 +1051,7 @@
     beam.position.set(0, viaductY + 3.5, viaductZ);
     beam.castShadow = true;
     beam.receiveShadow = true;
+    freezeStatic(beam);
     scene.add(beam);
 
     // Bangladesh Green & Red Ribbon Livery
@@ -913,12 +1059,14 @@
     const greenRibbonMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
     const greenRibbon = new THREE.Mesh(greenRibbonGeo, greenRibbonMat);
     greenRibbon.position.set(0, viaductY + 5, viaductZ + 13.3);
+    freezeStatic(greenRibbon);
     scene.add(greenRibbon);
 
     const redRibbonGeo = new THREE.BoxGeometry(1400, 1.5, 0.6);
     const redRibbonMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     const redRibbon = new THREE.Mesh(redRibbonGeo, redRibbonMat);
     redRibbon.position.set(0, viaductY + 3, viaductZ + 13.3);
+    freezeStatic(redRibbon);
     scene.add(redRibbon);
 
     // Dual Glowing Rails
@@ -926,11 +1074,13 @@
     const rail1Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
     const rail1 = new THREE.Mesh(rail1Geo, railMat);
     rail1.position.set(0, viaductY + 7.6, viaductZ - 4);
+    freezeStatic(rail1);
     scene.add(rail1);
 
     const rail2Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
     const rail2 = new THREE.Mesh(rail2Geo, railMat);
     rail2.position.set(0, viaductY + 7.6, viaductZ + 4);
+    freezeStatic(rail2);
     scene.add(rail2);
 
     // Mirpur 10 Station Structure (x: 180 .. 440)
@@ -965,7 +1115,6 @@
     canopy.rotation.z = Math.PI / 2;
     canopy.rotation.y = Math.PI / 2;
     canopy.position.set(0, 14, 0);
-    canopy.castShadow = true;
     stationGroup.add(canopy);
 
     // Station Signboard
@@ -993,6 +1142,7 @@
     stairs.rotation.x = 0.55;
     stationGroup.add(stairs);
 
+    freezeStatic(stationGroup);
     scene.add(stationGroup);
 
     // 7. 3D Metro Rail 3-Coach Train
@@ -1040,7 +1190,6 @@
     const bbMat = new THREE.MeshBasicMaterial({ map: bbTex });
     const billboard = new THREE.Mesh(bbGeo, bbMat);
     billboard.position.set(0, 90 + 32, 0);
-    billboard.castShadow = true;
     nwComplex.add(billboard);
 
     const bbLegGeo = new THREE.CylinderGeometry(1.2, 1.2, 28, 8);
@@ -1050,6 +1199,7 @@
       leg.position.set(lx, 90 + 14, 0);
       nwComplex.add(leg);
     });
+    freezeStatic(nwComplex);
 
     create3DBuilding({
       x: -225, z: -210, width: 80, depth: 60, height: 110,
@@ -1103,6 +1253,7 @@
     const plSign = new THREE.Mesh(plGeo, new THREE.MeshBasicMaterial({ map: plTex }));
     plSign.position.set(0, 135 + 12, (75 / 2) - 10);
     plaza.add(plSign);
+    freezeStatic(plaza);
 
     // Southwest Quadrant
     create3DBuilding({
@@ -1154,6 +1305,7 @@
     const seBbSign = new THREE.Mesh(seBbGeo, new THREE.MeshBasicMaterial({ map: seBbTex }));
     seBbSign.position.set(0, 46, (65 / 2) + 2);
     seBillboardBldg.add(seBbSign);
+    freezeStatic(seBillboardBldg);
 
     create3DBuilding({
       x: 450, z: 185, width: 45, depth: 45, height: 95,
@@ -1229,6 +1381,22 @@
     }, { passive: true });
 
     window.addEventListener('resize', onResize);
+    if (typeof ResizeObserver !== 'undefined' && containerEl) {
+      const ro = new ResizeObserver(() => {
+        onResize();
+      });
+      ro.observe(containerEl);
+    }
+
+    // Warm-up shader precompilation to eliminate runtime shader compilation stutter
+    if (renderer && renderer.compile) {
+      if (ambulanceGroup) ambulanceGroup.visible = true;
+      if (rainParticles) rainParticles.visible = true;
+      renderer.compile(scene, camera);
+      if (ambulanceGroup) ambulanceGroup.visible = false;
+      if (rainParticles) rainParticles.visible = false;
+    }
+
     isReady = true;
   }
 
@@ -1274,19 +1442,22 @@
     onResize();
   };
 
+  window.getDhakaCrossroads3DMetrics = function() {
+    return {
+      fps: Math.round(currentFps),
+      avgFrameTimeMs: parseFloat(avgFrameTimeMs.toFixed(2)),
+      pixelRatio: renderer ? (renderer.getPixelRatio ? renderer.getPixelRatio() : 1) : 1,
+      drawCalls: renderer && renderer.info ? renderer.info.render.calls : 0,
+      triangles: renderer && renderer.info ? renderer.info.render.triangles : 0,
+      geometries: renderer && renderer.info ? renderer.info.memory.geometries : 0,
+      textures: renderer && renderer.info ? renderer.info.memory.textures : 0
+    };
+  };
+
   let strobeTimer = 0;
 
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain) {
     if (!isReady || !renderer || !scene || !camera) return;
-
-    // Auto-sync drawing buffer and projection matrix if canvas was recently unhidden or resized
-    if (canvasEl && canvasEl.clientWidth > 0 && canvasEl.clientHeight > 0) {
-      const pr = renderer.getPixelRatio ? renderer.getPixelRatio() : 1;
-      const curW = Math.round(renderer.domElement.width / pr);
-      if (Math.abs(curW - canvasEl.clientWidth) > 4) {
-        onResize();
-      }
-    }
 
     // 1. Update Metro Train position & Boarding badge
     if (trainGroup) {
@@ -1333,6 +1504,8 @@
         if (ambStrobeBlue) ambStrobeBlue.intensity = isRed ? 0.2 : 3.0;
       } else {
         ambulanceGroup.visible = false;
+        if (ambStrobeRed && ambStrobeRed.intensity > 0) ambStrobeRed.intensity = 0;
+        if (ambStrobeBlue && ambStrobeBlue.intensity > 0) ambStrobeBlue.intensity = 0;
       }
     }
 
@@ -1366,7 +1539,7 @@
       }
     }
 
-    // 5. Update Traffic Signal Lights
+    // 5. Update Traffic Signal Lights (Cached to eliminate redundant material uniform updates)
     if (activePhase) {
       const isEmergencyGreenWave = emergencyWaveActive && ambulanceX >= -100 && ambulanceX <= 780;
       const isNSGreen = !isEmergencyGreenWave && activePhase.nsLight === 'green';
@@ -1377,25 +1550,30 @@
       const isEWYellow = !isEmergencyGreenWave && activePhase.ewLight === 'yellow';
       const isEWRed = !isEmergencyGreenWave && activePhase.ewLight === 'red';
 
-      const R_ON = 0xff1744, R_OFF = 0x200508;
-      const Y_ON = 0xffea00, Y_OFF = 0x261a02;
-      const G_ON = 0x00e676, G_OFF = 0x02210f;
+      const sigKey = `${isNSGreen ? 1 : 0}${isNSYellow ? 1 : 0}${isNSRed ? 1 : 0}_${isEWGreen ? 1 : 0}${isEWYellow ? 1 : 0}${isEWRed ? 1 : 0}`;
+      if (sigKey !== lastSignalStateKey) {
+        lastSignalStateKey = sigKey;
 
-      // NW & NE: N-S approaches
-      [signalLamps.nw, signalLamps.ne].forEach(sig => {
-        if (!sig) return;
-        sig.red.color.setHex(isNSRed ? R_ON : R_OFF);
-        sig.yellow.color.setHex(isNSYellow ? Y_ON : Y_OFF);
-        sig.green.color.setHex(isNSGreen ? G_ON : G_OFF);
-      });
+        const R_ON = 0xff1744, R_OFF = 0x200508;
+        const Y_ON = 0xffea00, Y_OFF = 0x261a02;
+        const G_ON = 0x00e676, G_OFF = 0x02210f;
 
-      // SW & SE: E-W approaches
-      [signalLamps.sw, signalLamps.se].forEach(sig => {
-        if (!sig) return;
-        sig.red.color.setHex(isEWRed ? R_ON : R_OFF);
-        sig.yellow.color.setHex(isEWYellow ? Y_ON : Y_OFF);
-        sig.green.color.setHex(isEWGreen ? G_ON : G_OFF);
-      });
+        // NW & NE: N-S approaches
+        [signalLamps.nw, signalLamps.ne].forEach(sig => {
+          if (!sig) return;
+          sig.red.color.setHex(isNSRed ? R_ON : R_OFF);
+          sig.yellow.color.setHex(isNSYellow ? Y_ON : Y_OFF);
+          sig.green.color.setHex(isNSGreen ? G_ON : G_OFF);
+        });
+
+        // SW & SE: E-W approaches
+        [signalLamps.sw, signalLamps.se].forEach(sig => {
+          if (!sig) return;
+          sig.red.color.setHex(isEWRed ? R_ON : R_OFF);
+          sig.yellow.color.setHex(isEWYellow ? Y_ON : Y_OFF);
+          sig.green.color.setHex(isEWGreen ? G_ON : G_OFF);
+        });
+      }
     }
 
     // 6. Rain Particle System
@@ -1411,15 +1589,33 @@
       }
     }
 
-    // 7. Interactive Drone Camera Banking & Pitching
+    // 7. Interactive Drone Camera Banking & Pitching (Optimized convergence)
     targetCamX = CAM_DEFAULT_POS.x + mouseRelX * 65;
     targetCamY = CAM_DEFAULT_POS.y - mouseRelY * 45;
-    camera.position.x += (targetCamX - camera.position.x) * 0.06;
-    camera.position.y += (targetCamY - camera.position.y) * 0.06;
-    camera.lookAt(CAM_DEFAULT_LOOK.x, CAM_DEFAULT_LOOK.y, CAM_DEFAULT_LOOK.z);
+    const diffX = targetCamX - camera.position.x;
+    const diffY = targetCamY - camera.position.y;
+    if (Math.abs(diffX) > 0.02 || Math.abs(diffY) > 0.02) {
+      camera.position.x += diffX * 0.08;
+      camera.position.y += diffY * 0.08;
+      camera.lookAt(CAM_DEFAULT_LOOK.x, CAM_DEFAULT_LOOK.y, CAM_DEFAULT_LOOK.z);
+    }
 
-    // 8. Render Scene
+    // 8. Render Scene & Measure Performance
+    const renderT0 = performance.now();
     renderer.render(scene, camera);
+    const renderTimeMs = performance.now() - renderT0;
+
+    // Performance telemetry
+    perfFrameCount++;
+    perfTotalCpuMs += renderTimeMs;
+    const nowTime = performance.now();
+    if (nowTime - perfLastSampleTime >= 500) {
+      currentFps = (perfFrameCount * 1000) / (nowTime - perfLastSampleTime);
+      avgFrameTimeMs = perfTotalCpuMs / perfFrameCount;
+      perfFrameCount = 0;
+      perfTotalCpuMs = 0;
+      perfLastSampleTime = nowTime;
+    }
   };
 
 })();
