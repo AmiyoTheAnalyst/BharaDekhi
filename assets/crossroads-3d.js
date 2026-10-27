@@ -42,6 +42,46 @@
   let targetCamX = -20, targetCamY = 420;
   const CAM_DEFAULT_POS = { x: -20, y: 420, z: 500 };
   const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
+  let camBasePos = { x: -20, y: 420, z: 500 };
+  let camBaseLook = { x: 0, y: 25, z: -35 };
+
+  function updateCameraFraming(aspect) {
+    if (!camera) return;
+    const baseFov = 38;
+    if (aspect < 1.15) {
+      // Portrait / vertical mobile and small tablet displays (aspect < 1.15)
+      // Smoothly scale FOV and zoom distance to keep all crossroads, roads, viaduct and buildings visible
+      const portraitFactor = Math.max(0, Math.min(1, (1.15 - aspect) / 0.70));
+      camera.fov = baseFov + portraitFactor * 10;
+      const zoomFactor = 1 + portraitFactor * 0.42;
+
+      const lookY = 25 + portraitFactor * 12;
+      const lookZ = -35;
+      camBaseLook.x = 0;
+      camBaseLook.y = lookY;
+      camBaseLook.z = lookZ;
+
+      camBasePos.x = -20;
+      camBasePos.y = lookY + (420 - 25) * zoomFactor;
+      camBasePos.z = lookZ + (500 - (-35)) * zoomFactor;
+
+      camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
+      camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
+    } else {
+      // Landscape / Desktop / Wide displays
+      camera.fov = baseFov;
+      camBasePos.x = CAM_DEFAULT_POS.x;
+      camBasePos.y = CAM_DEFAULT_POS.y;
+      camBasePos.z = CAM_DEFAULT_POS.z;
+      camBaseLook.x = CAM_DEFAULT_LOOK.x;
+      camBaseLook.y = CAM_DEFAULT_LOOK.y;
+      camBaseLook.z = CAM_DEFAULT_LOOK.z;
+      camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
+      camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
+    }
+    camera.aspect = aspect;
+    camera.updateProjectionMatrix();
+  }
 
   // Performance caches & 120 FPS optimization resources
   let whiteMarkMat = null;
@@ -1425,8 +1465,7 @@
     const aspect = (width > 0 && height > 0) ? (width / height) : (1200 / 700);
 
     camera = new THREE.PerspectiveCamera(38, aspect, 10, 4000);
-    camera.position.set(CAM_DEFAULT_POS.x, CAM_DEFAULT_POS.y, CAM_DEFAULT_POS.z);
-    camera.lookAt(CAM_DEFAULT_LOOK.x, CAM_DEFAULT_LOOK.y, CAM_DEFAULT_LOOK.z);
+    updateCameraFraming(aspect);
 
     // 3. Renderer (High performance WebGL with optimal pixel ratio for 120 FPS)
     renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -1973,8 +2012,8 @@
       }
     }
     if (width > 0 && height > 0) {
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+      const aspect = width / height;
+      updateCameraFraming(aspect);
       renderer.setSize(width, height, false);
     }
   }
@@ -2206,14 +2245,14 @@
     }
 
     // 7. Interactive Drone Camera Banking & Pitching (Optimized convergence)
-    targetCamX = CAM_DEFAULT_POS.x + mouseRelX * 65;
-    targetCamY = CAM_DEFAULT_POS.y - mouseRelY * 45;
+    targetCamX = camBasePos.x + mouseRelX * 65;
+    targetCamY = camBasePos.y - mouseRelY * 45;
     const diffX = targetCamX - camera.position.x;
     const diffY = targetCamY - camera.position.y;
     if (Math.abs(diffX) > 0.02 || Math.abs(diffY) > 0.02) {
       camera.position.x += diffX * 0.08;
       camera.position.y += diffY * 0.08;
-      camera.lookAt(CAM_DEFAULT_LOOK.x, CAM_DEFAULT_LOOK.y, CAM_DEFAULT_LOOK.z);
+      camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
     }
 
     // 8. Render Scene & Measure Performance
