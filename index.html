@@ -497,6 +497,56 @@
     }
 
     /* =========================================================
+       Mirpur 10 Crossroads: 2D Flat vs. 3D Drone Isometric View
+       ========================================================= */
+    #dhakaCrossroadsContainer {
+      perspective: 1400px;
+    }
+    #dhakaCrossroadsStageWrapper {
+      transform-origin: center center;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+    #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroadsStageWrapper {
+      transform: none;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
+      transform: perspective(1400px) rotateX(26deg) rotateZ(-6deg) scale3d(0.94, 0.94, 0.94);
+      overflow: visible !important;
+    }
+    @media (max-width: 767.98px) {
+      #dhakaCrossroadsContainer {
+        perspective: 1000px;
+      }
+      #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
+        transform: perspective(1000px) rotateX(24deg) rotateZ(-4deg) scale3d(0.92, 0.92, 0.92);
+      }
+    }
+
+    /* 3D Drone Mode Elevation Drop-Shadows for Elevated Metro & Multistory Architecture */
+    #nwBuildingsGroup,
+    #neBuildingsGroup,
+    #swBuildingsGroup,
+    #seBuildingsGroup,
+    #metroViaductStructureGroup,
+    #mirpur10StationGroup,
+    #crossroadsMetroTrain {
+      transition: filter 0.6s ease;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #nwBuildingsGroup,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #neBuildingsGroup,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #swBuildingsGroup,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #seBuildingsGroup {
+      filter: drop-shadow(0px 18px 14px rgba(0, 0, 0, 0.65));
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #metroViaductStructureGroup,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #mirpur10StationGroup,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsMetroTrain {
+      filter: drop-shadow(0px 22px 18px rgba(0, 0, 0, 0.75));
+    }
+
+    /* =========================================================
        Dhaka Crossroads Dynamic Weather & Time-of-Day Effects (Rain, Night, Sun)
        ========================================================= */
     #dhakaCrossroadsContainer {
@@ -2868,6 +2918,12 @@
             <span class="hidden sm:inline">Emergency Wave</span>
           </button>
 
+          <!-- 2D / 3D Drone View Mode Toggle Button -->
+          <button type="button" id="crossroadsViewModeBtn" onclick="toggleCrossroadsViewMode()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 text-[11px] sm:text-xs font-bold backdrop-blur-md transition-all duration-300 shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Switch to 3D Drone Isometric View / থ্রিডি ড্রোন ভিউ দেখুন">
+            <span id="crossroadsViewModeIcon">🗺️</span>
+            <span id="crossroadsViewModeText"><span class="hidden sm:inline">View: </span>2D Flat</span>
+          </button>
+
           <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
             বাংলা
           </button>
@@ -3234,26 +3290,29 @@
                2. ELEVATED METRO RAIL VIADUCT & MIRPUR 10 STATION (Top)
                ======================================================== -->
           
-          <!-- Concrete Viaduct Piers -->
-          <g fill="#1e293b" stroke="#334155" stroke-width="1.5">
-            <rect x="80" y="105" width="22" height="70" rx="2"/>
-            <rect x="250" y="105" width="22" height="70" rx="2"/>
-            <rect x="420" y="105" width="22" height="70" rx="2"/>
-            <rect x="600" y="105" width="22" height="70" rx="2"/>
-            <rect x="1100" y="105" width="22" height="70" rx="2"/>
-            <!-- Hammerhead Caps -->
-            <polygon points="70,105 112,105 106,115 76,115"/>
-            <polygon points="240,105 282,105 276,115 246,115"/>
-            <polygon points="410,105 452,105 446,115 416,115"/>
-            <polygon points="590,105 632,105 626,115 596,115"/>
-            <polygon points="1090,105 1132,105 1126,115 1096,115"/>
-          </g>
+          <!-- Elevated Viaduct Superstructure (Piers, Deck & Rails) -->
+          <g id="metroViaductStructureGroup">
+            <!-- Concrete Viaduct Piers -->
+            <g fill="#1e293b" stroke="#334155" stroke-width="1.5">
+              <rect x="80" y="105" width="22" height="70" rx="2"/>
+              <rect x="250" y="105" width="22" height="70" rx="2"/>
+              <rect x="420" y="105" width="22" height="70" rx="2"/>
+              <rect x="600" y="105" width="22" height="70" rx="2"/>
+              <rect x="1100" y="105" width="22" height="70" rx="2"/>
+              <!-- Hammerhead Caps -->
+              <polygon points="70,105 112,105 106,115 76,115"/>
+              <polygon points="240,105 282,105 276,115 246,115"/>
+              <polygon points="410,105 452,105 446,115 416,115"/>
+              <polygon points="590,105 632,105 626,115 596,115"/>
+              <polygon points="1090,105 1132,105 1126,115 1096,115"/>
+            </g>
 
-          <!-- Viaduct Track Deck -->
-          <rect x="-100" y="98" width="1400" height="14" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
-          <!-- Dual Steel Rails with Radiant Electric Cyan Core -->
-          <line x1="-100" y1="102" x2="1300" y2="102" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
-          <line x1="-100" y1="108" x2="1300" y2="108" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
+            <!-- Viaduct Track Deck -->
+            <rect x="-100" y="98" width="1400" height="14" fill="#0f172a" stroke="#00f2fe" stroke-width="1.2"/>
+            <!-- Dual Steel Rails with Radiant Electric Cyan Core -->
+            <line x1="-100" y1="102" x2="1300" y2="102" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
+            <line x1="-100" y1="108" x2="1300" y2="108" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
+          </g>
 
           <!-- Mirpur 10 Metro Station Structure (Upper Right) -->
           <g id="mirpur10StationGroup" transform="translate(710, 30)">
@@ -7076,6 +7135,7 @@
       if (typeof updateBusTickerText === 'function') updateBusTickerText();
       if (typeof initHolographicFareCards === 'function') initHolographicFareCards();
       if (window.crossroadsAudio && typeof crossroadsAudio.updateUi === 'function') crossroadsAudio.updateUi();
+      if (typeof updateCrossroadsViewModeUI === 'function') updateCrossroadsViewModeUI();
     }
 
     function toggleLanguage() {
@@ -12039,6 +12099,89 @@
     }
     window.toggleCrossroadsAudio = toggleCrossroadsAudio;
 
+    // =========================================================
+    // Mirpur 10 Crossroads: 2D Flat vs. 3D Drone Isometric View Logic
+    // =========================================================
+    let crossroads3DMode = false;
+    let crossroads3dTrackingInitialized = false;
+
+    function updateCrossroadsViewModeUI() {
+      const btn = document.getElementById('crossroadsViewModeBtn');
+      const icon = document.getElementById('crossroadsViewModeIcon');
+      const text = document.getElementById('crossroadsViewModeText');
+      if (!btn) return;
+      const isBn = typeof currentLanguage !== 'undefined' && currentLanguage === 'bn';
+
+      if (crossroads3DMode) {
+        btn.className = 'px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-200 border border-cyan-400 text-[11px] sm:text-xs font-bold backdrop-blur-md transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.4)] active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0';
+        if (icon) icon.textContent = '🛸';
+        if (text) text.innerHTML = isBn ? '<span class="hidden sm:inline">ভিউ: </span>৩ডি ড্রোন' : '<span class="hidden sm:inline">View: </span>3D Drone';
+        btn.title = isBn ? 'টুডি ফ্ল্যাট ভিউ দেখুন' : 'Switch to 2D Flat Top-Down View';
+      } else {
+        btn.className = 'px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 text-[11px] sm:text-xs font-bold backdrop-blur-md transition-all duration-300 shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0';
+        if (icon) icon.textContent = '🗺️';
+        if (text) text.innerHTML = isBn ? '<span class="hidden sm:inline">ভিউ: </span>২ডি ফ্ল্যাট' : '<span class="hidden sm:inline">View: </span>2D Flat';
+        btn.title = isBn ? 'থ্রিডি ড্রোন ভিউ দেখুন' : 'Switch to 3D Drone Isometric View';
+      }
+    }
+    window.updateCrossroadsViewModeUI = updateCrossroadsViewModeUI;
+
+    function setCrossroadsViewMode(enable3D) {
+      crossroads3DMode = !!enable3D;
+      const container = document.getElementById('dhakaCrossroadsContainer');
+      const stageWrapper = document.getElementById('dhakaCrossroadsStageWrapper');
+
+      if (container) {
+        container.classList.toggle('is-3d-drone-mode', crossroads3DMode);
+      }
+      if (stageWrapper) {
+        stageWrapper.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+        stageWrapper.style.transform = '';
+      }
+      updateCrossroadsViewModeUI();
+    }
+    window.setCrossroadsViewMode = setCrossroadsViewMode;
+
+    function toggleCrossroadsViewMode() {
+      setCrossroadsViewMode(!crossroads3DMode);
+    }
+    window.toggleCrossroadsViewMode = toggleCrossroadsViewMode;
+
+    function initCrossroads3dMouseTracking() {
+      if (crossroads3dTrackingInitialized) return;
+      const container = document.getElementById('dhakaCrossroadsContainer');
+      const stageWrapper = document.getElementById('dhakaCrossroadsStageWrapper');
+      if (!container || !stageWrapper) return;
+      crossroads3dTrackingInitialized = true;
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const isMobile = window.matchMedia('(max-width: 767.98px)');
+
+      container.addEventListener('mousemove', (e) => {
+        if (!crossroads3DMode || prefersReducedMotion.matches) return;
+        const rect = container.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const relX = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+        const relY = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+        const baseRotX = isMobile.matches ? 24 : 26;
+        const baseRotZ = isMobile.matches ? -4 : -6;
+        const baseScale = isMobile.matches ? 0.92 : 0.94;
+        const persp = isMobile.matches ? 1000 : 1400;
+        const tiltX = -relY * 6; // max +-3 deg shift
+        const tiltY = relX * 6;  // max +-3 deg shift
+
+        stageWrapper.style.transition = 'transform 0.15s ease-out';
+        stageWrapper.style.transform = `perspective(${persp}px) rotateX(${baseRotX + tiltX}deg) rotateY(${tiltY}deg) rotateZ(${baseRotZ}deg) scale3d(${baseScale}, ${baseScale}, ${baseScale})`;
+      });
+
+      container.addEventListener('mouseleave', () => {
+        if (!crossroads3DMode) return;
+        stageWrapper.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+        stageWrapper.style.transform = '';
+      });
+    }
+    window.initCrossroads3dMouseTracking = initCrossroads3dMouseTracking;
+
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         if (window.crossroadsAudio && crossroadsAudio.isActive) {
@@ -12062,6 +12205,12 @@
 
       updateCrossroadsAspectRatio();
       updateCrossroadsAtmosphere();
+      if (typeof initCrossroads3dMouseTracking === 'function') {
+        initCrossroads3dMouseTracking();
+      }
+      if (typeof updateCrossroadsViewModeUI === 'function') {
+        updateCrossroadsViewModeUI();
+      }
 
       if (dhakaCrossroadsRunning) return;
       dhakaCrossroadsRunning = true;
@@ -13122,6 +13271,9 @@
         if (typeof updateCrossroadsAtmosphere === 'function') {
           updateCrossroadsAtmosphere();
         }
+        if (typeof updateCrossroadsViewModeUI === 'function') {
+          updateCrossroadsViewModeUI();
+        }
         if (window.crossroadsAudio && crossroadsAudio.wasEnabled) {
           crossroadsAudio.resume();
         }
@@ -13957,12 +14109,14 @@
         initAdminFareSimulator();
         initHolographicFareCards();
         updateBusTickerText();
+        if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
       });
     } else {
       bootApp();
       initAdminFareSimulator();
       initHolographicFareCards();
       updateBusTickerText();
+      if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
     }
   </script>
 </body>
