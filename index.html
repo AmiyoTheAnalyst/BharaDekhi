@@ -497,10 +497,10 @@
     }
 
     /* =========================================================
-       Mirpur 10 Crossroads: Cinematic 3D Aerial Drone Camera View
+       Mirpur 10 Crossroads: Standing 3D Miniature City & Drone View
        ========================================================= */
     #dhakaCrossroadsContainer {
-      perspective: 1100px;
+      perspective: 1200px;
       perspective-origin: 50% 55%;
     }
     #dhakaCrossroadsStageWrapper {
@@ -509,44 +509,54 @@
       transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: transform;
     }
+
+    /* 2D Flat Mode vs. 3D Drone Miniature City Switching */
     #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroadsStageWrapper {
-      transform: none;
+      transform: none !important;
+    }
+    #dhakaCrossroadsContainer:not(.is-3d-drone-mode) .cr-3d-only {
+      display: none !important;
+    }
+    #dhakaCrossroadsContainer:not(.is-3d-drone-mode) .cr-2d-only {
+      display: block !important;
     }
 
-    /* Cinematic Drone Camera Pose: Elevated Downward Pitch, Isometric Axonometric Yaw & Receding Perspective */
+    /* 3D Drone Mode: Activates Standing 3D Buildings & Elevated Viaduct with Isometric Camera Perspective */
+    #dhakaCrossroadsContainer.is-3d-drone-mode .cr-2d-only {
+      display: none !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode .cr-3d-only {
+      display: block !important;
+    }
     #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
-      transform: perspective(1100px) rotateX(38deg) rotateY(5deg) rotateZ(-10deg) scale3d(0.95, 0.95, 0.95) translateY(-1%);
+      transform: perspective(1200px) rotateX(24deg) rotateZ(-4deg) scale3d(0.96, 0.96, 0.96);
       overflow: visible !important;
     }
     @media (max-width: 767.98px) {
       #dhakaCrossroadsContainer {
-        perspective: 950px;
+        perspective: 1000px;
         perspective-origin: 50% 52%;
       }
       #dhakaCrossroadsStageWrapper {
         transform-origin: 50% 52%;
       }
       #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
-        transform: perspective(950px) rotateX(32deg) rotateY(3deg) rotateZ(-6deg) scale3d(0.92, 0.92, 0.92);
+        transform: perspective(1000px) rotateX(20deg) rotateZ(-2deg) scale3d(0.92, 0.92, 0.92);
       }
     }
 
-    /* 3D Drone Mode Transitions for All Structural Layers */
-    #nwBuildingsGroup,
-    #neBuildingsGroup,
-    #swBuildingsGroup,
-    #seBuildingsGroup,
-    #metroViaductStructureGroup,
-    #mirpur10StationGroup,
+    /* 3D Mode Ambient Depth & Drop Shadows */
+    #nw3dBuildingsGroup,
+    #ne3dBuildingsGroup,
+    #sw3dBuildingsGroup,
+    #se3dBuildingsGroup,
+    #metro3dViaductGroup,
     #crossroadsMetroTrain,
     #sidewalkGroundSlabs,
     #dhakaVehiclesLayer > g,
     #emergencyAmbulanceVehicle,
     #dhakaPedestriansLayer > g,
-    #crossroadsSignals,
-    #crSkylineSilhouettes,
-    #crStarsLayer,
-    #surroundingBuildingsLayer polygon {
+    #crossroadsSignals {
       transition: filter 0.65s ease, opacity 0.65s ease;
     }
 
@@ -3374,8 +3384,8 @@
                2. ELEVATED METRO RAIL VIADUCT & MIRPUR 10 STATION (Top)
                ======================================================== -->
           
-          <!-- Elevated Viaduct Superstructure (Piers, Deck & Rails) -->
-          <g id="metroViaductStructureGroup">
+          <!-- 2D Elevated Viaduct Superstructure (Piers, Deck & Rails) -->
+          <g id="metroViaductStructureGroup" class="cr-2d-only">
             <!-- Concrete Viaduct Piers -->
             <g fill="#1e293b" stroke="#334155" stroke-width="1.5">
               <rect x="80" y="105" width="22" height="70" rx="2"/>
@@ -3398,8 +3408,8 @@
             <line x1="-100" y1="108" x2="1300" y2="108" stroke="#00f2fe" stroke-width="3" filter="url(#crNeonCyanGlow)"/>
           </g>
 
-          <!-- Mirpur 10 Metro Station Structure (Upper Right) -->
-          <g id="mirpur10StationGroup" transform="translate(710, 30)">
+          <!-- 2D Mirpur 10 Metro Station Structure (Upper Right) -->
+          <g id="mirpur10StationGroup" class="cr-2d-only" transform="translate(710, 30)">
             <!-- Glass Canopy Arched Roof with Electric Cyan Neon Outline -->
             <path d="M 0,55 Q 160,0 330,55 L 320,85 L 10,85 Z" fill="url(#stationRoofGrad)" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
             <!-- Roof Truss Ribs -->
@@ -3439,6 +3449,110 @@
             <!-- Station Support Columns to Ground -->
             <rect x="30" y="115" width="12" height="100" fill="#334155"/>
             <rect x="280" y="115" width="12" height="100" fill="#334155"/>
+          </g>
+
+          <!-- 3D ELEVATED METRO RAIL VIADUCT & STATION (Active in 3D Mode Only) -->
+          <g id="metro3dViaductGroup" class="cr-3d-only">
+            <!-- 1. Deep Ground Cast Shadows of the Viaduct & Pillars -->
+            <rect x="-100" y="145" width="1400" height="24" fill="#000000" opacity="0.45" filter="url(#crStreetlampGlow)"/>
+            <polygon points="76,175 106,175 120,240 60,240" fill="#000000" opacity="0.5"/>
+            <polygon points="246,175 276,175 290,240 230,240" fill="#000000" opacity="0.5"/>
+            <polygon points="416,175 446,175 460,240 400,240" fill="#000000" opacity="0.5"/>
+            <polygon points="596,175 626,175 640,240 580,240" fill="#000000" opacity="0.5"/>
+            <polygon points="1096,175 1126,175 1140,240 1080,240" fill="#000000" opacity="0.5"/>
+
+            <!-- 2. Massive 3D Concrete Piers (Columns with 3D Beveled Hammerheads) -->
+            <!-- Pier 1 (x=80) -->
+            <g>
+              <polygon points="75,175 87,175 87,112 75,112" fill="#1e293b"/>
+              <polygon points="87,175 105,175 105,112 87,112" fill="#334155"/>
+              <polygon points="105,175 115,175 115,112 105,112" fill="#0f172a"/>
+              <polygon points="65,112 125,112 120,102 70,102" fill="#475569"/>
+              <polygon points="120,102 125,112 132,106 126,98" fill="#1e293b"/>
+              <polygon points="70,102 120,102 126,98 76,98" fill="#64748b"/>
+            </g>
+            <!-- Pier 2 (x=250) -->
+            <g>
+              <polygon points="245,175 257,175 257,112 245,112" fill="#1e293b"/>
+              <polygon points="257,175 275,175 275,112 257,112" fill="#334155"/>
+              <polygon points="275,175 285,175 285,112 275,112" fill="#0f172a"/>
+              <polygon points="235,112 295,112 290,102 240,102" fill="#475569"/>
+              <polygon points="290,102 295,112 302,106 296,98" fill="#1e293b"/>
+              <polygon points="240,102 290,102 296,98 246,98" fill="#64748b"/>
+            </g>
+            <!-- Pier 3 (x=420) -->
+            <g>
+              <polygon points="415,175 427,175 427,112 415,112" fill="#1e293b"/>
+              <polygon points="427,175 445,175 445,112 427,112" fill="#334155"/>
+              <polygon points="445,175 455,175 455,112 445,112" fill="#0f172a"/>
+              <polygon points="405,112 465,112 460,102 410,102" fill="#475569"/>
+              <polygon points="460,102 465,112 472,106 466,98" fill="#1e293b"/>
+              <polygon points="410,102 460,102 466,98 416,98" fill="#64748b"/>
+            </g>
+            <!-- Pier 4 (x=600) -->
+            <g>
+              <polygon points="595,175 607,175 607,112 595,112" fill="#1e293b"/>
+              <polygon points="607,175 625,175 625,112 607,112" fill="#334155"/>
+              <polygon points="625,175 635,175 635,112 625,112" fill="#0f172a"/>
+              <polygon points="585,112 645,112 640,102 590,102" fill="#475569"/>
+              <polygon points="640,102 645,112 652,106 646,98" fill="#1e293b"/>
+              <polygon points="590,102 640,102 646,98 596,98" fill="#64748b"/>
+            </g>
+            <!-- Pier 5 (x=1100) -->
+            <g>
+              <polygon points="1095,175 1107,175 1107,112 1095,112" fill="#1e293b"/>
+              <polygon points="1107,175 1125,175 1125,112 1107,112" fill="#334155"/>
+              <polygon points="1125,175 1135,175 1135,112 1125,112" fill="#0f172a"/>
+              <polygon points="1085,112 1145,112 1140,102 1090,102" fill="#475569"/>
+              <polygon points="1140,102 1145,112 1152,106 1146,98" fill="#1e293b"/>
+              <polygon points="1090,102 1140,102 1146,98 1096,98" fill="#64748b"/>
+            </g>
+
+            <!-- 3. Heavy 3D Concrete Box-Girder Viaduct Beam -->
+            <polygon points="-100,108 1300,108 1300,118 -100,118" fill="#0b1324"/>
+            <polygon points="-100,98 1300,98 1300,112 -100,112" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+            <rect x="-100" y="103" width="1400" height="3" fill="#15803d"/>
+            <rect x="-100" y="106" width="1400" height="2" fill="#dc2626"/>
+            <line x1="-100" y1="98" x2="1300" y2="98" stroke="#00f2fe" stroke-width="1.5" filter="url(#crNeonCyanGlow)"/>
+            <polygon points="-100,98 1300,98 1300,90 -100,90" fill="#334155"/>
+            <line x1="-100" y1="93" x2="1300" y2="93" stroke="#00f2fe" stroke-width="2.2" filter="url(#crNeonCyanGlow)"/>
+            <line x1="-100" y1="96" x2="1300" y2="96" stroke="#00f2fe" stroke-width="2.2" filter="url(#crNeonCyanGlow)"/>
+            <polygon points="-100,90 1300,90 1300,86 -100,86" fill="#1e293b"/>
+
+            <!-- 4. Mirpur 10 Station Structure in 3D (x=710..1040) -->
+            <g id="mirpur10StationGroup3d" transform="translate(710, 20)">
+              <rect x="30" y="125" width="14" height="90" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="280" y="125" width="14" height="90" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <polygon points="50,110 115,205 145,205 80,110" fill="#0f172a" stroke="#00f2fe" stroke-width="1.5"/>
+              <line x1="55" y1="112" x2="120" y2="202" stroke="#38bdf8" stroke-width="2.5" opacity="0.9" filter="url(#crNeonCyanGlow)"/>
+              <polygon points="80,110 145,205 155,200 90,105" fill="#1e293b"/>
+              <polygon points="10,95 320,95 330,85 20,85" fill="#0b1324"/>
+              <rect x="10" y="72" width="310" height="23" rx="3" fill="#0f172a" stroke="#00f2fe" stroke-width="1.8"/>
+              <line x1="15" y1="76" x2="315" y2="76" stroke="#ffffff" stroke-width="3" opacity="0.9" filter="url(#crNeonCyanGlow)"/>
+              <g fill="#bae6fd" opacity="0.95">
+                <circle cx="50" cy="67" r="3.5"/><rect x="48" y="71" width="4" height="6"/>
+                <circle cx="80" cy="67" r="3.5"/><rect x="78" y="71" width="4" height="6"/>
+                <circle cx="120" cy="67" r="3.5"/><rect x="118" y="71" width="4" height="6"/>
+                <circle cx="180" cy="67" r="3.5"/><rect x="178" y="71" width="4" height="6"/>
+                <circle cx="240" cy="67" r="3.5"/><rect x="238" y="71" width="4" height="6"/>
+                <circle cx="280" cy="67" r="3.5"/><rect x="278" y="71" width="4" height="6"/>
+              </g>
+              <path d="M 15,48 Q 170,-5 335,48 L 325,74 L 25,74 Z" fill="#032541" opacity="0.8"/>
+              <path d="M 0,55 Q 160,0 330,55 L 320,78 L 10,78 Z" fill="url(#stationRoofGrad)" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
+              <path d="M 40,43 L 40,78 M 95,30 L 95,78 M 165,22 L 165,78 M 235,30 L 235,78 M 285,43 L 285,78" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.9"/>
+              <path d="M 20,50 Q 160,5 310,50" stroke="#ffffff" stroke-width="1.8" fill="none" opacity="0.6"/>
+              <rect x="35" y="42" width="180" height="28" rx="6" fill="#020617" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
+              <circle cx="55" cy="56" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5"/>
+              <text x="55" y="60" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle">M</text>
+              <text x="74" y="53" fill="#ffffff" font-size="12" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">মিরপুর ১০</text>
+              <text x="74" y="65" fill="#38bdf8" font-size="9.5" font-weight="700" class="cr-signboard-text">Mirpur 10</text>
+              <g id="mrtPlatformBoardingBadge3d" opacity="0" style="transition: opacity 0.35s ease; pointer-events: none;">
+                <rect x="224" y="45" width="90" height="22" rx="4" fill="#020617" stroke="#22c55e" stroke-width="1.2"/>
+                <circle cx="236" cy="56" r="3.5" fill="#22c55e" class="animate-ping"/>
+                <circle cx="236" cy="56" r="3" fill="#4ade80"/>
+                <text x="246" y="60" fill="#4ade80" font-size="9" font-weight="700" letter-spacing="0.04em" class="cr-signboard-text">BOARDING</text>
+              </g>
+            </g>
           </g>
 
           <!-- Continuous Moving Dhaka Metro Rail Train (MRT Line 6) with Electric Cyan Windows -->
@@ -3517,8 +3631,8 @@
           <!-- Layer of Dhaka City Multistory Buildings (Quadrant NW, NE, SW, SE) -->
           <g id="surroundingBuildingsLayer">
 
-            <!-- Quadrant A: Top-Left (NW) Dhaka Architecture -->
-            <g id="nwBuildingsGroup">
+            <!-- Quadrant A: Top-Left (NW) Dhaka Architecture (2D Flat View) -->
+            <g id="nwBuildingsGroup" class="cr-2d-only">
               <!-- NW-1: Far Left Edge Narrow Indigo Tower -->
               <rect x="6" y="135" width="30" height="190" rx="3" fill="url(#bldgBlueGrad)" stroke="#0284c7" stroke-width="1"/>
               <polygon points="4,135 38,135 34,125 8,125" fill="#082f49"/>
@@ -3622,8 +3736,8 @@
               <rect x="388" y="282" width="63" height="30" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
             </g>
 
-            <!-- Quadrant B: Top-Right (NE) Dhaka Architecture -->
-            <g id="neBuildingsGroup">
+            <!-- Quadrant B: Top-Right (NE) Dhaka Architecture (2D Flat View) -->
+            <g id="neBuildingsGroup" class="cr-2d-only">
               <!-- NE-1: Violet / Purple Modern Mid-Rise with Electric Magenta Windows -->
               <rect x="732" y="145" width="84" height="180" rx="4" fill="url(#bldgPurpleGrad)" stroke="#a855f7" stroke-width="1.2"/>
               <polygon points="728,145 820,145 812,133 736,133" fill="#2e1065"/>
@@ -3728,8 +3842,8 @@
               <text x="1109" y="296" fill="#fde68a" font-size="7.5" font-weight="900" text-anchor="middle" class="cr-neon-amber">ENTRANCE</text>
             </g>
 
-            <!-- Quadrant C: Bottom-Left (SW) Architecture -->
-            <g id="swBuildingsGroup">
+            <!-- Quadrant C: Bottom-Left (SW) Architecture (2D Flat View) -->
+            <g id="swBuildingsGroup" class="cr-2d-only">
               <!-- SW-1: Far Left Slice in Coral -->
               <rect x="4" y="520" width="32" height="175" rx="3" fill="url(#bldgCoralGrad)" stroke="#fb7185" stroke-width="1"/>
               <g fill="#fef08a" opacity="1" class="cr-neon-amber" filter="url(#crWindowGlowAmber)">
@@ -3805,8 +3919,8 @@
               <rect x="380" y="646" width="76" height="26" fill="#fef08a" opacity="1" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
             </g>
 
-            <!-- Quadrant D: Bottom-Right (SE) Architecture -->
-            <g id="seBuildingsGroup">
+            <!-- Quadrant D: Bottom-Right (SE) Architecture (2D Flat View) -->
+            <g id="seBuildingsGroup" class="cr-2d-only">
               <!-- SE-1: Rose & Coral 4-Story with Clinic ("জনতা ফার্মেসি") -->
               <rect x="732" y="518" width="142" height="172" rx="4" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
               <polygon points="727,518 878,518 868,506 737,506" fill="#4c0519"/>
@@ -3863,6 +3977,590 @@
                 <rect x="1174" y="595" width="16" height="24" rx="1"/>
                 <rect x="1152" y="630" width="16" height="24" rx="1"/>
                 <rect x="1174" y="630" width="16" height="24" rx="1"/>
+              </g>
+            </g>
+
+            <!-- ========================================================
+                 3D DRONE MODE: STANDING MINIATURE CITY BUILDINGS
+                 True Isometric Prisms with Front Facades, Side Depth Walls,
+                 Roofs & Architectural Elevation
+                 ======================================================== -->
+            <!-- 3D Quadrant NW Buildings Group (Top-Left) -->
+            <g id="nw3dBuildingsGroup" class="cr-3d-only">
+              <!-- NW Ambient Ground Cast Shadow -->
+              <polygon points="2,312 470,312 485,322 10,322" fill="#000000" opacity="0.38"/>
+
+              <!-- NW-1: 3D Slender Indigo Spire Tower -->
+              <g id="nw1_3d_tower">
+                <polygon points="6,312 34,312 50,300 20,300" fill="#000000" opacity="0.45"/>
+                <rect x="6" y="134" width="28" height="178" rx="2" fill="url(#bldgBlueGrad)" stroke="#0284c7" stroke-width="1"/>
+                <polygon points="34,312 44,302 44,124 34,134" fill="#082f49" stroke="#0369a1" stroke-width="0.8"/>
+                <polygon points="6,134 34,134 44,124 16,124" fill="#0c4a6e" stroke="#0284c7" stroke-width="1"/>
+                <polygon points="9,133 32,133 40,125 18,125" fill="#082f49"/>
+                <line x1="28" y1="124" x2="28" y2="102" stroke="#94a3b8" stroke-width="1.4"/>
+                <circle cx="28" cy="101" r="2.2" fill="#ef4444" class="beacon-blink"/>
+                <g fill="#a5f3fc" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)">
+                  <rect x="10" y="146" width="8" height="12" rx="1"/>
+                  <rect x="22" y="146" width="8" height="12" rx="1"/>
+                  <rect x="10" y="172" width="8" height="12" rx="1"/>
+                  <rect x="22" y="172" width="8" height="12" rx="1"/>
+                  <rect x="10" y="198" width="8" height="12" rx="1"/>
+                  <rect x="22" y="198" width="8" height="12" rx="1"/>
+                  <rect x="10" y="224" width="8" height="12" rx="1"/>
+                  <rect x="22" y="224" width="8" height="12" rx="1"/>
+                </g>
+                <line x1="38" y1="152" x2="41" y2="149" stroke="#38bdf8" stroke-width="1.2" opacity="0.8"/>
+                <line x1="38" y1="178" x2="41" y2="175" stroke="#38bdf8" stroke-width="1.2" opacity="0.8"/>
+                <line x1="38" y1="204" x2="41" y2="201" stroke="#38bdf8" stroke-width="1.2" opacity="0.8"/>
+              </g>
+
+              <!-- NW-2: 3D Terracotta Complex with Authentic Billboard & Ground Shops -->
+              <g id="nw2_3d_complex">
+                <polygon points="42,312 268,312 282,302 56,302" fill="#000000" opacity="0.45"/>
+                <rect x="42" y="156" width="226" height="156" rx="3" fill="url(#bldgOrangeGrad)" stroke="#ea580c" stroke-width="1.2"/>
+                <polygon points="268,312 280,300 280,144 268,156" fill="#431407" stroke="#7c2d12" stroke-width="0.8"/>
+                <line x1="42" y1="192" x2="268" y2="192" stroke="#9a3412" stroke-width="1.5"/>
+                <line x1="268" y1="192" x2="280" y2="180" stroke="#7c2d12" stroke-width="1.5"/>
+                <line x1="42" y1="228" x2="268" y2="228" stroke="#9a3412" stroke-width="1.5"/>
+                <line x1="268" y1="228" x2="280" y2="216" stroke="#7c2d12" stroke-width="1.5"/>
+                <line x1="42" y1="264" x2="268" y2="264" stroke="#9a3412" stroke-width="1.5"/>
+                <line x1="268" y1="264" x2="280" y2="252" stroke="#7c2d12" stroke-width="1.5"/>
+                <polygon points="42,156 268,156 280,144 54,144" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <polygon points="45,155 266,155 277,145 56,145" fill="#1c1917"/>
+                <line x1="42" y1="156" x2="268" y2="156" stroke="#f97316" stroke-width="2"/>
+                <line x1="268" y1="156" x2="280" y2="144" stroke="#c2410c" stroke-width="2"/>
+
+                <!-- 3D Standing Billboard: "ঢাকা আমাদের শহর" -->
+                <g id="nw2_3d_billboard">
+                  <line x1="65" y1="150" x2="65" y2="76" stroke="#475569" stroke-width="2.5"/>
+                  <line x1="105" y1="147" x2="105" y2="76" stroke="#475569" stroke-width="2"/>
+                  <line x1="175" y1="147" x2="175" y2="76" stroke="#475569" stroke-width="2"/>
+                  <line x1="215" y1="150" x2="215" y2="76" stroke="#475569" stroke-width="2.5"/>
+                  <line x1="65" y1="110" x2="215" y2="110" stroke="#334155" stroke-width="1.5"/>
+                  <rect x="52" y="70" width="168" height="74" rx="5" fill="#042f2e" stroke="#10b981" stroke-width="2.5" filter="url(#crNeonGreenGlow)"/>
+                  <rect x="56" y="74" width="160" height="66" rx="3" fill="#065f46"/>
+                  <polygon points="52,70 220,70 226,64 58,64" fill="#022c22" stroke="#059669" stroke-width="1"/>
+                  <polygon points="220,70 226,64 226,138 220,144" fill="#022c22"/>
+                  <path d="M 64,124 L 80,124 L 80,102 L 94,102 L 94,124 L 118,124 L 118,92 L 138,92 L 138,124 L 168,124 L 168,106 L 186,106 L 186,124 L 210,124 Z" fill="#022c22" opacity="0.6"/>
+                  <text x="70" y="97" fill="#fde047" font-size="14.5" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা</text>
+                  <text x="70" y="114" fill="#ffffff" font-size="12.5" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">আমাদের</text>
+                  <text x="70" y="131" fill="#34d399" font-size="12.5" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">শহর</text>
+                  <circle cx="85" cy="65" r="3" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
+                  <circle cx="185" cy="65" r="3" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
+                </g>
+
+                <!-- 2 Tiers of 5 Windows with Warm Amber Neon -->
+                <g fill="#fef08a" class="cr-neon-amber window-glow-pulse" filter="url(#crWindowGlowAmber)">
+                  <rect x="62" y="168" width="18" height="18" rx="1"/>
+                  <rect x="98" y="168" width="18" height="18" rx="1"/>
+                  <rect x="134" y="168" width="18" height="18" rx="1"/>
+                  <rect x="170" y="168" width="18" height="18" rx="1"/>
+                  <rect x="206" y="168" width="18" height="18" rx="1"/>
+                  <rect x="62" y="202" width="18" height="18" rx="1"/>
+                  <rect x="98" y="202" width="18" height="18" rx="1"/>
+                  <rect x="134" y="202" width="18" height="18" rx="1"/>
+                  <rect x="170" y="202" width="18" height="18" rx="1"/>
+                  <rect x="206" y="202" width="18" height="18" rx="1"/>
+                </g>
+
+                <!-- Ground Shop 1: "ঢাকা বেকারি" -->
+                <g id="nw2_shop1_bakery">
+                  <rect x="52" y="258" width="98" height="52" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
+                  <polygon points="50,258 152,258 150,250 52,250" fill="#b45309"/>
+                  <rect x="55" y="260" width="92" height="16" rx="2" fill="#090d16" stroke="#d97706" stroke-width="0.8"/>
+                  <text x="101" y="272" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা বেকারি</text>
+                  <rect x="60" y="278" width="82" height="28" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <line x1="101" y1="278" x2="101" y2="306" stroke="#b45309" stroke-width="1.2"/>
+                </g>
+
+                <!-- Ground Shop 2: "গ্রীন ফার্মেসি" -->
+                <g id="nw2_shop2_pharmacy">
+                  <rect x="158" y="258" width="98" height="52" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
+                  <polygon points="156,258 258,258 256,250 158,250" fill="#047857"/>
+                  <rect x="161" y="260" width="92" height="16" rx="2" fill="#090d16" stroke="#059669" stroke-width="0.8"/>
+                  <text x="207" y="272" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">গ্রীন ফার্মেসি</text>
+                  <rect x="166" y="278" width="82" height="28" fill="#6ee7b7" opacity="0.95" class="cr-neon-green"/>
+                  <line x1="207" y1="278" x2="207" y2="306" stroke="#047857" stroke-width="1.2"/>
+                  <rect x="172" y="284" width="8" height="2.5" fill="#059669"/>
+                  <rect x="175" y="281" width="2.5" height="8" fill="#059669"/>
+                </g>
+              </g>
+
+              <!-- NW-3: 3D Turquoise 5-Story Residential Tower with Water Tank -->
+              <g id="nw3_3d_tower">
+                <polygon points="276,312 368,312 380,300 288,300" fill="#000000" opacity="0.45"/>
+                <rect x="276" y="128" width="92" height="184" rx="3" fill="url(#bldgTurquoiseGrad)" stroke="#0d9488" stroke-width="1.2"/>
+                <polygon points="368,312 380,300 380,116 368,128" fill="#134e4a" stroke="#0f766e" stroke-width="0.8"/>
+                <line x1="276" y1="162" x2="368" y2="162" stroke="#115e59" stroke-width="1.2"/>
+                <line x1="368" y1="162" x2="380" y2="150" stroke="#042f2e" stroke-width="1.2"/>
+                <line x1="276" y1="196" x2="368" y2="196" stroke="#115e59" stroke-width="1.2"/>
+                <line x1="368" y1="196" x2="380" y2="184" stroke="#042f2e" stroke-width="1.2"/>
+                <line x1="276" y1="230" x2="368" y2="230" stroke="#115e59" stroke-width="1.2"/>
+                <line x1="368" y1="230" x2="380" y2="218" stroke="#042f2e" stroke-width="1.2"/>
+                <line x1="276" y1="264" x2="368" y2="264" stroke="#115e59" stroke-width="1.2"/>
+                <line x1="368" y1="264" x2="380" y2="252" stroke="#042f2e" stroke-width="1.2"/>
+                <polygon points="276,128 368,128 380,116 288,116" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <polygon points="279,127 366,127 377,117 290,117" fill="#0f172a"/>
+
+                <!-- 3D Cylindrical Water Tank -->
+                <g id="nw3_3d_watertank">
+                  <line x1="295" y1="120" x2="295" y2="108" stroke="#475569" stroke-width="1.8"/>
+                  <line x1="321" y1="120" x2="321" y2="108" stroke="#475569" stroke-width="1.8"/>
+                  <rect x="292" y="96" width="32" height="18" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                  <ellipse cx="308" cy="96" rx="16" ry="4" fill="#38bdf8"/>
+                  <text x="308" y="108" fill="#ffffff" font-size="7.5" font-weight="900" text-anchor="middle">TANK</text>
+                </g>
+                <line x1="350" y1="116" x2="350" y2="90" stroke="#94a3b8" stroke-width="1.5"/>
+                <line x1="345" y1="96" x2="355" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+                <circle cx="350" cy="89" r="2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- 4 Floors of Warm Illuminated Windows -->
+                <g fill="#fef08a" class="cr-neon-amber window-glow-pulse" filter="url(#crWindowGlowAmber)">
+                  <rect x="286" y="138" width="20" height="16" rx="1"/>
+                  <rect x="314" y="138" width="20" height="16" rx="1"/>
+                  <rect x="342" y="138" width="18" height="16" rx="1"/>
+                  <rect x="286" y="172" width="20" height="16" rx="1"/>
+                  <rect x="314" y="172" width="20" height="16" rx="1"/>
+                  <rect x="342" y="172" width="18" height="16" rx="1"/>
+                  <rect x="286" y="206" width="20" height="16" rx="1"/>
+                  <rect x="314" y="206" width="20" height="16" rx="1"/>
+                  <rect x="342" y="206" width="18" height="16" rx="1"/>
+                  <rect x="286" y="240" width="20" height="16" rx="1"/>
+                  <rect x="314" y="240" width="20" height="16" rx="1"/>
+                  <rect x="342" y="240" width="18" height="16" rx="1"/>
+                </g>
+
+                <!-- Ground Entrance Lobby -->
+                <rect x="284" y="272" width="76" height="38" fill="#042f2e" stroke="#2dd4bf" stroke-width="1.5" class="cr-neon-cyan"/>
+                <rect x="290" y="280" width="64" height="26" fill="#a5f3fc" opacity="0.95" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                <line x1="322" y1="280" x2="322" y2="306" stroke="#042f2e" stroke-width="1.2"/>
+              </g>
+
+              <!-- NW-4: 3D Amber Mid-Rise with Shop "ঢাকা বুক ডিপো" -->
+              <g id="nw4_3d_building">
+                <polygon points="376,312 460,312 472,300 388,300" fill="#000000" opacity="0.45"/>
+                <rect x="376" y="144" width="84" height="168" rx="3" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
+                <polygon points="460,312 472,300 472,132 460,144" fill="#451a03" stroke="#78350f" stroke-width="0.8"/>
+                <polygon points="376,144 460,144 472,132 388,132" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <polygon points="379,143 458,143 469,133 390,133" fill="#1c1917"/>
+                <line x1="422" y1="132" x2="422" y2="108" stroke="#94a3b8" stroke-width="1.4"/>
+                <circle cx="422" cy="107" r="2.2" fill="#ef4444" class="beacon-blink"/>
+
+                <g fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)">
+                  <rect x="388" y="156" width="18" height="18" rx="1"/>
+                  <rect x="414" y="156" width="18" height="18" rx="1"/>
+                  <rect x="438" y="156" width="16" height="18" rx="1"/>
+                  <rect x="388" y="186" width="18" height="18" rx="1"/>
+                  <rect x="414" y="186" width="18" height="18" rx="1"/>
+                  <rect x="438" y="186" width="16" height="18" rx="1"/>
+                  <rect x="388" y="216" width="18" height="18" rx="1"/>
+                  <rect x="414" y="216" width="18" height="18" rx="1"/>
+                  <rect x="438" y="216" width="16" height="18" rx="1"/>
+                </g>
+
+                <!-- Ground Shopfront: "ঢাকা বুক ডিপো" -->
+                <g id="nw4_shop_bookstore">
+                  <rect x="382" y="258" width="74" height="52" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
+                  <polygon points="380,258 458,258 456,250 382,250" fill="#b45309"/>
+                  <rect x="385" y="260" width="68" height="15" rx="2" fill="#090d16" stroke="#b45309" stroke-width="0.8"/>
+                  <text x="419" y="271" fill="#ffffff" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা বুক ডিপো</text>
+                  <rect x="388" y="278" width="62" height="28" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <line x1="419" y1="278" x2="419" y2="306" stroke="#b45309" stroke-width="1"/>
+                </g>
+              </g>
+            </g>
+
+            <!-- 3D Quadrant NE Buildings Group (Top-Right) -->
+            <g id="ne3dBuildingsGroup" class="cr-3d-only">
+              <!-- NE Ambient Ground Cast Shadow -->
+              <polygon points="726,312 1198,312 1190,322 716,322" fill="#000000" opacity="0.38"/>
+
+              <!-- NE-1: 3D Purple Boutique Mid-Rise with "ফ্যাশন কর্নার" -->
+              <g id="ne1_3d_boutique">
+                <polygon points="734,312 816,312 804,300 722,300" fill="#000000" opacity="0.45"/>
+                <!-- Left Depth Side Wall (Facing Crossroads Center!) -->
+                <polygon points="734,312 722,300 722,132 734,144" fill="#1e0838" stroke="#3b0764" stroke-width="0.8"/>
+                <!-- Front Facade -->
+                <rect x="734" y="144" width="82" height="168" rx="3" fill="url(#bldgPurpleGrad)" stroke="#a855f7" stroke-width="1.2"/>
+                <!-- Roof Deck -->
+                <polygon points="734,144 816,144 804,132 722,132" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <polygon points="736,143 814,143 802,133 724,133" fill="#180728"/>
+                <line x1="772" y1="132" x2="772" y2="108" stroke="#cbd5e1" stroke-width="1.5"/>
+                <circle cx="772" cy="107" r="2.2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- 3 Tiers of Magenta Windows -->
+                <g fill="#f5d0fe" class="cr-neon-magenta" filter="url(#crWindowGlowMagenta)">
+                  <rect x="744" y="156" width="18" height="18" rx="1"/>
+                  <rect x="768" y="156" width="18" height="18" rx="1"/>
+                  <rect x="792" y="156" width="16" height="18" rx="1"/>
+                  <rect x="744" y="186" width="18" height="18" rx="1"/>
+                  <rect x="768" y="186" width="18" height="18" rx="1"/>
+                  <rect x="792" y="186" width="16" height="18" rx="1"/>
+                  <rect x="744" y="216" width="18" height="18" rx="1"/>
+                  <rect x="768" y="216" width="18" height="18" rx="1"/>
+                  <rect x="792" y="216" width="16" height="18" rx="1"/>
+                </g>
+
+                <!-- Ground Boutique Shop: "ফ্যাশন কর্নার" -->
+                <g id="ne1_shop_fashion">
+                  <rect x="738" y="258" width="74" height="52" fill="#0f172a" stroke="#d946ef" stroke-width="1.8" class="cr-neon-magenta"/>
+                  <polygon points="736,258 814,258 812,250 738,250" fill="#701a75"/>
+                  <rect x="741" y="260" width="68" height="15" rx="2" fill="#090d16" stroke="#7e22ce" stroke-width="0.8"/>
+                  <text x="775" y="271" fill="#ffffff" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ফ্যাশন কর্নার</text>
+                  <rect x="744" y="278" width="62" height="28" fill="#f5d0fe" opacity="0.95" class="cr-neon-magenta" filter="url(#crWindowGlowMagenta)"/>
+                  <line x1="775" y1="278" x2="775" y2="306" stroke="#7e22ce" stroke-width="1"/>
+                </g>
+              </g>
+
+              <!-- NE-2: 3D Turquoise Tech Commercial ("বাংলা টেক") -->
+              <g id="ne2_3d_tech">
+                <polygon points="826,312 910,312 898,300 814,300" fill="#000000" opacity="0.45"/>
+                <!-- Left Depth Side Wall -->
+                <polygon points="826,312 814,300 814,138 826,150" fill="#042f2e" stroke="#0f766e" stroke-width="0.8"/>
+                <!-- Front Facade -->
+                <rect x="826" y="150" width="84" height="162" rx="3" fill="url(#bldgTurquoiseGrad)" stroke="#14b8a6" stroke-width="1.2"/>
+                <!-- Roof Deck -->
+                <polygon points="826,150 910,150 898,138 814,138" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <polygon points="828,149 908,149 896,139 816,139" fill="#0f172a"/>
+
+                <!-- 3D Water Tank -->
+                <g id="ne2_3d_watertank">
+                  <line x1="848" y1="140" x2="848" y2="128" stroke="#475569" stroke-width="1.8"/>
+                  <line x1="874" y1="140" x2="874" y2="128" stroke="#475569" stroke-width="1.8"/>
+                  <rect x="846" y="118" width="30" height="16" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                  <ellipse cx="861" cy="118" rx="15" ry="3.5" fill="#38bdf8"/>
+                  <text x="861" y="129" fill="#ffffff" font-size="7" font-weight="900" text-anchor="middle">TANK</text>
+                </g>
+
+                <!-- 3 Tiers of Cyan Windows -->
+                <g fill="#a5f3fc" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)">
+                  <rect x="836" y="164" width="18" height="16" rx="1"/>
+                  <rect x="860" y="164" width="18" height="16" rx="1"/>
+                  <rect x="884" y="164" width="16" height="16" rx="1"/>
+                  <rect x="836" y="192" width="18" height="16" rx="1"/>
+                  <rect x="860" y="192" width="18" height="16" rx="1"/>
+                  <rect x="884" y="192" width="16" height="16" rx="1"/>
+                  <rect x="836" y="220" width="18" height="16" rx="1"/>
+                  <rect x="860" y="220" width="18" height="16" rx="1"/>
+                  <rect x="884" y="220" width="16" height="16" rx="1"/>
+                </g>
+
+                <!-- Ground Tech Shop: "বাংলা টেক" -->
+                <g id="ne2_shop_tech">
+                  <rect x="830" y="260" width="76" height="50" fill="#0f172a" stroke="#00f2fe" stroke-width="1.8" class="cr-neon-cyan"/>
+                  <polygon points="828,260 908,260 906,252 830,252" fill="#0f766e"/>
+                  <rect x="833" y="262" width="70" height="15" rx="2" fill="#090d16" stroke="#0f766e" stroke-width="0.8"/>
+                  <text x="868" y="273" fill="#00f2fe" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">বাংলা টেক</text>
+                  <rect x="836" y="280" width="64" height="26" fill="#a5f3fc" opacity="0.95" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <line x1="868" y1="280" x2="868" y2="306" stroke="#0f766e" stroke-width="1"/>
+                </g>
+              </g>
+
+              <!-- NE-3: 3D Coral & Rose 5-Story Residential Tower with "সুপার শপ" -->
+              <g id="ne3_3d_tower">
+                <polygon points="920,312 1018,312 1006,300 908,300" fill="#000000" opacity="0.45"/>
+                <!-- Left Depth Side Wall -->
+                <polygon points="920,312 908,300 908,114 920,126" fill="#4c0519" stroke="#9f1239" stroke-width="0.8"/>
+                <!-- Front Facade -->
+                <rect x="920" y="126" width="98" height="186" rx="3" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
+                <!-- Roof Deck -->
+                <polygon points="920,126 1018,126 1006,114 908,114" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <polygon points="922,125 1016,125 1004,115 910,115" fill="#1c1917"/>
+
+                <!-- 3D Water Tank -->
+                <g id="ne3_3d_watertank">
+                  <line x1="938" y1="116" x2="938" y2="104" stroke="#475569" stroke-width="1.8"/>
+                  <line x1="964" y1="116" x2="964" y2="104" stroke="#475569" stroke-width="1.8"/>
+                  <rect x="936" y="94" width="30" height="16" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                  <ellipse cx="951" cy="94" rx="15" ry="3.5" fill="#38bdf8"/>
+                  <text x="951" y="105" fill="#ffffff" font-size="7" font-weight="900" text-anchor="middle">TANK</text>
+                </g>
+                <line x1="992" y1="114" x2="992" y2="88" stroke="#cbd5e1" stroke-width="1.5"/>
+                <circle cx="992" cy="87" r="2.2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- 4 Tiers of Warm Amber Windows -->
+                <g fill="#fef08a" class="cr-neon-amber window-glow-pulse" filter="url(#crWindowGlowAmber)">
+                  <rect x="930" y="136" width="20" height="16" rx="1"/>
+                  <rect x="958" y="136" width="20" height="16" rx="1"/>
+                  <rect x="986" y="136" width="20" height="16" rx="1"/>
+                  <rect x="930" y="164" width="20" height="16" rx="1"/>
+                  <rect x="958" y="164" width="20" height="16" rx="1"/>
+                  <rect x="986" y="164" width="20" height="16" rx="1"/>
+                  <rect x="930" y="192" width="20" height="16" rx="1"/>
+                  <rect x="958" y="192" width="20" height="16" rx="1"/>
+                  <rect x="986" y="192" width="20" height="16" rx="1"/>
+                  <rect x="930" y="220" width="20" height="16" rx="1"/>
+                  <rect x="958" y="220" width="20" height="16" rx="1"/>
+                  <rect x="986" y="220" width="20" height="16" rx="1"/>
+                </g>
+
+                <!-- Ground Super Shop: "সুপার শপ" -->
+                <g id="ne3_shop_supershop">
+                  <rect x="926" y="260" width="86" height="50" fill="#0f172a" stroke="#ff2a54" stroke-width="1.8" class="cr-neon-red"/>
+                  <polygon points="924,260 1014,260 1012,252 926,252" fill="#be123c"/>
+                  <rect x="929" y="262" width="80" height="15" rx="2" fill="#090d16" stroke="#be123c" stroke-width="0.8"/>
+                  <text x="969" y="273" fill="#fef08a" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সুপার শপ</text>
+                  <rect x="932" y="280" width="74" height="26" fill="#fecdd3" opacity="0.95" class="cr-neon-red"/>
+                  <line x1="969" y1="280" x2="969" y2="306" stroke="#be123c" stroke-width="1"/>
+                </g>
+              </g>
+
+              <!-- NE-4: "মিরপুর প্লাজা" (Mirpur Plaza) Landmark 3D Glass High-Rise -->
+              <g id="ne4_3d_highrise">
+                <polygon points="1028,312 1192,312 1178,298 1014,298" fill="#000000" opacity="0.45"/>
+                <!-- Left Depth Side Wall -->
+                <polygon points="1028,312 1014,298 1014,84 1028,98" fill="#031728" stroke="#0284c7" stroke-width="0.8"/>
+                <!-- Front Facade -->
+                <rect x="1028" y="98" width="164" height="214" rx="4" fill="url(#bldgBlueGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+                <!-- Roof Deck -->
+                <polygon points="1028,98 1192,98 1178,84 1014,84" fill="#082f49" stroke="#0284c7" stroke-width="1.2"/>
+                <polygon points="1030,97 1190,97 1176,85 1016,85" fill="#041624"/>
+
+                <!-- Tower Spire Mast with Beacon -->
+                <line x1="1106" y1="84" x2="1106" y2="52" stroke="#e2e8f0" stroke-width="2.2"/>
+                <circle cx="1106" cy="50" r="3.2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- Rooftop Crown Billboard: "মিরপুর প্লাজা" -->
+                <g id="ne4_rooftop_sign" transform="translate(1048, 88)">
+                  <rect x="0" y="0" width="124" height="24" rx="4" fill="#0369a1" stroke="#00f2fe" stroke-width="2" filter="url(#crNeonCyanGlow)"/>
+                  <text x="62" y="17" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">মিরপুর প্লাজা</text>
+                </g>
+
+                <!-- 5 Floors of Panoramic Glass Windows -->
+                <g class="window-glow-pulse">
+                  <rect x="1040" y="124" width="34" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1084" y="124" width="46" height="18" rx="1" fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <rect x="1140" y="124" width="38" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1040" y="152" width="34" height="18" rx="1" fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <rect x="1084" y="152" width="46" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1140" y="152" width="38" height="18" rx="1" fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <rect x="1040" y="180" width="34" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1084" y="180" width="46" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1140" y="180" width="38" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1040" y="208" width="34" height="18" rx="1" fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <rect x="1084" y="208" width="46" height="18" rx="1" fill="#67e8f9" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+                  <rect x="1140" y="208" width="38" height="18" rx="1" fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                </g>
+
+                <!-- Double-Height Glass Entrance Lobby -->
+                <rect x="1046" y="250" width="126" height="60" fill="#082f49" stroke="#00f2fe" stroke-width="1.8" class="cr-neon-cyan"/>
+                <polygon points="1042,250 1176,250 1172,242 1046,242" fill="#0284c7"/>
+                <rect x="1054" y="258" width="110" height="48" fill="#38bdf8" opacity="0.55"/>
+                <rect x="1086" y="274" width="46" height="32" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5" class="cr-neon-amber"/>
+                <text x="1109" y="292" fill="#fde68a" font-size="7.5" font-weight="900" text-anchor="middle" class="cr-neon-amber">ENTRANCE</text>
+              </g>
+            </g>
+
+            <!-- 3D Quadrant SW Buildings Group (Bottom-Left) -->
+            <g id="sw3dBuildingsGroup" class="cr-3d-only">
+              <!-- SW Ground Ambient Shadow -->
+              <polygon points="4,675 470,675 480,685 10,685" fill="#000000" opacity="0.45"/>
+
+              <!-- SW-1: 3D Coral Slice Tower (x: 4..32, y: 540..675) -->
+              <g id="sw1_3d_tower">
+                <rect x="4" y="540" width="28" height="135" rx="2" fill="url(#bldgCoralGrad)" stroke="#fb7185" stroke-width="1"/>
+                <polygon points="32,675 42,663 42,528 32,540" fill="#4c0519" stroke="#9f1239" stroke-width="0.8"/>
+                <polygon points="4,540 32,540 42,528 14,528" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <g fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)">
+                  <rect x="8" y="552" width="10" height="14" rx="1"/>
+                  <rect x="20" y="552" width="10" height="14" rx="1"/>
+                  <rect x="8" y="580" width="10" height="14" rx="1"/>
+                  <rect x="20" y="580" width="10" height="14" rx="1"/>
+                  <rect x="8" y="608" width="10" height="14" rx="1"/>
+                  <rect x="20" y="608" width="10" height="14" rx="1"/>
+                  <rect x="8" y="636" width="10" height="14" rx="1"/>
+                  <rect x="20" y="636" width="10" height="14" rx="1"/>
+                </g>
+              </g>
+
+              <!-- SW-2: 3D Teal Multistory Residential Block with Rooftop Water Tank -->
+              <g id="sw2_3d_block">
+                <rect x="40" y="538" width="236" height="137" rx="3" fill="url(#bldgTealGrad)" stroke="#14b8a6" stroke-width="1.2"/>
+                <polygon points="276,675 288,663 288,526 276,538" fill="#042f2e" stroke="#0f766e" stroke-width="0.8"/>
+                <polygon points="40,538 276,538 288,526 52,526" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <polygon points="43,537 274,537 285,527 54,527" fill="#0f172a"/>
+
+                <!-- 3D Water Tank -->
+                <g id="sw2_3d_watertank">
+                  <line x1="72" y1="528" x2="72" y2="516" stroke="#475569" stroke-width="1.8"/>
+                  <line x1="98" y1="528" x2="98" y2="516" stroke="#475569" stroke-width="1.8"/>
+                  <rect x="70" y="504" width="30" height="16" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                  <ellipse cx="85" cy="504" rx="15" ry="3.5" fill="#38bdf8"/>
+                  <text x="85" y="515" fill="#ffffff" font-size="7" font-weight="900" text-anchor="middle">TANK</text>
+                </g>
+                <line x1="140" y1="526" x2="140" y2="498" stroke="#94a3b8" stroke-width="1.5"/>
+                <circle cx="140" cy="497" r="2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- 2 Tiers of 4 Large Windows -->
+                <g fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)">
+                  <rect x="65" y="552" width="22" height="22" rx="1"/>
+                  <rect x="110" y="552" width="22" height="22" rx="1"/>
+                  <rect x="155" y="552" width="22" height="22" rx="1"/>
+                  <rect x="200" y="552" width="22" height="22" rx="1"/>
+                  <rect x="65" y="590" width="22" height="22" rx="1"/>
+                  <rect x="110" y="590" width="22" height="22" rx="1"/>
+                  <rect x="155" y="590" width="22" height="22" rx="1"/>
+                  <rect x="200" y="590" width="22" height="22" rx="1"/>
+                </g>
+              </g>
+
+              <!-- SW-3: 3D Purple Mid-Rise with Traditional Tea Stall ("চায়ের টং") -->
+              <g id="sw3_3d_teastall_building">
+                <rect x="282" y="532" width="82" height="143" rx="3" fill="url(#bldgPurpleGrad)" stroke="#8b5cf6" stroke-width="1.2"/>
+                <polygon points="364,675 376,663 376,520 364,532" fill="#2e1065" stroke="#581c87" stroke-width="0.8"/>
+                <polygon points="282,532 364,532 376,520 294,520" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <line x1="324" y1="520" x2="324" y2="494" stroke="#94a3b8" stroke-width="1.5"/>
+                <circle cx="324" cy="493" r="2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- Windows -->
+                <g fill="#f5d0fe" class="cr-neon-magenta" filter="url(#crWindowGlowMagenta)">
+                  <rect x="292" y="544" width="16" height="18" rx="1"/>
+                  <rect x="316" y="544" width="16" height="18" rx="1"/>
+                  <rect x="340" y="544" width="16" height="18" rx="1"/>
+                  <rect x="292" y="572" width="16" height="18" rx="1"/>
+                  <rect x="316" y="572" width="16" height="18" rx="1"/>
+                  <rect x="340" y="572" width="16" height="18" rx="1"/>
+                </g>
+
+                <!-- Traditional Tea Stall: "চায়ের টং" -->
+                <g id="sw3_traditional_teastall">
+                  <rect x="294" y="620" width="68" height="48" rx="3" fill="#78350f" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
+                  <polygon points="292,620 364,620 362,612 294,612" fill="#b45309"/>
+                  <text x="328" y="636" fill="#fef08a" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">চায়ের টং</text>
+                  <circle cx="328" cy="650" r="4.5" fill="#fef08a" filter="url(#crNeonAmberGlow)"/>
+                </g>
+              </g>
+
+              <!-- SW-4: 3D Amber Corner Building with "সোনালী জুয়েলার্স" -->
+              <g id="sw4_3d_jewelry">
+                <rect x="368" y="534" width="98" height="141" rx="3" fill="url(#bldgAmberGrad)" stroke="#f59e0b" stroke-width="1.2"/>
+                <polygon points="466,675 478,663 478,522 466,534" fill="#451a03" stroke="#78350f" stroke-width="0.8"/>
+                <polygon points="368,534 466,534 478,522 380,522" fill="#292524" stroke="#78716c" stroke-width="1"/>
+
+                <!-- 3D Water Tank -->
+                <g id="sw4_3d_watertank">
+                  <line x1="392" y1="524" x2="392" y2="512" stroke="#475569" stroke-width="1.8"/>
+                  <line x1="418" y1="524" x2="418" y2="512" stroke="#475569" stroke-width="1.8"/>
+                  <rect x="390" y="500" width="30" height="16" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                  <ellipse cx="405" cy="500" rx="15" ry="3.5" fill="#38bdf8"/>
+                  <text x="405" y="511" fill="#ffffff" font-size="7" font-weight="900" text-anchor="middle">TANK</text>
+                </g>
+
+                <!-- Windows -->
+                <g fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)">
+                  <rect x="380" y="546" width="20" height="18" rx="1"/>
+                  <rect x="410" y="546" width="20" height="18" rx="1"/>
+                  <rect x="438" y="546" width="18" height="18" rx="1"/>
+                  <rect x="380" y="574" width="20" height="18" rx="1"/>
+                  <rect x="410" y="574" width="20" height="18" rx="1"/>
+                  <rect x="438" y="574" width="18" height="18" rx="1"/>
+                </g>
+
+                <!-- Ground Shop: "সোনালী জুয়েলার্স" -->
+                <g id="sw4_shop_jewelry">
+                  <rect x="374" y="622" width="88" height="50" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8" class="cr-neon-amber"/>
+                  <polygon points="372,622 464,622 462,614 374,614" fill="#b45309"/>
+                  <rect x="377" y="624" width="82" height="16" rx="2" fill="#090d16" stroke="#b45309" stroke-width="0.8"/>
+                  <text x="418" y="636" fill="#fde047" font-size="9" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সোনালী জুয়েলার্স</text>
+                  <rect x="380" y="642" width="76" height="26" fill="#fef08a" opacity="1" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+                  <line x1="418" y1="642" x2="418" y2="668" stroke="#b45309" stroke-width="1"/>
+                </g>
+              </g>
+            </g>
+
+            <!-- 3D Quadrant SE Buildings Group (Bottom-Right) -->
+            <g id="se3dBuildingsGroup" class="cr-3d-only">
+              <!-- SE Ground Ambient Shadow -->
+              <polygon points="726,675 1198,675 1188,685 716,685" fill="#000000" opacity="0.45"/>
+
+              <!-- SE-1: 3D Rose & Coral 4-Story with Clinic ("জনতা ফার্মেসি") -->
+              <g id="se1_3d_clinic">
+                <!-- Left Depth Side Wall -->
+                <polygon points="732,675 720,663 720,522 732,534" fill="#4c0519" stroke="#9f1239" stroke-width="0.8"/>
+                <!-- Front Facade -->
+                <rect x="732" y="534" width="142" height="141" rx="3" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
+                <!-- Roof Deck -->
+                <polygon points="732,534 874,534 862,522 720,522" fill="#292524" stroke="#78716c" stroke-width="1"/>
+                <line x1="802" y1="522" x2="802" y2="494" stroke="#94a3b8" stroke-width="1.5"/>
+                <circle cx="802" cy="493" r="2.2" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- 2 Tiers of 4 Windows -->
+                <g fill="#fef08a" class="cr-neon-amber" filter="url(#crWindowGlowAmber)">
+                  <rect x="746" y="548" width="22" height="18" rx="1"/>
+                  <rect x="778" y="548" width="22" height="18" rx="1"/>
+                  <rect x="810" y="548" width="22" height="18" rx="1"/>
+                  <rect x="842" y="548" width="20" height="18" rx="1"/>
+                  <rect x="746" y="576" width="22" height="18" rx="1"/>
+                  <rect x="778" y="576" width="22" height="18" rx="1"/>
+                  <rect x="810" y="576" width="22" height="18" rx="1"/>
+                  <rect x="842" y="576" width="20" height="18" rx="1"/>
+                </g>
+
+                <!-- Clinic / Pharmacy Shopfront: "জনতা ফার্মেসি" with Green Cross -->
+                <g id="se1_shop_clinic">
+                  <rect x="740" y="622" width="126" height="50" fill="#0f172a" stroke="#10b981" stroke-width="1.8" class="cr-neon-green"/>
+                  <polygon points="738,622 868,622 866,614 740,614" fill="#047857"/>
+                  <rect x="744" y="624" width="118" height="16" rx="2" fill="#090d16" stroke="#065f46" stroke-width="0.8"/>
+                  <text x="803" y="636" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">জনতা ফার্মেসি</text>
+                  <rect x="748" y="642" width="110" height="26" fill="#a7f3d0" opacity="0.95" class="cr-neon-green"/>
+                  <!-- Radiant Green Cross -->
+                  <rect x="758" y="650" width="14" height="4" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
+                  <rect x="763" y="645" width="4" height="14" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
+                  <line x1="803" y1="642" x2="803" y2="668" stroke="#065f46" stroke-width="1"/>
+                </g>
+              </g>
+
+              <!-- SE-2: 3D Commercial Building & Authentic Billboard ("সবাই মিলে একটি ভালো ঢাকা") -->
+              <g id="se2_3d_billboard_building">
+                <!-- Left Depth Side Wall -->
+                <polygon points="882,675 870,663 870,526 882,538" fill="#0f172a" stroke="#1e293b" stroke-width="0.8"/>
+                <!-- Front Facade -->
+                <rect x="882" y="538" width="256" height="137" rx="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+                <!-- Roof Deck -->
+                <polygon points="882,538 1138,538 1126,526 870,526" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+
+                <!-- 3D Water Tank -->
+                <g id="se2_3d_watertank">
+                  <line x1="912" y1="528" x2="912" y2="516" stroke="#475569" stroke-width="1.8"/>
+                  <line x1="940" y1="528" x2="940" y2="516" stroke="#475569" stroke-width="1.8"/>
+                  <rect x="910" y="504" width="32" height="16" rx="3" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
+                  <ellipse cx="926" cy="504" rx="16" ry="3.5" fill="#38bdf8"/>
+                  <text x="926" y="515" fill="#ffffff" font-size="7" font-weight="900" text-anchor="middle">TANK</text>
+                </g>
+                <line x1="980" y1="526" x2="980" y2="496" stroke="#ef4444" stroke-width="2"/>
+                <circle cx="980" cy="495" r="2.5" fill="#ef4444" class="beacon-blink"/>
+
+                <!-- Iconic Authentic Billboard: "সবাই মিলে একটি ভালো ঢাকা" -->
+                <g id="se2_billboard_panel" transform="translate(892, 550)">
+                  <rect x="0" y="0" width="232" height="96" rx="6" fill="#1e3a8a" stroke="#00f2fe" stroke-width="2.5" filter="url(#crNeonCyanGlow)"/>
+                  <rect x="5" y="5" width="222" height="86" rx="4" fill="#172554"/>
+                  <!-- Stylized Skyline Graphic -->
+                  <path d="M 148,75 L 162,52 L 175,62 L 192,38 L 212,75 Z" fill="#3b82f6" opacity="0.4"/>
+                  <!-- Glowing Billboard Typography -->
+                  <text x="16" y="30" fill="#ffffff" font-size="13.5" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সবাই মিলে গড়ি</text>
+                  <text x="16" y="52" fill="#38bdf8" font-size="12.5" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">একটি সুন্দর ও সচল</text>
+                  <text x="16" y="74" fill="#fde047" font-size="14" font-weight="700" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">আমাদের Dhaka</text>
+                </g>
+              </g>
+
+              <!-- SE-3: 3D Far-Right Sapphire Tower -->
+              <g id="se3_3d_tower">
+                <polygon points="1146,675 1136,663 1136,516 1146,528" fill="#082f49" stroke="#0369a1" stroke-width="0.8"/>
+                <rect x="1146" y="528" width="50" height="147" rx="3" fill="url(#bldgBlueGrad)" stroke="#0ea5e9" stroke-width="1.2"/>
+                <polygon points="1146,528 1196,528 1186,516 1136,516" fill="#0c4a6e" stroke="#0284c7" stroke-width="1"/>
+                <line x1="1170" y1="516" x2="1170" y2="492" stroke="#94a3b8" stroke-width="1.4"/>
+                <circle cx="1170" cy="491" r="2.2" fill="#ef4444" class="beacon-blink"/>
+
+                <g fill="#a5f3fc" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)">
+                  <rect x="1154" y="540" width="14" height="20" rx="1"/>
+                  <rect x="1174" y="540" width="14" height="20" rx="1"/>
+                  <rect x="1154" y="570" width="14" height="20" rx="1"/>
+                  <rect x="1174" y="570" width="14" height="20" rx="1"/>
+                  <rect x="1154" y="600" width="14" height="20" rx="1"/>
+                  <rect x="1174" y="600" width="14" height="20" rx="1"/>
+                  <rect x="1154" y="630" width="14" height="20" rx="1"/>
+                  <rect x="1174" y="630" width="14" height="20" rx="1"/>
+                </g>
               </g>
             </g>
 
@@ -12249,12 +12947,12 @@
         const relX = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
         const relY = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
 
-        const baseRotX = isMobile.matches ? 32 : 38;
-        const baseRotY = isMobile.matches ? 3 : 5;
-        const baseRotZ = isMobile.matches ? -6 : -10;
-        const baseScale = isMobile.matches ? 0.92 : 0.95;
-        const persp = isMobile.matches ? 950 : 1100;
-        const translateShift = isMobile.matches ? '' : 'translateY(-1%)';
+        const baseRotX = isMobile.matches ? 20 : 24;
+        const baseRotY = isMobile.matches ? 0 : 2;
+        const baseRotZ = isMobile.matches ? -2 : -4;
+        const baseScale = isMobile.matches ? 0.92 : 0.96;
+        const persp = isMobile.matches ? 1000 : 1200;
+        const translateShift = '';
 
         // Controlled, natural aerial drone camera banking & pitching (max ~2.5 deg)
         const tiltPitch = -relY * 4.5;
@@ -12337,6 +13035,7 @@
       const badgeDot = document.getElementById('trafficSignalDot');
       const trainEl = document.getElementById('crossroadsMetroTrain');
       const mrtBoardingBadge = document.getElementById('mrtPlatformBoardingBadge');
+      const mrtBoardingBadge3d = document.getElementById('mrtPlatformBoardingBadge3d');
       const vehiclesLayer = document.getElementById('dhakaVehiclesLayer');
       const pedsLayer = document.getElementById('dhakaPedestriansLayer');
 
@@ -12839,6 +13538,7 @@
               trainState = 'boarding';
               trainBoardingTimer = 3.2; // 3.2s station dwell / passenger boarding
               if (mrtBoardingBadge) mrtBoardingBadge.style.opacity = '1';
+              if (mrtBoardingBadge3d) mrtBoardingBadge3d.style.opacity = '1';
               if (window.crossroadsAudio) crossroadsAudio.playStationArrivalChime();
             } else {
               const targetSpeed = Math.max(14, (dist / (DOCK_X - APPROACH_X)) * CRUISE_SPEED);
@@ -12850,6 +13550,7 @@
             if (trainBoardingTimer <= 0) {
               trainState = 'accelerating';
               if (mrtBoardingBadge) mrtBoardingBadge.style.opacity = '0';
+              if (mrtBoardingBadge3d) mrtBoardingBadge3d.style.opacity = '0';
               if (window.crossroadsAudio) crossroadsAudio.playTrainTractionHum();
             }
           } else if (trainState === 'accelerating') {
@@ -13259,9 +13960,11 @@
       }
 
       const stationGroup = document.getElementById('mirpur10StationGroup');
-      if (stationGroup) {
-        stationGroup.style.cursor = 'pointer';
-        stationGroup.addEventListener('mouseenter', (e) => {
+      const stationGroup3d = document.getElementById('mirpur10StationGroup3d');
+      [stationGroup, stationGroup3d].forEach(sg => {
+        if (!sg) return;
+        sg.style.cursor = 'pointer';
+        sg.addEventListener('mouseenter', (e) => {
           if (window.crossroadsAudio) {
             const now = Date.now();
             if (now - crossroadsAudio.lastHoverTime > 300) {
@@ -13271,9 +13974,9 @@
           }
           showVehicleTooltip(e, { type: 'station' });
         });
-        stationGroup.addEventListener('mousemove', (e) => moveVehicleTooltip(e));
-        stationGroup.addEventListener('mouseleave', () => hideVehicleTooltip());
-      }
+        sg.addEventListener('mousemove', (e) => moveVehicleTooltip(e));
+        sg.addEventListener('mouseleave', () => hideVehicleTooltip());
+      });
 
       if (ambEl) {
         ambEl.addEventListener('mouseenter', (e) => {
