@@ -433,34 +433,38 @@
       overflow: hidden !important;
     }
 
-    /* Mobile Viewport (< 768px): Proportional Responsive Framing, Centered & Zero Cropping */
-    @media (max-width: 767.98px) {
+    /* Mobile Viewport (<= 768px): Exact Framing for 2D Flat Mode (Full-Height Stage, No Dead Space) */
+    @media (max-width: 768px) {
       #dhakaCrossroadsContainer {
         overflow: hidden !important;
       }
-      #dhakaCrossroadsStageWrapper {
+      #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroadsStageWrapper {
         position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        height: 100svh !important;
-        height: 100dvh !important;
-        min-height: 100% !important;
-        max-height: 100% !important;
-        margin: 0 auto !important;
-        padding: max(0.5rem, env(safe-area-inset-top, 0.5rem)) max(0.5rem, env(safe-area-inset-right, 0.5rem)) max(0.5rem, env(safe-area-inset-bottom, 0.5rem)) max(0.5rem, env(safe-area-inset-left, 0.5rem)) !important;
+        top: 54px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: calc(100dvh - 155px) !important;
+        min-height: 540px !important;
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: hidden !important;
         display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
         pointer-events: none !important;
       }
-      #dhakaCrossroadsSvg {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        object-fit: contain !important;
+      #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroadsSvg {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: calc(100dvh - 155px) !important;
+        min-height: 540px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        object-fit: cover !important;
         display: block !important;
         pointer-events: auto !important;
       }
@@ -472,8 +476,8 @@
       }
     }
 
-    /* Desktop & Tablet Viewport (>= 768px): Panoramic Contain Layout */
-    @media (min-width: 768px) {
+    /* Desktop & Tablet Viewport (> 768px): Panoramic Contain Layout */
+    @media (min-width: 768.02px) {
       #dhakaCrossroadsStageWrapper {
         position: absolute;
         inset: 0;
@@ -5054,12 +5058,12 @@
           </svg>
         </div>
 
-        <!-- Instant Aspect Ratio Synchronizer for Mobile (< 768px: slice) vs Desktop (>= 768px: meet) -->
+        <!-- Instant Aspect Ratio Synchronizer for Mobile (<= 768px: slice) vs Desktop (> 768px: meet) -->
         <script>
           (function() {
             var svg = document.getElementById('dhakaCrossroadsSvg');
             if (svg) {
-              svg.setAttribute('preserveAspectRatio', window.innerWidth < 768 ? 'xMidYMid slice' : 'xMidYMid meet');
+              svg.setAttribute('preserveAspectRatio', window.innerWidth <= 768 ? 'xMidYMid slice' : 'xMidYMid meet');
             }
           })();
         </script>
@@ -11931,13 +11935,17 @@
     let dhakaCrossroadsObserver = null;
     let dhakaCrossroadsInitialized = false;
 
-    // Responsive Dhaka Crossroads Aspect Ratio Controller (Full contain, centered, zero cropping across mobile & desktop)
+    // Responsive Dhaka Crossroads Aspect Ratio Controller (Mobile <= 768px: slice; Desktop > 768px: meet)
     function updateCrossroadsAspectRatio() {
       const svg = document.getElementById('dhakaCrossroadsSvg');
       if (!svg) return;
-      const targetAspect = 'xMidYMid meet';
+      const isMobile = window.innerWidth <= 768;
+      const targetAspect = isMobile ? 'xMidYMid slice' : 'xMidYMid meet';
       if (svg.getAttribute('preserveAspectRatio') !== targetAspect) {
         svg.setAttribute('preserveAspectRatio', targetAspect);
+      }
+      if (!isMobile && svg.getAttribute('viewBox') !== '0 0 1200 700') {
+        svg.setAttribute('viewBox', '0 0 1200 700');
       }
     }
     window.addEventListener('resize', updateCrossroadsAspectRatio);
@@ -12984,6 +12992,9 @@
         if (stageWrapper) {
           stageWrapper.style.display = 'flex';
           stageWrapper.style.transform = 'none';
+        }
+        if (typeof updateCrossroadsAspectRatio === 'function') {
+          updateCrossroadsAspectRatio();
         }
       }
 
