@@ -874,27 +874,35 @@
       mix-blend-mode: screen !important;
       filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.65)) !important;
     }
+    /* Atmospheric Foggy & Overcast Lighting: Tuned to 20% Intensity */
     [data-crossroads-weather="fog_night"] .cr-headlight-beam,
     [data-crossroads-weather="night_overcast"] .cr-headlight-beam,
-    [data-crossroads-weather="night"] .cr-headlight-beam,
     [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam,
     [data-crossroads-weather="fog_sunset"] .cr-headlight-beam,
+    [data-crossroads-weather="fog_sunrise"] .cr-headlight-beam,
+    [data-crossroads-weather="fog_day"] .cr-headlight-beam,
+    [data-crossroads-weather="day_overcast"] .cr-headlight-beam,
+    [data-crossroads-weather="morning_overcast"] .cr-headlight-beam,
+    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam,
     .is-foggy-night .cr-headlight-beam,
-    .night-overcast .cr-headlight-beam,
-    .is-night-mode .cr-headlight-beam {
-      opacity: 1.0 !important;
+    .night-overcast .cr-headlight-beam {
+      opacity: 0.20 !important;
       mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 18px rgba(254, 240, 138, 1)) drop-shadow(0 0 38px rgba(253, 224, 71, 0.95)) !important;
+      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.35)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-headlight-bulb,
     [data-crossroads-weather="night_overcast"] .cr-headlight-bulb,
-    [data-crossroads-weather="night"] .cr-headlight-bulb,
     [data-crossroads-weather="sunset_overcast"] .cr-headlight-bulb,
     [data-crossroads-weather="fog_sunset"] .cr-headlight-bulb,
+    [data-crossroads-weather="fog_sunrise"] .cr-headlight-bulb,
+    [data-crossroads-weather="fog_day"] .cr-headlight-bulb,
+    [data-crossroads-weather="day_overcast"] .cr-headlight-bulb,
+    [data-crossroads-weather="morning_overcast"] .cr-headlight-bulb,
+    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-bulb,
     .is-foggy-night .cr-headlight-bulb,
-    .night-overcast .cr-headlight-bulb,
-    .is-night-mode .cr-headlight-bulb {
-      filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 14px #fef08a) drop-shadow(0 0 28px rgba(254, 240, 138, 1)) !important;
+    .night-overcast .cr-headlight-bulb {
+      filter: drop-shadow(0 0 2px rgba(254, 240, 138, 0.45)) !important;
+      opacity: 0.85 !important;
     }
     [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
     [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
@@ -902,9 +910,6 @@
     [data-crossroads-weather="night_overcast"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
     [data-crossroads-weather="night_overcast"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
     [data-crossroads-weather="night_overcast"] #crossroadsMetroTrain circle[fill="#ff2a54"],
-    [data-crossroads-weather="night"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
-    [data-crossroads-weather="night"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
-    [data-crossroads-weather="night"] #crossroadsMetroTrain circle[fill="#ff2a54"],
     [data-crossroads-weather="sunset_overcast"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
     [data-crossroads-weather="sunset_overcast"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
     [data-crossroads-weather="sunset_overcast"] #crossroadsMetroTrain circle[fill="#ff2a54"],
@@ -916,78 +921,63 @@
     .is-foggy-night #crossroadsMetroTrain circle[fill="#ff2a54"],
     .night-overcast #dhakaVehiclesLayer circle[fill="#ff2a54"],
     .night-overcast #dhakaVehiclesLayer rect[fill="#ff2a54"],
-    .night-overcast #crossroadsMetroTrain circle[fill="#ff2a54"],
-    .is-night-mode #dhakaVehiclesLayer circle[fill="#ff2a54"],
-    .is-night-mode #dhakaVehiclesLayer rect[fill="#ff2a54"],
-    .is-night-mode #crossroadsMetroTrain circle[fill="#ff2a54"] {
-      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 14px #ff2a54) drop-shadow(0 0 26px rgba(255, 23, 68, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast #crossroadsMetroTrain circle[fill="#ff2a54"] {
+      filter: drop-shadow(0 0 3px #ff2a54) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-cyan,
     [data-crossroads-weather="night_overcast"] .cr-neon-cyan,
-    [data-crossroads-weather="night"] .cr-neon-cyan,
     [data-crossroads-weather="sunset_overcast"] .cr-neon-cyan,
     [data-crossroads-weather="fog_sunset"] .cr-neon-cyan,
     .is-foggy-night .cr-neon-cyan,
-    .night-overcast .cr-neon-cyan,
-    .is-night-mode .cr-neon-cyan {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #00f2fe) drop-shadow(0 0 28px rgba(0, 242, 254, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast .cr-neon-cyan {
+      filter: drop-shadow(0 0 3px #00f2fe) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-amber,
     [data-crossroads-weather="night_overcast"] .cr-neon-amber,
-    [data-crossroads-weather="night"] .cr-neon-amber,
     [data-crossroads-weather="sunset_overcast"] .cr-neon-amber,
     [data-crossroads-weather="fog_sunset"] .cr-neon-amber,
     .is-foggy-night .cr-neon-amber,
-    .night-overcast .cr-neon-amber,
-    .is-night-mode .cr-neon-amber {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #fde047) drop-shadow(0 0 28px rgba(251, 191, 36, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast .cr-neon-amber {
+      filter: drop-shadow(0 0 3px #fde047) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-magenta,
     [data-crossroads-weather="night_overcast"] .cr-neon-magenta,
-    [data-crossroads-weather="night"] .cr-neon-magenta,
     [data-crossroads-weather="sunset_overcast"] .cr-neon-magenta,
     [data-crossroads-weather="fog_sunset"] .cr-neon-magenta,
     .is-foggy-night .cr-neon-magenta,
-    .night-overcast .cr-neon-magenta,
-    .is-night-mode .cr-neon-magenta {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #f0abfc) drop-shadow(0 0 28px rgba(217, 70, 239, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast .cr-neon-magenta {
+      filter: drop-shadow(0 0 3px #f0abfc) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-green,
     [data-crossroads-weather="night_overcast"] .cr-neon-green,
-    [data-crossroads-weather="night"] .cr-neon-green,
     [data-crossroads-weather="sunset_overcast"] .cr-neon-green,
     [data-crossroads-weather="fog_sunset"] .cr-neon-green,
     .is-foggy-night .cr-neon-green,
-    .night-overcast .cr-neon-green,
-    .is-night-mode .cr-neon-green {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #34d399) drop-shadow(0 0 28px rgba(16, 185, 129, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast .cr-neon-green {
+      filter: drop-shadow(0 0 3px #34d399) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-red,
     [data-crossroads-weather="night_overcast"] .cr-neon-red,
-    [data-crossroads-weather="night"] .cr-neon-red,
     [data-crossroads-weather="sunset_overcast"] .cr-neon-red,
     [data-crossroads-weather="fog_sunset"] .cr-neon-red,
     .is-foggy-night .cr-neon-red,
-    .night-overcast .cr-neon-red,
-    .is-night-mode .cr-neon-red {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #ff2a54) drop-shadow(0 0 28px rgba(255, 42, 84, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast .cr-neon-red {
+      filter: drop-shadow(0 0 3px #ff2a54) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-blue,
     [data-crossroads-weather="night_overcast"] .cr-neon-blue,
-    [data-crossroads-weather="night"] .cr-neon-blue,
     [data-crossroads-weather="sunset_overcast"] .cr-neon-blue,
     [data-crossroads-weather="fog_sunset"] .cr-neon-blue,
     .is-foggy-night .cr-neon-blue,
-    .night-overcast .cr-neon-blue,
-    .is-night-mode .cr-neon-blue {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #38bdf8) drop-shadow(0 0 30px rgba(56, 189, 248, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast .cr-neon-blue {
+      filter: drop-shadow(0 0 3px #38bdf8) !important;
+      opacity: 0.95 !important;
     }
     [data-crossroads-weather="fog_night"] .window-glow-pulse,
     [data-crossroads-weather="fog_night"] .building-window,
@@ -995,9 +985,6 @@
     [data-crossroads-weather="night_overcast"] .window-glow-pulse,
     [data-crossroads-weather="night_overcast"] .building-window,
     [data-crossroads-weather="night_overcast"] [filter*="crWindowGlow"],
-    [data-crossroads-weather="night"] .window-glow-pulse,
-    [data-crossroads-weather="night"] .building-window,
-    [data-crossroads-weather="night"] [filter*="crWindowGlow"],
     [data-crossroads-weather="sunset_overcast"] .window-glow-pulse,
     [data-crossroads-weather="sunset_overcast"] .building-window,
     [data-crossroads-weather="sunset_overcast"] [filter*="crWindowGlow"],
@@ -1009,34 +996,39 @@
     .is-foggy-night [filter*="crWindowGlow"],
     .night-overcast .window-glow-pulse,
     .night-overcast .building-window,
-    .night-overcast [filter*="crWindowGlow"],
-    .is-night-mode .window-glow-pulse,
-    .is-night-mode .building-window,
-    .is-night-mode [filter*="crWindowGlow"] {
-      filter: drop-shadow(0 0 5px #fffbeb) drop-shadow(0 0 14px #fef08a) drop-shadow(0 0 30px rgba(251, 191, 36, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast [filter*="crWindowGlow"] {
+      filter: drop-shadow(0 0 3px rgba(254, 240, 138, 0.45)) !important;
+      opacity: 0.90 !important;
     }
+    /* 20% Intensity for Streetlamp Ground Pools in Foggy & Overcast */
     [data-crossroads-weather="fog_night"] ellipse[fill*="streetlampPoolGrad"],
     [data-crossroads-weather="night_overcast"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="night"] ellipse[fill*="streetlampPoolGrad"],
     [data-crossroads-weather="sunset_overcast"] ellipse[fill*="streetlampPoolGrad"],
     [data-crossroads-weather="fog_sunset"] ellipse[fill*="streetlampPoolGrad"],
+    [data-crossroads-weather="fog_sunrise"] ellipse[fill*="streetlampPoolGrad"],
+    [data-crossroads-weather="fog_day"] ellipse[fill*="streetlampPoolGrad"],
+    [data-crossroads-weather="day_overcast"] ellipse[fill*="streetlampPoolGrad"],
+    [data-crossroads-weather="morning_overcast"] ellipse[fill*="streetlampPoolGrad"],
+    [data-crossroads-weather="sunrise_overcast"] ellipse[fill*="streetlampPoolGrad"],
     .is-foggy-night ellipse[fill*="streetlampPoolGrad"],
-    .night-overcast ellipse[fill*="streetlampPoolGrad"],
-    .is-night-mode ellipse[fill*="streetlampPoolGrad"] {
-      opacity: 0.96 !important;
-      filter: drop-shadow(0 0 12px #ffffff) drop-shadow(0 0 32px rgba(254, 240, 138, 0.95)) !important;
+    .night-overcast ellipse[fill*="streetlampPoolGrad"] {
+      opacity: 0.20 !important;
+      filter: none !important;
     }
+    /* 20% Intensity for Streetlamp Lantern Head Glow in Foggy & Overcast */
     [data-crossroads-weather="fog_night"] circle[filter*="crLightGlow"],
     [data-crossroads-weather="night_overcast"] circle[filter*="crLightGlow"],
-    [data-crossroads-weather="night"] circle[filter*="crLightGlow"],
     [data-crossroads-weather="sunset_overcast"] circle[filter*="crLightGlow"],
     [data-crossroads-weather="fog_sunset"] circle[filter*="crLightGlow"],
+    [data-crossroads-weather="fog_sunrise"] circle[filter*="crLightGlow"],
+    [data-crossroads-weather="fog_day"] circle[filter*="crLightGlow"],
+    [data-crossroads-weather="day_overcast"] circle[filter*="crLightGlow"],
+    [data-crossroads-weather="morning_overcast"] circle[filter*="crLightGlow"],
+    [data-crossroads-weather="sunrise_overcast"] circle[filter*="crLightGlow"],
     .is-foggy-night circle[filter*="crLightGlow"],
-    .night-overcast circle[filter*="crLightGlow"],
-    .is-night-mode circle[filter*="crLightGlow"] {
-      filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 16px #fef08a) drop-shadow(0 0 35px rgba(251, 191, 36, 1)) !important;
-      opacity: 1 !important;
+    .night-overcast circle[filter*="crLightGlow"] {
+      filter: drop-shadow(0 0 3px rgba(254, 240, 138, 0.45)) !important;
+      opacity: 0.80 !important;
     }
 
     /* Building Architectural Entryway / Porch Sconces & Threshold Downlights */
@@ -1061,25 +1053,31 @@
     }
     [data-crossroads-weather="fog_night"] .cr-entryway-light,
     [data-crossroads-weather="night_overcast"] .cr-entryway-light,
-    [data-crossroads-weather="night"] .cr-entryway-light,
     [data-crossroads-weather="sunset_overcast"] .cr-entryway-light,
     [data-crossroads-weather="fog_sunset"] .cr-entryway-light,
+    [data-crossroads-weather="fog_sunrise"] .cr-entryway-light,
+    [data-crossroads-weather="fog_day"] .cr-entryway-light,
+    [data-crossroads-weather="day_overcast"] .cr-entryway-light,
+    [data-crossroads-weather="morning_overcast"] .cr-entryway-light,
+    [data-crossroads-weather="sunrise_overcast"] .cr-entryway-light,
     .is-foggy-night .cr-entryway-light,
-    .night-overcast .cr-entryway-light,
-    .is-night-mode .cr-entryway-light {
-      opacity: 1.0 !important;
-      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 14px #fde047) drop-shadow(0 0 28px rgba(251, 191, 36, 1)) !important;
+    .night-overcast .cr-entryway-light {
+      opacity: 0.65 !important;
+      filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.4)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-entryway-downlight,
     [data-crossroads-weather="night_overcast"] .cr-entryway-downlight,
-    [data-crossroads-weather="night"] .cr-entryway-downlight,
     [data-crossroads-weather="sunset_overcast"] .cr-entryway-downlight,
     [data-crossroads-weather="fog_sunset"] .cr-entryway-downlight,
+    [data-crossroads-weather="fog_sunrise"] .cr-entryway-downlight,
+    [data-crossroads-weather="fog_day"] .cr-entryway-downlight,
+    [data-crossroads-weather="day_overcast"] .cr-entryway-downlight,
+    [data-crossroads-weather="morning_overcast"] .cr-entryway-downlight,
+    [data-crossroads-weather="sunrise_overcast"] .cr-entryway-downlight,
     .is-foggy-night .cr-entryway-downlight,
-    .night-overcast .cr-entryway-downlight,
-    .is-night-mode .cr-entryway-downlight {
-      opacity: 1.0 !important;
-      filter: drop-shadow(0 0 10px rgba(254, 240, 138, 0.85)) !important;
+    .night-overcast .cr-entryway-downlight {
+      opacity: 0.20 !important;
+      filter: none !important;
     }
     [data-crossroads-weather="rain"] .cr-headlight-beam {
       opacity: 0.82 !important;
@@ -6062,20 +6060,20 @@
               <!-- Drifting Night Smog/Fog Banks -->
               <path class="fog-drift-1" d="M -150,240 Q 200,200 500,250 Q 800,290 1100,230 Q 1350,200 1550,240 L 1550,400 Q 1250,360 950,390 Q 650,430 350,380 Q 50,340 -150,390 Z" fill="#334155" opacity="0.25" filter="blur(10px)"/>
               <path class="fog-drift-2" d="M -150,460 Q 150,500 500,450 Q 850,410 1200,470 Q 1400,500 1550,450 L 1550,620 Q 1200,570 900,610 Q 600,640 300,590 Q 50,550 -150,600 Z" fill="#1e293b" opacity="0.28" filter="blur(12px)"/>
-              <!-- Glowing Streetlamp Halo Fog Blooms (Cinematic Haze Spread across all Streetlamps) -->
-              <ellipse cx="460" cy="320" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
-              <ellipse cx="740" cy="320" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
-              <ellipse cx="460" cy="520" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
-              <ellipse cx="740" cy="520" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <!-- Glowing Streetlamp Halo Fog Blooms (Tuned to 20% Foggy Intensity) -->
+              <ellipse cx="460" cy="320" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.20" style="mix-blend-mode: screen;"/>
+              <ellipse cx="740" cy="320" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.20" style="mix-blend-mode: screen;"/>
+              <ellipse cx="460" cy="520" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.20" style="mix-blend-mode: screen;"/>
+              <ellipse cx="740" cy="520" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.20" style="mix-blend-mode: screen;"/>
               <!-- Sidewalk Streetlamp Halo Blooms -->
-              <ellipse cx="180" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="325" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="180" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="325" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="880" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="1030" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="880" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
-              <ellipse cx="1030" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="180" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="325" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="180" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="325" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="880" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="1030" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="880" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
+              <ellipse cx="1030" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.18" style="mix-blend-mode: screen;"/>
             </g>
 
             <!-- Rain & Wet Street Reflections Layer -->

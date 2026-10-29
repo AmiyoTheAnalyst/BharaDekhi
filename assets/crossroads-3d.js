@@ -363,7 +363,7 @@
       metalness: 0.1,
       emissive: new THREE.Color(winColor || 0xfef08a),
       emissiveMap: frontTex,
-      emissiveIntensity: 0.85
+      emissiveIntensity: 0.45
     });
     const sideMat = new THREE.MeshStandardMaterial({
       map: sideTex,
@@ -371,7 +371,7 @@
       metalness: 0.1,
       emissive: new THREE.Color(winColor || 0xfef08a),
       emissiveMap: sideTex,
-      emissiveIntensity: 0.75
+      emissiveIntensity: 0.35
     });
     const roofMat = new THREE.MeshStandardMaterial({
       color: roofColor || 0x1e293b,
@@ -2084,12 +2084,32 @@
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
     if (currentMode !== lastWeatherMode) {
       lastWeatherMode = currentMode;
+      const isFoggyOrOvercast = currentMode.includes('fog') || currentMode.includes('overcast');
       if (cornerPointLights && cornerPointLights.length) {
-        const isNightLike = currentMode === 'fog_night' || currentMode === 'night_overcast' || currentMode === 'night' || currentMode === 'sunset_overcast' || currentMode === 'fog_sunset';
-        const baseIntensity = isNightLike ? 2.4 : (currentMode === 'sun' ? 0.3 : 1.5);
+        // 10% point light intensity in foggy & overcast, standard 1.5 in normal night mode
+        const baseIntensity = isFoggyOrOvercast ? 0.15 : (currentMode === 'sun' ? 0.3 : (currentMode === 'rain' ? 1.2 : 1.5));
         cornerPointLights.forEach(pl => {
           pl.intensity = baseIntensity;
           pl.color.setHex(0xfef08a);
+        });
+      }
+      // Calibrate building window emissive glow: 10% for foggy & overcast, standard 0.45 for normal night
+      if (scene) {
+        scene.traverse(obj => {
+          if (obj.isMesh && obj.material) {
+            const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+            mats.forEach(mat => {
+              if (mat && mat.emissiveMap) {
+                if (isFoggyOrOvercast) {
+                  mat.emissiveIntensity = 0.08;
+                } else if (currentMode === 'sun') {
+                  mat.emissiveIntensity = 0.05;
+                } else {
+                  mat.emissiveIntensity = 0.45;
+                }
+              }
+            });
+          }
         });
       }
       if (currentMode === 'sunrise') {
@@ -2240,15 +2260,15 @@
         }
         if (sunLight) {
           sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = 0.58;
+          sunLight.intensity = 0.35;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x273549);
-          ambientLight.intensity = 0.68;
+          ambientLight.color.setHex(0x1e293b);
+          ambientLight.intensity = 0.40;
         }
         if (cornerPointLights && cornerPointLights.length) {
           cornerPointLights.forEach(pl => {
-            pl.intensity = 2.4;
+            pl.intensity = 0.15;
             pl.color.setHex(0xfff08a);
           });
         }
@@ -2274,11 +2294,11 @@
         }
         if (sunLight) {
           sunLight.color.setHex(0x64748b);
-          sunLight.intensity = 0.55;
+          sunLight.intensity = 0.30;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = 0.65;
+          ambientLight.intensity = 0.38;
         }
       } else { // night
         scene.background.setHex(0x040814);
