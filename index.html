@@ -2864,27 +2864,38 @@
     /* Weather Selector Scrollable Dropdown (Max 5 Visible Items ~220px) */
     .weather-dropdown-menu,
     .weather-select select,
+    .select-dropdown,
     .custom-dropdown-list,
     #rainModeSelect {
       max-height: 220px !important; /* Height approx equal to 5 dropdown option items */
       overflow-y: auto !important;
       overflow-x: hidden !important;
       scrollbar-width: thin; /* Firefox scrollbar */
+      scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
     }
 
     /* Custom Webkit scrollbar for sleek dark-glass theme consistency */
     .weather-dropdown-menu::-webkit-scrollbar,
     .weather-select select::-webkit-scrollbar,
+    .select-dropdown::-webkit-scrollbar,
     .custom-dropdown-list::-webkit-scrollbar,
     #rainModeSelect::-webkit-scrollbar {
       width: 6px;
     }
     .weather-dropdown-menu::-webkit-scrollbar-thumb,
     .weather-select select::-webkit-scrollbar-thumb,
+    .select-dropdown::-webkit-scrollbar-thumb,
     .custom-dropdown-list::-webkit-scrollbar-thumb,
     #rainModeSelect::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.2);
       border-radius: 4px;
+    }
+    .weather-dropdown-menu::-webkit-scrollbar-track,
+    .weather-select select::-webkit-scrollbar-track,
+    .select-dropdown::-webkit-scrollbar-track,
+    .custom-dropdown-list::-webkit-scrollbar-track,
+    #rainModeSelect::-webkit-scrollbar-track {
+      background: transparent;
     }
     #mainHeader[data-header-weather="sunrise"] .header-brand-title,
     #mainHeader[data-header-weather="sunset"] .header-brand-title,
