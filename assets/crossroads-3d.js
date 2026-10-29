@@ -2058,11 +2058,25 @@
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
 
-    // Atmospheric Weather Mode Transition (Sun, Sunset, Night, Fog Day, Fog Night, Rain)
+    // Atmospheric Weather Mode Transition (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
     if (currentMode !== lastWeatherMode) {
       lastWeatherMode = currentMode;
-      if (currentMode === 'sun') {
+      if (currentMode === 'sunrise') {
+        scene.background.setHex(0x311b38);
+        if (scene.fog) {
+          scene.fog.color.setHex(0xf472b6);
+          scene.fog.density = 0.0006;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xffaa88);
+          sunLight.intensity = 1.35;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0xfbcfe8);
+          ambientLight.intensity = 0.70;
+        }
+      } else if (currentMode === 'sun') {
         scene.background.setHex(0x0284c7);
         if (scene.fog) {
           scene.fog.color.setHex(0x0284c7);
