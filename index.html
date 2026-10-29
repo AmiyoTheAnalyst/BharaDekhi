@@ -2755,7 +2755,8 @@
       border-color: rgba(255, 255, 255, 0.35) !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
-    #mainHeader[data-header-weather="sun"] #rainModeSelect {
+    #mainHeader[data-header-weather="sun"] #rainModeSelect,
+    #mainHeader[data-header-weather="sun"] #customWeatherActiveLabel {
       color: #ffffff !important;
     }
     #mainHeader[data-header-weather="sun"] #themeToggleIcon,
@@ -2847,55 +2848,95 @@
       border-color: rgba(71, 85, 105, 0.75) !important;
     }
     #mainHeader[data-header-weather="sunrise"] #rainModeSelect,
+    #mainHeader[data-header-weather="sunrise"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="sunset"] #rainModeSelect,
+    #mainHeader[data-header-weather="sunset"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="fog_sunrise"] #rainModeSelect,
+    #mainHeader[data-header-weather="fog_sunrise"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="fog_sunset"] #rainModeSelect,
+    #mainHeader[data-header-weather="fog_sunset"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="fog_day"] #rainModeSelect,
+    #mainHeader[data-header-weather="fog_day"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="fog_night"] #rainModeSelect,
+    #mainHeader[data-header-weather="fog_night"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="night"] #rainModeSelect,
+    #mainHeader[data-header-weather="night"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="rain"] #rainModeSelect,
+    #mainHeader[data-header-weather="rain"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="sunrise_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="sunrise_overcast"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="morning_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="morning_overcast"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="day_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="day_overcast"] #customWeatherActiveLabel,
     #mainHeader[data-header-weather="sunset_overcast"] #rainModeSelect,
-    #mainHeader[data-header-weather="night_overcast"] #rainModeSelect {
+    #mainHeader[data-header-weather="sunset_overcast"] #customWeatherActiveLabel,
+    #mainHeader[data-header-weather="night_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="night_overcast"] #customWeatherActiveLabel {
       color: #f1f5f9 !important;
     }
-    /* Weather Selector Scrollable Dropdown (Max 5 Visible Items ~220px) */
-    .weather-dropdown-menu,
-    .weather-select select,
-    .select-dropdown,
-    .custom-dropdown-list,
-    #rainModeSelect {
-      max-height: 220px !important; /* Height approx equal to 5 dropdown option items */
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      scrollbar-width: thin; /* Firefox scrollbar */
-      scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+    #mainHeader[data-header-weather] #customWeatherChevron {
+      color: currentColor !important;
+      opacity: 0.85;
     }
 
-    /* Custom Webkit scrollbar for sleek dark-glass theme consistency */
-    .weather-dropdown-menu::-webkit-scrollbar,
-    .weather-select select::-webkit-scrollbar,
-    .select-dropdown::-webkit-scrollbar,
-    .custom-dropdown-list::-webkit-scrollbar,
-    #rainModeSelect::-webkit-scrollbar {
-      width: 6px;
+    /* Weather Selector Custom Glassmorphic Scrollbar & Max 5 Visible Items (~188px) */
+    .glass-weather-scroll {
+      max-height: 188px !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(56, 189, 248, 0.5) rgba(15, 23, 42, 0.45);
+      scroll-behavior: smooth;
     }
-    .weather-dropdown-menu::-webkit-scrollbar-thumb,
-    .weather-select select::-webkit-scrollbar-thumb,
-    .select-dropdown::-webkit-scrollbar-thumb,
-    .custom-dropdown-list::-webkit-scrollbar-thumb,
-    #rainModeSelect::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
+    .glass-weather-scroll::-webkit-scrollbar {
+      width: 7px;
+      display: block !important;
     }
-    .weather-dropdown-menu::-webkit-scrollbar-track,
-    .weather-select select::-webkit-scrollbar-track,
-    .select-dropdown::-webkit-scrollbar-track,
-    .custom-dropdown-list::-webkit-scrollbar-track,
-    #rainModeSelect::-webkit-scrollbar-track {
-      background: transparent;
+    .glass-weather-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.45);
+      border-radius: 9999px;
+      margin: 4px 1px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .glass-weather-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.5) 0%, rgba(14, 165, 233, 0.7) 100%);
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4), inset 0 0 4px rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .glass-weather-scroll::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.85) 0%, rgba(14, 165, 233, 1) 100%);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.7), inset 0 0 6px rgba(255, 255, 255, 0.5);
+    }
+    .glass-weather-scroll::-webkit-scrollbar-thumb:active {
+      background: rgba(56, 189, 248, 0.95);
+    }
+
+    .custom-weather-item {
+      border: 1px solid transparent;
+      outline: none;
+    }
+    .custom-weather-item:focus-visible {
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+    }
+    .custom-weather-item.is-active {
+      background: rgba(56, 189, 248, 0.16) !important;
+      color: #38bdf8 !important;
+      border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    }
+    .custom-weather-item.is-active .custom-item-check {
+      opacity: 1 !important;
+    }
+    .custom-weather-item.is-active .custom-item-icon {
+      color: #38bdf8 !important;
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
     }
     #mainHeader[data-header-weather="sunrise"] .header-brand-title,
     #mainHeader[data-header-weather="sunset"] .header-brand-title,
@@ -3523,31 +3564,189 @@
           <span id="themeToggleLabel">Dark mode</span>
         </button>
 
-        <!-- Weather Console Pill (Clean, without overlapping floating popup) -->
-        <div id="headerWeatherPill" class="weather-select relative inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0">
-          <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500">
-            <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
-          </span>
+        <!-- Weather Console Pill with Custom Glass Dropdown (Max 5 items visible + Glass Sidebar) -->
+        <div id="headerWeatherWrapper" class="relative inline-flex items-center shrink-0">
+          <button id="headerWeatherPill" type="button" aria-haspopup="listbox" aria-expanded="false" class="weather-select relative inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0 cursor-pointer select-none" title="Select Weather & Time Mode">
+            <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500 shrink-0">
+              <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            </span>
+            <span id="customWeatherActiveLabel" class="text-xs font-bold truncate max-w-[210px] sm:max-w-[250px]">Auto Weather</span>
+            <svg id="customWeatherChevron" class="w-3.5 h-3.5 text-slate-400 dark:text-slate-300 transition-transform duration-200 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <!-- Hidden native select for 100% backward compatibility & automated logic -->
           <label for="rainModeSelect" class="sr-only">Rain fare mode</label>
-          <select id="rainModeSelect" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 border-none outline-none cursor-pointer focus:ring-0 py-0.5 pr-1" title="Select Weather & Time Mode">
-            <option value="auto" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Auto Weather</option>
-            <option value="sunrise" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunrise / Early Morning (Clear)</option>
-            <option value="sunrise_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunrise Overcast / Dark Ash Clouds</option>
-            <option value="fog_sunrise" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunrise Foggy</option>
-            <option value="morning_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Morning Overcast / Dark Ash Clouds</option>
-            <option value="sun" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunny / Day</option>
-            <option value="day_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Day Overcast / Dark Ash Clouds</option>
-            <option value="sunset" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunset / Evening (Clear)</option>
-            <option value="sunset_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunset / Evening Overcast / Dark Ash Clouds</option>
-            <option value="fog_sunset" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Evening Foggy</option>
-            <option value="night" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Night</option>
-            <option value="night_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Night Overcast / Dark Ash Clouds</option>
-            <option value="fog_day" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Foggy (Day)</option>
-            <option value="fog_night" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Foggy (Night)</option>
-            <option value="rain" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Rain (+30%)</option>
-            <option value="dry" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Dry / Normal</option>
+          <select id="rainModeSelect" class="sr-only" tabindex="-1" aria-hidden="true" title="Select Weather & Time Mode">
+            <option value="auto">Auto Weather</option>
+            <option value="sunrise">Force Sunrise / Early Morning (Clear)</option>
+            <option value="sunrise_overcast">Force Sunrise Overcast / Dark Ash Clouds</option>
+            <option value="fog_sunrise">Force Sunrise Foggy</option>
+            <option value="morning_overcast">Force Morning Overcast / Dark Ash Clouds</option>
+            <option value="sun">Force Sunny / Day</option>
+            <option value="day_overcast">Force Day Overcast / Dark Ash Clouds</option>
+            <option value="sunset">Force Sunset / Evening (Clear)</option>
+            <option value="sunset_overcast">Force Sunset / Evening Overcast / Dark Ash Clouds</option>
+            <option value="fog_sunset">Force Evening Foggy</option>
+            <option value="night">Force Night</option>
+            <option value="night_overcast">Force Night Overcast / Dark Ash Clouds</option>
+            <option value="fog_day">Force Foggy (Day)</option>
+            <option value="fog_night">Force Foggy (Night)</option>
+            <option value="rain">Force Rain (+30%)</option>
+            <option value="dry">Dry / Normal</option>
           </select>
           <span id="weatherStatus" class="sr-only" aria-live="polite">Checking Dhaka weather…</span>
+
+          <!-- Glass Dropdown Panel: Max 5 Options Visible (~188px) + Custom Glass Side Bar -->
+          <div id="customWeatherMenu" role="listbox" aria-labelledby="headerWeatherPill" class="hidden absolute top-[calc(100%+8px)] right-0 w-[335px] max-w-[92vw] rounded-2xl bg-slate-900/90 dark:bg-slate-950/95 backdrop-blur-xl border border-slate-700/80 shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-1.5 z-[100] transition-all duration-150">
+            <div id="customWeatherOptionsList" class="glass-weather-scroll overflow-y-auto max-h-[188px] pr-1 space-y-0.5">
+              <button type="button" role="option" data-value="auto" id="customWeatherItem_auto" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-sky-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3m0 12v3M5 12H2m20 0h-3m-2.5-6.5 2-2M7.5 16.5l-2 2m0-11 2 2m11 11-2-2"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Auto Weather</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="sunrise" id="customWeatherItem_sunrise" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-amber-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6m0 10v4M4.93 10.93l4.24 4.24M2 18h20M19.07 10.93l-4.24 4.24M16 18a4 4 0 0 0-8 0"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Sunrise / Early Morning (Clear)</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="sunrise_overcast" id="customWeatherItem_sunrise_overcast" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-indigo-300 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m5.66 1.34-2.83 2.83M17.5 19H9a5 5 0 0 1 0-10c.26 0 .52.02.78.06A6 6 0 0 1 21 14a5 5 0 0 1-3.5 5z"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Sunrise Overcast / Dark Ash Clouds</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="fog_sunrise" id="customWeatherItem_fog_sunrise" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-pink-300 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h16M4 18h16M4 10h16M12 3v3m4.9 1.1-2.1 2.1M7.1 7.1l2.1 2.1"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Sunrise Foggy</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="morning_overcast" id="customWeatherItem_morning_overcast" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-slate-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Morning Overcast / Dark Ash Clouds</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="sun" id="customWeatherItem_sun" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-amber-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14-1.41 1.41"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Sunny / Day</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="day_overcast" id="customWeatherItem_day_overcast" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-slate-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Day Overcast / Dark Ash Clouds</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="sunset" id="customWeatherItem_sunset" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-orange-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 10V2m0 8-3-3m3 3 3-3M2 18h20M19.07 10.93l-4.24 4.24M16 18a4 4 0 0 0-8 0"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Sunset / Evening (Clear)</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="sunset_overcast" id="customWeatherItem_sunset_overcast" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-amber-500 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m5.66 1.34-2.83 2.83M17.5 19H9a5 5 0 0 1 0-10c.26 0 .52.02.78.06A6 6 0 0 1 21 14a5 5 0 0 1-3.5 5z"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Sunset / Evening Overcast / Dark Ash Clouds</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="fog_sunset" id="customWeatherItem_fog_sunset" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-orange-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h16M4 18h16M4 10h16M12 10V2m-3 3 3-3 3 3"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Evening Foggy</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="night" id="customWeatherItem_night" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-indigo-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Night</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="night_overcast" id="customWeatherItem_night_overcast" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-purple-300 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12h8a4 4 0 1 0 0-8c-.28 0-.55.03-.82.08A6 6 0 1 0 6 12h4Z"/><path d="m14 16 1-1"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Night Overcast / Dark Ash Clouds</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="fog_day" id="customWeatherItem_fog_day" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-teal-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h16M4 18h16M4 10h16M4 6h16"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Foggy (Day)</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="fog_night" id="customWeatherItem_fog_night" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-slate-300 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h16M4 18h16M4 10h16M12 3a6 6 0 0 0 6 6"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Foggy (Night)</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="rain" id="customWeatherItem_rain" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-sky-400 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M16 14v6M8 14v6M12 16v6"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Force Rain (+30%)</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+              <button type="button" role="option" data-value="dry" id="customWeatherItem_dry" class="custom-weather-item w-full flex items-center justify-between gap-2 px-2.5 h-[36px] min-h-[36px] text-xs font-semibold rounded-xl text-left transition-all duration-150 text-slate-300 hover:text-white hover:bg-white/10 active:scale-[0.98]">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="custom-item-icon text-amber-300 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364-.707-.707M6.343 6.343l-.707-.707m12.728 0-.707.707M6.343 17.657l-.707.707"/></svg>
+                  </span>
+                  <span class="custom-item-label truncate">Dry / Normal</span>
+                </div>
+                <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Sleek Hardware Micro Switch for Surge -->
@@ -9252,6 +9451,7 @@
       if (typeof initHolographicFareCards === 'function') initHolographicFareCards();
       if (window.crossroadsAudio && typeof crossroadsAudio.updateUi === 'function') crossroadsAudio.updateUi();
       if (typeof updateCrossroadsViewModeUI === 'function') updateCrossroadsViewModeUI();
+      if (typeof syncCustomWeatherDropdown === 'function') syncCustomWeatherDropdown(typeof rainFareMode !== 'undefined' ? rainFareMode : 'auto');
     }
 
     function toggleLanguage() {
@@ -10530,8 +10730,152 @@
         autoOption.textContent = labelText;
         select.title = isBn ? 'আবহাওয়া ও সময় নির্বাচন করুন' : 'Select Weather & Time Mode';
       }
+      if (typeof syncCustomWeatherDropdown === 'function') {
+        syncCustomWeatherDropdown(rainFareMode || 'auto');
+      }
     }
     window.updateAutoWeatherDropdownLabel = updateAutoWeatherDropdownLabel;
+
+    function syncCustomWeatherDropdown(activeMode) {
+      const select = document.getElementById('rainModeSelect');
+      const activeLabel = document.getElementById('customWeatherActiveLabel');
+      const pill = document.getElementById('headerWeatherPill');
+      const menu = document.getElementById('customWeatherMenu');
+      if (!select) return;
+
+      const currentMode = activeMode || select.value || 'auto';
+      const isBn = (typeof currentLanguage !== 'undefined' && currentLanguage === 'bn') || (document.documentElement.lang === 'bn');
+
+      // Find selected option
+      const selectedOption = select.querySelector(`option[value="${currentMode}"]`) || select.querySelector('option[value="auto"]');
+      let displayLabel = selectedOption ? selectedOption.textContent.trim() : 'Auto Weather';
+
+      if (currentMode === 'auto') {
+        const autoOption = select.querySelector('option[value="auto"]');
+        if (autoOption && autoOption.textContent.trim()) {
+          displayLabel = autoOption.textContent.trim();
+        }
+      }
+
+      if (activeLabel) {
+        activeLabel.textContent = displayLabel;
+      }
+      if (pill) {
+        pill.title = displayLabel;
+      }
+
+      // Update options list in custom dropdown
+      if (menu) {
+        const items = menu.querySelectorAll('.custom-weather-item');
+        items.forEach(item => {
+          const val = item.getAttribute('data-value');
+          const isSelected = val === currentMode;
+          item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+          item.classList.toggle('is-active', isSelected);
+
+          if (val === 'auto') {
+            const labelSpan = item.querySelector('.custom-item-label');
+            if (labelSpan) {
+              const autoOption = select.querySelector('option[value="auto"]');
+              labelSpan.textContent = (autoOption && autoOption.textContent.trim()) || (isBn ? 'আবহাওয়া' : 'Auto Weather');
+            }
+          }
+        });
+      }
+    }
+    window.syncCustomWeatherDropdown = syncCustomWeatherDropdown;
+
+    function initCustomWeatherDropdown() {
+      const pill = document.getElementById('headerWeatherPill');
+      const menu = document.getElementById('customWeatherMenu');
+      const chevron = document.getElementById('customWeatherChevron');
+      const select = document.getElementById('rainModeSelect');
+      if (!pill || !menu || pill.dataset.customDropdownInit === 'true') return;
+      pill.dataset.customDropdownInit = 'true';
+
+      const toggleMenu = (open) => {
+        const shouldOpen = typeof open === 'boolean' ? open : menu.classList.contains('hidden');
+        if (shouldOpen) {
+          menu.classList.remove('hidden');
+          pill.setAttribute('aria-expanded', 'true');
+          if (chevron) chevron.classList.add('rotate-180');
+          // Scroll active item into view
+          const activeItem = menu.querySelector('.custom-weather-item.is-active');
+          if (activeItem) {
+            activeItem.scrollIntoView({ block: 'nearest' });
+          }
+        } else {
+          menu.classList.add('hidden');
+          pill.setAttribute('aria-expanded', 'false');
+          if (chevron) chevron.classList.remove('rotate-180');
+        }
+      };
+
+      pill.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      pill.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          toggleMenu(true);
+          const firstItem = menu.querySelector('.custom-weather-item.is-active') || menu.querySelector('.custom-weather-item');
+          if (firstItem) firstItem.focus();
+        } else if (e.key === 'Escape') {
+          toggleMenu(false);
+        }
+      });
+
+      menu.querySelectorAll('.custom-weather-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const val = item.getAttribute('data-value');
+          if (select) {
+            select.value = val;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          syncCustomWeatherDropdown(val);
+          toggleMenu(false);
+          pill.focus();
+        });
+
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            toggleMenu(false);
+            pill.focus();
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = item.nextElementSibling;
+            if (next && next.classList.contains('custom-weather-item')) next.focus();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prev = item.previousElementSibling;
+            if (prev && prev.classList.contains('custom-weather-item')) prev.focus();
+            else pill.focus();
+          }
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        const wrapper = document.getElementById('headerWeatherWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+          toggleMenu(false);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+          toggleMenu(false);
+        }
+      });
+
+      syncCustomWeatherDropdown(select ? select.value : 'auto');
+    }
+    window.initCustomWeatherDropdown = initCustomWeatherDropdown;
 
     function updateRainFareState() {
       isHeavyRain = rainFareMode === 'rain' ||
@@ -13855,6 +14199,9 @@
       if (select) {
         select.value = nextMode;
       }
+      if (typeof syncCustomWeatherDropdown === 'function') {
+        syncCustomWeatherDropdown(nextMode);
+      }
       if (typeof updateRainFareState === 'function') {
         updateRainFareState();
       } else if (typeof updateCrossroadsAtmosphere === 'function') {
@@ -16562,6 +16909,9 @@
         if (typeof updateAutoWeatherDropdownLabel === 'function') {
           updateAutoWeatherDropdownLabel();
         }
+        if (typeof syncCustomWeatherDropdown === 'function') {
+          syncCustomWeatherDropdown(rainFareMode);
+        }
         if (rainFareMode === 'auto') {
           fetchDhakaWeather();
         } else {
@@ -16575,6 +16925,9 @@
           }
         }
       });
+      if (typeof initCustomWeatherDropdown === 'function') {
+        initCustomWeatherDropdown();
+      }
       populateLocationSelectors();
       initMap();
       applyLanguage();
