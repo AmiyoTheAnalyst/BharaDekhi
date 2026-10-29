@@ -2076,6 +2076,34 @@
           ambientLight.color.setHex(0xfbcfe8);
           ambientLight.intensity = 0.70;
         }
+      } else if (currentMode === 'sunrise_overcast') {
+        scene.background.setHex(0x1e1b4b);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x312e81);
+          scene.fog.density = 0.0009;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xfb7185);
+          sunLight.intensity = 0.95;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x6366f1);
+          ambientLight.intensity = 0.60;
+        }
+      } else if (currentMode === 'morning_overcast') {
+        scene.background.setHex(0x1e293b);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x334155);
+          scene.fog.density = 0.0010;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x94a3b8);
+          sunLight.intensity = 0.85;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x475569);
+          ambientLight.intensity = 0.65;
+        }
       } else if (currentMode === 'sun') {
         scene.background.setHex(0x0284c7);
         if (scene.fog) {
@@ -2090,6 +2118,20 @@
           ambientLight.color.setHex(0x7dd3fc);
           ambientLight.intensity = 0.75;
         }
+      } else if (currentMode === 'day_overcast') {
+        scene.background.setHex(0x111827);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x1f2937);
+          scene.fog.density = 0.0012;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x64748b);
+          sunLight.intensity = 0.75;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x374151);
+          ambientLight.intensity = 0.60;
+        }
       } else if (currentMode === 'sunset') {
         scene.background.setHex(0x311006);
         if (scene.fog) {
@@ -2103,6 +2145,20 @@
         if (ambientLight) {
           ambientLight.color.setHex(0xfb923c);
           ambientLight.intensity = 0.7;
+        }
+      } else if (currentMode === 'sunset_overcast') {
+        scene.background.setHex(0x2e1065);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x431407);
+          scene.fog.density = 0.0010;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xea580c);
+          sunLight.intensity = 1.05;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x7c2d12);
+          ambientLight.intensity = 0.60;
         }
       } else if (currentMode === 'fog_day') {
         scene.background.setHex(0x94a3b8);
@@ -2145,6 +2201,20 @@
         if (ambientLight) {
           ambientLight.color.setHex(0x1e293b);
           ambientLight.intensity = 0.6;
+        }
+      } else if (currentMode === 'night_overcast') {
+        scene.background.setHex(0x020617);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x050c1f);
+          scene.fog.density = 0.0008;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x38bdf8);
+          sunLight.intensity = 0.30;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x0f172a);
+          ambientLight.intensity = 0.45;
         }
       } else { // night
         scene.background.setHex(0x040814);

@@ -673,6 +673,21 @@
     #dhakaCrossroadsContainer[data-crossroads-weather="rain"] {
       background-color: #0f172a;
     }
+    #dhakaCrossroadsContainer[data-crossroads-weather="sunrise_overcast"] {
+      background-color: #1e1b4b;
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather="morning_overcast"] {
+      background-color: #1e293b;
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather="day_overcast"] {
+      background-color: #111827;
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather="sunset_overcast"] {
+      background-color: #2e1065;
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather="night_overcast"] {
+      background-color: #020617;
+    }
 
     /* Atmosphere Overlays Transition */
     .cr-atmos-layer {
@@ -790,6 +805,25 @@
     [data-crossroads-weather="rain"] #crFogNightLayer { opacity: 0 !important; }
     [data-crossroads-weather="rain"] #crRainLayer { opacity: 1 !important; }
 
+    /* Granular Overcast / Storm Cloud Modes Visibility */
+    [data-crossroads-weather="sunrise_overcast"] #crSkySunriseOvercastRect { opacity: 1 !important; }
+    [data-crossroads-weather="sunrise_overcast"] #crOvercastLayer { opacity: 1 !important; }
+    [data-crossroads-weather="sunrise_overcast"] #crSunriseLayer { opacity: 0.35 !important; }
+
+    [data-crossroads-weather="morning_overcast"] #crSkyMorningOvercastRect { opacity: 1 !important; }
+    [data-crossroads-weather="morning_overcast"] #crOvercastLayer { opacity: 0.90 !important; }
+
+    [data-crossroads-weather="day_overcast"] #crSkyDayOvercastRect { opacity: 1 !important; }
+    [data-crossroads-weather="day_overcast"] #crOvercastLayer { opacity: 1 !important; }
+
+    [data-crossroads-weather="sunset_overcast"] #crSkySunsetOvercastRect { opacity: 1 !important; }
+    [data-crossroads-weather="sunset_overcast"] #crOvercastLayer { opacity: 0.95 !important; }
+    [data-crossroads-weather="sunset_overcast"] #crSunsetLayer { opacity: 0.40 !important; }
+
+    [data-crossroads-weather="night_overcast"] #crSkyNightOvercastRect { opacity: 1 !important; }
+    [data-crossroads-weather="night_overcast"] #crOvercastLayer { opacity: 1 !important; }
+    [data-crossroads-weather="night_overcast"] #crNightLayer { opacity: 0.85 !important; }
+
     /* Dynamic Vehicle Headlights & Vivid Night/Fog/Sunset/Sunrise Illumination */
     .cr-headlight-beam {
       transition: opacity 0.8s ease;
@@ -826,6 +860,27 @@
       opacity: 0.82 !important;
       mix-blend-mode: screen !important;
     }
+    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam {
+      opacity: 0.75 !important;
+      mix-blend-mode: screen !important;
+    }
+    [data-crossroads-weather="morning_overcast"] .cr-headlight-beam {
+      opacity: 0.70 !important;
+      mix-blend-mode: screen !important;
+    }
+    [data-crossroads-weather="day_overcast"] .cr-headlight-beam {
+      opacity: 0.75 !important;
+      mix-blend-mode: screen !important;
+    }
+    [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam {
+      opacity: 0.80 !important;
+      mix-blend-mode: screen !important;
+    }
+    [data-crossroads-weather="night_overcast"] .cr-headlight-beam {
+      opacity: 1.0 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.65)) !important;
+    }
 
     /* Fog Drift Animations */
     @keyframes fogDriftSlow {
@@ -854,8 +909,14 @@
       animation: pedUmbrellaSway 1.4s ease-in-out infinite;
     }
     [data-crossroads-weather="sun"] .ped-umbrella,
+    [data-crossroads-weather="sunrise"] .ped-umbrella,
+    [data-crossroads-weather="sunrise_overcast"] .ped-umbrella,
+    [data-crossroads-weather="morning_overcast"] .ped-umbrella,
+    [data-crossroads-weather="day_overcast"] .ped-umbrella,
     [data-crossroads-weather="sunset"] .ped-umbrella,
+    [data-crossroads-weather="sunset_overcast"] .ped-umbrella,
     [data-crossroads-weather="night"] .ped-umbrella,
+    [data-crossroads-weather="night_overcast"] .ped-umbrella,
     [data-crossroads-weather="fog_day"] .ped-umbrella,
     [data-crossroads-weather="fog_night"] .ped-umbrella {
       opacity: 0 !important;
@@ -2398,6 +2459,39 @@
       border-bottom: 1px solid rgba(71, 85, 105, 0.7) !important;
       box-shadow: 0 4px 20px rgba(15, 23, 42, 0.5);
     }
+    #mainHeader[data-header-weather="sunrise_overcast"] {
+      background:
+        radial-gradient(ellipse 70% 90% at 75% 30%, rgba(244, 114, 182, 0.25) 0%, rgba(49, 46, 129, 0.4) 45%, transparent 75%),
+        linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 70%, #7c2d12 100%) !important;
+      border-bottom: 1px solid rgba(165, 180, 252, 0.4) !important;
+      box-shadow: 0 4px 20px rgba(30, 27, 75, 0.45);
+    }
+    #mainHeader[data-header-weather="morning_overcast"] {
+      background:
+        radial-gradient(ellipse 70% 90% at 75% 30%, rgba(203, 213, 225, 0.2) 0%, rgba(51, 65, 85, 0.35) 45%, transparent 75%),
+        linear-gradient(135deg, #1e293b 0%, #334155 45%, #475569 80%, #64748b 100%) !important;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4) !important;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.4);
+    }
+    #mainHeader[data-header-weather="day_overcast"] {
+      background:
+        radial-gradient(ellipse 70% 90% at 75% 30%, rgba(148, 163, 184, 0.2) 0%, rgba(30, 41, 59, 0.4) 45%, transparent 75%),
+        linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%) !important;
+      border-bottom: 1px solid rgba(100, 116, 139, 0.4) !important;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.5);
+    }
+    #mainHeader[data-header-weather="sunset_overcast"] {
+      background:
+        radial-gradient(ellipse 70% 90% at 75% 35%, rgba(234, 88, 12, 0.4) 0%, rgba(88, 28, 135, 0.35) 45%, transparent 75%),
+        linear-gradient(135deg, #1e1b4b 0%, #3b0764 40%, #7c2d12 75%, #9a3412 100%) !important;
+      border-bottom: 1px solid rgba(251, 146, 60, 0.4) !important;
+      box-shadow: 0 4px 20px rgba(59, 7, 100, 0.45);
+    }
+    #mainHeader[data-header-weather="night_overcast"] {
+      background: linear-gradient(135deg, #020617 0%, #09162e 60%, #0f172a 100%) !important;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.8) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
 
     /* 2. Glassmorphic Pill Buttons with Dark Tint (Requirement 4) */
     #mainHeader #faqLink,
@@ -2473,7 +2567,32 @@
     #mainHeader[data-header-weather="rain"] #languageToggle,
     #mainHeader[data-header-weather="rain"] #themeToggle,
     #mainHeader[data-header-weather="rain"] #headerWeatherPill,
-    #mainHeader[data-header-weather="rain"] #headerSurgeCapsule {
+    #mainHeader[data-header-weather="rain"] #headerSurgeCapsule,
+    #mainHeader[data-header-weather="sunrise_overcast"] #faqLink,
+    #mainHeader[data-header-weather="sunrise_overcast"] #languageToggle,
+    #mainHeader[data-header-weather="sunrise_overcast"] #themeToggle,
+    #mainHeader[data-header-weather="sunrise_overcast"] #headerWeatherPill,
+    #mainHeader[data-header-weather="sunrise_overcast"] #headerSurgeCapsule,
+    #mainHeader[data-header-weather="morning_overcast"] #faqLink,
+    #mainHeader[data-header-weather="morning_overcast"] #languageToggle,
+    #mainHeader[data-header-weather="morning_overcast"] #themeToggle,
+    #mainHeader[data-header-weather="morning_overcast"] #headerWeatherPill,
+    #mainHeader[data-header-weather="morning_overcast"] #headerSurgeCapsule,
+    #mainHeader[data-header-weather="day_overcast"] #faqLink,
+    #mainHeader[data-header-weather="day_overcast"] #languageToggle,
+    #mainHeader[data-header-weather="day_overcast"] #themeToggle,
+    #mainHeader[data-header-weather="day_overcast"] #headerWeatherPill,
+    #mainHeader[data-header-weather="day_overcast"] #headerSurgeCapsule,
+    #mainHeader[data-header-weather="sunset_overcast"] #faqLink,
+    #mainHeader[data-header-weather="sunset_overcast"] #languageToggle,
+    #mainHeader[data-header-weather="sunset_overcast"] #themeToggle,
+    #mainHeader[data-header-weather="sunset_overcast"] #headerWeatherPill,
+    #mainHeader[data-header-weather="sunset_overcast"] #headerSurgeCapsule,
+    #mainHeader[data-header-weather="night_overcast"] #faqLink,
+    #mainHeader[data-header-weather="night_overcast"] #languageToggle,
+    #mainHeader[data-header-weather="night_overcast"] #themeToggle,
+    #mainHeader[data-header-weather="night_overcast"] #headerWeatherPill,
+    #mainHeader[data-header-weather="night_overcast"] #headerSurgeCapsule {
       background: rgba(15, 23, 42, 0.65) !important;
       color: #f1f5f9 !important;
       border-color: rgba(71, 85, 105, 0.75) !important;
@@ -2483,7 +2602,12 @@
     #mainHeader[data-header-weather="fog_day"] #rainModeSelect,
     #mainHeader[data-header-weather="fog_night"] #rainModeSelect,
     #mainHeader[data-header-weather="night"] #rainModeSelect,
-    #mainHeader[data-header-weather="rain"] #rainModeSelect {
+    #mainHeader[data-header-weather="rain"] #rainModeSelect,
+    #mainHeader[data-header-weather="sunrise_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="morning_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="day_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="sunset_overcast"] #rainModeSelect,
+    #mainHeader[data-header-weather="night_overcast"] #rainModeSelect {
       color: #f1f5f9 !important;
     }
     #mainHeader[data-header-weather="sunrise"] .header-brand-title,
@@ -2491,7 +2615,12 @@
     #mainHeader[data-header-weather="fog_day"] .header-brand-title,
     #mainHeader[data-header-weather="fog_night"] .header-brand-title,
     #mainHeader[data-header-weather="night"] .header-brand-title,
-    #mainHeader[data-header-weather="rain"] .header-brand-title {
+    #mainHeader[data-header-weather="rain"] .header-brand-title,
+    #mainHeader[data-header-weather="sunrise_overcast"] .header-brand-title,
+    #mainHeader[data-header-weather="morning_overcast"] .header-brand-title,
+    #mainHeader[data-header-weather="day_overcast"] .header-brand-title,
+    #mainHeader[data-header-weather="sunset_overcast"] .header-brand-title,
+    #mainHeader[data-header-weather="night_overcast"] .header-brand-title {
       color: #ffffff !important;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
     }
@@ -2499,9 +2628,25 @@
       color: #f472b6 !important;
       text-shadow: 0 0 10px rgba(244, 114, 182, 0.6);
     }
+    #mainHeader[data-header-weather="sunrise_overcast"] .header-brand-title span {
+      color: #c084fc !important;
+      text-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
+    }
+    #mainHeader[data-header-weather="morning_overcast"] .header-brand-title span {
+      color: #cbd5e1 !important;
+      text-shadow: 0 0 10px rgba(203, 213, 225, 0.6);
+    }
+    #mainHeader[data-header-weather="day_overcast"] .header-brand-title span {
+      color: #94a3b8 !important;
+      text-shadow: 0 0 10px rgba(148, 163, 184, 0.6);
+    }
     #mainHeader[data-header-weather="sunset"] .header-brand-title span {
       color: #fb923c !important;
       text-shadow: 0 0 10px rgba(251, 146, 60, 0.6);
+    }
+    #mainHeader[data-header-weather="sunset_overcast"] .header-brand-title span {
+      color: #f97316 !important;
+      text-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
     }
     #mainHeader[data-header-weather="fog_day"] .header-brand-title span {
       color: #38bdf8 !important;
@@ -2515,6 +2660,10 @@
       color: #60a5fa !important;
       text-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
     }
+    #mainHeader[data-header-weather="night_overcast"] .header-brand-title span {
+      color: #818cf8 !important;
+      text-shadow: 0 0 10px rgba(129, 140, 248, 0.6);
+    }
     #mainHeader[data-header-weather="rain"] .header-brand-title span {
       color: #38bdf8 !important;
       text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
@@ -2524,7 +2673,12 @@
     #mainHeader[data-header-weather="fog_day"] .header-brand-subtext,
     #mainHeader[data-header-weather="fog_night"] .header-brand-subtext,
     #mainHeader[data-header-weather="night"] .header-brand-subtext,
-    #mainHeader[data-header-weather="rain"] .header-brand-subtext {
+    #mainHeader[data-header-weather="rain"] .header-brand-subtext,
+    #mainHeader[data-header-weather="sunrise_overcast"] .header-brand-subtext,
+    #mainHeader[data-header-weather="morning_overcast"] .header-brand-subtext,
+    #mainHeader[data-header-weather="day_overcast"] .header-brand-subtext,
+    #mainHeader[data-header-weather="sunset_overcast"] .header-brand-subtext,
+    #mainHeader[data-header-weather="night_overcast"] .header-brand-subtext {
       color: #cbd5e1 !important;
     }
 
@@ -2532,17 +2686,30 @@
     #mainHeader[data-header-weather="sunrise"] #headerWeatherSunriseLayer {
       opacity: 1;
     }
+    #mainHeader[data-header-weather="sunrise_overcast"] #headerWeatherSunriseLayer {
+      opacity: 0.65;
+    }
     #mainHeader[data-header-weather="sun"] #headerWeatherSunLayer {
       opacity: 1;
     }
     #mainHeader[data-header-weather="sunset"] #headerWeatherSunsetLayer {
       opacity: 1;
     }
+    #mainHeader[data-header-weather="sunset_overcast"] #headerWeatherSunsetLayer {
+      opacity: 0.70;
+    }
     #mainHeader[data-header-weather="night"] #headerWeatherNightLayer {
       opacity: 1;
     }
+    #mainHeader[data-header-weather="night_overcast"] #headerWeatherNightLayer {
+      opacity: 0.75;
+    }
     #mainHeader[data-header-weather="fog_day"] #headerWeatherFogDayLayer {
       opacity: 1;
+    }
+    #mainHeader[data-header-weather="morning_overcast"] #headerWeatherFogDayLayer,
+    #mainHeader[data-header-weather="day_overcast"] #headerWeatherFogDayLayer {
+      opacity: 0.65;
     }
     #mainHeader[data-header-weather="fog_night"] #headerWeatherFogNightLayer {
       opacity: 1;
@@ -3053,10 +3220,15 @@
           <label for="rainModeSelect" class="sr-only">Rain fare mode</label>
           <select id="rainModeSelect" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 border-none outline-none cursor-pointer focus:ring-0 py-0.5 pr-1" title="Select Weather & Time Mode">
             <option value="auto" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Auto Weather</option>
-            <option value="sunrise" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunrise / Early Morning</option>
+            <option value="sunrise" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunrise / Early Morning (Clear)</option>
+            <option value="sunrise_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunrise Overcast / Storm Clouds</option>
+            <option value="morning_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Morning Overcast / Storm Clouds</option>
             <option value="sun" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunny / Day</option>
-            <option value="sunset" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunset / Evening</option>
+            <option value="day_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Day Overcast / Storm Clouds</option>
+            <option value="sunset" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunset / Evening (Clear)</option>
+            <option value="sunset_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Sunset / Evening Overcast</option>
             <option value="night" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Night</option>
+            <option value="night_overcast" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Night Overcast / Storm Clouds</option>
             <option value="fog_day" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Foggy (Day)</option>
             <option value="fog_night" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Foggy (Night)</option>
             <option value="rain" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Force Rain (+30%)</option>
@@ -3813,16 +3985,56 @@
               <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.25"/>
               <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
             </radialGradient>
+
+            <!-- Granular Overcast Sky Gradients -->
+            <linearGradient id="crSkySunriseOvercastGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e1b4b"/>
+              <stop offset="35%" stop-color="#312e81"/>
+              <stop offset="70%" stop-color="#4338ca"/>
+              <stop offset="100%" stop-color="#7c2d12"/>
+            </linearGradient>
+
+            <linearGradient id="crSkyMorningOvercastGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e293b"/>
+              <stop offset="45%" stop-color="#334155"/>
+              <stop offset="80%" stop-color="#475569"/>
+              <stop offset="100%" stop-color="#64748b"/>
+            </linearGradient>
+
+            <linearGradient id="crSkyDayOvercastGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0f172a"/>
+              <stop offset="40%" stop-color="#1e293b"/>
+              <stop offset="80%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#475569"/>
+            </linearGradient>
+
+            <linearGradient id="crSkySunsetOvercastGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1e1b4b"/>
+              <stop offset="35%" stop-color="#3b0764"/>
+              <stop offset="70%" stop-color="#7c2d12"/>
+              <stop offset="100%" stop-color="#9a3412"/>
+            </linearGradient>
+
+            <linearGradient id="crSkyNightOvercastGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#020617"/>
+              <stop offset="50%" stop-color="#09162e"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
           </defs>
 
           <!-- 1. Background Sky (Dynamic Night, Sun, Sunrise, Sunset, Fog & Rain Layers) -->
           <rect id="crSkyNightRect" width="1200" height="700" fill="url(#crSkyNightGrad)" class="cr-atmos-layer"/>
           <rect id="crSkySunriseRect" width="1200" height="700" fill="url(#crSkySunriseGrad)" opacity="0" class="cr-atmos-layer"/>
+          <rect id="crSkySunriseOvercastRect" width="1200" height="700" fill="url(#crSkySunriseOvercastGrad)" opacity="0" class="cr-atmos-layer"/>
+          <rect id="crSkyMorningOvercastRect" width="1200" height="700" fill="url(#crSkyMorningOvercastGrad)" opacity="0" class="cr-atmos-layer"/>
           <rect id="crSkySunRect" width="1200" height="700" fill="url(#crSkySunGrad)" opacity="0" class="cr-atmos-layer"/>
+          <rect id="crSkyDayOvercastRect" width="1200" height="700" fill="url(#crSkyDayOvercastGrad)" opacity="0" class="cr-atmos-layer"/>
           <rect id="crSkySunsetRect" width="1200" height="700" fill="url(#crSkySunsetGrad)" opacity="0" class="cr-atmos-layer"/>
+          <rect id="crSkySunsetOvercastRect" width="1200" height="700" fill="url(#crSkySunsetOvercastGrad)" opacity="0" class="cr-atmos-layer"/>
           <rect id="crSkyFogDayRect" width="1200" height="700" fill="url(#crSkyFogDayGrad)" opacity="0" class="cr-atmos-layer"/>
           <rect id="crSkyFogNightRect" width="1200" height="700" fill="url(#crSkyFogNightGrad)" opacity="0" class="cr-atmos-layer"/>
           <rect id="crSkyRainRect" width="1200" height="700" fill="url(#crSkyRainGrad)" opacity="0" class="cr-atmos-layer"/>
+          <rect id="crSkyNightOvercastRect" width="1200" height="700" fill="url(#crSkyNightOvercastGrad)" opacity="0" class="cr-atmos-layer"/>
 
           <!-- Distant Skyline Silhouettes -->
           <path id="crSkylineSilhouettes" d="M 0,160 L 50,160 L 50,105 L 90,105 L 90,160 L 140,160 L 140,85 L 180,85 L 180,160 L 250,160 L 250,95 L 290,95 L 290,160 L 370,160 L 370,70 L 420,70 L 420,160 L 520,160 L 520,110 L 570,110 L 570,160 L 670,160 L 670,80 L 710,80 L 710,160 L 800,160 L 800,95 L 850,95 L 850,160 L 920,160 L 920,65 L 970,65 L 970,160 L 1050,160 L 1050,90 L 1100,90 L 1100,160 L 1200,160 Z" fill="#071328" opacity="0.6"/>
@@ -4012,7 +4224,6 @@
                 <text x="246" y="60" fill="#4ade80" font-size="9" font-weight="700" letter-spacing="0.04em" class="cr-signboard-text">BOARDING</text>
               </g>
             </g>
-          </g>
 
           <!-- Continuous Moving Dhaka Metro Rail Train (MRT Line 6) with Electric Cyan Windows -->
           <g id="crossroadsMetroTrain" transform="translate(150, 88)">
@@ -5540,6 +5751,15 @@
                 <line x1="1150" y1="640" x2="1142" y2="670"/>
                 <line x1="30" y1="380" x2="22" y2="410"/>
               </g>
+            </g>
+
+            <!-- Dynamic Overcast Storm Cloud Shelves Layer -->
+            <g id="crOvercastLayer" class="cr-atmos-layer pointer-events-none" opacity="0">
+              <!-- Dark Brooding Storm Shelf Clouds across upper crossroads -->
+              <path d="M 0,0 L 1200,0 L 1200,95 Q 1080,135 960,105 Q 840,145 720,110 Q 600,150 480,112 Q 360,148 240,110 Q 120,145 0,95 Z" fill="#090d16" opacity="0.75"/>
+              <!-- Drifting Thunderhead Cloud Banks -->
+              <path class="fog-drift-1" d="M -120,115 Q 120,70 380,120 Q 640,165 920,105 Q 1180,65 1380,115 L 1380,195 Q 1120,155 860,190 Q 580,225 320,180 Q 80,145 -120,190 Z" fill="#1e293b" opacity="0.55" filter="blur(7px)"/>
+              <path class="fog-drift-2" d="M -150,150 Q 160,105 480,160 Q 800,210 1120,145 Q 1380,110 1550,155 L 1550,235 Q 1250,195 940,240 Q 620,275 320,220 Q 40,185 -150,235 Z" fill="#334155" opacity="0.45" filter="blur(9px)"/>
             </g>
           </g>
 
@@ -7985,15 +8205,27 @@
       'Surge': 'সার্জ',
       'Auto Weather': 'আবহাওয়া (Auto)',
       'Force Sunrise / Early Morning': 'ভোর / সূর্যোদয় (Sunrise)',
+      'Force Sunrise / Early Morning (Clear)': 'ভোর / সূর্যোদয় (পরিষ্কার)',
+      'Force Sunrise Overcast / Storm Clouds': 'ভোরের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Morning Overcast / Storm Clouds': 'সকালের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunny / Day': 'রৌদ্রোজ্জ্বল দিন (Sunny)',
+      'Force Day Overcast / Storm Clouds': 'দিনের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunset / Evening': 'সন্ধ্যা / সূর্যাস্ত (Sunset)',
+      'Force Sunset / Evening (Clear)': 'সন্ধ্যা / সূর্যাস্ত (পরিষ্কার)',
+      'Force Sunset / Evening Overcast': 'সন্ধ্যার মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Night': 'রাত (Night)',
+      'Force Night Overcast / Storm Clouds': 'রাতের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Foggy (Day)': 'কুয়াশাচ্ছন্ন দিন (Fog Day)',
       'Force Foggy (Night)': 'কুয়াশাচ্ছন্ন রাত (Fog Night)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
       'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Sunrise / Early Morning mode active.': 'ভোর / সূর্যোদয় সক্রিয় (Sunrise)',
+      'Sunrise Overcast mode active.': 'ভোরের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
+      'Morning Overcast mode active.': 'সকালের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
+      'Day Overcast mode active.': 'দিনের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
       'Sunset / Evening mode active.': 'সন্ধ্যা / সূর্যাস্ত সক্রিয় (Sunset)',
+      'Sunset Overcast mode active.': 'সন্ধ্যার মেঘাচ্ছন্ন আকাশ সক্রিয়।',
+      'Night Overcast mode active.': 'রাতের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। ৫ কিমি পর্যন্ত ফিডার যাত্রায় রিকশার আনুমানিক ভাড়া ৳২০ + প্রতি কিমি ৳১২, যা পরবর্তী ৳১০-এ বাড়িয়ে দেখানো হয়; এর বেশি দূরত্বে রিকশা ভাড়া দেখানো হয় না। বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। Open-Meteo মধ্য ঢাকার বর্তমান আবহাওয়ার তথ্য থেকে বৃষ্টি স্বয়ংক্রিয়ভাবে অনুমান করে রাইড ও ফিডার ভাড়ায় ৩০%–৫০% অতিরিক্ত যোগ করে, তবে মেট্রো ভাড়ায় নয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fare uses approximate station-to-station distances at ৳5/km (৳20 minimum, ৳100 maximum), and the optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw fare uses ৳30 + ৳25/km; bike and CNG use the site\'s baseline mode rates. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes; fares round up to ৳10. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.': 'এগুলো কেবল ধারণামূলক হিসাব, সরাসরি ভাড়া নয়। নিকটতম স্টেশন ও যাতায়াত দূরত্ব সরলরেখার মানচিত্র দূরত্বে হিসাব করা হয়; স্টেশন-থেকে-স্টেশন আনুমানিক দূরত্বে মেট্রো ভাড়া প্রতি কিমি ৳৫ (সর্বনিম্ন ৳২০, সর্বোচ্চ ৳১০০), এবং ঐচ্ছিক পাসে ১০% ছাড় প্রযোজ্য। ফিডার রুটের দূরত্ব সরলরেখার দূরত্বের ১.২৫ গুণ ধরা হয়। রিকশার ভাড়া ৳৩০ + প্রতি কিমি ৳২৫; বাইক ও সিএনজির ভাড়া ওয়েবসাইটের বেসলাইন হারে হিসাব করা হয়। ফিডারের আনুমানিক গতি রিকশা/সিএনজিতে ঘণ্টায় ১২ কিমি এবং বাইকে ১৮ কিমি; ভাড়া পরবর্তী ৳১০-এ বাড়িয়ে ধরা হয়। সরাসরি যাত্রার সময়ে পিক আওয়ারে ঘণ্টায় ১৫ কিমি এবং অফ-পিকে ২২ কিমি গড় সড়ক গতি ধরে যানবাহন অনুযায়ী সমন্বয় করা হয়; মেট্রোর সময়ে প্রতি স্টেশন ব্যবধানে ২ মিনিট ও অপেক্ষায় ৫ মিনিট ধরা হয়। প্রকৃত ভাড়া, স্টেশনে যাতায়াত ও যানজট ভিন্ন হতে পারে।',
       'Calculating Road Distance via OSRM...': 'OSRM দিয়ে সড়ক দূরত্ব হিসাব করা হচ্ছে...',
@@ -8170,15 +8402,27 @@
       'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
       'Auto Weather': 'আবহাওয়া (Auto)',
       'Force Sunrise / Early Morning': 'ভোর / সূর্যোদয় (Sunrise)',
+      'Force Sunrise / Early Morning (Clear)': 'ভোর / সূর্যোদয় (পরিষ্কার)',
+      'Force Sunrise Overcast / Storm Clouds': 'ভোরের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Morning Overcast / Storm Clouds': 'সকালের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunny / Day': 'রৌদ্রোজ্জ্বল দিন (Sunny)',
+      'Force Day Overcast / Storm Clouds': 'দিনের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunset / Evening': 'সন্ধ্যা / সূর্যাস্ত (Sunset)',
+      'Force Sunset / Evening (Clear)': 'সন্ধ্যা / সূর্যাস্ত (পরিষ্কার)',
+      'Force Sunset / Evening Overcast': 'সন্ধ্যার মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Night': 'রাত (Night)',
+      'Force Night Overcast / Storm Clouds': 'রাতের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Foggy (Day)': 'কুয়াশাচ্ছন্ন দিন (Fog Day)',
       'Force Foggy (Night)': 'কুয়াশাচ্ছন্ন রাত (Fog Night)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
       'Dry / Normal': 'শুষ্ক / স্বাভাবিক',
       'Sunrise / Early Morning mode active.': 'ভোর / সূর্যোদয় সক্রিয় (Sunrise)',
+      'Sunrise Overcast mode active.': 'ভোরের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
+      'Morning Overcast mode active.': 'সকালের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
+      'Day Overcast mode active.': 'দিনের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
       'Sunset / Evening mode active.': 'সন্ধ্যা / সূর্যাস্ত সক্রিয় (Sunset)',
+      'Sunset Overcast mode active.': 'সন্ধ্যার মেঘাচ্ছন্ন আকাশ সক্রিয়।',
+      'Night Overcast mode active.': 'রাতের মেঘাচ্ছন্ন আকাশ সক্রিয়।',
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
       'Switch to light mode': 'লাইট মোড চালু করুন',
       'Switch to Bangla': 'বাংলায় পরিবর্তন করুন',
@@ -9581,14 +9825,26 @@
         } else if (rainFareMode === 'sunrise' || currentMode === 'sunrise') {
           iconContainer.className = 'flex items-center justify-center text-rose-400 dark:text-rose-300';
           iconContainer.innerHTML = '<i data-lucide="sunrise" class="w-3.5 h-3.5" aria-hidden="true"></i>';
+        } else if (rainFareMode === 'sunrise_overcast' || currentMode === 'sunrise_overcast') {
+          iconContainer.className = 'flex items-center justify-center text-indigo-300';
+          iconContainer.innerHTML = '<i data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>';
+        } else if (rainFareMode === 'morning_overcast' || currentMode === 'morning_overcast' || rainFareMode === 'day_overcast' || currentMode === 'day_overcast') {
+          iconContainer.className = 'flex items-center justify-center text-slate-300';
+          iconContainer.innerHTML = '<i data-lucide="cloud" class="w-3.5 h-3.5" aria-hidden="true"></i>';
         } else if (rainFareMode === 'sunset' || currentMode === 'sunset') {
           iconContainer.className = 'flex items-center justify-center text-orange-500 dark:text-orange-400';
           iconContainer.innerHTML = '<i data-lucide="sunset" class="w-3.5 h-3.5" aria-hidden="true"></i>';
+        } else if (rainFareMode === 'sunset_overcast' || currentMode === 'sunset_overcast') {
+          iconContainer.className = 'flex items-center justify-center text-amber-400';
+          iconContainer.innerHTML = '<i data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>';
         } else if (rainFareMode === 'fog_day' || currentMode === 'fog_day') {
           iconContainer.className = 'flex items-center justify-center text-teal-400';
           iconContainer.innerHTML = '<i data-lucide="cloud" class="w-3.5 h-3.5" aria-hidden="true"></i>';
         } else if (rainFareMode === 'fog_night' || currentMode === 'fog_night') {
           iconContainer.className = 'flex items-center justify-center text-slate-300';
+          iconContainer.innerHTML = '<i data-lucide="cloud-moon" class="w-3.5 h-3.5" aria-hidden="true"></i>';
+        } else if (rainFareMode === 'night_overcast' || currentMode === 'night_overcast') {
+          iconContainer.className = 'flex items-center justify-center text-purple-300';
           iconContainer.innerHTML = '<i data-lucide="cloud-moon" class="w-3.5 h-3.5" aria-hidden="true"></i>';
         } else if (rainFareMode === 'night' || currentMode === 'night') {
           iconContainer.className = 'flex items-center justify-center text-indigo-400';
@@ -9608,12 +9864,22 @@
           status.textContent = getLocalizedText('Rain fare is on (manual override).');
         } else if (rainFareMode === 'sunrise') {
           status.textContent = getLocalizedText('Sunrise / Early Morning mode active.');
+        } else if (rainFareMode === 'sunrise_overcast') {
+          status.textContent = getLocalizedText('Sunrise Overcast mode active.');
+        } else if (rainFareMode === 'morning_overcast') {
+          status.textContent = getLocalizedText('Morning Overcast mode active.');
         } else if (rainFareMode === 'sun') {
           status.textContent = getLocalizedText('Sunny Day mode active.');
+        } else if (rainFareMode === 'day_overcast') {
+          status.textContent = getLocalizedText('Day Overcast mode active.');
         } else if (rainFareMode === 'sunset') {
           status.textContent = getLocalizedText('Sunset / Evening mode active.');
+        } else if (rainFareMode === 'sunset_overcast') {
+          status.textContent = getLocalizedText('Sunset Overcast mode active.');
         } else if (rainFareMode === 'night') {
           status.textContent = getLocalizedText('Night mode active.');
+        } else if (rainFareMode === 'night_overcast') {
+          status.textContent = getLocalizedText('Night Overcast mode active.');
         } else if (rainFareMode === 'fog_day') {
           status.textContent = getLocalizedText('Foggy (Day) mode active.');
         } else if (rainFareMode === 'fog_night') {
@@ -12670,19 +12936,72 @@
       });
     })();
 
-    // Dynamic Weather and Time-of-Day Atmosphere Engine (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
+    // 6 Seasons of Bangladesh (Ritu) Solar Ephemeris & Daylight Engine for Dhaka (lat: 23.8103° N, lon: 90.4125° E)
+    function getDhakaSolarTimes(date = new Date()) {
+      const dhakaSolarTable = [
+        { month: 0, season: 'Sheet (Winter)', sunrise: 402, sunset: 1050, duskEnd: 1075 }, // Jan
+        { month: 1, season: 'Basanta (Spring)', sunrise: 390, sunset: 1072, duskEnd: 1097 }, // Feb
+        { month: 2, season: 'Basanta (Spring)', sunrise: 365, sunset: 1088, duskEnd: 1113 }, // Mar
+        { month: 3, season: 'Grishma (Summer)', sunrise: 335, sunset: 1102, duskEnd: 1128 }, // Apr
+        { month: 4, season: 'Grishma (Summer)', sunrise: 315, sunset: 1118, duskEnd: 1145 }, // May
+        { month: 5, season: 'Borsha (Monsoon)', sunrise: 311, sunset: 1129, duskEnd: 1158 }, // Jun
+        { month: 6, season: 'Borsha (Monsoon)', sunrise: 318, sunset: 1129, duskEnd: 1157 }, // Jul
+        { month: 7, season: 'Sharat (Autumn)', sunrise: 333, sunset: 1110, duskEnd: 1135 }, // Aug
+        { month: 8, season: 'Sharat (Autumn)', sunrise: 345, sunset: 1080, duskEnd: 1105 }, // Sep
+        { month: 9, season: 'Hemanta (Late Autumn)', sunrise: 358, sunset: 1050, duskEnd: 1075 }, // Oct
+        { month: 10, season: 'Hemanta (Late Autumn)', sunrise: 377, sunset: 1035, duskEnd: 1060 }, // Nov
+        { month: 11, season: 'Sheet (Winter)', sunrise: 397, sunset: 1035, duskEnd: 1060 }  // Dec
+      ];
+
+      const m = date.getMonth();
+      const nextM = (m + 1) % 12;
+      const dayProgress = date.getDate() / 31;
+      const cur = dhakaSolarTable[m];
+      const next = dhakaSolarTable[nextM];
+
+      const sunrise = Math.round(cur.sunrise + (next.sunrise - cur.sunrise) * dayProgress);
+      const sunset = Math.round(cur.sunset + (next.sunset - cur.sunset) * dayProgress);
+      const duskEnd = Math.round(cur.duskEnd + (next.duskEnd - cur.duskEnd) * dayProgress);
+
+      const dawnStart = sunrise - 25;
+      const sunriseEnd = sunrise + 25;
+      const morningEnd = sunrise + 160;
+
+      return {
+        season: cur.season,
+        sunrise,
+        sunset,
+        duskEnd,
+        dawnStart,
+        sunriseEnd,
+        morningEnd
+      };
+    }
+    window.getDhakaSolarTimes = getDhakaSolarTimes;
+
+    // Dynamic Weather and Time-of-Day Atmosphere Engine (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain, Overcast Storm)
     function updateCrossroadsAtmosphere() {
       // 1. Determine Manual Override and Rain State
       const isExplicitSunrise = typeof rainFareMode !== 'undefined' && rainFareMode === 'sunrise';
+      const isExplicitSunriseOvercast = typeof rainFareMode !== 'undefined' && rainFareMode === 'sunrise_overcast';
+      const isExplicitMorningOvercast = typeof rainFareMode !== 'undefined' && rainFareMode === 'morning_overcast';
       const isExplicitSun = typeof rainFareMode !== 'undefined' && rainFareMode === 'sun';
+      const isExplicitDayOvercast = typeof rainFareMode !== 'undefined' && rainFareMode === 'day_overcast';
       const isExplicitSunset = typeof rainFareMode !== 'undefined' && rainFareMode === 'sunset';
+      const isExplicitSunsetOvercast = typeof rainFareMode !== 'undefined' && rainFareMode === 'sunset_overcast';
       const isExplicitNight = typeof rainFareMode !== 'undefined' && rainFareMode === 'night';
+      const isExplicitNightOvercast = typeof rainFareMode !== 'undefined' && rainFareMode === 'night_overcast';
       const isExplicitFogDay = typeof rainFareMode !== 'undefined' && rainFareMode === 'fog_day';
       const isExplicitFogNight = typeof rainFareMode !== 'undefined' && rainFareMode === 'fog_night';
       const isExplicitRain = typeof rainFareMode !== 'undefined' && rainFareMode === 'rain';
       const isExplicitDry = typeof rainFareMode !== 'undefined' && rainFareMode === 'dry';
 
-      const isRainingNow = !isExplicitSunrise && !isExplicitSun && !isExplicitSunset && !isExplicitNight && !isExplicitFogDay && !isExplicitFogNight && !isExplicitDry && (
+      const isManualWeather = isExplicitSunrise || isExplicitSunriseOvercast || isExplicitMorningOvercast ||
+                              isExplicitSun || isExplicitDayOvercast || isExplicitSunset ||
+                              isExplicitSunsetOvercast || isExplicitNight || isExplicitNightOvercast ||
+                              isExplicitFogDay || isExplicitFogNight;
+
+      const isRainingNow = !isManualWeather && !isExplicitDry && (
         isExplicitRain ||
         (typeof isHeavyRain !== 'undefined' && isHeavyRain) ||
         (typeof rainFareMode !== 'undefined' && rainFareMode === 'auto' && typeof dhakaRainDetected !== 'undefined' && dhakaRainDetected === true)
@@ -12691,12 +13010,22 @@
       let mode = 'night';
       if (isExplicitSunrise) {
         mode = 'sunrise';
+      } else if (isExplicitSunriseOvercast) {
+        mode = 'sunrise_overcast';
+      } else if (isExplicitMorningOvercast) {
+        mode = 'morning_overcast';
       } else if (isExplicitSun) {
         mode = 'sun';
+      } else if (isExplicitDayOvercast) {
+        mode = 'day_overcast';
       } else if (isExplicitSunset) {
         mode = 'sunset';
+      } else if (isExplicitSunsetOvercast) {
+        mode = 'sunset_overcast';
       } else if (isExplicitNight) {
         mode = 'night';
+      } else if (isExplicitNightOvercast) {
+        mode = 'night_overcast';
       } else if (isExplicitFogDay) {
         mode = 'fog_day';
       } else if (isExplicitFogNight) {
@@ -12705,33 +13034,42 @@
         mode = 'rain';
       } else {
         // 2. Strict Full Automation Logic (Auto Weather & Dry Mode)
-        // Automatically reads local device clock hour and minute:
-        // - 05:00 AM – 06:59 AM: Automatically trigger Sunrise / Early Morning mode.
-        // - 07:00 AM – 04:59 PM: Automatically trigger Sunny / Day mode.
-        // - 05:00 PM – 06:30 PM: Automatically trigger Sunset / Evening mode (warm golden hour lighting).
-        // - 06:31 PM – 04:59 AM: Automatically trigger Night mode (stars, deep dark sky, full window/headlight illumination).
+        // Bangladesh seasonal solar daylight calculation engine for Dhaka:
         const now = new Date();
-        const localHour = now.getHours();
-        const localMin = now.getMinutes();
-        const totalMinutes = localHour * 60 + localMin;
-        const isDawnTime = totalMinutes >= 300 && totalMinutes < 420;
-        const isDayTime = totalMinutes >= 420 && totalMinutes < 1020;
-        const isSunsetTime = totalMinutes >= 1020 && totalMinutes <= 1110;
+        const solar = getDhakaSolarTimes(now);
+        const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-        // Auto Weather live Dhaka condition sync (Fog / Clear / Day / Night):
-        if (rainFareMode === 'auto' && typeof dhakaLiveCondition !== 'undefined' && dhakaLiveCondition === 'fog') {
-          if (isDayTime || isDawnTime) {
+        const isDawnPeriod = totalMinutes >= solar.dawnStart && totalMinutes < solar.sunriseEnd;
+        const isMorningPeriod = totalMinutes >= solar.sunriseEnd && totalMinutes < solar.morningEnd;
+        const isDayPeriod = totalMinutes >= solar.morningEnd && totalMinutes < solar.sunset;
+        const isSunsetPeriod = totalMinutes >= solar.sunset && totalMinutes < solar.duskEnd;
+
+        // Auto Weather live Dhaka condition sync (Overcast / Fog / Clear / Day / Night):
+        if (rainFareMode === 'auto' && typeof dhakaLiveCondition !== 'undefined' && dhakaLiveCondition === 'overcast') {
+          if (isDawnPeriod) {
+            mode = 'sunrise_overcast';
+          } else if (isMorningPeriod) {
+            mode = 'morning_overcast';
+          } else if (isDayPeriod) {
+            mode = 'day_overcast';
+          } else if (isSunsetPeriod) {
+            mode = 'sunset_overcast';
+          } else {
+            mode = 'night_overcast';
+          }
+        } else if (rainFareMode === 'auto' && typeof dhakaLiveCondition !== 'undefined' && dhakaLiveCondition === 'fog') {
+          if (isDawnPeriod || isMorningPeriod || isDayPeriod) {
             mode = 'fog_day';
           } else {
             mode = 'fog_night';
           }
         } else {
-          // Time-of-day progression (Clear/Sunny, Overcast, or Offline fallback):
-          if (isDawnTime) {
+          // Time-of-day progression (Clear/Sunny or Offline fallback):
+          if (isDawnPeriod) {
             mode = 'sunrise';
-          } else if (isDayTime) {
+          } else if (isMorningPeriod || isDayPeriod) {
             mode = 'sun';
-          } else if (isSunsetTime) {
+          } else if (isSunsetPeriod) {
             mode = 'sunset';
           } else {
             mode = 'night';
@@ -12770,6 +13108,14 @@
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-rose-400/60 text-rose-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-400 animate-pulse shrink-0';
           badgeText.textContent = '🌅 DAWN SUNRISE · EARLY MORNING GLOW';
+        } else if (mode === 'sunrise_overcast') {
+          badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-400/60 text-indigo-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
+          badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400 animate-pulse shrink-0';
+          badgeText.textContent = '🌅 DAWN STORM SHELF · MUTED ROSE HORIZON';
+        } else if (mode === 'morning_overcast') {
+          badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-slate-400/60 text-slate-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
+          badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-300 animate-pulse shrink-0';
+          badgeText.textContent = '☁️ MORNING OVERCAST · DRIFTING SLATE CLOUDS';
         } else if (mode === 'sun') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-amber-500/60 text-amber-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse shrink-0';
@@ -12778,10 +13124,18 @@
           } else {
             badgeText.textContent = '☀️ SUNNY CLEAR DAY · HIGH VISIBILITY';
           }
+        } else if (mode === 'day_overcast') {
+          badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-zinc-500/60 text-zinc-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
+          badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-zinc-400 animate-pulse shrink-0';
+          badgeText.textContent = '⛈️ THUNDERHEAD OVERCAST · DIM SKY & SQUALL';
         } else if (mode === 'sunset') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-orange-500/60 text-orange-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-400 animate-pulse shrink-0';
           badgeText.textContent = '🌇 GOLDEN HOUR SUNSET · WARM DUSK GLOW';
+        } else if (mode === 'sunset_overcast') {
+          badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-amber-600/70 text-amber-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
+          badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse shrink-0';
+          badgeText.textContent = '🌇 BRUISED DUSK OVERCAST · COPPER HORIZON';
         } else if (mode === 'fog_day') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-teal-400/60 text-teal-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-teal-300 animate-pulse shrink-0';
@@ -12790,6 +13144,10 @@
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-slate-500/60 text-slate-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 animate-pulse shrink-0';
           badgeText.textContent = '🌫️ NIGHT SMOG & FOG · HIGH-BEAM REFLECTIONS';
+        } else if (mode === 'night_overcast') {
+          badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-purple-500/60 text-purple-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
+          badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-purple-400 animate-pulse shrink-0';
+          badgeText.textContent = '☁️ NIGHT STORM CLOUDS · NEON & HEADLIGHTS';
         } else {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-500/60 text-indigo-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400 animate-pulse shrink-0';
@@ -12819,22 +13177,18 @@
       if (e) e.stopPropagation();
       const container = document.getElementById('dhakaCrossroadsContainer');
       const currentMode = container?.dataset?.crossroadsWeather || 'night';
-      let nextMode = 'sunrise';
-      if (currentMode === 'sunrise') {
-        nextMode = 'sun';
-      } else if (currentMode === 'sun') {
-        nextMode = 'sunset';
-      } else if (currentMode === 'sunset') {
-        nextMode = 'night';
-      } else if (currentMode === 'night') {
-        nextMode = 'fog_day';
-      } else if (currentMode === 'fog_day') {
-        nextMode = 'fog_night';
-      } else if (currentMode === 'fog_night') {
-        nextMode = 'rain';
-      } else {
-        nextMode = 'sunrise';
-      }
+      const modesOrder = [
+        'sunrise', 'sunrise_overcast', 'morning_overcast',
+        'sun', 'day_overcast',
+        'sunset', 'sunset_overcast',
+        'night', 'night_overcast',
+        'fog_day', 'fog_night',
+        'rain'
+      ];
+      let nextIdx = modesOrder.indexOf(currentMode) + 1;
+      if (nextIdx >= modesOrder.length || nextIdx < 0) nextIdx = 0;
+      const nextMode = modesOrder[nextIdx];
+
       rainFareMode = nextMode;
       const select = document.getElementById('rainModeSelect');
       if (select) {
