@@ -2861,6 +2861,31 @@
     #mainHeader[data-header-weather="night_overcast"] #rainModeSelect {
       color: #f1f5f9 !important;
     }
+    /* Weather Selector Scrollable Dropdown (Max 5 Visible Items ~220px) */
+    .weather-dropdown-menu,
+    .weather-select select,
+    .custom-dropdown-list,
+    #rainModeSelect {
+      max-height: 220px !important; /* Height approx equal to 5 dropdown option items */
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      scrollbar-width: thin; /* Firefox scrollbar */
+    }
+
+    /* Custom Webkit scrollbar for sleek dark-glass theme consistency */
+    .weather-dropdown-menu::-webkit-scrollbar,
+    .weather-select select::-webkit-scrollbar,
+    .custom-dropdown-list::-webkit-scrollbar,
+    #rainModeSelect::-webkit-scrollbar {
+      width: 6px;
+    }
+    .weather-dropdown-menu::-webkit-scrollbar-thumb,
+    .weather-select select::-webkit-scrollbar-thumb,
+    .custom-dropdown-list::-webkit-scrollbar-thumb,
+    #rainModeSelect::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
     #mainHeader[data-header-weather="sunrise"] .header-brand-title,
     #mainHeader[data-header-weather="sunset"] .header-brand-title,
     #mainHeader[data-header-weather="fog_sunrise"] .header-brand-title,
@@ -3488,7 +3513,7 @@
         </button>
 
         <!-- Weather Console Pill (Clean, without overlapping floating popup) -->
-        <div id="headerWeatherPill" class="relative inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0">
+        <div id="headerWeatherPill" class="weather-select relative inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:border-sky-300 dark:hover:border-sky-500 shrink-0">
           <span id="weatherIconContainer" class="flex items-center justify-center text-sky-500">
             <i id="headerWeatherIcon" data-lucide="cloud-sun" class="w-3.5 h-3.5" aria-hidden="true"></i>
           </span>
