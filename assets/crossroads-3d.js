@@ -452,6 +452,17 @@
       awn.position.set(signboard.ox || 0, (signboard.y || 16) + signboard.h / 2 + 1.5, (depth / 2) + 5);
       awn.rotation.x = 0.25;
       group.add(awn);
+
+      // Architectural Entryway Porch Sconce & Downlight
+      const porchLampGeo = new THREE.SphereGeometry(1.6, 8, 8);
+      const porchLampMat = new THREE.MeshBasicMaterial({ color: 0xfff08a });
+      const porchLamp = new THREE.Mesh(porchLampGeo, porchLampMat);
+      porchLamp.position.set(signboard.ox || 0, (signboard.y || 16) - 4, (depth / 2) + 3);
+      group.add(porchLamp);
+
+      const porchLight = new THREE.PointLight(0xfef08a, 1.2, 55);
+      porchLight.position.set(signboard.ox || 0, (signboard.y || 16) - 5, (depth / 2) + 6);
+      group.add(porchLight);
     }
 
     freezeStatic(group);
@@ -1493,12 +1504,23 @@
     sunLight.shadow.camera.bottom = -d;
     scene.add(sunLight);
 
-    // 4 Corner Streetlights
+    // Streetlights along Crossroads & Sidewalks
     const cornerLightCoords = [
+      // 4 Intersection corners
       [-135, 26, -100],
       [135, 26, -100],
       [-135, 26, 100],
-      [135, 26, 100]
+      [135, 26, 100],
+      // West road sidewalks
+      [-320, 26, -100],
+      [-480, 26, -100],
+      [-320, 26, 100],
+      [-480, 26, 100],
+      // East road sidewalks
+      [320, 26, -100],
+      [480, 26, -100],
+      [320, 26, 100],
+      [480, 26, 100]
     ];
     cornerLightCoords.forEach(pos => {
       const pl = new THREE.PointLight(0xfef08a, 1.5, 260);
@@ -1589,12 +1611,12 @@
     addSidewalkCorner(480, 260, -350, 210);
     addSidewalkCorner(480, 260, 350, 210);
 
-    // Miniature Trees along Sidewalks
-    [-460, -310, -170, 170, 310, 460].forEach(tx => {
+    // Miniature Decorative Trees along Sidewalks
+    [-520, -460, -390, -310, -230, -170, 170, 230, 310, 390, 460, 520].forEach(tx => {
       addTree(tx, -88);
       addTree(tx, 88);
     });
-    [-220, -140, 140, 220].forEach(tz => {
+    [-260, -220, -180, -140, 140, 180, 220, 260].forEach(tz => {
       addTree(-118, tz);
       addTree(118, tz);
     });
@@ -2062,6 +2084,13 @@
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
     if (currentMode !== lastWeatherMode) {
       lastWeatherMode = currentMode;
+      if (cornerPointLights && cornerPointLights.length) {
+        const baseIntensity = currentMode === 'fog_night' ? 2.4 : (currentMode === 'sun' ? 0.3 : 1.5);
+        cornerPointLights.forEach(pl => {
+          pl.intensity = baseIntensity;
+          pl.color.setHex(0xfef08a);
+        });
+      }
       if (currentMode === 'sunrise') {
         scene.background.setHex(0x311b38);
         if (scene.fog) {
@@ -2203,18 +2232,24 @@
           ambientLight.intensity = 0.85;
         }
       } else if (currentMode === 'fog_night') {
-        scene.background.setHex(0x050914);
+        scene.background.setHex(0x060c18);
         if (scene.fog) {
-          scene.fog.color.setHex(0x0a1120);
-          scene.fog.density = 0.0025;
+          scene.fog.color.setHex(0x0c1527);
+          scene.fog.density = 0.0020;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x60a5fa);
-          sunLight.intensity = 0.42;
+          sunLight.color.setHex(0x93c5fd);
+          sunLight.intensity = 0.58;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = 0.52;
+          ambientLight.color.setHex(0x273549);
+          ambientLight.intensity = 0.68;
+        }
+        if (cornerPointLights && cornerPointLights.length) {
+          cornerPointLights.forEach(pl => {
+            pl.intensity = 2.4;
+            pl.color.setHex(0xfff08a);
+          });
         }
       } else if (currentMode === 'rain') {
         scene.background.setHex(0x0a1120);

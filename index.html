@@ -877,44 +877,73 @@
     [data-crossroads-weather="fog_night"] .cr-headlight-beam {
       opacity: 1.0 !important;
       mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px rgba(254, 240, 138, 0.95)) drop-shadow(0 0 28px rgba(253, 224, 71, 0.8)) !important;
+      filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 18px rgba(254, 240, 138, 1)) drop-shadow(0 0 38px rgba(253, 224, 71, 0.95)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-headlight-bulb {
-      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 10px #fef08a) drop-shadow(0 0 20px rgba(254, 240, 138, 0.95)) !important;
+      filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 14px #fef08a) drop-shadow(0 0 28px rgba(254, 240, 138, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
     [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
     [data-crossroads-weather="fog_night"] #crossroadsMetroTrain circle[fill="#ff2a54"] {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 9px #ff2a54) drop-shadow(0 0 18px rgba(255, 23, 68, 0.9)) !important;
+      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 14px #ff2a54) drop-shadow(0 0 26px rgba(255, 23, 68, 1)) !important;
       opacity: 1 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-cyan {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #00f2fe) drop-shadow(0 0 20px rgba(0, 242, 254, 1)) !important;
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #00f2fe) drop-shadow(0 0 28px rgba(0, 242, 254, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-amber {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #fde047) drop-shadow(0 0 20px rgba(251, 191, 36, 1)) !important;
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #fde047) drop-shadow(0 0 28px rgba(251, 191, 36, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-magenta {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #f0abfc) drop-shadow(0 0 20px rgba(217, 70, 239, 1)) !important;
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #f0abfc) drop-shadow(0 0 28px rgba(217, 70, 239, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-green {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #34d399) drop-shadow(0 0 20px rgba(16, 185, 129, 1)) !important;
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #34d399) drop-shadow(0 0 28px rgba(16, 185, 129, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-red {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #ff2a54) drop-shadow(0 0 20px rgba(255, 42, 84, 1)) !important;
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #ff2a54) drop-shadow(0 0 28px rgba(255, 42, 84, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-neon-blue {
-      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 9px #38bdf8) drop-shadow(0 0 22px rgba(56, 189, 248, 1)) !important;
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 12px #38bdf8) drop-shadow(0 0 30px rgba(56, 189, 248, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] .window-glow-pulse {
-      filter: drop-shadow(0 0 4px #fffbeb) drop-shadow(0 0 10px #fef08a) drop-shadow(0 0 22px rgba(251, 191, 36, 0.95)) !important;
+      filter: drop-shadow(0 0 5px #fffbeb) drop-shadow(0 0 14px #fef08a) drop-shadow(0 0 30px rgba(251, 191, 36, 1)) !important;
     }
     [data-crossroads-weather="fog_night"] ellipse[fill*="streetlampPoolGrad"] {
-      opacity: 0.88 !important;
-      filter: drop-shadow(0 0 24px rgba(254, 240, 138, 0.75)) !important;
+      opacity: 0.96 !important;
+      filter: drop-shadow(0 0 12px #ffffff) drop-shadow(0 0 32px rgba(254, 240, 138, 0.95)) !important;
     }
     [data-crossroads-weather="fog_night"] circle[filter*="crLightGlow"] {
-      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px #fef08a) drop-shadow(0 0 26px rgba(251, 191, 36, 1)) !important;
+      filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 16px #fef08a) drop-shadow(0 0 35px rgba(251, 191, 36, 1)) !important;
+    }
+
+    /* Building Architectural Entryway / Porch Sconces & Threshold Downlights */
+    .cr-entryway-light {
+      transition: opacity 0.8s ease, filter 0.8s ease;
+      will-change: opacity, filter;
+      opacity: 0.95;
+      filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 6px #fde047) drop-shadow(0 0 14px rgba(251, 191, 36, 0.85));
+    }
+    .cr-entryway-downlight {
+      transition: opacity 0.8s ease;
+      will-change: opacity;
+      opacity: 0.82;
+      mix-blend-mode: screen;
+    }
+    [data-crossroads-weather="sun"] .cr-entryway-light {
+      opacity: 0.25 !important;
+      filter: none !important;
+    }
+    [data-crossroads-weather="sun"] .cr-entryway-downlight {
+      opacity: 0.08 !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-entryway-light {
+      opacity: 1.0 !important;
+      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 14px #fde047) drop-shadow(0 0 28px rgba(251, 191, 36, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-entryway-downlight {
+      opacity: 1.0 !important;
+      filter: drop-shadow(0 0 10px rgba(254, 240, 138, 0.85)) !important;
     }
     [data-crossroads-weather="rain"] .cr-headlight-beam {
       opacity: 0.82 !important;
@@ -4088,16 +4117,31 @@
             </linearGradient>
 
             <linearGradient id="fogNightHazeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#0f172a" stop-opacity="0.65"/>
-              <stop offset="50%" stop-color="#1e293b" stop-opacity="0.45"/>
-              <stop offset="100%" stop-color="#334155" stop-opacity="0.5"/>
+              <stop offset="0%" stop-color="#0f172a" stop-opacity="0.40"/>
+              <stop offset="50%" stop-color="#1e293b" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="#334155" stop-opacity="0.30"/>
             </linearGradient>
 
             <radialGradient id="fogLampBloomGrad" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-              <stop offset="25%" stop-color="#fef08a" stop-opacity="0.85"/>
-              <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.38"/>
+              <stop offset="25%" stop-color="#fef08a" stop-opacity="0.90"/>
+              <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.45"/>
               <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
+            </radialGradient>
+
+            <!-- Building Architectural Entryway / Porch Downlight Gradients -->
+            <linearGradient id="entrywayDownlightBeamGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+              <stop offset="25%" stop-color="#fef08a" stop-opacity="0.75"/>
+              <stop offset="65%" stop-color="#f59e0b" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#b45309" stop-opacity="0"/>
+            </linearGradient>
+
+            <radialGradient id="entrywayDownlightPoolGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.90"/>
+              <stop offset="30%" stop-color="#fef08a" stop-opacity="0.70"/>
+              <stop offset="70%" stop-color="#f59e0b" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#b45309" stop-opacity="0"/>
             </radialGradient>
 
             <!-- Granular Dark Ash Overcast & Dawn/Dusk Fog Sky Gradients -->
@@ -4535,6 +4579,11 @@
               <rect x="385" y="264" width="69" height="15" rx="2" fill="#090d16" stroke="#b45309" stroke-width="0.8"/>
               <text x="419" y="275" fill="#ffffff" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ঢাকা বুক ডিপো</text>
               <rect x="388" y="282" width="63" height="30" fill="#fef08a" opacity="0.95" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+              <!-- Architectural Entryway Porch Downlight & Glowing Sconce Lamp -->
+              <polygon points="414,280 424,280 436,315 402,315" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="419" cy="315" rx="18" ry="6" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="417" y="277" width="4" height="4" fill="#1e293b"/>
+              <circle cx="419" cy="280" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
             </g>
 
             <!-- Quadrant B: Top-Right (NE) Dhaka Architecture (2D Flat View) -->
@@ -4560,6 +4609,11 @@
               <rect x="741" y="264" width="66" height="15" rx="2" fill="#090d16" stroke="#7e22ce" stroke-width="0.8"/>
               <text x="774" y="275" fill="#ffffff" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">ফ্যাশন কর্নার</text>
               <rect x="744" y="281" width="60" height="30" fill="#f5d0fe" opacity="0.95" class="cr-neon-magenta" filter="url(#crWindowGlowMagenta)"/>
+              <!-- Architectural Entryway Porch Downlight & Glowing Sconce Lamp -->
+              <polygon points="769,280 779,280 791,315 757,315" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="774" cy="315" rx="18" ry="6" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="772" y="277" width="4" height="4" fill="#1e293b"/>
+              <circle cx="774" cy="280" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
 
               <!-- NE-2: Turquoise Commercial & Tech ("বাংলা টেক") with Vivid Cyan Glow -->
               <rect x="824" y="152" width="86" height="173" rx="4" fill="url(#bldgTurquoiseGrad)" stroke="#14b8a6" stroke-width="1.2"/>
@@ -4582,6 +4636,11 @@
               <rect x="833" y="265" width="68" height="15" rx="2" fill="#090d16" stroke="#0f766e" stroke-width="0.8"/>
               <text x="867" y="277" fill="#00f2fe" font-size="8.8" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">বাংলা টেক</text>
               <rect x="836" y="283" width="62" height="28" fill="#a5f3fc" opacity="0.95" class="cr-neon-cyan" filter="url(#crWindowGlowCyan)"/>
+              <!-- Architectural Entryway Porch Downlight & Glowing Sconce Lamp -->
+              <polygon points="862,282 872,282 884,314 850,314" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="867" cy="314" rx="18" ry="6" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="865" y="279" width="4" height="4" fill="#1e293b"/>
+              <circle cx="867" cy="282" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
 
               <!-- NE-3: Coral & Rose 5-Story Residential -->
               <rect x="918" y="126" width="100" height="199" rx="4" fill="url(#bldgCoralGrad)" stroke="#f43f5e" stroke-width="1.2"/>
@@ -4609,6 +4668,11 @@
               <rect x="929" y="267" width="78" height="15" rx="2" fill="#090d16" stroke="#be123c" stroke-width="0.8"/>
               <text x="968" y="279" fill="#fef08a" font-size="9.5" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সুপার শপ</text>
               <rect x="932" y="285" width="72" height="26" fill="#fecdd3" opacity="0.95" class="cr-neon-red"/>
+              <!-- Architectural Entryway Porch Downlight & Glowing Sconce Lamp -->
+              <polygon points="963,284 973,284 985,314 951,314" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="968" cy="314" rx="18" ry="6" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="966" y="281" width="4" height="4" fill="#1e293b"/>
+              <circle cx="968" cy="284" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
 
               <!-- NE-4: "মিরপুর প্লাজা" (Mirpur Plaza) Landmark Glass & Indigo High-Rise -->
               <rect x="1026" y="100" width="166" height="225" rx="5" fill="url(#bldgBlueGrad)" stroke="#38bdf8" stroke-width="1.5"/>
@@ -4718,6 +4782,11 @@
               <rect x="377" y="628" width="82" height="16" rx="2" fill="#090d16" stroke="#b45309" stroke-width="0.8"/>
               <text x="418" y="640" fill="#fde047" font-size="9" font-weight="700" text-anchor="middle" font-family="'Noto Sans Bengali', sans-serif" class="cr-signboard-text">সোনালী জুয়েলার্স</text>
               <rect x="380" y="646" width="76" height="26" fill="#fef08a" opacity="1" class="cr-neon-amber" filter="url(#crWindowGlowAmber)"/>
+              <!-- Architectural Entryway Porch Downlight & Glowing Sconce Lamp -->
+              <polygon points="413,646 423,646 435,674 401,674" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="418" cy="674" rx="18" ry="5" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="416" y="643" width="4" height="4" fill="#1e293b"/>
+              <circle cx="418" cy="646" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
             </g>
 
             <!-- Quadrant D: Bottom-Right (SE) Architecture (2D Flat View) -->
@@ -4749,6 +4818,16 @@
               <!-- Radiant Green Medical Cross -->
               <rect x="758" y="652" width="14" height="4" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
               <rect x="763" y="647" width="4" height="14" fill="#00ff88" class="cr-neon-green" filter="url(#crNeonGreenGlow)"/>
+              <!-- Architectural Entryway Dual Porch Downlights & Sconce Lamps -->
+              <polygon points="788,646 798,646 810,674 776,674" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="793" cy="674" rx="18" ry="5" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="791" y="643" width="4" height="4" fill="#1e293b"/>
+              <circle cx="793" cy="646" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
+
+              <polygon points="833,646 843,646 855,674 821,674" fill="url(#entrywayDownlightBeamGrad)" class="cr-entryway-downlight"/>
+              <ellipse cx="838" cy="674" rx="18" ry="5" fill="url(#entrywayDownlightPoolGrad)" class="cr-entryway-downlight"/>
+              <rect x="836" y="643" width="4" height="4" fill="#1e293b"/>
+              <circle cx="838" cy="646" r="3.2" fill="#ffffff" stroke="#fde047" stroke-width="1.4" class="cr-entryway-light" filter="url(#crLightGlow)"/>
 
               <!-- SE-2: Modern Commercial Building & Authentic Billboard ("সবাই মিলে একটি ভালো ঢাকা") -->
               <rect x="880" y="525" width="260" height="155" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
@@ -5501,35 +5580,187 @@
                ======================================================== -->
 
           <!-- Enhanced Streetlight Radial Illumination Pools on Asphalt (High Luminance) -->
-          <ellipse cx="460" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="740" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="460" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="740" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <!-- 4 Corner Intersection Illumination Pools -->
+          <ellipse cx="460" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="740" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="460" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="740" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+
+          <!-- Sidewalk Illumination Pools along East/West Avenues -->
+          <ellipse cx="180" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="325" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="180" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="325" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="880" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="1030" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="880" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
+          <ellipse cx="1030" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
 
           <!-- Streetlight Poles & Fixtures with Glowing Warm Lantern Heads -->
           <g stroke="#64748b" stroke-width="2">
-            <!-- NW Streetlamp -->
+            <!-- NW Corner Streetlamp -->
             <line x1="465" y1="320" x2="465" y2="295"/>
             <path d="M 465,295 Q 465,285 455,288" fill="none"/>
-            <circle cx="454" cy="289" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
+            <circle cx="454" cy="289" r="4.8" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
 
-            <!-- NE Streetlamp -->
+            <!-- NE Corner Streetlamp -->
             <line x1="735" y1="320" x2="735" y2="295"/>
             <path d="M 735,295 Q 735,285 745,288" fill="none"/>
-            <circle cx="746" cy="289" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
+            <circle cx="746" cy="289" r="4.8" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
 
-            <!-- SW Streetlamp -->
+            <!-- SW Corner Streetlamp -->
             <line x1="465" y1="520" x2="465" y2="545"/>
             <path d="M 465,545 Q 465,555 455,552" fill="none"/>
-            <circle cx="454" cy="551" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
+            <circle cx="454" cy="551" r="4.8" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
 
-            <!-- SE Streetlamp -->
+            <!-- SE Corner Streetlamp -->
             <line x1="735" y1="520" x2="735" y2="545"/>
             <path d="M 735,545 Q 735,555 745,552" fill="none"/>
-            <circle cx="746" cy="551" r="4.5" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
+            <circle cx="746" cy="551" r="4.8" fill="#ffffff" stroke="#fef08a" stroke-width="2" filter="url(#crLightGlow)"/>
+
+            <!-- West North Sidewalk Streetlamps -->
+            <line x1="180" y1="325" x2="180" y2="300"/>
+            <path d="M 180,300 Q 180,290 170,293" fill="none"/>
+            <circle cx="169" cy="294" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <line x1="325" y1="325" x2="325" y2="300"/>
+            <path d="M 325,300 Q 325,290 315,293" fill="none"/>
+            <circle cx="314" cy="294" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <!-- West South Sidewalk Streetlamps -->
+            <line x1="180" y1="515" x2="180" y2="540"/>
+            <path d="M 180,540 Q 180,550 170,547" fill="none"/>
+            <circle cx="169" cy="546" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <line x1="325" y1="515" x2="325" y2="540"/>
+            <path d="M 325,540 Q 325,550 315,547" fill="none"/>
+            <circle cx="314" cy="546" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <!-- East North Sidewalk Streetlamps -->
+            <line x1="880" y1="325" x2="880" y2="300"/>
+            <path d="M 880,300 Q 880,290 890,293" fill="none"/>
+            <circle cx="891" cy="294" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <line x1="1030" y1="325" x2="1030" y2="300"/>
+            <path d="M 1030,300 Q 1030,290 1040,293" fill="none"/>
+            <circle cx="1041" cy="294" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <!-- East South Sidewalk Streetlamps -->
+            <line x1="880" y1="515" x2="880" y2="540"/>
+            <path d="M 880,540 Q 880,550 890,547" fill="none"/>
+            <circle cx="891" cy="546" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
+
+            <line x1="1030" y1="515" x2="1030" y2="540"/>
+            <path d="M 1030,540 Q 1030,550 1040,547" fill="none"/>
+            <circle cx="1041" cy="546" r="4.2" fill="#ffffff" stroke="#fef08a" stroke-width="1.8" filter="url(#crLightGlow)"/>
           </g>
 
-          <!-- Lush Green Roadside Trees & Shrubbery removed to reveal clean building facades -->
+          <!-- Decorative Urban Dhaka Trees (Lush Green Canopies Spaced on Sidewalks) -->
+          <g id="crDecorativeTreesGroup">
+            <!-- 1. NW Sidewalk Trees (Planted neatly in sidewalk bays between buildings and road) -->
+            <g id="crTree_NW1" transform="translate(100, 324)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_NW2" transform="translate(240, 324)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_NW3" transform="translate(362, 324)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="13" fill="#14532d"/>
+              <circle cx="-3" cy="-24" r="9" fill="#166534"/>
+              <circle cx="3" cy="-23" r="10" fill="#15803d"/>
+              <circle cx="0" cy="-27" r="7" fill="#22c55e" opacity="0.85"/>
+            </g>
+
+            <!-- 2. NE Sidewalk Trees -->
+            <g id="crTree_NE1" transform="translate(820, 324)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_NE2" transform="translate(950, 324)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_NE3" transform="translate(1100, 324)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="13" fill="#14532d"/>
+              <circle cx="-3" cy="-24" r="9" fill="#166534"/>
+              <circle cx="3" cy="-23" r="10" fill="#15803d"/>
+              <circle cx="0" cy="-27" r="7" fill="#22c55e" opacity="0.85"/>
+            </g>
+
+            <!-- 3. SW Sidewalk Trees -->
+            <g id="crTree_SW1" transform="translate(100, 516)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_SW2" transform="translate(240, 516)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_SW3" transform="translate(362, 516)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="13" fill="#14532d"/>
+              <circle cx="-3" cy="-24" r="9" fill="#166534"/>
+              <circle cx="3" cy="-23" r="10" fill="#15803d"/>
+              <circle cx="0" cy="-27" r="7" fill="#22c55e" opacity="0.85"/>
+            </g>
+
+            <!-- 4. SE Sidewalk Trees -->
+            <g id="crTree_SE1" transform="translate(820, 516)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_SE2" transform="translate(950, 516)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="14" fill="#14532d"/>
+              <circle cx="-4" cy="-25" r="10" fill="#166534"/>
+              <circle cx="4" cy="-24" r="11" fill="#15803d"/>
+              <circle cx="0" cy="-28" r="8" fill="#22c55e" opacity="0.85"/>
+            </g>
+            <g id="crTree_SE3" transform="translate(1100, 516)">
+              <ellipse cx="0" cy="5" rx="9" ry="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+              <rect x="-2" y="-12" width="4" height="15" rx="1.5" fill="#78350f"/>
+              <circle cx="0" cy="-22" r="13" fill="#14532d"/>
+              <circle cx="-3" cy="-24" r="9" fill="#166534"/>
+              <circle cx="3" cy="-23" r="10" fill="#15803d"/>
+              <circle cx="0" cy="-27" r="7" fill="#22c55e" opacity="0.85"/>
+            </g>
+          </g>
 
 
           <!-- ========================================================
@@ -5690,16 +5921,25 @@
 
             <!-- Foggy Night Moody Dense Mist & Streetlamp Halo Blooms -->
             <g id="crFogNightLayer" class="cr-atmos-layer pointer-events-none" opacity="0">
-              <!-- Dark Smoky Night Mist Blanket -->
-              <rect width="1200" height="700" fill="url(#fogNightHazeGrad)" opacity="0.55"/>
+              <!-- Dark Smoky Night Mist Blanket (Balanced to let lights pierce vividly) -->
+              <rect width="1200" height="700" fill="url(#fogNightHazeGrad)" opacity="0.36"/>
               <!-- Drifting Night Smog/Fog Banks -->
-              <path class="fog-drift-1" d="M -150,240 Q 200,200 500,250 Q 800,290 1100,230 Q 1350,200 1550,240 L 1550,400 Q 1250,360 950,390 Q 650,430 350,380 Q 50,340 -150,390 Z" fill="#334155" opacity="0.35" filter="blur(10px)"/>
-              <path class="fog-drift-2" d="M -150,460 Q 150,500 500,450 Q 850,410 1200,470 Q 1400,500 1550,450 L 1550,620 Q 1200,570 900,610 Q 600,640 300,590 Q 50,550 -150,600 Z" fill="#1e293b" opacity="0.4" filter="blur(12px)"/>
-              <!-- Glowing Streetlamp Halo Fog Blooms (Cinematic Haze Spread) -->
-              <ellipse cx="460" cy="320" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
-              <ellipse cx="740" cy="320" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
-              <ellipse cx="460" cy="520" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
-              <ellipse cx="740" cy="520" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <path class="fog-drift-1" d="M -150,240 Q 200,200 500,250 Q 800,290 1100,230 Q 1350,200 1550,240 L 1550,400 Q 1250,360 950,390 Q 650,430 350,380 Q 50,340 -150,390 Z" fill="#334155" opacity="0.25" filter="blur(10px)"/>
+              <path class="fog-drift-2" d="M -150,460 Q 150,500 500,450 Q 850,410 1200,470 Q 1400,500 1550,450 L 1550,620 Q 1200,570 900,610 Q 600,640 300,590 Q 50,550 -150,600 Z" fill="#1e293b" opacity="0.28" filter="blur(12px)"/>
+              <!-- Glowing Streetlamp Halo Fog Blooms (Cinematic Haze Spread across all Streetlamps) -->
+              <ellipse cx="460" cy="320" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <ellipse cx="740" cy="320" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <ellipse cx="460" cy="520" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <ellipse cx="740" cy="520" rx="160" ry="120" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <!-- Sidewalk Streetlamp Halo Blooms -->
+              <ellipse cx="180" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="325" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="180" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="325" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="880" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="1030" cy="325" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="880" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
+              <ellipse cx="1030" cy="515" rx="130" ry="95" fill="url(#fogLampBloomGrad)" opacity="0.88" style="mix-blend-mode: screen;"/>
             </g>
 
             <!-- Rain & Wet Street Reflections Layer -->
