@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta name="google-site-verification" content="OV8Vll8SM-8YyLrRzLiKztvzDgoVSPrAGnKpC0N_9_A">
@@ -7744,6 +7744,10 @@
       'Checking Dhaka weather…': 'ঢাকার আবহাওয়া দেখা হচ্ছে…',
       'Dhaka weather estimate: Rain indicated (automatic)': 'ঢাকার আবহাওয়ার আনুমানিক: বৃষ্টি আছে (স্বয়ংক্রিয়)',
       'Dhaka weather estimate: No rain indicated (automatic)': 'ঢাকার আবহাওয়ার আনুমানিক: বৃষ্টি নেই (স্বয়ংক্রিয়)',
+      'Dhaka weather: Foggy / Low Visibility (automatic)': 'ঢাকার আবহাওয়া: কুয়াশাচ্ছন্ন / কম দৃশ্যমানতা (স্বয়ংক্রিয়)',
+      'Dhaka weather: Overcast / Cloudy (automatic)': 'ঢাকার আবহাওয়া: মেঘাচ্ছন্ন / মেঘলা (স্বয়ংক্রিয়)',
+      'Dhaka weather: Clear / Sunny (automatic)': 'ঢাকার আবহাওয়া: পরিষ্কার / রৌদ্রোজ্জ্বল (স্বয়ংক্রিয়)',
+      'Dhaka weather unavailable; falling back to time-of-day automation.': 'ঢাকার আবহাওয়া পাওয়া যাচ্ছে না; সময়ভিত্তিক আবহাওয়ায় ফিরে যাওয়া হচ্ছে।',
       'Dhaka weather unavailable; rain adjustment is off in automatic mode.': 'ঢাকার আবহাওয়া পাওয়া যাচ্ছে না; স্বয়ংক্রিয় মোডে বৃষ্টির অতিরিক্ত ভাড়া বন্ধ।',
       'Dhaka weather unavailable; keeping the last detected condition.': 'ঢাকার আবহাওয়া পাওয়া যাচ্ছে না; সর্বশেষ শনাক্ত অবস্থা বহাল আছে।',
       'Rain fare is on (manual override).': 'বৃষ্টির ভাড়া চালু (ম্যানুয়াল নিয়ন্ত্রণ)।',
@@ -9218,6 +9222,8 @@
     let isHeavyRain = false;
     let rainFareMode = 'auto';
     let dhakaRainDetected = null;
+    let dhakaLiveWeatherCode = null;
+    let dhakaLiveCondition = null;
     let dhakaWeatherStatus = 'checking';
     const CURRENT_LOCATION_KEY = 'bharadekhi-current-location';
     let currentLocation = null;
@@ -9619,13 +9625,19 @@
         } else if (dhakaWeatherStatus === 'unavailable') {
           status.textContent = getLocalizedText(
             dhakaRainDetected === null
-              ? 'Dhaka weather unavailable; rain adjustment is off in automatic mode.'
+              ? 'Dhaka weather unavailable; falling back to time-of-day automation.'
               : 'Dhaka weather unavailable; keeping the last detected condition.'
           );
         } else {
-          status.textContent = getLocalizedText(dhakaRainDetected
-            ? 'Dhaka weather estimate: Rain indicated (automatic)'
-            : 'Dhaka weather estimate: No rain indicated (automatic)');
+          if (dhakaRainDetected) {
+            status.textContent = getLocalizedText('Dhaka weather estimate: Rain indicated (automatic)');
+          } else if (dhakaLiveCondition === 'fog') {
+            status.textContent = getLocalizedText('Dhaka weather: Foggy / Low Visibility (automatic)');
+          } else if (dhakaLiveCondition === 'overcast') {
+            status.textContent = getLocalizedText('Dhaka weather: Overcast / Cloudy (automatic)');
+          } else {
+            status.textContent = getLocalizedText('Dhaka weather: Clear / Sunny (automatic)');
+          }
         }
       }
     }
@@ -9640,8 +9652,43 @@
       }
     }
 
-    async function refreshDhakaWeather() {
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=23.8103&longitude=90.4125&current=precipitation%2Crain%2Cshowers%2Cweather_code&timezone=Asia%2FDhaka';
+    function applyDhakaWeatherCode(weatherCode, precipitation = 0) {
+      dhakaLiveWeatherCode = weatherCode;
+      dhakaWeatherStatus = 'available';
+
+      const rainyWeatherCodes = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99]);
+      const foggyWeatherCodes = new Set([45, 48]);
+
+      const isRainy = (precipitation > 0) || (weatherCode !== null && rainyWeatherCodes.has(weatherCode));
+      const isFoggy = !isRainy && (weatherCode !== null && foggyWeatherCodes.has(weatherCode));
+      const isOvercast = !isRainy && !isFoggy && (weatherCode === 2 || weatherCode === 3);
+
+      dhakaRainDetected = isRainy;
+      if (isRainy) {
+        dhakaLiveCondition = 'rain';
+      } else if (isFoggy) {
+        dhakaLiveCondition = 'fog';
+      } else if (isOvercast) {
+        dhakaLiveCondition = 'overcast';
+      } else {
+        dhakaLiveCondition = 'clear';
+      }
+
+      updateRainFareState();
+    }
+    window.applyDhakaWeatherCode = applyDhakaWeatherCode;
+
+    function applyTimeBasedAutomation() {
+      dhakaWeatherStatus = 'unavailable';
+      dhakaRainDetected = null;
+      dhakaLiveWeatherCode = null;
+      dhakaLiveCondition = null;
+      updateRainFareState();
+    }
+    window.applyTimeBasedAutomation = applyTimeBasedAutomation;
+
+    async function fetchDhakaWeather() {
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=23.8103&longitude=90.4125&current=precipitation,rain,showers,weather_code&current_weather=true&timezone=Asia%2FDhaka';
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
       dhakaWeatherStatus = 'checking';
@@ -9651,24 +9698,35 @@
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) throw new Error(`Weather service returned ${response.status}.`);
         const data = await response.json();
-        const current = data.current;
-        if (!current || !Number.isFinite(current.precipitation) ||
-            !Number.isFinite(current.weather_code)) {
+
+        let weatherCode = null;
+        if (data.current_weather && Number.isFinite(data.current_weather.weathercode)) {
+          weatherCode = data.current_weather.weathercode;
+        } else if (data.current && Number.isFinite(data.current.weather_code)) {
+          weatherCode = data.current.weather_code;
+        }
+
+        let precipitation = 0;
+        if (data.current && Number.isFinite(data.current.precipitation)) {
+          precipitation = data.current.precipitation;
+        } else if (data.current_weather && Number.isFinite(data.current_weather.precipitation)) {
+          precipitation = data.current_weather.precipitation;
+        }
+
+        if (weatherCode === null && precipitation <= 0) {
           throw new Error('Weather service returned incomplete current conditions.');
         }
 
-        const rainyWeatherCodes = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]);
-        dhakaRainDetected = current.precipitation > 0 || rainyWeatherCodes.has(current.weather_code);
-        dhakaWeatherStatus = 'available';
-      } catch (error) {
-        console.warn('Could not refresh Dhaka weather:', error);
-        dhakaWeatherStatus = 'unavailable';
+        applyDhakaWeatherCode(weatherCode, precipitation);
+      } catch (err) {
+        console.warn('Weather fetch offline, falling back to time-of-day automation:', err);
+        applyTimeBasedAutomation();
       } finally {
         clearTimeout(timeoutId);
       }
-
-      updateRainFareState();
     }
+    window.fetchDhakaWeather = fetchDhakaWeather;
+    window.refreshDhakaWeather = fetchDhakaWeather;
 
     // 4. Update Route, Markers & Fetch OSRM Road Distance
     async function updateRoute() {
@@ -12656,15 +12714,28 @@
         const localHour = now.getHours();
         const localMin = now.getMinutes();
         const totalMinutes = localHour * 60 + localMin;
+        const isDawnTime = totalMinutes >= 300 && totalMinutes < 420;
+        const isDayTime = totalMinutes >= 420 && totalMinutes < 1020;
+        const isSunsetTime = totalMinutes >= 1020 && totalMinutes <= 1110;
 
-        if (totalMinutes >= 300 && totalMinutes < 420) {
-          mode = 'sunrise';
-        } else if (totalMinutes >= 420 && totalMinutes < 1020) {
-          mode = 'sun';
-        } else if (totalMinutes >= 1020 && totalMinutes <= 1110) {
-          mode = 'sunset';
+        // Auto Weather live Dhaka condition sync (Fog / Clear / Day / Night):
+        if (rainFareMode === 'auto' && typeof dhakaLiveCondition !== 'undefined' && dhakaLiveCondition === 'fog') {
+          if (isDayTime || isDawnTime) {
+            mode = 'fog_day';
+          } else {
+            mode = 'fog_night';
+          }
         } else {
-          mode = 'night';
+          // Time-of-day progression (Clear/Sunny, Overcast, or Offline fallback):
+          if (isDawnTime) {
+            mode = 'sunrise';
+          } else if (isDayTime) {
+            mode = 'sun';
+          } else if (isSunsetTime) {
+            mode = 'sunset';
+          } else {
+            mode = 'night';
+          }
         }
       }
 
@@ -12702,7 +12773,11 @@
         } else if (mode === 'sun') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-amber-500/60 text-amber-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse shrink-0';
-          badgeText.textContent = '☀️ SUNNY CLEAR DAY · HIGH VISIBILITY';
+          if (rainFareMode === 'auto' && typeof dhakaLiveCondition !== 'undefined' && dhakaLiveCondition === 'overcast') {
+            badgeText.textContent = '☁️ DHAKA LIVE OVERCAST · DRIFTING CLOUDS';
+          } else {
+            badgeText.textContent = '☀️ SUNNY CLEAR DAY · HIGH VISIBILITY';
+          }
         } else if (mode === 'sunset') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-orange-500/60 text-orange-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-400 animate-pulse shrink-0';
@@ -12718,7 +12793,11 @@
         } else {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-500/60 text-indigo-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400 animate-pulse shrink-0';
-          badgeText.textContent = '🌙 DHAKA NIGHTFALL · NEON & HEADLIGHTS';
+          if (rainFareMode === 'auto' && typeof dhakaLiveCondition !== 'undefined' && dhakaLiveCondition === 'overcast') {
+            badgeText.textContent = '☁️ DHAKA OVERCAST NIGHT · CLOUDY SKIES';
+          } else {
+            badgeText.textContent = '🌙 DHAKA NIGHTFALL · NEON & HEADLIGHTS';
+          }
         }
       }
 
@@ -15465,7 +15544,11 @@
       document.getElementById('mrtPassToggle')?.addEventListener('change', renderMetricsAndFares);
       document.getElementById('rainModeSelect')?.addEventListener('change', event => {
         rainFareMode = event.currentTarget.value;
-        updateRainFareState();
+        if (rainFareMode === 'auto') {
+          fetchDhakaWeather();
+        } else {
+          updateRainFareState();
+        }
         if (window.crossroadsAudio) {
           if (rainFareMode === 'rain') {
             crossroadsAudio.start();
