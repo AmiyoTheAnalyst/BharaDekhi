@@ -2053,9 +2053,101 @@
   };
 
   let strobeTimer = 0;
+  let lastWeatherMode = null;
 
-  window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain) {
+  window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
+
+    // Atmospheric Weather Mode Transition (Sun, Sunset, Night, Fog Day, Fog Night, Rain)
+    const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
+    if (currentMode !== lastWeatherMode) {
+      lastWeatherMode = currentMode;
+      if (currentMode === 'sun') {
+        scene.background.setHex(0x0284c7);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x0284c7);
+          scene.fog.density = 0.0004;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xffeedd);
+          sunLight.intensity = 1.6;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x7dd3fc);
+          ambientLight.intensity = 0.75;
+        }
+      } else if (currentMode === 'sunset') {
+        scene.background.setHex(0x311006);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x431407);
+          scene.fog.density = 0.0006;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xff7722);
+          sunLight.intensity = 1.35;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0xfb923c);
+          ambientLight.intensity = 0.7;
+        }
+      } else if (currentMode === 'fog_day') {
+        scene.background.setHex(0x94a3b8);
+        if (scene.fog) {
+          scene.fog.color.setHex(0xb0c4de);
+          scene.fog.density = 0.0022;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xe2e8f0);
+          sunLight.intensity = 0.9;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x94a3b8);
+          ambientLight.intensity = 0.85;
+        }
+      } else if (currentMode === 'fog_night') {
+        scene.background.setHex(0x050914);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x0a1120);
+          scene.fog.density = 0.0025;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x38bdf8);
+          sunLight.intensity = 0.3;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x0f172a);
+          ambientLight.intensity = 0.4;
+        }
+      } else if (currentMode === 'rain') {
+        scene.background.setHex(0x0a1120);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x0f172a);
+          scene.fog.density = 0.0012;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x60a5fa);
+          sunLight.intensity = 0.65;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x1e293b);
+          ambientLight.intensity = 0.6;
+        }
+      } else { // night
+        scene.background.setHex(0x040814);
+        if (scene.fog) {
+          scene.fog.color.setHex(0x060e20);
+          scene.fog.density = 0.0005;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x93c5fd);
+          sunLight.intensity = 0.45;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x1e293b);
+          ambientLight.intensity = 0.55;
+        }
+      }
+    }
 
     // 1. Update Metro Train position & Boarding badge
     if (trainGroup) {
