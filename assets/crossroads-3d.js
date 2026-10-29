@@ -363,7 +363,7 @@
       metalness: 0.1,
       emissive: new THREE.Color(winColor || 0xfef08a),
       emissiveMap: frontTex,
-      emissiveIntensity: 0.45
+      emissiveIntensity: 0.85
     });
     const sideMat = new THREE.MeshStandardMaterial({
       map: sideTex,
@@ -371,7 +371,7 @@
       metalness: 0.1,
       emissive: new THREE.Color(winColor || 0xfef08a),
       emissiveMap: sideTex,
-      emissiveIntensity: 0.35
+      emissiveIntensity: 0.75
     });
     const roofMat = new THREE.MeshStandardMaterial({
       color: roofColor || 0x1e293b,
@@ -2085,7 +2085,8 @@
     if (currentMode !== lastWeatherMode) {
       lastWeatherMode = currentMode;
       if (cornerPointLights && cornerPointLights.length) {
-        const baseIntensity = currentMode === 'fog_night' ? 2.4 : (currentMode === 'sun' ? 0.3 : 1.5);
+        const isNightLike = currentMode === 'fog_night' || currentMode === 'night_overcast' || currentMode === 'night' || currentMode === 'sunset_overcast' || currentMode === 'fog_sunset';
+        const baseIntensity = isNightLike ? 2.4 : (currentMode === 'sun' ? 0.3 : 1.5);
         cornerPointLights.forEach(pl => {
           pl.intensity = baseIntensity;
           pl.color.setHex(0xfef08a);
@@ -2266,18 +2267,18 @@
           ambientLight.intensity = 0.6;
         }
       } else if (currentMode === 'night_overcast') {
-        scene.background.setHex(0x090b10);
+        scene.background.setHex(0x0c0f17);
         if (scene.fog) {
-          scene.fog.color.setHex(0x111622);
-          scene.fog.density = 0.0015;
+          scene.fog.color.setHex(0x131a29);
+          scene.fog.density = 0.0012;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x475569);
-          sunLight.intensity = 0.40;
+          sunLight.color.setHex(0x64748b);
+          sunLight.intensity = 0.55;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x181e29);
-          ambientLight.intensity = 0.35;
+          ambientLight.color.setHex(0x1e293b);
+          ambientLight.intensity = 0.65;
         }
       } else { // night
         scene.background.setHex(0x040814);
