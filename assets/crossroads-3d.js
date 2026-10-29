@@ -2242,7 +2242,7 @@
         scene.background.setHex(0x94a3b8);
         if (scene.fog) {
           scene.fog.color.setHex(0xb0c4de);
-          scene.fog.density = 0.0022;
+          scene.fog.density = 0.0012;
         }
         if (sunLight) {
           sunLight.color.setHex(0xe2e8f0);
