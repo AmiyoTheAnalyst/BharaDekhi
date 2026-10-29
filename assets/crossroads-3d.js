@@ -2209,12 +2209,12 @@
           scene.fog.density = 0.0025;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x38bdf8);
-          sunLight.intensity = 0.3;
+          sunLight.color.setHex(0x60a5fa);
+          sunLight.intensity = 0.42;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x0f172a);
-          ambientLight.intensity = 0.4;
+          ambientLight.color.setHex(0x1e293b);
+          ambientLight.intensity = 0.52;
         }
       } else if (currentMode === 'rain') {
         scene.background.setHex(0x0a1120);

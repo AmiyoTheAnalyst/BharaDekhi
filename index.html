@@ -877,7 +877,44 @@
     [data-crossroads-weather="fog_night"] .cr-headlight-beam {
       opacity: 1.0 !important;
       mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 8px rgba(254, 240, 138, 0.75)) !important;
+      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px rgba(254, 240, 138, 0.95)) drop-shadow(0 0 28px rgba(253, 224, 71, 0.8)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-headlight-bulb {
+      filter: drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 10px #fef08a) drop-shadow(0 0 20px rgba(254, 240, 138, 0.95)) !important;
+    }
+    [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
+    [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
+    [data-crossroads-weather="fog_night"] #crossroadsMetroTrain circle[fill="#ff2a54"] {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 9px #ff2a54) drop-shadow(0 0 18px rgba(255, 23, 68, 0.9)) !important;
+      opacity: 1 !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-neon-cyan {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #00f2fe) drop-shadow(0 0 20px rgba(0, 242, 254, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-neon-amber {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #fde047) drop-shadow(0 0 20px rgba(251, 191, 36, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-neon-magenta {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #f0abfc) drop-shadow(0 0 20px rgba(217, 70, 239, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-neon-green {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #34d399) drop-shadow(0 0 20px rgba(16, 185, 129, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-neon-red {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 8px #ff2a54) drop-shadow(0 0 20px rgba(255, 42, 84, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .cr-neon-blue {
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 9px #38bdf8) drop-shadow(0 0 22px rgba(56, 189, 248, 1)) !important;
+    }
+    [data-crossroads-weather="fog_night"] .window-glow-pulse {
+      filter: drop-shadow(0 0 4px #fffbeb) drop-shadow(0 0 10px #fef08a) drop-shadow(0 0 22px rgba(251, 191, 36, 0.95)) !important;
+    }
+    [data-crossroads-weather="fog_night"] ellipse[fill*="streetlampPoolGrad"] {
+      opacity: 0.88 !important;
+      filter: drop-shadow(0 0 24px rgba(254, 240, 138, 0.75)) !important;
+    }
+    [data-crossroads-weather="fog_night"] circle[filter*="crLightGlow"] {
+      filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 12px #fef08a) drop-shadow(0 0 26px rgba(251, 191, 36, 1)) !important;
     }
     [data-crossroads-weather="rain"] .cr-headlight-beam {
       opacity: 0.82 !important;
@@ -4057,9 +4094,9 @@
             </linearGradient>
 
             <radialGradient id="fogLampBloomGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-              <stop offset="25%" stop-color="#fef08a" stop-opacity="0.65"/>
-              <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.25"/>
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+              <stop offset="25%" stop-color="#fef08a" stop-opacity="0.85"/>
+              <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.38"/>
               <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
             </radialGradient>
 
@@ -5658,11 +5695,11 @@
               <!-- Drifting Night Smog/Fog Banks -->
               <path class="fog-drift-1" d="M -150,240 Q 200,200 500,250 Q 800,290 1100,230 Q 1350,200 1550,240 L 1550,400 Q 1250,360 950,390 Q 650,430 350,380 Q 50,340 -150,390 Z" fill="#334155" opacity="0.35" filter="blur(10px)"/>
               <path class="fog-drift-2" d="M -150,460 Q 150,500 500,450 Q 850,410 1200,470 Q 1400,500 1550,450 L 1550,620 Q 1200,570 900,610 Q 600,640 300,590 Q 50,550 -150,600 Z" fill="#1e293b" opacity="0.4" filter="blur(12px)"/>
-              <!-- Glowing Streetlamp Halo Fog Blooms -->
-              <ellipse cx="460" cy="320" rx="140" ry="105" fill="url(#fogLampBloomGrad)" opacity="0.75" style="mix-blend-mode: screen;"/>
-              <ellipse cx="740" cy="320" rx="140" ry="105" fill="url(#fogLampBloomGrad)" opacity="0.75" style="mix-blend-mode: screen;"/>
-              <ellipse cx="460" cy="520" rx="140" ry="105" fill="url(#fogLampBloomGrad)" opacity="0.75" style="mix-blend-mode: screen;"/>
-              <ellipse cx="740" cy="520" rx="140" ry="105" fill="url(#fogLampBloomGrad)" opacity="0.75" style="mix-blend-mode: screen;"/>
+              <!-- Glowing Streetlamp Halo Fog Blooms (Cinematic Haze Spread) -->
+              <ellipse cx="460" cy="320" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <ellipse cx="740" cy="320" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <ellipse cx="460" cy="520" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
+              <ellipse cx="740" cy="520" rx="155" ry="118" fill="url(#fogLampBloomGrad)" opacity="0.95" style="mix-blend-mode: screen;"/>
             </g>
 
             <!-- Rain & Wet Street Reflections Layer -->
@@ -8298,6 +8335,12 @@
       '⭐ Best Value': '⭐ সেরা সাশ্রয়ী',
       'Surge': 'সার্জ',
       'Auto Weather': 'আবহাওয়া (Auto)',
+      'Auto Weather (Clear)': 'আবহাওয়া (পরিষ্কার)',
+      'Auto Weather (Overcast / Storm Clouds)': 'আবহাওয়া (মেঘাচ্ছন্ন / ঝড়ো আকাশ)',
+      'Auto Weather (Foggy)': 'আবহাওয়া (কুয়াশাচ্ছন্ন)',
+      'Auto Weather (Rain)': 'আবহাওয়া (বৃষ্টি)',
+      'Auto Weather (Sunrise)': 'আবহাওয়া (সূর্যোদয়)',
+      'Auto Weather (Sunset)': 'আবহাওয়া (সূর্যাস্ত)',
       'Force Sunrise / Early Morning': 'ভোর / সূর্যোদয় (Sunrise)',
       'Force Sunrise / Early Morning (Clear)': 'ভোর / সূর্যোদয় (পরিষ্কার)',
       'Force Sunrise Overcast / Dark Ash Clouds': 'ভোরের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
@@ -8499,6 +8542,12 @@
       'Live Route & Fare Engine': 'লাইভ রুট ও ভাড়ার হিসাব',
       'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
       'Auto Weather': 'আবহাওয়া (Auto)',
+      'Auto Weather (Clear)': 'আবহাওয়া (পরিষ্কার)',
+      'Auto Weather (Overcast / Storm Clouds)': 'আবহাওয়া (মেঘাচ্ছন্ন / ঝড়ো আকাশ)',
+      'Auto Weather (Foggy)': 'আবহাওয়া (কুয়াশাচ্ছন্ন)',
+      'Auto Weather (Rain)': 'আবহাওয়া (বৃষ্টি)',
+      'Auto Weather (Sunrise)': 'আবহাওয়া (সূর্যোদয়)',
+      'Auto Weather (Sunset)': 'আবহাওয়া (সূর্যাস্ত)',
       'Force Sunrise / Early Morning': 'ভোর / সূর্যোদয় (Sunrise)',
       'Force Sunrise / Early Morning (Clear)': 'ভোর / সূর্যোদয় (পরিষ্কার)',
       'Force Sunrise Overcast / Dark Ash Clouds': 'ভোরের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
@@ -10018,7 +10067,61 @@
           }
         }
       }
+      if (typeof updateAutoWeatherDropdownLabel === 'function') {
+        updateAutoWeatherDropdownLabel();
+      }
     }
+
+    function updateAutoWeatherDropdownLabel(activeMode) {
+      const select = document.getElementById('rainModeSelect');
+      if (!select) return;
+      const autoOption = select.querySelector('option[value="auto"]');
+      if (!autoOption) return;
+
+      const isBn = (typeof currentLanguage !== 'undefined' && currentLanguage === 'bn') ||
+                   (document.documentElement.lang === 'bn');
+
+      if (typeof rainFareMode === 'undefined' || rainFareMode === 'auto') {
+        const container = document.getElementById('dhakaCrossroadsContainer');
+        const mainHeader = document.getElementById('mainHeader');
+        const currentMode = activeMode ||
+                            (container && container.dataset.crossroadsWeather) ||
+                            (mainHeader && mainHeader.dataset.headerWeather) ||
+                            'night';
+
+        let subEn = 'Clear';
+        let subBn = 'পরিষ্কার';
+
+        if (currentMode === 'rain' || (typeof isHeavyRain !== 'undefined' && isHeavyRain) || (typeof dhakaRainDetected !== 'undefined' && dhakaRainDetected === true)) {
+          subEn = 'Rain';
+          subBn = 'বৃষ্টি';
+        } else if (currentMode.includes('overcast')) {
+          subEn = 'Overcast / Storm Clouds';
+          subBn = 'মেঘাচ্ছন্ন / ঝড়ো আকাশ';
+        } else if (currentMode.startsWith('fog')) {
+          subEn = 'Foggy';
+          subBn = 'কুয়াশাচ্ছন্ন';
+        } else if (currentMode === 'sunrise') {
+          subEn = 'Sunrise';
+          subBn = 'সূর্যোদয়';
+        } else if (currentMode === 'sunset') {
+          subEn = 'Sunset';
+          subBn = 'সূর্যাস্ত';
+        } else {
+          subEn = 'Clear';
+          subBn = 'পরিষ্কার';
+        }
+
+        const labelText = isBn ? `আবহাওয়া (${subBn})` : `Auto Weather (${subEn})`;
+        autoOption.textContent = labelText;
+        select.title = labelText;
+      } else {
+        const labelText = isBn ? 'আবহাওয়া (Auto)' : 'Auto Weather';
+        autoOption.textContent = labelText;
+        select.title = isBn ? 'আবহাওয়া ও সময় নির্বাচন করুন' : 'Select Weather & Time Mode';
+      }
+    }
+    window.updateAutoWeatherDropdownLabel = updateAutoWeatherDropdownLabel;
 
     function updateRainFareState() {
       isHeavyRain = rainFareMode === 'rain' ||
@@ -13301,6 +13404,10 @@
           crossroadsAudio.setRainMode(false);
         }
       }
+
+      if (typeof updateAutoWeatherDropdownLabel === 'function') {
+        updateAutoWeatherDropdownLabel(mode);
+      }
     }
     window.updateCrossroadsAtmosphere = updateCrossroadsAtmosphere;
 
@@ -16037,6 +16144,9 @@
       document.getElementById('mrtPassToggle')?.addEventListener('change', renderMetricsAndFares);
       document.getElementById('rainModeSelect')?.addEventListener('change', event => {
         rainFareMode = event.currentTarget.value;
+        if (typeof updateAutoWeatherDropdownLabel === 'function') {
+          updateAutoWeatherDropdownLabel();
+        }
         if (rainFareMode === 'auto') {
           fetchDhakaWeather();
         } else {
