@@ -2883,16 +2883,30 @@
 
     /* Weather Selector Custom Glassmorphic Scrollbar & Max 5 Visible Items (~190px) */
     #customWeatherMenu {
-      z-index: 1000 !important;
+      z-index: 9999 !important;
     }
     .glass-weather-scroll {
       height: 190px !important;
-      max-height: 190px !important;
+      max-height: 220px !important;
       overflow-y: auto !important;
       overflow-x: hidden !important;
       scrollbar-width: thin;
       scrollbar-color: rgba(56, 189, 248, 0.5) rgba(15, 23, 42, 0.45);
       scroll-behavior: smooth;
+    }
+    @media (max-width: 768px) {
+      #customWeatherMenu {
+        max-width: 90vw !important;
+        z-index: 9999 !important;
+      }
+      .weather-dropdown-menu,
+      .weather-select select,
+      .select-dropdown,
+      .custom-dropdown-list,
+      .glass-weather-scroll {
+        max-height: 220px !important;
+        overflow-y: auto !important;
+      }
     }
     .glass-weather-scroll::-webkit-scrollbar {
       width: 7px;
@@ -3586,16 +3600,16 @@
           <select id="rainModeSelect" class="sr-only" tabindex="-1" aria-hidden="true" title="Select Weather & Time Mode">
             <option value="auto">Auto Weather</option>
             <option value="sunrise">Force Sunrise / Early Morning (Clear)</option>
-            <option value="sunrise_overcast">Force Sunrise Overcast / Dark Ash Clouds</option>
+            <option value="sunrise_overcast">Force Sunrise Overcast / Stormy</option>
             <option value="fog_sunrise">Force Sunrise Foggy</option>
-            <option value="morning_overcast">Force Morning Overcast / Dark Ash Clouds</option>
+            <option value="morning_overcast">Force Morning Overcast / Stormy</option>
             <option value="sun">Force Sunny / Day</option>
-            <option value="day_overcast">Force Day Overcast / Dark Ash Clouds</option>
+            <option value="day_overcast">Force Day Overcast / Stormy</option>
             <option value="sunset">Force Sunset / Evening (Clear)</option>
-            <option value="sunset_overcast">Force Sunset / Evening Overcast / Dark Ash Clouds</option>
+            <option value="sunset_overcast">Force Sunset / Evening Overcast / Stormy</option>
             <option value="fog_sunset">Force Evening Foggy</option>
             <option value="night">Force Night</option>
-            <option value="night_overcast">Force Night Overcast / Dark Ash Clouds</option>
+            <option value="night_overcast">Force Night Overcast / Stormy</option>
             <option value="fog_day">Force Foggy (Day)</option>
             <option value="fog_night">Force Foggy (Night)</option>
             <option value="rain">Force Rain (+30%)</option>
@@ -3629,7 +3643,7 @@
                   <span class="custom-item-icon text-indigo-300 shrink-0">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m5.66 1.34-2.83 2.83M17.5 19H9a5 5 0 0 1 0-10c.26 0 .52.02.78.06A6 6 0 0 1 21 14a5 5 0 0 1-3.5 5z"/></svg>
                   </span>
-                  <span class="custom-item-label truncate">Force Sunrise Overcast / Dark Ash Clouds</span>
+                  <span class="custom-item-label truncate">Force Sunrise Overcast / Stormy</span>
                 </div>
                 <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
               </button>
@@ -3647,7 +3661,7 @@
                   <span class="custom-item-icon text-slate-400 shrink-0">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
                   </span>
-                  <span class="custom-item-label truncate">Force Morning Overcast / Dark Ash Clouds</span>
+                  <span class="custom-item-label truncate">Force Morning Overcast / Stormy</span>
                 </div>
                 <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
               </button>
@@ -3665,7 +3679,7 @@
                   <span class="custom-item-icon text-slate-400 shrink-0">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
                   </span>
-                  <span class="custom-item-label truncate">Force Day Overcast / Dark Ash Clouds</span>
+                  <span class="custom-item-label truncate">Force Day Overcast / Stormy</span>
                 </div>
                 <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
               </button>
@@ -3683,7 +3697,7 @@
                   <span class="custom-item-icon text-amber-500 shrink-0">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m5.66 1.34-2.83 2.83M17.5 19H9a5 5 0 0 1 0-10c.26 0 .52.02.78.06A6 6 0 0 1 21 14a5 5 0 0 1-3.5 5z"/></svg>
                   </span>
-                  <span class="custom-item-label truncate">Force Sunset / Evening Overcast / Dark Ash Clouds</span>
+                  <span class="custom-item-label truncate">Force Sunset / Evening Overcast / Stormy</span>
                 </div>
                 <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
               </button>
@@ -3710,7 +3724,7 @@
                   <span class="custom-item-icon text-purple-300 shrink-0">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12h8a4 4 0 1 0 0-8c-.28 0-.55.03-.82.08A6 6 0 1 0 6 12h4Z"/><path d="m14 16 1-1"/></svg>
                   </span>
-                  <span class="custom-item-label truncate">Force Night Overcast / Dark Ash Clouds</span>
+                  <span class="custom-item-label truncate">Force Night Overcast / Stormy</span>
                 </div>
                 <svg class="custom-item-check w-3.5 h-3.5 text-sky-400 shrink-0 opacity-0 transition-opacity" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
               </button>
@@ -8950,6 +8964,7 @@
       'Surge': 'সার্জ',
       'Auto Weather': 'আবহাওয়া (Auto)',
       'Auto Weather (Clear)': 'আবহাওয়া (পরিষ্কার)',
+      'Auto Weather (Overcast / Stormy)': 'আবহাওয়া (মেঘাচ্ছন্ন / ঝড়ো আকাশ)',
       'Auto Weather (Overcast / Storm Clouds)': 'আবহাওয়া (মেঘাচ্ছন্ন / ঝড়ো আকাশ)',
       'Auto Weather (Foggy)': 'আবহাওয়া (কুয়াশাচ্ছন্ন)',
       'Auto Weather (Rain)': 'আবহাওয়া (বৃষ্টি)',
@@ -8957,17 +8972,22 @@
       'Auto Weather (Sunset)': 'আবহাওয়া (সূর্যাস্ত)',
       'Force Sunrise / Early Morning': 'ভোর / সূর্যোদয় (Sunrise)',
       'Force Sunrise / Early Morning (Clear)': 'ভোর / সূর্যোদয় (পরিষ্কার)',
-      'Force Sunrise Overcast / Dark Ash Clouds': 'ভোরের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Sunrise Overcast / Stormy': 'ভোরের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Sunrise Overcast / Dark Ash Clouds': 'ভোরের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunrise Foggy': 'ভোরের ঘন কুয়াশা (Foggy Sunrise)',
-      'Force Morning Overcast / Dark Ash Clouds': 'সকালের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Morning Overcast / Stormy': 'সকালের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Morning Overcast / Dark Ash Clouds': 'সকালের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunny / Day': 'রৌদ্রোজ্জ্বল দিন (Sunny)',
-      'Force Day Overcast / Dark Ash Clouds': 'দিনের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Day Overcast / Stormy': 'দিনের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Day Overcast / Dark Ash Clouds': 'দিনের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunset / Evening': 'সন্ধ্যা / সূর্যাস্ত (Sunset)',
       'Force Sunset / Evening (Clear)': 'সন্ধ্যা / সূর্যাস্ত (পরিষ্কার)',
-      'Force Sunset / Evening Overcast / Dark Ash Clouds': 'সন্ধ্যার মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Sunset / Evening Overcast / Stormy': 'সন্ধ্যার মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Sunset / Evening Overcast / Dark Ash Clouds': 'সন্ধ্যার মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Evening Foggy': 'সন্ধ্যার ঘন কুয়াশা (Foggy Evening)',
       'Force Night': 'রাত (Night)',
-      'Force Night Overcast / Dark Ash Clouds': 'রাতের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Night Overcast / Stormy': 'রাতের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Night Overcast / Dark Ash Clouds': 'রাতের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Foggy (Day)': 'কুয়াশাচ্ছন্ন দিন (Fog Day)',
       'Force Foggy (Night)': 'কুয়াশাচ্ছন্ন রাত (Fog Night)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
@@ -9157,6 +9177,7 @@
       'MRT Line 6 Active': 'এমআরটি লাইন ৬ চালু',
       'Auto Weather': 'আবহাওয়া (Auto)',
       'Auto Weather (Clear)': 'আবহাওয়া (পরিষ্কার)',
+      'Auto Weather (Overcast / Stormy)': 'আবহাওয়া (মেঘাচ্ছন্ন / ঝড়ো আকাশ)',
       'Auto Weather (Overcast / Storm Clouds)': 'আবহাওয়া (মেঘাচ্ছন্ন / ঝড়ো আকাশ)',
       'Auto Weather (Foggy)': 'আবহাওয়া (কুয়াশাচ্ছন্ন)',
       'Auto Weather (Rain)': 'আবহাওয়া (বৃষ্টি)',
@@ -9164,17 +9185,22 @@
       'Auto Weather (Sunset)': 'আবহাওয়া (সূর্যাস্ত)',
       'Force Sunrise / Early Morning': 'ভোর / সূর্যোদয় (Sunrise)',
       'Force Sunrise / Early Morning (Clear)': 'ভোর / সূর্যোদয় (পরিষ্কার)',
-      'Force Sunrise Overcast / Dark Ash Clouds': 'ভোরের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Sunrise Overcast / Stormy': 'ভোরের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Sunrise Overcast / Dark Ash Clouds': 'ভোরের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunrise Foggy': 'ভোরের ঘন কুয়াশা (Foggy Sunrise)',
-      'Force Morning Overcast / Dark Ash Clouds': 'সকালের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Morning Overcast / Stormy': 'সকালের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Morning Overcast / Dark Ash Clouds': 'সকালের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunny / Day': 'রৌদ্রোজ্জ্বল দিন (Sunny)',
-      'Force Day Overcast / Dark Ash Clouds': 'দিনের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Day Overcast / Stormy': 'দিনের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Day Overcast / Dark Ash Clouds': 'দিনের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Sunset / Evening': 'সন্ধ্যা / সূর্যাস্ত (Sunset)',
       'Force Sunset / Evening (Clear)': 'সন্ধ্যা / সূর্যাস্ত (পরিষ্কার)',
-      'Force Sunset / Evening Overcast / Dark Ash Clouds': 'সন্ধ্যার মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Sunset / Evening Overcast / Stormy': 'সন্ধ্যার মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Sunset / Evening Overcast / Dark Ash Clouds': 'সন্ধ্যার মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Evening Foggy': 'সন্ধ্যার ঘন কুয়াশা (Foggy Evening)',
       'Force Night': 'রাত (Night)',
-      'Force Night Overcast / Dark Ash Clouds': 'রাতের মেঘাচ্ছন্ন / ঘন ছাইরঙা আকাশ',
+      'Force Night Overcast / Stormy': 'রাতের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
+      'Force Night Overcast / Dark Ash Clouds': 'রাতের মেঘাচ্ছন্ন / ঝড়ো আকাশ',
       'Force Foggy (Day)': 'কুয়াশাচ্ছন্ন দিন (Fog Day)',
       'Force Foggy (Night)': 'কুয়াশাচ্ছন্ন রাত (Fog Night)',
       'Force Rain (+30%)': 'বৃষ্টির ভাড়া (+৩০%)',
@@ -10711,7 +10737,7 @@
           subEn = 'Rain';
           subBn = 'বৃষ্টি';
         } else if (currentMode.includes('overcast')) {
-          subEn = 'Overcast / Storm Clouds';
+          subEn = 'Overcast / Stormy';
           subBn = 'মেঘাচ্ছন্ন / ঝড়ো আকাশ';
         } else if (currentMode.startsWith('fog')) {
           subEn = 'Foggy';
@@ -10798,12 +10824,33 @@
       if (!pill || !menu || pill.dataset.customDropdownInit === 'true') return;
       pill.dataset.customDropdownInit = 'true';
 
+      const positionMenu = () => {
+        if (!menu || menu.classList.contains('hidden')) return;
+        const pillRect = pill.getBoundingClientRect();
+        const screenWidth = window.innerWidth || document.documentElement.clientWidth;
+        const menuWidth = Math.min(320, Math.floor(screenWidth * 0.90));
+        menu.style.width = `${menuWidth}px`;
+
+        // Check if aligning to the right (right: 0) causes the dropdown to hang off the left of screen
+        if (pillRect.right - menuWidth >= 8 && pillRect.right <= screenWidth) {
+          menu.style.right = '0';
+          menu.style.left = 'auto';
+        } else {
+          // Calculate safe left position relative to pill to stay within [8px, screenWidth - menuWidth - 8px]
+          const targetScreenLeft = Math.max(8, Math.min(pillRect.left, screenWidth - menuWidth - 8));
+          const relativeLeft = targetScreenLeft - pillRect.left;
+          menu.style.left = `${relativeLeft}px`;
+          menu.style.right = 'auto';
+        }
+      };
+
       const toggleMenu = (open) => {
         const shouldOpen = typeof open === 'boolean' ? open : menu.classList.contains('hidden');
         if (shouldOpen) {
           menu.classList.remove('hidden');
           pill.setAttribute('aria-expanded', 'true');
           if (chevron) chevron.classList.add('rotate-180');
+          positionMenu();
           // Start at top to show 5 options, or scroll active into view
           const scrollContainer = menu.querySelector('.glass-weather-scroll');
           const activeItem = menu.querySelector('.custom-weather-item.is-active');
@@ -10820,6 +10867,9 @@
           if (chevron) chevron.classList.remove('rotate-180');
         }
       };
+
+      window.addEventListener('resize', positionMenu);
+      window.addEventListener('scroll', positionMenu, { passive: true });
 
       pill.addEventListener('click', (e) => {
         e.preventDefault();
@@ -14106,7 +14156,7 @@
         } else if (mode === 'sunrise_overcast') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-400/60 text-indigo-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400 animate-pulse shrink-0';
-          badgeText.textContent = '🌅 DAWN DARK ASH OVERCAST · MUTED ROSE HORIZON';
+          badgeText.textContent = '🌅 DAWN OVERCAST / STORMY · MUTED ROSE HORIZON';
         } else if (mode === 'fog_sunrise') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-pink-400/60 text-pink-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-pink-400 animate-pulse shrink-0';
@@ -14114,7 +14164,7 @@
         } else if (mode === 'morning_overcast') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-slate-400/60 text-slate-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-300 animate-pulse shrink-0';
-          badgeText.textContent = '☁️ MORNING DARK ASH OVERCAST · SLATE CLOUDS';
+          badgeText.textContent = '☁️ MORNING OVERCAST / STORMY · SLATE CLOUDS';
         } else if (mode === 'sun') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-amber-500/60 text-amber-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse shrink-0';
@@ -14126,7 +14176,7 @@
         } else if (mode === 'day_overcast') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-zinc-500/60 text-zinc-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-zinc-400 animate-pulse shrink-0';
-          badgeText.textContent = '⛈️ THUNDERHEAD DARK ASH · PRE-STORM GLOOM';
+          badgeText.textContent = '⛈️ THUNDERHEAD OVERCAST / STORMY · PRE-STORM GLOOM';
         } else if (mode === 'sunset') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-orange-500/60 text-orange-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-400 animate-pulse shrink-0';
@@ -14134,7 +14184,7 @@
         } else if (mode === 'sunset_overcast') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-amber-600/70 text-amber-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 animate-pulse shrink-0';
-          badgeText.textContent = '🌇 BRUISED DUSK DARK ASH · COPPER HORIZON';
+          badgeText.textContent = '🌇 DUSK OVERCAST / STORMY · COPPER HORIZON';
         } else if (mode === 'fog_sunset') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-orange-500/70 text-orange-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-400 animate-pulse shrink-0';
@@ -14150,7 +14200,7 @@
         } else if (mode === 'night_overcast') {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-purple-500/60 text-purple-200 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-purple-400 animate-pulse shrink-0';
-          badgeText.textContent = '☁️ NIGHT DARK ASH STORM CLOUDS · NEON & HEADLIGHTS';
+          badgeText.textContent = '☁️ NIGHT OVERCAST / STORMY · NEON & HEADLIGHTS';
         } else {
           badge.className = 'inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-500/60 text-indigo-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95';
           badgeDot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400 animate-pulse shrink-0';
