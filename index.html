@@ -2587,11 +2587,11 @@
     #mainHeader, header {
       position: sticky !important;
       top: 0 !important;
-      z-index: 30 !important;
+      z-index: 50 !important;
       width: 100% !important;
       max-width: none !important;
-      overflow: hidden !important;
-      contain: paint !important;
+      overflow: visible !important;
+      contain: none !important;
       transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.8s ease;
       background-color: transparent !important;
     }
@@ -2609,6 +2609,7 @@
       pointer-events: none !important;
       z-index: 0 !important;
       overflow: hidden !important;
+      contain: paint !important;
     }
 
     .header-weather-layer {
@@ -2880,9 +2881,13 @@
       opacity: 0.85;
     }
 
-    /* Weather Selector Custom Glassmorphic Scrollbar & Max 5 Visible Items (~188px) */
+    /* Weather Selector Custom Glassmorphic Scrollbar & Max 5 Visible Items (~190px) */
+    #customWeatherMenu {
+      z-index: 1000 !important;
+    }
     .glass-weather-scroll {
-      max-height: 188px !important;
+      height: 190px !important;
+      max-height: 190px !important;
       overflow-y: auto !important;
       overflow-x: hidden !important;
       scrollbar-width: thin;
@@ -3259,7 +3264,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
 
   <!-- Header with Strictly Contained Weather Animation -->
-  <header id="mainHeader" class="sticky top-0 z-30 relative overflow-hidden transition-all duration-700 shadow-sm w-full max-w-none" data-header-weather="night">
+  <header id="mainHeader" class="sticky top-0 z-50 relative overflow-visible transition-all duration-700 shadow-sm w-full max-w-none" data-header-weather="night">
     <!-- Synchronized Header Lightning Sky Flash Overlay -->
     <div id="headerLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-40 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
     <!-- Strictly Contained Weather Scene (Sky, Clouds, Sun, Moon, Falling Rain) -->
@@ -10799,10 +10804,15 @@
           menu.classList.remove('hidden');
           pill.setAttribute('aria-expanded', 'true');
           if (chevron) chevron.classList.add('rotate-180');
-          // Scroll active item into view
+          // Start at top to show 5 options, or scroll active into view
+          const scrollContainer = menu.querySelector('.glass-weather-scroll');
           const activeItem = menu.querySelector('.custom-weather-item.is-active');
-          if (activeItem) {
-            activeItem.scrollIntoView({ block: 'nearest' });
+          if (scrollContainer) {
+            if (activeItem && activeItem.getAttribute('data-value') !== 'auto') {
+              activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            } else {
+              scrollContainer.scrollTop = 0;
+            }
           }
         } else {
           menu.classList.add('hidden');
