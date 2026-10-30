@@ -43,6 +43,7 @@ graph LR
     B --> C[Direct Rides: Bike / CNG / Car]
     B --> D[MRT Line 6 Metro + Feeder Leg]
     B --> E[City Bus Corridor + Feeder Leg]
+    B --> K[One-Tap Deep Links: Uber Universal & Pathao Scheme]
     
     F[Live Open-Meteo Dhaka API] --> G(16-Mode Weather Engine)
     H[Dhaka Time & Peak Clock] --> G
@@ -50,6 +51,7 @@ graph LR
     G --> J[Living 3D WebGL Diorama & Audio Engine]
     
     I --> B
+    L[🎓 Student 50% Concession & 🚇 MRT Pass Discounter] --> B
 ```
 
 ---
@@ -74,6 +76,10 @@ Commuters are greeted by a living miniature digital twin of Dhaka's most famous 
 
 * **🚨 Emergency Priority Green Wave:**
   * One-tap emergency dispatch button clears the north-south transit corridor with animated visual flashing lights and an audible siren, signaling all cross-traffic to yield.
+
+* **🚌 Autonomous Dhaka City Bus & Feeder Traffic Network:**
+  * Realistic simulation of Dhaka's multi-tier road hierarchy: high-capacity transit buses (classic red/green Dhaka livery) cruise the central avenues and stop at zebra crossings.
+  * Feeder cycle rickshaws with vivid decorative hoods and emerald-green CNG auto-rickshaws populate feeder lanes and turns, reacting to 4-phase signals with realistic deceleration, idle tremor, and staggered green-phase acceleration across both 3D WebGL and 2D vector engines.
 
 ---
 
@@ -124,10 +130,40 @@ The visual environment, lighting, shadows, and transit surge multipliers dynamic
 * **OSRM Routing with Haversine Fallback:** Computes actual turn-by-turn road geometry and travel duration, backed by a resilient mathematical Haversine trigonometric fallback.
 * **Animated Route Playback:** Smooth camera tracking and vehicle marker progression with real-time heading angle rotation along Dhaka's roads.
 * **"More Ways to Travel" Comparison Cards:**
-  * **MRT Line 6 Metro Card:** Exact station-to-station ticket calculations based on official MRT fare charts (৳20 min, ৳100 max) with optional **10% MRT Pass discount** toggle.
-  * **Local City Bus Card:** Comprehensive Dhaka bus corridor database with BRTA distance fare progression (৳10 min, ৳2.70/km).
+  * **Local City Bus Card & Student Concession:** Comprehensive Dhaka bus corridor database with BRTA distance fare progression (৳10 min, ৳2.70/km) and an interactive **🎓 Student Concession (50% Bus Fare Half-Pass)** toggle respecting the official ৳10 minimum fare floor with dynamic UI badges (`🎓 Student 50% Applied`).
+  * **MRT Line 6 Metro Card & MRT Pass:** Exact station-to-station ticket calculations based on official DMTCL fare tables (৳20 min, ৳100 max) with interactive **10% MRT Pass discount** toggle.
   * **Feeder Leg Optimizer:** Connects your origin and destination to the nearest transit hubs via customizable first/last-mile feeder modes (**Rickshaw, CNG, Bike, Car**), displaying the complete combined journey fare and time.
 * **Peak Surge Radar:** Time-aware rush hour multiplier (1.4x – 2.2x) calculated from local Dhaka time (`Asia/Dhaka`: 8:30–10:30 AM, 5:00–8:00 PM).
+
+---
+
+### 5. 🚀 One-Tap Ride-Hailing Deep Linking (Uber & Pathao Integration)
+
+BharaDekhi bridges route planning with seamless real-world execution by providing direct deep-linking into Dhaka's two primary ride-hailing networks directly from the comparison cards:
+
+* **🚗 Uber Universal Deep Linking:**
+  * Uses Uber's official universal link protocol:
+    ```
+    https://m.uber.com/ul/?action=setPickup&pickup[latitude]=<lat>&pickup[longitude]=<lng>&pickup[nickname]=<name>&dropoff[latitude]=<lat>&dropoff[longitude]=<lng>&dropoff[nickname]=<name>
+    ```
+  * Automatically pins the commuter's exact origin and destination GPS coordinates with localized landmark names, launching the native Uber mobile app (or web fallback) with zero manual location re-typing.
+
+* **🏍️ Pathao App Deep Linking & Clipboard Bridge:**
+  * Dispatches through Pathao's custom URL scheme (`pathao://`) to trigger the native Pathao mobile application.
+  * **Automatic Clipboard Synchronization:** Seamlessly copies an optimized, human-readable route and fare payload to the commuter's system clipboard:
+    ```text
+    Pickup: Farmgate (23.7561, 90.3872) | Destination: Gulshan 2 | Ride: Bike | BharaDekhi estimated Pathao fare: ৳140 - ৳170
+    ```
+  * Commuters can paste directly into the destination field inside Pathao with zero friction.
+
+* **✨ Haptic Confetti Particle Physics:**
+  * Every dispatch triggers an interactive, DOM-based 28-particle physics explosion radiating from the commuter's tap coordinates:
+    * **Uber Dispatch:** High-tech monochrome, cyber cyan, and violet particle shower (`#000000`, `#ffffff`, `#38bdf8`, `#60a5fa`, `#a855f7`).
+    * **Pathao Dispatch:** Signature Dhaka crimson, amber, and flame orange particle burst (`#dc2626`, `#ef4444`, `#f97316`, `#fbbf24`).
+  * Features a micro-haptic button compression animation (`btn-haptic-pop`) and instant toast feedback.
+
+* **📊 Live Price Guidance & Comparative Baseline:**
+  * Computes transparent benchmark fares using OSRM road geometry, enabling commuters to assess official external quotes against standard public transit before hailing.
 
 ---
 
@@ -157,7 +193,7 @@ The visual environment, lighting, shadows, and transit surge multipliers dynamic
 | **🚗 Car (Sedan)** | ৳80 | ৳24 / km | 15 km/h (Peak) / 22 km/h | 1.4x–2.2x Rush hour · +30%–50% Rain surge |
 | **🚲 Feeder Rickshaw** | ৳20 | ৳12 / km *(৳10 steps)* | 12 km/h | Peak adds ৳10 to upper range; +30%–50% Rain |
 | **🚇 MRT Line 6 Metro** | ৳20 | Station matrix *(max ৳100)* | 2 min/station + 5 min wait | Fixed official fare; **10% MRT Pass discount** |
-| **🚌 Local City Bus** | ৳10 | ৳2.70 / km | BRTA Distance Scale | Distance-based BRTA scale; immune to surge |
+| **🚌 Local City Bus** | ৳10 | ৳2.70 / km | BRTA Distance Scale | Distance-based BRTA scale; immune to surge · **🎓 50% Student Pass concession (min ৳10)** |
 
 ---
 
