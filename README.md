@@ -125,7 +125,7 @@ The visual environment, lighting, shadows, and transit surge multipliers dynamic
 * **Animated Route Playback:** Smooth camera tracking and vehicle marker progression with real-time heading angle rotation along Dhaka's roads.
 * **"More Ways to Travel" Comparison Cards:**
   * **MRT Line 6 Metro Card:** Exact station-to-station ticket calculations based on official MRT fare charts (৳20 min, ৳100 max) with optional **10% MRT Pass discount** toggle.
-  * **Local City Bus Card:** Comprehensive Dhaka bus corridor database with BRTA distance fare progression (৳10 min, ৳2.45/km).
+  * **Local City Bus Card:** Comprehensive Dhaka bus corridor database with BRTA distance fare progression (৳10 min, ৳2.70/km).
   * **Feeder Leg Optimizer:** Connects your origin and destination to the nearest transit hubs via customizable first/last-mile feeder modes (**Rickshaw, CNG, Bike, Car**), displaying the complete combined journey fare and time.
 * **Peak Surge Radar:** Time-aware rush hour multiplier (1.4x – 2.2x) calculated from local Dhaka time (`Asia/Dhaka`: 8:30–10:30 AM, 5:00–8:00 PM).
 
@@ -157,7 +157,7 @@ The visual environment, lighting, shadows, and transit surge multipliers dynamic
 | **🚗 Car (Sedan)** | ৳80 | ৳24 / km | 15 km/h (Peak) / 22 km/h | 1.4x–2.2x Rush hour · +30%–50% Rain surge |
 | **🚲 Feeder Rickshaw** | ৳20 | ৳12 / km *(৳10 steps)* | 12 km/h | Peak adds ৳10 to upper range; +30%–50% Rain |
 | **🚇 MRT Line 6 Metro** | ৳20 | Station matrix *(max ৳100)* | 2 min/station + 5 min wait | Fixed official fare; **10% MRT Pass discount** |
-| **🚌 Local City Bus** | ৳10 | ৳2.45 / km | BRTA Draft Table | Distance-based BRTA scale; immune to surge |
+| **🚌 Local City Bus** | ৳10 | ৳2.70 / km | BRTA Distance Scale | Distance-based BRTA scale; immune to surge |
 
 ---
 
