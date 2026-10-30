@@ -11293,6 +11293,7 @@
     let selectedMrtLastMileMode = 'Rickshaw';
     let selectedBusFirstMileMode = 'Rickshaw';
     let selectedBusLastMileMode = 'Rickshaw';
+    let selectedHybridBusRouteIndex = 0;
     let customMrtPickupStationIdx = null;
     let customMrtDropoffStationIdx = null;
     let inspectedMrtStationIdx = null;
@@ -11367,6 +11368,11 @@
 
     function selectBusLastMileMode(mode) {
       selectedBusLastMileMode = mode;
+      renderBusRouteFinder();
+    }
+
+    function selectHybridBusRoute(idx) {
+      selectedHybridBusRouteIndex = idx;
       renderBusRouteFinder();
     }
 
@@ -12345,94 +12351,135 @@
     }
 
     function getBusHybridMatches(pickup, destination, isPeak, directMatches) {
+      if (!busRouteData || !Array.isArray(busRouteData.routes)) return [];
       const { farePolicy, routes } = busRouteData;
-      return routes.map(route => {
-        let bestMatch = null;
-        for (let startIndex = 0; startIndex < route.stops.length; startIndex += 1) {
-          for (let endIndex = 0; endIndex < route.stops.length; endIndex += 1) {
-            if (startIndex === endIndex) continue;
-            if (directMatches.some(match =>
-              match.id === route.id &&
-              match.journeyStops[0] === route.stops[startIndex] &&
-              match.journeyStops[match.journeyStops.length - 1] === route.stops[endIndex]
-            )) continue;
+      const isStudent = typeof isStudentBusFareActive === 'function' && isStudentBusFareActive();
+      const busSpeedKmh = isPeak ? 15 : 22;
+      const directTripDist = calculateDirectDistance(pickup, destination);
+      const candidates = [];
 
-            const direction = startIndex < endIndex ? 1 : -1;
+      routes.forEach(route => {
+        if (!Array.isArray(route.stops) || route.stops.length < 2) return;
+
+        // 1. Find the stop on this route closest to the pickup point
+        let minSDist = Infinity;
+        for (let i = 0; i < route.stops.length; i++) {
+          const stopLoc = LOCATIONS[route.stops[i].locationKey];
+          if (!stopLoc) continue;
+          const d = calculateDirectDistance(pickup, stopLoc);
+          if (d < minSDist) minSDist = d;
+        }
+
+        // 2. Find the stop on this route closest to the destination point
+        let minDDist = Infinity;
+        for (let i = 0; i < route.stops.length; i++) {
+          const stopLoc = LOCATIONS[route.stops[i].locationKey];
+          if (!stopLoc) continue;
+          const d = calculateDirectDistance(destination, stopLoc);
+          if (d < minDDist) minDDist = d;
+        }
+
+        // Candidate pools: candidate stops within 1.0 km of the closest stop on this corridor
+        const candStarts = [];
+        const candEnds = [];
+        route.stops.forEach((s, idx) => {
+          const loc = LOCATIONS[s.locationKey];
+          if (!loc) return;
+          if (calculateDirectDistance(pickup, loc) <= minSDist + 1.0) candStarts.push(idx);
+          if (calculateDirectDistance(destination, loc) <= minDDist + 1.0) candEnds.push(idx);
+        });
+
+        let bestRouteCand = null;
+
+        for (const sIdx of candStarts) {
+          for (const eIdx of candEnds) {
+            if (sIdx === eIdx) continue;
+            const startLoc = LOCATIONS[route.stops[sIdx].locationKey];
+            const endLoc = LOCATIONS[route.stops[eIdx].locationKey];
+            if (!startLoc || !endLoc) continue;
+
+            const f1Dist = calculateDirectDistance(pickup, startLoc);
+            const f2Dist = calculateDirectDistance(destination, endLoc);
+
+            // Feeder access limits: each feeder leg should be <= 5.0 km
+            if (f1Dist > 5.0 || f2Dist > 5.0) continue;
+
+            // Transit progress check: exit stop must actually bring commuter closer to destination
+            if (directTripDist > 2.0 && f2Dist >= directTripDist * 0.85) continue;
+
+            const direction = sIdx < eIdx ? 1 : -1;
             const journeyStops = [];
-            for (let index = startIndex; ; index += direction) {
-              journeyStops.push(route.stops[index]);
-              if (index === endIndex) break;
+            for (let i = sIdx; ; i += direction) {
+              journeyStops.push(route.stops[i]);
+              if (i === eIdx) break;
             }
 
-            const firstMileDistanceKm = calculateDirectDistance(
-              pickup,
-              LOCATIONS[route.stops[startIndex].locationKey]
-            );
-            const lastMileDistanceKm = calculateDirectDistance(
-              destination,
-              LOCATIONS[route.stops[endIndex].locationKey]
-            );
-            const firstMileOptions = getFeederOptions(firstMileDistanceKm, isPeak)
-              .filter(option => option.isAvailable !== false);
-            const lastMileOptions = getFeederOptions(lastMileDistanceKm, isPeak)
-              .filter(option => option.isAvailable !== false);
-            if (!firstMileOptions.length || !lastMileOptions.length) continue;
-            const firstMile = firstMileOptions[0];
-            const lastMile = lastMileOptions[0];
-
-            const lowIndex = Math.min(startIndex, endIndex);
-            const highIndex = Math.max(startIndex, endIndex);
+            const lowIndex = Math.min(sIdx, eIdx);
+            const highIndex = Math.max(sIdx, eIdx);
             let busDistanceKm = 0;
-            for (let index = lowIndex + 1; index <= highIndex; index += 1) {
-              busDistanceKm += route.stops[index].distanceKmFromPrevious;
+            for (let i = lowIndex + 1; i <= highIndex; i++) {
+              busDistanceKm += route.stops[i].distanceKmFromPrevious;
             }
             if (!Number.isFinite(busDistanceKm) || busDistanceKm <= 0) continue;
-            const regularBusFare = Math.max(
-              farePolicy.minimumFareByType[route.type],
-              Math.ceil(busDistanceKm * farePolicy.farePerKm)
-            );
-            const isStudent = isStudentBusFareActive();
-            // Discount strictly applies to bus segment; feeders (Rickshaw/CNG/Walk) remain untouched
+
+            const f1Options = getFeederOptions(f1Dist, isPeak).filter(o => o.isAvailable !== false);
+            const f2Options = getFeederOptions(f2Dist, isPeak).filter(o => o.isAvailable !== false);
+            if (!f1Options.length || !f2Options.length) continue;
+
+            const firstMile = f1Options[0];
+            const lastMile = f2Options[0];
+
+            const minFare = farePolicy.minimumFareByType[route.type] || 10;
+            const regularBusFare = Math.max(minFare, Math.ceil(busDistanceKm * farePolicy.farePerKm));
             const busFare = isStudent ? Math.max(10, Math.round(regularBusFare * 0.5)) : regularBusFare;
             const feederFareMin = firstMile.fareMin + lastMile.fareMin;
             const feederFareMax = firstMile.fareMax + lastMile.fareMax;
-            const busSpeedKmh = isPeak ? 15 : 22;
-            const durationMins = firstMile.durationMins + lastMile.durationMins +
-              Math.ceil(busDistanceKm / busSpeedKmh * 60) + 10;
-            const candidate = {
+            const durationMins = firstMile.durationMins + lastMile.durationMins + Math.ceil(busDistanceKm / busSpeedKmh * 60) + 10;
+            const feederDistanceKm = f1Dist + f2Dist;
+
+            const cand = {
               ...route,
               journeyStops,
-              startIndex,
-              endIndex,
+              startIndex: sIdx,
+              endIndex: eIdx,
               busDistanceKm,
               busFare,
               regularBusFare,
               isStudent,
               firstMile,
               lastMile,
-              firstMileDistanceKm,
-              lastMileDistanceKm,
+              firstMileDistanceKm: f1Dist,
+              lastMileDistanceKm: f2Dist,
               feederFareMin,
               feederFareMax,
               fareMin: busFare + feederFareMin,
               fareMax: busFare + feederFareMax,
-              durationMins
+              durationMins,
+              feederDistanceKm
             };
-            if (!bestMatch ||
-                candidate.fareMin < bestMatch.fareMin ||
-                (candidate.fareMin === bestMatch.fareMin &&
-                  candidate.durationMins < bestMatch.durationMins)) {
-              bestMatch = candidate;
+
+            // Rank within this route: prioritize boarding at the closest stop to pickup & exiting at closest to destination
+            if (!bestRouteCand ||
+                cand.feederDistanceKm < bestRouteCand.feederDistanceKm ||
+                (Math.abs(cand.feederDistanceKm - bestRouteCand.feederDistanceKm) < 0.2 && cand.fareMin < bestRouteCand.fareMin)) {
+              bestRouteCand = cand;
             }
           }
         }
-        return bestMatch;
-      }).filter(Boolean)
-        .sort((first, second) =>
-          first.fareMin - second.fareMin ||
-          first.durationMins - second.durationMins
-        )
-        .slice(0, 3);
+
+        if (bestRouteCand) {
+          candidates.push(bestRouteCand);
+        }
+      });
+
+      // Rank all routes: prioritize minimal feeder distance (closest boarding & exit stops), then lowest fare, then time
+      candidates.sort((first, second) => {
+        const feederDiff = Math.round(first.feederDistanceKm * 10) - Math.round(second.feederDistanceKm * 10);
+        if (feederDiff !== 0) return feederDiff;
+        return first.fareMin - second.fareMin || first.durationMins - second.durationMins;
+      });
+
+      return candidates.slice(0, 5);
     }
 
     function renderBusRouteFinder() {
@@ -12724,7 +12771,10 @@
 
       // 2. Bus + Feeder Hybrid Options (Section 4)
       if (hybridMatches.length > 0) {
-        const primaryRoute = hybridMatches[0];
+        if (selectedHybridBusRouteIndex >= hybridMatches.length) {
+          selectedHybridBusRouteIndex = 0;
+        }
+        const primaryRoute = hybridMatches[selectedHybridBusRouteIndex] || hybridMatches[0];
 
         const busFirstMileOptions = getFeederOptions(primaryRoute.firstMileDistanceKm || primaryRoute.firstMile.distanceKm, isPeak);
         const busLastMileOptions = getFeederOptions(primaryRoute.lastMileDistanceKm || primaryRoute.lastMile.distanceKm, isPeak);
@@ -12761,8 +12811,10 @@
           hybridMatches.forEach((hRoute, hIdx) => {
             const pill = document.createElement('button');
             pill.type = 'button';
-            pill.className = `px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition ${hIdx === 0 ? 'bg-emerald-600 text-white' : 'bg-[#0f2042] text-slate-300 hover:bg-[#152a55]'}`;
+            const isActive = hIdx === selectedHybridBusRouteIndex;
+            pill.className = `px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition ${isActive ? 'bg-emerald-600 text-white shadow-md' : 'bg-[#0f2042] text-slate-300 hover:bg-[#152a55]'}`;
             pill.textContent = `${getLocalizedText(hRoute.service)} (${formatLocalizedFare(hRoute.busFare)})`;
+            pill.onclick = () => selectHybridBusRoute(hIdx);
             switcherWrap.appendChild(pill);
           });
           hybridWrapper.appendChild(switcherWrap);
@@ -14211,6 +14263,7 @@
         document.getElementById('currentLocationStatus').textContent =
           getLocalizedText('Your browser will ask permission before sharing your location.');
       }
+      selectedHybridBusRouteIndex = 0;
       updateRoute();
       renderBusRouteFinder();
       if (typeof updateBusTickerText === 'function') updateBusTickerText();
