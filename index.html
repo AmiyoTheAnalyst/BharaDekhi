@@ -6784,6 +6784,7 @@
           </button>
           <p id="currentLocationStatus" class="mt-1 text-xs text-slate-500" aria-live="polite">Your browser will ask permission before sharing your location.</p>
           <p class="mt-1 text-xs text-slate-400">Nearby place names come from OpenStreetMap; building-level details depend on available map data.</p>
+          <div id="pickupNearestBusStopInfo" class="mt-2" aria-live="polite"></div>
         </div>
 
         <!-- Interactive Swap Locations Button -->
@@ -6800,6 +6801,7 @@
           </label>
           <select id="dropoffSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="onLocationChange()">
           </select>
+          <div id="dropoffNearestBusStopInfo" class="mt-2" aria-live="polite"></div>
         </div>
       </div>
 
@@ -9426,6 +9428,10 @@
         pickupMarker.setPopupContent(`${getLocalizedText('Pickup')}: ${getLocalizedLocationName(pickup.name)}`);
         dropMarker.setPopupContent(`${getLocalizedText('Destination')}: ${getLocalizedLocationName(destination.name)}`);
       }
+
+      if (typeof renderNearestBusStops === 'function') {
+        renderNearestBusStops();
+      }
     }
 
     const originalTextMap = new WeakMap();
@@ -11184,6 +11190,99 @@
       }, { station: MRT_LINE_6_STATIONS[0], index: 0, distanceKm: Infinity });
     }
 
+    function getNearestBusStop(location) {
+      if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') return null;
+      if (!busRouteData || !Array.isArray(busRouteData.routes)) return null;
+
+      let nearest = null;
+      let minDistance = Infinity;
+      const seen = new Set();
+
+      busRouteData.routes.forEach(route => {
+        if (!Array.isArray(route.stops)) return;
+        route.stops.forEach(stop => {
+          if (seen.has(stop.locationKey)) return;
+          seen.add(stop.locationKey);
+          const stopLocation = LOCATIONS[stop.locationKey];
+          if (!stopLocation) return;
+          const distanceKm = calculateDirectDistance(location, stopLocation);
+          if (distanceKm < minDistance) {
+            minDistance = distanceKm;
+            nearest = {
+              name: stop.name,
+              locationKey: stop.locationKey,
+              distanceKm,
+              lat: stopLocation.lat,
+              lng: stopLocation.lng,
+              isWalkable: distanceKm <= 1.0
+            };
+          }
+        });
+      });
+
+      return nearest;
+    }
+
+    function renderNearestBusStops() {
+      const pickupEl = document.getElementById('pickupNearestBusStopInfo');
+      const dropoffEl = document.getElementById('dropoffNearestBusStopInfo');
+      if (!pickupEl || !dropoffEl) return;
+
+      const pickupKey = document.getElementById('pickupSelect')?.value;
+      const dropoffKey = document.getElementById('dropoffSelect')?.value;
+      const pickup = getLocationForKey(pickupKey);
+      const destination = getLocationForKey(dropoffKey);
+
+      const renderStopBadge = (loc, targetEl, isPickup) => {
+        if (!loc) {
+          targetEl.innerHTML = '';
+          return;
+        }
+        const nearBus = getNearestBusStop(loc);
+        if (!nearBus) {
+          targetEl.innerHTML = '';
+          return;
+        }
+        const isAtStop = nearBus.distanceKm < 0.08;
+        const isWalk = nearBus.distanceKm <= 1.0;
+        const walkMins = Math.max(1, Math.ceil(nearBus.distanceKm / 4.5 * 60));
+        const colorBorder = isPickup ? 'border-blue-200/90 dark:border-blue-900/60' : 'border-rose-200/90 dark:border-rose-900/60';
+        const colorBg = isPickup ? 'bg-blue-50/90 dark:bg-blue-950/40' : 'bg-rose-50/90 dark:bg-rose-950/40';
+        const colorText = isPickup ? 'text-blue-900 dark:text-blue-200' : 'text-rose-900 dark:text-rose-200';
+        const iconBg = isPickup ? 'bg-blue-600' : 'bg-rose-600';
+        const labelText = isPickup
+          ? (currentLanguage === 'bn' ? 'পিকআপের নিকটবর্তী বাস স্টপ:' : 'Closest Bus Stop (Pickup):')
+          : (currentLanguage === 'bn' ? 'গন্তব্যের নিকটবর্তী বাস স্টপ:' : 'Closest Bus Stop (Destination):');
+        const distBadge = isAtStop
+          ? (currentLanguage === 'bn' ? 'স্টপেজেই' : 'At stop')
+          : `~${formatLocalizedNumber(nearBus.distanceKm, 1)} km`;
+        const walkBadge = isWalk && !isAtStop
+          ? `<div class="mt-1 flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400 font-medium"><span>🚶</span><span>${currentLanguage === 'bn' ? `হাঁটার পথ (~${formatLocalizedNumber(walkMins)} মিনিট, ১ কিমি-র মধ্যে)` : `Walkable (~${formatLocalizedNumber(walkMins)} mins walk, under 1 km)`}</span></div>`
+          : '';
+
+        targetEl.innerHTML = `
+          <div class="rounded-xl border ${colorBorder} ${colorBg} p-2 text-xs ${colorText} shadow-sm transition-all">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 truncate">
+                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${iconBg} text-white text-[10px] shadow-sm font-bold">🚏</span>
+                <div class="truncate">
+                  <span class="font-bold text-[11px] block md:inline opacity-90">${labelText}</span>
+                  <span class="font-semibold text-slate-800 dark:text-slate-100">${getLocalizedLocationName(nearBus.name)}</span>
+                </div>
+              </div>
+              <span class="shrink-0 rounded-full ${isWalk ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-500/30' : 'bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300'} px-2 py-0.5 text-[10px] font-bold">
+                ${distBadge}
+              </span>
+            </div>
+            ${walkBadge}
+          </div>
+        `;
+      };
+
+      renderStopBadge(pickup, pickupEl, true);
+      renderStopBadge(destination, dropoffEl, false);
+    }
+
     const VEHICLE_RATES = {
       Bike: { base: 30, perKm: 14, perMin: 0.5, durationFactor: 0.85 },
       CNG: { base: 50, perKm: 18, perMin: 0.7, durationFactor: 1.15 },
@@ -11310,7 +11409,7 @@
 
     function getFeederOptions(accessDistanceKm, isPeak) {
       const routeDistanceKm = Math.max(0.05, accessDistanceKm * 1.25);
-      const isWalkable = routeDistanceKm <= 0.6;
+      const isWalkable = accessDistanceKm <= 1.0 || routeDistanceKm <= 1.0;
 
       const accessModes = [
         { vehicle: 'Bus', base: 10, perKm: 2.70, perMin: 0, speedKmh: 15, maximumDistanceKm: 15 },
@@ -11397,7 +11496,7 @@
           durationMins: Math.max(1, Math.ceil(routeDistanceKm / 4.5 * 60)),
           isWalking: true,
           isAvailable: true,
-          isAtStation: routeDistanceKm < 0.1
+          isAtStation: accessDistanceKm < 0.1 || routeDistanceKm < 0.1
         });
       }
 
@@ -12066,6 +12165,7 @@
         busRouteData = data;
         renderBusRouteFinder();
         if (typeof updateMoreWaysToTravelCards === 'function') updateMoreWaysToTravelCards();
+        if (typeof renderNearestBusStops === 'function') renderNearestBusStops();
       } catch (error) {
         console.error('Could not load local bus routes:', error);
         if (status) status.textContent = getLocalizedText('Could not load local bus routes. Please refresh or check the route data file.');
@@ -12348,6 +12448,9 @@
       const destinationKey = document.getElementById('dropoffSelect').value;
       const pickup = getLocationForKey(pickupKey);
       const destination = getLocationForKey(destinationKey);
+      if (typeof renderNearestBusStops === 'function') {
+        renderNearestBusStops();
+      }
       if (!pickup || !destination) {
         if (status) status.textContent = getLocalizedText('Could not estimate a bus + feeder route for these locations.');
         return;
@@ -12690,7 +12793,7 @@
 
               <div class="relative z-10 -mt-6 flex flex-col items-center">
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d2a27] border border-emerald-500/50 shadow-md text-[11px] font-bold text-emerald-300">
-                  <span>🚲</span>
+                  <span>${bFirstMile.vehicle === 'Walk' ? '🚶' : bFirstMile.vehicle === 'Bike' ? '🏍️' : bFirstMile.vehicle === 'CNG' ? '🛺' : bFirstMile.vehicle === 'Car' ? '🚗' : '🚲'}</span>
                   <span>Feeder (${getLocalizedText(bFirstMile.vehicle)}) ~ ${formatLocalizedNumber(bFirstMile.distanceKm, 1)} km</span>
                 </div>
               </div>
@@ -12700,7 +12803,7 @@
                   <span class="text-xs font-black text-blue-300">BUS</span>
                 </div>
                 <span class="mt-2 text-xs font-bold text-white leading-tight">${getLocalizedLocationName(boardStop.name)}</span>
-                <span class="text-[10px] text-blue-400 mt-0.5">Bus Stop (Board)</span>
+                <span class="text-[10px] text-blue-400 mt-0.5">${currentLanguage === 'bn' ? 'নিকটবর্তী বাস স্টপ (বোর্ডিং)' : 'Closest Bus Stop (Board)'}</span>
               </div>
 
               <div class="relative z-10 -mt-6 flex flex-col items-center">
@@ -12715,12 +12818,12 @@
                   <span class="text-xs font-black text-blue-300">BUS</span>
                 </div>
                 <span class="mt-2 text-xs font-bold text-white leading-tight">${getLocalizedLocationName(exitStop.name)}</span>
-                <span class="text-[10px] text-blue-400 mt-0.5">Bus Stop (Exit)</span>
+                <span class="text-[10px] text-blue-400 mt-0.5">${currentLanguage === 'bn' ? 'নিকটবর্তী বাস স্টপ (নামার স্টপ)' : 'Closest Bus Stop (Exit)'}</span>
               </div>
 
               <div class="relative z-10 -mt-6 flex flex-col items-center">
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d2a27] border border-emerald-500/50 shadow-md text-[11px] font-bold text-emerald-300">
-                  <span>🚲</span>
+                  <span>${bLastMile.vehicle === 'Walk' ? '🚶' : bLastMile.vehicle === 'Bike' ? '🏍️' : bLastMile.vehicle === 'CNG' ? '🛺' : bLastMile.vehicle === 'Car' ? '🚗' : '🚲'}</span>
                   <span>Feeder (${getLocalizedText(bLastMile.vehicle)}) ~ ${formatLocalizedNumber(bLastMile.distanceKm, 1)} km</span>
                 </div>
               </div>
@@ -12743,8 +12846,8 @@
             <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">1</span>
             <h4 class="text-sm font-bold text-white">${getLocalizedText('Choose your feeder option')}</h4>
           </div>
-          <p class="text-xs text-slate-400 mb-2 ml-7">${getLocalizedText('From')} ${getLocalizedLocationName(pickup.name)} → ${getLocalizedLocationName(boardStop.name)} (${getLocalizedText('first mile')})</p>
-          <div id="busFirstMileContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+          <p class="text-xs text-slate-400 mb-2 ml-7">${getLocalizedText('From')} ${getLocalizedLocationName(pickup.name)} → <strong>${getLocalizedLocationName(boardStop.name)}</strong> (${currentLanguage === 'bn' ? 'পিকআপের নিকটবর্তী বাস স্টপ' : 'closest bus stop to pickup'}, ~${formatLocalizedNumber(primaryRoute.firstMileDistanceKm, 1)} km)</p>
+          <div id="busFirstMileContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2.5"></div>
         `;
         hybridWrapper.appendChild(step1Wrap);
 
@@ -12781,8 +12884,8 @@
             <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">3</span>
             <h4 class="text-sm font-bold text-white">${getLocalizedText('Choose your feeder option (again)')}</h4>
           </div>
-          <p class="text-xs text-slate-400 mb-2 ml-7">${getLocalizedText('From')} ${getLocalizedLocationName(exitStop.name)} → ${getLocalizedLocationName(destination.name)} (${getLocalizedText('last mile')})</p>
-          <div id="busLastMileContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
+          <p class="text-xs text-slate-400 mb-2 ml-7">${getLocalizedText('From')} <strong>${getLocalizedLocationName(exitStop.name)}</strong> (${currentLanguage === 'bn' ? 'গন্তব্যের নিকটবর্তী বাস স্টপ' : 'closest bus stop to destination'}, ~${formatLocalizedNumber(primaryRoute.lastMileDistanceKm, 1)} km) → ${getLocalizedLocationName(destination.name)}</p>
+          <div id="busLastMileContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2.5"></div>
         `;
         hybridWrapper.appendChild(step3Wrap);
 
@@ -14111,6 +14214,7 @@
       updateRoute();
       renderBusRouteFinder();
       if (typeof updateBusTickerText === 'function') updateBusTickerText();
+      if (typeof renderNearestBusStops === 'function') renderNearestBusStops();
     }
 
     function toggleSurgeSimulation() {
