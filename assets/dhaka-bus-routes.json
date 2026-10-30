@@ -1,7 +1,7 @@
 {
   "notice": "Unverified draft routes and estimated segment distances; not official BRTA records.",
   "farePolicy": {
-    "farePerKm": 2.70,
+    "farePerKm": 2.7,
     "rounding": "ceil-to-taka",
     "minimumFareByType": {
       "non-ac": 10,
@@ -11,15 +11,236 @@
   },
   "routes": [
     {
-      "id": "raida-mirpur-motijheel",
-      "service": "Raida",
+      "id": "falgun-azimpur-uttara",
+      "service": "Falgun Paribahan",
       "type": "non-ac",
       "status": "unverified-draft",
       "stops": [
-        { "locationKey": "mirpur", "name": "Mirpur 10", "distanceKmFromPrevious": 0 },
-        { "locationKey": "gulshan", "name": "Gulshan 1", "distanceKmFromPrevious": 5.5 },
-        { "locationKey": "rampura", "name": "Rampura", "distanceKmFromPrevious": 4.2 },
-        { "locationKey": "motijheel", "name": "Motijheel", "distanceKmFromPrevious": 5.2 }
+        {
+          "locationKey": "azimpur",
+          "name": "Azimpur Bus Stand",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "sciencelab",
+          "name": "Science Lab",
+          "distanceKmFromPrevious": 1.8
+        },
+        {
+          "locationKey": "shahbagh",
+          "name": "Shahbagh",
+          "distanceKmFromPrevious": 1.5
+        },
+        {
+          "locationKey": "kakrail",
+          "name": "Kakrail",
+          "distanceKmFromPrevious": 1.6
+        },
+        {
+          "locationKey": "malibagh",
+          "name": "Malibagh",
+          "distanceKmFromPrevious": 1.2
+        },
+        {
+          "locationKey": "rampura",
+          "name": "Rampura",
+          "distanceKmFromPrevious": 2.2
+        },
+        {
+          "locationKey": "brac",
+          "name": "BRAC University (Merul Badda)",
+          "distanceKmFromPrevious": 1.8
+        },
+        {
+          "locationKey": "natunbazar",
+          "name": "Natun Bazar",
+          "distanceKmFromPrevious": 2.1
+        },
+        {
+          "locationKey": "uttara",
+          "name": "Uttara",
+          "distanceKmFromPrevious": 8.5
+        }
+      ]
+    },
+    {
+      "id": "bikash-azimpur-uttara",
+      "service": "Bikash Paribahan",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "azimpur",
+          "name": "Azimpur Bus Stand",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "sciencelab",
+          "name": "Science Lab",
+          "distanceKmFromPrevious": 1.8
+        },
+        {
+          "locationKey": "dhanmondi",
+          "name": "Dhanmondi 27",
+          "distanceKmFromPrevious": 2.2
+        },
+        {
+          "locationKey": "farmgate",
+          "name": "Farmgate",
+          "distanceKmFromPrevious": 2.4
+        },
+        {
+          "locationKey": "mohakhali",
+          "name": "Mohakhali",
+          "distanceKmFromPrevious": 3.2
+        },
+        {
+          "locationKey": "banani",
+          "name": "Banani",
+          "distanceKmFromPrevious": 2.1
+        },
+        {
+          "locationKey": "uttara",
+          "name": "Uttara",
+          "distanceKmFromPrevious": 8.2
+        }
+      ]
+    },
+    {
+      "id": "shadhin-azimpur-farmgate",
+      "service": "Shadhin Paribahan",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "azimpur",
+          "name": "Azimpur Bus Stand",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "sciencelab",
+          "name": "Science Lab",
+          "distanceKmFromPrevious": 1.8
+        },
+        {
+          "locationKey": "panthapath",
+          "name": "Panthapath",
+          "distanceKmFromPrevious": 1.9
+        },
+        {
+          "locationKey": "farmgate",
+          "name": "Farmgate",
+          "distanceKmFromPrevious": 1.2
+        }
+      ]
+    },
+    {
+      "id": "vip27-dhanmondi-baridhara",
+      "service": "VIP 27",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "dhanmondi",
+          "name": "Dhanmondi 27",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "sciencelab",
+          "name": "Science Lab",
+          "distanceKmFromPrevious": 2.2
+        },
+        {
+          "locationKey": "farmgate",
+          "name": "Farmgate",
+          "distanceKmFromPrevious": 2.6
+        },
+        {
+          "locationKey": "mohakhali",
+          "name": "Mohakhali",
+          "distanceKmFromPrevious": 3.2
+        },
+        {
+          "locationKey": "gulshan",
+          "name": "Gulshan 1 Circle",
+          "distanceKmFromPrevious": 2.1
+        },
+        {
+          "locationKey": "baridhara",
+          "name": "Baridhara",
+          "distanceKmFromPrevious": 2.5
+        }
+      ]
+    },
+    {
+      "id": "bikalpa-mirpur-motijheel",
+      "service": "Bikalpa Super Service",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "mirpur",
+          "name": "Mirpur 10 Circle",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "farmgate",
+          "name": "Farmgate",
+          "distanceKmFromPrevious": 5.6
+        },
+        {
+          "locationKey": "shahbagh",
+          "name": "Shahbagh",
+          "distanceKmFromPrevious": 2.8
+        },
+        {
+          "locationKey": "motijheel",
+          "name": "Motijheel Shapla Chattar",
+          "distanceKmFromPrevious": 3.2
+        }
+      ]
+    },
+    {
+      "id": "raida-mirpur-motijheel",
+      "service": "Raida Enterprise",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "mirpur",
+          "name": "Mirpur 10 Circle",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "banani",
+          "name": "Banani",
+          "distanceKmFromPrevious": 4.8
+        },
+        {
+          "locationKey": "gulshan",
+          "name": "Gulshan 1 Circle",
+          "distanceKmFromPrevious": 2.1
+        },
+        {
+          "locationKey": "brac",
+          "name": "BRAC University (Merul Badda)",
+          "distanceKmFromPrevious": 1.9
+        },
+        {
+          "locationKey": "rampura",
+          "name": "Rampura",
+          "distanceKmFromPrevious": 2.3
+        },
+        {
+          "locationKey": "khilgaon",
+          "name": "Khilgaon",
+          "distanceKmFromPrevious": 2.2
+        },
+        {
+          "locationKey": "motijheel",
+          "name": "Motijheel Shapla Chattar",
+          "distanceKmFromPrevious": 3.1
+        }
       ]
     },
     {
@@ -28,22 +249,59 @@
       "type": "non-ac",
       "status": "unverified-draft",
       "stops": [
-        { "locationKey": "uttara", "name": "Uttara", "distanceKmFromPrevious": 0 },
-        { "locationKey": "mohakhali", "name": "Mohakhali", "distanceKmFromPrevious": 11.5 },
-        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 4.3 },
-        { "locationKey": "azimpur", "name": "Azimpur", "distanceKmFromPrevious": 4.8 }
+        {
+          "locationKey": "uttara",
+          "name": "Uttara",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "mohakhali",
+          "name": "Mohakhali",
+          "distanceKmFromPrevious": 11.5
+        },
+        {
+          "locationKey": "tejgaon",
+          "name": "Tejgaon",
+          "distanceKmFromPrevious": 4.3
+        },
+        {
+          "locationKey": "azimpur",
+          "name": "Azimpur Bus Stand",
+          "distanceKmFromPrevious": 4.8
+        }
       ]
     },
     {
       "id": "projapoti-mirpur-motijheel",
-      "service": "Projapoti",
+      "service": "Projapoti Paribahan",
       "type": "non-ac",
       "status": "unverified-draft",
       "stops": [
-        { "locationKey": "mirpur", "name": "Mirpur 10", "distanceKmFromPrevious": 0 },
-        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 8.1 },
-        { "locationKey": "azimpur", "name": "Azimpur", "distanceKmFromPrevious": 4.6 },
-        { "locationKey": "motijheel", "name": "Motijheel", "distanceKmFromPrevious": 3.1 }
+        {
+          "locationKey": "mirpur",
+          "name": "Mirpur 10 Circle",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "farmgate",
+          "name": "Farmgate",
+          "distanceKmFromPrevious": 5.6
+        },
+        {
+          "locationKey": "tejgaon",
+          "name": "Tejgaon",
+          "distanceKmFromPrevious": 2.5
+        },
+        {
+          "locationKey": "azimpur",
+          "name": "Azimpur Bus Stand",
+          "distanceKmFromPrevious": 4.6
+        },
+        {
+          "locationKey": "motijheel",
+          "name": "Motijheel Shapla Chattar",
+          "distanceKmFromPrevious": 3.1
+        }
       ]
     },
     {
@@ -52,23 +310,150 @@
       "type": "non-ac",
       "status": "unverified-draft",
       "stops": [
-        { "locationKey": "savar", "name": "Savar", "distanceKmFromPrevious": 0 },
-        { "locationKey": "mirpur", "name": "Mirpur 10", "distanceKmFromPrevious": 17.5 },
-        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 8.1 },
-        { "locationKey": "azimpur", "name": "Azimpur", "distanceKmFromPrevious": 4.6 }
+        {
+          "locationKey": "savar",
+          "name": "Savar",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "mirpur",
+          "name": "Mirpur 10 Circle",
+          "distanceKmFromPrevious": 17.5
+        },
+        {
+          "locationKey": "tejgaon",
+          "name": "Tejgaon",
+          "distanceKmFromPrevious": 8.1
+        },
+        {
+          "locationKey": "azimpur",
+          "name": "Azimpur Bus Stand",
+          "distanceKmFromPrevious": 4.6
+        }
       ]
     },
     {
       "id": "brtc-ac-uttara-motijheel",
-      "service": "BRTC AC",
+      "service": "BRTC AC Express",
       "type": "ac",
       "status": "unverified-draft",
       "stops": [
-        { "locationKey": "uttara", "name": "Uttara", "distanceKmFromPrevious": 0 },
-        { "locationKey": "banani", "name": "Banani", "distanceKmFromPrevious": 12.5 },
-        { "locationKey": "mohakhali", "name": "Mohakhali", "distanceKmFromPrevious": 2.3 },
-        { "locationKey": "tejgaon", "name": "Tejgaon", "distanceKmFromPrevious": 4.3 },
-        { "locationKey": "motijheel", "name": "Motijheel", "distanceKmFromPrevious": 7.2 }
+        {
+          "locationKey": "uttara",
+          "name": "Uttara",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "banani",
+          "name": "Banani",
+          "distanceKmFromPrevious": 12.5
+        },
+        {
+          "locationKey": "mohakhali",
+          "name": "Mohakhali",
+          "distanceKmFromPrevious": 2.3
+        },
+        {
+          "locationKey": "farmgate",
+          "name": "Farmgate",
+          "distanceKmFromPrevious": 3.2
+        },
+        {
+          "locationKey": "shahbagh",
+          "name": "Shahbagh",
+          "distanceKmFromPrevious": 2.8
+        },
+        {
+          "locationKey": "motijheel",
+          "name": "Motijheel Shapla Chattar",
+          "distanceKmFromPrevious": 3.2
+        }
+      ]
+    },
+    {
+      "id": "turag-jatrabari-uttara",
+      "service": "Turag Paribahan",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "jatrabari",
+          "name": "Jatrabari",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "motijheel",
+          "name": "Motijheel Shapla Chattar",
+          "distanceKmFromPrevious": 3.4
+        },
+        {
+          "locationKey": "kakrail",
+          "name": "Kakrail",
+          "distanceKmFromPrevious": 2.1
+        },
+        {
+          "locationKey": "malibagh",
+          "name": "Malibagh",
+          "distanceKmFromPrevious": 1.3
+        },
+        {
+          "locationKey": "rampura",
+          "name": "Rampura",
+          "distanceKmFromPrevious": 2.2
+        },
+        {
+          "locationKey": "brac",
+          "name": "BRAC University (Merul Badda)",
+          "distanceKmFromPrevious": 1.8
+        },
+        {
+          "locationKey": "bashundhara",
+          "name": "Bashundhara Residential Area",
+          "distanceKmFromPrevious": 4.2
+        },
+        {
+          "locationKey": "uttara",
+          "name": "Uttara",
+          "distanceKmFromPrevious": 6.5
+        }
+      ]
+    },
+    {
+      "id": "achim-mirpur-motijheel",
+      "service": "Achim Paribahan",
+      "type": "non-ac",
+      "status": "unverified-draft",
+      "stops": [
+        {
+          "locationKey": "mirpur",
+          "name": "Mirpur 10 Circle",
+          "distanceKmFromPrevious": 0
+        },
+        {
+          "locationKey": "banani",
+          "name": "Banani",
+          "distanceKmFromPrevious": 4.8
+        },
+        {
+          "locationKey": "mohakhali",
+          "name": "Mohakhali",
+          "distanceKmFromPrevious": 2.3
+        },
+        {
+          "locationKey": "tejgaon",
+          "name": "Tejgaon",
+          "distanceKmFromPrevious": 3.1
+        },
+        {
+          "locationKey": "shantinagar",
+          "name": "Shantinagar",
+          "distanceKmFromPrevious": 2.8
+        },
+        {
+          "locationKey": "motijheel",
+          "name": "Motijheel Shapla Chattar",
+          "distanceKmFromPrevious": 2.5
+        }
       ]
     }
   ]

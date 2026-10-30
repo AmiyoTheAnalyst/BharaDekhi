@@ -2519,6 +2519,11 @@
       background: linear-gradient(180deg, #102547 0%, #0c1a36 100%) !important;
       z-index: 15;
     }
+    
+    .feeder-card-item[data-feeder-mode="Bus"]:hover {
+      border-color: rgba(16, 185, 129, 0.6) !important;
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.25) !important;
+    }
     .feeder-card-item[data-feeder-mode="Rickshaw"]:hover {
       border-color: #34d399 !important;
       outline-color: #34d399 !important;
@@ -8872,6 +8877,29 @@
       'No bus data is available for your current-location or map-pin trip yet. Choose listed locations to check draft routes.': 'বর্তমান অবস্থান বা মানচিত্রের পিনের জন্য এখনও বাসের তথ্য নেই। খসড়া রুট দেখতে তালিকাভুক্ত স্থান বেছে নিন।',
       'No direct route in the draft data; showing bus + feeder suggestions below.': 'খসড়া তথ্যে সরাসরি বাসের রুট নেই; নিচে বাস + ফিডার যাত্রার পরামর্শ দেখানো হয়েছে।',
       'Direct bus routes': 'সরাসরি বাসের রুট',
+      'Multi-Bus Transfer': 'মাল্টি-বাস ট্রান্সফার',
+      '2-Bus Transfer': '২-বাস ট্রান্সফার',
+      'Multi-Bus Transfer Routes': 'মাল্টি-বাস ট্রান্সফার রুট',
+      'Transfer at': 'ট্রান্সফার পয়েন্ট',
+      'Interchange': 'ট্রান্সফার',
+      'Transfer wait': 'ট্রান্সফার অপেক্ষা',
+      'Local Feeder Bus': 'লোকাল ফিডার বাস',
+      'Feeder Bus': 'ফিডার বাস',
+      'Local Bus': 'লোকাল বাস',
+      'Bus': 'বাস',
+      'Bus Feeder': 'বাস ফিডার',
+      'Direct bus transit': 'সরাসরি বাস ট্রানজিট',
+      'direct bus routes': 'সরাসরি বাস রুট',
+      'Direct city corridor': 'সরাসরি সিটি করিডোর',
+      'Falgun Paribahan': 'ফাল্গুন পরিবহন',
+      'Bikash Paribahan': 'বিকাশ পরিবহন',
+      'Shadhin Paribahan': 'স্বাধীন পরিবহন',
+      'VIP 27': 'ভিআইপি ২৭',
+      'Bikalpa Super Service': 'বিকল্প সুপার সার্ভিস',
+      'Raida Enterprise': 'রাইদা এন্টারপ্রাইজ',
+      'Turag Paribahan': 'তুরাগ পরিবহন',
+      'Achim Paribahan': 'অছিম পরিবহন',
+      'BRTC AC Express': 'বিআরটিসি এসি এক্সপ্রেস',
       'Bus + feeder options': 'বাস + ফিডার বিকল্প',
       'Bus + feeder': 'বাস + ফিডার',
       'Ride to board': 'বাসে উঠতে যান',
@@ -9296,6 +9324,9 @@
     const BENGALI_LOCATION_NAMES = {
       'Azimpur': 'আজিমপুর',
       'Azimpur Bus Stand': 'আজিমপুর বাস স্ট্যান্ড',
+      'Science Lab': 'সায়েন্স ল্যাব',
+      'Farmgate': 'ফার্মগেট',
+      'Shahbagh': 'শাহবাগ',
       'Uttara': 'উত্তরা',
       'Banani': 'বনানী',
       'Baridhara': 'বারিধারা',
@@ -10201,6 +10232,9 @@
     // 1. Coordinates Database for Dhaka Hubs
     const LOCATIONS = {
       azimpur: { name: "Azimpur Bus Stand", lat: 23.7270, lng: 90.3854 },
+      sciencelab: { name: "Science Lab", lat: 23.7390, lng: 90.3835 },
+      farmgate: { name: "Farmgate", lat: 23.7579, lng: 90.3891 },
+      shahbagh: { name: "Shahbagh", lat: 23.7388, lng: 90.3956 },
       uttara: { name: "Uttara", lat: 23.8761, lng: 90.3795 },
       banani: { name: "Banani", lat: 23.7937, lng: 90.4043 },
       baridhara: { name: "Baridhara", lat: 23.7995, lng: 90.4238 },
@@ -11269,6 +11303,7 @@
       const isWalkable = routeDistanceKm <= 0.6;
 
       const accessModes = [
+        { vehicle: 'Bus', base: 10, perKm: 2.70, perMin: 0, speedKmh: 15, maximumDistanceKm: 15 },
         { vehicle: 'Rickshaw', base: 20, perKm: 12, perMin: 0, speedKmh: 12, maximumDistanceKm: 5 },
         { vehicle: 'CNG', ...VEHICLE_RATES.CNG, speedKmh: 12 },
         { vehicle: 'Bike', ...VEHICLE_RATES.Bike, speedKmh: 18 },
@@ -11291,6 +11326,24 @@
 
         const durationMins = Math.max(2, Math.ceil(routeDistanceKm / speedKmh * 60));
         const fare = Math.ceil((base + routeDistanceKm * perKm + durationMins * perMin) / 10) * 10;
+        if (vehicle === 'Bus') {
+          const isStudent = typeof isStudentBusFareActive === 'function' && isStudentBusFareActive();
+          const regularBusFeederFare = Math.max(10, Math.ceil(routeDistanceKm * 2.70));
+          const busFeederFare = isStudent ? Math.max(10, Math.round(regularBusFeederFare * 0.5)) : regularBusFeederFare;
+          const busDurationMins = Math.max(5, Math.ceil(routeDistanceKm / (isPeak ? 12 : 18) * 60) + 3);
+          const isAvail = routeDistanceKm >= 0.7 && routeDistanceKm <= 15;
+          return {
+            vehicle,
+            fare: busFeederFare,
+            fareMin: busFeederFare,
+            fareMax: busFeederFare,
+            distanceKm: routeDistanceKm,
+            durationMins: isAvail ? busDurationMins : null,
+            isWalking: false,
+            isAvailable: isAvail
+          };
+        }
+
         if (vehicle === 'Rickshaw') {
           const fareMin = Math.max(20, fare - 10);
           let fareMax = fare + (isPeak ? 10 : 0);
@@ -11643,6 +11696,56 @@
 </svg>`;
     }
 
+    function getBusMiniPreviewSvg() {
+      return `<svg class="w-full h-full" viewBox="0 0 240 56" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="busBeamFeeder" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Road Surface -->
+  <rect x="0" y="44" width="240" height="12" fill="#091413" />
+  <line x1="0" y1="44" x2="240" y2="44" stroke="#1e293b" stroke-width="1.8" />
+  <g class="bus-glide-group" transform="translate(68, 6)">
+    <polygon points="96,24 175,14 175,34" fill="url(#busBeamFeeder)" />
+    <!-- Bus Body: Dhaka classic red & green livery -->
+    <rect x="6" y="8" width="90" height="24" rx="4" fill="#b91c1c" stroke="#dc2626" stroke-width="1" />
+    <rect x="6" y="20" width="90" height="12" rx="2" fill="#047857" />
+    <line x1="6" y1="20" x2="96" y2="20" stroke="#fbbf24" stroke-width="1" />
+    <!-- LED Destination Board -->
+    <rect x="74" y="9.5" width="20" height="4.5" rx="1" fill="#fef08a" opacity="0.95" />
+    <!-- Lighted Passenger Windows -->
+    <rect x="12" y="11" width="10" height="6" rx="1.5" fill="#fef08a" opacity="0.9" />
+    <rect x="25" y="11" width="10" height="6" rx="1.5" fill="#fef08a" opacity="0.9" />
+    <rect x="38" y="11" width="10" height="6" rx="1.5" fill="#fef08a" opacity="0.9" />
+    <rect x="51" y="11" width="10" height="6" rx="1.5" fill="#fef08a" opacity="0.9" />
+    <rect x="64" y="11" width="10" height="6" rx="1.5" fill="#fef08a" opacity="0.9" />
+    <!-- Front Windshield -->
+    <polygon points="85,10 93,10 93,18 85,18" fill="#e0f2fe" opacity="0.85" />
+    <!-- Wheels -->
+    <g transform="translate(26, 32)">
+      <circle cx="0" cy="0" r="5.5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="2" fill="#cbd5e1" />
+    </g>
+    <g transform="translate(76, 32)">
+      <circle cx="0" cy="0" r="5.5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+      <circle cx="0" cy="0" r="2" fill="#cbd5e1" />
+    </g>
+  </g>
+  <!-- Badges -->
+  <g transform="translate(6, 4)">
+    <rect x="0" y="0" width="76" height="13" rx="3" fill="#b91c1c" fill-opacity="0.3" stroke="#ef4444" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#fca5a5" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">DHAKA TRANSIT</text>
+  </g>
+  <g transform="translate(150, 4)">
+    <rect x="0" y="0" width="84" height="13" rx="3" fill="#047857" fill-opacity="0.35" stroke="#10b981" stroke-width="0.8" />
+    <text x="5" y="9.5" fill="#6ee7b7" font-family="monospace" font-size="7.5" font-weight="900" letter-spacing="0.3">FEEDER BUS · LIVE</text>
+  </g>
+</svg>`;
+    }
+
     function updateBusTickerText() {
       const tickerEl = document.getElementById('bdBusTickerText');
       if (!tickerEl) return;
@@ -11710,6 +11813,10 @@
       container.innerHTML = '';
 
       const VEHICLE_META = {
+        Bus: {
+          iconBg: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40',
+          svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="15" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><circle cx="7.5" cy="18" r="2.5"/><circle cx="16.5" cy="18" r="2.5"/><line x1="3" y1="14" x2="7" y2="14"/><line x1="17" y1="14" x2="21" y2="14"/></svg>`
+        },
         Rickshaw: {
           iconBg: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40',
           svg: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="18" r="3"/><circle cx="19" cy="18" r="3"/><path d="M12 18V8l3-3h4"/><path d="M5 18l5-8h6"/><circle cx="12" cy="7" r="1.5"/></svg>`
@@ -11735,7 +11842,7 @@
       const validOptions = options.filter(o => o.isAvailable !== false);
       const cheapestFare = validOptions.length ? Math.min(...validOptions.map(o => o.fareMin)) : Infinity;
 
-      const modesToRender = ['Rickshaw', 'CNG', 'Bike', 'Car'];
+      const modesToRender = ['Bus', 'Rickshaw', 'CNG', 'Bike', 'Car'];
       if (options.some(o => o.vehicle === 'Walk')) {
         modesToRender.unshift('Walk');
       }
@@ -11809,6 +11916,10 @@
         } else if (opt.vehicle === 'Bike') {
           previewDiv.className = 'bd-card-vehicle-preview bd-card-bike-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#06172a] to-sky-950/70 border border-sky-500/30 relative pointer-events-none select-none shadow-inner';
           previewDiv.innerHTML = getBikeMiniPreviewSvg();
+          card.appendChild(previewDiv);
+        } else if (opt.vehicle === 'Bus') {
+          previewDiv.className = 'bd-card-vehicle-preview bd-card-bus-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#180a0a] to-emerald-950/70 border border-emerald-500/30 relative pointer-events-none select-none shadow-inner';
+          previewDiv.innerHTML = getBusMiniPreviewSvg();
           card.appendChild(previewDiv);
         } else if (opt.vehicle === 'Car') {
           previewDiv.className = 'bd-card-vehicle-preview bd-card-car-preview my-1.5 overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-[#0d1233] to-indigo-950/70 border border-indigo-500/30 relative pointer-events-none select-none shadow-inner';
@@ -12005,6 +12116,121 @@
       }).sort((first, second) => first.fare - second.fare || first.distanceKm - second.distanceKm);
     }
 
+
+    function getBusTransferMatches(pickupKey, destinationKey, isPeak) {
+      if (!busRouteData || !Array.isArray(busRouteData.routes)) return [];
+      const { farePolicy, routes } = busRouteData;
+      const isStudent = isStudentBusFareActive();
+      const busSpeedKmh = isPeak ? 15 : 22;
+      const transferResults = [];
+
+      routes.forEach(route1 => {
+        const pIndex = route1.stops.findIndex(s => s.locationKey === pickupKey);
+        if (pIndex === -1) return;
+
+        routes.forEach(route2 => {
+          if (route1.id === route2.id) return;
+          const dIndex = route2.stops.findIndex(s => s.locationKey === destinationKey);
+          if (dIndex === -1) return;
+
+          route1.stops.forEach((stop1, s1Index) => {
+            if (s1Index === pIndex) return;
+            const s2Index = route2.stops.findIndex(s => s.locationKey === stop1.locationKey);
+            if (s2Index === -1 || s2Index === dIndex) return;
+
+            const interchangeKey = stop1.locationKey;
+
+            // Leg 1 distance
+            const start1 = Math.min(pIndex, s1Index);
+            const end1 = Math.max(pIndex, s1Index);
+            let dist1 = 0;
+            for (let i = start1 + 1; i <= end1; i++) {
+              dist1 += route1.stops[i].distanceKmFromPrevious;
+            }
+            if (!Number.isFinite(dist1) || dist1 <= 0) return;
+
+            // Leg 2 distance
+            const start2 = Math.min(s2Index, dIndex);
+            const end2 = Math.max(s2Index, dIndex);
+            let dist2 = 0;
+            for (let i = start2 + 1; i <= end2; i++) {
+              dist2 += route2.stops[i].distanceKmFromPrevious;
+            }
+            if (!Number.isFinite(dist2) || dist2 <= 0) return;
+
+            // Leg 1 and Leg 2 fares
+            const minFare1 = farePolicy.minimumFareByType[route1.type] || 10;
+            const minFare2 = farePolicy.minimumFareByType[route2.type] || 10;
+            const regFare1 = Math.max(minFare1, Math.ceil(dist1 * farePolicy.farePerKm));
+            const regFare2 = Math.max(minFare2, Math.ceil(dist2 * farePolicy.farePerKm));
+            const fare1 = isStudent ? Math.max(10, Math.round(regFare1 * 0.5)) : regFare1;
+            const fare2 = isStudent ? Math.max(10, Math.round(regFare2 * 0.5)) : regFare2;
+
+            const totalFare = fare1 + fare2;
+            const totalRegularFare = regFare1 + regFare2;
+            const totalDistanceKm = dist1 + dist2;
+
+            // Stops along each leg
+            const dir1 = pIndex < s1Index ? 1 : -1;
+            const stopsLeg1 = [];
+            for (let i = pIndex; ; i += dir1) {
+              stopsLeg1.push(route1.stops[i]);
+              if (i === s1Index) break;
+            }
+
+            const dir2 = s2Index < dIndex ? 1 : -1;
+            const stopsLeg2 = [];
+            for (let i = s2Index; ; i += dir2) {
+              stopsLeg2.push(route2.stops[i]);
+              if (i === dIndex) break;
+            }
+
+            const transferWaitMins = 6;
+            const duration1 = Math.ceil((dist1 / busSpeedKmh) * 60) + 3;
+            const duration2 = Math.ceil((dist2 / busSpeedKmh) * 60) + 3;
+            const totalDurationMins = duration1 + transferWaitMins + duration2;
+
+            transferResults.push({
+              isTransfer: true,
+              route1,
+              route2,
+              interchangeKey,
+              interchangeName: stop1.name,
+              stopsLeg1,
+              stopsLeg2,
+              dist1,
+              dist2,
+              fare1,
+              fare2,
+              regFare1,
+              regFare2,
+              isStudent,
+              totalFare,
+              totalRegularFare,
+              totalDistanceKm,
+              duration1,
+              duration2,
+              transferWaitMins,
+              totalDurationMins
+            });
+          });
+        });
+      });
+
+      // Deduplicate identical route combinations
+      const unique = [];
+      const seen = new Set();
+      transferResults.sort((a, b) => a.totalFare - b.totalFare || a.totalDurationMins - b.totalDurationMins);
+      for (const res of transferResults) {
+        const key = `${res.route1.id}_${res.interchangeKey}_${res.route2.id}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(res);
+        }
+      }
+      return unique.slice(0, 4);
+    }
+
     function getBusHybridMatches(pickup, destination, isPeak, directMatches) {
       const { farePolicy, routes } = busRouteData;
       return routes.map(route => {
@@ -12117,18 +12343,28 @@
       const matches = getBusRouteMatches(pickupKey, destinationKey);
       const dhakaTime = getDhakaTimeInfo();
       const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const transferMatches = getBusTransferMatches(pickupKey, destinationKey, isPeak);
       const hybridMatches = getBusHybridMatches(pickup, destination, isPeak, matches);
 
       if (status) {
-        const directStatus = matches.length
+        const directText = matches.length
           ? currentLanguage === 'bn'
-            ? `${formatLocalizedNumber(matches.length)}টি সরাসরি বাস রুট পাওয়া গেছে।`
-            : `${formatLocalizedNumber(matches.length)} direct bus route${matches.length === 1 ? '' : 's'} found.`
-          : getLocalizedText('No direct route in the draft data; showing bus + feeder suggestions below.');
-        const hybridStatus = currentLanguage === 'bn'
+            ? `${formatLocalizedNumber(matches.length)}টি সরাসরি বাস রুট`
+            : `${formatLocalizedNumber(matches.length)} direct bus route${matches.length === 1 ? '' : 's'}`
+          : '';
+        const transferText = transferMatches.length
+          ? currentLanguage === 'bn'
+            ? `${formatLocalizedNumber(transferMatches.length)}টি মাল্টি-বাস ট্রান্সফার`
+            : `${formatLocalizedNumber(transferMatches.length)} multi-bus transfer${transferMatches.length === 1 ? '' : 's'}`
+          : '';
+        const hybridText = currentLanguage === 'bn'
           ? `${formatLocalizedNumber(hybridMatches.length)}টি বাস + ফিডার বিকল্প`
           : `${formatLocalizedNumber(hybridMatches.length)} bus + feeder option${hybridMatches.length === 1 ? '' : 's'}`;
-        status.textContent = `${directStatus} ${hybridStatus}.`;
+
+        const parts = [directText, transferText, hybridText].filter(Boolean);
+        status.textContent = currentLanguage === 'bn'
+          ? `${parts.join(', ')} পাওয়া গেছে।`
+          : `${parts.join(', ')} found.`;
       }
 
       // 1. Direct Bus Routes (Section 3)
@@ -12234,7 +12470,136 @@
 
           results.appendChild(card);
         });
-      } else {
+      }
+
+      // 1B. Multi-Bus Transfer Routes (e.g. Bus 1 -> Interchange -> Bus 2)
+      if (transferMatches.length > 0) {
+        const transferHeader = document.createElement('div');
+        transferHeader.className = 'md:col-span-2 mt-2 pt-2 flex items-center justify-between gap-2';
+        transferHeader.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-black">🔄</span>
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-200">${getLocalizedText('Multi-Bus Transfer Routes')}</h4>
+            <span class="rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 text-[10px] font-bold">${formatLocalizedNumber(transferMatches.length)}</span>
+          </div>
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">${getLocalizedText('Transfer at')} ${getLocalizedLocationName(transferMatches[0].interchangeName)}</span>
+        `;
+        results.appendChild(transferHeader);
+
+        const lowestTransferFare = Math.min(...transferMatches.map(m => m.totalFare));
+
+        transferMatches.forEach(tMatch => {
+          const card = document.createElement('article');
+          card.className = 'interactive-elevate rounded-2xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-br from-white to-indigo-50/20 dark:from-slate-900/95 dark:to-indigo-950/20 p-4 shadow-sm flex flex-col justify-between';
+
+          const isCheapest = tMatch.totalFare === lowestTransferFare;
+
+          const header = document.createElement('div');
+          header.className = 'flex items-start justify-between gap-2 mb-2';
+
+          const titleWrap = document.createElement('div');
+          titleWrap.className = 'flex items-center gap-2 flex-wrap';
+
+          const title = document.createElement('h3');
+          title.className = 'font-bold text-slate-900 dark:text-white text-sm md:text-base flex items-center gap-1.5 flex-wrap';
+          title.innerHTML = `<span>${getLocalizedText(tMatch.route1.service)}</span> <span class="text-indigo-500">➔ 🔄 ➔</span> <span>${getLocalizedText(tMatch.route2.service)}</span>`;
+
+          const typePill = document.createElement('span');
+          typePill.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300';
+          typePill.textContent = getLocalizedText('2-Bus Transfer');
+
+          titleWrap.append(title, typePill);
+
+          const badgesWrap = document.createElement('div');
+          badgesWrap.className = 'flex items-center gap-1.5 flex-wrap';
+          if (isCheapest) {
+            const cheapBadge = document.createElement('span');
+            cheapBadge.className = 'rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-bold';
+            cheapBadge.textContent = getLocalizedText('Lowest fare');
+            badgesWrap.appendChild(cheapBadge);
+          }
+          header.append(titleWrap, badgesWrap);
+          card.appendChild(header);
+
+          // Step progression
+          const progression = document.createElement('div');
+          progression.className = 'space-y-1.5 my-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs';
+          progression.innerHTML = `
+            <div class="flex items-center justify-between text-slate-700 dark:text-slate-300 font-semibold">
+              <span class="flex items-center gap-1.5 truncate">
+                <span class="text-emerald-600 dark:text-emerald-400">🟢</span> ${getLocalizedLocationName(pickup.name)} 
+                <span class="text-slate-400 font-normal">(${getLocalizedText(tMatch.route1.service)})</span>
+              </span>
+              <span class="text-[11px] text-slate-500">${formatLocalizedNumber(tMatch.dist1, 1)} km · ${formatLocalizedFare(tMatch.fare1)}</span>
+            </div>
+            <div class="flex items-center justify-between py-1 px-2 rounded-lg bg-indigo-100/50 dark:bg-indigo-950/40 border border-indigo-200/50 dark:border-indigo-800/40 text-[11px] font-bold text-indigo-700 dark:text-indigo-300">
+              <span class="flex items-center gap-1.5">
+                <span>🔄</span> ${getLocalizedText('Transfer at')} ${getLocalizedLocationName(tMatch.interchangeName)}
+              </span>
+              <span class="font-normal text-slate-500 dark:text-slate-400">~${formatLocalizedNumber(tMatch.transferWaitMins)} ${getLocalizedText('mins')} wait</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-700 dark:text-slate-300 font-semibold">
+              <span class="flex items-center gap-1.5 truncate">
+                <span class="text-rose-600 dark:text-rose-400">🏁</span> ${getLocalizedLocationName(destination.name)}
+                <span class="text-slate-400 font-normal">(${getLocalizedText(tMatch.route2.service)})</span>
+              </span>
+              <span class="text-[11px] text-slate-500">${formatLocalizedNumber(tMatch.dist2, 1)} km · ${formatLocalizedFare(tMatch.fare2)}</span>
+            </div>
+          `;
+          card.appendChild(progression);
+
+          // Stats row
+          const stats = document.createElement('div');
+          stats.className = 'flex items-baseline justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800';
+          const fare = document.createElement('span');
+          fare.className = 'text-lg font-black text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1.5 flex-wrap';
+          fare.textContent = formatLocalizedFare(tMatch.totalFare);
+          if (tMatch.isStudent) {
+            const studentBadge = document.createElement('span');
+            studentBadge.className = 'rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold tracking-tight';
+            studentBadge.textContent = '🎓 Student 50% Applied';
+            fare.appendChild(studentBadge);
+          }
+
+          const distance = document.createElement('span');
+          distance.className = 'text-xs text-slate-500 dark:text-slate-400';
+          distance.textContent = `${formatLocalizedNumber(tMatch.totalDistanceKm, 1)} ${getLocalizedText('km')} · ~${formatLocalizedNumber(tMatch.totalDurationMins)} ${getLocalizedText('mins')}`;
+
+          stats.append(fare, distance);
+          card.appendChild(stats);
+
+          // Accordion for intermediate stops
+          const intermediateCount = tMatch.stopsLeg1.length + tMatch.stopsLeg2.length - 2;
+          if (intermediateCount > 0) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'mt-2 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline text-left cursor-pointer';
+            toggleBtn.textContent = `${getLocalizedText('View intermediate stops')} (${formatLocalizedNumber(intermediateCount)})`;
+
+            const stopsList = document.createElement('div');
+            stopsList.className = 'hidden mt-1.5 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed space-y-1';
+            stopsList.innerHTML = `
+              <div><strong class="text-slate-700 dark:text-slate-300">Leg 1 (${getLocalizedText(tMatch.route1.service)}):</strong> ${tMatch.stopsLeg1.map(s => getLocalizedLocationName(s.name)).join(' → ')}</div>
+              <div><strong class="text-slate-700 dark:text-slate-300">Leg 2 (${getLocalizedText(tMatch.route2.service)}):</strong> ${tMatch.stopsLeg2.map(s => getLocalizedLocationName(s.name)).join(' → ')}</div>
+            `;
+
+            toggleBtn.addEventListener('click', () => {
+              const isClosed = stopsList.classList.contains('hidden');
+              stopsList.classList.toggle('hidden');
+              toggleBtn.textContent = isClosed
+                ? `${getLocalizedText('Hide intermediate stops')}`
+                : `${getLocalizedText('View intermediate stops')} (${formatLocalizedNumber(intermediateCount)})`;
+            });
+
+            card.appendChild(toggleBtn);
+            card.appendChild(stopsList);
+          }
+
+          results.appendChild(card);
+        });
+      }
+
+      if (matches.length === 0 && transferMatches.length === 0) {
         const noDirectCard = document.createElement('div');
         noDirectCard.className = 'md:col-span-2 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 text-xs text-center';
         noDirectCard.textContent = getLocalizedText('No direct bus route found between these stops. See optimized Bus + Feeder options below.');
@@ -12977,6 +13342,7 @@
         if (cardBusRouteInfo) cardBusRouteInfo.textContent = getLocalizedText('Loading local bus routes…');
       } else {
         const matches = typeof getBusRouteMatches === 'function' ? getBusRouteMatches(pickupKey, dropoffKey) : [];
+        const transferMatches = typeof getBusTransferMatches === 'function' ? getBusTransferMatches(pickupKey, dropoffKey, isPeak) : [];
         const hybridMatches = typeof getBusHybridMatches === 'function' ? getBusHybridMatches(pickup, destination, isPeak, matches) : [];
         const isStudent = typeof isStudentBusFareActive === 'function' && isStudentBusFareActive();
 
@@ -13010,6 +13376,28 @@
           if (cardBusRouteInfo) {
             const names = matches.slice(0, 2).map(m => getLocalizedText(m.service)).join(', ') + (matches.length > 2 ? '...' : '');
             cardBusRouteInfo.textContent = `${formatLocalizedNumber(matches.length)} ${getLocalizedText('direct bus routes')} (${names})`;
+          }
+        } else if (transferMatches.length > 0) {
+          const primaryTransfer = transferMatches[0];
+          if (cardBusFare) {
+            const fareText = formatLocalizedFare(primaryTransfer.totalFare);
+            if (isStudent) {
+              cardBusFare.innerHTML = `<span class="inline-flex items-center gap-1.5 flex-wrap">${fareText} <span class="rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold">🎓 Student 50% Applied</span></span>`;
+            } else {
+              cardBusFare.textContent = fareText;
+            }
+          }
+          if (cardBusFareBreakdown) {
+            cardBusFareBreakdown.textContent = `${getLocalizedText(primaryTransfer.route1.service)} (${formatLocalizedFare(primaryTransfer.fare1)}) ➔ ${getLocalizedText('Transfer at')} ${getLocalizedLocationName(primaryTransfer.interchangeName)} ➔ ${getLocalizedText(primaryTransfer.route2.service)} (${formatLocalizedFare(primaryTransfer.fare2)})`;
+          }
+          if (cardBusDuration) {
+            cardBusDuration.textContent = `~${formatLocalizedNumber(primaryTransfer.totalDurationMins)} ${getLocalizedText('mins')}`;
+          }
+          if (cardBusDurationSub) {
+            cardBusDurationSub.textContent = `${getLocalizedText('2-Bus Transfer')} (${getLocalizedLocationName(primaryTransfer.interchangeName)})`;
+          }
+          if (cardBusRouteInfo) {
+            cardBusRouteInfo.textContent = `${getLocalizedText('Multi-Bus Transfer')}: ${getLocalizedText(primaryTransfer.route1.service)} ➔ ${getLocalizedText(primaryTransfer.route2.service)}`;
           }
         } else if (hybridMatches.length > 0) {
           const primary = hybridMatches[0];

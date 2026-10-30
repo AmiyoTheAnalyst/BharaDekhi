@@ -131,8 +131,9 @@ The visual environment, lighting, shadows, and transit surge multipliers dynamic
 * **Animated Route Playback:** Smooth camera tracking and vehicle marker progression with real-time heading angle rotation along Dhaka's roads.
 * **"More Ways to Travel" Comparison Cards:**
   * **Local City Bus Card & Student Concession:** Comprehensive Dhaka bus corridor database with BRTA distance fare progression (৳10 min, ৳2.70/km) and an interactive **🎓 Student Concession (50% Bus Fare Half-Pass)** toggle respecting the official ৳10 minimum fare floor with dynamic UI badges (`🎓 Student 50% Applied`).
+  * **🔄 Multi-Bus Transfer & Interchange Engine:** Automatically calculates connected 2-bus journeys (e.g., *Azimpur ➔ Science Lab on Bus 1 ➔ Transfer at Science Lab ➔ Mohakhali on Bus 2*) when direct routes are unavailable or for alternate corridors, displaying step-by-step transfer points, ~6 min interchange buffers, individual segment fares, and combined student discount pricing.
   * **MRT Line 6 Metro Card & MRT Pass:** Exact station-to-station ticket calculations based on official DMTCL fare tables (৳20 min, ৳100 max) with interactive **10% MRT Pass discount** toggle.
-  * **Feeder Leg Optimizer:** Connects your origin and destination to the nearest transit hubs via customizable first/last-mile feeder modes (**Rickshaw, CNG, Bike, Car**), displaying the complete combined journey fare and time.
+  * **Feeder Leg Optimizer:** Connects your origin and destination to the nearest transit hubs via customizable first/last-mile feeder modes (**Local Bus, Rickshaw, CNG, Bike, Car**), displaying the complete combined journey fare and time.
 * **Peak Surge Radar:** Time-aware rush hour multiplier (1.4x – 2.2x) calculated from local Dhaka time (`Asia/Dhaka`: 8:30–10:30 AM, 5:00–8:00 PM).
 
 ---
