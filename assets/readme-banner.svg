@@ -1,0 +1,251 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 290" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070b14"/>
+      <stop offset="50%" stop-color="#0b1326"/>
+      <stop offset="100%" stop-color="#060e1c"/>
+    </linearGradient>
+
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <linearGradient id="mrtTrainGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="70%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <linearGradient id="headlightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#facc15" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fef08a" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <linearGradient id="taillightGrad" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#f87171" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <radialGradient id="cyanAmbientGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="emeraldAmbientGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Glow Filters -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes moveTrain {
+      0% { transform: translateX(-120px); }
+      100% { transform: translateX(1020px); }
+    }
+    @keyframes moveCarLeft {
+      0% { transform: translateX(-80px); }
+      100% { transform: translateX(1000px); }
+    }
+    @keyframes moveCarRight {
+      0% { transform: translateX(1000px); }
+      100% { transform: translateX(-80px); }
+    }
+    @keyframes pulseLive {
+      0% { r: 4px; opacity: 0.8; }
+      50% { r: 6px; opacity: 1; }
+      100% { r: 4px; opacity: 0.8; }
+    }
+    @keyframes floatParticle {
+      0% { opacity: 0.2; transform: translateY(0px); }
+      50% { opacity: 0.8; transform: translateY(-4px); }
+      100% { opacity: 0.2; transform: translateY(0px); }
+    }
+    .anim-train {
+      animation: moveTrain 7.5s linear infinite;
+    }
+    .anim-car-1 {
+      animation: moveCarLeft 5s linear infinite;
+    }
+    .anim-car-2 {
+      animation: moveCarRight 6.2s linear infinite 1.2s;
+    }
+    .anim-live-dot {
+      animation: pulseLive 2s ease-in-out infinite;
+    }
+    .particle-1 { animation: floatParticle 3s ease-in-out infinite; }
+    .particle-2 { animation: floatParticle 4s ease-in-out infinite 1s; }
+    .particle-3 { animation: floatParticle 3.5s ease-in-out infinite 0.5s; }
+  </style>
+
+  <!-- Card Background -->
+  <rect x="2" y="2" width="896" height="286" rx="18" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="1.5"/>
+
+  <!-- Ambient Glow Circles -->
+  <circle cx="820" cy="50" r="180" fill="url(#cyanAmbientGlow)"/>
+  <circle cx="80" cy="240" r="180" fill="url(#emeraldAmbientGlow)"/>
+
+  <!-- Starry Sky Particles -->
+  <circle cx="120" cy="40" r="1" fill="#bae6fd" class="particle-1"/>
+  <circle cx="280" cy="30" r="1.2" fill="#fde68a" class="particle-2"/>
+  <circle cx="460" cy="25" r="1" fill="#ffffff" class="particle-3"/>
+  <circle cx="680" cy="45" r="1.2" fill="#7dd3fc" class="particle-1"/>
+  <circle cx="810" cy="20" r="1" fill="#a7f3d0" class="particle-2"/>
+
+  <!-- Background Skyline Vector Silhouettes -->
+  <path d="M 600,160 L 600,120 L 640,120 L 640,160 Z" fill="#0f172a" opacity="0.6"/>
+  <path d="M 645,160 L 645,95 L 685,95 L 685,160 Z" fill="#131e33" opacity="0.5"/>
+  <path d="M 690,160 L 690,110 L 730,110 L 730,160 Z" fill="#0f172a" opacity="0.6"/>
+  <path d="M 735,160 L 735,80 L 785,80 L 785,160 Z" fill="#131e33" opacity="0.5"/>
+  <path d="M 790,160 L 790,105 L 830,105 L 830,160 Z" fill="#0f172a" opacity="0.6"/>
+
+  <!-- Elevated MRT Viaduct -->
+  <line x1="0" y1="125" x2="900" y2="125" stroke="#38bdf8" stroke-width="4" stroke-opacity="0.4" filter="url(#softGlow)"/>
+  <line x1="0" y1="128" x2="900" y2="128" stroke="#0ea5e9" stroke-width="2" stroke-opacity="0.8"/>
+  <!-- Viaduct Concrete Pillars -->
+  <rect x="140" y="128" width="8" height="50" rx="2" fill="#1e293b"/>
+  <rect x="360" y="128" width="8" height="50" rx="2" fill="#1e293b"/>
+  <rect x="580" y="128" width="8" height="50" rx="2" fill="#1e293b"/>
+  <rect x="800" y="128" width="8" height="50" rx="2" fill="#1e293b"/>
+
+  <!-- Animated MRT-6 Metro Train Gliding on Track -->
+  <g class="anim-train">
+    <!-- Train Cars Body -->
+    <rect x="0" y="112" width="88" height="12" rx="5" fill="url(#mrtTrainGrad)" filter="url(#neonGlow)"/>
+    <!-- Windows -->
+    <rect x="6" y="115" width="12" height="4" rx="1.5" fill="#ffffff" opacity="0.95"/>
+    <rect x="22" y="115" width="12" height="4" rx="1.5" fill="#ffffff" opacity="0.95"/>
+    <rect x="38" y="115" width="12" height="4" rx="1.5" fill="#ffffff" opacity="0.95"/>
+    <rect x="54" y="115" width="12" height="4" rx="1.5" fill="#ffffff" opacity="0.95"/>
+    <rect x="70" y="115" width="12" height="4" rx="1.5" fill="#ffffff" opacity="0.95"/>
+    <!-- Train Front Headlight Beam -->
+    <polygon points="88,114 125,108 125,124 88,122" fill="#e0f2fe" opacity="0.35"/>
+  </g>
+
+  <!-- Ground Road Network -->
+  <rect x="0" y="235" width="900" height="2" fill="#334155" opacity="0.6"/>
+  <line x1="0" y1="236" x2="900" y2="236" stroke="#f8fafc" stroke-width="1.5" stroke-dasharray="12,12" stroke-opacity="0.25"/>
+
+  <!-- Traffic Light Streaks (Eastbound Headlights & Westbound Taillights) -->
+  <g class="anim-car-1">
+    <rect x="0" y="233" width="55" height="3.5" rx="1.5" fill="url(#headlightGrad)" filter="url(#softGlow)"/>
+  </g>
+  <g class="anim-car-2">
+    <rect x="0" y="239" width="60" height="3.5" rx="1.5" fill="url(#taillightGrad)" filter="url(#softGlow)"/>
+  </g>
+
+  <!-- Brand Logo Emblem -->
+  <g transform="translate(42, 34)">
+    <rect x="0" y="0" width="52" height="52" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" filter="url(#neonGlow)"/>
+    <!-- Stylized Transit B Logo -->
+    <text x="26" y="37" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="30" font-weight="900" fill="#38bdf8" text-anchor="middle">B</text>
+    <circle cx="36" cy="18" r="3.5" fill="#10b981"/>
+    <line x1="16" y1="36" x2="36" y2="18" stroke="#10b981" stroke-width="2" stroke-dasharray="2,2"/>
+  </g>
+
+  <!-- Main Title & Bengali Capsule -->
+  <g transform="translate(110, 52)">
+    <text font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" fill="#ffffff" letter-spacing="-0.5">
+      Bhara<tspan fill="url(#textGrad)">Dekhi</tspan>
+    </text>
+
+    <!-- Bangla Badge -->
+    <g transform="translate(182, -20)">
+      <rect x="0" y="0" width="80" height="24" rx="12" fill="#0c4a6e" fill-opacity="0.5" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.7"/>
+      <text x="40" y="16" font-family="'Noto Sans Bengali', -apple-system, sans-serif" font-size="12" font-weight="700" fill="#7dd3fc" text-anchor="middle">ভাড়া দেখি</text>
+    </g>
+
+    <!-- Tagline -->
+    <text x="0" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="500" fill="#94a3b8" letter-spacing="0.2">
+      Dhaka Multi-Modal Transit Planner, Dynamic Fare Engine &amp; 3D City Simulation
+    </text>
+  </g>
+
+  <!-- Feature Capabilities Badges (Row of Interactive Capsule Pills) -->
+  <g transform="translate(42, 142)">
+    <!-- Pill 1: 3D & 2D Dual Mode -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="186" height="28" rx="14" fill="#0f172a" fill-opacity="0.85" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="14" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#bae6fd">&#127918; 3D Drone &amp; 2D Flat View</text>
+    </g>
+
+    <!-- Pill 2: Web Audio Soundscape -->
+    <g transform="translate(196, 0)">
+      <rect x="0" y="0" width="195" height="28" rx="14" fill="#0f172a" fill-opacity="0.85" stroke="#10b981" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="14" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#a7f3d0">&#128266; Procedural Web Audio API</text>
+    </g>
+
+    <!-- Pill 3: 16 Weather Modes -->
+    <g transform="translate(401, 0)">
+      <rect x="0" y="0" width="202" height="28" rx="14" fill="#0f172a" fill-opacity="0.85" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="14" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#fde68a">&#9925; 16 Weather &amp; Season States</text>
+    </g>
+
+    <!-- Pill 4: MRT-6 & Bus Matrix -->
+    <g transform="translate(613, 0)">
+      <rect x="0" y="0" width="200" height="28" rx="14" fill="#0f172a" fill-opacity="0.85" stroke="#c084fc" stroke-width="1" stroke-opacity="0.6"/>
+      <text x="14" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#e9d5ff">&#128647; MRT Line 6 &amp; Feeder Hub</text>
+    </g>
+  </g>
+
+  <!-- Secondary Capability Strip -->
+  <g transform="translate(42, 180)">
+    <!-- Pill 5: Peak Surge Radar -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="158" height="26" rx="13" fill="#1e1b4b" fill-opacity="0.8" stroke="#818cf8" stroke-width="1" stroke-opacity="0.5"/>
+      <text x="12" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="600" fill="#c7d2fe">&#9889; Peak Surge Radar</text>
+    </g>
+
+    <!-- Pill 6: Emergency Green Wave -->
+    <g transform="translate(168, 0)">
+      <rect x="0" y="0" width="186" height="26" rx="13" fill="#450a0a" fill-opacity="0.75" stroke="#f87171" stroke-width="1" stroke-opacity="0.5"/>
+      <text x="12" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="600" fill="#fca5a5">&#128680; Emergency Green Wave</text>
+    </g>
+
+    <!-- Pill 7: OSRM Routing -->
+    <g transform="translate(364, 0)">
+      <rect x="0" y="0" width="168" height="26" rx="13" fill="#0f172a" fill-opacity="0.75" stroke="#64748b" stroke-width="1" stroke-opacity="0.5"/>
+      <text x="12" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="600" fill="#cbd5e1">&#128506;&#65039; OSRM Road Geometry</text>
+    </g>
+
+    <!-- Pill 8: 120 FPS Target -->
+    <g transform="translate(542, 0)">
+      <rect x="0" y="0" width="150" height="26" rx="13" fill="#0f172a" fill-opacity="0.75" stroke="#64748b" stroke-width="1" stroke-opacity="0.5"/>
+      <text x="12" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="600" fill="#cbd5e1">&#127916; 120 FPS Responsive</text>
+    </g>
+  </g>
+
+  <!-- Live Telemetry Status Bar -->
+  <g transform="translate(42, 266)">
+    <!-- Pulsing Status Dot -->
+    <circle cx="5" cy="0" r="4.5" fill="#10b981" class="anim-live-dot" filter="url(#softGlow)"/>
+    <text x="16" y="3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#10b981">
+      LIVE TRANSIT ACTIVE
+    </text>
+    <text x="150" y="3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="500" fill="#64748b">
+      Mirpur 10 Multi-Modal Crossroads &amp; MRT-6 Viaduct Grid
+    </text>
+    <text x="816" y="3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#38bdf8" text-anchor="end">
+      bharadekhi.vercel.app &#8594;
+    </text>
+  </g>
+</svg>
