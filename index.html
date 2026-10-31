@@ -18364,7 +18364,7 @@
         if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
         initPwaInstallManager();
         initHeaderLogoAnimation();
-        setTimeout(dismissAppLaunchSplash, 3500);
+        setTimeout(dismissAppLaunchSplash, 3000);
       });
     } else {
       bootApp();
@@ -18374,12 +18374,12 @@
       if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
       initPwaInstallManager();
       initHeaderLogoAnimation();
-      setTimeout(dismissAppLaunchSplash, 3500);
+      setTimeout(dismissAppLaunchSplash, 3000);
     }
 
     // Fallback dismiss to ensure screen is never stuck
-    window.addEventListener('load', () => setTimeout(dismissAppLaunchSplash, 3500));
-    setTimeout(dismissAppLaunchSplash, 4500);
+    window.addEventListener('load', () => setTimeout(dismissAppLaunchSplash, 3000));
+    setTimeout(dismissAppLaunchSplash, 3800);
 
     // Register PWA Service Worker for zero-warning mobile installation
     if ('serviceWorker' in navigator) {
