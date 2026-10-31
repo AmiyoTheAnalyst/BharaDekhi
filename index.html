@@ -12,8 +12,12 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BharaDekhi">
   <link rel="canonical" href="https://bharadekhi.vercel.app/">
 
   <!-- Google Search Site Name & Mobile Web App Metadata -->
@@ -3768,7 +3772,7 @@
       
       <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
       <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
-        <button id="pwaInstallHeaderBtn" type="button" class="hidden inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 dark:border-emerald-500/40 px-2.5 py-1 text-xs font-bold shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Install BharaDekhi App" title="Install BharaDekhi as an app">
+        <button id="pwaInstallHeaderBtn" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 dark:border-emerald-500/40 px-2.5 py-1 text-xs font-bold shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Install BharaDekhi App" title="Install BharaDekhi as an app">
           <i data-lucide="smartphone" class="h-3.5 w-3.5 text-emerald-500" aria-hidden="true"></i>
           <span class="header-install-btn-text">Install App</span>
         </button>
@@ -8905,7 +8909,7 @@
   </footer>
 
   <!-- Floating PWA Install Banner for Mobile & Desktop -->
-  <aside id="pwaInstallBanner" class="hidden fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm z-50 bg-slate-900/95 dark:bg-slate-950/95 text-white p-3.5 rounded-2xl border border-emerald-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-6 opacity-0 pointer-events-none" aria-label="Install App Prompt">
+  <aside id="pwaInstallBanner" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm z-50 bg-slate-900/95 dark:bg-slate-950/95 text-white p-3.5 rounded-2xl border border-emerald-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl flex items-center justify-between gap-3 transition-all duration-300" aria-label="Install App Prompt">
     <div class="flex items-center gap-3 min-w-0">
       <img src="/icon-192.png" alt="BharaDekhi App Icon" class="w-10 h-10 rounded-xl shadow-md shrink-0 border border-emerald-500/30 object-cover">
       <div class="min-w-0">
@@ -8927,14 +8931,14 @@
   </aside>
 
   <!-- iOS PWA Install Instructions Modal -->
-  <div id="pwaIosModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true" aria-labelledby="pwaIosModalTitle">
+  <div id="pwaIosModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md transition-opacity" role="dialog" aria-modal="true" aria-labelledby="pwaIosModalTitle">
     <div class="w-full sm:max-w-md bg-slate-900 border border-slate-700/80 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl text-slate-100 space-y-4 animate-in fade-in slide-in-from-bottom duration-200">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-3">
           <img src="/icon-192.png" alt="BharaDekhi App" class="w-10 h-10 rounded-xl border border-emerald-500/30 object-cover">
           <div>
             <h3 id="pwaIosModalTitle" class="font-bold text-base text-white">Install BharaDekhi on iPhone</h3>
-            <p class="text-xs text-slate-400">Zero warning · Instant &amp; 100% Free</p>
+            <p class="text-xs text-emerald-400 font-semibold">Zero warning · Instant &amp; 100% Free</p>
           </div>
         </div>
         <button id="pwaIosModalClose" type="button" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-slate-800 hover:bg-slate-700 transition" aria-label="Close modal">
@@ -8942,27 +8946,36 @@
         </button>
       </div>
 
+      <!-- Warning if opened inside non-Safari browser on iOS -->
+      <div id="pwaIosNonSafariNotice" class="hidden text-xs text-amber-200 bg-amber-950/70 p-3 rounded-2xl border border-amber-500/40">
+        ⚠️ <strong>Note for iOS users:</strong> Apple only allows app installation from the <strong>Safari</strong> browser. If you are in Chrome or another app, tap <strong>•••</strong> and choose <strong>"Open in Safari"</strong>.
+      </div>
+
       <div class="space-y-3 text-sm">
-        <div class="flex items-start gap-3 bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/40">
+        <div class="flex items-start gap-3 bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/50">
           <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
           <div>
-            <p class="text-slate-200">Tap the <strong>Share</strong> button <svg class="inline-block w-4 h-4 text-blue-400 -mt-0.5 mx-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> in Safari's bottom toolbar.</p>
+            <p class="text-slate-200">In Safari's bottom toolbar, tap the <strong>Share</strong> button <svg class="inline-block w-4 h-4 text-sky-400 -mt-0.5 mx-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>.</p>
           </div>
         </div>
 
-        <div class="flex items-start gap-3 bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/40">
+        <div class="flex items-start gap-3 bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/50">
           <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
           <div>
-            <p class="text-slate-200">Scroll down and tap <strong>"Add to Home Screen"</strong> (হোম স্ক্রিনে যোগ করুন).</p>
+            <p class="text-slate-200">Scroll down the menu and tap <strong>"Add to Home Screen"</strong> (হোম স্ক্রিনে যোগ করুন).</p>
           </div>
         </div>
 
-        <div class="flex items-start gap-3 bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/40">
+        <div class="flex items-start gap-3 bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/50">
           <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
           <div>
-            <p class="text-slate-200">Tap <strong>"Add"</strong> in the top-right corner. BharaDekhi will open as a full app icon!</p>
+            <p class="text-slate-200">Tap <strong>"Add"</strong> at the top right. The BharaDekhi icon will appear on your home screen!</p>
           </div>
         </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-1.5 text-xs text-sky-400 font-semibold pt-1">
+        <span>Safari bottom toolbar is below</span> <span class="animate-bounce">↓</span>
       </div>
 
       <button id="pwaIosModalGotIt" type="button" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-[0.99] transition">
@@ -18184,13 +18197,8 @@
 
     // PWA Custom Installation Manager (100% Free, Zero Security Warnings)
     function initPwaInstallManager() {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-      // If already installed and running as standalone app, do not prompt
-      if (isStandalone) {
-        return;
-      }
 
       const headerBtn = document.getElementById('pwaInstallHeaderBtn');
       const banner = document.getElementById('pwaInstallBanner');
@@ -18199,6 +18207,23 @@
       const iosModal = document.getElementById('pwaIosModal');
       const iosModalClose = document.getElementById('pwaIosModalClose');
       const iosModalGotIt = document.getElementById('pwaIosModalGotIt');
+      const iosNonSafariNotice = document.getElementById('pwaIosNonSafariNotice');
+
+      // If already installed and running as standalone app, hide both install triggers
+      if (isStandalone) {
+        if (headerBtn) headerBtn.classList.add('hidden');
+        if (banner) banner.classList.add('hidden');
+        return;
+      }
+
+      // Ensure header button is visible on non-standalone browsers
+      if (headerBtn) {
+        headerBtn.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+
+      // Detect non-Safari browser on iOS (e.g. Chrome, Facebook, Instagram)
+      const isIOSNonSafari = isIOS && (/CriOS|FxiOS|EdgiOS|FBAN|FBAV|Instagram|Line/i.test(navigator.userAgent) || (!/Safari/i.test(navigator.userAgent)));
 
       let deferredInstallPrompt = null;
 
@@ -18206,29 +18231,26 @@
         const ts = localStorage.getItem('bharadekhi_pwa_dismissed');
         if (!ts) return false;
         const diffHours = (Date.now() - parseInt(ts, 10)) / (1000 * 60 * 60);
-        return diffHours < 48; // Suppress floating banner for 48 hours after dismiss
+        return diffHours < 24; // Suppress floating banner for 24 hours after dismiss
       }
 
       function showBanner() {
         if (banner && !isDismissedRecently()) {
           banner.classList.remove('hidden');
-          requestAnimationFrame(() => {
-            banner.classList.remove('translate-y-6', 'opacity-0', 'pointer-events-none');
-            banner.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
-          });
         }
       }
 
       function hideBanner() {
         if (banner) {
-          banner.classList.add('translate-y-6', 'opacity-0', 'pointer-events-none');
-          banner.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
-          setTimeout(() => banner.classList.add('hidden'), 350);
+          banner.classList.add('hidden');
         }
       }
 
       function showIosInstructions() {
         if (iosModal) {
+          if (iosNonSafariNotice) {
+            iosNonSafariNotice.classList.toggle('hidden', !isIOSNonSafari);
+          }
           iosModal.classList.remove('hidden');
         }
       }
@@ -18239,55 +18261,37 @@
         }
       }
 
-      // iOS Safari Environment
-      if (isIOS) {
-        if (headerBtn) {
-          headerBtn.classList.remove('hidden');
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-        setTimeout(showBanner, 2200);
-
-        const handleIosInstall = () => showIosInstructions();
-        if (headerBtn) headerBtn.addEventListener('click', handleIosInstall);
-        if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', handleIosInstall);
-      }
-
       // Android, Chrome, Edge, Chromium Environment
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstallPrompt = e;
-
-        if (headerBtn) {
-          headerBtn.classList.remove('hidden');
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-        setTimeout(showBanner, 1500);
       });
 
-      const handleChromiumInstall = async () => {
-        if (isIOS) {
-          showIosInstructions();
-          return;
-        }
-        if (!deferredInstallPrompt) {
-          if (typeof showToast === 'function') {
-            showToast('Use browser menu to Install App / Add to Home screen');
+      // Show banner if not dismissed
+      showBanner();
+
+      // Universal click handler for BOTH iOS and Android
+      const handleInstallClick = async (e) => {
+        if (e) e.preventDefault();
+
+        // 1. If Chromium / Android with deferredPrompt
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            if (headerBtn) headerBtn.classList.add('hidden');
+            hideBanner();
           }
+          deferredInstallPrompt = null;
           return;
         }
-        deferredInstallPrompt.prompt();
-        const choice = await deferredInstallPrompt.userChoice;
-        if (choice && choice.outcome === 'accepted') {
-          if (headerBtn) headerBtn.classList.add('hidden');
-          hideBanner();
-        }
-        deferredInstallPrompt = null;
+
+        // 2. Otherwise (iOS Safari, desktop Safari, Firefox, or prompt not available)
+        showIosInstructions();
       };
 
-      if (!isIOS) {
-        if (headerBtn) headerBtn.addEventListener('click', handleChromiumInstall);
-        if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', handleChromiumInstall);
-      }
+      if (headerBtn) headerBtn.addEventListener('click', handleInstallClick);
+      if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', handleInstallClick);
 
       // Banner dismiss handler
       if (bannerDismissBtn) {
