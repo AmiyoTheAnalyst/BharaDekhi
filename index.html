@@ -2743,6 +2743,7 @@
     }
 
     /* 2. Glassmorphic Pill Buttons with Dark Tint (Requirement 4) */
+    #mainHeader #pwaInstallHeaderBtn,
     #mainHeader #faqLink,
     #mainHeader #languageToggle,
     #mainHeader #themeToggle,
@@ -2755,6 +2756,12 @@
     }
 
     /* Sunny Day Mode Contrast */
+    #mainHeader[data-header-weather="sun"] #pwaInstallHeaderBtn {
+      background: rgba(16, 185, 129, 0.25) !important;
+      color: #ffffff !important;
+      border-color: rgba(52, 211, 153, 0.6) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
     #mainHeader[data-header-weather="sun"] #faqLink,
     #mainHeader[data-header-weather="sun"] #languageToggle,
     #mainHeader[data-header-weather="sun"] #themeToggle,
@@ -3580,6 +3587,10 @@
       
       <!-- Quick Actions & Glassmorphic Transit Telemetry HUD -->
       <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+        <button id="pwaInstallHeaderBtn" type="button" class="hidden inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 dark:border-emerald-500/40 px-2.5 py-1 text-xs font-bold shadow-sm transition active:scale-95 shrink-0 whitespace-nowrap" aria-label="Install BharaDekhi App" title="Install BharaDekhi as an app">
+          <i data-lucide="smartphone" class="h-3.5 w-3.5 text-emerald-500" aria-hidden="true"></i>
+          <span class="header-install-btn-text">Install App</span>
+        </button>
         <a id="faqLink" href="./faq.html" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-sm shrink-0 whitespace-nowrap" aria-label="Frequently Asked Questions" title="Frequently Asked Questions">
           <i data-lucide="circle-help" class="h-3.5 w-3.5" aria-hidden="true"></i>
           <span>FAQ</span>
@@ -8712,6 +8723,73 @@
     </p>
   </footer>
 
+  <!-- Floating PWA Install Banner for Mobile & Desktop -->
+  <aside id="pwaInstallBanner" class="hidden fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm z-50 bg-slate-900/95 dark:bg-slate-950/95 text-white p-3.5 rounded-2xl border border-emerald-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-6 opacity-0 pointer-events-none" aria-label="Install App Prompt">
+    <div class="flex items-center gap-3 min-w-0">
+      <img src="/icon-192.png" alt="BharaDekhi App Icon" class="w-10 h-10 rounded-xl shadow-md shrink-0 border border-emerald-500/30 object-cover">
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span id="pwaBannerTitle" class="font-bold text-sm text-white tracking-tight truncate">BharaDekhi App</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Free</span>
+        </div>
+        <p id="pwaBannerSub" class="text-[11px] text-slate-300 truncate">Fast 0-warning install · Works offline</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <button id="pwaBannerInstallBtn" type="button" class="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/25 active:scale-95 transition-all">
+        Install
+      </button>
+      <button id="pwaBannerDismissBtn" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" aria-label="Dismiss install banner">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- iOS PWA Install Instructions Modal -->
+  <div id="pwaIosModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true" aria-labelledby="pwaIosModalTitle">
+    <div class="w-full sm:max-w-md bg-slate-900 border border-slate-700/80 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl text-slate-100 space-y-4 animate-in fade-in slide-in-from-bottom duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <img src="/icon-192.png" alt="BharaDekhi App" class="w-10 h-10 rounded-xl border border-emerald-500/30 object-cover">
+          <div>
+            <h3 id="pwaIosModalTitle" class="font-bold text-base text-white">Install BharaDekhi on iPhone</h3>
+            <p class="text-xs text-slate-400">Zero warning · Instant &amp; 100% Free</p>
+          </div>
+        </div>
+        <button id="pwaIosModalClose" type="button" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-slate-800 hover:bg-slate-700 transition" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-sm">
+        <div class="flex items-start gap-3 bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/40">
+          <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+          <div>
+            <p class="text-slate-200">Tap the <strong>Share</strong> button <svg class="inline-block w-4 h-4 text-blue-400 -mt-0.5 mx-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> in Safari's bottom toolbar.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/40">
+          <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+          <div>
+            <p class="text-slate-200">Scroll down and tap <strong>"Add to Home Screen"</strong> (হোম স্ক্রিনে যোগ করুন).</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-slate-800/60 p-3.5 rounded-2xl border border-slate-700/40">
+          <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+          <div>
+            <p class="text-slate-200">Tap <strong>"Add"</strong> in the top-right corner. BharaDekhi will open as a full app icon!</p>
+          </div>
+        </div>
+      </div>
+
+      <button id="pwaIosModalGotIt" type="button" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-[0.99] transition">
+        Got it!
+      </button>
+    </div>
+  </div>
+
   <script>
     const MRT_ESTIMATE_DISCLAIMER = 'Illustrative estimates only, not live quotes. Nearest stations and access distances use straight-line map distance; MRT fares use a published Uttara North station-fare chart, with station-to-station fares estimated from the difference between those fares (৳20 minimum, ৳100 maximum). The optional pass applies a 10% discount. Feeder routes assume 1.25× access distance. Rickshaw is estimated at ৳20 + ৳12/km, rounded up to ৳10, for feeder trips up to 5 km; longer rickshaw legs are marked unavailable. Rickshaw fare ranges reflect bargaining; peak hours keep the low estimate unchanged and add ৳10 to the upper estimate. Bike and CNG use the site\'s baseline mode rates. Automatic rain estimates use Open-Meteo current conditions for central Dhaka and apply a 30%–50% uplift to ride and feeder fares, but not Metro fares. Assumed feeder speeds are 12 km/h for rickshaws/CNG and 18 km/h for bikes. Direct ride time assumes average road speeds of 15 km/h at peak and 22 km/h off-peak, adjusted by vehicle; MRT time assumes 2 minutes per station interval and 5 minutes waiting. Actual fares, station access, and traffic may differ.';
 
@@ -8720,6 +8798,11 @@
       'Route Planner & Fare Estimator': 'রুট পরিকল্পনা ও ভাড়ার আনুমানিক হিসাব',
       'TWO STOPS. ONE SIMPLE PLAN.': 'দুইটি গন্তব্য। একটি সহজ পরিকল্পনা।',
       'Switch language': 'ভাষা পরিবর্তন করুন',
+      'Install App': 'অ্যাপ ইনস্টল',
+      'BharaDekhi App': 'ভাড়া দেখি অ্যাপ',
+      'Fast 0-warning install · Works offline': 'সহজ ইনস্টলেশন · অফলাইনেও ব্যবহারযোগ্য',
+      'Install': 'ইনস্টল',
+      'BharaDekhi installed successfully!': 'ভাড়া দেখি অ্যাপ সফলভাবে ইনস্টল হয়েছে!',
       'Dark mode': 'ডার্ক মোড',
       'Light mode': 'লাইট মোড',
       'Switch to dark mode': 'ডার্ক মোড চালু করুন',
@@ -9516,6 +9599,19 @@
       if (faqLink) {
         faqLink.title = getLocalizedText('Frequently Asked Questions');
       }
+
+      const pwaHeaderBtn = document.getElementById('pwaInstallHeaderBtn');
+      if (pwaHeaderBtn) {
+        const textSpan = pwaHeaderBtn.querySelector('.header-install-btn-text');
+        if (textSpan) textSpan.textContent = currentLanguage === 'bn' ? 'অ্যাপ ইনস্টল' : 'Install App';
+        pwaHeaderBtn.setAttribute('title', currentLanguage === 'bn' ? 'ভাড়া দেখি অ্যাপ ইনস্টল করুন' : 'Install BharaDekhi as an app');
+      }
+      const pwaBannerTitle = document.getElementById('pwaBannerTitle');
+      if (pwaBannerTitle) pwaBannerTitle.textContent = currentLanguage === 'bn' ? 'ভাড়া দেখি অ্যাপ' : 'BharaDekhi App';
+      const pwaBannerSub = document.getElementById('pwaBannerSub');
+      if (pwaBannerSub) pwaBannerSub.textContent = currentLanguage === 'bn' ? 'সহজ ইনস্টলেশন · অফলাইনেও ব্যবহারযোগ্য' : 'Fast 0-warning install · Works offline';
+      const pwaBannerBtn = document.getElementById('pwaBannerInstallBtn');
+      if (pwaBannerBtn) pwaBannerBtn.textContent = currentLanguage === 'bn' ? 'ইনস্টল' : 'Install';
 
       if (typeof renderDhakaWeatherStatus === 'function') renderDhakaWeatherStatus();
       if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
@@ -17905,6 +18001,141 @@
     }
     window.initAdminFareSimulator = initAdminFareSimulator;
 
+    // PWA Custom Installation Manager (100% Free, Zero Security Warnings)
+    function initPwaInstallManager() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+      // If already installed and running as standalone app, do not prompt
+      if (isStandalone) {
+        return;
+      }
+
+      const headerBtn = document.getElementById('pwaInstallHeaderBtn');
+      const banner = document.getElementById('pwaInstallBanner');
+      const bannerInstallBtn = document.getElementById('pwaBannerInstallBtn');
+      const bannerDismissBtn = document.getElementById('pwaBannerDismissBtn');
+      const iosModal = document.getElementById('pwaIosModal');
+      const iosModalClose = document.getElementById('pwaIosModalClose');
+      const iosModalGotIt = document.getElementById('pwaIosModalGotIt');
+
+      let deferredInstallPrompt = null;
+
+      function isDismissedRecently() {
+        const ts = localStorage.getItem('bharadekhi_pwa_dismissed');
+        if (!ts) return false;
+        const diffHours = (Date.now() - parseInt(ts, 10)) / (1000 * 60 * 60);
+        return diffHours < 48; // Suppress floating banner for 48 hours after dismiss
+      }
+
+      function showBanner() {
+        if (banner && !isDismissedRecently()) {
+          banner.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            banner.classList.remove('translate-y-6', 'opacity-0', 'pointer-events-none');
+            banner.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+          });
+        }
+      }
+
+      function hideBanner() {
+        if (banner) {
+          banner.classList.add('translate-y-6', 'opacity-0', 'pointer-events-none');
+          banner.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+          setTimeout(() => banner.classList.add('hidden'), 350);
+        }
+      }
+
+      function showIosInstructions() {
+        if (iosModal) {
+          iosModal.classList.remove('hidden');
+        }
+      }
+
+      function hideIosInstructions() {
+        if (iosModal) {
+          iosModal.classList.add('hidden');
+        }
+      }
+
+      // iOS Safari Environment
+      if (isIOS) {
+        if (headerBtn) {
+          headerBtn.classList.remove('hidden');
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        setTimeout(showBanner, 2200);
+
+        const handleIosInstall = () => showIosInstructions();
+        if (headerBtn) headerBtn.addEventListener('click', handleIosInstall);
+        if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', handleIosInstall);
+      }
+
+      // Android, Chrome, Edge, Chromium Environment
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+
+        if (headerBtn) {
+          headerBtn.classList.remove('hidden');
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        setTimeout(showBanner, 1500);
+      });
+
+      const handleChromiumInstall = async () => {
+        if (isIOS) {
+          showIosInstructions();
+          return;
+        }
+        if (!deferredInstallPrompt) {
+          if (typeof showToast === 'function') {
+            showToast('Use browser menu to Install App / Add to Home screen');
+          }
+          return;
+        }
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          if (headerBtn) headerBtn.classList.add('hidden');
+          hideBanner();
+        }
+        deferredInstallPrompt = null;
+      };
+
+      if (!isIOS) {
+        if (headerBtn) headerBtn.addEventListener('click', handleChromiumInstall);
+        if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', handleChromiumInstall);
+      }
+
+      // Banner dismiss handler
+      if (bannerDismissBtn) {
+        bannerDismissBtn.addEventListener('click', () => {
+          localStorage.setItem('bharadekhi_pwa_dismissed', Date.now());
+          hideBanner();
+        });
+      }
+
+      // iOS modal dismiss handlers
+      if (iosModalClose) iosModalClose.addEventListener('click', hideIosInstructions);
+      if (iosModalGotIt) iosModalGotIt.addEventListener('click', hideIosInstructions);
+      if (iosModal) {
+        iosModal.addEventListener('click', (e) => {
+          if (e.target === iosModal) hideIosInstructions();
+        });
+      }
+
+      // Successful install listener
+      window.addEventListener('appinstalled', () => {
+        if (headerBtn) headerBtn.classList.add('hidden');
+        hideBanner();
+        hideIosInstructions();
+        if (typeof showToast === 'function') {
+          showToast('BharaDekhi installed successfully!');
+        }
+      });
+    }
+
     if (document.readyState === 'loading') {
       window.addEventListener('DOMContentLoaded', () => {
         bootApp();
@@ -17912,6 +18143,7 @@
         initHolographicFareCards();
         updateBusTickerText();
         if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
+        initPwaInstallManager();
       });
     } else {
       bootApp();
@@ -17919,6 +18151,7 @@
       initHolographicFareCards();
       updateBusTickerText();
       if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
+      initPwaInstallManager();
     }
 
     // Register PWA Service Worker for zero-warning mobile installation
