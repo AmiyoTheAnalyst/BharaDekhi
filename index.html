@@ -3466,15 +3466,17 @@
         <div class="splash-shimmer-sweep"></div>
       </div>
     </div>
-    <div class="mt-5 flex flex-col items-center text-center">
-      <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+    <div class="mt-6 flex flex-col items-center text-center px-4">
+      <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
         <span>Bhara</span><span class="text-blue-400">dekhi</span>
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ভাড়া দেখি</span>
+        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ভাড়া দেখি</span>
       </h1>
-      <p class="text-[10px] font-semibold text-slate-400 tracking-[0.16em] uppercase mt-1">Dhaka Commute &amp; Fare Engine</p>
-      <div class="splash-transit-track">
+      <p class="text-xs font-semibold text-slate-300 tracking-[0.14em] uppercase mt-2">Dhaka Commute &amp; Fare Engine</p>
+      <p class="text-[11px] text-emerald-400/90 font-medium mt-1">Rickshaw · Bus · Metro · Ride Comparisons</p>
+      <div class="splash-transit-track mt-4">
         <div class="splash-transit-indicator"></div>
       </div>
+      <p class="text-[10px] text-slate-500 tracking-wider mt-2.5 animate-pulse">Initializing Dhaka Transit Radar…</p>
     </div>
   </div>
 
@@ -18331,7 +18333,13 @@
       splash.style.pointerEvents = 'none';
       setTimeout(() => {
         try { splash.remove(); } catch (e) {}
-      }, 600);
+      }, 700);
+    }
+
+    // Allow user to tap/click splash screen to skip if desired
+    const launchSplashEl = document.getElementById('appLaunchSplash');
+    if (launchSplashEl) {
+      launchSplashEl.addEventListener('click', dismissAppLaunchSplash);
     }
 
     // Interactive bounce animation when clicking the header brand logo
@@ -18356,7 +18364,7 @@
         if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
         initPwaInstallManager();
         initHeaderLogoAnimation();
-        setTimeout(dismissAppLaunchSplash, 800);
+        setTimeout(dismissAppLaunchSplash, 3500);
       });
     } else {
       bootApp();
@@ -18366,12 +18374,12 @@
       if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
       initPwaInstallManager();
       initHeaderLogoAnimation();
-      setTimeout(dismissAppLaunchSplash, 800);
+      setTimeout(dismissAppLaunchSplash, 3500);
     }
 
     // Fallback dismiss to ensure screen is never stuck
-    window.addEventListener('load', () => setTimeout(dismissAppLaunchSplash, 850));
-    setTimeout(dismissAppLaunchSplash, 2200);
+    window.addEventListener('load', () => setTimeout(dismissAppLaunchSplash, 3500));
+    setTimeout(dismissAppLaunchSplash, 4500);
 
     // Register PWA Service Worker for zero-warning mobile installation
     if ('serviceWorker' in navigator) {
