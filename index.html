@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta name="google-site-verification" content="OV8Vll8SM-8YyLrRzLiKztvzDgoVSPrAGnKpC0N_9_A">
@@ -8,8 +8,12 @@
   <title>Bhara dekhi | Dhaka Rickshaw, Bus, Metro &amp; Ride Fare Estimator - BharaDekhi</title>
   <meta name="description" content="Bhara dekhi (ভাড়া দেখি) helps plan trips in Dhaka. Check accurate rickshaw fare estimation, local bus routes, metro rail (MRT-6) routes, and compare bike, CNG, and car fares in Uber and Pathao on BharaDekhi.">
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#0b0f19">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="canonical" href="https://bharadekhi.vercel.app/">
 
   <!-- Google Search Site Name & Mobile Web App Metadata -->
@@ -17915,6 +17919,15 @@
       initHolographicFareCards();
       updateBusTickerText();
       if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
+    }
+
+    // Register PWA Service Worker for zero-warning mobile installation
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('[BharaDekhi PWA] Service worker registration failed:', err);
+        });
+      });
     }
   </script>
 </body>
