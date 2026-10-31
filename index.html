@@ -3289,9 +3289,190 @@
     .bd-admin-sim-stepper-btn:active {
       transform: scale(0.92);
     }
+
+    /* ========================================================
+       App Launch Animated Splash Screen (Zero-Warning PWA Launch)
+       ======================================================== */
+    #appLaunchSplash {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #0b0f19;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: auto;
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .splash-glow-ambient {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(14, 165, 233, 0.12) 50%, transparent 70%);
+      filter: blur(40px);
+      animation: splashGlowPulse 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes splashGlowPulse {
+      0%, 100% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 0.95; }
+    }
+
+    .splash-icon-box {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, #131b2c 0%, #0b0f19 100%);
+      border: 1.5px solid rgba(16, 185, 129, 0.45);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 35px rgba(16, 185, 129, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      animation: splashIconEntrance 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes splashIconEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.4) rotate(-10deg);
+        filter: blur(6px);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.1) rotate(2deg);
+        filter: blur(0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: blur(0);
+      }
+    }
+
+    .splash-icon-img {
+      width: 68px;
+      height: 68px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+      animation: splashIconFloat 2.2s ease-in-out infinite;
+    }
+
+    @keyframes splashIconFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .splash-ring {
+      position: absolute;
+      border-radius: 28px;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      pointer-events: none;
+      animation: splashRingExpand 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    }
+
+    .splash-ring-1 {
+      inset: -8px;
+      animation-delay: 0.1s;
+    }
+
+    .splash-ring-2 {
+      inset: -18px;
+      border-color: rgba(56, 189, 248, 0.25);
+      animation-delay: 0.5s;
+    }
+
+    @keyframes splashRingExpand {
+      0% { transform: scale(0.9); opacity: 0.9; }
+      50% { transform: scale(1.12); opacity: 0.35; }
+      100% { transform: scale(0.9); opacity: 0.9; }
+    }
+
+    .splash-shimmer-sweep {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 20%, rgba(255, 255, 255, 0.22) 50%, transparent 80%);
+      transform: translateX(-150%) translateY(-150%);
+      animation: splashShimmerSlide 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      pointer-events: none;
+    }
+
+    @keyframes splashShimmerSlide {
+      0% { transform: translateX(-150%) translateY(-150%); }
+      60%, 100% { transform: translateX(150%) translateY(150%); }
+    }
+
+    .splash-transit-track {
+      width: 140px;
+      height: 3px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    .splash-transit-indicator {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 45%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #10b981 0%, #38bdf8 100%);
+      box-shadow: 0 0 10px #10b981;
+      animation: splashTransitIndicator 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes splashTransitIndicator {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(260%); }
+    }
+
+    /* Interactive logo bounce animation on tap/click */
+    .header-brand-logo-bounce {
+      animation: brandLogoPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes brandLogoPop {
+      0% { transform: scale(1); }
+      40% { transform: scale(0.85) rotate(-6deg); }
+      75% { transform: scale(1.18) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-12">
+
+  <!-- BharaDekhi Animated App Launch Splash Screen -->
+  <div id="appLaunchSplash" aria-hidden="true">
+    <div class="splash-glow-ambient"></div>
+    <div class="relative flex items-center justify-center">
+      <div class="splash-ring splash-ring-1"></div>
+      <div class="splash-ring splash-ring-2"></div>
+      <div class="splash-icon-box">
+        <img src="./assets/bharadekhi-mark.svg" alt="BharaDekhi App" class="splash-icon-img">
+        <div class="splash-shimmer-sweep"></div>
+      </div>
+    </div>
+    <div class="mt-5 flex flex-col items-center text-center">
+      <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+        <span>Bhara</span><span class="text-blue-400">dekhi</span>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ভাড়া দেখি</span>
+      </h1>
+      <p class="text-[10px] font-semibold text-slate-400 tracking-[0.16em] uppercase mt-1">Dhaka Commute &amp; Fare Engine</p>
+      <div class="splash-transit-track">
+        <div class="splash-transit-indicator"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Header with Strictly Contained Weather Animation -->
   <header id="mainHeader" class="sticky top-0 z-50 relative overflow-visible transition-all duration-700 shadow-sm w-full max-w-none" data-header-weather="night">
@@ -3576,8 +3757,8 @@
     <!-- Header UI Content (relative z-10) -->
     <div class="relative z-10 max-w-7xl mx-auto px-4 py-2 flex flex-wrap md:flex-nowrap items-center justify-between gap-2">
       <div class="flex items-center gap-2 shrink-0">
-        <a href="#/home" onclick="if (localStorage.getItem('commuteHubLoggedIn') === 'true') { event.preventDefault(); navigateToRoute('#/home'); }" class="flex items-center gap-2 rounded-xl" aria-label="BharaDekhi home">
-          <img src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0">
+        <a id="headerBrandLink" href="#/home" onclick="if (localStorage.getItem('commuteHubLoggedIn') === 'true') { event.preventDefault(); navigateToRoute('#/home'); }" class="flex items-center gap-2 rounded-xl group cursor-pointer" aria-label="BharaDekhi home">
+          <img id="headerBrandLogoImg" src="./assets/bharadekhi-mark.svg" alt="" aria-hidden="true" class="h-10 w-10 shrink-0 transition-transform duration-200 group-hover:scale-105 group-active:scale-95">
           <span class="block">
             <h1 class="text-base sm:text-lg font-bold leading-tight text-slate-900 dark:text-white header-brand-title">Bhara <span class="text-blue-700 dark:text-blue-400">dekhi</span> <span class="ml-1 inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/80">ভাড়া দেখি</span></h1>
             <span class="block text-[9px] font-bold tracking-[0.13em] text-slate-500 dark:text-slate-400 header-brand-subtext">Route Planner &amp; Fare Estimator · Dhaka</span>
@@ -18136,6 +18317,32 @@
       });
     }
 
+    // App Launch Splash Screen Controller (Animates App Icon on click/launch)
+    function dismissAppLaunchSplash() {
+      const splash = document.getElementById('appLaunchSplash');
+      if (!splash || splash.dataset.dismissed === 'true') return;
+      splash.dataset.dismissed = 'true';
+      splash.style.opacity = '0';
+      splash.style.transform = 'scale(1.08)';
+      splash.style.pointerEvents = 'none';
+      setTimeout(() => {
+        try { splash.remove(); } catch (e) {}
+      }, 600);
+    }
+
+    // Interactive bounce animation when clicking the header brand logo
+    function initHeaderLogoAnimation() {
+      const logoImg = document.getElementById('headerBrandLogoImg');
+      const brandLink = document.getElementById('headerBrandLink');
+      if (brandLink && logoImg) {
+        brandLink.addEventListener('click', () => {
+          logoImg.classList.remove('header-brand-logo-bounce');
+          void logoImg.offsetWidth;
+          logoImg.classList.add('header-brand-logo-bounce');
+        });
+      }
+    }
+
     if (document.readyState === 'loading') {
       window.addEventListener('DOMContentLoaded', () => {
         bootApp();
@@ -18144,6 +18351,8 @@
         updateBusTickerText();
         if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
         initPwaInstallManager();
+        initHeaderLogoAnimation();
+        setTimeout(dismissAppLaunchSplash, 800);
       });
     } else {
       bootApp();
@@ -18152,7 +18361,13 @@
       updateBusTickerText();
       if (typeof initCrossroads3dMouseTracking === 'function') initCrossroads3dMouseTracking();
       initPwaInstallManager();
+      initHeaderLogoAnimation();
+      setTimeout(dismissAppLaunchSplash, 800);
     }
+
+    // Fallback dismiss to ensure screen is never stuck
+    window.addEventListener('load', () => setTimeout(dismissAppLaunchSplash, 850));
+    setTimeout(dismissAppLaunchSplash, 2200);
 
     // Register PWA Service Worker for zero-warning mobile installation
     if ('serviceWorker' in navigator) {
