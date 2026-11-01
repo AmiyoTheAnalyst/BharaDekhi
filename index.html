@@ -1967,37 +1967,67 @@
       100% { transform: scaleY(1.22) scaleX(1.06); opacity: 1; }
     }
 
-    /* Visible 3D Fluffy Rocket Smoke Trail Plume (Clearly Visible & Proportional) */
+    /* Realistic Volumetric Rocket Smoke Plume & Exhaust */
     .rocket-visible-smoke {
       position: fixed;
-      border-radius: 50%;
+      border-radius: 48% 52% 54% 46% / 53% 47% 53% 47%;
       pointer-events: none;
       z-index: 999997;
-      background: radial-gradient(circle at 38% 38%, #ffffff 0%, #f8fafc 48%, #e2e8f0 78%, rgba(226, 232, 240, 0) 100%);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24), inset 0 -2px 5px rgba(148, 163, 184, 0.28);
-      animation: rocketSmokePlumeBillow 0.95s cubic-bezier(0.14, 0.75, 0.3, 1) forwards;
-      will-change: transform, opacity;
+      background: radial-gradient(circle at 38% 38%, 
+        rgba(255, 255, 255, 0.98) 0%, 
+        rgba(248, 250, 252, 0.92) 28%, 
+        rgba(226, 232, 240, 0.72) 52%, 
+        rgba(203, 213, 225, 0.38) 74%, 
+        rgba(148, 163, 184, 0.12) 88%, 
+        transparent 100%
+      );
+      filter: blur(1.5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+      animation: realisticSmokePlumeBillow 0.95s cubic-bezier(0.14, 0.75, 0.3, 1) forwards;
+      will-change: transform, opacity, filter;
     }
 
-    .rocket-visible-smoke-hot {
-      background: radial-gradient(circle at 38% 38%, #fffbeb 0%, #fef08a 25%, #f97316 62%, rgba(239, 68, 68, 0) 100%);
-      box-shadow: 0 0 14px rgba(249, 115, 22, 0.8), inset 0 -2px 5px rgba(220, 38, 38, 0.32);
+    .rocket-visible-smoke-hot-pathao {
+      background: radial-gradient(circle at 38% 38%, 
+        #ffffff 0%, 
+        #fef08a 25%, 
+        #f97316 55%, 
+        rgba(239, 68, 68, 0.3) 78%, 
+        transparent 100%
+      );
+      filter: blur(1.2px);
+      box-shadow: 0 0 14px rgba(249, 115, 22, 0.8);
     }
 
-    @keyframes rocketSmokePlumeBillow {
+    .rocket-visible-smoke-hot-uber {
+      background: radial-gradient(circle at 38% 38%, 
+        #ffffff 0%, 
+        #e0f2fe 25%, 
+        #38bdf8 55%, 
+        rgba(2, 132, 199, 0.3) 78%, 
+        transparent 100%
+      );
+      filter: blur(1.2px);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.8);
+    }
+
+    @keyframes realisticSmokePlumeBillow {
       0% {
-        transform: translate(-50%, -50%) scale(0.65);
+        transform: translate(-50%, -50%) scale(0.58) rotate(var(--rot, 0deg));
         opacity: 0.96;
       }
-      35% {
+      30% {
+        transform: translate(calc(-50% + var(--dx, -8px) * 0.35), calc(-50% + var(--dy, 8px) * 0.35)) scale(1.15) rotate(calc(var(--rot, 0deg) + 8deg));
         opacity: 0.92;
       }
-      70% {
-        opacity: 0.65;
+      65% {
+        transform: translate(calc(-50% + var(--dx, -8px) * 0.72), calc(-50% + var(--dy, 8px) * 0.72)) scale(1.5) rotate(calc(var(--rot, 0deg) + 16deg));
+        opacity: 0.7;
       }
       100% {
-        transform: translate(calc(-50% + var(--dx, -8px)), calc(-50% + var(--dy, 8px))) scale(var(--sEnd, 1.65));
+        transform: translate(calc(-50% + var(--dx, -8px)), calc(-50% + var(--dy, 8px))) scale(var(--sEnd, 1.8)) rotate(calc(var(--rot, 0deg) + 24deg));
         opacity: 0;
+        filter: blur(4px);
       }
     }
 
@@ -15219,106 +15249,144 @@
       }
     }
 
-    // 🚀 Exact Cartoon Rocket SVG Generator (Matches User Reference Image)
+    // 🚀 Exact Cartoon Rocket SVG Generator
+    // Uber Rocket: Black and Blue
+    // Pathao Rocket: Red and White
     function getCartoonRocketSvg(appType) {
       const isUber = appType === 'uber';
-      const finColor1 = isUber ? '#38bdf8' : '#ef4444';
-      const finColor2 = isUber ? '#0284c7' : '#dc2626';
-      const finColor3 = isUber ? '#0369a1' : '#b91c1c';
-      const collarColor = isUber ? '#0284c7' : '#ef4444';
-      const brandBadge = isUber
-        ? `<text x="27" y="52" fill="#0f172a" font-size="6.5" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="-0.3">UBER</text>`
-        : `<text x="27" y="52" fill="#991b1b" font-size="6" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="-0.3">PATHAO</text>`;
 
-      return `
-        <svg width="56" height="114" viewBox="0 0 56 114" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <!-- Golden-Orange Cartoon Fuselage -->
-            <linearGradient id="fuselageGrad" x1="15" y1="40" x2="39" y2="40" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#fffbeb"/>
-              <stop offset="18%" stop-color="#fef08a"/>
-              <stop offset="45%" stop-color="#fbbf24"/>
-              <stop offset="80%" stop-color="#f59e0b"/>
-              <stop offset="100%" stop-color="#ea580c"/>
-            </linearGradient>
+      if (isUber) {
+        // Uber Rocket: Sleek Metallic Obsidian Black Fuselage with Electric Blue Wings & Accents
+        return `
+          <svg width="56" height="114" viewBox="0 0 56 114" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="fuselageGradUber" x1="15" y1="40" x2="39" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                <stop offset="18%" stop-color="#1e293b"/>
+                <stop offset="50%" stop-color="#0f172a"/>
+                <stop offset="85%" stop-color="#020617"/>
+                <stop offset="100%" stop-color="#000000"/>
+              </linearGradient>
+              <linearGradient id="finGradUber" x1="4" y1="55" x2="50" y2="83" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="65%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#0369a1"/>
+              </linearGradient>
+              <linearGradient id="flameUberGrad" x1="27" y1="78" x2="27" y2="112" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="35%" stop-color="#bae6fd"/>
+                <stop offset="70%" stop-color="#38bdf8"/>
+                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.1"/>
+              </linearGradient>
+            </defs>
 
-            <!-- Fin Gradients -->
-            <linearGradient id="finGradLeft" x1="4" y1="55" x2="18" y2="83" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="${finColor1}"/>
-              <stop offset="70%" stop-color="${finColor2}"/>
-              <stop offset="100%" stop-color="${finColor3}"/>
-            </linearGradient>
-            <linearGradient id="finGradRight" x1="36" y1="55" x2="50" y2="83" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="${finColor1}"/>
-              <stop offset="70%" stop-color="${finColor2}"/>
-              <stop offset="100%" stop-color="${finColor3}"/>
-            </linearGradient>
+            <!-- 1. Electric Plasma Flame Jet -->
+            <g class="rocket-flame-jet">
+              <path d="M21 78C21 78 15 97 27 112C39 97 33 78 33 78H21Z" fill="url(#flameUberGrad)" filter="drop-shadow(0 0 8px #38bdf8)"/>
+              <path d="M23 78C23 78 19 93 27 104C35 93 31 78 31 78H23Z" fill="#bae6fd"/>
+              <path d="M25 78C25 78 23 88 27 96C31 88 29 78 29 78H25Z" fill="#ffffff"/>
+            </g>
 
-            <!-- Flame Jet Outer Glow & Gradient -->
-            <linearGradient id="flameOuterGrad" x1="27" y1="78" x2="27" y2="112" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#fef08a"/>
-              <stop offset="35%" stop-color="#fde047"/>
-              <stop offset="70%" stop-color="#f97316"/>
-              <stop offset="100%" stop-color="#ef4444" stop-opacity="0.1"/>
-            </linearGradient>
-          </defs>
+            <!-- 2. Electric Blue Swept-Back Fins -->
+            <path d="M18 55C11 58 4 68 4 83C9 83 15 80 18 74V55Z" fill="url(#finGradUber)" stroke="#0284c7" stroke-width="1.3"/>
+            <path d="M18 57C13 60 8 68 7 80C10 80 15 78 17 73V57Z" fill="#ffffff" opacity="0.3"/>
 
-          <!-- 1. Layered Flame Jet at Tail (Animated CSS Pulse) -->
-          <g class="rocket-flame-jet">
-            <!-- Outer flame -->
-            <path d="M21 78C21 78 15 97 27 112C39 97 33 78 33 78H21Z" fill="url(#flameOuterGrad)" filter="drop-shadow(0 0 6px #f97316)"/>
-            <!-- Mid yellow flame -->
-            <path d="M23 78C23 78 19 93 27 104C35 93 31 78 31 78H23Z" fill="#fde047"/>
-            <!-- Hot white core flame -->
-            <path d="M25 78C25 78 23 88 27 96C31 88 29 78 29 78H25Z" fill="#ffffff"/>
-          </g>
+            <path d="M36 55C43 58 50 68 50 83C45 83 39 80 36 74V55Z" fill="url(#finGradUber)" stroke="#0284c7" stroke-width="1.3"/>
+            <path d="M36 57C41 60 46 68 47 80C44 80 39 78 37 73V57Z" fill="#000000" opacity="0.25"/>
 
-          <!-- 2. Swept-Back Curved Wings / Fins -->
-          <!-- Left Fin -->
-          <path d="M18 55C11 58 4 68 4 83C9 83 15 80 18 74V55Z" fill="url(#finGradLeft)" stroke="${finColor3}" stroke-width="1.2"/>
-          <path d="M18 57C13 60 8 68 7 80C10 80 15 78 17 73V57Z" fill="#ffffff" opacity="0.25"/>
+            <!-- 3. Electric Blue Engine Collar -->
+            <rect x="19.5" y="74" width="15" height="5.5" rx="2.5" fill="#0284c7" stroke="#38bdf8" stroke-width="1.1"/>
 
-          <!-- Right Fin -->
-          <path d="M36 55C43 58 50 68 50 83C45 83 39 80 36 74V55Z" fill="url(#finGradRight)" stroke="${finColor3}" stroke-width="1.2"/>
-          <path d="M36 57C41 60 46 68 47 80C44 80 39 78 37 73V57Z" fill="#000000" opacity="0.15"/>
+            <!-- 4. Obsidian Black Fuselage -->
+            <path d="M27 4C17 17 15 42 15 75H39C39 42 37 17 27 4Z" fill="url(#fuselageGradUber)" stroke="#38bdf8" stroke-width="1.4"/>
 
-          <!-- 3. Red Engine Base Collar -->
-          <rect x="19.5" y="74" width="15" height="5.5" rx="2.5" fill="${collarColor}" stroke="${finColor3}" stroke-width="1"/>
+            <!-- 5. Electric Blue 3D Highlight Sheen -->
+            <path d="M27 4C19 17 18 42 18 75H23C23 42 24 17 27 4Z" fill="#38bdf8" opacity="0.45"/>
 
-          <!-- 4. Fuselage / Rocket Body -->
-          <path d="M27 4C17 17 15 42 15 75H39C39 42 37 17 27 4Z" fill="url(#fuselageGrad)" stroke="#b45309" stroke-width="1.3"/>
+            <!-- 6. Electric Blue Aerodynamic Bands -->
+            <path d="M16.2 38C19.5 41 34.5 41 37.8 38L38.4 43.5C34.8 46.5 19.2 46.5 15.6 43.5L16.2 38Z" fill="#0284c7" stroke="#38bdf8" stroke-width="0.8"/>
+            <path d="M15.2 48.5C18.8 51.5 35.2 51.5 38.8 48.5L39 54C35.2 57 18.8 57 15 54L15.2 48.5Z" fill="#0284c7" stroke="#38bdf8" stroke-width="0.8"/>
+            <text x="27" y="52" fill="#ffffff" font-size="6.5" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="-0.3">UBER</text>
 
-          <!-- 5. Cylindrical 3D Specular Highlight Streak -->
-          <path d="M27 4C19 17 18 42 18 75H23C23 42 24 17 27 4Z" fill="#ffffff" opacity="0.45"/>
+            <!-- 7. Porthole Windows with Electric Blue Rims -->
+            <circle cx="27" cy="25" r="6.2" fill="#0284c7" stroke="#38bdf8" stroke-width="1.4"/>
+            <circle cx="27" cy="25" r="4.6" fill="#090d16"/>
+            <ellipse cx="25.5" cy="23.5" rx="2.2" ry="1.3" fill="#38bdf8" transform="rotate(-35 25.5 23.5)"/>
 
-          <!-- 6. Two Curved Aerodynamic White Bands -->
-          <!-- Upper Stripe (between portholes) -->
-          <path d="M16.2 38C19.5 41 34.5 41 37.8 38L38.4 43.5C34.8 46.5 19.2 46.5 15.6 43.5L16.2 38Z" fill="#ffffff"/>
-          <!-- Lower Stripe (below porthole 2) -->
-          <path d="M15.2 48.5C18.8 51.5 35.2 51.5 38.8 48.5L39 54C35.2 57 18.8 57 15 54L15.2 48.5Z" fill="#ffffff"/>
+            <circle cx="27" cy="65" r="6.2" fill="#0284c7" stroke="#38bdf8" stroke-width="1.4"/>
+            <circle cx="27" cy="65" r="4.6" fill="#090d16"/>
+            <ellipse cx="25.5" cy="63.5" rx="2.2" ry="1.3" fill="#38bdf8" transform="rotate(-35 25.5 63.5)"/>
+          </svg>
+        `;
+      } else {
+        // Pathao Rocket: Vibrant Pathao Red Fuselage with Crisp Clean White Wings & Accents
+        return `
+          <svg width="56" height="114" viewBox="0 0 56 114" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="fuselageGradPathao" x1="15" y1="40" x2="39" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#fee2e2"/>
+                <stop offset="15%" stop-color="#f87171"/>
+                <stop offset="50%" stop-color="#ef4444"/>
+                <stop offset="85%" stop-color="#dc2626"/>
+                <stop offset="100%" stop-color="#991b1b"/>
+              </linearGradient>
+              <linearGradient id="finGradPathao" x1="4" y1="55" x2="50" y2="83" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="65%" stop-color="#f8fafc"/>
+                <stop offset="100%" stop-color="#e2e8f0"/>
+              </linearGradient>
+              <linearGradient id="flamePathaoGrad" x1="27" y1="78" x2="27" y2="112" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="35%" stop-color="#fde047"/>
+                <stop offset="70%" stop-color="#f97316"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0.1"/>
+              </linearGradient>
+            </defs>
 
-          <!-- Brand Micro-Label inside Lower Stripe -->
-          ${brandBadge}
+            <!-- 1. Fiery Combustion Flame Jet -->
+            <g class="rocket-flame-jet">
+              <path d="M21 78C21 78 15 97 27 112C39 97 33 78 33 78H21Z" fill="url(#flamePathaoGrad)" filter="drop-shadow(0 0 8px #f97316)"/>
+              <path d="M23 78C23 78 19 93 27 104C35 93 31 78 31 78H23Z" fill="#fde047"/>
+              <path d="M25 78C25 78 23 88 27 96C31 88 29 78 29 78H25Z" fill="#ffffff"/>
+            </g>
 
-          <!-- 7. Two Circular Porthole Windows -->
-          <!-- Upper Window -->
-          <circle cx="27" cy="25" r="6.2" fill="#0f172a" stroke="#ffffff" stroke-width="1.4"/>
-          <circle cx="27" cy="25" r="4.6" fill="#0284c7"/>
-          <ellipse cx="25.5" cy="23.5" rx="2.2" ry="1.3" fill="#ffffff" transform="rotate(-35 25.5 23.5)"/>
+            <!-- 2. Crisp White Swept-Back Fins with Red Border -->
+            <path d="M18 55C11 58 4 68 4 83C9 83 15 80 18 74V55Z" fill="url(#finGradPathao)" stroke="#dc2626" stroke-width="1.3"/>
+            <path d="M18 57C13 60 8 68 7 80C10 80 15 78 17 73V57Z" fill="#ffffff"/>
 
-          <!-- Lower Window -->
-          <circle cx="27" cy="65" r="6.2" fill="#0f172a" stroke="#ffffff" stroke-width="1.4"/>
-          <circle cx="27" cy="65" r="4.6" fill="#0284c7"/>
-          <ellipse cx="25.5" cy="63.5" rx="2.2" ry="1.3" fill="#ffffff" transform="rotate(-35 25.5 63.5)"/>
-        </svg>
-      `;
+            <path d="M36 55C43 58 50 68 50 83C45 83 39 80 36 74V55Z" fill="url(#finGradPathao)" stroke="#dc2626" stroke-width="1.3"/>
+            <path d="M36 57C41 60 46 68 47 80C44 80 39 78 37 73V57Z" fill="#cbd5e1" opacity="0.35"/>
+
+            <!-- 3. White Engine Base Collar -->
+            <rect x="19.5" y="74" width="15" height="5.5" rx="2.5" fill="#ffffff" stroke="#dc2626" stroke-width="1.1"/>
+
+            <!-- 4. Pathao Red Fuselage -->
+            <path d="M27 4C17 17 15 42 15 75H39C39 42 37 17 27 4Z" fill="url(#fuselageGradPathao)" stroke="#991b1b" stroke-width="1.4"/>
+
+            <!-- 5. 3D Specular Highlight Streak -->
+            <path d="M27 4C19 17 18 42 18 75H23C23 42 24 17 27 4Z" fill="#ffffff" opacity="0.45"/>
+
+            <!-- 6. Two Pure White Aerodynamic Stripes -->
+            <path d="M16.2 38C19.5 41 34.5 41 37.8 38L38.4 43.5C34.8 46.5 19.2 46.5 15.6 43.5L16.2 38Z" fill="#ffffff"/>
+            <path d="M15.2 48.5C18.8 51.5 35.2 51.5 38.8 48.5L39 54C35.2 57 18.8 57 15 54L15.2 48.5Z" fill="#ffffff"/>
+            <text x="27" y="52" fill="#dc2626" font-size="6" font-weight="900" font-family="system-ui, sans-serif" text-anchor="middle" letter-spacing="-0.3">PATHAO</text>
+
+            <!-- 7. Portholes with Crisp White Rims -->
+            <circle cx="27" cy="25" r="6.2" fill="#ffffff" stroke="#991b1b" stroke-width="1.4"/>
+            <circle cx="27" cy="25" r="4.6" fill="#0f172a"/>
+            <ellipse cx="25.5" cy="23.5" rx="2.2" ry="1.3" fill="#ffffff" transform="rotate(-35 25.5 23.5)"/>
+
+            <circle cx="27" cy="65" r="6.2" fill="#ffffff" stroke="#991b1b" stroke-width="1.4"/>
+            <circle cx="27" cy="65" r="4.6" fill="#0f172a"/>
+            <ellipse cx="25.5" cy="63.5" rx="2.2" ry="1.3" fill="#ffffff" transform="rotate(-35 25.5 63.5)"/>
+          </svg>
+        `;
+      }
     }
 
     // 🚀 High-Octane Rocket Launch Simulation for Uber & Pathao Deep Links
-    // Replicates the cartoon rocket simulation from user reference image:
-    // - 45° launch angle towards top-right
-    // - Stage 1 (0s-1s): 1s pause with launchpad cloud bed billowing & rocket rumble
-    // - Stage 2 (1s-2s): 1s blastoff flight with continuous trailing cartoon smoke plume column
+    // Uber: Black & Blue Rocket with Cyan Plasma Flame & Blue/White Smoke
+    // Pathao: Red & White Rocket with Fiery Orange Flame & Warm/White Smoke
     function triggerRocketLaunchAnimation(event, appType, onLaunchComplete) {
       const btn = event?.currentTarget || (appType === 'uber' 
         ? document.getElementById('btnOpenUber') || document.querySelector('[onclick*="handleUberClick"]') 
@@ -15356,14 +15424,17 @@
       const nozzleBaseX = originX - 39;
       const nozzleBaseY = originY + 39;
 
-      // Visible 3D Fluffy Smoke Puff Generator (Clearly visible, 3D shaded, proportional)
-      function spawnVisibleSmokePuff(x, y, isHot = false, customSize = null) {
+      // Realistic Volumetric Smoke Puff Generator
+      function spawnRealisticSmokePuff(x, y, isHot = false, customSize = null) {
         const puff = document.createElement('div');
-        puff.className = `rocket-visible-smoke ${isHot ? 'rocket-visible-smoke-hot' : ''}`;
-        const size = customSize || (28 + Math.random() * 12);
+        const hotClass = isUber ? 'rocket-visible-smoke-hot-uber' : 'rocket-visible-smoke-hot-pathao';
+        puff.className = `rocket-visible-smoke ${isHot ? hotClass : ''}`;
+        const size = customSize || (26 + Math.random() * 14);
         const dx = -6 - Math.random() * 10;
         const dy = 6 + Math.random() * 10;
-        const sEnd = 1.5 + Math.random() * 0.4;
+        const sEnd = 1.55 + Math.random() * 0.45;
+        const rot = Math.round((Math.random() - 0.5) * 60);
+
         puff.style.cssText = `
           left: ${x + (Math.random() - 0.5) * 6}px;
           top: ${y + (Math.random() - 0.5) * 6}px;
@@ -15372,22 +15443,26 @@
           --dx: ${dx.toFixed(1)}px;
           --dy: ${dy.toFixed(1)}px;
           --sEnd: ${sEnd.toFixed(2)};
+          --rot: ${rot}deg;
         `;
         container.appendChild(puff);
       }
 
       // Compact Launchpad Base Smoke (Stage 1 ignition cloud bed)
       function spawnLaunchpadBaseSmoke(baseX, baseY) {
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * Math.PI * 0.9;
-          const dist = 5 + Math.random() * 16;
+        for (let i = 0; i < 7; i++) {
+          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * Math.PI * 0.95;
+          const dist = 5 + Math.random() * 18;
           const sx = baseX + Math.cos(angle) * dist;
           const sy = baseY + Math.sin(angle) * dist;
-          spawnVisibleSmokePuff(sx, sy, i === 0, 32 + Math.random() * 10);
+          spawnRealisticSmokePuff(sx, sy, i === 0, 32 + Math.random() * 10);
         }
 
         // Ignition sparks
-        const sparkColors = ['#ffffff', '#fde047', '#f97316'];
+        const sparkColors = isUber 
+          ? ['#ffffff', '#bae6fd', '#38bdf8', '#0284c7'] 
+          : ['#ffffff', '#fde047', '#f97316', '#ef4444'];
+
         for (let i = 0; i < 6; i++) {
           const spark = document.createElement('div');
           spark.className = 'rocket-spark-ember';
@@ -15401,7 +15476,7 @@
             width: ${size}px;
             height: ${size}px;
             background: ${color};
-            box-shadow: 0 0 10px ${color}, 0 0 16px rgba(249, 115, 22, 0.85);
+            box-shadow: 0 0 10px ${color}, 0 0 16px ${isUber ? 'rgba(56, 189, 248, 0.85)' : 'rgba(249, 115, 22, 0.85)'};
             --pdx: ${pdx.toFixed(1)}px;
             --pdy: ${pdy.toFixed(1)}px;
             animation-duration: 0.65s;
@@ -15435,13 +15510,13 @@
 
       // Mid-rumble puff at 450ms
       setTimeout(() => {
-        spawnVisibleSmokePuff(nozzleBaseX, nozzleBaseY, true, 30);
-        spawnVisibleSmokePuff(nozzleBaseX - 8, nozzleBaseY + 8, false, 34);
+        spawnRealisticSmokePuff(nozzleBaseX, nozzleBaseY, true, 28);
+        spawnRealisticSmokePuff(nozzleBaseX - 8, nozzleBaseY + 8, false, 32);
       }, 450);
 
       // ========================================================
       // STAGE 2 (at 1.0s): "then show 1sec for rocket launched so moving to the uber or pathap"
-      // Visible, continuous billowing smoke plume streaming directly from rocket nozzle!
+      // Realistic, volumetric continuous smoke plume streaming directly from rocket nozzle!
       // ========================================================
       let plumeInterval = null;
 
@@ -15453,17 +15528,19 @@
         // Shockwave Ring
         const wave = document.createElement('div');
         wave.className = 'rocket-launch-shockwave';
+        const waveBorder = isUber ? 'rgba(56, 189, 248, 0.9)' : 'rgba(239, 68, 68, 0.9)';
+        const waveShadow = isUber ? 'rgba(56, 189, 248, 0.75)' : 'rgba(239, 68, 68, 0.75)';
         wave.style.cssText = `
           left: ${nozzleBaseX}px;
           top: ${nozzleBaseY}px;
           width: 65px;
           height: 65px;
-          border: 2.5px solid rgba(254, 240, 138, 0.85);
-          box-shadow: 0 0 20px rgba(249, 115, 22, 0.75);
+          border: 2.5px solid ${waveBorder};
+          box-shadow: 0 0 20px ${waveShadow};
         `;
         container.appendChild(wave);
 
-        // Continuous billowing smoke trail emission (tracks nozzle every 32ms)
+        // Continuous realistic plume emission (every 26ms = seamless, dense exhaust stream)
         const plumeStartTime = Date.now();
         let tickCount = 0;
         plumeInterval = setInterval(() => {
@@ -15480,9 +15557,9 @@
           const tipY = cy + 39;
 
           tickCount++;
-          // Spawn clearly visible fluffy cloud puffs continuously behind nozzle
-          spawnVisibleSmokePuff(tipX, tipY, tickCount % 3 === 0, 30 + Math.random() * 8);
-        }, 32);
+          // High-frequency volumetric puffs create a continuous connected realistic smoke plume
+          spawnRealisticSmokePuff(tipX, tipY, tickCount % 3 === 0, 28 + Math.random() * 8);
+        }, 26);
 
         if (btnLabel) {
           btnLabel.textContent = currentLanguage === 'bn' ? `🚀 ${appName}-এ যাওয়া হচ্ছে...` : `🚀 Moving to ${appName}...`;
