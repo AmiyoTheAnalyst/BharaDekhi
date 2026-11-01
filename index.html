@@ -4191,7 +4191,12 @@
                 <span id="loginErrorMessage" class="leading-snug"></span>
               </div>
 
-              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Login</button>
+              <button type="submit" id="loginSubmitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1 inline-flex items-center justify-center gap-2 select-none disabled:opacity-80 disabled:cursor-wait">
+                <span id="loginBtnSpinner" class="hidden inline-flex items-center justify-center">
+                  <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                </span>
+                <span id="loginBtnText">Login</span>
+              </button>
             </form>
 
             <form id="signupForm" class="auth-form hidden space-y-2.5 auth-form-fade">
@@ -4211,7 +4216,12 @@
                 <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-0.5">Confirm Password</label>
                 <input type="password" placeholder="Confirm password" class="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs rounded-xl p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all" required>
               </div>
-              <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1">Create Account</button>
+              <button type="submit" id="signupSubmitBtn" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2.5 text-xs rounded-xl shadow-md transition-all hover:shadow-lg active:scale-[0.99] mt-1 inline-flex items-center justify-center gap-2 select-none disabled:opacity-80 disabled:cursor-wait">
+                <span id="signupBtnSpinner" class="hidden inline-flex items-center justify-center">
+                  <span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                </span>
+                <span id="signupBtnText">Create Account</span>
+              </button>
             </form>
           </div>
         </div>
@@ -9818,6 +9828,15 @@
       const pwaBannerBtn = document.getElementById('pwaBannerInstallBtn');
       if (pwaBannerBtn) pwaBannerBtn.textContent = currentLanguage === 'bn' ? 'ইনস্টল' : 'Install';
 
+      const loginBtnText = document.getElementById('loginBtnText');
+      if (loginBtnText && !document.getElementById('loginSubmitBtn')?.disabled) {
+        loginBtnText.textContent = currentLanguage === 'bn' ? 'লগইন' : 'Login';
+      }
+      const signupBtnText = document.getElementById('signupBtnText');
+      if (signupBtnText && !document.getElementById('signupSubmitBtn')?.disabled) {
+        signupBtnText.textContent = currentLanguage === 'bn' ? 'অ্যাকাউন্ট তৈরি করুন' : 'Create Account';
+      }
+
       if (typeof renderDhakaWeatherStatus === 'function') renderDhakaWeatherStatus();
       if (typeof renderMetricsAndFares === 'function') renderMetricsAndFares();
       if (typeof updateLocationLabels === 'function') updateLocationLabels();
@@ -14831,6 +14850,12 @@
       if (typeof clearLoginError === 'function') {
         clearLoginError();
       }
+      if (typeof setLoginLoading === 'function') {
+        setLoginLoading(false);
+      }
+      if (typeof setSignupLoading === 'function') {
+        setSignupLoading(false);
+      }
     }
 
     // =========================================================
@@ -17673,6 +17698,10 @@
         return;
       }
 
+      if (typeof setSignupLoading === 'function') {
+        setSignupLoading(true);
+      }
+
       try {
         const { data, error } = await supabaseClient.auth.signUp({
           email,
@@ -17688,7 +17717,13 @@
           setAuthTab('login');
           showToast('Account created. Check your email to confirm the account, then log in.');
         }
+        if (typeof setSignupLoading === 'function') {
+          setSignupLoading(false);
+        }
       } catch (error) {
+        if (typeof setSignupLoading === 'function') {
+          setSignupLoading(false);
+        }
         console.error('Account registration failed:', error);
         showToast(error.message || 'Could not create your account. Please try again.');
       }
@@ -17786,6 +17821,48 @@
     }
     window.clearLoginError = clearLoginError;
 
+    function setLoginLoading(isLoading) {
+      const btn = document.getElementById('loginSubmitBtn');
+      const spinner = document.getElementById('loginBtnSpinner');
+      const textEl = document.getElementById('loginBtnText');
+      const isBn = (typeof currentLanguage !== 'undefined' && currentLanguage === 'bn') || (document.documentElement.lang === 'bn');
+      if (!btn) return;
+
+      if (isLoading) {
+        btn.disabled = true;
+        btn.classList.add('cursor-wait', 'opacity-85', 'pointer-events-none');
+        if (spinner) spinner.classList.remove('hidden');
+        if (textEl) textEl.textContent = isBn ? 'লগইন হচ্ছে…' : 'Logging in…';
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('cursor-wait', 'opacity-85', 'pointer-events-none');
+        if (spinner) spinner.classList.add('hidden');
+        if (textEl) textEl.textContent = isBn ? 'লগইন' : 'Login';
+      }
+    }
+    window.setLoginLoading = setLoginLoading;
+
+    function setSignupLoading(isLoading) {
+      const btn = document.getElementById('signupSubmitBtn');
+      const spinner = document.getElementById('signupBtnSpinner');
+      const textEl = document.getElementById('signupBtnText');
+      const isBn = (typeof currentLanguage !== 'undefined' && currentLanguage === 'bn') || (document.documentElement.lang === 'bn');
+      if (!btn) return;
+
+      if (isLoading) {
+        btn.disabled = true;
+        btn.classList.add('cursor-wait', 'opacity-85', 'pointer-events-none');
+        if (spinner) spinner.classList.remove('hidden');
+        if (textEl) textEl.textContent = isBn ? 'অ্যাকাউন্ট তৈরি হচ্ছে…' : 'Creating account…';
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('cursor-wait', 'opacity-85', 'pointer-events-none');
+        if (spinner) spinner.classList.add('hidden');
+        if (textEl) textEl.textContent = isBn ? 'অ্যাকাউন্ট তৈরি করুন' : 'Create Account';
+      }
+    }
+    window.setSignupLoading = setSignupLoading;
+
     async function handleLogin(event) {
       event.preventDefault();
       clearLoginError();
@@ -17814,6 +17891,8 @@
         return;
       }
 
+      setLoginLoading(true);
+
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -17836,7 +17915,9 @@
         if (toggleBtn) toggleBtn.style.color = '#94a3b8';
 
         await completeLogin(data.user);
+        setLoginLoading(false);
       } catch (error) {
+        setLoginLoading(false);
         console.error('Sign-in failed:', error);
         const errMsg = (error.message || '').toLowerCase();
         const errCode = (error.code || '').toLowerCase();
