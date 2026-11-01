@@ -1909,15 +1909,22 @@
 
     @keyframes rocketLaunchSmokePuff {
       0% {
-        transform: translate(-50%, -50%) scale(0.3);
-        opacity: 0.82;
+        transform: translate(-50%, -50%) scale(0.35);
+        opacity: 0.95;
+        filter: brightness(1.25) contrast(1.1);
       }
-      50% {
-        opacity: 0.6;
+      40% {
+        opacity: 0.88;
+        filter: brightness(1.15);
+      }
+      75% {
+        opacity: 0.55;
+        filter: brightness(0.9);
       }
       100% {
-        transform: translate(calc(-50% + var(--sdx, -35px)), calc(-50% + var(--sdy, 35px))) scale(var(--s-scale, 2));
+        transform: translate(calc(-50% + var(--sdx, -35px)), calc(-50% + var(--sdy, 35px))) scale(var(--s-scale, 2.2));
         opacity: 0;
+        filter: brightness(0.65);
       }
     }
 
@@ -1959,8 +1966,9 @@
       border-radius: 50%;
       pointer-events: none;
       z-index: 999998;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(203, 213, 225, 0.45) 60%, transparent 100%);
-      animation: rocketLaunchSmokePuff 0.9s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+      background: radial-gradient(circle, #ffffff 0%, #fef08a 22%, #f97316 52%, #ef4444 80%, rgba(220, 38, 38, 0) 100%);
+      box-shadow: 0 0 18px rgba(249, 115, 22, 0.85), 0 0 32px rgba(239, 68, 68, 0.5);
+      animation: rocketLaunchSmokePuff 0.95s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
       will-change: transform, opacity;
     }
 
@@ -15209,8 +15217,8 @@
       const originX = event?.clientX && event.clientX > 0 ? event.clientX : (rect.left + rect.width / 2);
       const originY = event?.clientY && event.clientY > 0 ? event.clientY : (rect.top + rect.height / 2);
 
-      const glowColor = isUber ? 'rgba(56, 189, 248, 0.95)' : 'rgba(239, 68, 68, 0.95)';
-      const waveColor = isUber ? 'rgba(56, 189, 248, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+      const glowColor = isUber ? 'rgba(249, 115, 22, 0.95)' : 'rgba(239, 68, 68, 0.95)';
+      const waveColor = isUber ? 'rgba(249, 115, 22, 0.85)' : 'rgba(239, 68, 68, 0.85)';
 
       const container = document.createElement('div');
       container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999999;';
@@ -15246,7 +15254,7 @@
         ? `<svg width="48" height="74" viewBox="0 0 48 74" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g class="rocket-flame-jet">
               <path d="M19 46C19 46 16 64 24 73C32 64 29 46 29 46H19Z" fill="url(#flameOuterUber)" />
-              <path d="M21 46C21 46 19 58 24 65C29 58 27 46 27 46H21Z" fill="#e0f2fe" />
+              <path d="M21 46C21 46 19 58 24 65C29 58 27 46 27 46H21Z" fill="#fef08a" />
               <path d="M22 46C22 46 21 53 24 58C27 53 26 46 26 46H22Z" fill="#ffffff" />
             </g>
             <path d="M14 36L4 47C3 48 4 50 6 50H14V36Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.3"/>
@@ -15261,9 +15269,9 @@
                 <stop offset="1" stop-color="#020617"/>
               </linearGradient>
               <linearGradient id="flameOuterUber" x1="24" y1="46" x2="24" y2="73" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#bae6fd"/>
-                <stop offset="0.5" stop-color="#38bdf8"/>
-                <stop offset="1" stop-color="#0284c7" stop-opacity="0.1"/>
+                <stop stop-color="#fde047"/>
+                <stop offset="0.5" stop-color="#f97316"/>
+                <stop offset="1" stop-color="#ef4444" stop-opacity="0.1"/>
               </linearGradient>
             </defs>
           </svg>`
@@ -15295,31 +15303,42 @@
       rocket.innerHTML = rocketSvg;
       container.appendChild(rocket);
 
-      // Helper: Spawns smoke puffs and sparks pointing down-left (exhaust of 45° rocket)
+      // Helper: Spawns fiery exhaust puffs and sparks pointing down-left (exhaust of 45° rocket)
       function spawnExhaustPuffsAndSparks(baseX, baseY, countPuffs = 6, countSparks = 14) {
+        const firePuffGradients = [
+          'radial-gradient(circle, #ffffff 0%, #fef08a 22%, #f97316 54%, #ef4444 82%, rgba(220, 38, 38, 0) 100%)',
+          'radial-gradient(circle, #fff7ed 0%, #fde047 26%, #fb923c 56%, #dc2626 84%, rgba(185, 28, 28, 0) 100%)',
+          'radial-gradient(circle, #fef08a 0%, #f59e0b 32%, #ea580c 62%, #b91c1c 88%, rgba(153, 27, 27, 0) 100%)',
+          'radial-gradient(circle, #ffedd5 0%, #fde047 20%, #f97316 50%, #e11d48 80%, rgba(225, 29, 72, 0) 100%)'
+        ];
+
         for (let i = 0; i < countPuffs; i++) {
           const puff = document.createElement('div');
           puff.className = 'rocket-smoke-puff';
-          const size = 18 + Math.random() * 24;
-          const sdx = -20 - Math.random() * 45;
-          const sdy = 20 + Math.random() * 45;
-          const scale = 1.6 + Math.random() * 1.2;
+          const size = 20 + Math.random() * 26;
+          const sdx = -22 - Math.random() * 48;
+          const sdy = 22 + Math.random() * 48;
+          const scale = 1.7 + Math.random() * 1.3;
+          const grad = firePuffGradients[Math.floor(Math.random() * firePuffGradients.length)];
+          const glow1 = Math.round(14 + Math.random() * 14);
+          const glow2 = Math.round(24 + Math.random() * 20);
+
           puff.style.cssText = `
-            left: ${baseX + (Math.random() - 0.5) * 18}px;
-            top: ${baseY + (Math.random() - 0.5) * 18}px;
+            left: ${baseX + (Math.random() - 0.5) * 20}px;
+            top: ${baseY + (Math.random() - 0.5) * 20}px;
             width: ${size}px;
             height: ${size}px;
+            background: ${grad};
+            box-shadow: 0 0 ${glow1}px rgba(249, 115, 22, 0.9), 0 0 ${glow2}px rgba(239, 68, 68, 0.6);
             --sdx: ${sdx.toFixed(1)}px;
             --sdy: ${sdy.toFixed(1)}px;
             --s-scale: ${scale.toFixed(2)};
-            animation-delay: ${(i * 40)}ms;
+            animation-delay: ${(i * 35)}ms;
           `;
           container.appendChild(puff);
         }
 
-        const sparkColors = isUber
-          ? ['#ffffff', '#38bdf8', '#60a5fa', '#93c5fd', '#0284c7']
-          : ['#ffffff', '#fde047', '#f97316', '#ef4444', '#b91c1c'];
+        const sparkColors = ['#ffffff', '#fffbeb', '#fef08a', '#fde047', '#f97316', '#ea580c', '#ef4444', '#dc2626'];
         for (let i = 0; i < countSparks; i++) {
           const spark = document.createElement('div');
           spark.className = 'rocket-spark-ember';
@@ -15333,7 +15352,7 @@
             width: ${size}px;
             height: ${size}px;
             background: ${color};
-            box-shadow: 0 0 10px ${color};
+            box-shadow: 0 0 10px ${color}, 0 0 16px rgba(249, 115, 22, 0.85);
             --pdx: ${pdx.toFixed(1)}px;
             --pdy: ${pdy.toFixed(1)}px;
             animation-delay: ${(i * 25)}ms;
@@ -15344,6 +15363,11 @@
 
       // Initial launchpad exhaust
       spawnExhaustPuffsAndSparks(originX - 10, originY + 15, 8, 16);
+
+      // Rumble combustion pulse at 450ms
+      setTimeout(() => {
+        spawnExhaustPuffsAndSparks(originX - 10, originY + 15, 6, 12);
+      }, 450);
 
       // ========================================================
       // STAGE 1 (0s - 1s): "pause 1sec for rocket launching"
@@ -15365,7 +15389,7 @@
         rocket.classList.add('rocket-stage-blastoff');
 
         // Blastoff exhaust burst
-        spawnExhaustPuffsAndSparks(originX - 15, originY + 20, 10, 20);
+        spawnExhaustPuffsAndSparks(originX - 15, originY + 20, 12, 22);
 
         if (btnLabel) {
           btnLabel.textContent = currentLanguage === 'bn' ? `🚀 ${appName}-এ যাওয়া হচ্ছে...` : `🚀 Moving to ${appName}...`;
