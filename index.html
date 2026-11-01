@@ -11360,16 +11360,27 @@
       if (locationKey && DHAKA_AREA_NAMES[locationKey]) {
         return DHAKA_AREA_NAMES[locationKey];
       }
-      if (!locationObj) return { en: 'Dhaka', bn: 'ঢাকা' };
-      const rawName = locationObj.name || '';
-      for (const [k, v] of Object.entries(DHAKA_AREA_NAMES)) {
-        if (LOCATIONS[k] && LOCATIONS[k].name === rawName) {
-          return v;
+      if (locationObj && Number.isFinite(locationObj.lat) && Number.isFinite(locationObj.lng)) {
+        for (const [k, loc] of Object.entries(LOCATIONS)) {
+          const dLat = Math.abs(loc.lat - locationObj.lat);
+          const dLng = Math.abs(loc.lng - locationObj.lng);
+          if (dLat < 0.006 && dLng < 0.006) {
+            return DHAKA_AREA_NAMES[k] || { en: loc.name, bn: loc.name };
+          }
         }
       }
-      const en = rawName.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+(Bus Stand|Circle|Residential Area|Shapla Chattar|University)\b/gi, '').trim() || 'Dhaka';
-      const bn = (typeof getLocalizedLocationName === 'function' ? getLocalizedLocationName(rawName) : en) || 'ঢাকা';
-      return { en, bn };
+      if (locationObj && locationObj.name) {
+        const rawName = locationObj.name;
+        for (const [k, v] of Object.entries(DHAKA_AREA_NAMES)) {
+          if (LOCATIONS[k] && LOCATIONS[k].name === rawName) {
+            return v;
+          }
+        }
+        const en = rawName.replace(/\s*\(.*?\)\s*/g, '').replace(/\s+(Bus Stand|Circle|Residential Area|Shapla Chattar|University)\b/gi, '').trim() || 'Dhaka';
+        const bn = (typeof getLocalizedLocationName === 'function' ? getLocalizedLocationName(rawName) : en) || 'ঢাকা';
+        return { en, bn };
+      }
+      return { en: 'Dhaka', bn: 'ঢাকা' };
     }
 
     function updateRainFareState() {
@@ -11394,7 +11405,11 @@
 
       const isRainy = (precipitation > 0) || (weatherCode !== null && rainyWeatherCodes.has(weatherCode));
       const isFoggy = !isRainy && (weatherCode !== null && foggyWeatherCodes.has(weatherCode));
-      const isOvercast = !isRainy && !isFoggy && ((weatherCode !== null && overcastWeatherCodes.has(weatherCode)) || (cloudCover !== null && cloudCover >= 75));
+      const isOvercast = !isRainy && !isFoggy && (
+        (weatherCode !== null && overcastWeatherCodes.has(weatherCode)) ||
+        (cloudCover !== null && cloudCover >= 60) ||
+        (weatherCode === 2 && cloudCover !== null && cloudCover >= 40)
+      );
 
       dhakaRainDetected = isRainy;
       if (isRainy) {
@@ -11446,10 +11461,13 @@
       const rainyWeatherCodes = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99]);
 
       let destWeather = cached;
-      if (!destWeather || (now - destWeather.timestamp > 10 * 60 * 1000)) {
+      if (!destWeather || (now - destWeather.timestamp > 5 * 60 * 1000)) {
         try {
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${dLoc.lat.toFixed(4)}&longitude=${dLoc.lng.toFixed(4)}&current=temperature_2m,precipitation,rain,showers,weather_code,cloud_cover&timezone=Asia%2FDhaka`;
-          const res = await fetch(url);
+          const primaryDestUrl = `https://api.open-meteo.com/v1/forecast?latitude=${dLoc.lat.toFixed(4)}&longitude=${dLoc.lng.toFixed(4)}&models=icon_seamless&current=temperature_2m,precipitation,rain,showers,weather_code,cloud_cover&timezone=Asia%2FDhaka`;
+          let res = await fetch(primaryDestUrl);
+          if (!res.ok) {
+            res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${dLoc.lat.toFixed(4)}&longitude=${dLoc.lng.toFixed(4)}&current=temperature_2m,precipitation,rain,showers,weather_code,cloud_cover&timezone=Asia%2FDhaka`);
+          }
           if (res.ok) {
             const data = await res.json();
             let wc = data.current?.weather_code ?? data.current_weather?.weathercode ?? null;
@@ -11493,7 +11511,7 @@
       const now = Date.now();
       const cached = dhakaWeatherCache.get(cacheKey);
 
-      if (cached && (now - cached.timestamp < 10 * 60 * 1000)) {
+      if (cached && (now - cached.timestamp < 5 * 60 * 1000)) {
         if (thisSeq !== weatherFetchSeq) return;
         dhakaActiveWeatherTemp = cached.temperature;
         dhakaActiveWeatherHumidity = cached.humidity;
@@ -11503,12 +11521,16 @@
         return;
       }
 
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${targetLoc.lat.toFixed(4)}&longitude=${targetLoc.lng.toFixed(4)}&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&current_weather=true&timezone=Asia%2FDhaka`;
+      const primaryUrl = `https://api.open-meteo.com/v1/forecast?latitude=${targetLoc.lat.toFixed(4)}&longitude=${targetLoc.lng.toFixed(4)}&models=icon_seamless&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&timezone=Asia%2FDhaka`;
+      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${targetLoc.lat.toFixed(4)}&longitude=${targetLoc.lng.toFixed(4)}&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&current_weather=true&timezone=Asia%2FDhaka`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
-        const response = await fetch(url, { signal: controller.signal });
+        let response = await fetch(primaryUrl, { signal: controller.signal });
+        if (!response.ok) {
+          response = await fetch(fallbackUrl, { signal: controller.signal });
+        }
         if (!response.ok) throw new Error(`Weather service returned ${response.status}.`);
         const data = await response.json();
         if (thisSeq !== weatherFetchSeq) return;
