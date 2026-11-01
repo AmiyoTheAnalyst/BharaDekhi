@@ -18569,11 +18569,17 @@
         if (typeof updateCrossroadsAtmosphere === 'function') {
           updateCrossroadsAtmosphere();
         }
+        if (!document.hidden && !document.getElementById('adminPanel')?.classList.contains('hidden')) {
+          loadAdminDownloadMetrics();
+        }
       }, 30000);
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
           refreshDhakaWeather();
           renderMetricsAndFares();
+          if (!document.getElementById('adminPanel')?.classList.contains('hidden')) {
+            loadAdminDownloadMetrics();
+          }
           if (typeof updateCrossroadsAtmosphere === 'function') {
             updateCrossroadsAtmosphere();
           }
