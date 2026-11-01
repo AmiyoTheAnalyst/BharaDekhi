@@ -1967,38 +1967,37 @@
       100% { transform: scaleY(1.22) scaleX(1.06); opacity: 1; }
     }
 
-    /* Realistic Translucent Rocket Exhaust Vapor & Smoke Trail */
-    .rocket-real-smoke {
+    /* Visible 3D Fluffy Rocket Smoke Trail Plume (Clearly Visible & Proportional) */
+    .rocket-visible-smoke {
       position: fixed;
       border-radius: 50%;
       pointer-events: none;
       z-index: 999997;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.42) 0%, rgba(226, 232, 240, 0.22) 45%, rgba(148, 163, 184, 0.08) 75%, transparent 100%);
-      filter: blur(5px);
-      animation: realisticSmokeDisperse 0.65s cubic-bezier(0.16, 0.8, 0.35, 1) forwards;
-      will-change: transform, opacity, filter;
+      background: radial-gradient(circle at 38% 38%, #ffffff 0%, #f8fafc 48%, #e2e8f0 78%, rgba(226, 232, 240, 0) 100%);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24), inset 0 -2px 5px rgba(148, 163, 184, 0.28);
+      animation: rocketSmokePlumeBillow 0.95s cubic-bezier(0.14, 0.75, 0.3, 1) forwards;
+      will-change: transform, opacity;
     }
 
-    .rocket-real-smoke-glow {
-      background: radial-gradient(circle, rgba(254, 240, 138, 0.55) 0%, rgba(249, 115, 22, 0.35) 42%, rgba(239, 68, 68, 0.1) 75%, transparent 100%);
-      filter: blur(4px);
+    .rocket-visible-smoke-hot {
+      background: radial-gradient(circle at 38% 38%, #fffbeb 0%, #fef08a 25%, #f97316 62%, rgba(239, 68, 68, 0) 100%);
+      box-shadow: 0 0 14px rgba(249, 115, 22, 0.8), inset 0 -2px 5px rgba(220, 38, 38, 0.32);
     }
 
-    @keyframes realisticSmokeDisperse {
+    @keyframes rocketSmokePlumeBillow {
       0% {
-        transform: translate(-50%, -50%) scale(0.6);
-        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(0.65);
+        opacity: 0.96;
       }
-      30% {
-        opacity: 0.48;
+      35% {
+        opacity: 0.92;
       }
       70% {
-        opacity: 0.22;
+        opacity: 0.65;
       }
       100% {
-        transform: translate(calc(-50% + var(--dx, -8px)), calc(-50% + var(--dy, 8px))) scale(var(--sEnd, 1.8));
+        transform: translate(calc(-50% + var(--dx, -8px)), calc(-50% + var(--dy, 8px))) scale(var(--sEnd, 1.65));
         opacity: 0;
-        filter: blur(8px);
       }
     }
 
@@ -15353,19 +15352,19 @@
       const screenH = window.innerHeight;
       const flightDist = Math.round(Math.max(screenW, screenH) + 400);
 
-      // Rocket flame tip origin: when tilted 45° at (originX, originY), the nozzle tip is 38px down-left
-      const nozzleBaseX = originX - 38;
-      const nozzleBaseY = originY + 38;
+      // Rocket flame tip origin: when tilted 45° at (originX, originY), the nozzle tip is 39px down-left
+      const nozzleBaseX = originX - 39;
+      const nozzleBaseY = originY + 39;
 
-      // Realistic Translucent Smoke Wisp Generator (Lightweight, soft-blurred, feathered)
-      function spawnRealisticSmokeWisp(x, y, isGlow = false) {
-        const smoke = document.createElement('div');
-        smoke.className = `rocket-real-smoke ${isGlow ? 'rocket-real-smoke-glow' : ''}`;
-        const size = 16 + Math.random() * 10;
-        const dx = -8 - Math.random() * 10;
-        const dy = 8 + Math.random() * 10;
-        const sEnd = 1.6 + Math.random() * 0.5;
-        smoke.style.cssText = `
+      // Visible 3D Fluffy Smoke Puff Generator (Clearly visible, 3D shaded, proportional)
+      function spawnVisibleSmokePuff(x, y, isHot = false, customSize = null) {
+        const puff = document.createElement('div');
+        puff.className = `rocket-visible-smoke ${isHot ? 'rocket-visible-smoke-hot' : ''}`;
+        const size = customSize || (28 + Math.random() * 12);
+        const dx = -6 - Math.random() * 10;
+        const dy = 6 + Math.random() * 10;
+        const sEnd = 1.5 + Math.random() * 0.4;
+        puff.style.cssText = `
           left: ${x + (Math.random() - 0.5) * 6}px;
           top: ${y + (Math.random() - 0.5) * 6}px;
           width: ${size}px;
@@ -15374,17 +15373,26 @@
           --dy: ${dy.toFixed(1)}px;
           --sEnd: ${sEnd.toFixed(2)};
         `;
-        container.appendChild(smoke);
+        container.appendChild(puff);
       }
 
-      // Subtle, tiny ignition spark embers
-      function spawnRealisticSparks(baseX, baseY, count = 4) {
+      // Compact Launchpad Base Smoke (Stage 1 ignition cloud bed)
+      function spawnLaunchpadBaseSmoke(baseX, baseY) {
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * Math.PI * 0.9;
+          const dist = 5 + Math.random() * 16;
+          const sx = baseX + Math.cos(angle) * dist;
+          const sy = baseY + Math.sin(angle) * dist;
+          spawnVisibleSmokePuff(sx, sy, i === 0, 32 + Math.random() * 10);
+        }
+
+        // Ignition sparks
         const sparkColors = ['#ffffff', '#fde047', '#f97316'];
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < 6; i++) {
           const spark = document.createElement('div');
           spark.className = 'rocket-spark-ember';
           const color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
-          const size = 2.5 + Math.random() * 2.5;
+          const size = 3 + Math.random() * 3;
           const pdx = -15 - Math.random() * 35;
           const pdy = 15 + Math.random() * 35;
           spark.style.cssText = `
@@ -15393,19 +15401,17 @@
             width: ${size}px;
             height: ${size}px;
             background: ${color};
-            box-shadow: 0 0 8px ${color};
+            box-shadow: 0 0 10px ${color}, 0 0 16px rgba(249, 115, 22, 0.85);
             --pdx: ${pdx.toFixed(1)}px;
             --pdy: ${pdy.toFixed(1)}px;
-            animation-duration: 0.55s;
+            animation-duration: 0.65s;
           `;
           container.appendChild(spark);
         }
       }
 
-      // Initial subtle nozzle pre-ignition vapor (only 2 small translucent wisps + 4 embers)
-      spawnRealisticSmokeWisp(nozzleBaseX, nozzleBaseY, true);
-      spawnRealisticSmokeWisp(nozzleBaseX - 6, nozzleBaseY + 6, false);
-      spawnRealisticSparks(nozzleBaseX, nozzleBaseY, 4);
+      // Initial launchpad base smoke
+      spawnLaunchpadBaseSmoke(nozzleBaseX, nozzleBaseY);
 
       // 2. The Rocket Actor (45° angle pointing to top-right matching reference icon)
       const rocket = document.createElement('div');
@@ -15427,15 +15433,15 @@
         : `🚀 Launching ${appName}... Preparing rocket!`;
       showToast(stage1Toast);
 
-      // Mid-rumble soft vapor puff at 450ms (only 2 wisps)
+      // Mid-rumble puff at 450ms
       setTimeout(() => {
-        spawnRealisticSmokeWisp(nozzleBaseX, nozzleBaseY, true);
-        spawnRealisticSmokeWisp(nozzleBaseX - 6, nozzleBaseY + 6, false);
+        spawnVisibleSmokePuff(nozzleBaseX, nozzleBaseY, true, 30);
+        spawnVisibleSmokePuff(nozzleBaseX - 8, nozzleBaseY + 8, false, 34);
       }, 450);
 
       // ========================================================
       // STAGE 2 (at 1.0s): "then show 1sec for rocket launched so moving to the uber or pathap"
-      // Light, realistic translucent vapor trail trailing from rocket nozzle across 45° flight!
+      // Visible, continuous billowing smoke plume streaming directly from rocket nozzle!
       // ========================================================
       let plumeInterval = null;
 
@@ -15444,20 +15450,20 @@
         rocket.classList.remove('rocket-stage-rumble');
         rocket.classList.add('rocket-stage-blastoff');
 
-        // Delicate Translucent Shockwave Ring
+        // Shockwave Ring
         const wave = document.createElement('div');
         wave.className = 'rocket-launch-shockwave';
         wave.style.cssText = `
           left: ${nozzleBaseX}px;
           top: ${nozzleBaseY}px;
-          width: 55px;
-          height: 55px;
-          border: 2px solid rgba(254, 240, 138, 0.7);
-          box-shadow: 0 0 16px rgba(249, 115, 22, 0.6);
+          width: 65px;
+          height: 65px;
+          border: 2.5px solid rgba(254, 240, 138, 0.85);
+          box-shadow: 0 0 20px rgba(249, 115, 22, 0.75);
         `;
         container.appendChild(wave);
 
-        // Realistic smoke vapor trail (only 1 wisp every 75ms = ~13 wisps total over the whole flight!)
+        // Continuous billowing smoke trail emission (tracks nozzle every 32ms)
         const plumeStartTime = Date.now();
         let tickCount = 0;
         plumeInterval = setInterval(() => {
@@ -15469,12 +15475,14 @@
           const r = rocket.getBoundingClientRect();
           const cx = r.left + r.width / 2;
           const cy = r.top + r.height / 2;
-          const tipX = cx - 38;
-          const tipY = cy + 38;
+          // Exact nozzle flame tip coordinates:
+          const tipX = cx - 39;
+          const tipY = cy + 39;
 
           tickCount++;
-          spawnRealisticSmokeWisp(tipX, tipY, tickCount % 3 === 0);
-        }, 75);
+          // Spawn clearly visible fluffy cloud puffs continuously behind nozzle
+          spawnVisibleSmokePuff(tipX, tipY, tickCount % 3 === 0, 30 + Math.random() * 8);
+        }, 32);
 
         if (btnLabel) {
           btnLabel.textContent = currentLanguage === 'bn' ? `🚀 ${appName}-এ যাওয়া হচ্ছে...` : `🚀 Moving to ${appName}...`;
@@ -15499,8 +15507,8 @@
           btn.disabled = false;
           if (btnLabel) btnLabel.textContent = originalBtnText;
         }
-        // Let remaining wisps evaporate quickly
-        setTimeout(() => container.remove(), 500);
+        // Let the smoke trail gently dissolve before clearing container
+        setTimeout(() => container.remove(), 750);
       }, 2000);
     }
 
