@@ -1845,6 +1845,114 @@
     .btn-haptic-pop {
       animation: btnHapticPop 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+
+    /* 🚀 Rocket Launch Animation for Deep Links (Uber & Pathao) */
+    @keyframes rocketBlastoffFlight {
+      0% {
+        transform: translate(-50%, -50%) rotate(-18deg) scale(0.8);
+        opacity: 0;
+      }
+      8% {
+        transform: translate(-50%, -50%) rotate(-18deg) scale(1.15);
+        opacity: 1;
+      }
+      18% {
+        transform: translate(-50%, calc(-50% - 20px)) rotate(-22deg) scale(1.22);
+        opacity: 1;
+      }
+      40% {
+        transform: translate(calc(-50% + (var(--target-x, 80px) * 0.35)), calc(-50% - (var(--target-y, 650px) * 0.35))) rotate(-26deg) scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(-50% + var(--target-x, 80px)), calc(-50% - var(--target-y, 650px))) rotate(-32deg) scale(0.35);
+        opacity: 0;
+      }
+    }
+
+    @keyframes rocketFlamePulse {
+      0%, 100% { transform: scaleY(1) scaleX(1); opacity: 0.95; }
+      50% { transform: scaleY(1.35) scaleX(0.88); opacity: 1; }
+    }
+
+    @keyframes rocketLaunchShockwave {
+      0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0.95;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(2.6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes rocketLaunchSmokePuff {
+      0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0.75;
+      }
+      50% {
+        opacity: 0.55;
+      }
+      100% {
+        transform: translate(calc(-50% + var(--sdx, 0px)), calc(-50% + var(--sdy, 35px))) scale(var(--s-scale, 1.9));
+        opacity: 0;
+      }
+    }
+
+    @keyframes rocketLaunchSparkFly {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(-50% + var(--pdx, 0px)), calc(-50% + var(--pdy, 50px))) scale(0.1);
+        opacity: 0;
+      }
+    }
+
+    .rocket-launch-actor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 999999;
+      filter: drop-shadow(0 0 16px var(--rocket-glow, rgba(255, 120, 0, 0.85)));
+      animation: rocketBlastoffFlight 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    .rocket-flame-jet {
+      transform-origin: 24px 46px;
+      animation: rocketFlamePulse 0.12s ease-in-out infinite alternate;
+    }
+
+    .rocket-smoke-puff {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999998;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(203, 213, 225, 0.4) 60%, transparent 100%);
+      animation: rocketLaunchSmokePuff 0.85s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    .rocket-spark-ember {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999998;
+      animation: rocketLaunchSparkFly 0.7s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    .rocket-launch-shockwave {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999997;
+      animation: rocketLaunchShockwave 0.55s ease-out forwards;
+      will-change: transform, opacity;
+    }
+
     @keyframes burstParticleShoot {
       0% {
         opacity: 1;
@@ -8331,7 +8439,7 @@
             </div>
           </div>
           <button onclick="handleUberClick(event)" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-black text-white hover:bg-slate-800 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
-            <i data-lucide="external-link" class="w-4 h-4"></i> Open in Uber
+            <i data-lucide="rocket" class="w-4 h-4 text-sky-400"></i> Open in Uber
           </button>
         </div>
 
@@ -8352,7 +8460,7 @@
             </div>
           </div>
           <button onclick="handlePathaoClick(event)" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
-            <i data-lucide="external-link" class="w-4 h-4"></i> Open in Pathao
+            <i data-lucide="rocket" class="w-4 h-4 text-amber-300"></i> Open in Pathao
           </button>
         </div>
 
@@ -15045,80 +15153,183 @@
       }
     }
 
-    // Launch Button Particle Burst Animation
-    function triggerLaunchParticleBurst(event, appType) {
-      const btn = event?.currentTarget || (appType === 'uber' ? document.querySelector('[onclick*="handleUberClick"]') : document.querySelector('[onclick*="handlePathaoClick"]'));
+    // 🚀 High-Octane Rocket Launch Animation for Uber & Pathao Deep Links
+    function triggerRocketLaunchAnimation(event, appType) {
+      const btn = event?.currentTarget || (appType === 'uber' 
+        ? document.querySelector('[onclick*="handleUberClick"]') 
+        : document.querySelector('[onclick*="handlePathaoClick"]'));
+      
       if (btn) {
         btn.classList.add('btn-haptic-pop');
         setTimeout(() => btn.classList.remove('btn-haptic-pop'), 400);
       }
-      const rect = btn ? btn.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
-      const originX = event?.clientX ?? (rect.left + rect.width / 2);
-      const originY = event?.clientY ?? (rect.top + rect.height / 2);
 
-      const colors = appType === 'uber'
-        ? ['#000000', '#ffffff', '#38bdf8', '#60a5fa', '#a855f7', '#64748b']
-        : ['#dc2626', '#ef4444', '#f97316', '#fbbf24', '#ffffff', '#b91c1c'];
+      // Haptic vibration feedback on supported mobile devices
+      if (navigator.vibrate) {
+        try { navigator.vibrate([40, 50, 90]); } catch (e) {}
+      }
+
+      const rect = btn ? btn.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
+      const originX = event?.clientX && event.clientX > 0 ? event.clientX : (rect.left + rect.width / 2);
+      const originY = event?.clientY && event.clientY > 0 ? event.clientY : (rect.top + rect.height / 2);
+
+      const isUber = appType === 'uber';
+      const glowColor = isUber ? 'rgba(56, 189, 248, 0.95)' : 'rgba(239, 68, 68, 0.95)';
+      const waveColor = isUber ? 'rgba(56, 189, 248, 0.8)' : 'rgba(239, 68, 68, 0.8)';
 
       const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;';
+      container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999999;';
       document.body.appendChild(container);
 
-      const particleCount = 28;
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'burst-particle';
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.45;
-        const distance = 40 + Math.random() * 85;
-        const dx = Math.cos(angle) * distance;
-        const dy = Math.sin(angle) * distance;
-        const size = 5 + Math.random() * 7;
-        const rot = Math.random() * 360;
+      // 1. Launchpad Shockwave Ring
+      const wave = document.createElement('div');
+      wave.className = 'rocket-launch-shockwave';
+      wave.style.cssText = `
+        left: ${originX}px;
+        top: ${originY}px;
+        width: 80px;
+        height: 80px;
+        border: 3px solid ${waveColor};
+        box-shadow: 0 0 18px ${waveColor};
+      `;
+      container.appendChild(wave);
 
-        particle.style.cssText = `
-          position: fixed;
-          left: ${originX}px;
-          top: ${originY}px;
+      // 2. The Rocket Actor
+      const rocket = document.createElement('div');
+      rocket.className = 'rocket-launch-actor';
+      rocket.style.setProperty('--rocket-glow', glowColor);
+      
+      const screenW = window.innerWidth;
+      const targetX = (screenW > 600 ? 110 : 70) * (originX < screenW / 2 ? 1 : 0.65);
+      const targetY = originY + 240; // Blasts completely past top of screen
+      rocket.style.setProperty('--target-x', `${targetX}px`);
+      rocket.style.setProperty('--target-y', `${targetY}px`);
+      rocket.style.left = `${originX}px`;
+      rocket.style.top = `${originY}px`;
+
+      const rocketSvg = isUber
+        ? `<svg width="48" height="74" viewBox="0 0 48 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="rocket-flame-jet">
+              <path d="M19 46C19 46 16 64 24 73C32 64 29 46 29 46H19Z" fill="url(#flameOuterUber)" />
+              <path d="M21 46C21 46 19 58 24 65C29 58 27 46 27 46H21Z" fill="#e0f2fe" />
+              <path d="M22 46C22 46 21 53 24 58C27 53 26 46 26 46H22Z" fill="#ffffff" />
+            </g>
+            <path d="M14 36L4 47C3 48 4 50 6 50H14V36Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.3"/>
+            <path d="M34 36L44 47C45 48 44 50 42 50H34V36Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.3"/>
+            <path d="M24 2C18 10 14 24 14 46H34C34 24 30 10 24 2Z" fill="url(#bodyGradUber)" stroke="#ffffff" stroke-width="1.5"/>
+            <path d="M24 2C22 8 21 18 21 46H27C27 18 26 8 24 2Z" fill="#38bdf8" opacity="0.5"/>
+            <circle cx="24" cy="20" r="5.5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="22.5" cy="18.5" r="1.8" fill="#ffffff"/>
+            <defs>
+              <linearGradient id="bodyGradUber" x1="14" y1="2" x2="34" y2="46" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#334155"/>
+                <stop offset="1" stop-color="#020617"/>
+              </linearGradient>
+              <linearGradient id="flameOuterUber" x1="24" y1="46" x2="24" y2="73" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#bae6fd"/>
+                <stop offset="0.5" stop-color="#38bdf8"/>
+                <stop offset="1" stop-color="#0284c7" stop-opacity="0.1"/>
+              </linearGradient>
+            </defs>
+          </svg>`
+        : `<svg width="48" height="74" viewBox="0 0 48 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="rocket-flame-jet">
+              <path d="M19 46C19 46 16 64 24 73C32 64 29 46 29 46H19Z" fill="url(#flameOuterPathao)" />
+              <path d="M21 46C21 46 19 58 24 65C29 58 27 46 27 46H21Z" fill="#fef08a" />
+              <path d="M22 46C22 46 21 53 24 58C27 53 26 46 26 46H22Z" fill="#ffffff" />
+            </g>
+            <path d="M14 36L4 47C3 48 4 50 6 50H14V36Z" fill="#991b1b" stroke="#fef08a" stroke-width="1.3"/>
+            <path d="M34 36L44 47C45 48 44 50 42 50H34V36Z" fill="#991b1b" stroke="#fef08a" stroke-width="1.3"/>
+            <path d="M24 2C18 10 14 24 14 46H34C34 24 30 10 24 2Z" fill="url(#bodyGradPathao)" stroke="#ffffff" stroke-width="1.5"/>
+            <path d="M24 2C22 8 21 18 21 46H27C27 18 26 8 24 2Z" fill="#ffffff" opacity="0.35"/>
+            <circle cx="24" cy="20" r="5.5" fill="#fef08a" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="22.5" cy="18.5" r="1.8" fill="#ffffff"/>
+            <defs>
+              <linearGradient id="bodyGradPathao" x1="14" y1="2" x2="34" y2="46" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ef4444"/>
+                <stop offset="1" stop-color="#991b1b"/>
+              </linearGradient>
+              <linearGradient id="flameOuterPathao" x1="24" y1="46" x2="24" y2="73" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#fde047"/>
+                <stop offset="0.5" stop-color="#f97316"/>
+                <stop offset="1" stop-color="#ef4444" stop-opacity="0.1"/>
+              </linearGradient>
+            </defs>
+          </svg>`;
+
+      rocket.innerHTML = rocketSvg;
+      container.appendChild(rocket);
+
+      // 3. Billowing Smoke Puffs
+      const puffCount = 10;
+      for (let i = 0; i < puffCount; i++) {
+        const puff = document.createElement('div');
+        puff.className = 'rocket-smoke-puff';
+        const size = 18 + Math.random() * 24;
+        const sdx = (Math.random() - 0.5) * 65;
+        const sdy = 25 + Math.random() * 55;
+        const scale = 1.6 + Math.random() * 1.3;
+        puff.style.cssText = `
+          left: ${originX + (Math.random() - 0.5) * 22}px;
+          top: ${originY + 20 + Math.random() * 20}px;
           width: ${size}px;
           height: ${size}px;
-          background-color: ${color};
-          border-radius: ${Math.random() > 0.4 ? '50%' : '3px'};
-          pointer-events: none;
-          z-index: 99999;
-          transform: translate(-50%, -50%);
-          --dx: ${dx.toFixed(1)}px;
-          --dy: ${dy.toFixed(1)}px;
-          --rot: ${rot.toFixed(1)}deg;
-          box-shadow: 0 0 10px ${color};
+          --sdx: ${sdx.toFixed(1)}px;
+          --sdy: ${sdy.toFixed(1)}px;
+          --s-scale: ${scale.toFixed(2)};
+          animation-delay: ${(i * 40)}ms;
         `;
-        container.appendChild(particle);
+        container.appendChild(puff);
+      }
+
+      // 4. Fiery Exhaust Sparks
+      const sparkColors = isUber
+        ? ['#ffffff', '#38bdf8', '#60a5fa', '#93c5fd', '#0284c7']
+        : ['#ffffff', '#fde047', '#f97316', '#ef4444', '#b91c1c'];
+      const sparkCount = 22;
+      for (let i = 0; i < sparkCount; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'rocket-spark-ember';
+        const color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+        const size = 4 + Math.random() * 5;
+        const pdx = (Math.random() - 0.5) * 85;
+        const pdy = 40 + Math.random() * 95;
+        spark.style.cssText = `
+          left: ${originX}px;
+          top: ${originY + 18}px;
+          width: ${size}px;
+          height: ${size}px;
+          background: ${color};
+          box-shadow: 0 0 10px ${color};
+          --pdx: ${pdx.toFixed(1)}px;
+          --pdy: ${pdy.toFixed(1)}px;
+          animation-delay: ${(i * 20)}ms;
+        `;
+        container.appendChild(spark);
       }
 
       setTimeout(() => {
         container.remove();
-      }, 850);
+      }, 1250);
     }
+
+    // Backwards compatibility alias
+    window.triggerLaunchParticleBurst = triggerRocketLaunchAnimation;
+    window.triggerRocketLaunchAnimation = triggerRocketLaunchAnimation;
 
     // 6. Action Button Handlers
     function openRideAppAndCopy(appLink, clipboardText, successMessage) {
       window.open(appLink, '_blank');
 
       if (!navigator.clipboard?.writeText) {
-        showToast('Could not access the clipboard. The app is opening.');
         return;
       }
 
-      navigator.clipboard.writeText(clipboardText)
-        .then(() => showToast(successMessage))
-        .catch(error => {
-          console.error('Failed to copy ride details to the clipboard:', error);
-          showToast('Could not copy ride details. The app is opening.');
-        });
+      navigator.clipboard.writeText(clipboardText).catch(() => {});
     }
 
     function handleUberClick(event) {
-      triggerLaunchParticleBurst(event, 'uber');
+      triggerRocketLaunchAnimation(event, 'uber');
       const pKey = document.getElementById('pickupSelect').value;
       const dKey = document.getElementById('dropoffSelect').value;
       const pLoc = getLocationForKey(pKey);
@@ -15131,12 +15342,18 @@
         `&dropoff[latitude]=${dLoc.lat}&dropoff[longitude]=${dLoc.lng}&dropoff[nickname]=${encodeURIComponent(dLoc.name)}`;
 
       const estimate = document.getElementById('uberFare').innerText;
-      showToast(`Opening Uber for ${selectedVehicle}. Its app will show the official quote; our estimate is ${estimate}.`);
-      window.open(uberLink, '_blank');
+      const toastMsg = currentLanguage === 'bn'
+        ? `🚀 Uber চালু হচ্ছে... (${getLocalizedText(selectedVehicle)} আনুমানিক ভাড়া: ${estimate})`
+        : `🚀 Launching Uber... (${selectedVehicle} estimate: ${estimate})`;
+      showToast(toastMsg);
+
+      setTimeout(() => {
+        window.open(uberLink, '_blank');
+      }, 260);
     }
 
     function handlePathaoClick(event) {
-      triggerLaunchParticleBurst(event, 'pathao');
+      triggerRocketLaunchAnimation(event, 'pathao');
       const dKey = document.getElementById('dropoffSelect').value;
       const pKey = document.getElementById('pickupSelect').value;
       const pLoc = getLocationForKey(pKey);
@@ -15149,13 +15366,19 @@
         ? `শুরুর স্থান: ${pName} | গন্তব্য: ${dName} | যানবাহন: ${getLocalizedText(selectedVehicle)} | BharaDekhi-এর Pathao আনুমানিক ভাড়া: ${fare}`
         : `Pickup: ${pName} | Destination: ${dName} | Ride: ${selectedVehicle} | BharaDekhi estimated Pathao fare: ${fare}`;
 
-      openRideAppAndCopy(
-        'pathao://',
-        rideDetails,
-        currentLanguage === 'bn'
-          ? `শুরুর স্থান, গন্তব্য ও ${getLocalizedText(selectedVehicle)}-এর আনুমানিক ভাড়া কপি করা হয়েছে। Pathao খোলা হচ্ছে...`
-          : `Copied pickup, destination, and ${selectedVehicle} estimate. Opening Pathao...`
-      );
+      const toastMsg = currentLanguage === 'bn'
+        ? `🚀 Pathao চালু হচ্ছে... গন্তব্য ও আনুমানিক ভাড়া (${fare}) তৈরি হচ্ছে!`
+        : `🚀 Launching Pathao... Destination & ${selectedVehicle} estimate (${fare}) ready!`;
+      showToast(toastMsg);
+
+      // Attempt clipboard copy gracefully in background
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(rideDetails).catch(() => {});
+      }
+
+      setTimeout(() => {
+        window.open('pathao://', '_blank');
+      }, 260);
     }
 
     function formatRideAppLocation(location, key) {
