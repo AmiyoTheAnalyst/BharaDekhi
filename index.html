@@ -8327,7 +8327,7 @@
             <p class="text-xs text-slate-500 mb-3">Opens Uber with pickup and drop-off pinned. Uber provides its own live quote; this estimate is for guidance.</p>
             <div class="bg-slate-50 rounded-xl p-3 mb-4">
               <span id="uberFareLabel" class="text-xs text-slate-500 block">Bike estimate</span>
-              <span id="uberFare" class="text-2xl font-black text-slate-900">৳145 - ৳175</span>
+              <span id="uberFare" class="text-2xl font-black text-slate-900">৳140 - ৳170</span>
             </div>
           </div>
           <button onclick="handleUberClick(event)" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-black text-white hover:bg-slate-800 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
@@ -8348,7 +8348,7 @@
             <p class="text-xs text-slate-500 mb-3">Opens the Pathao app and copies your destination.</p>
             <div class="bg-slate-50 rounded-xl p-3 mb-4">
               <span id="pathaoFareLabel" class="text-xs text-slate-500 block">Bike estimate</span>
-              <span id="pathaoFare" class="text-2xl font-black text-slate-900">৳140 - ৳170</span>
+              <span id="pathaoFare" class="text-2xl font-black text-slate-900">৳155 - ৳190</span>
             </div>
           </div>
           <button onclick="handlePathaoClick(event)" class="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-red-600 text-white hover:bg-red-700 active:scale-95 transition flex items-center justify-center gap-2 shadow-sm">
@@ -13877,14 +13877,42 @@
       const { base, perKm, perMin } = VEHICLE_RATES[vehicle];
       const standardFare = base + (currentDistanceKm * perKm) + (currentDurationMins * perMin);
       const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
-      const uberMin = Math.round(standardFare * minimumMultiplier);
-      const uberMax = Math.round(standardFare * maximumMultiplier);
+
+      const standardMin = Math.round(standardFare * minimumMultiplier);
+      const standardMax = Math.round(standardFare * maximumMultiplier);
+
+      // Dhaka Ride-Hailing Platform Calibrations:
+      // - Uber Saver (Uber Moto Saver / UberX Saver): Aggressively discounted (~3%-6% below standard benchmark).
+      // - Pathao (Bike / Car): Reflects fuel price adjustments + 5% platform fee/VAT, resulting in a higher realistic fare.
+      let uberFactorMin = 0.96;
+      let uberFactorMax = 0.97;
+      let pathaoFactorMin = 1.08;
+      let pathaoFactorMax = 1.12;
+
+      if (vehicle === 'Car') {
+        uberFactorMin = 0.94; // UberX Saver promo/discount tier
+        uberFactorMax = 0.96;
+        pathaoFactorMin = 1.08; // Pathao Car Lite base + platform commission
+        pathaoFactorMax = 1.14;
+      } else if (vehicle === 'CNG') {
+        uberFactorMin = 0.97;
+        uberFactorMax = 0.98;
+        pathaoFactorMin = 1.05;
+        pathaoFactorMax = 1.09;
+      }
+
+      const uberMin = Math.round(standardFare * minimumMultiplier * uberFactorMin);
+      const uberMax = Math.round(standardFare * maximumMultiplier * uberFactorMax);
+      const pathaoMin = Math.round(standardFare * minimumMultiplier * pathaoFactorMin);
+      const pathaoMax = Math.round(standardFare * maximumMultiplier * pathaoFactorMax);
 
       return {
-        minimum: uberMin,
-        maximum: uberMax,
-        pathaoMin: Math.round(uberMin * 0.97),
-        pathaoMax: Math.round(uberMax * 0.97)
+        minimum: standardMin,
+        maximum: standardMax,
+        uberMin,
+        uberMax,
+        pathaoMin,
+        pathaoMax
       };
     }
 
@@ -14603,7 +14631,7 @@
       const fare = getVehicleFareEstimate(selectedVehicle, isPeak);
       document.getElementById('uberFareLabel').innerText = getLocalizedText(`${selectedVehicle} estimate`);
       document.getElementById('pathaoFareLabel').innerText = getLocalizedText(`${selectedVehicle} estimate`);
-      document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.minimum)} - ${formatLocalizedFare(fare.maximum)}`;
+      document.getElementById('uberFare').innerText = `${formatLocalizedFare(fare.uberMin)} - ${formatLocalizedFare(fare.uberMax)}`;
       document.getElementById('pathaoFare').innerText = `${formatLocalizedFare(fare.pathaoMin)} - ${formatLocalizedFare(fare.pathaoMax)}`;
       renderMrtEstimate(isPeak);
       if (typeof updateMoreWaysToTravelCards === 'function') {
