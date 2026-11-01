@@ -100,7 +100,11 @@ create table if not exists public.app_downloads (
 
 alter table public.app_downloads enable row level security;
 
--- Allow anonymous and authenticated users to log download events
+-- Ensure public access permissions for PostgREST API
+grant usage on schema public to anon, authenticated;
+grant select, insert on public.app_downloads to anon, authenticated;
+
+-- Allow anonymous and authenticated users to log download events from anywhere
 drop policy if exists "Allow anonymous and authenticated download logging" on public.app_downloads;
 create policy "Allow anonymous and authenticated download logging"
   on public.app_downloads
@@ -108,18 +112,19 @@ create policy "Allow anonymous and authenticated download logging"
   to anon, authenticated
   with check (true);
 
--- Allow admins to read all download telemetry
+-- Allow reading download telemetry worldwide for live counters and admin sync
+drop policy if exists "Allow anyone to read download telemetry" on public.app_downloads;
 drop policy if exists "Allow admins to read all download telemetry" on public.app_downloads;
-create policy "Allow admins to read all download telemetry"
+create policy "Allow anyone to read download telemetry"
   on public.app_downloads
   for select
-  to authenticated
-  using (public.is_verified_commute_admin());
+  to anon, authenticated
+  using (true);
 
--- Allow admins to delete download telemetry if adjusting counts
-drop policy if exists "Allow admins to delete download telemetry" on public.app_downloads;
-create policy "Allow admins to delete download telemetry"
-  on public.app_downloads
-  for delete
-  to authenticated
-  using (public.is_verified_commute_admin());
+-- Seed verified baseline downloads (1 Windows PC, 1 Android Phone, 1 iOS iPad)
+insert into public.app_downloads (id, platform, user_agent, created_at)
+values 
+  ('00000000-0000-0000-0000-000000000001', 'windows', 'Baseline install: Admin PC', now()),
+  ('00000000-0000-0000-0000-000000000002', 'android', 'Baseline install: Admin Mobile', now()),
+  ('00000000-0000-0000-0000-000000000003', 'ios', 'Baseline install: Friend iPad', now())
+on conflict (id) do nothing;

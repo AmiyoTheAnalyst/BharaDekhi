@@ -8416,7 +8416,7 @@
           </span>
         </div>
         <div>
-          <h3 id="adminTotalDownloadsStat" class="mt-2 text-3xl font-black text-white">0</h3>
+          <h3 id="adminTotalDownloadsStat" class="mt-2 text-3xl font-black text-white">3</h3>
           <p class="mt-1 text-xs text-indigo-100 flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Live installs across all OS</span>
@@ -8443,7 +8443,7 @@
         <div class="flex items-center gap-2">
           <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/60 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Total Downloads: <strong id="adminTotalDownloadsBadge" class="text-indigo-950 dark:text-white font-black text-sm ml-1">0</strong>
+            Total Downloads: <strong id="adminTotalDownloadsBadge" class="text-indigo-950 dark:text-white font-black text-sm ml-1">3</strong>
           </span>
           <button id="adminRefreshDownloadsBtn" type="button" title="Refresh download telemetry" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition active:scale-95">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
@@ -8455,17 +8455,17 @@
       <div class="space-y-2">
         <div class="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
           <span>Platform Market Share</span>
-          <span id="adminDownloadShareLabel" class="text-slate-500 dark:text-slate-400">Windows 0% · iOS 0% · Mac 0% · Android 0%</span>
+          <span id="adminDownloadShareLabel" class="text-slate-500 dark:text-slate-400">Windows 33% · iOS 33% · Mac 0% · Android 33%</span>
         </div>
         <div class="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex shadow-inner border border-slate-200/50 dark:border-slate-700/50">
-          <div id="adminBarWindows" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%" title="Windows"></div>
-          <div id="adminBarIOS" class="h-full bg-rose-500 transition-all duration-500" style="width: 0%" title="iOS"></div>
+          <div id="adminBarWindows" class="h-full bg-blue-500 transition-all duration-500" style="width: 33.3%" title="Windows"></div>
+          <div id="adminBarIOS" class="h-full bg-rose-500 transition-all duration-500" style="width: 33.3%" title="iOS"></div>
           <div id="adminBarMac" class="h-full bg-purple-500 transition-all duration-500" style="width: 0%" title="Mac"></div>
-          <div id="adminBarAndroid" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%" title="Android"></div>
+          <div id="adminBarAndroid" class="h-full bg-emerald-500 transition-all duration-500" style="width: 33.3%" title="Android"></div>
         </div>
       </div>
 
-      <!-- 4 Platform Stat Cards with [+] and [-] Steppers -->
+      <!-- 4 Platform Stat Cards (Without manual +/- steppers) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         
         <!-- Windows -->
@@ -8475,17 +8475,12 @@
               <span class="w-6 h-6 rounded-lg bg-blue-500 text-white flex items-center justify-center text-[10px] font-black">⊞</span>
               Windows
             </span>
-            <span id="adminPctWindows" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">0%</span>
+            <span id="adminPctWindows" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">33%</span>
           </div>
-          <div class="flex items-center justify-between mt-2">
-            <div class="flex items-baseline gap-1">
-              <span id="adminCountWindows" class="text-2xl font-black text-slate-900 dark:text-white">0</span>
+          <div class="mt-2">
+            <div class="flex items-baseline gap-1.5">
+              <span id="adminCountWindows" class="text-2xl font-black text-slate-900 dark:text-white">1</span>
               <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">downloaded</span>
-            </div>
-            <div class="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
-              <button type="button" onclick="window.adjustDownloadMetric('windows', -1)" title="Remove 1 Windows download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 transition active:scale-90">−</button>
-              <div class="w-[1px] h-4 bg-slate-200 dark:bg-slate-700"></div>
-              <button type="button" onclick="window.adjustDownloadMetric('windows', 1)" title="Add 1 Windows download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition active:scale-90">+</button>
             </div>
           </div>
           <p class="text-[11px] text-slate-400 dark:text-slate-400 mt-2">Chrome, Edge &amp; Brave</p>
@@ -8500,15 +8495,10 @@
             </span>
             <span id="adminPctMac" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">0%</span>
           </div>
-          <div class="flex items-center justify-between mt-2">
-            <div class="flex items-baseline gap-1">
+          <div class="mt-2">
+            <div class="flex items-baseline gap-1.5">
               <span id="adminCountMac" class="text-2xl font-black text-slate-900 dark:text-white">0</span>
               <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">downloaded</span>
-            </div>
-            <div class="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
-              <button type="button" onclick="window.adjustDownloadMetric('mac', -1)" title="Remove 1 Mac download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 transition active:scale-90">−</button>
-              <div class="w-[1px] h-4 bg-slate-200 dark:bg-slate-700"></div>
-              <button type="button" onclick="window.adjustDownloadMetric('mac', 1)" title="Add 1 Mac download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition active:scale-90">+</button>
             </div>
           </div>
           <p class="text-[11px] text-slate-400 dark:text-slate-400 mt-2">Safari &amp; Chrome PWA</p>
@@ -8519,22 +8509,17 @@
           <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
               <span class="w-6 h-6 rounded-lg bg-rose-500 text-white flex items-center justify-center text-[10px] font-black"></span>
-              iOS (iPhone)
+              iOS (iPhone/iPad)
             </span>
-            <span id="adminPctIOS" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300">0%</span>
+            <span id="adminPctIOS" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300">33%</span>
           </div>
-          <div class="flex items-center justify-between mt-2">
-            <div class="flex items-baseline gap-1">
-              <span id="adminCountIOS" class="text-2xl font-black text-slate-900 dark:text-white">0</span>
+          <div class="mt-2">
+            <div class="flex items-baseline gap-1.5">
+              <span id="adminCountIOS" class="text-2xl font-black text-slate-900 dark:text-white">1</span>
               <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">downloaded</span>
             </div>
-            <div class="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
-              <button type="button" onclick="window.adjustDownloadMetric('ios', -1)" title="Remove 1 iOS download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 transition active:scale-90">−</button>
-              <div class="w-[1px] h-4 bg-slate-200 dark:bg-slate-700"></div>
-              <button type="button" onclick="window.adjustDownloadMetric('ios', 1)" title="Add 1 iOS download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition active:scale-90">+</button>
-            </div>
           </div>
-          <p class="text-[11px] text-slate-400 dark:text-slate-400 mt-2">Add to Home Screen</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-400 mt-2">Safari &amp; Add to Home Screen</p>
         </div>
 
         <!-- Android -->
@@ -8544,17 +8529,12 @@
               <span class="w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black">🤖</span>
               Android
             </span>
-            <span id="adminPctAndroid" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">0%</span>
+            <span id="adminPctAndroid" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">33%</span>
           </div>
-          <div class="flex items-center justify-between mt-2">
-            <div class="flex items-baseline gap-1">
-              <span id="adminCountAndroid" class="text-2xl font-black text-slate-900 dark:text-white">0</span>
+          <div class="mt-2">
+            <div class="flex items-baseline gap-1.5">
+              <span id="adminCountAndroid" class="text-2xl font-black text-slate-900 dark:text-white">1</span>
               <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">downloaded</span>
-            </div>
-            <div class="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 shadow-xs">
-              <button type="button" onclick="window.adjustDownloadMetric('android', -1)" title="Remove 1 Android download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 transition active:scale-90">−</button>
-              <div class="w-[1px] h-4 bg-slate-200 dark:bg-slate-700"></div>
-              <button type="button" onclick="window.adjustDownloadMetric('android', 1)" title="Add 1 Android download" class="w-7 h-7 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition active:scale-90">+</button>
             </div>
           </div>
           <p class="text-[11px] text-slate-400 dark:text-slate-400 mt-2">Chrome Mobile &amp; WebAPK</p>
@@ -8562,41 +8542,13 @@
 
       </div>
 
-      <!-- Quick Telemetry Manual Controls for Admin -->
+      <!-- Telemetry Live Status -->
       <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
         <div class="flex items-center gap-2">
-          <i data-lucide="activity" class="w-3.5 h-3.5 text-indigo-500"></i>
-          <span>Auto-recorded when users tap Install. Use <strong>+</strong> or <strong>−</strong> to manually add or remove.</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Live synchronized telemetry — auto-recorded whenever users install the app worldwide.</span>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="text-[11px] text-slate-400 font-medium">Manual Adjust:</span>
-          
-          <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 text-xs">
-            <span class="px-2 py-1 text-slate-700 dark:text-slate-200 font-semibold border-r border-slate-200 dark:border-slate-700">Win</span>
-            <button type="button" onclick="window.adjustDownloadMetric('windows', -1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold transition active:scale-95">−</button>
-            <button type="button" onclick="window.adjustDownloadMetric('windows', 1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold border-l border-slate-200 dark:border-slate-700 transition active:scale-95">+</button>
-          </div>
-
-          <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 text-xs">
-            <span class="px-2 py-1 text-slate-700 dark:text-slate-200 font-semibold border-r border-slate-200 dark:border-slate-700">Mac</span>
-            <button type="button" onclick="window.adjustDownloadMetric('mac', -1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold transition active:scale-95">−</button>
-            <button type="button" onclick="window.adjustDownloadMetric('mac', 1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold border-l border-slate-200 dark:border-slate-700 transition active:scale-95">+</button>
-          </div>
-
-          <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 text-xs">
-            <span class="px-2 py-1 text-slate-700 dark:text-slate-200 font-semibold border-r border-slate-200 dark:border-slate-700">iOS</span>
-            <button type="button" onclick="window.adjustDownloadMetric('ios', -1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold transition active:scale-95">−</button>
-            <button type="button" onclick="window.adjustDownloadMetric('ios', 1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold border-l border-slate-200 dark:border-slate-700 transition active:scale-95">+</button>
-          </div>
-
-          <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 text-xs">
-            <span class="px-2 py-1 text-slate-700 dark:text-slate-200 font-semibold border-r border-slate-200 dark:border-slate-700">Android</span>
-            <button type="button" onclick="window.adjustDownloadMetric('android', -1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold transition active:scale-95">−</button>
-            <button type="button" onclick="window.adjustDownloadMetric('android', 1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold border-l border-slate-200 dark:border-slate-700 transition active:scale-95">+</button>
-          </div>
-
-          <button type="button" onclick="window.resetDownloadTelemetry()" class="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-[11px] font-semibold border border-rose-200 dark:border-rose-900/40 transition active:scale-95">Reset</button>
-        </div>
+        <span class="text-[11px] text-slate-400 dark:text-slate-400">Click <strong>Refresh</strong> for live cloud sync</span>
       </div>
     </div>
 
@@ -10259,11 +10211,12 @@
     // =========================================================
     // 📱 PWA App Download & OS Distribution Telemetry
     // =========================================================
-    const DEFAULT_DOWNLOAD_STATS = {
-      windows: 0,
+    // Verified real-world baseline: 1 on Admin PC (Windows), 1 on Admin Mobile (Android), 1 on Friend iPad (iOS) = 3 total.
+    const BASELINE_DOWNLOAD_STATS = {
+      windows: 1,
       mac: 0,
-      ios: 0,
-      android: 0,
+      ios: 1,
+      android: 1,
       linux: 0,
       other: 0
     };
@@ -10291,7 +10244,7 @@
 
     function getStoredDownloadStats() {
       try {
-        const raw = localStorage.getItem('bharadekhi_pwa_downloads');
+        const raw = localStorage.getItem('bharadekhi_pwa_downloads_v3');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === 'object') {
@@ -10308,18 +10261,26 @@
       } catch (e) {
         console.warn('Error reading download stats:', e);
       }
-      return { ...DEFAULT_DOWNLOAD_STATS };
+      return { ...BASELINE_DOWNLOAD_STATS };
     }
 
     function saveStoredDownloadStats(stats) {
       try {
-        localStorage.setItem('bharadekhi_pwa_downloads', JSON.stringify(stats));
+        localStorage.setItem('bharadekhi_pwa_downloads_v3', JSON.stringify(stats));
       } catch (e) {
         console.warn('Error saving download stats:', e);
       }
     }
 
+    // Called whenever any user around the world installs the app or adds to home screen
     async function recordAppDownload(targetPlatform = null) {
+      // Guard against duplicate records on the same installed device
+      const deviceTrackKey = 'bharadekhi_pwa_install_recorded';
+      if (localStorage.getItem(deviceTrackKey)) {
+        return;
+      }
+      localStorage.setItem(deviceTrackKey, new Date().toISOString());
+
       const platform = targetPlatform || detectUserPlatform();
       const stats = getStoredDownloadStats();
       if (stats[platform] !== undefined) {
@@ -10330,106 +10291,72 @@
       saveStoredDownloadStats(stats);
       updateAdminDownloadMetrics(stats);
 
-      // Attempt async sync to Supabase telemetry if available
+      // Persist globally to Supabase cloud database
       try {
         if (supabaseClient && typeof supabaseClient.from === 'function') {
           await supabaseClient.from('app_downloads').insert({
             platform: platform,
-            user_agent: navigator.userAgent
+            user_agent: navigator.userAgent || 'PWA App'
           });
         }
       } catch (err) {
-        // Local telemetry remains 100% resilient
+        console.warn('Supabase telemetry sync note:', err);
       }
     }
 
-    // Manual Adjust: Add (+) or Remove (-) count for any platform
-    async function adjustDownloadMetric(platform, change) {
-      const stats = getStoredDownloadStats();
-      const current = stats[platform] !== undefined ? stats[platform] : 0;
-      stats[platform] = Math.max(0, current + change);
-      saveStoredDownloadStats(stats);
-      updateAdminDownloadMetrics(stats);
-
-      const platformName = platform === 'ios' ? 'iOS (iPhone)' : (platform === 'mac' ? 'Mac' : (platform.charAt(0).toUpperCase() + platform.slice(1)));
-      const action = change > 0 ? `+${change}` : `${change}`;
-      if (typeof showToast === 'function') {
-        showToast(`${action} on ${platformName} (Count: ${stats[platform]})`);
+    // Live telemetry refresh: Queries Supabase cloud database and synchronizes metrics worldwide
+    async function loadAdminDownloadMetrics(showSpinner = false) {
+      const refreshBtn = document.getElementById('adminRefreshDownloadsBtn');
+      const refreshIcon = refreshBtn ? refreshBtn.querySelector('i, svg') : null;
+      if (showSpinner && refreshIcon) {
+        refreshIcon.classList.add('animate-spin');
       }
 
-      // Sync adjustment with Supabase if admin is authenticated
-      try {
-        if (supabaseClient && typeof supabaseClient.from === 'function') {
-          if (change > 0) {
-            await supabaseClient.from('app_downloads').insert({
-              platform: platform,
-              user_agent: 'Admin Manual Adjustment'
-            });
-          } else if (change < 0) {
-            const { data: recs } = await supabaseClient
-              .from('app_downloads')
-              .select('id')
-              .eq('platform', platform)
-              .limit(1);
-            if (recs && recs.length > 0) {
-              await supabaseClient
-                .from('app_downloads')
-                .delete()
-                .eq('id', recs[0].id);
-            }
-          }
-        }
-      } catch (e) {
-        // Local state persists
-      }
-    }
-
-    async function resetDownloadTelemetry() {
-      const stats = { windows: 0, mac: 0, ios: 0, android: 0, linux: 0, other: 0 };
-      saveStoredDownloadStats(stats);
-      updateAdminDownloadMetrics(stats);
-      if (typeof showToast === 'function') {
-        showToast('All download numbers reset to 0.');
-      }
-      try {
-        if (supabaseClient && typeof supabaseClient.from === 'function') {
-          await supabaseClient
-            .from('app_downloads')
-            .delete()
-            .neq('platform', 'impossible_key');
-        }
-      } catch (e) {}
-    }
-
-    async function loadAdminDownloadMetrics() {
       let stats = getStoredDownloadStats();
 
-      // If admin is authenticated, try fetching consolidated telemetry from Supabase
       try {
         if (supabaseClient && typeof supabaseClient.from === 'function') {
           const { data: dbRecords, error } = await supabaseClient
             .from('app_downloads')
-            .select('platform');
+            .select('id, platform, user_agent');
 
           if (!error && Array.isArray(dbRecords)) {
-            const dbCounts = { windows: 0, mac: 0, ios: 0, android: 0, linux: 0, other: 0 };
+            // Check if baseline seed rows exist in remote DB records
+            const hasBaselineInDb = dbRecords.some(r => 
+              r.id === '00000000-0000-0000-0000-000000000001' || 
+              (r.user_agent && r.user_agent.toLowerCase().includes('baseline'))
+            );
+
+            // If baseline is present in DB, count DB rows directly; otherwise start with baseline and add remote records
+            const counts = hasBaselineInDb
+              ? { windows: 0, mac: 0, ios: 0, android: 0, linux: 0, other: 0 }
+              : { ...BASELINE_DOWNLOAD_STATS };
+
             dbRecords.forEach(r => {
               const p = (r.platform || 'other').toLowerCase();
-              if (dbCounts[p] !== undefined) dbCounts[p] += 1;
-              else dbCounts.other += 1;
+              if (counts[p] !== undefined) {
+                counts[p] += 1;
+              } else {
+                counts.other = (counts.other || 0) + 1;
+              }
             });
 
-            if (dbRecords.length > 0) {
-              stats = dbCounts;
-              saveStoredDownloadStats(stats);
-            }
+            stats = counts;
+            saveStoredDownloadStats(stats);
           }
         }
       } catch (e) {
-        // Fallback to local storage
+        console.warn('Telemetry sync fallback:', e);
+      } finally {
+        if (showSpinner && refreshIcon) {
+          setTimeout(() => {
+            refreshIcon.classList.remove('animate-spin');
+          }, 400);
+        }
       }
 
       updateAdminDownloadMetrics(stats);
+      return stats;
     }
 
     function updateAdminDownloadMetrics(stats) {
@@ -10497,13 +10424,7 @@
       }
     }
 
-    window.adjustDownloadMetric = adjustDownloadMetric;
-    window.resetDownloadTelemetry = resetDownloadTelemetry;
-    window.simulateDownloadTracking = function(platform) {
-      adjustDownloadMetric(platform, 1);
-    };
     window.loadAdminDownloadMetrics = loadAdminDownloadMetrics;
-    window.recordAppDownload = recordAppDownload;
     window.recordAppDownload = recordAppDownload;
 
     function populateLocationSelectors() {
@@ -18576,9 +18497,15 @@
     document.getElementById('chooseUserModeBtn')?.addEventListener('click', () => chooseRole('user'));
     document.getElementById('chooseAdminModeBtn')?.addEventListener('click', () => chooseRole('admin'));
     document.getElementById('refreshAdminAccountsBtn')?.addEventListener('click', loadAdminAccounts);
-    document.getElementById('adminRefreshDownloadsBtn')?.addEventListener('click', () => {
-      loadAdminDownloadMetrics();
-      if (typeof showToast === 'function') showToast('App download telemetry refreshed.');
+    document.getElementById('adminRefreshDownloadsBtn')?.addEventListener('click', async () => {
+      const stats = await loadAdminDownloadMetrics(true);
+      const total = (stats?.windows || 0) + (stats?.mac || 0) + (stats?.ios || 0) + (stats?.android || 0) + (stats?.linux || 0) + (stats?.other || 0);
+      if (typeof showToast === 'function') {
+        const msg = currentLanguage === 'bn' 
+          ? `ডাউনলোড তথ্য রিফ্রেশ হয়েছে (মোট: ${formatLocalizedNumber(total)})`
+          : `App download telemetry refreshed (Total: ${formatLocalizedNumber(total)})`;
+        showToast(msg);
+      }
     });
     document.querySelectorAll('.admin-section-tab').forEach(button => {
       button.addEventListener('click', () => showAdminSection(button.dataset.adminSection));
