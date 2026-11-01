@@ -7,6 +7,7 @@
 <p align="center">
   <a href="https://bharadekhi.vercel.app/"><img src="https://img.shields.io/badge/Production-Live%20on%20Vercel-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Deployment"></a>
   <a href="https://bharadekhi.vercel.app/#/home"><img src="https://img.shields.io/badge/3D%20Diorama-WebGL%20%2F%20Three.js-10b981?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js"></a>
+  <a href="https://bharadekhi.vercel.app/"><img src="https://img.shields.io/badge/PWA-Installable%20App-7c3aed?style=for-the-badge&logo=pwa&logoColor=white" alt="Installable PWA"></a>
   <a href="https://bharadekhi.vercel.app/#/home"><img src="https://img.shields.io/badge/Audio-Procedural%20Web%20Audio%20API-f59e0b?style=for-the-badge&logo=web-audio-api&logoColor=white" alt="Web Audio API"></a>
   <a href="https://leafletjs.com/"><img src="https://img.shields.io/badge/Geospatial-Leaflet%20%26%20OSRM-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet"></a>
   <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/UI-Tailwind%20Glassmorphism-38bdf8?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
@@ -52,6 +53,7 @@ graph LR
     
     I --> B
     L[🎓 Student 50% Concession & 🚇 MRT Pass Discounter] --> B
+    M[📱 Installable PWA & Offline Service Worker] --> A
 ```
 
 ---
@@ -153,7 +155,7 @@ BharaDekhi bridges route planning with seamless real-world execution by providin
   * Dispatches through Pathao's custom URL scheme (`pathao://`) to trigger the native Pathao mobile application.
   * **Automatic Clipboard Synchronization:** Seamlessly copies an optimized, human-readable route and fare payload to the commuter's system clipboard:
     ```text
-    Pickup: Farmgate (23.7561, 90.3872) | Destination: Gulshan 2 | Ride: Bike | BharaDekhi estimated Pathao fare: ৳140 - ৳170
+    Pickup: Farmgate (23.7561, 90.3872) | Destination: Gulshan 2 | Ride: Bike | BharaDekhi estimated Pathao fare: ৳155 - ৳190
     ```
   * Commuters can paste directly into the destination field inside Pathao with zero friction.
 
@@ -163,8 +165,29 @@ BharaDekhi bridges route planning with seamless real-world execution by providin
     * **Pathao Dispatch:** Signature Dhaka crimson, amber, and flame orange particle burst (`#dc2626`, `#ef4444`, `#f97316`, `#fbbf24`).
   * Features a micro-haptic button compression animation (`btn-haptic-pop`) and instant toast feedback.
 
-* **📊 Live Price Guidance & Comparative Baseline:**
-  * Computes transparent benchmark fares using OSRM road geometry, enabling commuters to assess official external quotes against standard public transit before hailing.
+* **📊 Real-World App Pricing Calibration (Uber Saver vs. Pathao App):**
+  * Computes transparent benchmark fares using OSRM road geometry, calibrated against ground-truth Dhaka ride-sharing pricing dynamics:
+    * **Uber Saver / Moto Calibration:** Accurately accounts for Uber's aggressive Saver tiers (`0.94x – 0.97x`), preventing overestimation and reflecting true budget-friendly Uber quotes.
+    * **Pathao App Ground Calibration:** Reflects Pathao's fuel-adjusted rates and mandatory **5% platform service charge / VAT** (`1.08x – 1.14x`), ensuring commuters see realistic higher Pathao quotes instead of unexpected checkout surges.
+
+---
+
+### 6. 📱 Installable Progressive Web App (PWA) & Mobile App Experience
+
+BharaDekhi delivers a zero-friction, native app-like experience directly through the browser without requiring any App Store or Google Play downloads:
+
+* **📲 One-Tap Device Installation:**
+  * **Android & Desktop Chromium (Chrome, Edge, Brave):** Automated `beforeinstallprompt` interception powers a discrete, floating install prompt banner and header action button for instant home screen installation.
+  * **iOS & iPadOS Safari:** Custom interactive modal guide (`pwaIosModal`) providing visual, step-by-step instructions for Apple's *"Share ➔ Add to Home Screen"* flow with automatic non-Safari browser detection.
+* **⚡ Standalone Display Mode & Mobile Shell:**
+  * Configured via [`manifest.json`](./manifest.json) with `display: "standalone"`, hiding URL navigation bars and browser chrome to maximize screen real estate.
+  * Custom dark status bar (`theme_color: "#0b0f19"`), portrait orientation lock, and adaptive maskable app icons (`icon-192.png`, `icon-512.png`).
+* **🚀 Offline-Resilient Service Worker (`sw.js`):**
+  * Lightweight custom service worker pre-caches core static assets (HTML, SVG brand marks, transit route JSON, high-resolution icons) for instantaneous boot speeds.
+  * Employs a network-first strategy for dynamic transit data and Open-Meteo satellite weather APIs with graceful offline cache fallbacks.
+* **🎬 Interactive Splash Screen & Haptic Brand Animation:**
+  * Native-like app launch splash screen with smooth fade-and-scale dismissal (`dismissAppLaunchSplash`) upon runtime readiness.
+  * Interactive micro-bounce animations on brand tap and haptic feedback across all transit action triggers.
 
 ---
 
@@ -180,6 +203,7 @@ BharaDekhi bridges route planning with seamless real-world execution by providin
 | **Mapping & Geospatial** | [Leaflet.js](https://leafletjs.com/) (v1.9.4), CartoDB Tiles | Themed dark/light tile layers, SVG vehicle pins, animated route polylines |
 | **Routing Engines** | [Project OSRM](https://project-osrm.org/), Haversine Math | Real Dhaka road paths, distance matrix, zero-downtime spherical fallback |
 | **External APIs** | [Open-Meteo API](https://open-meteo.com/) | Live central Dhaka weather codes (`weathercode`), precipitation rates |
+| **PWA & Mobile Shell** | Web App Manifest, Service Worker (`sw.js`), Cache API | Zero-friction installation, standalone fullscreen UI, offline asset caching |
 | **Database & Auth** | [Supabase](https://supabase.com/) (`@supabase/supabase-js` v2), PostgreSQL | User authentication, session persistence, Row-Level Security (RLS) |
 | **CI/CD & Hosting** | [Vercel](https://vercel.com/) | Automated Git-driven edge deployments |
 
@@ -235,6 +259,10 @@ commute-dhaka-web/
 ├── about.html                        # Developer portfolio & engineering skills matrix
 ├── faq.html                          # Interactive commuter help center & FAQ accordion
 ├── favicon.png                       # High-resolution application favicon
+├── icon-192.png                      # PWA Android/Chromium application icon (192x192)
+├── icon-512.png                      # PWA high-resolution splash & maskable icon (512x512)
+├── manifest.json                     # Progressive Web App manifest configuration
+├── sw.js                             # Offline caching service worker runtime
 ├── robots.txt                        # Search engine optimization indexing rules
 ├── sitemap.xml                       # XML Sitemap for search indexing
 └── README.md                         # Project documentation
