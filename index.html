@@ -11977,12 +11977,25 @@
         return DHAKA_AREA_NAMES[locationKey];
       }
       if (locationObj && Number.isFinite(locationObj.lat) && Number.isFinite(locationObj.lng)) {
+        if (Math.abs(locationObj.lat - 23.8103) < 0.0005 && Math.abs(locationObj.lng - 90.4125) < 0.0005) {
+          return { en: 'Dhaka', bn: 'ঢাকা' };
+        }
+        let bestKey = null;
+        let bestDist = Infinity;
         for (const [k, loc] of Object.entries(LOCATIONS)) {
           const dLat = Math.abs(loc.lat - locationObj.lat);
           const dLng = Math.abs(loc.lng - locationObj.lng);
           if (dLat < 0.006 && dLng < 0.006) {
             return DHAKA_AREA_NAMES[k] || { en: loc.name, bn: loc.name };
           }
+          const dist = Math.hypot(dLat, dLng);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestKey = k;
+          }
+        }
+        if (bestKey && bestDist < 0.035) {
+          return DHAKA_AREA_NAMES[bestKey] || { en: LOCATIONS[bestKey].name, bn: LOCATIONS[bestKey].name };
         }
       }
       if (locationObj && locationObj.name) {
@@ -12112,18 +12125,18 @@
     }
 
     let weatherFetchSeq = 0;
-    async function fetchDhakaWeather(pickupLoc, dropoffLoc) {
+
+    async function queryWeatherAPI(lat, lon, dropoffLoc) {
       const thisSeq = ++weatherFetchSeq;
-      const pKey = document.getElementById('pickupSelect')?.value;
-      const targetLoc = pickupLoc || (pKey ? getLocationForKey(pKey) : null) || { name: 'Dhaka', lat: 23.8103, lng: 90.4125 };
-      const area = resolveDhakaAreaName(targetLoc, pKey);
+      const targetLoc = { lat, lng: lon };
+      const area = resolveDhakaAreaName(targetLoc);
 
       dhakaActiveWeatherArea = area.en;
       dhakaActiveWeatherAreaBn = area.bn;
       dhakaWeatherStatus = 'checking';
       renderDhakaWeatherStatus();
 
-      const cacheKey = `${targetLoc.lat.toFixed(3)},${targetLoc.lng.toFixed(3)}`;
+      const cacheKey = `${lat.toFixed(3)},${lon.toFixed(3)}`;
       const now = Date.now();
       const cached = dhakaWeatherCache.get(cacheKey);
 
@@ -12137,8 +12150,8 @@
         return;
       }
 
-      const primaryUrl = `https://api.open-meteo.com/v1/forecast?latitude=${targetLoc.lat.toFixed(4)}&longitude=${targetLoc.lng.toFixed(4)}&models=icon_seamless&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&timezone=Asia%2FDhaka`;
-      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${targetLoc.lat.toFixed(4)}&longitude=${targetLoc.lng.toFixed(4)}&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&current_weather=true&timezone=Asia%2FDhaka`;
+      const primaryUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&models=icon_seamless&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&timezone=Asia%2FDhaka`;
+      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover&current_weather=true&timezone=Asia%2FDhaka`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -12196,6 +12209,40 @@
         clearTimeout(timeoutId);
       }
     }
+
+    async function fetchLiveWeather(dropoffLoc) {
+      // Default fallback coordinates (Dhaka, Bangladesh)
+      let lat = 23.8103;
+      let lon = 90.4125;
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
+            await queryWeatherAPI(lat, lon, dropoffLoc);
+          },
+          async (error) => {
+            console.warn('Geolocation permission denied or unavailable, using default Dhaka coordinates:', error);
+            await queryWeatherAPI(lat, lon, dropoffLoc);
+          },
+          { timeout: 10000, maximumAge: 60000 }
+        );
+      } else {
+        await queryWeatherAPI(lat, lon, dropoffLoc);
+      }
+    }
+
+    async function fetchDhakaWeather(pickupLoc, dropoffLoc) {
+      if (typeof rainFareMode === 'undefined' || rainFareMode === 'auto') {
+        return fetchLiveWeather(dropoffLoc);
+      }
+      const pKey = document.getElementById('pickupSelect')?.value;
+      const targetLoc = pickupLoc || (pKey ? getLocationForKey(pKey) : null) || { name: 'Dhaka', lat: 23.8103, lng: 90.4125 };
+      return queryWeatherAPI(targetLoc.lat, targetLoc.lng, dropoffLoc);
+    }
+    window.queryWeatherAPI = queryWeatherAPI;
+    window.fetchLiveWeather = fetchLiveWeather;
     window.fetchDhakaWeather = fetchDhakaWeather;
     window.refreshDhakaWeather = fetchDhakaWeather;
 
