@@ -520,26 +520,32 @@
     }
 
     /* =========================================================
-       Mirpur 10 Crossroads: Standing 3D Miniature City & Drone View
+       Mirpur 10 Crossroads: Cinematic 3D Miniature City & Drone View
        ========================================================= */
-    #dhakaCrossroadsContainer {
+    #dhakaCrossroadsContainer,
+    .diorama-container {
       perspective: 1200px;
       perspective-origin: 50% 55%;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), background-color 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
     #dhakaCrossroadsStageWrapper {
       transform-origin: 50% 55%;
       transform-style: preserve-3d;
-      transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: transform;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      will-change: transform, opacity;
     }
 
-    /* 2D Flat Mode vs. 3D Drone Miniature City Switching */
+    /* 2D Flat Mode vs. 3D Drone Miniature City Switching with Cinematic Fluidity */
     #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroadsStageWrapper {
-      display: flex !important;
-      transform: none !important;
+      opacity: 1;
+      pointer-events: auto;
+      transform: none;
     }
-    #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroads3dCanvas {
-      display: none !important;
+    #dhakaCrossroadsContainer:not(.is-3d-drone-mode) #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer:not(.is-3d-drone-mode) .canvas-3d {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96) translateY(8px);
     }
     #dhakaCrossroadsContainer:not(.is-3d-drone-mode) .cr-3d-only {
       display: none !important;
@@ -548,12 +554,17 @@
       display: block !important;
     }
 
-    /* 3D Drone Mode: Activates Real WebGL 3D Miniature City Diorama */
+    /* 3D Drone Mode: Activates Real WebGL 3D Miniature City Diorama with Cinematic Presence */
     #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
-      display: none !important;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.04) translateY(-12px);
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroads3dCanvas {
-      display: block !important;
+    #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer.is-3d-drone-mode .canvas-3d {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
     }
     #dhakaCrossroadsContainer.is-3d-drone-mode .cr-2d-only {
       display: none !important;
@@ -561,13 +572,24 @@
     #dhakaCrossroadsContainer.is-3d-drone-mode .cr-3d-only {
       display: block !important;
     }
+
+    #dhakaCrossroads3dCanvas,
+    .canvas-3d {
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity, filter;
+      filter: contrast(1.08) saturate(1.15) brightness(1.02);
+    }
+
     @media (max-width: 767.98px) {
-      #dhakaCrossroadsContainer {
+      #dhakaCrossroadsContainer,
+      .diorama-container {
         perspective: 1000px;
         perspective-origin: 50% 52%;
+        transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), background-color 1s cubic-bezier(0.16, 1, 0.3, 1);
       }
       #dhakaCrossroadsStageWrapper {
         transform-origin: 50% 52%;
+        transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
       }
       #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
         transform: perspective(1000px) rotateX(20deg) rotateZ(-2deg) scale3d(0.92, 0.92, 0.92);
@@ -586,10 +608,10 @@
     #emergencyAmbulanceVehicle,
     #dhakaPedestriansLayer > g,
     #crossroadsSignals {
-      transition: filter 0.65s ease, opacity 0.65s ease;
+      transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s ease;
     }
 
-    /* Multistory Building Height & Dimensionality: Two-tier directional cast shadows + contact ambient occlusion */
+    /* Multistory Building Height & Dimensionality: Directional cast shadows + contact ambient occlusion */
     #dhakaCrossroadsContainer.is-3d-drone-mode #nwBuildingsGroup,
     #dhakaCrossroadsContainer.is-3d-drone-mode #neBuildingsGroup,
     #dhakaCrossroadsContainer.is-3d-drone-mode #swBuildingsGroup,
@@ -643,17 +665,119 @@
       filter: blur(1px);
     }
 
-    /* Volumetric Warm Streetlight Road Surface Illumination */
+    /* Volumetric Warm Streetlight Road Surface Illumination & Soft Bloom */
     #dhakaCrossroadsContainer.is-3d-drone-mode ellipse[fill="url(#streetlampPoolGrad)"] {
       opacity: 0.72;
-      filter: url(#crStreetlampGlow) drop-shadow(0 0 16px rgba(254, 240, 138, 0.3));
+      filter: url(#crStreetlampGlow) drop-shadow(0 0 16px rgba(254, 240, 138, 0.35));
+    }
+
+    /* Cinematic Atmospheric Lighting Bloom on Street Lamps, Headlights, Building Windows & Porch Lights */
+    .cr-headlight-bulb,
+    .cr-streetlamp-head,
+    .building-window,
+    .window-glow-pulse,
+    .porch-light,
+    #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-bulb,
+    #dhakaCrossroadsContainer.is-3d-drone-mode .building-window {
+      filter: drop-shadow(0 0 10px rgba(255, 200, 100, 0.6)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+    }
+
+    /* Cinematic Weather-State Ambient Contrast & Shadow Facade Gradients */
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] .canvas-3d,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #dhakaCrossroadsSvg {
+      filter: contrast(1.22) saturate(0.88) brightness(0.92);
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #surroundingBuildingsLayer polygon,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #nwBuildingsGroup,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #neBuildingsGroup,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #swBuildingsGroup,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #seBuildingsGroup {
+      filter: drop-shadow(-14px 26px 12px rgba(0, 0, 0, 0.94))
+              drop-shadow(-32px 54px 32px rgba(0, 0, 0, 0.88));
+    }
+
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] .canvas-3d,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #dhakaCrossroadsSvg {
+      filter: contrast(1.18) saturate(1.25) brightness(1.04);
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #surroundingBuildingsLayer polygon,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #nwBuildingsGroup,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #neBuildingsGroup,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #swBuildingsGroup,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #seBuildingsGroup {
+      filter: drop-shadow(-12px 22px 10px rgba(0, 0, 0, 0.95))
+              drop-shadow(-26px 46px 28px rgba(2, 6, 23, 0.92));
+    }
+
+    #dhakaCrossroadsContainer[data-crossroads-weather="rain"] #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer[data-crossroads-weather="rain"] .canvas-3d,
+    #dhakaCrossroadsContainer[data-crossroads-weather="rain"] #dhakaCrossroadsSvg {
+      filter: contrast(1.16) saturate(1.10) brightness(0.95);
+    }
+
+    #dhakaCrossroadsContainer[data-crossroads-weather*="sunset"] #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="sunset"] .canvas-3d,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="sunset"] #dhakaCrossroadsSvg {
+      filter: contrast(1.12) saturate(1.30) brightness(1.05);
+    }
+
+    #dhakaCrossroadsContainer[data-crossroads-weather*="sunrise"] #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="sunrise"] .canvas-3d,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="sunrise"] #dhakaCrossroadsSvg {
+      filter: contrast(1.10) saturate(1.22) brightness(1.03);
+    }
+
+    #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] #dhakaCrossroads3dCanvas,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] .canvas-3d,
+    #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] #dhakaCrossroadsSvg {
+      filter: contrast(1.06) saturate(0.95) brightness(0.98);
+    }
+
+    /* Cinematic Depth-of-Field & Peripheral Vignette Frame */
+    .cinematic-vignette-frame {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 70px 20px rgba(2, 6, 23, 0.65),
+                  inset 0 0 140px 60px rgba(2, 6, 23, 0.45);
+      z-index: 21;
+    }
+    .cinematic-dof-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 18%;
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.75) 0%, rgba(2, 6, 23, 0.3) 60%, transparent 100%);
+      backdrop-filter: blur(2.5px);
+      -webkit-backdrop-filter: blur(2.5px);
+      mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
+      pointer-events: none;
+      z-index: 22;
+    }
+    .cinematic-dof-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 12%;
+      background: linear-gradient(to top, rgba(2, 6, 23, 0.6) 0%, transparent 100%);
+      backdrop-filter: blur(1.5px);
+      -webkit-backdrop-filter: blur(1.5px);
+      mask-image: linear-gradient(to top, black 25%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to top, black 25%, transparent 100%);
+      pointer-events: none;
+      z-index: 22;
     }
 
     /* Cinematic Drone Atmosphere Overlay Fade In/Out */
     #crossroads3dDroneAtmosphere {
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.7s ease;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
     #dhakaCrossroadsContainer.is-3d-drone-mode #crossroads3dDroneAtmosphere {
       opacity: 1;
@@ -4446,7 +4570,7 @@
   <section id="userLandingView" class="panel-section hidden fixed inset-0 z-30 w-full h-[100svh] min-h-[100svh] overflow-hidden bg-slate-950 select-none" aria-label="Dhaka Crossroads Animation Landing Page">
 
     <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
-    <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase relative w-full h-full min-h-[100svh] overflow-hidden text-white select-none">
+    <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase diorama-container relative w-full h-full min-h-[100svh] overflow-hidden text-white select-none">
         <!-- Synchronized Crossroads Lightning Sky Flash Overlay -->
         <div id="dhakaLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-30 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
         
@@ -4518,16 +4642,20 @@
 
         <!-- Cinematic Drone Camera Atmospheric Vignette & Depth-of-Field Overlay (Active in 3D Mode Only) -->
         <div id="crossroads3dDroneAtmosphere" class="pointer-events-none absolute inset-0 z-20 overflow-hidden">
-          <!-- 1. Distant Atmospheric Depth Haze (Top Horizon Aerial Perspective) -->
-          <div class="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-slate-950/75 via-slate-900/35 to-transparent"></div>
-          <!-- 2. Cinematic Lens Vignette (Soft Drone Optical Falloff) -->
-          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,transparent_48%,rgba(2,6,23,0.45)_82%,rgba(2,6,23,0.85)_100%)]"></div>
-          <!-- 3. Soft Ambient City Glow Bloom -->
-          <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_52%,rgba(56,189,248,0.05)_0%,transparent_65%)] mix-blend-screen"></div>
+          <!-- 1. Distant Atmospheric Depth Haze & Tilt-Shift Depth-of-Field Blur (Top Horizon) -->
+          <div class="cinematic-dof-top"></div>
+          <!-- 2. Foreground Soft Focal Falloff (Bottom Horizon) -->
+          <div class="cinematic-dof-bottom"></div>
+          <!-- 3. Cinematic Outer Edge Vignette Frame -->
+          <div class="cinematic-vignette-frame"></div>
+          <!-- 4. Radial Vignette Gradient (Miniature Drone Optical Falloff) -->
+          <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_52%,transparent_45%,rgba(2,6,23,0.35)_72%,rgba(2,6,23,0.85)_100%)]"></div>
+          <!-- 5. Soft Atmospheric City Light Glow Bloom -->
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.06)_0%,rgba(254,240,138,0.03)_40%,transparent_70%)] mix-blend-screen"></div>
         </div>
 
         <!-- Real 3D Miniature City Diorama WebGL Canvas (Active in 3D Drone Mode) -->
-        <canvas id="dhakaCrossroads3dCanvas" class="absolute inset-0 w-full h-full pointer-events-auto" style="display: none;"></canvas>
+        <canvas id="dhakaCrossroads3dCanvas" class="canvas-3d absolute inset-0 w-full h-full pointer-events-auto" style="display: none;"></canvas>
 
         <!-- Responsive Stage Wrapper: Mobile Prominent Height (< 768px) & Desktop Contain (>= 768px) -->
         <div id="dhakaCrossroadsStageWrapper" class="absolute inset-0 w-full h-full flex items-center justify-center p-1 sm:p-4 md:p-6 overflow-hidden pointer-events-none">
@@ -17105,9 +17233,11 @@
       document.body.classList.toggle('is-3d-drone-mode', crossroads3DMode);
 
       if (crossroads3DMode) {
-        // 1. Hide 2D stage and make 3D canvas visible first so layout dimensions are available
-        if (stageWrapper) stageWrapper.style.display = 'none';
+        // 1. Make 3D canvas visible with cinematic cubic-bezier crossfade
         if (canvas3d) canvas3d.style.display = 'block';
+        setTimeout(() => {
+          if (crossroads3DMode && stageWrapper) stageWrapper.style.display = 'none';
+        }, 550);
 
         // 2. Initialize 3D scene once if not already initialized
         const isReady = typeof window.isDhakaCrossroads3DReady === 'function' && window.isDhakaCrossroads3DReady();
@@ -17120,12 +17250,14 @@
           window.resizeDhakaCrossroads3D();
         }
       } else {
-        // Switch cleanly back to 2D Flat View
-        if (canvas3d) canvas3d.style.display = 'none';
+        // Switch cleanly back to 2D Flat View with smooth crossfade
         if (stageWrapper) {
           stageWrapper.style.display = 'flex';
           stageWrapper.style.transform = 'none';
         }
+        setTimeout(() => {
+          if (!crossroads3DMode && canvas3d) canvas3d.style.display = 'none';
+        }, 550);
       }
 
       if (typeof updateCrossroadsAspectRatio === 'function') {

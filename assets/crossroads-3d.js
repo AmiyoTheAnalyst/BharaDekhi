@@ -1483,7 +1483,11 @@
     renderer.setSize(width, height, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.08;
+    }
 
     // 4. Lighting: Ambient + Directional Sun + Corner Streetlights
     ambientLight = new THREE.AmbientLight(0x38bdf8, 0.7);
@@ -2504,14 +2508,15 @@
       roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, dt * 3.0);
     }
 
-    // 7. Interactive Drone Camera Banking & Pitching (Optimized convergence)
+    // 7. Interactive Drone Camera Banking & Pitching (Cinematic gyroscopic damping)
     targetCamX = camBasePos.x + mouseRelX * 65;
     targetCamY = camBasePos.y - mouseRelY * 45;
     const diffX = targetCamX - camera.position.x;
     const diffY = targetCamY - camera.position.y;
     if (Math.abs(diffX) > 0.02 || Math.abs(diffY) > 0.02) {
-      camera.position.x += diffX * 0.08;
-      camera.position.y += diffY * 0.08;
+      const easeFactor = Math.min(1, (dt || 0.016) * 5.0);
+      camera.position.x += diffX * easeFactor;
+      camera.position.y += diffY * easeFactor;
       camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
     }
 
