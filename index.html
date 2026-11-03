@@ -106,58 +106,273 @@
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
-    html[data-theme="dark"] { color-scheme: dark; }
-    html[data-theme="dark"] body { background-color: #0f172a; color: #e2e8f0; }
-    html[data-theme="dark"] .bg-white { background-color: #1e293b !important; }
-    html[data-theme="dark"] .bg-slate-50 { background-color: #0f172a !important; }
-    html[data-theme="dark"] .bg-slate-100 { background-color: #334155 !important; }
-    html[data-theme="dark"] .bg-slate-200 { background-color: #475569 !important; }
-    html[data-theme="dark"] .bg-blue-50 { background-color: #172554 !important; }
-    html[data-theme="dark"] .bg-blue-100 { background-color: #1e3a8a !important; }
-    html[data-theme="dark"] .bg-emerald-50 { background-color: #022c22 !important; }
-    html[data-theme="dark"] .bg-emerald-100 { background-color: #064e3b !important; }
-    html[data-theme="dark"] .bg-rose-50 { background-color: #4c0519 !important; }
-    html[data-theme="dark"] .bg-rose-100 { background-color: #881337 !important; }
-    html[data-theme="dark"] .bg-amber-50 { background-color: #451a03 !important; }
-    html[data-theme="dark"] .bg-amber-100 { background-color: #78350f !important; }
-    html[data-theme="dark"] .bg-red-50 { background-color: #450a0a !important; }
-    html[data-theme="dark"] .bg-sky-50 { background-color: #082f49 !important; }
-    html[data-theme="dark"] .bg-sky-100 { background-color: #0369a1 !important; }
-    html[data-theme="dark"] .border-sky-200 { border-color: #0369a1 !important; }
-    html[data-theme="dark"] .text-sky-800,
-    html[data-theme="dark"] .text-sky-700 { color: #bae6fd !important; }
+    /* =========================================================
+       Cinematic OLED Dark-Mode & Electric Glassmorphism Theme
+       ========================================================= */
+    html[data-theme="dark"] {
+      color-scheme: dark;
+    }
+
+    /* 1. Deep OLED Obsidian Dark Base */
+    html[data-theme="dark"] body {
+      background:
+        radial-gradient(ellipse at 50% -8%, rgba(14, 165, 233, 0.12) 0%, transparent 48rem),
+        radial-gradient(ellipse at 88% 16%, rgba(56, 189, 248, 0.05) 0%, transparent 34rem),
+        radial-gradient(circle at 10% 45%, rgba(99, 102, 241, 0.04) 0%, transparent 30rem),
+        #030508 !important;
+      background-color: #030508 !important;
+      color: #f8fafc !important;
+    }
+
+    /* 2. Glassmorphic Card Containers & Obsidian Panels */
+    html[data-theme="dark"] .bg-white,
+    html[data-theme="dark"] .dark\:bg-slate-900 {
+      background-color: rgba(9, 13, 22, 0.85) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    }
+
+    /* 3. Deep Inset Wells & Secondary Surfaces */
+    html[data-theme="dark"] .bg-slate-50,
+    html[data-theme="dark"] .dark\:bg-slate-800 {
+      background-color: rgba(5, 8, 15, 0.85) !important;
+      border-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    html[data-theme="dark"] .bg-slate-100 {
+      background-color: rgba(12, 17, 28, 0.80) !important;
+      border-color: rgba(255, 255, 255, 0.09) !important;
+    }
+    html[data-theme="dark"] .bg-slate-200 {
+      background-color: rgba(18, 26, 42, 0.85) !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    /* 4. Sleek Electric Accent States & High-Contrast Pill Badges */
+    html[data-theme="dark"] .bg-blue-50,
+    html[data-theme="dark"] .dark\:bg-blue-950\/70 {
+      background-color: rgba(14, 165, 233, 0.14) !important;
+      border-color: rgba(56, 189, 248, 0.35) !important;
+    }
+    html[data-theme="dark"] .bg-blue-100 {
+      background-color: rgba(2, 132, 199, 0.28) !important;
+      border-color: rgba(56, 189, 248, 0.45) !important;
+    }
+    html[data-theme="dark"] .bg-emerald-50,
+    html[data-theme="dark"] .dark\:bg-emerald-950\/60 {
+      background-color: rgba(5, 46, 32, 0.75) !important;
+      border-color: rgba(16, 185, 129, 0.45) !important;
+    }
+    html[data-theme="dark"] .bg-emerald-100 {
+      background-color: rgba(6, 78, 59, 0.85) !important;
+      border-color: rgba(52, 211, 153, 0.55) !important;
+    }
+    html[data-theme="dark"] .bg-rose-50,
+    html[data-theme="dark"] .dark\:bg-rose-950\/60 {
+      background-color: rgba(60, 6, 24, 0.80) !important;
+      border-color: rgba(244, 63, 94, 0.45) !important;
+    }
+    html[data-theme="dark"] .bg-rose-100 {
+      background-color: rgba(136, 19, 55, 0.85) !important;
+      border-color: rgba(251, 113, 133, 0.55) !important;
+    }
+    html[data-theme="dark"] .bg-amber-50 {
+      background-color: rgba(55, 24, 4, 0.75) !important;
+      border-color: rgba(245, 158, 11, 0.45) !important;
+    }
+    html[data-theme="dark"] .bg-amber-100 {
+      background-color: rgba(120, 53, 15, 0.85) !important;
+      border-color: rgba(251, 191, 36, 0.55) !important;
+    }
+    html[data-theme="dark"] .bg-red-50 {
+      background-color: rgba(50, 8, 8, 0.80) !important;
+      border-color: rgba(239, 68, 68, 0.45) !important;
+    }
+    html[data-theme="dark"] .bg-sky-50 {
+      background-color: rgba(8, 47, 73, 0.75) !important;
+      border-color: rgba(56, 189, 248, 0.40) !important;
+    }
+    html[data-theme="dark"] .bg-sky-100 {
+      background-color: rgba(3, 105, 161, 0.80) !important;
+      border-color: rgba(56, 189, 248, 0.55) !important;
+    }
+
+    /* 5. Ultra-Sharp Glowing Borders & Subtle Hairline Trims */
     html[data-theme="dark"] .border-slate-100,
     html[data-theme="dark"] .border-slate-200,
-    html[data-theme="dark"] .border-slate-300 { border-color: #475569 !important; }
+    html[data-theme="dark"] .border-slate-300,
+    html[data-theme="dark"] .dark\:border-slate-800,
+    html[data-theme="dark"] .dark\:border-slate-700 {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .border-sky-200 {
+      border-color: rgba(56, 189, 248, 0.45) !important;
+    }
+
+    /* 6. Crisp High-Contrast Typography */
     html[data-theme="dark"] .text-slate-900,
-    html[data-theme="dark"] .text-slate-800 { color: #f1f5f9 !important; }
-    html[data-theme="dark"] .text-slate-700,
-    html[data-theme="dark"] .text-slate-600 { color: #cbd5e1 !important; }
-    html[data-theme="dark"] .text-slate-500 { color: #94a3b8 !important; }
-    html[data-theme="dark"] .text-slate-400 { color: #94a3b8 !important; }
+    html[data-theme="dark"] .text-slate-800 {
+      color: #ffffff !important;
+    }
+    html[data-theme="dark"] .text-slate-700 {
+      color: #e2e8f0 !important;
+    }
+    html[data-theme="dark"] .text-slate-600,
+    html[data-theme="dark"] .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    html[data-theme="dark"] .text-slate-400 {
+      color: #64748b !important;
+    }
+    html[data-theme="dark"] .text-sky-800,
+    html[data-theme="dark"] .text-sky-700,
+    html[data-theme="dark"] .text-sky-600 {
+      color: #38bdf8 !important;
+    }
     html[data-theme="dark"] .text-blue-700,
-    html[data-theme="dark"] .text-blue-800 { color: #bfdbfe !important; }
+    html[data-theme="dark"] .text-blue-800,
+    html[data-theme="dark"] .text-blue-600 {
+      color: #38bdf8 !important;
+    }
     html[data-theme="dark"] .text-emerald-700,
-    html[data-theme="dark"] .text-emerald-800 { color: #a7f3d0 !important; }
+    html[data-theme="dark"] .text-emerald-800,
+    html[data-theme="dark"] .text-emerald-600 {
+      color: #34d399 !important;
+    }
     html[data-theme="dark"] .text-rose-700,
-    html[data-theme="dark"] .text-rose-800 { color: #fecdd3 !important; }
+    html[data-theme="dark"] .text-rose-800,
+    html[data-theme="dark"] .text-rose-600 {
+      color: #fb7185 !important;
+    }
     html[data-theme="dark"] .text-amber-700,
-    html[data-theme="dark"] .text-amber-800 { color: #fde68a !important; }
-    html[data-theme="dark"] .text-red-700 { color: #fecaca !important; }
+    html[data-theme="dark"] .text-amber-800,
+    html[data-theme="dark"] .text-amber-600 {
+      color: #fbbf24 !important;
+    }
+    html[data-theme="dark"] .text-red-700 {
+      color: #f87171 !important;
+    }
+
+    /* 7. Obsidian Inputs, Selects & Micro-Controls with Neon Focus Ring */
     html[data-theme="dark"] input,
     html[data-theme="dark"] select,
-    html[data-theme="dark"] textarea { background-color: #0f172a; color: #e2e8f0; border-color: #475569; }
+    html[data-theme="dark"] textarea {
+      background-color: rgba(5, 8, 15, 0.92) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    html[data-theme="dark"] input:focus,
+    html[data-theme="dark"] select:focus,
+    html[data-theme="dark"] textarea:focus {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.38), inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+      outline: none !important;
+    }
     html[data-theme="dark"] input::placeholder,
-    html[data-theme="dark"] textarea::placeholder { color: #94a3b8; }
-    html[data-theme="dark"] option { background-color: #1e293b; color: #e2e8f0; }
-    html[data-theme="dark"] .hover\:bg-slate-50:hover { background-color: #334155 !important; }
-    html[data-theme="dark"] .hover\:bg-slate-100:hover { background-color: #475569 !important; }
-    html[data-theme="dark"] .hover\:bg-slate-200:hover { background-color: #64748b !important; }
+    html[data-theme="dark"] textarea::placeholder {
+      color: #64748b !important;
+    }
+    html[data-theme="dark"] option {
+      background-color: #050812 !important;
+      color: #f8fafc !important;
+    }
+    html[data-theme="dark"] .hover\:bg-slate-50:hover {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    html[data-theme="dark"] .hover\:bg-slate-100:hover {
+      background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .hover\:bg-slate-200:hover {
+      background-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    /* 8. Active UI Elements & Glowing Accent States */
+    html[data-theme="dark"] .ride-option-hover-card {
+      background: rgba(10, 14, 23, 0.85) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65) !important;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    html[data-theme="dark"] .ride-option-hover-card:hover {
+      border-color: rgba(56, 189, 248, 0.65) !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25), 0 12px 36px rgba(0, 0, 0, 0.75) !important;
+    }
+    html[data-theme="dark"] .ride-option-hover-card.border-blue-600 {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 22px rgba(56, 189, 248, 0.4), 0 12px 36px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    }
+    html[data-theme="dark"] .vehicle-btn.border-blue-600,
+    html[data-theme="dark"] .vehicle-btn[aria-pressed="true"] {
+      border-color: #38bdf8 !important;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(2, 132, 199, 0.35) 100%) !important;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.4), inset 0 0 8px rgba(56, 189, 248, 0.2) !important;
+      color: #ffffff !important;
+    }
+    html[data-theme="dark"] #headerSurgeCapsule {
+      background: rgba(8, 12, 20, 0.85) !important;
+      border: 1px solid rgba(251, 191, 36, 0.4) !important;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+      color: #fef08a !important;
+    }
+    html[data-theme="dark"] #headerSurgeCapsule:hover {
+      border-color: rgba(251, 191, 36, 0.8) !important;
+      box-shadow: 0 0 22px rgba(245, 158, 11, 0.45) !important;
+    }
+    html[data-theme="dark"] #surgeBadge {
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+    }
+    html[data-theme="dark"] #surgeBadge.bg-emerald-50,
+    html[data-theme="dark"] #surgeBadge.bg-emerald-950\/60 {
+      background: rgba(6, 36, 26, 0.85) !important;
+      border: 1px solid rgba(52, 211, 153, 0.5) !important;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.35) !important;
+      color: #a7f3d0 !important;
+    }
+    html[data-theme="dark"] #surgeBadge.bg-rose-50 {
+      background: rgba(56, 8, 22, 0.88) !important;
+      border: 1px solid rgba(244, 63, 94, 0.6) !important;
+      box-shadow: 0 0 18px rgba(244, 63, 94, 0.45) !important;
+      color: #fecdd3 !important;
+    }
+    html[data-theme="dark"] #headerWeatherPill {
+      background: rgba(6, 11, 20, 0.85) !important;
+      border: 1px solid rgba(56, 189, 248, 0.35) !important;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+      color: #e0f2fe !important;
+    }
+    html[data-theme="dark"] #headerWeatherPill:hover {
+      border-color: rgba(56, 189, 248, 0.75) !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.45) !important;
+    }
+
+    /* 9. Leaflet Map in OLED Dark Mode */
+    html[data-theme="dark"] #map {
+      border: 1px solid rgba(56, 189, 248, 0.25) !important;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.12) !important;
+    }
     html[data-theme="dark"] .leaflet-popup-content-wrapper,
-    html[data-theme="dark"] .leaflet-popup-tip { background-color: #1e293b; color: #e2e8f0; }
-    html[data-theme="dark"] .leaflet-control-zoom a { background-color: #1e293b; color: #e2e8f0; border-color: #475569; }
-    html[data-theme="dark"] .leaflet-control-attribution { background-color: rgb(30 41 59 / 85%); color: #cbd5e1; }
-    html[data-theme="dark"] .leaflet-control-attribution a { color: #93c5fd; }
+    html[data-theme="dark"] .leaflet-popup-tip {
+      background-color: rgba(8, 12, 20, 0.95) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+    }
+    html[data-theme="dark"] .leaflet-control-zoom a {
+      background-color: rgba(8, 12, 20, 0.90) !important;
+      color: #f8fafc !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+    html[data-theme="dark"] .leaflet-control-attribution {
+      background-color: rgba(3, 5, 10, 0.85) !important;
+      color: #94a3b8 !important;
+    }
+    html[data-theme="dark"] .leaflet-control-attribution a {
+      color: #38bdf8 !important;
+    }
 
     /* Local visual preview: refined spacing, calmer surfaces, and clearer hierarchy. */
     body {
@@ -370,24 +585,43 @@
     }
     html[data-theme="dark"] body {
       background:
-        radial-gradient(ellipse at 12% 0%, rgb(30 58 138 / 22%), transparent 34rem),
-        #0f172a;
+        radial-gradient(ellipse at 50% -8%, rgba(14, 165, 233, 0.12) 0%, transparent 48rem),
+        radial-gradient(ellipse at 88% 16%, rgba(56, 189, 248, 0.05) 0%, transparent 34rem),
+        radial-gradient(circle at 10% 45%, rgba(99, 102, 241, 0.04) 0%, transparent 30rem),
+        #030508 !important;
+    }
+    html[data-theme="dark"] #authView > div:first-child {
+      background: rgba(8, 12, 20, 0.90) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8) !important;
     }
     html[data-theme="dark"] #authView > div:first-child > div > div:first-child {
-      background: linear-gradient(145deg, #0b1c30 0%, #12364f 54%, #1e40af 100%);
+      background: linear-gradient(145deg, #050b16 0%, #091524 54%, #0d2642 100%) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
     }
     html[data-theme="dark"] #userDashboardView .planner-hero,
     html[data-theme="dark"] #userPlannerView .planner-hero {
-      border-color: #334e68;
+      border: 1px solid rgba(56, 189, 248, 0.22) !important;
       background:
-        radial-gradient(circle at 88% 22%, rgb(59 130 246 / 18%), transparent 14rem),
-        linear-gradient(120deg, #14243a 0%, #172b40 55%, #102f3b 100%);
+        radial-gradient(circle at 88% 22%, rgba(56, 189, 248, 0.15), transparent 16rem),
+        radial-gradient(circle at 12% 80%, rgba(99, 102, 241, 0.08), transparent 18rem),
+        linear-gradient(135deg, #05070e 0%, #0a0f1d 55%, #060b16 100%) !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
     }
     html[data-theme="dark"] #userDashboardView .planner-step,
     html[data-theme="dark"] #userPlannerView .planner-step {
-      border-color: #3b536c;
-      background: rgb(15 23 42 / 72%);
-      color: #bfdbfe;
+      border: 1px solid rgba(255, 255, 255, 0.10) !important;
+      background: rgba(8, 13, 22, 0.75) !important;
+      color: #e2e8f0 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    }
+    html[data-theme="dark"] #userDashboardView .planner-step:hover,
+    html[data-theme="dark"] #userPlannerView .planner-step:hover {
+      border-color: rgba(56, 189, 248, 0.6) !important;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.3) !important;
+      color: #ffffff !important;
     }
     @media (max-width: 640px) {
       header {
@@ -433,7 +667,7 @@
       height: 100dvh;
       min-height: 100svh;
       overflow: hidden !important;
-      background: #030712;
+      background: #020408 !important;
       z-index: 35;
     }
     #userLandingView .dhaka-cyber-showcase {
@@ -526,6 +760,8 @@
     .diorama-container {
       perspective: 1200px;
       perspective-origin: 50% 55%;
+      background-color: #020408;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.85);
       transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), background-color 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
     #dhakaCrossroadsStageWrapper {
@@ -577,7 +813,7 @@
     .canvas-3d {
       transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: transform, opacity, filter;
-      filter: contrast(1.08) saturate(1.15) brightness(1.02);
+      filter: contrast(1.16) saturate(1.24) brightness(1.02);
     }
 
     @media (max-width: 767.98px) {
@@ -673,13 +909,15 @@
 
     /* Cinematic Atmospheric Lighting Bloom on Street Lamps, Headlights, Building Windows & Porch Lights */
     .cr-headlight-bulb,
+    #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-bulb {
+      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.85)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.95)) !important;
+    }
     .cr-streetlamp-head,
     .building-window,
     .window-glow-pulse,
     .porch-light,
-    #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-bulb,
     #dhakaCrossroadsContainer.is-3d-drone-mode .building-window {
-      filter: drop-shadow(0 0 10px rgba(255, 200, 100, 0.6)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+      filter: drop-shadow(0 0 14px rgba(254, 240, 138, 0.85)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.9)) !important;
     }
 
     /* Cinematic Weather-State Ambient Contrast & Shadow Facade Gradients */
@@ -740,8 +978,8 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      box-shadow: inset 0 0 70px 20px rgba(2, 6, 23, 0.65),
-                  inset 0 0 140px 60px rgba(2, 6, 23, 0.45);
+      box-shadow: inset 0 0 80px 25px rgba(2, 4, 8, 0.85),
+                  inset 0 0 160px 75px rgba(2, 4, 8, 0.65);
       z-index: 21;
     }
     .cinematic-dof-top {
@@ -799,13 +1037,16 @@
       background-color: #431407;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="night"] {
-      background-color: #020617;
+      background-color: #020408;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="fog_day"] {
       background-color: #64748b;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="fog_night"] {
-      background-color: #020617;
+      background-color: #020408;
+    }
+    #dhakaCrossroadsContainer[data-crossroads-weather="night_overcast"] {
+      background-color: #020306;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="rain"] {
       background-color: #0f172a;
@@ -2094,60 +2335,63 @@
     /* Volumetric Cartoon Smoke Cloud Plume & Exhaust (Matches Reference Image) */
     .rocket-visible-smoke {
       position: fixed;
-      border-radius: 46% 54% 52% 48% / 52% 48% 52% 48%;
+      border-radius: 48% 52% 54% 46% / 52% 48% 52% 48%;
       pointer-events: none;
       z-index: 999997;
       background: radial-gradient(circle at 35% 32%, 
         #ffffff 0%, 
-        #ffffff 38%, 
-        #f1f5f9 62%, 
-        #e2e8f0 82%, 
+        #ffffff 58%, 
+        #f1f5f9 78%, 
+        #e2e8f0 92%, 
         #cbd5e1 100%
       );
-      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.18);
-      filter: blur(0.4px);
-      animation: realisticSmokePlumeBillow 0.85s cubic-bezier(0.15, 0.75, 0.3, 1) forwards;
-      will-change: transform, opacity, filter;
+      box-shadow: inset -1px -2px 3px rgba(148, 163, 184, 0.35), 0 3px 8px rgba(15, 23, 42, 0.22);
+      animation: realisticSmokePlumeBillow 2.2s cubic-bezier(0.12, 0.75, 0.25, 1) forwards;
+      will-change: transform, opacity;
     }
 
     .rocket-visible-smoke-hot {
       background: radial-gradient(circle at 35% 32%, 
         #ffffff 0%, 
-        #fffbeb 26%, 
-        #fef08a 52%, 
-        #fdba74 80%, 
+        #fffbeb 30%, 
+        #fef08a 60%, 
+        #fdba74 85%, 
         #f97316 100%
       ) !important;
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.55) !important;
+      box-shadow: inset -1px -2px 3px rgba(249, 115, 22, 0.4), 0 0 12px rgba(249, 115, 22, 0.6) !important;
     }
 
     .rocket-visible-smoke-hot-pathao,
     .rocket-visible-smoke-hot-uber {
       background: radial-gradient(circle at 35% 32%, 
         #ffffff 0%, 
-        #fffbeb 26%, 
-        #fef08a 52%, 
-        #fdba74 80%, 
+        #fffbeb 30%, 
+        #fef08a 60%, 
+        #fdba74 85%, 
         #f97316 100%
       ) !important;
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.55) !important;
+      box-shadow: inset -1px -2px 3px rgba(249, 115, 22, 0.4), 0 0 12px rgba(249, 115, 22, 0.6) !important;
     }
 
     @keyframes realisticSmokePlumeBillow {
       0% {
-        transform: translate(-50%, -50%) scale(0.65) rotate(var(--rot, 0deg));
+        transform: translate(-50%, -50%) scale(0.7) rotate(var(--rot, 0deg));
         opacity: 0.98;
       }
-      35% {
-        transform: translate(calc(-50% + var(--dx, -4px) * 0.4), calc(-50% + var(--dy, 4px) * 0.4)) scale(1.18) rotate(calc(var(--rot, 0deg) + 6deg));
-        opacity: 0.94;
+      25% {
+        transform: translate(calc(-50% + var(--dx, 0px) * 0.3), calc(-50% + var(--dy, 0px) * 0.3)) scale(1.15) rotate(calc(var(--rot, 0deg) + 6deg));
+        opacity: 0.96;
       }
-      70% {
-        transform: translate(calc(-50% + var(--dx, -4px) * 0.8), calc(-50% + var(--dy, 4px) * 0.8)) scale(1.42) rotate(calc(var(--rot, 0deg) + 12deg));
-        opacity: 0.72;
+      65% {
+        transform: translate(calc(-50% + var(--dx, 0px) * 0.75), calc(-50% + var(--dy, 0px) * 0.75)) scale(1.4) rotate(calc(var(--rot, 0deg) + 12deg));
+        opacity: 0.90;
+      }
+      85% {
+        transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(var(--sEnd, 1.6)) rotate(calc(var(--rot, 0deg) + 16deg));
+        opacity: 0.65;
       }
       100% {
-        transform: translate(calc(-50% + var(--dx, -4px)), calc(-50% + var(--dy, 4px))) scale(var(--sEnd, 1.65)) rotate(calc(var(--rot, 0deg) + 18deg));
+        transform: translate(calc(-50% + var(--dx, 0px) * 1.15), calc(-50% + var(--dy, 0px) * 1.15)) scale(calc(var(--sEnd, 1.6) * 1.12)) rotate(calc(var(--rot, 0deg) + 20deg));
         opacity: 0;
         filter: blur(2.5px);
       }
@@ -15484,8 +15728,8 @@
             </defs>
 
             <!-- 1. Fiery Combustion Flame Jet -->
-            <g class="rocket-flame-jet">
-              <path d="M21 78C21 78 14 98 27 114C40 98 33 78 33 78H21Z" fill="url(#flameUberGrad)" filter="drop-shadow(0 0 10px #f97316)"/>
+            <g class="rocket-flame-jet" style="filter: drop-shadow(0 0 12px #f97316);">
+              <path d="M21 78C21 78 14 98 27 114C40 98 33 78 33 78H21Z" fill="url(#flameUberGrad)"/>
               <path d="M23 78C23 78 18 94 27 106C36 94 31 78 31 78H23Z" fill="#fde047"/>
               <path d="M25 78C25 78 22 89 27 97C32 89 29 78 29 78H25Z" fill="#ffffff"/>
             </g>
@@ -15548,8 +15792,8 @@
             </defs>
 
             <!-- 1. Fiery Combustion Flame Jet -->
-            <g class="rocket-flame-jet">
-              <path d="M21 78C21 78 14 98 27 114C40 98 33 78 33 78H21Z" fill="url(#flamePathaoGrad)" filter="drop-shadow(0 0 10px #f97316)"/>
+            <g class="rocket-flame-jet" style="filter: drop-shadow(0 0 12px #f97316);">
+              <path d="M21 78C21 78 14 98 27 114C40 98 33 78 33 78H21Z" fill="url(#flamePathaoGrad)"/>
               <path d="M23 78C23 78 18 94 27 106C36 94 31 78 31 78H23Z" fill="#fde047"/>
               <path d="M25 78C25 78 22 89 27 97C32 89 29 78 29 78H25Z" fill="#ffffff"/>
             </g>
@@ -15625,25 +15869,32 @@
       const screenH = window.innerHeight;
       const flightDist = Math.round(Math.max(screenW, screenH) + 400);
 
-      // Rocket flame tip origin: when tilted 45° at (originX, originY), the nozzle tip is 39px down-left
-      const nozzleBaseX = originX - 39;
-      const nozzleBaseY = originY + 39;
+      // Rocket flame tip origin: when tilted 45° at (originX, originY), the flame tip offset is (-38.2px, +36.8px)
+      const tipOffsetX = -38.2;
+      const tipOffsetY = 36.8;
+      const baseTipX = originX + tipOffsetX;
+      const baseTipY = originY + tipOffsetY;
 
       // Volumetric 3D Cartoon Smoke Puff Generator (Matches Reference Image)
       function spawnRealisticSmokePuff(x, y, isHot = false, customSize = null) {
         const puff = document.createElement('div');
         puff.className = `rocket-visible-smoke ${isHot ? 'rocket-visible-smoke-hot' : ''}`;
-        const size = customSize || (24 + Math.random() * 8);
-        const dx = -4 - Math.random() * 8;
-        const dy = 4 + Math.random() * 8;
-        const sEnd = 1.45 + Math.random() * 0.35;
-        const rot = Math.round((Math.random() - 0.5) * 40);
+        const size = customSize || (28 + Math.random() * 8);
+
+        // Gentle perpendicular drift to create expanding billowing cloud lobes
+        const perpAngle = (Math.random() - 0.5) * 1.2;
+        const driftDist = 6 + Math.random() * 12;
+        // Direction perpendicular to 45° flight path
+        const dx = Math.cos(Math.PI * 0.75 + perpAngle) * driftDist;
+        const dy = Math.sin(Math.PI * 0.75 + perpAngle) * driftDist;
+        const sEnd = 1.5 + Math.random() * 0.35;
+        const rot = Math.round((Math.random() - 0.5) * 50);
 
         puff.style.cssText = `
-          left: ${x + (Math.random() - 0.5) * 4}px;
-          top: ${y + (Math.random() - 0.5) * 4}px;
-          width: ${size}px;
-          height: ${size}px;
+          left: ${x.toFixed(1)}px;
+          top: ${y.toFixed(1)}px;
+          width: ${size.toFixed(1)}px;
+          height: ${size.toFixed(1)}px;
           --dx: ${dx.toFixed(1)}px;
           --dy: ${dy.toFixed(1)}px;
           --sEnd: ${sEnd.toFixed(2)};
@@ -15654,23 +15905,23 @@
 
       // Compact Launchpad Base Smoke (Stage 1 ignition cloud bed matching reference image)
       function spawnLaunchpadBaseSmoke(baseX, baseY) {
-        for (let i = 0; i < 7; i++) {
-          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * Math.PI * 0.85;
-          const dist = 4 + Math.random() * 16;
+        for (let i = 0; i < 5; i++) {
+          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * 1.0;
+          const dist = 6 + Math.random() * 18;
           const sx = baseX + Math.cos(angle) * dist;
           const sy = baseY + Math.sin(angle) * dist;
-          spawnRealisticSmokePuff(sx, sy, i === 0, 32 + Math.random() * 8);
+          spawnRealisticSmokePuff(sx, sy, i === 0, 34 + Math.random() * 8);
         }
 
         // Fiery ignition sparks
         const sparkColors = ['#ffffff', '#fde047', '#f97316', '#ef4444'];
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 5; i++) {
           const spark = document.createElement('div');
           spark.className = 'rocket-spark-ember';
           const color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
           const size = 3 + Math.random() * 2.5;
-          const pdx = -12 - Math.random() * 28;
-          const pdy = 12 + Math.random() * 28;
+          const pdx = -15 - Math.random() * 25;
+          const pdy = 15 + Math.random() * 25;
           spark.style.cssText = `
             left: ${baseX}px;
             top: ${baseY}px;
@@ -15687,7 +15938,7 @@
       }
 
       // Initial launchpad base cloud mound
-      spawnLaunchpadBaseSmoke(nozzleBaseX, nozzleBaseY);
+      spawnLaunchpadBaseSmoke(baseTipX, baseTipY);
 
       // The Rocket Actor (45° angle pointing to top-right)
       const rocket = document.createElement('div');
@@ -15710,8 +15961,8 @@
 
       // Mid-rumble soft puff at 450ms
       setTimeout(() => {
-        spawnRealisticSmokePuff(nozzleBaseX, nozzleBaseY, true, 28);
-        spawnRealisticSmokePuff(nozzleBaseX - 6, nozzleBaseY + 6, false, 32);
+        spawnRealisticSmokePuff(baseTipX, baseTipY, true, 30);
+        spawnRealisticSmokePuff(baseTipX - 6, baseTipY + 6, false, 34);
       }, 450);
 
       // ========================================================
@@ -15727,12 +15978,12 @@
         const wave = document.createElement('div');
         wave.className = 'rocket-launch-shockwave';
         wave.style.cssText = `
-          left: ${nozzleBaseX}px;
-          top: ${nozzleBaseY}px;
-          width: 60px;
-          height: 60px;
-          border: 2.5px solid rgba(254, 240, 138, 0.85);
-          box-shadow: 0 0 18px rgba(249, 115, 22, 0.7);
+          left: ${baseTipX}px;
+          top: ${baseTipY}px;
+          width: 55px;
+          height: 55px;
+          border: 2px solid rgba(254, 240, 138, 0.85);
+          box-shadow: 0 0 16px rgba(249, 115, 22, 0.7);
         `;
         container.appendChild(wave);
 
@@ -15748,15 +15999,15 @@
         // High-precision flight trajectory with continuous smoke trail
         const flightStartTime = performance.now();
         const flightDuration = 1000; // 1.0 second blastoff flight
-        let lastTipX = nozzleBaseX;
-        let lastTipY = nozzleBaseY;
+        let lastTipX = baseTipX;
+        let lastTipY = baseTipY;
 
         function animateFlight(now) {
           const elapsed = now - flightStartTime;
           const t = Math.min(1, elapsed / flightDuration);
 
           // Dynamic rocket launch acceleration curve
-          const eased = Math.pow(t, 2.3);
+          const eased = Math.pow(t, 2.2);
           const currentDist = flightDist * eased;
 
           // Rocket center along 45° diagonal (+X, -Y)
@@ -15766,25 +16017,27 @@
           // Flight scale dynamics: subtle aerodynamic swell then tapering
           const curScale = t < 0.25 
             ? 1.05 + (t / 0.25) * 0.12 
-            : (t < 0.7 ? 1.17 - ((t - 0.25) / 0.45) * 0.22 : 0.95 - ((t - 0.7) / 0.3) * 0.35);
+            : (t < 0.7 ? 1.17 - ((t - 0.25) / 0.45) * 0.2 : 0.97 - ((t - 0.7) / 0.3) * 0.3);
 
           rocket.style.left = `${rx}px`;
           rocket.style.top = `${ry}px`;
           rocket.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${curScale.toFixed(2)})`;
 
-          // Exact nozzle flame tip: offset -39px down-left at 45°
-          const tipX = rx - (39 * curScale);
-          const tipY = ry + (39 * curScale);
+          // Exact nozzle flame tip: offset at 45°
+          const tipX = rx + (tipOffsetX * curScale);
+          const tipY = ry + (tipOffsetY * curScale);
 
           // Spawn connected volumetric smoke cloud puffs along the path
           const distFromLast = Math.hypot(tipX - lastTipX, tipY - lastTipY);
-          const numSteps = Math.max(1, Math.floor(distFromLast / 14));
+          const numSteps = Math.max(1, Math.floor(distFromLast / 12));
           for (let s = 1; s <= numSteps; s++) {
             const px = lastTipX + (tipX - lastTipX) * (s / numSteps);
             const py = lastTipY + (tipY - lastTipY) * (s / numSteps);
-            // First 12% near launch has warm golden fire core, rest is pure cartoon cumulus cloud
-            const isWarm = (t < 0.12 && s === numSteps);
-            spawnRealisticSmokePuff(px, py, isWarm, 24 + Math.random() * 6);
+            // Nearest 1 puff to flame has warm fiery golden core
+            const isHot = (s === numSteps && t < 0.2);
+            // Size gradually expands as rocket accelerates: 28px near tip to 38px
+            const pSize = 28 + Math.min(10, t * 12) + (Math.random() * 6);
+            spawnRealisticSmokePuff(px, py, isHot, pSize);
           }
 
           lastTipX = tipX;
@@ -15814,7 +16067,7 @@
           if (btnLabel) btnLabel.textContent = originalBtnText;
         }
         // Let the beautiful smoke trail gently dissolve before clearing container
-        setTimeout(() => container.remove(), 850);
+        setTimeout(() => container.remove(), 1600);
       }, 2000);
     }
 

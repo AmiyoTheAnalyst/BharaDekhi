@@ -530,7 +530,7 @@
   function create3DVehicle(type, colorHex) {
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
     if (!sharedRimMat) sharedRimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.35, metalness: 0.75 });
-    if (!vehicleHeadlightMat) vehicleHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xfff08a });
+    if (!vehicleHeadlightMat) vehicleHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     if (!vehicleTaillightMat) vehicleTaillightMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
     if (!vehicleIndicatorMat) vehicleIndicatorMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
     if (!vehicleGlassMat) vehicleGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.6 });
@@ -1547,8 +1547,8 @@
       scene.add(head);
     });
 
-    // 5. Ground & Road Network
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.85 });
+    // 5. Ground & Road Network (Deep Obsidian Asphalt for High-Contrast Cinematic Aesthetics)
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x04060c, roughness: 0.80, metalness: 0.12 });
     roadMaterial = roadMat;
     const groundGeo = new THREE.PlaneGeometry(1600, 1200);
     const ground = new THREE.Mesh(groundGeo, roadMat);
@@ -2291,9 +2291,9 @@
           ambientLight.intensity = 0.6;
         }
       } else if (currentMode === 'night_overcast') {
-        scene.background.setHex(0x0c0f17);
+        scene.background.setHex(0x020306);
         if (scene.fog) {
-          scene.fog.color.setHex(0x131a29);
+          scene.fog.color.setHex(0x04060c);
           scene.fog.density = 0.0012;
         }
         if (sunLight) {
@@ -2305,9 +2305,9 @@
           ambientLight.intensity = 0.38;
         }
       } else { // night
-        scene.background.setHex(0x040814);
+        scene.background.setHex(0x020408);
         if (scene.fog) {
-          scene.fog.color.setHex(0x060e20);
+          scene.fog.color.setHex(0x03060f);
           scene.fog.density = 0.0005;
         }
         if (sunLight) {
