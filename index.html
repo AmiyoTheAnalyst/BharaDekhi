@@ -2070,7 +2070,7 @@
       z-index: 999999;
       transform: translate(-50%, -50%) rotate(45deg);
       filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45));
-      will-change: transform, opacity;
+      will-change: transform, opacity, left, top;
     }
 
     .rocket-stage-rumble {
@@ -2091,67 +2091,65 @@
       100% { transform: scaleY(1.22) scaleX(1.06); opacity: 1; }
     }
 
-    /* Realistic Volumetric Rocket Smoke Plume & Exhaust */
+    /* Volumetric Cartoon Smoke Cloud Plume & Exhaust (Matches Reference Image) */
     .rocket-visible-smoke {
       position: fixed;
-      border-radius: 48% 52% 54% 46% / 53% 47% 53% 47%;
+      border-radius: 46% 54% 52% 48% / 52% 48% 52% 48%;
       pointer-events: none;
       z-index: 999997;
-      background: radial-gradient(circle at 38% 38%, 
-        rgba(255, 255, 255, 0.98) 0%, 
-        rgba(248, 250, 252, 0.92) 28%, 
-        rgba(226, 232, 240, 0.72) 52%, 
-        rgba(203, 213, 225, 0.38) 74%, 
-        rgba(148, 163, 184, 0.12) 88%, 
-        transparent 100%
+      background: radial-gradient(circle at 35% 32%, 
+        #ffffff 0%, 
+        #ffffff 38%, 
+        #f1f5f9 62%, 
+        #e2e8f0 82%, 
+        #cbd5e1 100%
       );
-      filter: blur(1.5px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
-      animation: realisticSmokePlumeBillow 0.95s cubic-bezier(0.14, 0.75, 0.3, 1) forwards;
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.18);
+      filter: blur(0.4px);
+      animation: realisticSmokePlumeBillow 0.85s cubic-bezier(0.15, 0.75, 0.3, 1) forwards;
       will-change: transform, opacity, filter;
     }
 
-    .rocket-visible-smoke-hot-pathao {
-      background: radial-gradient(circle at 38% 38%, 
+    .rocket-visible-smoke-hot {
+      background: radial-gradient(circle at 35% 32%, 
         #ffffff 0%, 
-        #fef08a 25%, 
-        #f97316 55%, 
-        rgba(239, 68, 68, 0.3) 78%, 
-        transparent 100%
-      );
-      filter: blur(1.2px);
-      box-shadow: 0 0 14px rgba(249, 115, 22, 0.8);
+        #fffbeb 26%, 
+        #fef08a 52%, 
+        #fdba74 80%, 
+        #f97316 100%
+      ) !important;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.55) !important;
     }
 
+    .rocket-visible-smoke-hot-pathao,
     .rocket-visible-smoke-hot-uber {
-      background: radial-gradient(circle at 38% 38%, 
+      background: radial-gradient(circle at 35% 32%, 
         #ffffff 0%, 
-        #e0f2fe 25%, 
-        #38bdf8 55%, 
-        rgba(2, 132, 199, 0.3) 78%, 
-        transparent 100%
-      );
-      filter: blur(1.2px);
-      box-shadow: 0 0 14px rgba(56, 189, 248, 0.8);
+        #fffbeb 26%, 
+        #fef08a 52%, 
+        #fdba74 80%, 
+        #f97316 100%
+      ) !important;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.55) !important;
     }
 
     @keyframes realisticSmokePlumeBillow {
       0% {
-        transform: translate(-50%, -50%) scale(0.58) rotate(var(--rot, 0deg));
-        opacity: 0.96;
+        transform: translate(-50%, -50%) scale(0.65) rotate(var(--rot, 0deg));
+        opacity: 0.98;
       }
-      30% {
-        transform: translate(calc(-50% + var(--dx, -8px) * 0.35), calc(-50% + var(--dy, 8px) * 0.35)) scale(1.15) rotate(calc(var(--rot, 0deg) + 8deg));
-        opacity: 0.92;
+      35% {
+        transform: translate(calc(-50% + var(--dx, -4px) * 0.4), calc(-50% + var(--dy, 4px) * 0.4)) scale(1.18) rotate(calc(var(--rot, 0deg) + 6deg));
+        opacity: 0.94;
       }
-      65% {
-        transform: translate(calc(-50% + var(--dx, -8px) * 0.72), calc(-50% + var(--dy, 8px) * 0.72)) scale(1.5) rotate(calc(var(--rot, 0deg) + 16deg));
-        opacity: 0.7;
+      70% {
+        transform: translate(calc(-50% + var(--dx, -4px) * 0.8), calc(-50% + var(--dy, 4px) * 0.8)) scale(1.42) rotate(calc(var(--rot, 0deg) + 12deg));
+        opacity: 0.72;
       }
       100% {
-        transform: translate(calc(-50% + var(--dx, -8px)), calc(-50% + var(--dy, 8px))) scale(var(--sEnd, 1.8)) rotate(calc(var(--rot, 0deg) + 24deg));
+        transform: translate(calc(-50% + var(--dx, -4px)), calc(-50% + var(--dy, 4px))) scale(var(--sEnd, 1.65)) rotate(calc(var(--rot, 0deg) + 18deg));
         opacity: 0;
-        filter: blur(4px);
+        filter: blur(2.5px);
       }
     }
 
@@ -11352,6 +11350,15 @@
     let currentDistanceKm = 10.2;
     let currentDurationMins = 32;
     let isSimulatedSurge = false;
+    let surgeManualOverride = null; // null = auto scheduler, true = user forced on, false = user forced off
+
+    function getEffectivePeakState() {
+      const dhakaTime = typeof getDhakaTimeInfo === 'function' ? getDhakaTimeInfo() : { peakPeriod: null };
+      const isAutoPeakTime = Boolean(dhakaTime && dhakaTime.peakPeriod);
+      const isPeak = surgeManualOverride !== null ? Boolean(surgeManualOverride) : (isSimulatedSurge || isAutoPeakTime);
+      return { isPeak, isAutoPeakTime, dhakaTime };
+    }
+    window.getEffectivePeakState = getEffectivePeakState;
     let isHeavyRain = false;
     let rainFareMode = 'auto';
     let dhakaRainDetected = null;
@@ -12648,8 +12655,7 @@
     function selectMrtFirstMileMode(mode) {
       if (mode === 'Bus') return;
       selectedMrtFirstMileMode = mode;
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak } = getEffectivePeakState();
       renderMrtEstimate(isPeak);
       if (typeof updateMoreWaysToTravelCards === 'function') {
         updateMoreWaysToTravelCards();
@@ -12659,8 +12665,7 @@
     function selectMrtLastMileMode(mode) {
       if (mode === 'Bus') return;
       selectedMrtLastMileMode = mode;
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak } = getEffectivePeakState();
       renderMrtEstimate(isPeak);
       if (typeof updateMoreWaysToTravelCards === 'function') {
         updateMoreWaysToTravelCards();
@@ -12684,8 +12689,7 @@
 
     function setCustomMrtBoardingStation(idx) {
       customMrtPickupStationIdx = idx;
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak } = getEffectivePeakState();
       renderMrtEstimate(isPeak);
       if (typeof updateMoreWaysToTravelCards === 'function') {
         updateMoreWaysToTravelCards();
@@ -12694,8 +12698,7 @@
 
     function setCustomMrtExitStation(idx) {
       customMrtDropoffStationIdx = idx;
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak } = getEffectivePeakState();
       renderMrtEstimate(isPeak);
       if (typeof updateMoreWaysToTravelCards === 'function') {
         updateMoreWaysToTravelCards();
@@ -12711,8 +12714,7 @@
         actionsWrap.classList.add('hidden');
         actionsWrap.classList.remove('flex');
       }
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak } = getEffectivePeakState();
       renderMrtEstimate(isPeak);
       if (typeof updateMoreWaysToTravelCards === 'function') {
         updateMoreWaysToTravelCards();
@@ -13810,8 +13812,7 @@
       }
 
       const matches = getBusRouteMatches(pickupKey, destinationKey);
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak, dhakaTime } = getEffectivePeakState();
       const transferMatches = getBusTransferMatches(pickupKey, destinationKey, isPeak);
       const hybridMatches = getBusHybridMatches(pickup, destination, isPeak, matches);
 
@@ -14782,8 +14783,7 @@
       const destination = getLocationForKey(dropoffKey);
       if (!pickup || !destination) return;
 
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak, dhakaTime } = getEffectivePeakState();
 
       // 1. CARD A: Metro Rail
       const defaultPickupStation = getNearestMrtStation(pickup);
@@ -15008,8 +15008,7 @@
       const busBtnText = document.getElementById('btnToggleBusRouteText');
       const busBtnIcon = document.getElementById('btnToggleBusRouteIcon');
 
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak, dhakaTime } = getEffectivePeakState();
 
       if (mode === 'metro') {
         if (metroPortal) metroPortal.classList.remove('hidden');
@@ -15238,8 +15237,7 @@
         const allLatLngs = [];
         allLatLngs.push([pickup.lat, pickup.lng]);
 
-        const dhakaTime = getDhakaTimeInfo();
-        const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+        const { isPeak, dhakaTime } = getEffectivePeakState();
         const matches = typeof getBusRouteMatches === 'function' ? getBusRouteMatches(pickupKey, dropoffKey) : [];
         const hybridMatches = typeof getBusHybridMatches === 'function' ? getBusHybridMatches(pickup, destination, isPeak, matches) : [];
 
@@ -15353,15 +15351,19 @@
         ? `${formatLocalizedNumber(currentDurationMins)} মিনিট`
         : `${formatLocalizedNumber(currentDurationMins)} mins`;
 
-      const dhakaTime = getDhakaTimeInfo();
-      const isPeak = isSimulatedSurge || Boolean(dhakaTime.peakPeriod);
+      const { isPeak, isAutoPeakTime, dhakaTime } = getEffectivePeakState();
+      const surgeToggle = document.getElementById('surgeToggle');
+      if (surgeToggle && surgeToggle.checked !== isPeak) {
+        surgeToggle.checked = isPeak;
+      }
+
       const badge = document.getElementById('surgeBadge');
       const badgeText = document.getElementById('surgeStatusText');
       const dhakaTimeText = document.getElementById('dhakaTimeText');
       const badgeDot = document.getElementById('surgeStatusDot');
       const multText = document.getElementById('surgeMultiplierText');
 
-      if (dhakaTimeText) {
+      if (dhakaTimeText && dhakaTime) {
         dhakaTimeText.innerText = currentLanguage === 'bn'
           ? `ঢাকা ${dhakaTime.formattedTime}`
           : `Dhaka ${dhakaTime.formattedTime}`;
@@ -15374,7 +15376,8 @@
         if (isPeak) {
           badge.className = "inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200 shadow-sm transition-all duration-300";
           badgeDot.className = "w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse";
-          badgeText.innerText = getLocalizedText(isSimulatedSurge ? 'Simulated Peak' : dhakaTime.peakPeriod);
+          const peakLabel = (surgeManualOverride === true && !isAutoPeakTime) ? 'Simulated Peak' : (dhakaTime.peakPeriod || 'Peak Hour');
+          badgeText.innerText = getLocalizedText(peakLabel);
         } else if (isHeavyRain) {
           badge.className = "inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 shadow-sm transition-all duration-300";
           badgeDot.className = "w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_8px_#0284c7] animate-pulse";
@@ -15449,8 +15452,8 @@
     }
 
     // 🚀 Exact Cartoon Rocket SVG Generator
-    // Uber Rocket: Black and Blue
-    // Pathao Rocket: Red and White
+    // Uber Rocket: Black and Blue with Blazing Fire Flame
+    // Pathao Rocket: Red and White with Blazing Fire Flame
     function getCartoonRocketSvg(appType) {
       const isUber = appType === 'uber';
 
@@ -15460,7 +15463,7 @@
           <svg width="56" height="114" viewBox="0 0 56 114" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="fuselageGradUber" x1="15" y1="40" x2="39" y2="40" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
                 <stop offset="18%" stop-color="#1e293b"/>
                 <stop offset="50%" stop-color="#0f172a"/>
                 <stop offset="85%" stop-color="#020617"/>
@@ -15471,19 +15474,20 @@
                 <stop offset="65%" stop-color="#0284c7"/>
                 <stop offset="100%" stop-color="#0369a1"/>
               </linearGradient>
-              <linearGradient id="flameUberGrad" x1="27" y1="78" x2="27" y2="112" gradientUnits="userSpaceOnUse">
+              <linearGradient id="flameUberGrad" x1="27" y1="78" x2="27" y2="114" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="35%" stop-color="#bae6fd"/>
-                <stop offset="70%" stop-color="#38bdf8"/>
-                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.1"/>
+                <stop offset="25%" stop-color="#fef08a"/>
+                <stop offset="55%" stop-color="#fde047"/>
+                <stop offset="80%" stop-color="#f97316"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0.2"/>
               </linearGradient>
             </defs>
 
-            <!-- 1. Electric Plasma Flame Jet -->
+            <!-- 1. Fiery Combustion Flame Jet -->
             <g class="rocket-flame-jet">
-              <path d="M21 78C21 78 15 97 27 112C39 97 33 78 33 78H21Z" fill="url(#flameUberGrad)" filter="drop-shadow(0 0 8px #38bdf8)"/>
-              <path d="M23 78C23 78 19 93 27 104C35 93 31 78 31 78H23Z" fill="#bae6fd"/>
-              <path d="M25 78C25 78 23 88 27 96C31 88 29 78 29 78H25Z" fill="#ffffff"/>
+              <path d="M21 78C21 78 14 98 27 114C40 98 33 78 33 78H21Z" fill="url(#flameUberGrad)" filter="drop-shadow(0 0 10px #f97316)"/>
+              <path d="M23 78C23 78 18 94 27 106C36 94 31 78 31 78H23Z" fill="#fde047"/>
+              <path d="M25 78C25 78 22 89 27 97C32 89 29 78 29 78H25Z" fill="#ffffff"/>
             </g>
 
             <!-- 2. Electric Blue Swept-Back Fins -->
@@ -15534,19 +15538,20 @@
                 <stop offset="65%" stop-color="#f8fafc"/>
                 <stop offset="100%" stop-color="#e2e8f0"/>
               </linearGradient>
-              <linearGradient id="flamePathaoGrad" x1="27" y1="78" x2="27" y2="112" gradientUnits="userSpaceOnUse">
+              <linearGradient id="flamePathaoGrad" x1="27" y1="78" x2="27" y2="114" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="35%" stop-color="#fde047"/>
-                <stop offset="70%" stop-color="#f97316"/>
-                <stop offset="100%" stop-color="#ef4444" stop-opacity="0.1"/>
+                <stop offset="25%" stop-color="#fef08a"/>
+                <stop offset="55%" stop-color="#fde047"/>
+                <stop offset="80%" stop-color="#f97316"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0.2"/>
               </linearGradient>
             </defs>
 
             <!-- 1. Fiery Combustion Flame Jet -->
             <g class="rocket-flame-jet">
-              <path d="M21 78C21 78 15 97 27 112C39 97 33 78 33 78H21Z" fill="url(#flamePathaoGrad)" filter="drop-shadow(0 0 8px #f97316)"/>
-              <path d="M23 78C23 78 19 93 27 104C35 93 31 78 31 78H23Z" fill="#fde047"/>
-              <path d="M25 78C25 78 23 88 27 96C31 88 29 78 29 78H25Z" fill="#ffffff"/>
+              <path d="M21 78C21 78 14 98 27 114C40 98 33 78 33 78H21Z" fill="url(#flamePathaoGrad)" filter="drop-shadow(0 0 10px #f97316)"/>
+              <path d="M23 78C23 78 18 94 27 106C36 94 31 78 31 78H23Z" fill="#fde047"/>
+              <path d="M25 78C25 78 22 89 27 97C32 89 29 78 29 78H25Z" fill="#ffffff"/>
             </g>
 
             <!-- 2. Crisp White Swept-Back Fins with Red Border -->
@@ -15583,9 +15588,10 @@
       }
     }
 
-    // 🚀 High-Octane Rocket Launch Simulation for Uber & Pathao Deep Links
-    // Uber: Black & Blue Rocket with Cyan Plasma Flame & Blue/White Smoke
-    // Pathao: Red & White Rocket with Fiery Orange Flame & Warm/White Smoke
+    // 🚀 High-Octane Cartoon Rocket Launch Simulation for Uber & Pathao Deep Links
+    // Uber: Black & Blue Rocket with Blazing Fire Flame
+    // Pathao: Red & White Rocket with Blazing Fire Flame
+    // Exhaust: Volumetric 3D Cumulus Cloud Smoke Plume directly matching reference cartoon image
     function triggerRocketLaunchAnimation(event, appType, onLaunchComplete) {
       const btn = event?.currentTarget || (appType === 'uber' 
         ? document.getElementById('btnOpenUber') || document.querySelector('[onclick*="handleUberClick"]') 
@@ -15614,7 +15620,7 @@
       container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999999;';
       document.body.appendChild(container);
 
-      // Calculate 45° diagonal launch flight distance to shoot off top-right of screen
+      // 45° diagonal launch flight distance to shoot off top-right of screen
       const screenW = window.innerWidth;
       const screenH = window.innerHeight;
       const flightDist = Math.round(Math.max(screenW, screenH) + 400);
@@ -15623,20 +15629,19 @@
       const nozzleBaseX = originX - 39;
       const nozzleBaseY = originY + 39;
 
-      // Realistic Volumetric Smoke Puff Generator
+      // Volumetric 3D Cartoon Smoke Puff Generator (Matches Reference Image)
       function spawnRealisticSmokePuff(x, y, isHot = false, customSize = null) {
         const puff = document.createElement('div');
-        const hotClass = isUber ? 'rocket-visible-smoke-hot-uber' : 'rocket-visible-smoke-hot-pathao';
-        puff.className = `rocket-visible-smoke ${isHot ? hotClass : ''}`;
-        const size = customSize || (26 + Math.random() * 14);
-        const dx = -6 - Math.random() * 10;
-        const dy = 6 + Math.random() * 10;
-        const sEnd = 1.55 + Math.random() * 0.45;
-        const rot = Math.round((Math.random() - 0.5) * 60);
+        puff.className = `rocket-visible-smoke ${isHot ? 'rocket-visible-smoke-hot' : ''}`;
+        const size = customSize || (24 + Math.random() * 8);
+        const dx = -4 - Math.random() * 8;
+        const dy = 4 + Math.random() * 8;
+        const sEnd = 1.45 + Math.random() * 0.35;
+        const rot = Math.round((Math.random() - 0.5) * 40);
 
         puff.style.cssText = `
-          left: ${x + (Math.random() - 0.5) * 6}px;
-          top: ${y + (Math.random() - 0.5) * 6}px;
+          left: ${x + (Math.random() - 0.5) * 4}px;
+          top: ${y + (Math.random() - 0.5) * 4}px;
           width: ${size}px;
           height: ${size}px;
           --dx: ${dx.toFixed(1)}px;
@@ -15647,35 +15652,32 @@
         container.appendChild(puff);
       }
 
-      // Compact Launchpad Base Smoke (Stage 1 ignition cloud bed)
+      // Compact Launchpad Base Smoke (Stage 1 ignition cloud bed matching reference image)
       function spawnLaunchpadBaseSmoke(baseX, baseY) {
         for (let i = 0; i < 7; i++) {
-          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * Math.PI * 0.95;
-          const dist = 5 + Math.random() * 18;
+          const angle = (Math.PI * 0.75) + (Math.random() - 0.5) * Math.PI * 0.85;
+          const dist = 4 + Math.random() * 16;
           const sx = baseX + Math.cos(angle) * dist;
           const sy = baseY + Math.sin(angle) * dist;
-          spawnRealisticSmokePuff(sx, sy, i === 0, 32 + Math.random() * 10);
+          spawnRealisticSmokePuff(sx, sy, i === 0, 32 + Math.random() * 8);
         }
 
-        // Ignition sparks
-        const sparkColors = isUber 
-          ? ['#ffffff', '#bae6fd', '#38bdf8', '#0284c7'] 
-          : ['#ffffff', '#fde047', '#f97316', '#ef4444'];
-
+        // Fiery ignition sparks
+        const sparkColors = ['#ffffff', '#fde047', '#f97316', '#ef4444'];
         for (let i = 0; i < 6; i++) {
           const spark = document.createElement('div');
           spark.className = 'rocket-spark-ember';
           const color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
-          const size = 3 + Math.random() * 3;
-          const pdx = -15 - Math.random() * 35;
-          const pdy = 15 + Math.random() * 35;
+          const size = 3 + Math.random() * 2.5;
+          const pdx = -12 - Math.random() * 28;
+          const pdy = 12 + Math.random() * 28;
           spark.style.cssText = `
             left: ${baseX}px;
             top: ${baseY}px;
             width: ${size}px;
             height: ${size}px;
             background: ${color};
-            box-shadow: 0 0 10px ${color}, 0 0 16px ${isUber ? 'rgba(56, 189, 248, 0.85)' : 'rgba(249, 115, 22, 0.85)'};
+            box-shadow: 0 0 10px ${color}, 0 0 16px rgba(249, 115, 22, 0.85);
             --pdx: ${pdx.toFixed(1)}px;
             --pdy: ${pdy.toFixed(1)}px;
             animation-duration: 0.65s;
@@ -15684,13 +15686,12 @@
         }
       }
 
-      // Initial launchpad base smoke
+      // Initial launchpad base cloud mound
       spawnLaunchpadBaseSmoke(nozzleBaseX, nozzleBaseY);
 
-      // 2. The Rocket Actor (45° angle pointing to top-right matching reference icon)
+      // The Rocket Actor (45° angle pointing to top-right)
       const rocket = document.createElement('div');
       rocket.className = 'rocket-launch-actor rocket-stage-rumble';
-      rocket.style.setProperty('--target-dist', `${flightDist}px`);
       rocket.style.left = `${originX}px`;
       rocket.style.top = `${originY}px`;
       rocket.innerHTML = getCartoonRocketSvg(appType);
@@ -15707,58 +15708,33 @@
         : `🚀 Launching ${appName}... Preparing rocket!`;
       showToast(stage1Toast);
 
-      // Mid-rumble puff at 450ms
+      // Mid-rumble soft puff at 450ms
       setTimeout(() => {
         spawnRealisticSmokePuff(nozzleBaseX, nozzleBaseY, true, 28);
-        spawnRealisticSmokePuff(nozzleBaseX - 8, nozzleBaseY + 8, false, 32);
+        spawnRealisticSmokePuff(nozzleBaseX - 6, nozzleBaseY + 6, false, 32);
       }, 450);
 
       // ========================================================
-      // STAGE 2 (at 1.0s): "then show 1sec for rocket launched so moving to the uber or pathap"
-      // Realistic, volumetric continuous smoke plume streaming directly from rocket nozzle!
+      // STAGE 2 (at 1.0s): Blastoff Flight along 45° diagonal!
+      // Continuous, dense volumetric cartoon smoke plume directly following rocket nozzle!
       // ========================================================
-      let plumeInterval = null;
+      let animFrameId = null;
 
       setTimeout(() => {
-        // Switch to 45° blastoff flight
         rocket.classList.remove('rocket-stage-rumble');
-        rocket.classList.add('rocket-stage-blastoff');
 
-        // Shockwave Ring
+        // Delicate Launch Shockwave Ring
         const wave = document.createElement('div');
         wave.className = 'rocket-launch-shockwave';
-        const waveBorder = isUber ? 'rgba(56, 189, 248, 0.9)' : 'rgba(239, 68, 68, 0.9)';
-        const waveShadow = isUber ? 'rgba(56, 189, 248, 0.75)' : 'rgba(239, 68, 68, 0.75)';
         wave.style.cssText = `
           left: ${nozzleBaseX}px;
           top: ${nozzleBaseY}px;
-          width: 65px;
-          height: 65px;
-          border: 2.5px solid ${waveBorder};
-          box-shadow: 0 0 20px ${waveShadow};
+          width: 60px;
+          height: 60px;
+          border: 2.5px solid rgba(254, 240, 138, 0.85);
+          box-shadow: 0 0 18px rgba(249, 115, 22, 0.7);
         `;
         container.appendChild(wave);
-
-        // Continuous realistic plume emission (every 26ms = seamless, dense exhaust stream)
-        const plumeStartTime = Date.now();
-        let tickCount = 0;
-        plumeInterval = setInterval(() => {
-          const elapsed = Date.now() - plumeStartTime;
-          if (elapsed >= 1000) {
-            if (plumeInterval) clearInterval(plumeInterval);
-            return;
-          }
-          const r = rocket.getBoundingClientRect();
-          const cx = r.left + r.width / 2;
-          const cy = r.top + r.height / 2;
-          // Exact nozzle flame tip coordinates:
-          const tipX = cx - 39;
-          const tipY = cy + 39;
-
-          tickCount++;
-          // High-frequency volumetric puffs create a continuous connected realistic smoke plume
-          spawnRealisticSmokePuff(tipX, tipY, tickCount % 3 === 0, 28 + Math.random() * 8);
-        }, 26);
 
         if (btnLabel) {
           btnLabel.textContent = currentLanguage === 'bn' ? `🚀 ${appName}-এ যাওয়া হচ্ছে...` : `🚀 Moving to ${appName}...`;
@@ -15768,13 +15744,67 @@
           ? `🚀 রকেট লঞ্চ হয়েছে! ${appName}-এ যাওয়া হচ্ছে...`
           : `🚀 Rocket launched! Moving to ${appName}...`;
         showToast(stage2Toast);
+
+        // High-precision flight trajectory with continuous smoke trail
+        const flightStartTime = performance.now();
+        const flightDuration = 1000; // 1.0 second blastoff flight
+        let lastTipX = nozzleBaseX;
+        let lastTipY = nozzleBaseY;
+
+        function animateFlight(now) {
+          const elapsed = now - flightStartTime;
+          const t = Math.min(1, elapsed / flightDuration);
+
+          // Dynamic rocket launch acceleration curve
+          const eased = Math.pow(t, 2.3);
+          const currentDist = flightDist * eased;
+
+          // Rocket center along 45° diagonal (+X, -Y)
+          const rx = originX + (currentDist * 0.7071);
+          const ry = originY - (currentDist * 0.7071);
+
+          // Flight scale dynamics: subtle aerodynamic swell then tapering
+          const curScale = t < 0.25 
+            ? 1.05 + (t / 0.25) * 0.12 
+            : (t < 0.7 ? 1.17 - ((t - 0.25) / 0.45) * 0.22 : 0.95 - ((t - 0.7) / 0.3) * 0.35);
+
+          rocket.style.left = `${rx}px`;
+          rocket.style.top = `${ry}px`;
+          rocket.style.transform = `translate(-50%, -50%) rotate(45deg) scale(${curScale.toFixed(2)})`;
+
+          // Exact nozzle flame tip: offset -39px down-left at 45°
+          const tipX = rx - (39 * curScale);
+          const tipY = ry + (39 * curScale);
+
+          // Spawn connected volumetric smoke cloud puffs along the path
+          const distFromLast = Math.hypot(tipX - lastTipX, tipY - lastTipY);
+          const numSteps = Math.max(1, Math.floor(distFromLast / 14));
+          for (let s = 1; s <= numSteps; s++) {
+            const px = lastTipX + (tipX - lastTipX) * (s / numSteps);
+            const py = lastTipY + (tipY - lastTipY) * (s / numSteps);
+            // First 12% near launch has warm golden fire core, rest is pure cartoon cumulus cloud
+            const isWarm = (t < 0.12 && s === numSteps);
+            spawnRealisticSmokePuff(px, py, isWarm, 24 + Math.random() * 6);
+          }
+
+          lastTipX = tipX;
+          lastTipY = tipY;
+
+          if (t < 1) {
+            animFrameId = requestAnimationFrame(animateFlight);
+          } else {
+            rocket.style.opacity = '0';
+          }
+        }
+
+        animFrameId = requestAnimationFrame(animateFlight);
       }, 1000);
 
       // ========================================================
       // COMPLETE (at 2.0s): 1s launch + 1s flight -> Open app!
       // ========================================================
       setTimeout(() => {
-        if (plumeInterval) clearInterval(plumeInterval);
+        if (animFrameId) cancelAnimationFrame(animFrameId);
 
         if (typeof onLaunchComplete === 'function') {
           onLaunchComplete();
@@ -15783,8 +15813,8 @@
           btn.disabled = false;
           if (btnLabel) btnLabel.textContent = originalBtnText;
         }
-        // Let the smoke trail gently dissolve before clearing container
-        setTimeout(() => container.remove(), 750);
+        // Let the beautiful smoke trail gently dissolve before clearing container
+        setTimeout(() => container.remove(), 850);
       }, 2000);
     }
 
@@ -15911,7 +15941,16 @@
     }
 
     function toggleSurgeSimulation() {
-      isSimulatedSurge = document.getElementById('surgeToggle').checked;
+      const toggle = document.getElementById('surgeToggle');
+      const isChecked = toggle ? toggle.checked : false;
+      const { isAutoPeakTime } = getEffectivePeakState();
+
+      if (isChecked !== isAutoPeakTime) {
+        surgeManualOverride = isChecked;
+      } else {
+        surgeManualOverride = null;
+      }
+      isSimulatedSurge = isChecked;
       renderMetricsAndFares();
     }
 
