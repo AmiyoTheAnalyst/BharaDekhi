@@ -14634,13 +14634,34 @@
       ));
     }
 
-    function getFareMultipliers(isPeak) {
-      const minimumMultiplier = isPeak ? 1.4 : 0.95;
-      const maximumMultiplier = isPeak ? 2.2 : 1.15;
+    function getFareMultipliers(isPeak, vehicle = null) {
+      let minimumMultiplier;
+      let maximumMultiplier;
+
+      if (isPeak) {
+        if (vehicle === 'Bike') {
+          minimumMultiplier = 1.10;
+          maximumMultiplier = 1.80;
+        } else if (vehicle === 'Car') {
+          minimumMultiplier = 1.15;
+          maximumMultiplier = 1.80;
+        } else if (vehicle === 'CNG') {
+          minimumMultiplier = 1.12;
+          maximumMultiplier = 1.70;
+        } else {
+          // General / fallback peak multipliers (for gauge, feeds, etc.)
+          minimumMultiplier = 1.12;
+          maximumMultiplier = 1.80;
+        }
+      } else {
+        minimumMultiplier = 0.95;
+        maximumMultiplier = 1.15;
+      }
+
       return isHeavyRain
         ? {
-            minimumMultiplier: minimumMultiplier * 1.3,
-            maximumMultiplier: maximumMultiplier * 1.5
+            minimumMultiplier: Number((minimumMultiplier * 1.25).toFixed(2)),
+            maximumMultiplier: Number((maximumMultiplier * 1.35).toFixed(2))
           }
         : { minimumMultiplier, maximumMultiplier };
     }
@@ -14648,7 +14669,7 @@
     function getVehicleFareEstimate(vehicle, isPeak) {
       const { base, perKm, perMin } = VEHICLE_RATES[vehicle];
       const standardFare = base + (currentDistanceKm * perKm) + (currentDurationMins * perMin);
-      const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak);
+      const { minimumMultiplier, maximumMultiplier } = getFareMultipliers(isPeak, vehicle);
 
       const standardMin = Math.round(standardFare * minimumMultiplier);
       const standardMax = Math.round(standardFare * maximumMultiplier);
@@ -14659,7 +14680,7 @@
       let uberFactorMin = 0.96;
       let uberFactorMax = 0.97;
       let pathaoFactorMin = 1.08;
-      let pathaoFactorMax = 1.12;
+      let pathaoFactorMax = 1.10;
 
       if (vehicle === 'Car') {
         uberFactorMin = 0.94; // UberX Saver promo/discount tier
