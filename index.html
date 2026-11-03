@@ -816,7 +816,7 @@
       filter: contrast(1.16) saturate(1.24) brightness(1.02);
     }
 
-    @media (max-width: 767.98px) {
+    @media (max-width: 768px) {
       #dhakaCrossroadsContainer,
       .diorama-container {
         perspective: 1000px;
@@ -829,6 +829,121 @@
       }
       #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper {
         transform: perspective(1000px) rotateX(20deg) rotateZ(-2deg) scale3d(0.92, 0.92, 0.92);
+      }
+
+      /* 1. Mobile 3D Canvas Base Visibility Floor */
+      #dhakaCrossroads3dCanvas,
+      .canvas-3d {
+        filter: contrast(1.10) saturate(1.20) brightness(1.16) !important;
+      }
+
+      /* 2. Mobile Overcast & Stormy: High-Luminosity Visibility & Softened Shadows */
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] .canvas-3d,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #dhakaCrossroadsSvg,
+      #dhakaCrossroadsContainer.overcast #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer.overcast .canvas-3d,
+      #dhakaCrossroadsContainer.stormy #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer.stormy .canvas-3d,
+      .diorama-container.overcast .canvas-3d,
+      .diorama-container.stormy .canvas-3d {
+        filter: contrast(1.12) saturate(1.18) brightness(1.22) !important;
+      }
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #surroundingBuildingsLayer polygon,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #nwBuildingsGroup,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #neBuildingsGroup,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #swBuildingsGroup,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #seBuildingsGroup {
+        filter: drop-shadow(-4px 8px 6px rgba(10, 15, 30, 0.55))
+                drop-shadow(-8px 16px 14px rgba(10, 15, 30, 0.38)) !important;
+      }
+
+      /* 3. Mobile Night & Foggy: Radiant Illumination Eliminating Pitch-Black Scenes */
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] .canvas-3d,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #dhakaCrossroadsSvg,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] .canvas-3d,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] #dhakaCrossroadsSvg,
+      #dhakaCrossroadsContainer.night #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer.night .canvas-3d,
+      #dhakaCrossroadsContainer.foggy #dhakaCrossroads3dCanvas,
+      #dhakaCrossroadsContainer.foggy .canvas-3d,
+      .diorama-container.night .canvas-3d,
+      .diorama-container.foggy .canvas-3d {
+        filter: contrast(1.14) saturate(1.28) brightness(1.24) !important;
+      }
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #surroundingBuildingsLayer polygon,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #nwBuildingsGroup,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #neBuildingsGroup,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #swBuildingsGroup,
+      #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #seBuildingsGroup {
+        filter: drop-shadow(-4px 8px 6px rgba(10, 15, 30, 0.60))
+                drop-shadow(-8px 16px 14px rgba(10, 15, 30, 0.42)) !important;
+      }
+
+      /* 4. Mobile Diorama Container Background Colors */
+      #dhakaCrossroadsContainer[data-crossroads-weather="night"],
+      #dhakaCrossroadsContainer.night {
+        background-color: #08101e !important;
+      }
+      #dhakaCrossroadsContainer[data-crossroads-weather="fog_night"],
+      #dhakaCrossroadsContainer.foggy.night {
+        background-color: #0a1426 !important;
+      }
+      #dhakaCrossroadsContainer[data-crossroads-weather="night_overcast"],
+      #dhakaCrossroadsContainer.overcast.night {
+        background-color: #091222 !important;
+      }
+      #dhakaCrossroadsContainer[data-crossroads-weather="day_overcast"],
+      #dhakaCrossroadsContainer.overcast {
+        background-color: #1a202c !important;
+      }
+      #dhakaCrossroadsContainer[data-crossroads-weather="morning_overcast"] {
+        background-color: #202634 !important;
+      }
+
+      /* 5. Mobile Atmospheric Vignette & Depth-of-Field: Softened to prevent peripheral darkness */
+      .cinematic-vignette-frame {
+        box-shadow: inset 0 0 25px 8px rgba(10, 15, 30, 0.40),
+                    inset 0 0 50px 18px rgba(10, 15, 30, 0.25) !important;
+      }
+      .cinematic-dof-top {
+        height: 10% !important;
+        opacity: 0.40 !important;
+        background: linear-gradient(to bottom, rgba(10, 15, 30, 0.55) 0%, transparent 100%) !important;
+      }
+      .cinematic-dof-bottom {
+        height: 8% !important;
+        opacity: 0.35 !important;
+        background: linear-gradient(to top, rgba(10, 15, 30, 0.50) 0%, transparent 100%) !important;
+      }
+
+      /* 6. Mobile High-Intensity Headlights, Streetlamps & Window Glow */
+      .cr-headlight-bulb,
+      #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-bulb,
+      .vehicle-headlight,
+      .headlight-glow {
+        filter: drop-shadow(0 0 16px rgba(56, 189, 248, 1))
+                drop-shadow(0 0 28px rgba(56, 189, 248, 0.85))
+                drop-shadow(0 0 6px rgba(255, 255, 255, 1)) !important;
+        opacity: 1 !important;
+      }
+
+      .cr-streetlamp-head,
+      #dhakaCrossroadsContainer.is-3d-drone-mode ellipse[fill="url(#streetlampPoolGrad)"] {
+        filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.95))
+                drop-shadow(0 0 35px rgba(251, 191, 36, 0.75)) !important;
+        opacity: 0.95 !important;
+      }
+
+      .building-window,
+      .window-glow-pulse,
+      .porch-light,
+      #dhakaCrossroadsContainer.is-3d-drone-mode .building-window {
+        filter: drop-shadow(0 0 18px rgba(254, 240, 138, 0.95))
+                drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) !important;
+        opacity: 1 !important;
       }
     }
 
@@ -924,35 +1039,35 @@
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #dhakaCrossroads3dCanvas,
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] .canvas-3d,
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #dhakaCrossroadsSvg {
-      filter: contrast(1.22) saturate(0.88) brightness(0.92);
+      filter: contrast(1.15) saturate(1.05) brightness(1.06);
     }
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #surroundingBuildingsLayer polygon,
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #nwBuildingsGroup,
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #neBuildingsGroup,
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #swBuildingsGroup,
     #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #seBuildingsGroup {
-      filter: drop-shadow(-14px 26px 12px rgba(0, 0, 0, 0.94))
-              drop-shadow(-32px 54px 32px rgba(0, 0, 0, 0.88));
+      filter: drop-shadow(-10px 18px 8px rgba(0, 0, 0, 0.75))
+              drop-shadow(-22px 38px 22px rgba(0, 0, 0, 0.65));
     }
 
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #dhakaCrossroads3dCanvas,
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] .canvas-3d,
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #dhakaCrossroadsSvg {
-      filter: contrast(1.18) saturate(1.25) brightness(1.04);
+      filter: contrast(1.16) saturate(1.26) brightness(1.10);
     }
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #surroundingBuildingsLayer polygon,
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #nwBuildingsGroup,
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #neBuildingsGroup,
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #swBuildingsGroup,
     #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #seBuildingsGroup {
-      filter: drop-shadow(-12px 22px 10px rgba(0, 0, 0, 0.95))
-              drop-shadow(-26px 46px 28px rgba(2, 6, 23, 0.92));
+      filter: drop-shadow(-10px 18px 8px rgba(0, 0, 0, 0.80))
+              drop-shadow(-20px 36px 20px rgba(2, 6, 23, 0.72));
     }
 
     #dhakaCrossroadsContainer[data-crossroads-weather="rain"] #dhakaCrossroads3dCanvas,
     #dhakaCrossroadsContainer[data-crossroads-weather="rain"] .canvas-3d,
     #dhakaCrossroadsContainer[data-crossroads-weather="rain"] #dhakaCrossroadsSvg {
-      filter: contrast(1.16) saturate(1.10) brightness(0.95);
+      filter: contrast(1.16) saturate(1.12) brightness(1.02);
     }
 
     #dhakaCrossroadsContainer[data-crossroads-weather*="sunset"] #dhakaCrossroads3dCanvas,
@@ -964,13 +1079,13 @@
     #dhakaCrossroadsContainer[data-crossroads-weather*="sunrise"] #dhakaCrossroads3dCanvas,
     #dhakaCrossroadsContainer[data-crossroads-weather*="sunrise"] .canvas-3d,
     #dhakaCrossroadsContainer[data-crossroads-weather*="sunrise"] #dhakaCrossroadsSvg {
-      filter: contrast(1.10) saturate(1.22) brightness(1.03);
+      filter: contrast(1.10) saturate(1.22) brightness(1.04);
     }
 
     #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] #dhakaCrossroads3dCanvas,
     #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] .canvas-3d,
     #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] #dhakaCrossroadsSvg {
-      filter: contrast(1.06) saturate(0.95) brightness(0.98);
+      filter: contrast(1.08) saturate(1.06) brightness(1.08);
     }
 
     /* Cinematic Depth-of-Field & Peripheral Vignette Frame */

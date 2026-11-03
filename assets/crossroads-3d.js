@@ -2080,24 +2080,32 @@
 
   let strobeTimer = 0;
   let lastWeatherMode = null;
+  let lastIsMobile = null;
 
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
 
     // Atmospheric Weather Mode Transition (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
-    if (currentMode !== lastWeatherMode) {
+    const isMobileScreen = typeof window !== 'undefined' && (window.innerWidth <= 768 || (camera && camera.aspect < 1.15));
+
+    if (currentMode !== lastWeatherMode || isMobileScreen !== lastIsMobile) {
       lastWeatherMode = currentMode;
+      lastIsMobile = isMobileScreen;
       const isFoggyOrOvercast = currentMode.includes('fog') || currentMode.includes('overcast');
+
       if (cornerPointLights && cornerPointLights.length) {
-        // 10% point light intensity in foggy & overcast, standard 1.5 in normal night mode
-        const baseIntensity = isFoggyOrOvercast ? 0.15 : (currentMode === 'sun' ? 0.3 : (currentMode === 'rain' ? 1.2 : 1.5));
+        // Boost point light illumination on mobile screens (especially in overcast & foggy night)
+        const baseIntensity = isMobileScreen 
+          ? (isFoggyOrOvercast ? 1.05 : (currentMode === 'sun' ? 0.6 : (currentMode === 'rain' ? 1.6 : 1.8)))
+          : (isFoggyOrOvercast ? 0.55 : (currentMode === 'sun' ? 0.3 : (currentMode === 'rain' ? 1.2 : 1.5)));
         cornerPointLights.forEach(pl => {
           pl.intensity = baseIntensity;
           pl.color.setHex(0xfef08a);
         });
       }
-      // Calibrate building window emissive glow: 10% for foggy & overcast, standard 0.45 for normal night
+
+      // Calibrate building window emissive glow: keep well-lit and vibrant on mobile
       if (scene) {
         scene.traverse(obj => {
           if (obj.isMesh && obj.material) {
@@ -2105,17 +2113,18 @@
             mats.forEach(mat => {
               if (mat && mat.emissiveMap) {
                 if (isFoggyOrOvercast) {
-                  mat.emissiveIntensity = 0.08;
+                  mat.emissiveIntensity = isMobileScreen ? 0.45 : 0.25;
                 } else if (currentMode === 'sun') {
-                  mat.emissiveIntensity = 0.05;
+                  mat.emissiveIntensity = 0.08;
                 } else {
-                  mat.emissiveIntensity = 0.45;
+                  mat.emissiveIntensity = isMobileScreen ? 0.70 : 0.45;
                 }
               }
             });
           }
         });
       }
+
       if (currentMode === 'sunrise') {
         scene.background.setHex(0x311b38);
         if (scene.fog) {
@@ -2124,53 +2133,53 @@
         }
         if (sunLight) {
           sunLight.color.setHex(0xffaa88);
-          sunLight.intensity = 1.35;
+          sunLight.intensity = isMobileScreen ? 1.50 : 1.35;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfbcfe8);
-          ambientLight.intensity = 0.70;
+          ambientLight.intensity = isMobileScreen ? 0.85 : 0.70;
         }
       } else if (currentMode === 'sunrise_overcast') {
-        scene.background.setHex(0x1a1921);
+        scene.background.setHex(isMobileScreen ? 0x25232e : 0x1a1921);
         if (scene.fog) {
-          scene.fog.color.setHex(0x322830);
-          scene.fog.density = 0.0012;
+          scene.fog.color.setHex(isMobileScreen ? 0x483a45 : 0x322830);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0012;
         }
         if (sunLight) {
           sunLight.color.setHex(0xfb7185);
-          sunLight.intensity = 0.80;
+          sunLight.intensity = isMobileScreen ? 1.10 : 0.80;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x3b3340);
-          ambientLight.intensity = 0.55;
+          ambientLight.color.setHex(isMobileScreen ? 0x54495c : 0x3b3340);
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.55;
         }
       } else if (currentMode === 'fog_sunrise') {
-        scene.background.setHex(0x2e1f2f);
+        scene.background.setHex(isMobileScreen ? 0x3a283c : 0x2e1f2f);
         if (scene.fog) {
-          scene.fog.color.setHex(0x7c4d5a);
-          scene.fog.density = 0.0022;
+          scene.fog.color.setHex(isMobileScreen ? 0x8a5565 : 0x7c4d5a);
+          scene.fog.density = isMobileScreen ? 0.0012 : 0.0022;
         }
         if (sunLight) {
           sunLight.color.setHex(0xfed7aa);
-          sunLight.intensity = 0.85;
+          sunLight.intensity = isMobileScreen ? 1.15 : 0.85;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfbcfe8);
-          ambientLight.intensity = 0.70;
+          ambientLight.intensity = isMobileScreen ? 0.88 : 0.70;
         }
       } else if (currentMode === 'morning_overcast') {
-        scene.background.setHex(0x1e2129);
+        scene.background.setHex(isMobileScreen ? 0x2a2f3a : 0x1e2129);
         if (scene.fog) {
-          scene.fog.color.setHex(0x282e38);
-          scene.fog.density = 0.0013;
+          scene.fog.color.setHex(isMobileScreen ? 0x394150 : 0x282e38);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0013;
         }
         if (sunLight) {
           sunLight.color.setHex(0x94a3b8);
-          sunLight.intensity = 0.75;
+          sunLight.intensity = isMobileScreen ? 1.10 : 0.75;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x333b47);
-          ambientLight.intensity = 0.55;
+          ambientLight.color.setHex(isMobileScreen ? 0x485363 : 0x333b47);
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.55;
         }
       } else if (currentMode === 'sun') {
         scene.background.setHex(0x0284c7);
@@ -2184,21 +2193,21 @@
         }
         if (ambientLight) {
           ambientLight.color.setHex(0x7dd3fc);
-          ambientLight.intensity = 0.75;
+          ambientLight.intensity = isMobileScreen ? 0.88 : 0.75;
         }
       } else if (currentMode === 'day_overcast') {
-        scene.background.setHex(0x12151b);
+        scene.background.setHex(isMobileScreen ? 0x1e232e : 0x12151b);
         if (scene.fog) {
-          scene.fog.color.setHex(0x1f232b);
-          scene.fog.density = 0.0014;
+          scene.fog.color.setHex(isMobileScreen ? 0x2c3240 : 0x1f232b);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0014;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x64748b);
-          sunLight.intensity = 0.70;
+          sunLight.color.setHex(0x94a3b8);
+          sunLight.intensity = isMobileScreen ? 1.05 : 0.70;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x272c36);
-          ambientLight.intensity = 0.50;
+          ambientLight.color.setHex(isMobileScreen ? 0x3b4352 : 0x272c36);
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.50;
         }
       } else if (currentMode === 'sunset') {
         scene.background.setHex(0x311006);
@@ -2208,39 +2217,39 @@
         }
         if (sunLight) {
           sunLight.color.setHex(0xff7722);
-          sunLight.intensity = 1.35;
+          sunLight.intensity = isMobileScreen ? 1.50 : 1.35;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfb923c);
-          ambientLight.intensity = 0.7;
+          ambientLight.intensity = isMobileScreen ? 0.85 : 0.70;
         }
       } else if (currentMode === 'sunset_overcast') {
-        scene.background.setHex(0x20141d);
+        scene.background.setHex(isMobileScreen ? 0x2e1d2a : 0x20141d);
         if (scene.fog) {
-          scene.fog.color.setHex(0x3a2228);
-          scene.fog.density = 0.0013;
+          scene.fog.color.setHex(isMobileScreen ? 0x4e2e36 : 0x3a2228);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0013;
         }
         if (sunLight) {
           sunLight.color.setHex(0xea580c);
-          sunLight.intensity = 0.85;
+          sunLight.intensity = isMobileScreen ? 1.15 : 0.85;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x4a2a2d);
-          ambientLight.intensity = 0.50;
+          ambientLight.color.setHex(isMobileScreen ? 0x61373b : 0x4a2a2d);
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.50;
         }
       } else if (currentMode === 'fog_sunset') {
-        scene.background.setHex(0x2a1510);
+        scene.background.setHex(isMobileScreen ? 0x381c15 : 0x2a1510);
         if (scene.fog) {
-          scene.fog.color.setHex(0x7c2d12);
-          scene.fog.density = 0.0024;
+          scene.fog.color.setHex(isMobileScreen ? 0x8f3616 : 0x7c2d12);
+          scene.fog.density = isMobileScreen ? 0.0014 : 0.0024;
         }
         if (sunLight) {
           sunLight.color.setHex(0xea580c);
-          sunLight.intensity = 0.80;
+          sunLight.intensity = isMobileScreen ? 1.10 : 0.80;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xc2410c);
-          ambientLight.intensity = 0.55;
+          ambientLight.intensity = isMobileScreen ? 0.78 : 0.55;
         }
       } else if (currentMode === 'fog_day') {
         scene.background.setHex(0x94a3b8);
@@ -2250,73 +2259,79 @@
         }
         if (sunLight) {
           sunLight.color.setHex(0xe2e8f0);
-          sunLight.intensity = 0.9;
+          sunLight.intensity = 1.0;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0x94a3b8);
-          ambientLight.intensity = 0.85;
+          ambientLight.intensity = 0.90;
         }
       } else if (currentMode === 'fog_night') {
-        scene.background.setHex(0x060c18);
+        scene.background.setHex(isMobileScreen ? 0x0c1527 : 0x060c18);
         if (scene.fog) {
-          scene.fog.color.setHex(0x0c1527);
-          scene.fog.density = 0.0020;
+          scene.fog.color.setHex(isMobileScreen ? 0x13203a : 0x0c1527);
+          scene.fog.density = isMobileScreen ? 0.0009 : 0.0014;
         }
         if (sunLight) {
           sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = 0.35;
+          sunLight.intensity = isMobileScreen ? 0.75 : 0.45;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = 0.40;
+          ambientLight.color.setHex(0x38bdf8);
+          ambientLight.intensity = isMobileScreen ? 0.78 : 0.55;
         }
         if (cornerPointLights && cornerPointLights.length) {
           cornerPointLights.forEach(pl => {
-            pl.intensity = 0.15;
-            pl.color.setHex(0xfff08a);
+            pl.intensity = isMobileScreen ? 1.10 : 0.45;
+            pl.color.setHex(0xfef08a);
           });
         }
       } else if (currentMode === 'rain') {
-        scene.background.setHex(0x0a1120);
+        scene.background.setHex(isMobileScreen ? 0x0f1a30 : 0x0a1120);
         if (scene.fog) {
-          scene.fog.color.setHex(0x0f172a);
-          scene.fog.density = 0.0012;
+          scene.fog.color.setHex(isMobileScreen ? 0x16233d : 0x0f172a);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0012;
         }
         if (sunLight) {
           sunLight.color.setHex(0x60a5fa);
-          sunLight.intensity = 0.65;
+          sunLight.intensity = isMobileScreen ? 0.90 : 0.65;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = 0.6;
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.60;
         }
       } else if (currentMode === 'night_overcast') {
-        scene.background.setHex(0x020306);
+        scene.background.setHex(isMobileScreen ? 0x0a1222 : 0x020306);
         if (scene.fog) {
-          scene.fog.color.setHex(0x04060c);
-          scene.fog.density = 0.0012;
-        }
-        if (sunLight) {
-          sunLight.color.setHex(0x64748b);
-          sunLight.intensity = 0.30;
-        }
-        if (ambientLight) {
-          ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = 0.38;
-        }
-      } else { // night
-        scene.background.setHex(0x020408);
-        if (scene.fog) {
-          scene.fog.color.setHex(0x03060f);
-          scene.fog.density = 0.0005;
+          scene.fog.color.setHex(isMobileScreen ? 0x111c30 : 0x04060c);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0011;
         }
         if (sunLight) {
           sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = 0.45;
+          sunLight.intensity = isMobileScreen ? 0.70 : 0.45;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = 0.55;
+          ambientLight.color.setHex(0x38bdf8);
+          ambientLight.intensity = isMobileScreen ? 0.76 : 0.52;
+        }
+        if (cornerPointLights && cornerPointLights.length) {
+          cornerPointLights.forEach(pl => {
+            pl.intensity = isMobileScreen ? 1.00 : 0.45;
+            pl.color.setHex(0xfef08a);
+          });
+        }
+      } else { // night
+        scene.background.setHex(isMobileScreen ? 0x08101e : 0x020408);
+        if (scene.fog) {
+          scene.fog.color.setHex(isMobileScreen ? 0x0e182d : 0x03060f);
+          scene.fog.density = isMobileScreen ? 0.0004 : 0.0005;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x93c5fd);
+          sunLight.intensity = isMobileScreen ? 0.75 : 0.50;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(0x38bdf8);
+          ambientLight.intensity = isMobileScreen ? 0.76 : 0.58;
         }
       }
     }
