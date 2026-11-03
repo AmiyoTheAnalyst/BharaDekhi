@@ -14639,19 +14639,22 @@
       let maximumMultiplier;
 
       if (isPeak) {
+        const dhakaTime = typeof getDhakaTimeInfo === 'function' ? getDhakaTimeInfo() : null;
+        const isEveningPeak = (dhakaTime && dhakaTime.peakPeriod === 'Evening Peak') || isSimulatedSurge;
+
         if (vehicle === 'Bike') {
-          minimumMultiplier = 1.10;
-          maximumMultiplier = 1.80;
+          minimumMultiplier = isEveningPeak ? 1.12 : 1.10;
+          maximumMultiplier = isEveningPeak ? 1.82 : 1.75;
         } else if (vehicle === 'Car') {
-          minimumMultiplier = 1.15;
-          maximumMultiplier = 1.80;
+          minimumMultiplier = isEveningPeak ? 1.18 : 1.15;
+          maximumMultiplier = isEveningPeak ? 1.85 : 1.78;
         } else if (vehicle === 'CNG') {
           minimumMultiplier = 1.12;
           maximumMultiplier = 1.70;
         } else {
           // General / fallback peak multipliers (for gauge, feeds, etc.)
-          minimumMultiplier = 1.12;
-          maximumMultiplier = 1.80;
+          minimumMultiplier = isEveningPeak ? 1.14 : 1.12;
+          maximumMultiplier = isEveningPeak ? 1.82 : 1.78;
         }
       } else {
         minimumMultiplier = 0.95;
