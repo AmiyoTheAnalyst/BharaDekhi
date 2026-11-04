@@ -102,13 +102,6 @@
       document.write('\x3Cscript src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">\x3C/script>');
     }
   </script>
-  <!-- Three.js Post-processing for Cyber-Modern Dhaka Bloom & Atmospheric Glow -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -1020,6 +1013,54 @@
         opacity: 0.85 !important;
         filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.65)) !important;
       }
+
+      /* Compact Mobile HUD: Horizontal Docked Transit Legend (< 768px) */
+      #crossroadsModeLegend {
+        position: absolute !important;
+        bottom: 4.8rem !important;
+        left: 0.75rem !important;
+        right: 0.75rem !important;
+        max-width: none !important;
+        width: auto !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0.35rem 0.6rem !important;
+        border-radius: 9999px !important;
+        gap: 0.35rem !important;
+        z-index: 45 !important;
+        scrollbar-width: none !important;
+      }
+      #crossroadsModeLegend::-webkit-scrollbar {
+        display: none !important;
+      }
+      #crossroadsModeLegend > div:first-child {
+        display: none !important;
+      }
+      #crossroadsModeLegend button {
+        flex-shrink: 0 !important;
+        padding: 0.3rem 0.65rem !important;
+        border-radius: 9999px !important;
+      }
+
+      /* Compact Mobile Header: Title & Quick Actions */
+      #landingTopHeader {
+        max-width: 58% !important;
+      }
+      #landingTopHeader h2 {
+        font-size: 1.15rem !important;
+        line-height: 1.25 !important;
+      }
+      #landingTopActions {
+        max-width: 40% !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+      }
+      #landingTopActions::-webkit-scrollbar {
+        display: none !important;
+      }
     }
 
     /* 3D Mode Ambient Depth & Drop Shadows */
@@ -1166,22 +1207,30 @@
     /* Outer HUD & Controls Layer (Toggles, Badges, Buttons): Prominently visible above 3D diorama canvas & atmosphere in ALL modes */
     #landingTopHeader,
     #landingTopActions {
-      z-index: 60 !important;
+      z-index: 90 !important;
       opacity: 1 !important;
       visibility: visible !important;
+      pointer-events: auto !important;
     }
     #landingTopActions > *,
     #landingTopHeader .inline-flex {
-      background-color: rgba(15, 23, 42, 0.95) !important;
-      border: 1px solid rgba(56, 189, 248, 0.45) !important;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85), 0 0 12px rgba(56, 189, 248, 0.25) !important;
-      backdrop-filter: blur(12px) !important;
-      -webkit-backdrop-filter: blur(12px) !important;
-      color: #f8fafc !important;
+      background-color: rgba(10, 15, 26, 0.94) !important;
+      border: 1px solid rgba(56, 189, 248, 0.55) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85), 0 0 12px rgba(56, 189, 248, 0.30) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      color: #ffffff !important;
     }
     #landingTopActions button {
-      color: #f8fafc !important;
+      background-color: rgba(15, 23, 42, 0.92) !important;
+      border: 1px solid rgba(148, 163, 184, 0.45) !important;
+      color: #ffffff !important;
       opacity: 1 !important;
+    }
+    #landingTopActions button:hover {
+      background-color: rgba(30, 41, 59, 0.95) !important;
+      border-color: rgba(56, 189, 248, 0.7) !important;
+      color: #ffffff !important;
     }
     #crossroadsViewModeBtn {
       border: 1px solid rgba(52, 211, 153, 0.85) !important;
@@ -5020,7 +5069,30 @@
         <!-- Synchronized Crossroads Lightning Sky Flash Overlay -->
         <div id="dhakaLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-30 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
         
-        <!-- Top-Left HUD Header: Transit Grid & Slogan -->
+        <!-- Floating Interactive Vehicle & Transit Micro-Tooltip -->
+        <div id="crossroadsVehicleTooltip" class="absolute z-40 pointer-events-none opacity-0 transition-opacity duration-150 px-2.5 py-1.5 rounded-xl bg-slate-950/95 border border-sky-500/50 text-white text-[11px] font-bold shadow-2xl backdrop-blur-md flex items-center gap-1.5 transform -translate-x-1/2 -translate-y-full">
+          <span id="crossroadsVehicleTooltipIcon">🛺</span>
+          <span id="crossroadsVehicleTooltipText">Cycle Rickshaw · রিকশা</span>
+        </div>
+
+        <!-- Cinematic Drone Camera Atmospheric Vignette & Depth-of-Field Overlay (Active in 3D Mode Only) -->
+        <div id="crossroads3dDroneAtmosphere" class="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+          <!-- 1. Distant Atmospheric Depth Haze & Tilt-Shift Depth-of-Field Blur (Top Horizon) -->
+          <div class="cinematic-dof-top"></div>
+          <!-- 2. Foreground Soft Focal Falloff (Bottom Horizon) -->
+          <div class="cinematic-dof-bottom"></div>
+          <!-- 3. Cinematic Outer Edge Vignette Frame -->
+          <div class="cinematic-vignette-frame"></div>
+          <!-- 4. Radial Vignette Gradient (Miniature Drone Optical Falloff) -->
+          <div class="cinematic-drone-vignette absolute inset-0 bg-[radial-gradient(ellipse_at_50%_52%,transparent_45%,rgba(2,6,23,0.35)_72%,rgba(2,6,23,0.85)_100%)] transition-opacity duration-700"></div>
+          <!-- 5. Dedicated Volumetric Fog & Overcast Atmospheric Haze Layer -->
+          <div id="crossroadsVolumetricFogHaze" class="volumetric-fog-haze-layer absolute inset-0 pointer-events-none transition-all duration-700 opacity-0"></div>
+        </div>
+
+        <!-- Real 3D Miniature City Diorama WebGL Canvas (Active in 3D Drone Mode) -->
+        <canvas id="dhakaCrossroads3dCanvas" class="canvas-3d absolute inset-0 w-full h-full pointer-events-auto" style="display: none;"></canvas>
+
+        <!-- Top-Left HUD Header: Transit Grid & Slogan (Prominently stacked above 3D diorama & atmosphere) -->
         <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-50 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
             <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg w-fit">
@@ -5046,7 +5118,7 @@
           </div>
         </div>
 
-        <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
+        <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions (Prominently stacked above 3D diorama & atmosphere) -->
         <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-50 flex items-center gap-1.5 sm:gap-2">
           <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
             <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
@@ -5079,31 +5151,6 @@
             <span class="hidden sm:inline">Logout</span>
           </button>
         </div>
-
-        <!-- Floating Interactive Vehicle & Transit Micro-Tooltip -->
-        <div id="crossroadsVehicleTooltip" class="absolute z-40 pointer-events-none opacity-0 transition-opacity duration-150 px-2.5 py-1.5 rounded-xl bg-slate-950/95 border border-sky-500/50 text-white text-[11px] font-bold shadow-2xl backdrop-blur-md flex items-center gap-1.5 transform -translate-x-1/2 -translate-y-full">
-          <span id="crossroadsVehicleTooltipIcon">🛺</span>
-          <span id="crossroadsVehicleTooltipText">Cycle Rickshaw · রিকশা</span>
-        </div>
-
-        <!-- Cinematic Drone Camera Atmospheric Vignette & Depth-of-Field Overlay (Active in 3D Mode Only) -->
-        <div id="crossroads3dDroneAtmosphere" class="pointer-events-none absolute inset-0 z-10 overflow-hidden">
-          <!-- 1. Distant Atmospheric Depth Haze & Tilt-Shift Depth-of-Field Blur (Top Horizon) -->
-          <div class="cinematic-dof-top"></div>
-          <!-- 2. Foreground Soft Focal Falloff (Bottom Horizon) -->
-          <div class="cinematic-dof-bottom"></div>
-          <!-- 3. Cinematic Outer Edge Vignette Frame -->
-          <div class="cinematic-vignette-frame"></div>
-          <!-- 4. Radial Vignette Gradient (Miniature Drone Optical Falloff) -->
-          <div class="cinematic-drone-vignette absolute inset-0 bg-[radial-gradient(ellipse_at_50%_52%,transparent_45%,rgba(2,6,23,0.35)_72%,rgba(2,6,23,0.85)_100%)] transition-opacity duration-700"></div>
-          <!-- 5. Soft Atmospheric City Light Glow Bloom -->
-          <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.06)_0%,rgba(254,240,138,0.03)_40%,transparent_70%)] mix-blend-screen"></div>
-          <!-- 6. Dedicated Volumetric Fog & Overcast Atmospheric Haze Layer -->
-          <div id="crossroadsVolumetricFogHaze" class="volumetric-fog-haze-layer absolute inset-0 pointer-events-none transition-all duration-700 opacity-0"></div>
-        </div>
-
-        <!-- Real 3D Miniature City Diorama WebGL Canvas (Active in 3D Drone Mode) -->
-        <canvas id="dhakaCrossroads3dCanvas" class="canvas-3d absolute inset-0 w-full h-full pointer-events-auto" style="display: none;"></canvas>
 
         <!-- Responsive Stage Wrapper: Mobile Prominent Height (< 768px) & Desktop Contain (>= 768px) -->
         <div id="dhakaCrossroadsStageWrapper" class="absolute inset-0 w-full h-full flex items-center justify-center p-1 sm:p-4 md:p-6 overflow-hidden pointer-events-none">
@@ -7624,7 +7671,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <span class="font-black text-sm sm:text-base text-sky-400 font-mono">৳85</span>
+                <span class="font-black text-sm sm:text-base text-sky-400 font-mono">৳60–৳90</span>
                 <span class="text-[9px] text-emerald-400 block font-bold">12 min ETA</span>
               </div>
             </div>
@@ -7636,13 +7683,13 @@
                 <div>
                   <div class="flex items-center gap-1.5">
                     <span class="font-bold text-xs sm:text-sm text-emerald-300">CNG Auto-Rickshaw</span>
-                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-200 font-semibold">Dhaka Icon</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-200 font-semibold">Balanced</span>
                   </div>
                   <span class="text-[10px] text-slate-400 block">Base ৳40 + ৳15/km · Rainproof</span>
                 </div>
               </div>
               <div class="text-right">
-                <span class="font-black text-sm sm:text-base text-emerald-400 font-mono">৳130</span>
+                <span class="font-black text-sm sm:text-base text-emerald-400 font-mono">৳120–৳160</span>
                 <span class="text-[9px] text-slate-400 block">22 min ETA</span>
               </div>
             </div>
@@ -7660,7 +7707,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <span class="font-black text-sm sm:text-base text-indigo-400 font-mono">৳210</span>
+                <span class="font-black text-sm sm:text-base text-indigo-400 font-mono">৳220–৳300</span>
                 <span class="text-[9px] text-slate-400 block">35 min ETA</span>
               </div>
             </div>
