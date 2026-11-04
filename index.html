@@ -7625,22 +7625,56 @@
       </div>
   </section>
 
-  <!-- 4-Stage 3D Scroll-Triggered Storytelling Hero for Bhara dekhi -->
+  <!-- 5-Stage 3D Scroll-Triggered Storytelling Hero for Bhara dekhi (500vh container, scrub: 1.2) -->
   <section id="scrollTransitHeroSection" class="hidden relative w-full bg-slate-950 text-white select-none">
-    <!-- Sticky 3D Canvas Background (Scoped so it never blocks Leaflet map clicks below) -->
+    <!-- Sticky 3D Canvas Background (Scoped pointer-events-none ensures Leaflet map stays 100% interactive) -->
     <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
       <canvas id="scrollTransitHeroCanvas" class="w-full h-full block"></canvas>
     </div>
 
-    <!-- Scrollable Foreground Storytelling Cards (400vh total scroll distance) -->
+    <!-- Scrollable Foreground Storytelling Cards (500vh total scroll distance) -->
     <div class="relative z-10 -mt-[100vh] pointer-events-none">
-      <!-- Section 1: Rickshaw Fare Estimation (0% - 25% Scroll) -->
+      <!-- Stage 1 (0% – 20% Scroll) — Comparison of Bike, CNG, & Car Fare (NEW FIRST STAGE) -->
       <div class="h-screen flex items-center px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/75 backdrop-blur-xl border border-amber-500/30 p-8 rounded-2xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-amber-500/20 text-amber-300 rounded-full mb-4">
+        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-violet-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
+          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-violet-500/20 text-violet-300 rounded-full mb-3.5 border border-violet-500/30">
+            Bhara dekhi • Multi-Mode Comparison
+          </span>
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
+            Comparison of Bike, CNG &amp; Car Fare
+          </h2>
+          <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-5">
+            Compare instant side-by-side fare estimates for Ride-Share Bikes, CNG Auto-Rickshaws, and Cars across Dhaka traffic before you book.
+          </p>
+
+          <!-- 3 Mini Visual Comparison Pills -->
+          <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
+            <div class="flex flex-col items-center justify-center p-2 rounded-xl bg-violet-950/60 border border-violet-500/40 text-center">
+              <span class="text-sm">🏍️</span>
+              <span class="text-[10px] font-bold text-violet-200 mt-0.5">Bike</span>
+              <span class="text-[8px] text-violet-300/80 uppercase tracking-wider font-semibold">Fastest</span>
+            </div>
+            <div class="flex flex-col items-center justify-center p-2 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-center">
+              <span class="text-sm">🛺</span>
+              <span class="text-[10px] font-bold text-emerald-200 mt-0.5">CNG</span>
+              <span class="text-[8px] text-emerald-300/80 uppercase tracking-wider font-semibold">Balanced</span>
+            </div>
+            <div class="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-center">
+              <span class="text-sm">🚗</span>
+              <span class="text-[10px] font-bold text-cyan-200 mt-0.5">Car</span>
+              <span class="text-[8px] text-cyan-300/80 uppercase tracking-wider font-semibold">Comfort</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage 2 (20% – 40% Scroll) — Rickshaw Fare Estimation -->
+      <div class="h-screen flex items-center justify-end px-6 md:px-16 lg:px-24">
+        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
+          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-amber-500/20 text-amber-300 rounded-full mb-3.5 border border-amber-500/30">
             Bhara dekhi • Hyper-Local
           </span>
-          <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
             Rickshaw Fare Estimation
           </h2>
           <p class="text-slate-300 leading-relaxed text-sm md:text-base">
@@ -7649,13 +7683,13 @@
         </div>
       </div>
 
-      <!-- Section 2: Bus Routes (25% - 50% Scroll) -->
-      <div class="h-screen flex items-center justify-end px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/75 backdrop-blur-xl border border-teal-500/30 p-8 rounded-2xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-teal-500/20 text-teal-300 rounded-full mb-4">
+      <!-- Stage 3 (40% – 60% Scroll) — Smart Bus Route Discovery (BRTA Calibrated) -->
+      <div class="h-screen flex items-center px-6 md:px-16 lg:px-24">
+        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-teal-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
+          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-teal-500/20 text-teal-300 rounded-full mb-3.5 border border-teal-500/30">
             Official BRTA Calibration
           </span>
-          <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
             Smart Bus Route Discovery
           </h2>
           <p class="text-slate-300 leading-relaxed text-sm md:text-base">
@@ -7664,13 +7698,13 @@
         </div>
       </div>
 
-      <!-- Section 3: Dhaka Metro Rail (50% - 75% Scroll) -->
-      <div class="h-screen flex items-center px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/75 backdrop-blur-xl border border-emerald-500/30 p-8 rounded-2xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-emerald-500/20 text-emerald-300 rounded-full mb-4">
+      <!-- Stage 4 (60% – 80% Scroll) — Dhaka Metro Rail (MRT Line-6) -->
+      <div class="h-screen flex items-center justify-end px-6 md:px-16 lg:px-24">
+        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-emerald-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
+          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-emerald-500/20 text-emerald-300 rounded-full mb-3.5 border border-emerald-500/30">
             MRT Line-6 Rapid Transit
           </span>
-          <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
             Metro Rail Route &amp; Fares
           </h2>
           <p class="text-slate-300 leading-relaxed text-sm md:text-base">
@@ -7679,16 +7713,16 @@
         </div>
       </div>
 
-      <!-- Section 4: Dynamic Weather Surge & Planner CTA (75% - 100% Scroll) -->
+      <!-- Stage 5 (80% – 100% Scroll) — Real-Time Weather Surge Pricing & Planner CTA -->
       <div class="h-screen flex items-center justify-center px-6 text-center">
         <div class="max-w-lg bg-slate-900/85 backdrop-blur-xl border border-blue-500/40 p-8 md:p-10 rounded-3xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-blue-500/20 text-blue-300 rounded-full mb-4">
+          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-blue-500/20 text-blue-300 rounded-full mb-3.5 border border-blue-500/30">
             Live Open-Meteo Integration
           </span>
-          <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
             Real-Time Weather Surge Pricing
           </h2>
-          <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-8">
+          <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-7">
             Rain in Dhaka changes everything. Bhara dekhi checks live weather data to factor rain surge adjustments into your fare estimates automatically.
           </p>
           <a
@@ -16605,6 +16639,13 @@
       const isLoggedIn = (localStorage.getItem('commuteHubLoggedIn') === 'true' && Boolean(currentUser)) || isTestBypass;
 
       if (!isLoggedIn) {
+        if (hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner') {
+          localStorage.setItem('commuteHubLoggedIn', 'true');
+          localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Dhaka Commuter', email: 'demo@bharadekhi.com' }));
+          localStorage.setItem('commuteHubRole', 'user');
+          showView('user-planner');
+          return;
+        }
         showView('auth');
         return;
       }
