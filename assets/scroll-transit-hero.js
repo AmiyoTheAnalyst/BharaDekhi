@@ -394,8 +394,9 @@
       };
       targetLookAt = { x: 0.5, y: 1.2, z: 2 };
       targetSpotPos = { x: 0, y: 1.5, z: 2 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0x38bdf8);
+      if (studioSpotlight) studioSpotlight.color.setHex(0x06b6d4);
       if (rainParticles) rainParticles.material.opacity = 0;
+      if (canvasEl) canvasEl.style.opacity = '1.0';
 
     } else if (p < 0.40) {
       // Stage 2: Rickshaw Fare Estimation
@@ -413,6 +414,7 @@
       targetSpotPos = { x: -16, y: 1.5, z: -4 };
       if (studioSpotlight) studioSpotlight.color.setHex(0xf59e0b);
       if (rainParticles) rainParticles.material.opacity = 0;
+      if (canvasEl) canvasEl.style.opacity = '1.0';
 
     } else if (p < 0.60) {
       // Stage 3: Smart Bus Route Discovery (BRTA Calibrated)
@@ -428,8 +430,9 @@
         z: -4 - stg * 2
       };
       targetSpotPos = { x: 16, y: 2.5, z: -6 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0xef4444);
+      if (studioSpotlight) studioSpotlight.color.setHex(0x14b8a6);
       if (rainParticles) rainParticles.material.opacity = 0;
+      if (canvasEl) canvasEl.style.opacity = '1.0';
 
     } else if (p < 0.80) {
       // Stage 4: Dhaka Metro Rail MRT Line-6
@@ -447,6 +450,7 @@
       targetSpotPos = { x: 0, y: 15, z: -18 };
       if (studioSpotlight) studioSpotlight.color.setHex(0x10b981);
       if (rainParticles) rainParticles.material.opacity = 0;
+      if (canvasEl) canvasEl.style.opacity = '1.0';
 
     } else {
       // Stage 5: Weather Surge Pricing & Multimodal Overview
@@ -462,8 +466,16 @@
         z: -18 + stg * 10
       };
       targetSpotPos = { x: 0, y: 5, z: -5 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0x60a5fa);
+      if (studioSpotlight) studioSpotlight.color.setHex(0x3b82f6);
       if (rainParticles) rainParticles.material.opacity = Math.min(0.85, stg * 1.1);
+      if (canvasEl) {
+        if (stg > 0.25) {
+          const fadeP = (stg - 0.25) / 0.75;
+          canvasEl.style.opacity = Math.max(0.1, 1.0 - fadeP * 0.9).toFixed(3);
+        } else {
+          canvasEl.style.opacity = '1.0';
+        }
+      }
     }
   }
 
