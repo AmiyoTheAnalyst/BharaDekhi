@@ -26,7 +26,7 @@
   let isReady = false;
 
   // Scene elements
-  let sunLight, ambientLight;
+  let sunLight, ambientLight, hemiLight;
   let cornerPointLights = [];
   let trainGroup, boardingBadgeMesh;
   let ambulanceGroup, ambStrobeRed, ambStrobeBlue;
@@ -37,16 +37,12 @@
   let pedMeshMap = {};
   let rainParticles = null;
 
-  // Post-Processing UnrealBloomPass
-  let composer = null;
-  let bloomPass = null;
-
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
-  let targetCamX = -20, targetCamY = 420;
-  const CAM_DEFAULT_POS = { x: -20, y: 420, z: 500 };
+  let targetCamX = 220, targetCamY = 440;
+  const CAM_DEFAULT_POS = { x: 220, y: 440, z: 460 };
   const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
-  let camBasePos = { x: -20, y: 420, z: 500 };
+  let camBasePos = { x: 220, y: 440, z: 460 };
   let camBaseLook = { x: 0, y: 25, z: -35 };
   let currentCamLook = { x: 0, y: 25, z: -35 };
   let idleDroneTime = 0;
@@ -54,7 +50,7 @@
   // Multimodal Camera Choreography Presets
   const CAM_MODES = {
     overview: {
-      pos: { x: -20, y: 420, z: 500 },
+      pos: { x: 220, y: 440, z: 460 },
       look: { x: 0, y: 25, z: -35 },
       badge: 'Drone View'
     },
@@ -206,9 +202,9 @@
       camBaseLook.y = lookY;
       camBaseLook.z = lookZ;
 
-      camBasePos.x = -20;
-      camBasePos.y = lookY + (420 - 25) * zoomFactor;
-      camBasePos.z = lookZ + (500 - (-35)) * zoomFactor;
+      camBasePos.x = 220 * (1 - portraitFactor * 0.4);
+      camBasePos.y = lookY + (440 - 25) * zoomFactor;
+      camBasePos.z = lookZ + (460 - (-35)) * zoomFactor;
 
       camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
       camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
@@ -334,76 +330,6 @@
     return texture;
   }
 
-  // Shared Vehicle Lighting Effects (Forward Soft Ground Pool & Taillight Trail Ribbons)
-  let sharedTailTrailMat = null;
-  let sharedHeadlightPoolMat = null;
-
-  function getSharedTailTrailMat() {
-    if (!sharedTailTrailMat) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-      const grad = ctx.createLinearGradient(0, 0, 0, 128);
-      grad.addColorStop(0, 'rgba(255, 23, 68, 0.85)');
-      grad.addColorStop(0.35, 'rgba(255, 23, 68, 0.40)');
-      grad.addColorStop(1, 'rgba(255, 23, 68, 0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 64, 128);
-      const tex = new THREE.CanvasTexture(canvas);
-      sharedTailTrailMat = new THREE.MeshBasicMaterial({
-        map: tex,
-        transparent: true,
-        opacity: 0.75,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      });
-    }
-    return sharedTailTrailMat;
-  }
-
-  function getSharedHeadlightPoolMat() {
-    if (!sharedHeadlightPoolMat) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 256;
-      const ctx = canvas.getContext('2d');
-      const grad = ctx.createRadialGradient(64, 10, 8, 64, 140, 120);
-      grad.addColorStop(0, 'rgba(255, 255, 255, 0.65)');
-      grad.addColorStop(0.25, 'rgba(254, 240, 138, 0.40)');
-      grad.addColorStop(0.65, 'rgba(251, 191, 36, 0.12)');
-      grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 128, 256);
-      const tex = new THREE.CanvasTexture(canvas);
-      sharedHeadlightPoolMat = new THREE.MeshBasicMaterial({
-        map: tex,
-        transparent: true,
-        opacity: 0.55,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      });
-    }
-    return sharedHeadlightPoolMat;
-  }
-
-  function addVehicleLightEffects(group, length, width) {
-    // 1. Forward soft ground pool (Feathered, no harsh cones)
-    const poolGeo = new THREE.PlaneGeometry(width * 1.5, length * 0.7);
-    const poolMesh = new THREE.Mesh(poolGeo, getSharedHeadlightPoolMat());
-    poolMesh.rotation.x = -Math.PI / 2;
-    poolMesh.rotation.z = Math.PI / 2;
-    poolMesh.position.set(length / 2 + length * 0.35, 0.25, 0);
-    group.add(poolMesh);
-
-    // 2. Short glowing red taillight trails
-    const trailGeo = new THREE.PlaneGeometry(width * 0.85, length * 0.45);
-    const trailMesh = new THREE.Mesh(trailGeo, getSharedTailTrailMat());
-    trailMesh.rotation.x = -Math.PI / 2;
-    trailMesh.rotation.z = -Math.PI / 2;
-    trailMesh.position.set(-length / 2 - length * 0.22, 0.25, 0);
-    group.add(trailMesh);
-  }
 
   function createWindowFacadeTexture(floors, cols, winColor, wallColor) {
     const canvas = document.createElement('canvas');
@@ -535,7 +461,7 @@
 
   // Sidewalk Corners with Curbs
   function addSidewalkCorner(w, d, x, z) {
-    if (!sidewalkMat) sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+    if (!sidewalkMat) sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9, metalness: 0.05 });
     if (!curbMat) curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
 
     const swGeo = new THREE.BoxGeometry(w, 2, d);
@@ -695,10 +621,6 @@
       const porchLamp = new THREE.Mesh(porchLampGeo, porchLampMat);
       porchLamp.position.set(signboard.ox || 0, (signboard.y || 16) - 4, (depth / 2) + 3);
       group.add(porchLamp);
-
-      const porchLight = new THREE.PointLight(0xfef08a, 1.2, 55);
-      porchLight.position.set(signboard.ox || 0, (signboard.y || 16) - 5, (depth / 2) + 6);
-      group.add(porchLight);
     }
 
     freezeStatic(group);
@@ -881,8 +803,6 @@
         group.add(tl);
       });
 
-      addVehicleLightEffects(group, length, width);
-
     } else if (type === 'car') {
       const length = 44;
       const width = 18;
@@ -964,8 +884,6 @@
         tl.position.set(-length / 2 + 0.8, 5.2, tz);
         group.add(tl);
       });
-
-      addVehicleLightEffects(group, length, width);
 
     } else if (type === 'cng') {
       const length = 30;
@@ -1080,8 +998,6 @@
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-12.4, 5.5, 0);
       group.add(tl);
-
-      addVehicleLightEffects(group, length, width);
 
     } else if (type === 'rickshaw') {
       const length = 34;
@@ -1378,8 +1294,6 @@
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-9.0, 5.5, 0);
       group.add(tl);
-
-      addVehicleLightEffects(group, length, width);
     }
 
     scene.add(group);
@@ -1494,8 +1408,6 @@
       tl.position.set(-length / 2 - 0.2, 8.0, tz);
       ambGroup.add(tl);
     });
-
-    addVehicleLightEffects(ambGroup, length, width);
 
     ambGroup.visible = false;
     scene.add(ambGroup);
@@ -1735,35 +1647,18 @@
       renderer.toneMappingExposure = 1.08;
     }
 
-    // Set up Post-Processing UnrealBloomPass if dependencies loaded
-    if (typeof THREE.EffectComposer !== 'undefined' && typeof THREE.RenderPass !== 'undefined' && typeof THREE.UnrealBloomPass !== 'undefined') {
-      try {
-        composer = new THREE.EffectComposer(renderer);
-        const renderPass = new THREE.RenderPass(scene, camera);
-        composer.addPass(renderPass);
+    // 4. Lighting: Balanced Sky Hemisphere + Ambient + Angled Directional Sun
+    hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x1e293b, 1.4);
+    scene.add(hemiLight);
 
-        bloomPass = new THREE.UnrealBloomPass(
-          new THREE.Vector2(width, height),
-          0.65, // strength
-          0.40, // radius
-          0.65  // threshold
-        );
-        composer.addPass(bloomPass);
-      } catch (err) {
-        console.warn('EffectComposer could not be initialized, falling back to standard renderer:', err);
-        composer = null;
-      }
-    }
-
-    // 4. Lighting: Ambient + Directional Sun + Corner Streetlights
-    ambientLight = new THREE.AmbientLight(0x38bdf8, 0.7);
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
-    sunLight = new THREE.DirectionalLight(0xffeedd, 1.4);
-    sunLight.position.set(-260, 500, 320);
+    sunLight = new THREE.DirectionalLight(0xfffbeb, 1.8);
+    sunLight.position.set(300, 500, 250);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 50;
     sunLight.shadow.camera.far = 1400;
     sunLight.shadow.bias = -0.0005;
@@ -1774,7 +1669,7 @@
     sunLight.shadow.camera.bottom = -d;
     scene.add(sunLight);
 
-    // Streetlights along Crossroads & Sidewalks
+    // Streetlights along Crossroads & Sidewalks (Clean physical fixtures without harsh ground spotlights)
     const cornerLightCoords = [
       // 4 Intersection corners
       [-135, 26, -100],
@@ -1793,11 +1688,6 @@
       [480, 26, 100]
     ];
     cornerLightCoords.forEach(pos => {
-      const pl = new THREE.PointLight(0xfef08a, 1.5, 260);
-      pl.position.set(pos[0], pos[1], pos[2]);
-      scene.add(pl);
-      cornerPointLights.push(pl);
-
       const poleGeo = new THREE.CylinderGeometry(1.2, 1.5, 26, 8);
       const poleMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6 });
       const pole = new THREE.Mesh(poleGeo, poleMat);
@@ -1813,8 +1703,9 @@
       scene.add(head);
     });
 
-    // 5. Ground & Road Network (Wet-Look Obsidian Asphalt for High-Contrast Modern Aesthetics)
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x0b0f17, roughness: 0.22, metalness: 0.55 });
+    // 5. Ground & Road Network (Clean Modern Matte Slate Asphalt)
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e2530, roughness: 0.85, metalness: 0.05 });
+    roadMaterial = roadMat;
     roadMaterial = roadMat;
     const groundGeo = new THREE.PlaneGeometry(1600, 1200);
     const ground = new THREE.Mesh(groundGeo, roadMat);
@@ -2034,20 +1925,20 @@
 
     scene.add(trainGroup);
 
-    // 8. 4 Quadrants of Extruded 3D Buildings (Cyber-Modern Architectural Slate Tones)
+    // 8. 4 Quadrants of Extruded 3D Buildings (Vibrant Dhaka Architecture)
     // Northwest Quadrant
     create3DBuilding({
       x: -490, z: -210, width: 34, depth: 40, height: 115,
-      wallColor: '#0f172a', sideColor: '#090d16',
-      floors: 6, cols: 2, winColor: '#38bdf8',
+      wallColor: '#0284c7', sideColor: '#082f49',
+      floors: 6, cols: 2, winColor: '#bae6fd',
       antenna: true
     });
 
     const nwComplex = create3DBuilding({
       x: -360, z: -210, width: 200, depth: 65, height: 90,
-      wallColor: '#1e293b', sideColor: '#0f172a',
-      floors: 4, cols: 6, winColor: '#fbbf24',
-      signboard: { text: 'ঢাকা বেকারি', sub: 'Dhaka Bakery', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 85, h: 18, ox: -45, y: 15, awnCol: 0x0f172a }
+      wallColor: '#ea580c', sideColor: '#431407',
+      floors: 4, cols: 6, winColor: '#fef08a',
+      signboard: { text: 'ঢাকা বেকারি', sub: 'Dhaka Bakery', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 85, h: 18, ox: -45, y: 15, awnCol: 0xb45309 }
     });
     const pharmTex = createSignboardTexture('গ্রীন ফার্মেসি', 'Pharmacy', '#0f172a', '#ffffff', '#6ee7b7', '#10b981', 256, 64);
     const pharmGeo = new THREE.BoxGeometry(85, 18, 2.5);
@@ -2074,52 +1965,52 @@
 
     create3DBuilding({
       x: -225, z: -210, width: 80, depth: 60, height: 110,
-      wallColor: '#111827', sideColor: '#0b0f19',
-      floors: 5, cols: 3, winColor: '#fbbf24',
+      wallColor: '#0d9488', sideColor: '#134e4a',
+      floors: 5, cols: 3, winColor: '#fef08a',
       waterTank: true, antenna: true
     });
 
     create3DBuilding({
       x: -150, z: -205, width: 68, depth: 55, height: 95,
-      wallColor: '#1e293b', sideColor: '#0f172a',
-      floors: 4, cols: 3, winColor: '#fef3c7',
+      wallColor: '#f59e0b', sideColor: '#451a03',
+      floors: 4, cols: 3, winColor: '#fef08a',
       antenna: true,
-      signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#38bdf8', w: 62, h: 16, y: 14 }
+      signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 62, h: 16, y: 14 }
     });
 
     // Northeast Quadrant
     create3DBuilding({
       x: 150, z: -205, width: 68, depth: 55, height: 95,
-      wallColor: '#131c2e', sideColor: '#0d1527',
-      floors: 4, cols: 3, winColor: '#38bdf8',
+      wallColor: '#a855f7', sideColor: '#2e1065',
+      floors: 4, cols: 3, winColor: '#bae6fd',
       antenna: true,
-      signboard: { text: 'ফ্যাশন কর্নার', sub: 'Fashion Corner', bg: '#0f172a', textCol: '#ffffff', border: '#d946ef', w: 62, h: 16, y: 14, awnCol: 0x1e1b4b }
+      signboard: { text: 'ফ্যাশন কর্নার', sub: 'Fashion Corner', bg: '#0f172a', textCol: '#ffffff', border: '#d946ef', w: 62, h: 16, y: 14, awnCol: 0x701a75 }
     });
 
     create3DBuilding({
       x: 230, z: -210, width: 75, depth: 60, height: 100,
-      wallColor: '#1e293b', sideColor: '#111827',
-      floors: 4, cols: 3, winColor: '#38bdf8',
+      wallColor: '#14b8a6', sideColor: '#042f2e',
+      floors: 4, cols: 3, winColor: '#bae6fd',
       waterTank: true,
-      signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f172a }
+      signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f766e }
     });
 
     create3DBuilding({
       x: 315, z: -215, width: 85, depth: 60, height: 115,
-      wallColor: '#0f172a', sideColor: '#090d16',
-      floors: 5, cols: 4, winColor: '#fbbf24',
+      wallColor: '#f43f5e', sideColor: '#4c0519',
+      floors: 5, cols: 4, winColor: '#fef08a',
       waterTank: true, antenna: true,
-      signboard: { text: 'সুপার শপ', sub: 'Super Shop', bg: '#0f172a', textCol: '#fef08a', border: '#facc15', w: 76, h: 16, y: 14, awnCol: 0x1e293b }
+      signboard: { text: 'সুপার শপ', sub: 'Super Shop', bg: '#0f172a', textCol: '#fef08a', border: '#ff2a54', w: 76, h: 16, y: 14, awnCol: 0xbe123c }
     });
 
     // NE-4 Mirpur Plaza Landmark High-Rise
     const plaza = create3DBuilding({
       x: 430, z: -200, width: 130, depth: 75, height: 135,
-      wallColor: '#111827', sideColor: '#0a0e1a',
-      floors: 6, cols: 5, winColor: '#38bdf8',
+      wallColor: '#0284c7', sideColor: '#082f49',
+      floors: 6, cols: 5, winColor: '#bae6fd',
       antenna: true
     });
-    const plTex = createSignboardTexture('মিরপুর প্লাজা', 'MIRPUR PLAZA', '#0f172a', '#ffffff', '#00f2fe', '#00f2fe', 380, 80);
+    const plTex = createSignboardTexture('মিরপুর প্লাজা', 'MIRPUR PLAZA', '#0369a1', '#ffffff', '#00f2fe', '#00f2fe', 380, 80);
     const plGeo = new THREE.BoxGeometry(105, 22, 3);
     const plSign = new THREE.Mesh(plGeo, new THREE.MeshBasicMaterial({ map: plTex }));
     plSign.position.set(0, 135 + 12, (75 / 2) - 10);
@@ -2129,49 +2020,49 @@
     // Southwest Quadrant
     create3DBuilding({
       x: -490, z: 185, width: 34, depth: 40, height: 85,
-      wallColor: '#1e293b', sideColor: '#0f172a',
-      floors: 4, cols: 2, winColor: '#fbbf24'
+      wallColor: '#fb7185', sideColor: '#4c0519',
+      floors: 4, cols: 2, winColor: '#fef08a'
     });
 
     create3DBuilding({
       x: -360, z: 185, width: 200, depth: 65, height: 80,
-      wallColor: '#0f172a', sideColor: '#090d16',
-      floors: 3, cols: 6, winColor: '#38bdf8',
+      wallColor: '#14b8a6', sideColor: '#042f2e',
+      floors: 3, cols: 6, winColor: '#fef08a',
       waterTank: true, antenna: true
     });
 
     create3DBuilding({
       x: -225, z: 180, width: 75, depth: 55, height: 85,
-      wallColor: '#111827', sideColor: '#0b0f19',
-      floors: 3, cols: 3, winColor: '#fbbf24',
+      wallColor: '#8b5cf6', sideColor: '#2e1065',
+      floors: 3, cols: 3, winColor: '#bae6fd',
       antenna: true,
-      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#0f172a', textCol: '#fef08a', border: '#f97316', w: 68, h: 16, y: 14, awnCol: 0x1e293b }
+      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
     });
 
     create3DBuilding({
       x: -150, z: 175, width: 75, depth: 55, height: 82,
-      wallColor: '#1e293b', sideColor: '#0f172a',
-      floors: 3, cols: 3, winColor: '#fbbf24',
+      wallColor: '#f59e0b', sideColor: '#451a03',
+      floors: 3, cols: 3, winColor: '#fef08a',
       waterTank: true,
-      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0x1e293b }
+      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
     });
 
     // Southeast Quadrant
     create3DBuilding({
       x: 165, z: 175, width: 110, depth: 60, height: 85,
-      wallColor: '#111827', sideColor: '#0a0e1a',
-      floors: 3, cols: 4, winColor: '#38bdf8',
+      wallColor: '#f43f5e', sideColor: '#4c0519',
+      floors: 3, cols: 4, winColor: '#fef08a',
       antenna: true,
-      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#064e3b', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x064e3b }
+      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#065f46', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x047857 }
     });
 
     const seBillboardBldg = create3DBuilding({
       x: 320, z: 185, width: 180, depth: 65, height: 85,
-      wallColor: '#1e293b', sideColor: '#0f172a',
-      floors: 3, cols: 5, winColor: '#fbbf24',
+      wallColor: '#1e3a8a', sideColor: '#0f172a',
+      floors: 3, cols: 5, winColor: '#bae6fd',
       waterTank: true, antenna: true
     });
-    const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#0f172a', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
+    const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#172554', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
     const seBbGeo = new THREE.BoxGeometry(160, 42, 3);
     const seBbSign = new THREE.Mesh(seBbGeo, new THREE.MeshBasicMaterial({ map: seBbTex }));
     seBbSign.position.set(0, 46, (65 / 2) + 2);
@@ -2180,8 +2071,8 @@
 
     create3DBuilding({
       x: 450, z: 185, width: 45, depth: 45, height: 95,
-      wallColor: '#0f172a', sideColor: '#090d16',
-      floors: 4, cols: 2, winColor: '#38bdf8',
+      wallColor: '#0ea5e9', sideColor: '#082f49',
+      floors: 4, cols: 2, winColor: '#bae6fd',
       antenna: true
     });
 
@@ -2307,12 +2198,6 @@
       const aspect = width / height;
       updateCameraFraming(aspect);
       renderer.setSize(width, height, false);
-      if (composer) {
-        composer.setSize(width, height);
-      }
-      if (bloomPass && bloomPass.resolution) {
-        bloomPass.resolution.set(width, height);
-      }
     }
   }
 
@@ -2463,55 +2348,75 @@
           scene.fog.color.setHex(isMobileScreen ? 0xa84370 : 0x863359);
           scene.fog.density = 0.0006;
         }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xfed7aa);
+          hemiLight.groundColor.setHex(0x2a1728);
+          hemiLight.intensity = isMobileScreen ? 1.30 : 1.20;
+        }
         if (sunLight) {
           sunLight.color.setHex(0xffaa88);
-          sunLight.intensity = isMobileScreen ? 1.40 : 1.30;
+          sunLight.intensity = isMobileScreen ? 1.50 : 1.40;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfbcfe8);
-          ambientLight.intensity = isMobileScreen ? 0.75 : 0.65;
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.72;
         }
       } else if (currentMode === 'sunrise_overcast') {
         scene.background.setHex(isMobileScreen ? 0x1f1b29 : 0x16131f);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d3242 : 0x2d2433);
-          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xddd6fe);
+          hemiLight.groundColor.setHex(0x282030);
+          hemiLight.intensity = isMobileScreen ? 1.15 : 1.05;
         }
         if (sunLight) {
           sunLight.color.setHex(0xf472b6);
-          sunLight.intensity = isMobileScreen ? 0.88 : 0.75;
+          sunLight.intensity = isMobileScreen ? 1.10 : 0.95;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x483e54 : 0x362e40);
-          ambientLight.intensity = isMobileScreen ? 0.62 : 0.52;
+          ambientLight.color.setHex(isMobileScreen ? 0x6b5b7b : 0x544761);
+          ambientLight.intensity = isMobileScreen ? 0.75 : 0.65;
         }
       } else if (currentMode === 'fog_sunrise') {
         scene.background.setHex(isMobileScreen ? 0x342238 : 0x27172b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x754757 : 0x613745);
-          scene.fog.density = isMobileScreen ? 0.0012 : 0.0015;
+          scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xfed7aa);
+          hemiLight.groundColor.setHex(0x35222f);
+          hemiLight.intensity = isMobileScreen ? 1.20 : 1.10;
         }
         if (sunLight) {
           sunLight.color.setHex(0xfed7aa);
-          sunLight.intensity = isMobileScreen ? 0.98 : 0.85;
+          sunLight.intensity = isMobileScreen ? 1.15 : 1.00;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x7c4f62 : 0x643d4e);
-          ambientLight.intensity = isMobileScreen ? 0.68 : 0.58;
+          ambientLight.color.setHex(isMobileScreen ? 0x8a5a6e : 0x73485b);
+          ambientLight.intensity = isMobileScreen ? 0.75 : 0.68;
         }
       } else if (currentMode === 'morning_overcast') {
         scene.background.setHex(isMobileScreen ? 0x222836 : 0x1a202c);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x333d4f : 0x27303f);
-          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0009;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xcbd5e1);
+          hemiLight.groundColor.setHex(0x1e2530);
+          hemiLight.intensity = isMobileScreen ? 1.20 : 1.10;
         }
         if (sunLight) {
           sunLight.color.setHex(0xa0aec0);
-          sunLight.intensity = isMobileScreen ? 0.85 : 0.72;
+          sunLight.intensity = isMobileScreen ? 1.15 : 1.00;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x475569 : 0x334155);
-          ambientLight.intensity = isMobileScreen ? 0.65 : 0.55;
+          ambientLight.color.setHex(isMobileScreen ? 0x64748b : 0x475569);
+          ambientLight.intensity = isMobileScreen ? 0.78 : 0.70;
         }
       } else if (currentMode === 'sun') {
         scene.background.setHex(0x0284c7);
@@ -2519,27 +2424,37 @@
           scene.fog.color.setHex(0x0284c7);
           scene.fog.density = 0.0004;
         }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xe0f2fe);
+          hemiLight.groundColor.setHex(0x1e293b);
+          hemiLight.intensity = 1.40;
+        }
         if (sunLight) {
-          sunLight.color.setHex(0xffeedd);
-          sunLight.intensity = 1.55;
+          sunLight.color.setHex(0xfffbeb);
+          sunLight.intensity = 1.80;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x7dd3fc);
-          ambientLight.intensity = isMobileScreen ? 0.82 : 0.72;
+          ambientLight.color.setHex(0xffffff);
+          ambientLight.intensity = isMobileScreen ? 0.85 : 0.80;
         }
       } else if (currentMode === 'day_overcast') {
         scene.background.setHex(isMobileScreen ? 0x262e3d : 0x1c2330);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3f4a5c : 0x303a49);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0009;
+          scene.fog.density = isMobileScreen ? 0.0007 : 0.0008;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xcbd5e1);
+          hemiLight.groundColor.setHex(0x1e2530);
+          hemiLight.intensity = isMobileScreen ? 1.25 : 1.15;
         }
         if (sunLight) {
           sunLight.color.setHex(0xcbd5e1);
-          sunLight.intensity = isMobileScreen ? 0.90 : 0.78;
+          sunLight.intensity = isMobileScreen ? 1.20 : 1.05;
         }
         if (ambientLight) {
           ambientLight.color.setHex(isMobileScreen ? 0x64748b : 0x475569);
-          ambientLight.intensity = isMobileScreen ? 0.68 : 0.58;
+          ambientLight.intensity = isMobileScreen ? 0.80 : 0.72;
         }
       } else if (currentMode === 'sunset') {
         scene.background.setHex(isMobileScreen ? 0x3a1409 : 0x2c0d05);
@@ -2547,99 +2462,134 @@
           scene.fog.color.setHex(isMobileScreen ? 0x66220d : 0x4d1607);
           scene.fog.density = 0.0006;
         }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xfed7aa);
+          hemiLight.groundColor.setHex(0x331a10);
+          hemiLight.intensity = isMobileScreen ? 1.25 : 1.15;
+        }
         if (sunLight) {
           sunLight.color.setHex(0xff7722);
-          sunLight.intensity = isMobileScreen ? 1.45 : 1.35;
+          sunLight.intensity = isMobileScreen ? 1.55 : 1.45;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfb923c);
-          ambientLight.intensity = isMobileScreen ? 0.78 : 0.68;
+          ambientLight.intensity = isMobileScreen ? 0.82 : 0.72;
         }
       } else if (currentMode === 'sunset_overcast') {
         scene.background.setHex(isMobileScreen ? 0x241620 : 0x1b0f17);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x422633 : 0x321a25);
-          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xfbcfe8);
+          hemiLight.groundColor.setHex(0x261922);
+          hemiLight.intensity = isMobileScreen ? 1.15 : 1.05;
         }
         if (sunLight) {
           sunLight.color.setHex(0xea580c);
-          sunLight.intensity = isMobileScreen ? 0.92 : 0.80;
+          sunLight.intensity = isMobileScreen ? 1.10 : 0.95;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x54323c : 0x40242d);
-          ambientLight.intensity = isMobileScreen ? 0.58 : 0.48;
+          ambientLight.color.setHex(isMobileScreen ? 0x6e4350 : 0x58343f);
+          ambientLight.intensity = isMobileScreen ? 0.72 : 0.65;
         }
       } else if (currentMode === 'fog_sunset') {
         scene.background.setHex(isMobileScreen ? 0x301812 : 0x24100b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x6b2b18 : 0x542011);
-          scene.fog.density = isMobileScreen ? 0.0012 : 0.0015;
+          scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xfed7aa);
+          hemiLight.groundColor.setHex(0x331b14);
+          hemiLight.intensity = isMobileScreen ? 1.20 : 1.10;
         }
         if (sunLight) {
           sunLight.color.setHex(0xf97316);
-          sunLight.intensity = isMobileScreen ? 0.98 : 0.85;
+          sunLight.intensity = isMobileScreen ? 1.20 : 1.05;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x6e2c1b : 0x562114);
-          ambientLight.intensity = isMobileScreen ? 0.64 : 0.54;
+          ambientLight.color.setHex(isMobileScreen ? 0x7e3723 : 0x662919);
+          ambientLight.intensity = isMobileScreen ? 0.75 : 0.66;
         }
       } else if (currentMode === 'fog_day') {
         scene.background.setHex(isMobileScreen ? 0x718096 : 0x64748b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x94a3b8 : 0x8293a7);
-          scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
+          scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0xe2e8f0);
+          hemiLight.groundColor.setHex(0x334155);
+          hemiLight.intensity = isMobileScreen ? 1.30 : 1.20;
         }
         if (sunLight) {
           sunLight.color.setHex(0xe2e8f0);
-          sunLight.intensity = isMobileScreen ? 0.85 : 0.75;
+          sunLight.intensity = isMobileScreen ? 1.10 : 0.95;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x8a99ad : 0x718096);
-          ambientLight.intensity = isMobileScreen ? 0.76 : 0.68;
+          ambientLight.color.setHex(isMobileScreen ? 0x94a3b8 : 0x718096);
+          ambientLight.intensity = isMobileScreen ? 0.82 : 0.74;
         }
       } else if (currentMode === 'fog_night') {
-        // Nighttime Fog: realistic atmospheric fog with depth, diffusion, and reduced visibility
+        // Nighttime Fog: realistic atmospheric fog with depth, diffusion, and subtle volumetric glow
         scene.background.setHex(isMobileScreen ? 0x091020 : 0x060c18);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d182d : 0x0a1426);
-          scene.fog.density = isMobileScreen ? 0.0012 : 0.0014;
+          scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0x94a3b8);
+          hemiLight.groundColor.setHex(0x141d2b);
+          hemiLight.intensity = isMobileScreen ? 0.90 : 0.80;
         }
         if (sunLight) {
           sunLight.color.setHex(0x94a3b8);
-          sunLight.intensity = isMobileScreen ? 0.45 : 0.38;
+          sunLight.intensity = isMobileScreen ? 0.70 : 0.60;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x223046 : 0x1a2638);
-          ambientLight.intensity = isMobileScreen ? 0.48 : 0.42;
+          ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x283344);
+          ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
         }
       } else if (currentMode === 'night_overcast') {
-        // Nighttime Overcast: real dark, cloudy, atmospheric night, no bright daytime wash
-        scene.background.setHex(isMobileScreen ? 0x060912 : 0x04060c);
+        // Nighttime Overcast: dark atmospheric night with clearly visible city elements
+        scene.background.setHex(isMobileScreen ? 0x080c16 : 0x050810);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x0a101e : 0x070c17);
-          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+          scene.fog.color.setHex(isMobileScreen ? 0x0d1422 : 0x090e18);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0x94a3b8);
+          hemiLight.groundColor.setHex(0x141d2b);
+          hemiLight.intensity = isMobileScreen ? 0.90 : 0.80;
         }
         if (sunLight) {
           sunLight.color.setHex(0x64748b);
-          sunLight.intensity = isMobileScreen ? 0.35 : 0.28;
+          sunLight.intensity = isMobileScreen ? 0.65 : 0.55;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x1a2436 : 0x141d2c);
-          ambientLight.intensity = isMobileScreen ? 0.44 : 0.38;
+          ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x283344);
+          ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
         }
       } else if (currentMode === 'rain') {
         scene.background.setHex(isMobileScreen ? 0x0d1628 : 0x08101e);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x121e36 : 0x0d172b);
-          scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
+          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+        }
+        if (hemiLight) {
+          hemiLight.color.setHex(0x94a3b8);
+          hemiLight.groundColor.setHex(0x1e293b);
+          hemiLight.intensity = isMobileScreen ? 1.10 : 1.00;
         }
         if (sunLight) {
           sunLight.color.setHex(0x60a5fa);
-          sunLight.intensity = isMobileScreen ? 0.72 : 0.65;
+          sunLight.intensity = isMobileScreen ? 1.05 : 0.95;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = isMobileScreen ? 0.65 : 0.58;
+          ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x243248);
+          ambientLight.intensity = isMobileScreen ? 0.78 : 0.70;
         }
       } else { // night (clear)
         scene.background.setHex(isMobileScreen ? 0x050a14 : 0x020408);
@@ -2647,13 +2597,18 @@
           scene.fog.color.setHex(isMobileScreen ? 0x081020 : 0x040812);
           scene.fog.density = isMobileScreen ? 0.0004 : 0.0005;
         }
+        if (hemiLight) {
+          hemiLight.color.setHex(0x94a3b8);
+          hemiLight.groundColor.setHex(0x0f172a);
+          hemiLight.intensity = isMobileScreen ? 0.95 : 0.85;
+        }
         if (sunLight) {
           sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = isMobileScreen ? 0.55 : 0.45;
+          sunLight.intensity = isMobileScreen ? 0.80 : 0.70;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x223147 : 0x1a2638);
-          ambientLight.intensity = isMobileScreen ? 0.55 : 0.48;
+          ambientLight.color.setHex(isMobileScreen ? 0x38bdf8 : 0x2563eb);
+          ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
         }
       }
     }
@@ -2844,10 +2799,10 @@
       }
     }
 
-    // Dynamic Road Wetness & Specular Sheen (Modern High-Contrast Wet Asphalt)
+    // Dynamic Road Wetness & Specular Sheen (Matte Slate Asphalt)
     if (roadMaterial) {
-      const targetRoughness = isRain ? 0.12 : 0.22;
-      const targetMetalness = isRain ? 0.75 : 0.55;
+      const targetRoughness = isRain ? 0.45 : 0.85;
+      const targetMetalness = isRain ? 0.20 : 0.05;
       roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * Math.min(1, dt * 3.0);
       roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, dt * 3.0);
     }
@@ -2875,13 +2830,9 @@
 
     camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
 
-    // 8. Render Scene with Post-Processing UnrealBloomPass (or standard fallback)
+    // 8. Crisp Direct WebGL Render (No Blur or Washout)
     const renderT0 = performance.now();
-    if (composer) {
-      composer.render();
-    } else {
-      renderer.render(scene, camera);
-    }
+    renderer.render(scene, camera);
     const renderTimeMs = performance.now() - renderT0;
 
     // Performance telemetry
