@@ -344,41 +344,379 @@
     return tex;
   }
 
+  // Real 3D GLTF Vehicle & Human Asset Registry
+  const gltfCarTemplates = {};
+  const gltfHumanTemplates = [];
+  const socialPedestrians = [];
+  const CAR_TINT_COLORS = [0x0047ab, 0xef4444, 0x84cc16, 0xf8fafc, 0xcbd5e1]; // Royal Blue, Crimson Red, Lime Green, Pearl White, Silver
+
+  function getHeading(dir) {
+    if (dir === 'EB') return 0;           // Facing +X (East)
+    if (dir === 'WB') return Math.PI;      // Facing -X (West)
+    if (dir === 'SB') return -Math.PI / 2; // Facing +Z (South)
+    if (dir === 'NB') return Math.PI / 2;  // Facing -Z (North)
+    return 0;
+  }
+
+  // Replace all live cars/buses/cngs/rickshaws in the scene graph with loaded GLTF models
+  function replaceLiveCarsWithGLTF() {
+    if (!scene || !vehicleMeshMap) return;
+    const carKeys = Object.keys(gltfCarTemplates).filter(k => k !== 'truck');
+    if (carKeys.length === 0 && !gltfCarTemplates.truck) return;
+
+    let carIdx = 0;
+    for (const id in vehicleMeshMap) {
+      const vm = vehicleMeshMap[id];
+      if (!vm || !vm.data) continue;
+      const vType = vm.data.type;
+
+      const isCar = (vType === 'car' || vType === 'bike');
+      const isTruck = (vType === 'bus' && gltfCarTemplates.truck);
+      const isCompact = ((vType === 'cng' || vType === 'rickshaw') && (gltfCarTemplates.toycar || carKeys.length > 0));
+
+      if ((isCar || isTruck || isCompact) && !vm.isGLTF) {
+        let chosenKey = 'ferrari';
+        if (isTruck) {
+          chosenKey = 'truck';
+        } else if (isCompact && gltfCarTemplates.toycar) {
+          chosenKey = 'toycar';
+        } else if (carKeys.length > 0) {
+          chosenKey = carKeys[carIdx % carKeys.length];
+          carIdx++;
+        }
+
+        const template = gltfCarTemplates[chosenKey];
+        if (!template) continue;
+
+        const gltfClone = template.clone(true);
+        const tint = CAR_TINT_COLORS[carIdx % CAR_TINT_COLORS.length];
+
+        // Tint body materials with diverse colors: Royal Blue, Crimson Red, Lime Green, Pearl White, Silver
+        gltfClone.traverse(child => {
+          if (child.isMesh && child.material) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material = child.material.clone();
+            const nm = (child.name || '').toLowerCase();
+            const mn = (child.material.name || '').toLowerCase();
+            if (nm.includes('body') || nm.includes('paint') || nm.includes('car') ||
+                mn.includes('body') || mn.includes('paint') || mn.includes('red') || mn.includes('car') ||
+                (!nm.includes('wheel') && !nm.includes('tire') && !nm.includes('glass') && !nm.includes('window') && !mn.includes('glass') && !mn.includes('tire'))) {
+              if (child.material.color) {
+                child.material.color.setHex(tint);
+              }
+            }
+          }
+        });
+
+        const prevPos = (vm.mesh && vm.mesh.position) ? vm.mesh.position.clone() : new THREE.Vector3();
+
+        // Completely remove old BoxGeometry mesh from scene graph
+        if (vm.mesh) {
+          scene.remove(vm.mesh);
+          vm.mesh.traverse(obj => {
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) {
+              if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+              else obj.material.dispose();
+            }
+          });
+        }
+
+        // Situate new real GLTF model
+        gltfClone.position.copy(prevPos);
+        gltfClone.rotation.y = getHeading(vm.data.dir);
+        scene.add(gltfClone);
+
+        vm.mesh = gltfClone;
+        vm.isGLTF = true;
+      }
+    }
+  }
+
+  // Replace all live pedestrians in the scene graph with loaded animated GLTF models
+  function replaceLivePedestriansWithGLTF() {
+    if (!scene || gltfHumanTemplates.length === 0) return;
+    if (typeof THREE.SkeletonUtils === 'undefined') return;
+
+    let humanIdx = 0;
+    if (pedMeshMap) {
+      for (const key in pedMeshMap) {
+        const pm = pedMeshMap[key];
+        if (!pm || !pm.data || pm.isGLTF) continue;
+
+        const template = gltfHumanTemplates[humanIdx % gltfHumanTemplates.length];
+        humanIdx++;
+        if (!template || !template.model) continue;
+
+        try {
+          const clone = THREE.SkeletonUtils.clone(template.model);
+          clone.traverse(child => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
+          const mixer = new THREE.AnimationMixer(clone);
+          if (template.animations && template.animations.length > 0) {
+            const walkClip = template.animations.find(c => /walk|run/i.test(c.name)) || template.animations[0];
+            if (walkClip) {
+              const action = mixer.clipAction(walkClip);
+              action.play();
+            }
+          }
+          activeMixers.push(mixer);
+
+          const prevPos = (pm.mesh && pm.mesh.position) ? pm.mesh.position.clone() : new THREE.Vector3();
+          const prevRotY = pm.mesh ? pm.mesh.rotation.y : 0;
+
+          // Completely remove old procedural mesh from scene graph
+          if (pm.mesh) {
+            scene.remove(pm.mesh);
+            pm.mesh.traverse(obj => {
+              if (obj.geometry) obj.geometry.dispose();
+              if (obj.material) {
+                if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+                else obj.material.dispose();
+              }
+            });
+          }
+
+          clone.position.copy(prevPos);
+          clone.rotation.y = prevRotY;
+          scene.add(clone);
+
+          pm.mesh = clone;
+          pm.isGLTF = true;
+          pm.mixer = mixer;
+        } catch (err) {
+          console.warn('Pedestrian replacement error:', err);
+        }
+      }
+    }
+
+    // Also replace standing sidewalk social group pedestrians
+    socialPedestrians.forEach(sp => {
+      if (!sp || sp.isGLTF || !sp.mesh || !sp.parent) return;
+      const template = gltfHumanTemplates[humanIdx % gltfHumanTemplates.length];
+      humanIdx++;
+      if (!template || !template.model) return;
+      try {
+        const clone = THREE.SkeletonUtils.clone(template.model);
+        clone.traverse(child => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        const mixer = new THREE.AnimationMixer(clone);
+        if (template.animations && template.animations.length > 0) {
+          const idleClip = template.animations.find(c => /idle|stand/i.test(c.name)) || template.animations[0];
+          if (idleClip) {
+            const action = mixer.clipAction(idleClip);
+            action.play();
+          }
+        }
+        activeMixers.push(mixer);
+
+        clone.position.copy(sp.mesh.position);
+        clone.rotation.y = sp.mesh.rotation.y;
+        sp.parent.remove(sp.mesh);
+        sp.mesh.traverse(obj => {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) {
+            if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+            else obj.material.dispose();
+          }
+        });
+        sp.parent.add(clone);
+        sp.mesh = clone;
+        sp.isGLTF = true;
+      } catch (e) {}
+    });
+  }
+
+  let gltfAssetManagerInitialized = false;
   function initGLTFAssetManager() {
+    if (gltfAssetManagerInitialized) return;
     if (typeof THREE.GLTFLoader !== 'function') return;
+    gltfAssetManagerInitialized = true;
+
     try {
       const loader = new THREE.GLTFLoader();
       if (typeof THREE.DRACOLoader === 'function') {
         const draco = new THREE.DRACOLoader();
-        draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.3/');
+        draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
         loader.setDRACOLoader(draco);
       }
-      const officialModels = [
-        'https://threejs.org/examples/models/gltf/Soldier.glb',
-        'https://threejs.org/examples/models/gltf/Xbot.glb'
+
+      // 1. Real 3D Sports Cars & Transit Vehicles (.glb)
+      const carSources = [
+        {
+          key: 'ferrari',
+          urls: [
+            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb',
+            'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/ferrari.glb',
+            'https://unpkg.com/three@0.128.0/examples/models/gltf/ferrari.glb'
+          ],
+          targetLength: 46
+        },
+        {
+          key: 'toycar',
+          urls: [
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/ToyCar/glTF-Binary/ToyCar.glb',
+            'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/ToyCar/glTF-Binary/ToyCar.glb'
+          ],
+          targetLength: 42
+        },
+        {
+          key: 'truck',
+          urls: [
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
+            'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb'
+          ],
+          targetLength: 68
+        }
       ];
-      officialModels.forEach(url => {
-        loader.load(url, (gltf) => {
+
+      function tryLoadModel(urls, uIdx, onSuccess) {
+        if (uIdx >= urls.length) return;
+        loader.load(urls[uIdx], (gltf) => {
+          onSuccess(gltf);
+        }, undefined, () => {
+          tryLoadModel(urls, uIdx + 1, onSuccess);
+        });
+      }
+
+      carSources.forEach(src => {
+        tryLoadModel(src.urls, 0, (gltf) => {
           if (gltf && gltf.scene) {
-            gltf.scene.scale.set(4.8, 4.8, 4.8);
-            gltf.scene.traverse(node => {
+            const rawModel = gltf.scene;
+
+            // Compute bounding box
+            const b1 = new THREE.Box3().setFromObject(rawModel);
+            const sz1 = new THREE.Vector3();
+            b1.getSize(sz1);
+            if (sz1.z > sz1.x) {
+              rawModel.rotation.y = Math.PI / 2; // Orient along +X
+            }
+
+            const wrapper = new THREE.Group();
+            wrapper.add(rawModel);
+
+            const b2 = new THREE.Box3().setFromObject(wrapper);
+            const sz2 = new THREE.Vector3();
+            b2.getSize(sz2);
+
+            const maxLen = Math.max(sz2.x, sz2.z);
+            const scale = src.targetLength / Math.max(0.1, maxLen);
+            wrapper.scale.set(scale, scale, scale);
+
+            const b3 = new THREE.Box3().setFromObject(wrapper);
+            wrapper.position.x -= (b3.min.x + b3.max.x) / 2;
+            wrapper.position.z -= (b3.min.z + b3.max.z) / 2;
+            wrapper.position.y -= b3.min.y; // Wheels sit flush on ground: y = 0
+
+            wrapper.traverse(node => {
               if (node.isMesh) {
                 node.castShadow = true;
                 node.receiveShadow = true;
               }
             });
-            gltfPedTemplates.push({
-              scene: gltf.scene,
-              animations: gltf.animations || []
-            });
+
+            const templateGroup = new THREE.Group();
+            templateGroup.add(wrapper);
+            gltfCarTemplates[src.key] = templateGroup;
+
+            // Immediately replace live cars/trucks in scene
+            replaceLiveCarsWithGLTF();
           }
-        }, undefined, () => {
-          // Silent fallback to procedural curved models if offline
         });
       });
+
+      // 2. Real Rigged Animated 3D Humans (.glb)
+      const humanSources = [
+        {
+          key: 'soldier',
+          urls: [
+            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',
+            'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Soldier.glb',
+            'https://unpkg.com/three@0.128.0/examples/models/gltf/Soldier.glb'
+          ],
+          targetHeight: 12.5
+        },
+        {
+          key: 'michelle',
+          urls: [
+            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb',
+            'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Michelle.glb',
+            'https://unpkg.com/three@0.128.0/examples/models/gltf/Michelle.glb'
+          ],
+          targetHeight: 12.0
+        },
+        {
+          key: 'cesiumman',
+          urls: [
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb',
+            'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb'
+          ],
+          targetHeight: 12.0
+        }
+      ];
+
+      humanSources.forEach(src => {
+        tryLoadModel(src.urls, 0, (gltf) => {
+          if (gltf && gltf.scene) {
+            const rawHuman = gltf.scene;
+
+            // Align forward orientation with coordinate system facing +X
+            rawHuman.rotation.y = Math.PI / 2;
+
+            const wrapper = new THREE.Group();
+            wrapper.add(rawHuman);
+
+            const box = new THREE.Box3().setFromObject(wrapper);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const scale = src.targetHeight / Math.max(0.1, size.y);
+            wrapper.scale.set(scale, scale, scale);
+
+            const b2 = new THREE.Box3().setFromObject(wrapper);
+            wrapper.position.y -= b2.min.y; // Shoes sit flush on ground: y = 0
+            wrapper.position.x -= (b2.min.x + b2.max.x) / 2;
+            wrapper.position.z -= (b2.min.z + b2.max.z) / 2;
+
+            wrapper.traverse(node => {
+              if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+              }
+            });
+
+            const templateGroup = new THREE.Group();
+            templateGroup.add(wrapper);
+
+            gltfHumanTemplates.push({
+              key: src.key,
+              model: templateGroup,
+              animations: gltf.animations || []
+            });
+
+            // Immediately replace live pedestrians in scene
+            replaceLivePedestriansWithGLTF();
+          }
+        });
+      });
+
     } catch (e) {
-      // Offline fallback
+      console.warn('initGLTFAssetManager exception:', e);
     }
+  }
+
+  // Preload GLTF assets in background as soon as script evaluates
+  if (typeof window !== 'undefined') {
+    setTimeout(initGLTFAssetManager, 100);
   }
 
   function getSharedBuildingDepthMat() {
@@ -1306,6 +1644,41 @@
 
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
+    const carKeys = Object.keys(gltfCarTemplates).filter(k => k !== 'truck');
+    if ((type === 'car' || type === 'bike' || type === 'cng' || type === 'rickshaw') && carKeys.length > 0) {
+      const chosenKey = (type === 'cng' || type === 'rickshaw') && gltfCarTemplates.toycar ? 'toycar' : carKeys[Math.floor(Math.random() * carKeys.length)];
+      const template = gltfCarTemplates[chosenKey];
+      if (template) {
+        const clone = template.clone(true);
+        const tint = colorHex || CAR_TINT_COLORS[Math.floor(Math.random() * CAR_TINT_COLORS.length)];
+        clone.traverse(child => {
+          if (child.isMesh && child.material) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material = child.material.clone();
+            const nm = (child.name || '').toLowerCase();
+            const mn = (child.material.name || '').toLowerCase();
+            if (nm.includes('body') || nm.includes('paint') || nm.includes('car') ||
+                mn.includes('body') || mn.includes('paint') || mn.includes('red') || mn.includes('car') ||
+                (!nm.includes('wheel') && !nm.includes('tire') && !nm.includes('glass') && !nm.includes('window') && !mn.includes('glass') && !mn.includes('tire'))) {
+              if (child.material.color) {
+                child.material.color.setHex(tint);
+              }
+            }
+          }
+        });
+        clone.userData.isGLTF = true;
+        scene.add(clone);
+        return clone;
+      }
+    }
+    if (type === 'bus' && gltfCarTemplates.truck) {
+      const clone = gltfCarTemplates.truck.clone(true);
+      clone.userData.isGLTF = true;
+      scene.add(clone);
+      return clone;
+    }
+
     if (type === 'car') {
       return createCurvedSportsCar();
     }
@@ -1916,197 +2289,76 @@
     return ambGroup;
   }
 
-  // 3D Human Pedestrian Builder — Diverse Articulated Humans with Multi-Joint Limbs & GLTF Skeletal Support
+  // 3D Human Pedestrian Builder — Real Rigged Animated GLTF Humans with Skeletal AnimationMixer
   function create3DPedestrian(p) {
-    // 1. Try GLTF Template instantiation if loaded
-    if (gltfPedTemplates.length > 0 && typeof THREE.SkeletonUtils !== 'undefined') {
-      const templateIdx = Math.abs(Math.floor((p.id || 0) * 17)) % gltfPedTemplates.length;
-      const template = gltfPedTemplates[templateIdx];
-      try {
-        const gltfClone = THREE.SkeletonUtils.clone(template.scene);
-        const mixer = new THREE.AnimationMixer(gltfClone);
-        if (template.animations && template.animations.length > 0) {
-          const clip = template.animations[0];
-          const action = mixer.clipAction(clip);
-          action.play();
+    // 1. Instantiate real rigged animated 3D human (.glb) if templates ready
+    if (gltfHumanTemplates.length > 0 && typeof THREE.SkeletonUtils !== 'undefined') {
+      const templateIdx = Math.abs(Math.floor((p.id || 0) * 17)) % gltfHumanTemplates.length;
+      const template = gltfHumanTemplates[templateIdx];
+      if (template && template.model) {
+        try {
+          const clone = THREE.SkeletonUtils.clone(template.model);
+          clone.traverse(child => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          const mixer = new THREE.AnimationMixer(clone);
+          if (template.animations && template.animations.length > 0) {
+            const walkClip = template.animations.find(c => /walk|run/i.test(c.name)) || template.animations[0];
+            if (walkClip) {
+              const action = mixer.clipAction(walkClip);
+              action.play();
+            }
+          }
+          activeMixers.push(mixer);
+          clone.userData.isGLTF = true;
+          clone.userData.mixer = mixer;
+          scene.add(clone);
+          return clone;
+        } catch (e) {
+          console.warn('Failed to clone GLTF human template:', e);
         }
-        activeMixers.push(mixer);
-        gltfClone.userData.isGLTF = true;
-        gltfClone.userData.mixer = mixer;
-        scene.add(gltfClone);
-        return gltfClone;
-      } catch (e) {
-        // Fallback to anatomical procedural human below
       }
     }
 
-    // 2. Procedural Anatomical Multi-Joint Human (Zero Boxy Lego Stick Figures)
+    // 2. Extruded contoured anatomical spline human (ZERO cylinders or spheres)
     const group = new THREE.Group();
+    const humanShape = new THREE.Shape();
+    humanShape.moveTo(0, 0);
+    humanShape.lineTo(0.5, 0.2);
+    humanShape.lineTo(0.45, 4.2);
+    humanShape.lineTo(0.85, 5.0);
+    humanShape.lineTo(1.05, 7.5);
+    humanShape.lineTo(0.4, 8.5);
+    humanShape.bezierCurveTo(0.85, 9.2, 0.85, 11.2, 0, 11.4);
+    humanShape.bezierCurveTo(-0.85, 11.2, -0.85, 9.2, -0.4, 8.5);
+    humanShape.lineTo(-1.05, 7.5);
+    humanShape.lineTo(-0.85, 5.0);
+    humanShape.lineTo(-0.45, 4.2);
+    humanShape.lineTo(-0.5, 0.2);
+    humanShape.closePath();
 
-    // Natural Skin Tones
-    const skinTones = [0xf5d0b0, 0xd4a373, 0xa9744c, 0x78472a];
-    const skinHex = skinTones[Math.abs(Math.floor((p.x || 0) * 3 + (p.y || 0) * 7)) % skinTones.length];
-    const skinMat = new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.65 });
-
-    // Diverse Clothing Colors (Kurta, Hoodie, Graphic Tee, Vest)
-    const topPalette = [0x0284c7, 0xef4444, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899, 0x14b8a6, 0xf8fafc, 0xd97706];
-    const topColor = p.color ? parseInt(p.color.replace('#', '0x'), 16) : topPalette[Math.abs(Math.floor((p.id || 0) * 7)) % topPalette.length];
-    const torsoMat = new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.55 });
-
-    // Sculpted Clothed Torso (CylinderGeometry with natural contouring)
-    const torsoGeo = new THREE.CylinderGeometry(1.05, 0.80, 3.4, 12);
-    const torso = new THREE.Mesh(torsoGeo, torsoMat);
-    torso.position.y = 6.4;
-    torso.castShadow = true;
-    group.add(torso);
-
-    // Anatomical Neck & Head
-    const neckGeo = new THREE.CylinderGeometry(0.38, 0.42, 0.8, 10);
-    const neck = new THREE.Mesh(neckGeo, skinMat);
-    neck.position.y = 8.4;
-    group.add(neck);
-
-    const headGeo = new THREE.SphereGeometry(1.15, 14, 12);
-    const head = new THREE.Mesh(headGeo, skinMat);
-    head.position.y = 9.45;
-    head.castShadow = true;
-    group.add(head);
-
-    // Varied Hairstyles & Headwear (Snapback cap with visor, voluminous curls, ponytail, clean fade)
-    const hairStyle = Math.abs(Math.floor((p.id || 0) * 13)) % 4;
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
-
-    if (hairStyle === 0) {
-      // Modern Snapback Cap with curved forward visor
-      const capGeo = new THREE.CylinderGeometry(1.22, 1.22, 0.45, 14);
-      const capMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
-      const cap = new THREE.Mesh(capGeo, capMat);
-      cap.position.y = 10.15;
-      group.add(cap);
-
-      const visorGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.08, 12, 1, false, -Math.PI / 4, Math.PI / 2);
-      const visor = new THREE.Mesh(visorGeo, capMat);
-      visor.position.set(0.65, 9.95, 0);
-      group.add(visor);
-    } else if (hairStyle === 1) {
-      // Voluminous Curly Afro
-      const curlsGeo = new THREE.DodecahedronGeometry(1.35, 1);
-      const curls = new THREE.Mesh(curlsGeo, hairMat);
-      curls.position.set(0, 9.8, -0.1);
-      group.add(curls);
-    } else if (hairStyle === 2) {
-      // Long Hair / Sleek Ponytail draped back
-      const hairGeo = new THREE.CylinderGeometry(1.20, 0.6, 2.4, 10);
-      const hair = new THREE.Mesh(hairGeo, hairMat);
-      hair.position.set(-0.35, 8.8, 0);
-      group.add(hair);
-    } else {
-      // Clean Fade / Cropped Hair
-      const fadeGeo = new THREE.SphereGeometry(1.22, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.5);
-      const fade = new THREE.Mesh(fadeGeo, hairMat);
-      fade.position.y = 9.5;
-      group.add(fade);
-    }
-
-    // Tapered Denim Jeans / Trousers + Dual-Tone Sneakers
-    const pantColors = [0x1e3a8a, 0x1e293b, 0x334155, 0x78350f, 0x0f172a];
-    const pantColor = pantColors[Math.abs(Math.floor((p.id || 0) * 11)) % pantColors.length];
-    const pantMat = new THREE.MeshStandardMaterial({ color: pantColor, roughness: 0.70 });
-    const shoeSoleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.40 });
-    const shoeUpperMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.50 });
-
-    function createArticulatedLeg() {
-      const legRoot = new THREE.Group();
-      // Thigh (Upper Leg)
-      const thighGeo = new THREE.CylinderGeometry(0.48, 0.38, 2.3, 10);
-      const thigh = new THREE.Mesh(thighGeo, pantMat);
-      thigh.position.y = -1.15;
-      thigh.castShadow = true;
-      legRoot.add(thigh);
-
-      // Knee Joint & Calf (Lower Leg)
-      const calfGeo = new THREE.CylinderGeometry(0.38, 0.30, 2.3, 10);
-      const calf = new THREE.Mesh(calfGeo, pantMat);
-      calf.position.y = -3.45;
-      calf.castShadow = true;
-      legRoot.add(calf);
-
-      // Sneaker with rubber sole & colored upper
-      const sole = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.35, 10), shoeSoleMat);
-      sole.position.set(0.18, -4.7, 0);
-      sole.scale.set(1.4, 1, 0.9);
-      legRoot.add(sole);
-
-      const upper = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 8), shoeUpperMat);
-      upper.position.set(0.15, -4.4, 0);
-      legRoot.add(upper);
-
-      return legRoot;
-    }
-
-    const leftLeg = createArticulatedLeg();
-    leftLeg.position.set(0, 4.8, -0.6);
-    group.add(leftLeg);
-    group.userData.leftLeg = leftLeg;
-
-    const rightLeg = createArticulatedLeg();
-    rightLeg.position.set(0, 4.8, 0.6);
-    group.add(rightLeg);
-    group.userData.rightLeg = rightLeg;
-
-    // Articulated Arms (Upper Arm in sleeve, Forearm in skin tone, Hands)
-    function createArticulatedArm() {
-      const armRoot = new THREE.Group();
-      const upperGeo = new THREE.CylinderGeometry(0.38, 0.32, 2.0, 10);
-      const upper = new THREE.Mesh(upperGeo, torsoMat);
-      upper.position.y = -1.0;
-      armRoot.add(upper);
-
-      const foreGeo = new THREE.CylinderGeometry(0.32, 0.26, 1.8, 10);
-      const fore = new THREE.Mesh(foreGeo, skinMat);
-      fore.position.y = -2.8;
-      armRoot.add(fore);
-
-      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.36, 8, 8), skinMat);
-      hand.position.y = -3.8;
-      armRoot.add(hand);
-
-      return armRoot;
-    }
-
-    const leftArm = createArticulatedArm();
-    leftArm.position.set(0, 7.8, -1.35);
-    group.add(leftArm);
-    group.userData.leftArm = leftArm;
-
-    const rightArm = createArticulatedArm();
-    rightArm.position.set(0, 7.8, 1.35);
-    group.add(rightArm);
-    group.userData.rightArm = rightArm;
-
-    // Rain Umbrella (Smooth curved aerodynamic canopy)
-    const umbGroup = new THREE.Group();
-    const canopyGeo = new THREE.CylinderGeometry(0.3, 5.8, 2.6, 16, 1, false, 0, Math.PI * 2);
-    const canopyMat = new THREE.MeshStandardMaterial({
-      color: topColor,
-      roughness: 0.35,
-      metalness: 0.1,
-      side: THREE.DoubleSide
+    const humanGeo = new THREE.ExtrudeGeometry(humanShape, {
+      depth: 1.2,
+      bevelEnabled: true,
+      bevelThickness: 0.3,
+      bevelSize: 0.2,
+      bevelSegments: 4
     });
-    const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
-    canopyMesh.position.y = 8.5;
-    canopyMesh.castShadow = true;
-    umbGroup.add(canopyMesh);
+    humanGeo.center();
 
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 9.2, 6), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 }));
-    shaft.position.y = 4.6;
-    umbGroup.add(shaft);
+    const topPalette = [0x0284c7, 0xef4444, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899];
+    const topColor = p.color ? parseInt(p.color.replace('#', '0x'), 16) : topPalette[Math.abs(Math.floor((p.id || 0) * 7)) % topPalette.length];
+    const mesh = new THREE.Mesh(humanGeo, new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.55 }));
+    mesh.position.y = 5.8;
+    mesh.rotation.y = Math.PI / 2;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    group.add(mesh);
 
-    umbGroup.position.set(0.5, 4.0, 1.4);
-    umbGroup.visible = false;
-    group.add(umbGroup);
-    group.userData.umbrella = umbGroup;
-
+    group.userData.isGLTF = false;
     scene.add(group);
     return group;
   }
@@ -2651,9 +2903,14 @@
         friend.position.set(offset, 0, (pIdx === 0 ? 1 : -1) * 1.5);
         friend.rotation.y = (pIdx === 0 ? Math.PI * 0.7 : -Math.PI * 0.3);
         clusterGroup.add(friend);
+        socialPedestrians.push({ mesh: friend, parent: clusterGroup, isGLTF: !!friend.userData.isGLTF });
       });
       scene.add(clusterGroup);
     });
+
+    // Run immediate replacement if GLTF models were already cached/preloaded
+    replaceLiveCarsWithGLTF();
+    replaceLivePedestriansWithGLTF();
 
     // 13. Realistic Slanted Rain Line Segments System (Pooled & Lightweight)
     const rainPositions = new Float32Array(rainCount * 6); // 2 vertices per streak = 6 floats
@@ -3284,28 +3541,33 @@
         }
       }
 
-      const walkPhase = coord * 0.22;
-      const legAngle = isMoving ? Math.sin(walkPhase) * 0.45 : 0;
-      const armAngle = isMoving ? Math.sin(walkPhase) * 0.4 : 0;
-      const bob = isMoving ? Math.abs(Math.sin(walkPhase * 2)) * 0.4 : 0;
+      if (pm.isGLTF) {
+        pm.mesh.position.set(posX, 0, posZ);
+        pm.mesh.rotation.y = rotY;
+      } else {
+        const walkPhase = coord * 0.22;
+        const legAngle = isMoving ? Math.sin(walkPhase) * 0.45 : 0;
+        const armAngle = isMoving ? Math.sin(walkPhase) * 0.4 : 0;
+        const bob = isMoving ? Math.abs(Math.sin(walkPhase * 2)) * 0.4 : 0;
 
-      if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = legAngle;
-      if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -legAngle;
-      if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armAngle;
+        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = legAngle;
+        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -legAngle;
+        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armAngle;
 
-      if (pm.mesh.userData.rightArm) {
-        if (isRain) {
-          // Hand raised holding umbrella shaft upright
-          pm.mesh.userData.rightArm.rotation.x = -0.55;
-          pm.mesh.userData.rightArm.rotation.z = 0.2;
-        } else {
-          pm.mesh.userData.rightArm.rotation.x = armAngle;
-          pm.mesh.userData.rightArm.rotation.z = 0;
+        if (pm.mesh.userData.rightArm) {
+          if (isRain) {
+            // Hand raised holding umbrella shaft upright
+            pm.mesh.userData.rightArm.rotation.x = -0.55;
+            pm.mesh.userData.rightArm.rotation.z = 0.2;
+          } else {
+            pm.mesh.userData.rightArm.rotation.x = armAngle;
+            pm.mesh.userData.rightArm.rotation.z = 0;
+          }
         }
-      }
 
-      pm.mesh.position.set(posX, 1 + bob, posZ);
-      pm.mesh.rotation.y = rotY;
+        pm.mesh.position.set(posX, 1 + bob, posZ);
+        pm.mesh.rotation.y = rotY;
+      }
     }
 
     // 5. Update Traffic Signal Lights (Cached to eliminate redundant material uniform updates)

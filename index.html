@@ -106,6 +106,17 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+  <script>
+    if (typeof THREE.GLTFLoader === 'undefined') {
+      document.write('\x3Cscript src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js">\x3C/script>');
+    }
+    if (typeof THREE.DRACOLoader === 'undefined') {
+      document.write('\x3Cscript src="https://unpkg.com/three@0.128.0/examples/js/loaders/DRACOLoader.js">\x3C/script>');
+    }
+    if (typeof THREE.SkeletonUtils === 'undefined') {
+      document.write('\x3Cscript src="https://unpkg.com/three@0.128.0/examples/js/utils/SkeletonUtils.js">\x3C/script>');
+    }
+  </script>
 
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -972,15 +983,18 @@
       #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-beam,
       #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] .cr-headlight-beam,
       #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] .cr-headlight-beam {
-        opacity: 0.35 !important;
+        display: none !important;
+        opacity: 0 !important;
         pointer-events: none !important;
       }
 
-      .cr-streetlamp-head,
+      .cr-streetlamp-head {
+        filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.95)) !important;
+      }
+
+      ellipse[fill="url(#streetlampPoolGrad)"],
       #dhakaCrossroadsContainer.is-3d-drone-mode ellipse[fill="url(#streetlampPoolGrad)"] {
-        filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.95))
-                drop-shadow(0 0 35px rgba(251, 191, 36, 0.75)) !important;
-        opacity: 0.95 !important;
+        display: none !important;
       }
 
       .building-window,
@@ -1494,54 +1508,12 @@
 
     /* Dynamic Vehicle Headlights & Realistic Luminous Illumination */
     .cr-headlight-beam {
-      transition: opacity 0.8s ease;
-      will-change: opacity;
-      pointer-events: none;
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
     .cr-headlight-bulb {
-      filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 5px #fef08a);
-    }
-    [data-crossroads-weather="sunrise"] .cr-headlight-beam {
-      opacity: 0.28 !important;
-    }
-    [data-crossroads-weather="sun"] .cr-headlight-beam {
-      opacity: 0.04 !important;
-    }
-    [data-crossroads-weather="sunset"] .cr-headlight-beam {
-      opacity: 0.38 !important;
-    }
-    [data-crossroads-weather="night"] .cr-headlight-beam {
-      opacity: 0.55 !important;
-    }
-    /* Atmospheric Headlight Beams across Foggy & Overcast Times of Day */
-    [data-crossroads-weather="fog_night"] .cr-headlight-beam,
-    .is-foggy-night .cr-headlight-beam {
-      opacity: 0.50 !important;
-    }
-    [data-crossroads-weather="night_overcast"] .cr-headlight-beam,
-    .night-overcast .cr-headlight-beam {
-      opacity: 0.48 !important;
-    }
-    [data-crossroads-weather="fog_sunset"] .cr-headlight-beam {
-      opacity: 0.42 !important;
-    }
-    [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam {
-      opacity: 0.35 !important;
-    }
-    [data-crossroads-weather="fog_sunrise"] .cr-headlight-beam {
-      opacity: 0.30 !important;
-    }
-    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam {
-      opacity: 0.25 !important;
-    }
-    [data-crossroads-weather="morning_overcast"] .cr-headlight-beam {
-      opacity: 0.20 !important;
-    }
-    [data-crossroads-weather="fog_day"] .cr-headlight-beam {
-      opacity: 0.22 !important;
-    }
-    [data-crossroads-weather="day_overcast"] .cr-headlight-beam {
-      opacity: 0.16 !important;
+      filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 4px #fef08a);
     }
     [data-crossroads-weather="fog_night"] .cr-headlight-bulb,
     [data-crossroads-weather="night_overcast"] .cr-headlight-bulb,
