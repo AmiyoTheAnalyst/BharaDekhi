@@ -320,6 +320,67 @@
   let rainLengths = null;
   const rainCount = 1200;
 
+  // Dusk Sky & Vice City Neon Palette Assets
+  let duskSkyTexture = null;
+  let gltfPedTemplates = [];
+  let activeMixers = [];
+  let carArchetypeCounter = 0;
+
+  function createDuskSkyGradientTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    // Rich dusk purple-to-magenta gradient (#1b1035 zenith blending into #5b2245 horizon)
+    grad.addColorStop(0.0, '#1b1035');  // Zenith rich purple
+    grad.addColorStop(0.35, '#2c123d');
+    grad.addColorStop(0.68, '#5b2245'); // Dusk magenta
+    grad.addColorStop(0.92, '#7a2858'); // Warm horizon sunset glow
+    grad.addColorStop(1.0, '#923368');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 128, 512);
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }
+
+  function initGLTFAssetManager() {
+    if (typeof THREE.GLTFLoader !== 'function') return;
+    try {
+      const loader = new THREE.GLTFLoader();
+      if (typeof THREE.DRACOLoader === 'function') {
+        const draco = new THREE.DRACOLoader();
+        draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.3/');
+        loader.setDRACOLoader(draco);
+      }
+      const officialModels = [
+        'https://threejs.org/examples/models/gltf/Soldier.glb',
+        'https://threejs.org/examples/models/gltf/Xbot.glb'
+      ];
+      officialModels.forEach(url => {
+        loader.load(url, (gltf) => {
+          if (gltf && gltf.scene) {
+            gltf.scene.scale.set(4.8, 4.8, 4.8);
+            gltf.scene.traverse(node => {
+              if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+              }
+            });
+            gltfPedTemplates.push({
+              scene: gltf.scene,
+              animations: gltf.animations || []
+            });
+          }
+        }, undefined, () => {
+          // Silent fallback to procedural curved models if offline
+        });
+      });
+    } catch (e) {
+      // Offline fallback
+    }
+  }
+
   function getSharedBuildingDepthMat() {
     if (!sharedBuildingDepthMat) {
       sharedBuildingDepthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
@@ -393,48 +454,63 @@
     canvas.height = 256;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = wallColor || '#0f172a';
+    ctx.fillStyle = wallColor || '#0d9488';
     ctx.fillRect(0, 0, 256, 256);
 
-    const floorH = 256 / floors;
-    const colW = 256 / cols;
+    const floorH = 256 / Math.max(1, floors);
+    const colW = 256 / Math.max(1, cols);
 
     for (let f = 0; f < floors; f++) {
-      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      // Art Deco horizontal floor separator groove
+      ctx.fillStyle = 'rgba(0,0,0,0.40)';
       ctx.fillRect(0, f * floorH + floorH - 3, 256, 3);
 
       for (let c = 0; c < cols; c++) {
-        const x = c * colW + colW * 0.18;
-        const y = f * floorH + floorH * 0.20;
-        const w = colW * 0.64;
-        const h = floorH * 0.54;
+        const x = c * colW + colW * 0.16;
+        const y = f * floorH + floorH * 0.18;
+        const w = colW * 0.68;
+        const h = floorH * 0.60;
 
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
-        ctx.fillRect(x - 1.5, y - 1.5, w + 3, h + 3);
+        // Recessed outer frame
+        ctx.fillStyle = 'rgba(10, 15, 26, 0.90)';
+        ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
 
-        // Pseudorandom window illumination (70% lit, 30% tinted glass reflection)
-        const hash = Math.sin((f + 1) * 31.7 + (c + 1) * 17.3);
-        const isLit = (hash - Math.floor(hash)) > 0.30;
+        // Pseudorandom window illumination (75% lit warm amber, 25% dark glass reflection)
+        const hash = Math.sin((f + 1) * 37.1 + (c + 1) * 19.3);
+        const isLit = (hash - Math.floor(hash)) > 0.25;
 
         if (isLit) {
-          ctx.fillStyle = winColor || '#fbbf24';
+          // Warm interior amber glow (#fde68a / #fef08a)
+          const amberCol = winColor || '#fde68a';
+          ctx.fillStyle = amberCol;
           ctx.fillRect(x, y, w, h);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
-          ctx.fillRect(x + w * 0.5, y, w * 0.5, h);
+
+          // Subtle warm interior curtain / shade gradient
+          const winGrad = ctx.createLinearGradient(x, y, x, y + h);
+          winGrad.addColorStop(0.0, 'rgba(254, 240, 138, 0.95)');
+          winGrad.addColorStop(0.5, 'rgba(251, 191, 36, 0.85)');
+          winGrad.addColorStop(1.0, 'rgba(245, 158, 11, 0.70)');
+          ctx.fillStyle = winGrad;
+          ctx.fillRect(x, y, w, h);
         } else {
           ctx.fillStyle = '#090d16';
           ctx.fillRect(x, y, w, h);
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+          // Diagonal glass reflection
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.12)';
           ctx.beginPath();
           ctx.moveTo(x, y + h);
-          ctx.lineTo(x + w * 0.4, y);
-          ctx.lineTo(x + w * 0.7, y);
-          ctx.lineTo(x + w * 0.3, y + h);
+          ctx.lineTo(x + w * 0.45, y);
+          ctx.lineTo(x + w * 0.75, y);
+          ctx.lineTo(x + w * 0.30, y + h);
           ctx.fill();
         }
 
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-        ctx.fillRect(x + w / 2 - 0.7, y, 1.4, h);
+        // 4-Pane Recessed Architectural Window Mullion Grid
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        // Vertical mullion
+        ctx.fillRect(x + w / 2 - 0.9, y, 1.8, h);
+        // Horizontal mullion
+        ctx.fillRect(x, y + h / 2 - 0.9, w, 1.8);
       }
     }
 
@@ -657,7 +733,7 @@
     scene.add(treeGroup);
   }
 
-  // 3D Building Builder (With Concrete Floor Slabs, Recessed Balconies & AC Wall Units)
+  // 3D Building Builder — GTA Vice City Definitive Edition Art-Deco & Modern Multi-Tier Architecture
   function create3DBuilding(config) {
     const {
       x, z, width, depth, height,
@@ -672,105 +748,159 @@
     const numFloors = floors || 4;
     const floorHeight = height / numFloors;
 
-    const frontTex = createWindowFacadeTexture(numFloors, cols || 4, winColor || '#fef08a', wallColor);
-    const sideTex = createWindowFacadeTexture(numFloors, Math.max(2, Math.floor((cols || 4) * 0.6)), winColor || '#fef08a', sideColor || wallColor);
+    // Vice City Pastel & Vibrant Palette
+    const vcColors = ['#a7f3d0', '#0d9488', '#fda4af', '#fef3c7'];
+    const chosenWallColor = wallColor || vcColors[Math.abs(Math.floor(x * 0.05 + z * 0.03)) % vcColors.length];
+    const chosenSideColor = sideColor || chosenWallColor;
+    const chosenWinColor = winColor || '#fde68a';
 
-    const frontMat = new THREE.MeshStandardMaterial({
-      map: frontTex,
-      roughness: 0.38,
-      metalness: 0.35,
-      emissive: new THREE.Color(winColor || 0xfbbf24),
-      emissiveMap: frontTex,
-      emissiveIntensity: 0.60
-    });
-    const sideMat = new THREE.MeshStandardMaterial({
-      map: sideTex,
-      roughness: 0.45,
-      metalness: 0.30,
-      emissive: new THREE.Color(winColor || 0xfbbf24),
-      emissiveMap: sideTex,
-      emissiveIntensity: 0.45
-    });
-    const roofMat = new THREE.MeshStandardMaterial({
-      color: roofColor || 0x0a0f1d,
-      roughness: 0.75,
-      metalness: 0.20
-    });
-    const bottomMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    // Stepped Multi-Tier Art Deco Architecture:
+    // Tier 1: Base / Podium (Ground to 36% height) with ground-floor overhang
+    // Tier 2: Mid Tower (36% to 76% height) stepped back slightly with vertical pilasters
+    // Tier 3: Setback Upper Crown (76% to 100% height) with decorative Art Deco crown parapet
+    const h1 = height * 0.36;
+    const h2 = height * 0.40;
+    const h3 = height * 0.24;
 
-    const materials = [
-      sideMat,   // px
-      sideMat,   // nx
-      roofMat,   // py (Roof)
-      bottomMat, // ny
-      frontMat,  // pz (Front)
-      sideMat    // nz
-    ];
+    const w1 = width;
+    const d1 = depth;
+    const w2 = Math.max(16, width * 0.88);
+    const d2 = Math.max(16, depth * 0.88);
+    const w3 = Math.max(12, width * 0.74);
+    const d3 = Math.max(12, depth * 0.74);
 
-    const bldgGeo = new THREE.BoxGeometry(width, height, depth);
-    const bldg = new THREE.Mesh(bldgGeo, materials);
-    bldg.position.y = height / 2;
-    bldg.castShadow = true;
-    bldg.receiveShadow = true;
-    bldg.customDepthMaterial = getSharedBuildingDepthMat();
-    group.add(bldg);
+    const frontTex1 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.36)), cols || 4, chosenWinColor, chosenWallColor);
+    const frontTex2 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.40)), Math.max(2, (cols || 4) - 1), chosenWinColor, chosenWallColor);
+    const frontTex3 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.24)), Math.max(2, (cols || 4) - 2), chosenWinColor, chosenWallColor);
 
-    // Concrete floor slabs protruding between stories
-    const slabGeo = new THREE.BoxGeometry(width + 1.2, 1.0, depth + 1.2);
-    const slabMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
-    for (let f = 1; f < numFloors; f++) {
-      const slab = new THREE.Mesh(slabGeo, slabMat);
-      slab.position.y = f * floorHeight;
-      group.add(slab);
+    const sideTex1 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.36)), Math.max(2, Math.floor((cols || 4) * 0.6)), chosenWinColor, chosenSideColor);
+    const sideTex2 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.40)), Math.max(2, Math.floor((cols || 4) * 0.5)), chosenWinColor, chosenSideColor);
+    const sideTex3 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.24)), Math.max(2, Math.floor((cols || 4) * 0.4)), chosenWinColor, chosenSideColor);
+
+    function createTierMaterials(frontT, sideT) {
+      const frontM = new THREE.MeshStandardMaterial({
+        map: frontT,
+        roughness: 0.35,
+        metalness: 0.25,
+        emissive: new THREE.Color(0xfbbf24),
+        emissiveMap: frontT,
+        emissiveIntensity: 0.65
+      });
+      const sideM = new THREE.MeshStandardMaterial({
+        map: sideT,
+        roughness: 0.45,
+        metalness: 0.20,
+        emissive: new THREE.Color(0xfbbf24),
+        emissiveMap: sideT,
+        emissiveIntensity: 0.45
+      });
+      const roofM = new THREE.MeshStandardMaterial({ color: roofColor || 0x0f172a, roughness: 0.75, metalness: 0.2 });
+      const botM = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      return [sideM, sideM, roofM, botM, frontM, sideM];
     }
+
+    // Tier 1: Base Podium
+    const tier1Mesh = new THREE.Mesh(new THREE.BoxGeometry(w1, h1, d1), createTierMaterials(frontTex1, sideTex1));
+    tier1Mesh.position.y = h1 / 2;
+    tier1Mesh.castShadow = true;
+    tier1Mesh.receiveShadow = true;
+    tier1Mesh.customDepthMaterial = getSharedBuildingDepthMat();
+    group.add(tier1Mesh);
+
+    // Ground Floor Overhang Canopy with architectural depth
+    const canopyMesh = new THREE.Mesh(new THREE.BoxGeometry(w1 + 3.5, 1.6, d1 + 3.5), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 }));
+    canopyMesh.position.y = h1;
+    canopyMesh.castShadow = true;
+    group.add(canopyMesh);
+
+    // Tier 2: Stepped Mid Tower
+    const tier2Mesh = new THREE.Mesh(new THREE.BoxGeometry(w2, h2, d2), createTierMaterials(frontTex2, sideTex2));
+    tier2Mesh.position.y = h1 + h2 / 2;
+    tier2Mesh.castShadow = true;
+    tier2Mesh.receiveShadow = true;
+    tier2Mesh.customDepthMaterial = getSharedBuildingDepthMat();
+    group.add(tier2Mesh);
+
+    // Tier 2 Setback Cornice Slab
+    const cornice2 = new THREE.Mesh(new THREE.BoxGeometry(w2 + 2.5, 1.4, d2 + 2.5), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 }));
+    cornice2.position.y = h1 + h2;
+    group.add(cornice2);
+
+    // Tier 3: Setback Upper Crown
+    const tier3Mesh = new THREE.Mesh(new THREE.BoxGeometry(w3, h3, d3), createTierMaterials(frontTex3, sideTex3));
+    tier3Mesh.position.y = h1 + h2 + h3 / 2;
+    tier3Mesh.castShadow = true;
+    tier3Mesh.receiveShadow = true;
+    tier3Mesh.customDepthMaterial = getSharedBuildingDepthMat();
+    group.add(tier3Mesh);
+
+    // Decorative Art Deco Stepped Spire / Crown Top
+    const crownGeo = new THREE.BoxGeometry(w3 * 0.65, 4.2, d3 * 0.65);
+    const crownMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.5 });
+    const crown = new THREE.Mesh(crownGeo, crownMat);
+    crown.position.y = height + 2.1;
+    group.add(crown);
+
+    // Neon Tube Building Trim & Vertical Pilasters (Vice City Definitive Edition)
+    // Bright emissive neon tubes: Hot Pink (#ff007f), Electric Cyan (#00f5d4), Neon Lime (#39ff14), Warm Gold (#facc15)
+    const neonPalette = [0xff007f, 0x00f5d4, 0x39ff14, 0xfacc15];
+    const neonHex = neonPalette[Math.abs(Math.floor((x * 11 + z * 17) / 100)) % neonPalette.length];
+    const neonMat = new THREE.MeshBasicMaterial({ color: neonHex });
+
+    // 1. Ground Overhang Neon Tube Trim
+    const neonStrip1 = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, w1 + 3.2, 8), neonMat);
+    neonStrip1.rotation.z = Math.PI / 2;
+    neonStrip1.position.set(0, h1 + 0.8, (d1 + 3.5) / 2);
+    group.add(neonStrip1);
+
+    // 2. Mid-Tier Roofline Neon Tube
+    const neonStrip2 = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, w2 + 2.2, 8), neonMat);
+    neonStrip2.rotation.z = Math.PI / 2;
+    neonStrip2.position.set(0, h1 + h2 + 0.7, (d2 + 2.5) / 2);
+    group.add(neonStrip2);
+
+    // 3. Crown Roofline Neon Tube
+    const neonStrip3 = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, w3 + 1.4, 8), neonMat);
+    neonStrip3.rotation.z = Math.PI / 2;
+    neonStrip3.position.set(0, height + 0.5, (d3 + 1.8) / 2);
+    group.add(neonStrip3);
+
+    // 4. Vertical Art Deco Pilasters (corner neon tubes)
+    [-w2 / 2 + 0.5, w2 / 2 - 0.5].forEach(px => {
+      const pilasterNeon = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, h2, 8), neonMat);
+      pilasterNeon.position.set(px, h1 + h2 / 2, d2 / 2 + 0.3);
+      group.add(pilasterNeon);
+    });
+
+    // 5. Colored PointLight Pool washing down facades and sidewalks
+    const neonLight = new THREE.PointLight(neonHex, 1.25, 80);
+    neonLight.position.set(0, h1 - 2, (d1 / 2) + 6);
+    group.add(neonLight);
 
     // 3D AC outdoor condenser units on exterior walls
     const acGeo = new THREE.BoxGeometry(3.6, 2.4, 2.0);
     const acMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 });
-    for (let f = 1; f < Math.min(numFloors, 5); f++) {
+    for (let f = 1; f < Math.min(numFloors, 4); f++) {
       const ac = new THREE.Mesh(acGeo, acMat);
-      const sideX = (f % 2 === 0) ? (width / 2 - 6) : (-width / 2 + 6);
-      ac.position.set(sideX, f * floorHeight + 2.5, depth / 2 + 1.0);
+      const sideX = (f % 2 === 0) ? (w1 / 2 - 6) : (-w1 / 2 + 6);
+      ac.position.set(sideX, f * (h1 / 2) + 2.0, d1 / 2 + 1.0);
       group.add(ac);
     }
 
-    // Recessed 3D Balconies with railings on upper stories
-    if (numFloors >= 3) {
-      const balGeo = new THREE.BoxGeometry(width * 0.42, 1.0, 4.5);
-      const railGeo = new THREE.BoxGeometry(width * 0.42, 2.6, 0.5);
-      const railMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
-      for (let f = 2; f < numFloors; f++) {
-        const bal = new THREE.Mesh(balGeo, slabMat);
-        bal.position.set(0, f * floorHeight, depth / 2 + 2.2);
-        group.add(bal);
-
-        const rail = new THREE.Mesh(railGeo, railMat);
-        rail.position.set(0, f * floorHeight + 1.6, depth / 2 + 4.4);
-        group.add(rail);
-      }
-    }
-
-    // Rooftop Parapet Rim
-    const rimGeo = new THREE.BoxGeometry(width + 2, 3, depth + 2);
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6 });
-    const rim = new THREE.Mesh(rimGeo, rimMat);
-    rim.position.y = height + 1.5;
-    group.add(rim);
-
     // Rooftop Water Tank
     if (waterTank) {
-      const tankGeo = new THREE.CylinderGeometry(8, 8, 14, 16);
+      const tankGeo = new THREE.CylinderGeometry(7, 7, 12, 16);
       const tankMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.4 });
       const tank = new THREE.Mesh(tankGeo, tankMat);
-      tank.position.set(-width * 0.25, height + 10, -depth * 0.15);
+      tank.position.set(-w3 * 0.25, height + 9, -d3 * 0.15);
       group.add(tank);
 
-      const legGeo = new THREE.CylinderGeometry(0.8, 0.8, 6, 6);
+      const legGeo = new THREE.CylinderGeometry(0.7, 0.7, 5, 6);
       const legMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
-      [-4, 4].forEach(lx => {
-        [-4, 4].forEach(lz => {
+      [-3.5, 3.5].forEach(lx => {
+        [-3.5, 3.5].forEach(lz => {
           const leg = new THREE.Mesh(legGeo, legMat);
-          leg.position.set(-width * 0.25 + lx, height + 3, -depth * 0.15 + lz);
+          leg.position.set(-w3 * 0.25 + lx, height + 2.5, -d3 * 0.15 + lz);
           group.add(leg);
         });
       });
@@ -778,41 +908,36 @@
 
     // Rooftop Radio/Cell Antenna with Flashing Obstacle Beacon
     if (antenna) {
-      const antGeo = new THREE.CylinderGeometry(0.6, 1.2, 28, 8);
+      const antGeo = new THREE.CylinderGeometry(0.5, 1.0, 26, 8);
       const antMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
       const ant = new THREE.Mesh(antGeo, antMat);
-      ant.position.set(width * 0.25, height + 14, -depth * 0.15);
+      ant.position.set(w3 * 0.25, height + 13, -d3 * 0.15);
       group.add(ant);
 
-      const beaconGeo = new THREE.SphereGeometry(1.8, 8, 8);
-      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+      const beaconGeo = new THREE.SphereGeometry(1.6, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
       const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-      beacon.position.set(width * 0.25, height + 28, -depth * 0.15);
+      beacon.position.set(w3 * 0.25, height + 26, -d3 * 0.15);
       group.add(beacon);
     }
 
-    // Shop Signboard and Awning
+    // Authentic Signboard and Awning
     if (signboard) {
       const sTex = createSignboardTexture(signboard.text, signboard.sub, signboard.bg, signboard.textCol, signboard.subCol, signboard.border, signboard.tw, signboard.th);
-      const sGeo = new THREE.BoxGeometry(signboard.w, signboard.h, 2.5);
+      const sGeo = new THREE.BoxGeometry(signboard.w || (w1 * 0.75), signboard.h || 16, 2.5);
       const sMat = new THREE.MeshBasicMaterial({ map: sTex });
       const signMesh = new THREE.Mesh(sGeo, sMat);
-      signMesh.position.set(signboard.ox || 0, signboard.y || 16, (depth / 2) + 1.5);
+      signMesh.position.set(signboard.ox || 0, signboard.y || 15, (d1 / 2) + 2.0);
       group.add(signMesh);
 
-      const awnGeo = new THREE.BoxGeometry(signboard.w + 4, 3, 10);
-      const awnMat = new THREE.MeshStandardMaterial({ color: signboard.awnCol || 0xb45309, roughness: 0.5 });
-      const awn = new THREE.Mesh(awnGeo, awnMat);
-      awn.position.set(signboard.ox || 0, (signboard.y || 16) + signboard.h / 2 + 1.5, (depth / 2) + 5);
-      awn.rotation.x = 0.25;
-      group.add(awn);
-
-      // Architectural Entryway Porch Sconce & Downlight
-      const porchLampGeo = new THREE.SphereGeometry(1.6, 8, 8);
-      const porchLampMat = new THREE.MeshBasicMaterial({ color: 0xfff08a });
-      const porchLamp = new THREE.Mesh(porchLampGeo, porchLampMat);
-      porchLamp.position.set(signboard.ox || 0, (signboard.y || 16) - 4, (depth / 2) + 3);
-      group.add(porchLamp);
+      if (signboard.awnCol) {
+        const awnGeo = new THREE.BoxGeometry((signboard.w || (w1 * 0.75)) + 3, 2.8, 8);
+        const awnMat = new THREE.MeshStandardMaterial({ color: signboard.awnCol, roughness: 0.5 });
+        const awn = new THREE.Mesh(awnGeo, awnMat);
+        awn.position.set(signboard.ox || 0, (signboard.y || 15) + (signboard.h || 16) / 2 + 1.4, (d1 / 2) + 4.5);
+        awn.rotation.x = 0.25;
+        group.add(awn);
+      }
     }
 
     freezeStatic(group);
@@ -876,8 +1001,314 @@
     return { group: sigGroup, red: rMat, yellow: yMat, green: gMat };
   }
 
+  // ---------------------------------------------------------------------------
+  // 10-Spoke Metallic Alloy Wheel Builder (Zero BoxGeometry)
+  // ---------------------------------------------------------------------------
+  function create10SpokeAlloyWheel(radius, width, rimColorHex, darkCenter) {
+    const wheelGroup = new THREE.Group();
+
+    // 1. Rubber Tire (Cylinder oriented to roll around Z)
+    const tireGeo = new THREE.CylinderGeometry(radius, radius, width, 24);
+    const tireMat = sharedWheelMat || new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    const tire = new THREE.Mesh(tireGeo, tireMat);
+    tire.rotation.x = Math.PI / 2;
+    wheelGroup.add(tire);
+
+    // 2. Metallic Outer Rim Lip
+    const rimGeo = new THREE.CylinderGeometry(radius * 0.74, radius * 0.72, width + 0.03, 20);
+    const rimMat = new THREE.MeshStandardMaterial({
+      color: rimColorHex || 0xd1d5db,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    rim.rotation.x = Math.PI / 2;
+    wheelGroup.add(rim);
+
+    // 3. Central Hub & Lug Circle
+    const hubGeo = new THREE.CylinderGeometry(radius * 0.24, radius * 0.24, width + 0.06, 12);
+    const hubMat = new THREE.MeshStandardMaterial({
+      color: darkCenter ? 0x18181b : (rimColorHex || 0xd1d5db),
+      metalness: 0.90,
+      roughness: 0.20
+    });
+    const hub = new THREE.Mesh(hubGeo, hubMat);
+    hub.rotation.x = Math.PI / 2;
+    wheelGroup.add(hub);
+
+    // 4. 10 Radial Metallic Alloy Spokes
+    const spokeGeo = new THREE.CylinderGeometry(radius * 0.045, radius * 0.04, radius * 0.52, 6);
+    for (let s = 0; s < 10; s++) {
+      const angle = s * (Math.PI * 2 / 10);
+      const spoke = new THREE.Mesh(spokeGeo, rimMat);
+      const dist = radius * 0.48;
+      spoke.position.set(Math.cos(angle) * dist, Math.sin(angle) * dist, (width / 2) + 0.015);
+      spoke.rotation.z = angle + Math.PI / 2;
+      wheelGroup.add(spoke);
+    }
+
+    // 5. Internal Brake Rotor Disc
+    const rotorGeo = new THREE.CylinderGeometry(radius * 0.52, radius * 0.52, width * 0.45, 16);
+    const rotorMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.3 });
+    const rotor = new THREE.Mesh(rotorGeo, rotorMat);
+    rotor.rotation.x = Math.PI / 2;
+    wheelGroup.add(rotor);
+
+    return wheelGroup;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Curved Aerodynamic Sports Car Factory — ZERO BoxGeometry
+  // 6 Diverse Archetypes (Bugatti, White Racing, Crimson Aero, Lime Neon, Silver Wedge, Night Muscle)
+  // ---------------------------------------------------------------------------
+  function createCurvedSportsCar(archetypeIdx) {
+    const typeIdx = (archetypeIdx !== undefined ? archetypeIdx : (carArchetypeCounter++)) % 6;
+    const group = new THREE.Group();
+    group.userData.wheels = [];
+
+    // Smooth Aerodynamic Side Profile (THREE.Shape with bezierCurveTo)
+    const shape = new THREE.Shape();
+    // Start at rear lower bumper / diffuser
+    shape.moveTo(-2.1, 0.25);
+    // Rear diffuser curve up to decklid
+    shape.bezierCurveTo(-2.15, 0.45, -2.1, 0.65, -1.95, 0.75);
+    shape.lineTo(-1.5, 0.78);
+    // Sloping fastback rear window up to roofline
+    shape.bezierCurveTo(-1.3, 0.90, -0.85, 1.25, -0.35, 1.28);
+    // Low sleek roofline
+    shape.lineTo(0.2, 1.28);
+    // Raked aerodynamic windshield
+    shape.bezierCurveTo(0.7, 1.22, 1.15, 0.75, 1.35, 0.68);
+    // Aggressive sloping hood
+    shape.bezierCurveTo(1.55, 0.62, 1.85, 0.48, 2.05, 0.38);
+    // Front carbon splitter nose
+    shape.lineTo(2.15, 0.28);
+    shape.lineTo(2.05, 0.18);
+    shape.lineTo(1.65, 0.18);
+    // Recessed front wheel well arch
+    shape.bezierCurveTo(1.65, 0.65, 0.95, 0.65, 0.95, 0.18);
+    shape.lineTo(-0.95, 0.18);
+    // Recessed rear wheel well arch
+    shape.bezierCurveTo(-0.95, 0.65, -1.65, 0.65, -1.65, 0.18);
+    shape.lineTo(-2.1, 0.25);
+
+    const extrudeSettings = {
+      depth: 1.7,
+      bevelEnabled: true,
+      bevelThickness: 0.18,
+      bevelSize: 0.15,
+      bevelSegments: 8,
+      curveSegments: 16
+    };
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    // Center extrusion across Z
+    bodyGeo.translate(0, 0, -1.7 / 2);
+
+    // 6 Specific Archetype Parameter Settings
+    let bodyColorHex = 0xf8fafc;
+    let roughness = 0.20;
+    let metalness = 0.60;
+    let rimColorHex = 0xd1d5db;
+    let darkRimCenter = false;
+
+    if (typeIdx === 0) {
+      // 1. Two-Tone Bugatti/Hypercar: Royal Blue #0047ab & Carbon Black shell
+      bodyColorHex = 0x0047ab;
+      roughness = 0.12;
+      metalness = 0.75;
+      rimColorHex = 0xe2e8f0;
+    } else if (typeIdx === 1) {
+      // 2. White Racing Supercar: Glossy pearl white #f8fafc with dual crimson racing stripes
+      bodyColorHex = 0xf8fafc;
+      roughness = 0.10;
+      metalness = 0.35;
+      rimColorHex = 0x94a3b8;
+    } else if (typeIdx === 2) {
+      // 3. Crimson & Black Aero Hypercar: Crimson red #ef4444, aggressive aero & rear spoiler wing
+      bodyColorHex = 0xef4444;
+      roughness = 0.18;
+      metalness = 0.65;
+      rimColorHex = 0x27272a;
+      darkRimCenter = true;
+    } else if (typeIdx === 3) {
+      // 4. Lime-Green Neon Coupe: #84cc16, black hood scoop, glowing neon-yellow LED strips
+      bodyColorHex = 0x84cc16;
+      roughness = 0.22;
+      metalness = 0.45;
+      rimColorHex = 0x18181b;
+      darkRimCenter = true;
+    } else if (typeIdx === 4) {
+      // 5. Silver Retro Wedge Coupe: #cbd5e1, sharp gullwing silhouette, quad headlights
+      bodyColorHex = 0xcbd5e1;
+      roughness = 0.25;
+      metalness = 0.90;
+      rimColorHex = 0xe2e8f0;
+    } else {
+      // 6. Night Muscle & Street Sedan: Midnight obsidian #0f172a, bright ice-blue xenon quad headlights + SpotLight
+      bodyColorHex = 0x0f172a;
+      roughness = 0.30;
+      metalness = 0.70;
+      rimColorHex = 0x94a3b8;
+    }
+
+    const carMat = new THREE.MeshStandardMaterial({
+      color: bodyColorHex,
+      roughness: roughness,
+      metalness: metalness
+    });
+
+    const bodyMesh = new THREE.Mesh(bodyGeo, carMat);
+    bodyMesh.castShadow = true;
+    bodyMesh.receiveShadow = true;
+    group.add(bodyMesh);
+
+    // Dark Curved Glass Canopy (THREE.Shape Extrusion)
+    const canopyShape = new THREE.Shape();
+    canopyShape.moveTo(-1.35, 0.76);
+    canopyShape.bezierCurveTo(-1.22, 0.88, -0.80, 1.24, -0.32, 1.26);
+    canopyShape.lineTo(0.18, 1.26);
+    canopyShape.bezierCurveTo(0.68, 1.20, 1.12, 0.74, 1.30, 0.68);
+    canopyShape.lineTo(0.85, 0.68);
+    canopyShape.bezierCurveTo(0.35, 0.72, -0.65, 0.72, -1.35, 0.76);
+
+    const canopyGeo = new THREE.ExtrudeGeometry(canopyShape, {
+      depth: 1.54,
+      bevelEnabled: true,
+      bevelThickness: 0.08,
+      bevelSize: 0.06,
+      bevelSegments: 6,
+      curveSegments: 16
+    });
+    canopyGeo.translate(0, 0, -1.54 / 2);
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16,
+      roughness: 0.08,
+      metalness: 0.85
+    });
+    const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
+    group.add(canopyMesh);
+
+    // Archetype-Specific Curved Details:
+    if (typeIdx === 0) {
+      // Bugatti Two-Tone: Curved C-Pillar side air intakes in Carbon Black
+      [-1, 1].forEach(side => {
+        const cPillarShape = new THREE.Shape();
+        cPillarShape.moveTo(-0.8, 0.3);
+        cPillarShape.bezierCurveTo(-0.8, 1.15, 0.2, 1.15, 0.2, 0.95);
+        cPillarShape.bezierCurveTo(0.2, 0.45, -0.5, 0.3, -0.8, 0.3);
+        const cPillarGeo = new THREE.ExtrudeGeometry(cPillarShape, { depth: 0.08, bevelEnabled: false });
+        cPillarGeo.translate(0, 0, side * 0.86);
+        const cPillarMesh = new THREE.Mesh(cPillarGeo, new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2, metalness: 0.8 }));
+        group.add(cPillarMesh);
+      });
+    } else if (typeIdx === 1) {
+      // White Racing Supercar: Dual crimson-red racing stripes down hood & roof
+      [-0.15, 0.15].forEach(sz => {
+        const stripeShape = new THREE.Shape();
+        stripeShape.moveTo(0.2, 1.29);
+        stripeShape.bezierCurveTo(0.7, 1.23, 1.15, 0.76, 1.35, 0.69);
+        stripeShape.bezierCurveTo(1.55, 0.63, 1.85, 0.49, 2.05, 0.39);
+        stripeShape.lineTo(2.05, 0.35);
+        stripeShape.lineTo(0.2, 1.25);
+        const stripeGeo = new THREE.ExtrudeGeometry(stripeShape, { depth: 0.12, bevelEnabled: false });
+        stripeGeo.translate(0, 0, sz - 0.06);
+        const stripeMesh = new THREE.Mesh(stripeGeo, new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
+        group.add(stripeMesh);
+      });
+    } else if (typeIdx === 2) {
+      // Crimson Aero Hypercar: Curved Front Splitter & Elevated Rear GT Wing
+      const wingGeo = new THREE.CylinderGeometry(0.08, 0.24, 1.6, 12);
+      const wingMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.3, metalness: 0.8 });
+      const wing = new THREE.Mesh(wingGeo, wingMat);
+      wing.rotation.x = Math.PI / 2;
+      wing.position.set(-1.85, 1.05, 0);
+      group.add(wing);
+
+      // Dual wing upright stanchions
+      [-0.45, 0.45].forEach(wz => {
+        const stanchion = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.32, 6), wingMat);
+        stanchion.position.set(-1.85, 0.90, wz);
+        group.add(stanchion);
+      });
+    } else if (typeIdx === 3) {
+      // Lime-Green Neon Coupe: Black hood scoop & Neon Yellow glowing LED strips
+      const scoopGeo = new THREE.CylinderGeometry(0.16, 0.22, 0.38, 8);
+      const scoopMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.3 });
+      const scoop = new THREE.Mesh(scoopGeo, scoopMat);
+      scoop.position.set(0.9, 0.82, 0);
+      group.add(scoop);
+
+      // Glowing Neon Yellow LED side skirts
+      [-0.86, 0.86].forEach(sideZ => {
+        const neonSkirt = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.8, 6), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        neonSkirt.rotation.z = Math.PI / 2;
+        neonSkirt.position.set(0, 0.20, sideZ);
+        group.add(neonSkirt);
+      });
+    } else if (typeIdx === 4) {
+      // Silver Retro Wedge: Quad rectangular vintage headlights
+      [-0.48, 0.48].forEach(hz => {
+        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.20, 8), new THREE.MeshBasicMaterial({ color: 0xe0f2fe }));
+        hl.rotation.x = Math.PI / 2;
+        hl.position.set(2.10, 0.38, hz);
+        group.add(hl);
+      });
+    } else if (typeIdx === 5) {
+      // Night Muscle Sedan: Bright ice-blue xenon quad headlights casting real SpotLight beam
+      [-0.45, 0.45].forEach(hz => {
+        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.18, 8), new THREE.MeshBasicMaterial({ color: 0x60a5fa }));
+        hl.rotation.x = Math.PI / 2;
+        hl.position.set(2.12, 0.40, hz);
+        group.add(hl);
+      });
+
+      // Real Three.js SpotLight casting forward onto asphalt ahead
+      const xenonSpot = new THREE.SpotLight(0x60a5fa, 2.8, 140, Math.PI / 6, 0.45, 1.2);
+      xenonSpot.position.set(2.2, 0.40, 0);
+      xenonSpot.target.position.set(16, 0, 0);
+      group.add(xenonSpot);
+      group.add(xenonSpot.target);
+    }
+
+    // Common Front Headlights & Rear Taillights
+    if (typeIdx !== 4 && typeIdx !== 5) {
+      [-0.48, 0.48].forEach(hz => {
+        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.18, 8), vehicleHeadlightMat || new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        hl.rotation.x = Math.PI / 2;
+        hl.position.set(2.12, 0.38, hz);
+        group.add(hl);
+      });
+    }
+
+    // Rear Ruby-Red LED Taillight Bar
+    const tlMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.25, 8), vehicleTaillightMat || new THREE.MeshBasicMaterial({ color: 0xff1744 }));
+    tlMesh.rotation.x = Math.PI / 2;
+    tlMesh.position.set(-2.08, 0.68, 0);
+    group.add(tlMesh);
+
+    // 4 Wheels: 10-Spoke Metallic Alloy Rims (radius 0.30, width 0.18)
+    const wheelRadius = 0.30;
+    const wheelWidth = 0.18;
+    [-0.86, 0.86].forEach(wz => {
+      [-1.3, 1.3].forEach(wx => {
+        const wheel = create10SpokeAlloyWheel(wheelRadius, wheelWidth, rimColorHex, darkRimCenter);
+        wheel.position.set(wx, 0.30, wz);
+        group.add(wheel);
+        group.userData.wheels.push(wheel);
+      });
+    });
+
+    // Scale whole car to coordinate scale of scene (Length 42, Width 17, Height 12.8)
+    group.scale.set(10, 10, 10);
+    return group;
+  }
+  window.createCurvedSportsCar = createCurvedSportsCar;
+
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
+    if (type === 'car') {
+      return createCurvedSportsCar();
+    }
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
     if (!sharedRimMat) sharedRimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.35, metalness: 0.75 });
     if (!vehicleHeadlightMat) vehicleHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -998,78 +1429,6 @@
       [-7, 7].forEach(tz => {
         const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
         tl.position.set(-length / 2 - 0.7, 7.5, tz);
-        group.add(tl);
-      });
-
-    } else if (type === 'car') {
-      const length = 44;
-      const width = 18;
-      const height = 13;
-
-      // Sedan Aerodynamic Contoured Body: Hood, Cabin, Trunk
-      const hoodGeo = new THREE.BoxGeometry(14, 4.5, width - 0.4);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xf8fafc, roughness: 0.3, metalness: 0.25 });
-      const hood = new THREE.Mesh(hoodGeo, bodyMat);
-      hood.position.set(13, 4.8, 0);
-      group.add(hood);
-
-      const cabinGeo = new THREE.BoxGeometry(18, 6.2, width - 1.2);
-      const cabin = new THREE.Mesh(cabinGeo, bodyMat);
-      cabin.position.set(-2, 8.8, 0);
-      cabin.castShadow = true;
-      group.add(cabin);
-
-      const trunkGeo = new THREE.BoxGeometry(11, 4.2, width - 0.4);
-      const trunk = new THREE.Mesh(trunkGeo, bodyMat);
-      trunk.position.set(-15, 4.8, 0);
-      group.add(trunk);
-
-      // Glass Windshields & Windows
-      const winGeo = new THREE.BoxGeometry(17, 4.2, width - 0.8);
-      const winMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-      const win = new THREE.Mesh(winGeo, winMat);
-      win.position.set(-2, 9.2, 0);
-      group.add(win);
-
-      // Front Grille & Bumpers
-      const fBumpGeo = new THREE.BoxGeometry(1.6, 2.8, width);
-      const fBump = new THREE.Mesh(fBumpGeo, vehicleBumperMat);
-      fBump.position.set(length / 2 - 1, 3.5, 0);
-      group.add(fBump);
-
-      const rBumpGeo = new THREE.BoxGeometry(1.6, 2.8, width);
-      const rBump = new THREE.Mesh(rBumpGeo, vehicleBumperMat);
-      rBump.position.set(-length / 2 + 1, 3.5, 0);
-      group.add(rBump);
-
-      // Side Mirrors
-      const mirrorGeo = new THREE.BoxGeometry(1.2, 1.8, 1.4);
-      [-1, 1].forEach(side => {
-        const mirror = new THREE.Mesh(mirrorGeo, vehicleBumperMat);
-        mirror.position.set(5.5, 8.0, side * (width / 2 + 0.8));
-        group.add(mirror);
-      });
-
-      // 4 Wheels touching ground (radius 3.0, center y = 3.0)
-      [-1, 1].forEach(wz => {
-        [-13, 13].forEach(wx => {
-          addVehicleWheel(wx, 3.0, wz * (width / 2), 3.0, 1.8);
-        });
-      });
-
-      // Front Headlights
-      const hlGeo = new THREE.BoxGeometry(1.0, 2.2, 3.2);
-      [-5, 5].forEach(hz => {
-        const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-        hl.position.set(length / 2 - 0.8, 5.0, hz);
-        group.add(hl);
-      });
-
-      // Rear Taillights
-      const tlGeo = new THREE.BoxGeometry(1.0, 2.0, 3.0);
-      [-5, 5].forEach(tz => {
-        const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
-        tl.position.set(-length / 2 + 0.8, 5.2, tz);
         group.add(tl);
       });
 
@@ -1557,142 +1916,196 @@
     return ambGroup;
   }
 
-  // 3D Human Pedestrian Builder (Articulated Torso, Head, Limbs with Visible Hands, Rain Umbrella)
+  // 3D Human Pedestrian Builder — Diverse Articulated Humans with Multi-Joint Limbs & GLTF Skeletal Support
   function create3DPedestrian(p) {
-    if (!sharedFleshMat) sharedFleshMat = new THREE.MeshStandardMaterial({ color: 0xf6d8ae, roughness: 0.6 });
-    if (!sharedPantsMat) sharedPantsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
-    if (!sharedShoeMat) sharedShoeMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.8 });
-    if (!sharedHairMat) sharedHairMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.9 });
-    if (!sharedUmbShaftMat) sharedUmbShaftMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+    // 1. Try GLTF Template instantiation if loaded
+    if (gltfPedTemplates.length > 0 && typeof THREE.SkeletonUtils !== 'undefined') {
+      const templateIdx = Math.abs(Math.floor((p.id || 0) * 17)) % gltfPedTemplates.length;
+      const template = gltfPedTemplates[templateIdx];
+      try {
+        const gltfClone = THREE.SkeletonUtils.clone(template.scene);
+        const mixer = new THREE.AnimationMixer(gltfClone);
+        if (template.animations && template.animations.length > 0) {
+          const clip = template.animations[0];
+          const action = mixer.clipAction(clip);
+          action.play();
+        }
+        activeMixers.push(mixer);
+        gltfClone.userData.isGLTF = true;
+        gltfClone.userData.mixer = mixer;
+        scene.add(gltfClone);
+        return gltfClone;
+      } catch (e) {
+        // Fallback to anatomical procedural human below
+      }
+    }
 
-    if (!sharedPedTorsoGeo) sharedPedTorsoGeo = new THREE.BoxGeometry(2.4, 4.2, 1.8);
-    if (!sharedPedNeckGeo) sharedPedNeckGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.8, 8);
-    if (!sharedPedHeadGeo) sharedPedHeadGeo = new THREE.SphereGeometry(1.25, 10, 10);
-    if (!sharedPedHairGeo) sharedPedHairGeo = new THREE.CylinderGeometry(1.3, 1.3, 0.6, 10);
-    if (!sharedPedLegGeo) sharedPedLegGeo = new THREE.BoxGeometry(0.85, 3.8, 0.95);
-    if (!sharedPedFootGeo) sharedPedFootGeo = new THREE.BoxGeometry(0.9, 0.8, 1.6);
-    if (!sharedPedArmGeo) sharedPedArmGeo = new THREE.BoxGeometry(0.7, 3.2, 0.75);
-    if (!sharedPedHandGeo) sharedPedHandGeo = new THREE.BoxGeometry(0.65, 0.8, 0.7);
-
-    if (!sharedUmbCanopyGeo) sharedUmbCanopyGeo = new THREE.CylinderGeometry(0.4, 5.8, 2.8, 14, 1, false, 0, Math.PI * 2);
-    if (!sharedUmbTipGeo) sharedUmbTipGeo = new THREE.CylinderGeometry(0.12, 0.25, 0.8, 6);
-    if (!sharedUmbShaftGeo) sharedUmbShaftGeo = new THREE.CylinderGeometry(0.12, 0.12, 9.2, 6);
-    if (!sharedUmbHandleGeo) sharedUmbHandleGeo = new THREE.TorusGeometry(0.6, 0.12, 6, 10, Math.PI);
-
+    // 2. Procedural Anatomical Multi-Joint Human (Zero Boxy Lego Stick Figures)
     const group = new THREE.Group();
 
-    // 1. Clothed Torso (Shirt / Kurta / Top)
-    const torsoMat = new THREE.MeshStandardMaterial({
-      color: p.color ? parseInt(p.color.replace('#', '0x'), 16) : 0x38bdf8,
-      roughness: 0.6
-    });
-    const torso = new THREE.Mesh(sharedPedTorsoGeo, torsoMat);
-    torso.position.y = 6.3;
+    // Natural Skin Tones
+    const skinTones = [0xf5d0b0, 0xd4a373, 0xa9744c, 0x78472a];
+    const skinHex = skinTones[Math.abs(Math.floor((p.x || 0) * 3 + (p.y || 0) * 7)) % skinTones.length];
+    const skinMat = new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.65 });
+
+    // Diverse Clothing Colors (Kurta, Hoodie, Graphic Tee, Vest)
+    const topPalette = [0x0284c7, 0xef4444, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899, 0x14b8a6, 0xf8fafc, 0xd97706];
+    const topColor = p.color ? parseInt(p.color.replace('#', '0x'), 16) : topPalette[Math.abs(Math.floor((p.id || 0) * 7)) % topPalette.length];
+    const torsoMat = new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.55 });
+
+    // Sculpted Clothed Torso (CylinderGeometry with natural contouring)
+    const torsoGeo = new THREE.CylinderGeometry(1.05, 0.80, 3.4, 12);
+    const torso = new THREE.Mesh(torsoGeo, torsoMat);
+    torso.position.y = 6.4;
     torso.castShadow = true;
     group.add(torso);
 
-    // 2. Head with Flesh Tone, Neck & Hair / Cap
-    const neck = new THREE.Mesh(sharedPedNeckGeo, sharedFleshMat);
-    neck.position.y = 8.6;
+    // Anatomical Neck & Head
+    const neckGeo = new THREE.CylinderGeometry(0.38, 0.42, 0.8, 10);
+    const neck = new THREE.Mesh(neckGeo, skinMat);
+    neck.position.y = 8.4;
     group.add(neck);
 
-    const head = new THREE.Mesh(sharedPedHeadGeo, sharedFleshMat);
-    head.position.y = 9.8;
+    const headGeo = new THREE.SphereGeometry(1.15, 14, 12);
+    const head = new THREE.Mesh(headGeo, skinMat);
+    head.position.y = 9.45;
     head.castShadow = true;
     group.add(head);
 
-    const hair = new THREE.Mesh(sharedPedHairGeo, sharedHairMat);
-    hair.position.y = 10.4;
-    group.add(hair);
+    // Varied Hairstyles & Headwear (Snapback cap with visor, voluminous curls, ponytail, clean fade)
+    const hairStyle = Math.abs(Math.floor((p.id || 0) * 13)) % 4;
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
 
-    // 3. Articulated Legs with Shoes Touching Ground
-    // Left Leg
-    const leftLegGroup = new THREE.Group();
-    leftLegGroup.position.set(-0.7, 4.2, 0);
-    const leftLeg = new THREE.Mesh(sharedPedLegGeo, sharedPantsMat);
-    leftLeg.position.y = -1.9;
-    leftLeg.castShadow = true;
-    leftLegGroup.add(leftLeg);
+    if (hairStyle === 0) {
+      // Modern Snapback Cap with curved forward visor
+      const capGeo = new THREE.CylinderGeometry(1.22, 1.22, 0.45, 14);
+      const capMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.y = 10.15;
+      group.add(cap);
 
-    const leftFoot = new THREE.Mesh(sharedPedFootGeo, sharedShoeMat);
-    leftFoot.position.set(0, -3.8, 0.35);
-    leftLegGroup.add(leftFoot);
-    group.add(leftLegGroup);
+      const visorGeo = new THREE.CylinderGeometry(1.35, 1.35, 0.08, 12, 1, false, -Math.PI / 4, Math.PI / 2);
+      const visor = new THREE.Mesh(visorGeo, capMat);
+      visor.position.set(0.65, 9.95, 0);
+      group.add(visor);
+    } else if (hairStyle === 1) {
+      // Voluminous Curly Afro
+      const curlsGeo = new THREE.DodecahedronGeometry(1.35, 1);
+      const curls = new THREE.Mesh(curlsGeo, hairMat);
+      curls.position.set(0, 9.8, -0.1);
+      group.add(curls);
+    } else if (hairStyle === 2) {
+      // Long Hair / Sleek Ponytail draped back
+      const hairGeo = new THREE.CylinderGeometry(1.20, 0.6, 2.4, 10);
+      const hair = new THREE.Mesh(hairGeo, hairMat);
+      hair.position.set(-0.35, 8.8, 0);
+      group.add(hair);
+    } else {
+      // Clean Fade / Cropped Hair
+      const fadeGeo = new THREE.SphereGeometry(1.22, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      const fade = new THREE.Mesh(fadeGeo, hairMat);
+      fade.position.y = 9.5;
+      group.add(fade);
+    }
 
-    // Right Leg
-    const rightLegGroup = new THREE.Group();
-    rightLegGroup.position.set(0.7, 4.2, 0);
-    const rightLeg = new THREE.Mesh(sharedPedLegGeo, sharedPantsMat);
-    rightLeg.position.y = -1.9;
-    rightLeg.castShadow = true;
-    rightLegGroup.add(rightLeg);
+    // Tapered Denim Jeans / Trousers + Dual-Tone Sneakers
+    const pantColors = [0x1e3a8a, 0x1e293b, 0x334155, 0x78350f, 0x0f172a];
+    const pantColor = pantColors[Math.abs(Math.floor((p.id || 0) * 11)) % pantColors.length];
+    const pantMat = new THREE.MeshStandardMaterial({ color: pantColor, roughness: 0.70 });
+    const shoeSoleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.40 });
+    const shoeUpperMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.50 });
 
-    const rightFoot = new THREE.Mesh(sharedPedFootGeo, sharedShoeMat);
-    rightFoot.position.set(0, -3.8, 0.35);
-    rightLegGroup.add(rightFoot);
-    group.add(rightLegGroup);
+    function createArticulatedLeg() {
+      const legRoot = new THREE.Group();
+      // Thigh (Upper Leg)
+      const thighGeo = new THREE.CylinderGeometry(0.48, 0.38, 2.3, 10);
+      const thigh = new THREE.Mesh(thighGeo, pantMat);
+      thigh.position.y = -1.15;
+      thigh.castShadow = true;
+      legRoot.add(thigh);
 
-    // 4. Articulated Arms with Visible Hands
-    // Left Arm
-    const leftArmGroup = new THREE.Group();
-    leftArmGroup.position.set(-1.65, 7.8, 0);
-    const leftArm = new THREE.Mesh(sharedPedArmGeo, torsoMat);
-    leftArm.position.y = -1.6;
-    leftArmGroup.add(leftArm);
+      // Knee Joint & Calf (Lower Leg)
+      const calfGeo = new THREE.CylinderGeometry(0.38, 0.30, 2.3, 10);
+      const calf = new THREE.Mesh(calfGeo, pantMat);
+      calf.position.y = -3.45;
+      calf.castShadow = true;
+      legRoot.add(calf);
 
-    const leftHand = new THREE.Mesh(sharedPedHandGeo, sharedFleshMat);
-    leftHand.position.set(0, -3.4, 0);
-    leftArmGroup.add(leftHand);
-    group.add(leftArmGroup);
+      // Sneaker with rubber sole & colored upper
+      const sole = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.35, 10), shoeSoleMat);
+      sole.position.set(0.18, -4.7, 0);
+      sole.scale.set(1.4, 1, 0.9);
+      legRoot.add(sole);
 
-    // Right Arm (Umbrella holding arm)
-    const rightArmGroup = new THREE.Group();
-    rightArmGroup.position.set(1.65, 7.8, 0);
-    const rightArm = new THREE.Mesh(sharedPedArmGeo, torsoMat);
-    rightArm.position.y = -1.6;
-    rightArmGroup.add(rightArm);
+      const upper = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 8), shoeUpperMat);
+      upper.position.set(0.15, -4.4, 0);
+      legRoot.add(upper);
 
-    const rightHand = new THREE.Mesh(sharedPedHandGeo, sharedFleshMat);
-    rightHand.position.set(0, -3.4, 0);
-    rightArmGroup.add(rightHand);
-    group.add(rightArmGroup);
+      return legRoot;
+    }
 
-    // 5. Rain Umbrella (Canopy, Ferrule, Central Shaft, Handle)
+    const leftLeg = createArticulatedLeg();
+    leftLeg.position.set(0, 4.8, -0.6);
+    group.add(leftLeg);
+    group.userData.leftLeg = leftLeg;
+
+    const rightLeg = createArticulatedLeg();
+    rightLeg.position.set(0, 4.8, 0.6);
+    group.add(rightLeg);
+    group.userData.rightLeg = rightLeg;
+
+    // Articulated Arms (Upper Arm in sleeve, Forearm in skin tone, Hands)
+    function createArticulatedArm() {
+      const armRoot = new THREE.Group();
+      const upperGeo = new THREE.CylinderGeometry(0.38, 0.32, 2.0, 10);
+      const upper = new THREE.Mesh(upperGeo, torsoMat);
+      upper.position.y = -1.0;
+      armRoot.add(upper);
+
+      const foreGeo = new THREE.CylinderGeometry(0.32, 0.26, 1.8, 10);
+      const fore = new THREE.Mesh(foreGeo, skinMat);
+      fore.position.y = -2.8;
+      armRoot.add(fore);
+
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.36, 8, 8), skinMat);
+      hand.position.y = -3.8;
+      armRoot.add(hand);
+
+      return armRoot;
+    }
+
+    const leftArm = createArticulatedArm();
+    leftArm.position.set(0, 7.8, -1.35);
+    group.add(leftArm);
+    group.userData.leftArm = leftArm;
+
+    const rightArm = createArticulatedArm();
+    rightArm.position.set(0, 7.8, 1.35);
+    group.add(rightArm);
+    group.userData.rightArm = rightArm;
+
+    // Rain Umbrella (Smooth curved aerodynamic canopy)
     const umbGroup = new THREE.Group();
-    const umbColorHex = p.umbrellaColor ? parseInt(p.umbrellaColor.replace('#', '0x'), 16) : 0xdc2626;
-    const umbCanopyMat = new THREE.MeshStandardMaterial({ color: umbColorHex, roughness: 0.35 });
+    const canopyGeo = new THREE.CylinderGeometry(0.3, 5.8, 2.6, 16, 1, false, 0, Math.PI * 2);
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: topColor,
+      roughness: 0.35,
+      metalness: 0.1,
+      side: THREE.DoubleSide
+    });
+    const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
+    canopyMesh.position.y = 8.5;
+    canopyMesh.castShadow = true;
+    umbGroup.add(canopyMesh);
 
-    // Canopy overhead (apex at y = 14.0, bottom at y = 12.6, well clear of head at y = 11.0)
-    const canopy = new THREE.Mesh(sharedUmbCanopyGeo, umbCanopyMat);
-    canopy.position.set(0.6, 14.0, 0);
-    canopy.castShadow = true;
-    umbGroup.add(canopy);
-
-    // Apex ferrule tip
-    const tip = new THREE.Mesh(sharedUmbTipGeo, sharedUmbShaftMat);
-    tip.position.set(0.6, 15.8, 0);
-    umbGroup.add(tip);
-
-    // Slender central shaft from canopy to hand (length 9.2, center at y = 9.4)
-    const shaft = new THREE.Mesh(sharedUmbShaftGeo, sharedUmbShaftMat);
-    shaft.position.set(0.6, 9.4, 0);
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 9.2, 6), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 }));
+    shaft.position.y = 4.6;
     umbGroup.add(shaft);
 
-    // Curved J-handle at the bottom
-    const handle = new THREE.Mesh(sharedUmbHandleGeo, sharedUmbShaftMat);
-    handle.rotation.z = Math.PI / 2;
-    handle.position.set(0.3, 4.8, 0);
-    umbGroup.add(handle);
-
+    umbGroup.position.set(0.5, 4.0, 1.4);
     umbGroup.visible = false;
     group.add(umbGroup);
-
-    // Store references for walking animations & weather response
     group.userData.umbrella = umbGroup;
-    group.userData.leftLeg = leftLegGroup;
-    group.userData.rightLeg = rightLegGroup;
-    group.userData.leftArm = leftArmGroup;
-    group.userData.rightArm = rightArmGroup;
 
     scene.add(group);
     return group;
@@ -1751,9 +2164,10 @@
   // Primary Scene Construction
   // -------------------------------------------------------------
   function buildScene(vehiclesData, pedestriansData) {
-    // 1. Fog & Background (Atmospheric Cyber-Modern Fog)
-    scene.background = new THREE.Color(0x040814);
-    scene.fog = new THREE.FogExp2(0x070b14, 0.0018);
+    // 1. Fog & Background (Dusk Sky Gradient: #1b1035 zenith to #5b2245 horizon)
+    duskSkyTexture = createDuskSkyGradientTexture();
+    scene.background = duskSkyTexture;
+    scene.fog = new THREE.FogExp2(0x35193d, 0.0011);
 
     // 2. Camera: Isometric Drone Aerial 3/4 Perspective
     let width = canvasEl.clientWidth;
@@ -1775,11 +2189,10 @@
     camera = new THREE.PerspectiveCamera(38, aspect, 10, 4000);
     updateCameraFraming(aspect);
 
-    // 3. Renderer (High performance WebGL with optimal pixel ratio for 120 FPS)
+    // 3. Renderer (High performance WebGL locked to 120 FPS with optimal pixel ratio)
     renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height, false);
-    const maxPR = (typeof window !== 'undefined' && window.innerWidth < 768) ? 1.5 : 2.0;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
@@ -2216,6 +2629,32 @@
       });
     }
 
+    // 13. Standing Sidewalk Social Groups (Diverse Street Life)
+    const socialSpots = [
+      [-160, -125, 0],
+      [165, -125, Math.PI / 3],
+      [-165, 125, -Math.PI / 4],
+      [160, 125, Math.PI]
+    ];
+    socialSpots.forEach((loc, gIdx) => {
+      const clusterGroup = new THREE.Group();
+      clusterGroup.position.set(loc[0], 0, loc[1]);
+      clusterGroup.rotation.y = loc[2];
+
+      [-2.4, 2.4].forEach((offset, pIdx) => {
+        const friend = create3DPedestrian({
+          id: 950 + gIdx * 10 + pIdx,
+          color: pIdx === 0 ? '#10b981' : '#f59e0b',
+          x: loc[0] + offset,
+          y: loc[1]
+        });
+        friend.position.set(offset, 0, (pIdx === 0 ? 1 : -1) * 1.5);
+        friend.rotation.y = (pIdx === 0 ? Math.PI * 0.7 : -Math.PI * 0.3);
+        clusterGroup.add(friend);
+      });
+      scene.add(clusterGroup);
+    });
+
     // 13. Realistic Slanted Rain Line Segments System (Pooled & Lightweight)
     const rainPositions = new Float32Array(rainCount * 6); // 2 vertices per streak = 6 floats
     rainSpeeds = new Float32Array(rainCount);
@@ -2319,6 +2758,7 @@
 
     isInitialized = true;
     scene = new THREE.Scene();
+    initGLTFAssetManager();
     buildScene(vehiclesData, pedestriansData);
   };
 
@@ -2351,6 +2791,11 @@
 
     // 120Hz Delta-Time Physics (clamped to max 0.05 to avoid frame-skip spikes)
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : (dt || 0.016);
+
+    // 0. Update Active Skeletal Animation Mixers (GLTF Pedestrians)
+    for (let m = 0; m < activeMixers.length; m++) {
+      activeMixers[m].update(delta);
+    }
 
     // Atmospheric Weather Mode Transition (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
@@ -2701,24 +3146,28 @@
           ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x243248);
           ambientLight.intensity = isMobileScreen ? 0.78 : 0.70;
         }
-      } else { // night (clear)
-        scene.background.setHex(isMobileScreen ? 0x050a14 : 0x020408);
+      } else { // night (clear) & Vice City Dusk Skyline
+        if (duskSkyTexture) {
+          scene.background = duskSkyTexture;
+        } else if (scene.background && scene.background.setHex) {
+          scene.background.setHex(isMobileScreen ? 0x1b1035 : 0x140b29);
+        }
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x081020 : 0x040812);
-          scene.fog.density = isMobileScreen ? 0.0004 : 0.0005;
+          scene.fog.color.setHex(isMobileScreen ? 0x3d173d : 0x2d122e);
+          scene.fog.density = isMobileScreen ? 0.0006 : 0.0007;
         }
         if (hemiLight) {
-          hemiLight.color.setHex(0x94a3b8);
-          hemiLight.groundColor.setHex(0x0f172a);
-          hemiLight.intensity = isMobileScreen ? 0.95 : 0.85;
+          hemiLight.color.setHex(0xf472b6);
+          hemiLight.groundColor.setHex(0x1e102d);
+          hemiLight.intensity = isMobileScreen ? 1.05 : 0.95;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = isMobileScreen ? 0.80 : 0.70;
+          sunLight.color.setHex(0xec4899);
+          sunLight.intensity = isMobileScreen ? 0.90 : 0.80;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x38bdf8 : 0x2563eb);
-          ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
+          ambientLight.color.setHex(isMobileScreen ? 0x8b5cf6 : 0x6d28d9);
+          ambientLight.intensity = isMobileScreen ? 0.75 : 0.68;
         }
       }
     }
