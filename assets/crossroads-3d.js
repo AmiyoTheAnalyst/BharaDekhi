@@ -92,6 +92,10 @@
   let treeFoliageGeo = null, treeFoliageMat = null;
   let vehicleHeadlightMat = null;
   let vehicleTaillightMat = null;
+  let vehicleVolumetricBeamMat = null;
+  let vehicleVolumetricTailMat = null;
+  let streetVolumetricBeamMat = null;
+  let streetlampVolumetricCones = [];
   let vehicleIndicatorMat = null;
   let vehicleGlassMat = null;
   let vehicleBumperMat = null;
@@ -526,6 +530,44 @@
     return { group: sigGroup, red: rMat, yellow: yMat, green: gMat };
   }
 
+  // Helper to create volumetric forward headlight beam cones (projecting forward in +X)
+  function createVehicleBeamMesh(length, radiusTop, radiusBottom, yPos, startX) {
+    if (!vehicleVolumetricBeamMat) {
+      vehicleVolumetricBeamMat = new THREE.MeshBasicMaterial({
+        color: 0xfff7ed,
+        transparent: true,
+        opacity: 0.16,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+    }
+    const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 10, 1, true);
+    const mesh = new THREE.Mesh(geo, vehicleVolumetricBeamMat);
+    mesh.rotation.z = Math.PI / 2;
+    mesh.position.set(startX + length / 2, yPos, 0);
+    return mesh;
+  }
+
+  // Helper to create subtle rear taillight volumetric red glow (projecting backward in -X)
+  function createVehicleTailGlowMesh(length, radiusTop, radiusBottom, yPos, startX) {
+    if (!vehicleVolumetricTailMat) {
+      vehicleVolumetricTailMat = new THREE.MeshBasicMaterial({
+        color: 0xff1744,
+        transparent: true,
+        opacity: 0.12,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+    }
+    const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 8, 1, true);
+    const mesh = new THREE.Mesh(geo, vehicleVolumetricTailMat);
+    mesh.rotation.z = -Math.PI / 2;
+    mesh.position.set(startX - length / 2, yPos, 0);
+    return mesh;
+  }
+
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
@@ -636,6 +678,7 @@
         hl.position.set(length / 2 + 0.7, 6.5, hz);
         group.add(hl);
       });
+      group.add(createVehicleBeamMesh(56, 3.5, 18, 6.5, length / 2 + 0.7));
 
       // Red Taillight Bars
       const tlGeo = new THREE.BoxGeometry(1.2, 4.5, 2.5);
@@ -644,6 +687,7 @@
         tl.position.set(-length / 2 - 0.7, 7.5, tz);
         group.add(tl);
       });
+      group.add(createVehicleTailGlowMesh(18, 2.5, 9, 7.5, -length / 2 - 0.7));
 
     } else if (type === 'car') {
       const length = 44;
@@ -718,6 +762,7 @@
         hl.position.set(length / 2 - 0.8, 5.0, hz);
         group.add(hl);
       });
+      group.add(createVehicleBeamMesh(46, 2.6, 14, 5.0, length / 2 - 0.8));
 
       // Rear Taillights
       const tlGeo = new THREE.BoxGeometry(1.0, 2.0, 3.0);
@@ -726,6 +771,7 @@
         tl.position.set(-length / 2 + 0.8, 5.2, tz);
         group.add(tl);
       });
+      group.add(createVehicleTailGlowMesh(15, 2.0, 7.5, 5.2, -length / 2 + 0.8));
 
     } else if (type === 'cng') {
       const length = 30;
@@ -826,6 +872,7 @@
       hl.rotation.z = Math.PI / 2;
       hl.position.set(11.2, 6.2, 0);
       group.add(hl);
+      group.add(createVehicleBeamMesh(38, 2.0, 11, 6.2, 11.2));
 
       // Front Amber Turn Signal Indicators
       const indGeo = new THREE.BoxGeometry(0.8, 1.2, 1.2);
@@ -840,6 +887,7 @@
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-12.4, 5.5, 0);
       group.add(tl);
+      group.add(createVehicleTailGlowMesh(12, 1.6, 5.5, 5.5, -12.4));
 
     } else if (type === 'rickshaw') {
       const length = 34;
@@ -1016,11 +1064,13 @@
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.position.set(11.6, 5.2, 0);
       group.add(hl);
+      group.add(createVehicleBeamMesh(28, 1.4, 8.0, 5.2, 11.6));
 
       const tlGeo = new THREE.BoxGeometry(0.6, 1.5, 1.5);
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-13.2, 5.5, 0);
       group.add(tl);
+      group.add(createVehicleTailGlowMesh(8, 1.0, 3.8, 4.0, -13.2));
 
     } else if (type === 'bike') {
       const length = 26;
@@ -1131,11 +1181,13 @@
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.position.set(9.0, 6.4, 0);
       group.add(hl);
+      group.add(createVehicleBeamMesh(36, 1.6, 9.5, 6.4, 9.0));
 
       const tlGeo = new THREE.BoxGeometry(0.8, 1.4, 1.4);
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-9.0, 5.5, 0);
       group.add(tl);
+      group.add(createVehicleTailGlowMesh(10, 1.2, 4.5, 5.5, -9.0));
     }
 
     scene.add(group);
@@ -1242,6 +1294,7 @@
       hl.position.set(length / 2 + 0.8, 6.5, hz);
       ambGroup.add(hl);
     });
+    ambGroup.add(createVehicleBeamMesh(48, 2.8, 15, 6.5, length / 2 + 0.8));
 
     // Rear Taillights
     const tlGeo = new THREE.BoxGeometry(1.0, 4.5, 2.0);
@@ -1250,6 +1303,7 @@
       tl.position.set(-length / 2 - 0.2, 8.0, tz);
       ambGroup.add(tl);
     });
+    ambGroup.add(createVehicleTailGlowMesh(16, 2.2, 8.0, 8.0, -length / 2 - 0.2));
 
     ambGroup.visible = false;
     scene.add(ambGroup);
@@ -1437,6 +1491,7 @@
         hlMesh.position.set(35, 6, hz);
         coach.add(hlMesh);
       });
+      coach.add(createVehicleBeamMesh(65, 3.0, 18, 6.0, 36));
     }
     return coach;
   }
@@ -1526,6 +1581,17 @@
       [320, 26, 100],
       [480, 26, 100]
     ];
+    if (!streetVolumetricBeamMat) {
+      streetVolumetricBeamMat = new THREE.MeshBasicMaterial({
+        color: 0xfef08a,
+        transparent: true,
+        opacity: 0.14,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+    }
+    const streetlampConeGeo = new THREE.CylinderGeometry(2.5, 22, 25, 14, 1, true);
     cornerLightCoords.forEach(pos => {
       const pl = new THREE.PointLight(0xfef08a, 1.5, 260);
       pl.position.set(pos[0], pos[1], pos[2]);
@@ -1545,6 +1611,12 @@
       head.position.set(pos[0], 26, pos[2]);
       freezeStatic(head);
       scene.add(head);
+
+      const cone = new THREE.Mesh(streetlampConeGeo, streetVolumetricBeamMat);
+      cone.position.set(pos[0], 13.5, pos[2]);
+      freezeStatic(cone);
+      scene.add(cone);
+      streetlampVolumetricCones.push(cone);
     });
 
     // 5. Ground & Road Network (Deep Obsidian Asphalt for High-Contrast Cinematic Aesthetics)
@@ -2092,32 +2164,82 @@
     if (currentMode !== lastWeatherMode || isMobileScreen !== lastIsMobile) {
       lastWeatherMode = currentMode;
       lastIsMobile = isMobileScreen;
-      const isFoggyOrOvercast = currentMode.includes('fog') || currentMode.includes('overcast');
 
+      // 1. Calibrate Streetlights (Corner & Sidewalk PointLights) across all 15 conditions
       if (cornerPointLights && cornerPointLights.length) {
-        // Desktop uses exact original 10% (0.15) in foggy & overcast, standard 1.5 in normal night
-        const baseIntensity = isMobileScreen 
-          ? (isFoggyOrOvercast ? 1.45 : (currentMode === 'sun' ? 0.6 : (currentMode === 'rain' ? 1.6 : 1.8)))
-          : (isFoggyOrOvercast ? 0.15 : (currentMode === 'sun' ? 0.3 : (currentMode === 'rain' ? 1.2 : 1.5)));
+        let baseIntensity = 1.0;
+        let lightColor = 0xfef08a;
+
+        if (currentMode === 'fog_night') {
+          baseIntensity = isMobileScreen ? 1.20 : 1.05;
+        } else if (currentMode === 'night_overcast') {
+          baseIntensity = isMobileScreen ? 1.25 : 1.10;
+        } else if (currentMode === 'fog_sunset') {
+          baseIntensity = isMobileScreen ? 1.15 : 0.95;
+          lightColor = 0xfeb272;
+        } else if (currentMode === 'sunset_overcast') {
+          baseIntensity = isMobileScreen ? 1.10 : 0.90;
+          lightColor = 0xfeb272;
+        } else if (currentMode === 'fog_sunrise') {
+          baseIntensity = isMobileScreen ? 0.95 : 0.75;
+          lightColor = 0xffedd5;
+        } else if (currentMode === 'sunrise_overcast') {
+          baseIntensity = isMobileScreen ? 0.85 : 0.65;
+          lightColor = 0xffedd5;
+        } else if (currentMode === 'morning_overcast') {
+          baseIntensity = isMobileScreen ? 0.55 : 0.40;
+        } else if (currentMode === 'fog_day') {
+          baseIntensity = isMobileScreen ? 0.60 : 0.45;
+          lightColor = 0xfef9c3;
+        } else if (currentMode === 'day_overcast') {
+          baseIntensity = isMobileScreen ? 0.40 : 0.25;
+        } else if (currentMode === 'sun') {
+          baseIntensity = isMobileScreen ? 0.35 : 0.20;
+        } else if (currentMode === 'rain') {
+          baseIntensity = isMobileScreen ? 1.35 : 1.20;
+        } else if (currentMode === 'sunset') {
+          baseIntensity = isMobileScreen ? 1.05 : 0.85;
+          lightColor = 0xfeb272;
+        } else if (currentMode === 'sunrise') {
+          baseIntensity = isMobileScreen ? 0.85 : 0.65;
+          lightColor = 0xffedd5;
+        } else { // night
+          baseIntensity = isMobileScreen ? 1.40 : 1.25;
+        }
+
         cornerPointLights.forEach(pl => {
           pl.intensity = baseIntensity;
-          pl.color.setHex(0xfef08a);
+          pl.color.setHex(lightColor);
         });
       }
 
-      // Calibrate building window emissive glow: Desktop uses exact original 0.08 in foggy/overcast, 0.05 in sun, 0.45 in night
+      // 2. Calibrate Building Window Emissive Glow through fog and clouds
       if (scene) {
         scene.traverse(obj => {
           if (obj.isMesh && obj.material) {
             const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
             mats.forEach(mat => {
               if (mat && mat.emissiveMap) {
-                if (isFoggyOrOvercast) {
-                  mat.emissiveIntensity = isMobileScreen ? 0.65 : 0.08;
+                if (currentMode === 'fog_night' || currentMode === 'night_overcast') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.36 : 0.28;
+                } else if (currentMode === 'fog_sunset' || currentMode === 'sunset_overcast') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.32 : 0.24;
+                } else if (currentMode === 'fog_sunrise' || currentMode === 'sunrise_overcast') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.22 : 0.16;
+                } else if (currentMode === 'morning_overcast' || currentMode === 'fog_day') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.14 : 0.10;
+                } else if (currentMode === 'day_overcast') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.10 : 0.08;
                 } else if (currentMode === 'sun') {
                   mat.emissiveIntensity = 0.05;
-                } else {
-                  mat.emissiveIntensity = isMobileScreen ? 0.75 : 0.45;
+                } else if (currentMode === 'rain') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.40 : 0.32;
+                } else if (currentMode === 'sunset') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.32 : 0.25;
+                } else if (currentMode === 'sunrise') {
+                  mat.emissiveIntensity = isMobileScreen ? 0.22 : 0.18;
+                } else { // night
+                  mat.emissiveIntensity = isMobileScreen ? 0.42 : 0.35;
                 }
               }
             });
@@ -2125,67 +2247,146 @@
         });
       }
 
+      // 3. Volumetric atmospheric light beams and streetlight cones calibration
+      if (vehicleVolumetricBeamMat && vehicleVolumetricTailMat && streetVolumetricBeamMat) {
+        if (currentMode === 'fog_night') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.24 : 0.20;
+          vehicleVolumetricBeamMat.color.setHex(0xfffae6);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.16 : 0.14;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.22 : 0.18;
+          streetVolumetricBeamMat.color.setHex(0xfef08a);
+        } else if (currentMode === 'night_overcast') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.20 : 0.16;
+          vehicleVolumetricBeamMat.color.setHex(0xfff7ed);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.14 : 0.11;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.15 : 0.12;
+          streetVolumetricBeamMat.color.setHex(0xfef08a);
+        } else if (currentMode === 'fog_sunset') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.22 : 0.18;
+          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.15 : 0.12;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.20 : 0.16;
+          streetVolumetricBeamMat.color.setHex(0xfeb272);
+        } else if (currentMode === 'sunset_overcast') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.18 : 0.14;
+          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.12 : 0.10;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.14 : 0.10;
+          streetVolumetricBeamMat.color.setHex(0xfeb272);
+        } else if (currentMode === 'fog_sunrise') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.20 : 0.16;
+          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.14 : 0.10;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.16 : 0.12;
+          streetVolumetricBeamMat.color.setHex(0xffedd5);
+        } else if (currentMode === 'sunrise_overcast') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.15 : 0.11;
+          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.10 : 0.08;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.08;
+          streetVolumetricBeamMat.color.setHex(0xffedd5);
+        } else if (currentMode === 'fog_day') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.16 : 0.12;
+          vehicleVolumetricBeamMat.color.setHex(0xfef9c3);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.08 : 0.06;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.08;
+          streetVolumetricBeamMat.color.setHex(0xfef9c3);
+        } else if (currentMode === 'morning_overcast') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.08;
+          vehicleVolumetricBeamMat.color.setHex(0xfef9c3);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.08 : 0.05;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.09 : 0.06;
+          streetVolumetricBeamMat.color.setHex(0xfef9c3);
+        } else if (currentMode === 'day_overcast') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.09 : 0.06;
+          vehicleVolumetricBeamMat.color.setHex(0xfff7ed);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.06 : 0.04;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.06 : 0.04;
+          streetVolumetricBeamMat.color.setHex(0xfef08a);
+        } else if (currentMode === 'rain') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.18 : 0.14;
+          vehicleVolumetricBeamMat.color.setHex(0xffffff);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.14 : 0.10;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.09;
+          streetVolumetricBeamMat.color.setHex(0xbae6fd);
+        } else if (currentMode === 'night') {
+          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.14 : 0.10;
+          vehicleVolumetricBeamMat.color.setHex(0xffffff);
+          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.10 : 0.07;
+          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.10 : 0.07;
+          streetVolumetricBeamMat.color.setHex(0xfef08a);
+        } else { // sun, sunrise, sunset
+          vehicleVolumetricBeamMat.opacity = 0;
+          vehicleVolumetricTailMat.opacity = 0;
+          streetVolumetricBeamMat.opacity = 0;
+        }
+      }
+
+      // 4. Vehicle headlight cluster tint calibration
+      if (vehicleHeadlightMat) {
+        if (currentMode === 'fog_night' || currentMode === 'fog_sunset' || currentMode === 'fog_sunrise') {
+          vehicleHeadlightMat.color.setHex(0xfffae6);
+        } else {
+          vehicleHeadlightMat.color.setHex(0xffffff);
+        }
+      }
+
+      // 5. Environmental Sky, Fog, SunLight, and AmbientLight Calibration across all 15 modes
       if (currentMode === 'sunrise') {
-        scene.background.setHex(0x311b38);
+        scene.background.setHex(isMobileScreen ? 0x24142b : 0x1e0e24);
         if (scene.fog) {
-          scene.fog.color.setHex(0xf472b6);
+          scene.fog.color.setHex(isMobileScreen ? 0xa84370 : 0x863359);
           scene.fog.density = 0.0006;
         }
         if (sunLight) {
           sunLight.color.setHex(0xffaa88);
-          sunLight.intensity = isMobileScreen ? 1.50 : 1.35;
+          sunLight.intensity = isMobileScreen ? 1.40 : 1.30;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfbcfe8);
-          ambientLight.intensity = isMobileScreen ? 0.85 : 0.70;
+          ambientLight.intensity = isMobileScreen ? 0.75 : 0.65;
         }
       } else if (currentMode === 'sunrise_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x25232e : 0x1a1921);
+        scene.background.setHex(isMobileScreen ? 0x1f1b29 : 0x16131f);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x483a45 : 0x322830);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0012;
+          scene.fog.color.setHex(isMobileScreen ? 0x3d3242 : 0x2d2433);
+          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
         }
         if (sunLight) {
-          sunLight.color.setHex(0xfb7185);
-          sunLight.intensity = isMobileScreen ? 1.10 : 0.80;
+          sunLight.color.setHex(0xf472b6);
+          sunLight.intensity = isMobileScreen ? 0.88 : 0.75;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x54495c : 0x3b3340);
-          ambientLight.intensity = isMobileScreen ? 0.80 : 0.55;
+          ambientLight.color.setHex(isMobileScreen ? 0x483e54 : 0x362e40);
+          ambientLight.intensity = isMobileScreen ? 0.62 : 0.52;
         }
       } else if (currentMode === 'fog_sunrise') {
-        scene.background.setHex(isMobileScreen ? 0x423046 : 0x2e1f2f);
+        scene.background.setHex(isMobileScreen ? 0x342238 : 0x27172b);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x8a5565 : 0x7c4d5a);
-          scene.fog.density = isMobileScreen ? 0.0007 : 0.0022;
+          scene.fog.color.setHex(isMobileScreen ? 0x754757 : 0x613745);
+          scene.fog.density = isMobileScreen ? 0.0012 : 0.0015;
         }
         if (sunLight) {
           sunLight.color.setHex(0xfed7aa);
-          sunLight.intensity = isMobileScreen ? 1.25 : 0.85;
+          sunLight.intensity = isMobileScreen ? 0.98 : 0.85;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0xfbcfe8);
-          ambientLight.intensity = isMobileScreen ? 0.92 : 0.70;
-        }
-        if (cornerPointLights && cornerPointLights.length && isMobileScreen) {
-          cornerPointLights.forEach(pl => {
-            pl.intensity = 1.40;
-            pl.color.setHex(0xffedd5);
-          });
+          ambientLight.color.setHex(isMobileScreen ? 0x7c4f62 : 0x643d4e);
+          ambientLight.intensity = isMobileScreen ? 0.68 : 0.58;
         }
       } else if (currentMode === 'morning_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x2a2f3a : 0x1e2129);
+        scene.background.setHex(isMobileScreen ? 0x222836 : 0x1a202c);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x394150 : 0x282e38);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0013;
+          scene.fog.color.setHex(isMobileScreen ? 0x333d4f : 0x27303f);
+          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x94a3b8);
-          sunLight.intensity = isMobileScreen ? 1.10 : 0.75;
+          sunLight.color.setHex(0xa0aec0);
+          sunLight.intensity = isMobileScreen ? 0.85 : 0.72;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x485363 : 0x333b47);
-          ambientLight.intensity = isMobileScreen ? 0.80 : 0.55;
+          ambientLight.color.setHex(isMobileScreen ? 0x475569 : 0x334155);
+          ambientLight.intensity = isMobileScreen ? 0.65 : 0.55;
         }
       } else if (currentMode === 'sun') {
         scene.background.setHex(0x0284c7);
@@ -2195,155 +2396,139 @@
         }
         if (sunLight) {
           sunLight.color.setHex(0xffeedd);
-          sunLight.intensity = 1.6;
+          sunLight.intensity = 1.55;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0x7dd3fc);
-          ambientLight.intensity = isMobileScreen ? 0.88 : 0.75;
+          ambientLight.intensity = isMobileScreen ? 0.82 : 0.72;
         }
       } else if (currentMode === 'day_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x1e232e : 0x12151b);
+        scene.background.setHex(isMobileScreen ? 0x262e3d : 0x1c2330);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x2c3240 : 0x1f232b);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0014;
+          scene.fog.color.setHex(isMobileScreen ? 0x3f4a5c : 0x303a49);
+          scene.fog.density = isMobileScreen ? 0.0008 : 0.0009;
         }
         if (sunLight) {
-          sunLight.color.setHex(isMobileScreen ? 0x94a3b8 : 0x64748b);
-          sunLight.intensity = isMobileScreen ? 1.05 : 0.70;
+          sunLight.color.setHex(0xcbd5e1);
+          sunLight.intensity = isMobileScreen ? 0.90 : 0.78;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x3b4352 : 0x272c36);
-          ambientLight.intensity = isMobileScreen ? 0.80 : 0.50;
+          ambientLight.color.setHex(isMobileScreen ? 0x64748b : 0x475569);
+          ambientLight.intensity = isMobileScreen ? 0.68 : 0.58;
         }
       } else if (currentMode === 'sunset') {
-        scene.background.setHex(0x311006);
+        scene.background.setHex(isMobileScreen ? 0x3a1409 : 0x2c0d05);
         if (scene.fog) {
-          scene.fog.color.setHex(0x431407);
+          scene.fog.color.setHex(isMobileScreen ? 0x66220d : 0x4d1607);
           scene.fog.density = 0.0006;
         }
         if (sunLight) {
           sunLight.color.setHex(0xff7722);
-          sunLight.intensity = isMobileScreen ? 1.50 : 1.35;
+          sunLight.intensity = isMobileScreen ? 1.45 : 1.35;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0xfb923c);
-          ambientLight.intensity = isMobileScreen ? 0.85 : 0.70;
+          ambientLight.intensity = isMobileScreen ? 0.78 : 0.68;
         }
       } else if (currentMode === 'sunset_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x2e1d2a : 0x20141d);
+        scene.background.setHex(isMobileScreen ? 0x241620 : 0x1b0f17);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x4e2e36 : 0x3a2228);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0013;
+          scene.fog.color.setHex(isMobileScreen ? 0x422633 : 0x321a25);
+          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
         }
         if (sunLight) {
           sunLight.color.setHex(0xea580c);
-          sunLight.intensity = isMobileScreen ? 1.15 : 0.85;
+          sunLight.intensity = isMobileScreen ? 0.92 : 0.80;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x61373b : 0x4a2a2d);
-          ambientLight.intensity = isMobileScreen ? 0.80 : 0.50;
+          ambientLight.color.setHex(isMobileScreen ? 0x54323c : 0x40242d);
+          ambientLight.intensity = isMobileScreen ? 0.58 : 0.48;
         }
       } else if (currentMode === 'fog_sunset') {
-        scene.background.setHex(isMobileScreen ? 0x44241c : 0x2a1510);
+        scene.background.setHex(isMobileScreen ? 0x301812 : 0x24100b);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x8f3616 : 0x7c2d12);
-          scene.fog.density = isMobileScreen ? 0.0007 : 0.0024;
+          scene.fog.color.setHex(isMobileScreen ? 0x6b2b18 : 0x542011);
+          scene.fog.density = isMobileScreen ? 0.0012 : 0.0015;
         }
         if (sunLight) {
-          sunLight.color.setHex(0xea580c);
-          sunLight.intensity = isMobileScreen ? 1.20 : 0.80;
+          sunLight.color.setHex(0xf97316);
+          sunLight.intensity = isMobileScreen ? 0.98 : 0.85;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0xc2410c);
-          ambientLight.intensity = isMobileScreen ? 0.88 : 0.55;
-        }
-        if (cornerPointLights && cornerPointLights.length && isMobileScreen) {
-          cornerPointLights.forEach(pl => {
-            pl.intensity = 1.40;
-            pl.color.setHex(0xfeb272);
-          });
+          ambientLight.color.setHex(isMobileScreen ? 0x6e2c1b : 0x562114);
+          ambientLight.intensity = isMobileScreen ? 0.64 : 0.54;
         }
       } else if (currentMode === 'fog_day') {
-        scene.background.setHex(0x94a3b8);
+        scene.background.setHex(isMobileScreen ? 0x718096 : 0x64748b);
         if (scene.fog) {
-          scene.fog.color.setHex(0xb0c4de);
-          scene.fog.density = 0.0012;
+          scene.fog.color.setHex(isMobileScreen ? 0x94a3b8 : 0x8293a7);
+          scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
         }
         if (sunLight) {
           sunLight.color.setHex(0xe2e8f0);
-          sunLight.intensity = isMobileScreen ? 1.0 : 0.9;
+          sunLight.intensity = isMobileScreen ? 0.85 : 0.75;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(0x94a3b8);
-          ambientLight.intensity = isMobileScreen ? 0.90 : 0.85;
+          ambientLight.color.setHex(isMobileScreen ? 0x8a99ad : 0x718096);
+          ambientLight.intensity = isMobileScreen ? 0.76 : 0.68;
         }
       } else if (currentMode === 'fog_night') {
-        scene.background.setHex(isMobileScreen ? 0x162238 : 0x060c18);
+        // Nighttime Fog: realistic atmospheric fog with depth, diffusion, and reduced visibility
+        scene.background.setHex(isMobileScreen ? 0x091020 : 0x060c18);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x1c2b45 : 0x0c1527);
-          scene.fog.density = isMobileScreen ? 0.0006 : 0.0020;
+          scene.fog.color.setHex(isMobileScreen ? 0x0d182d : 0x0a1426);
+          scene.fog.density = isMobileScreen ? 0.0012 : 0.0014;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = isMobileScreen ? 0.95 : 0.35;
+          sunLight.color.setHex(0x94a3b8);
+          sunLight.intensity = isMobileScreen ? 0.45 : 0.38;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x38bdf8 : 0x1e293b);
-          ambientLight.intensity = isMobileScreen ? 0.92 : 0.40;
+          ambientLight.color.setHex(isMobileScreen ? 0x223046 : 0x1a2638);
+          ambientLight.intensity = isMobileScreen ? 0.48 : 0.42;
         }
-        if (cornerPointLights && cornerPointLights.length) {
-          cornerPointLights.forEach(pl => {
-            pl.intensity = isMobileScreen ? 1.50 : 0.15;
-            pl.color.setHex(0xfff08a);
-          });
+      } else if (currentMode === 'night_overcast') {
+        // Nighttime Overcast: real dark, cloudy, atmospheric night, no bright daytime wash
+        scene.background.setHex(isMobileScreen ? 0x060912 : 0x04060c);
+        if (scene.fog) {
+          scene.fog.color.setHex(isMobileScreen ? 0x0a101e : 0x070c17);
+          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0x64748b);
+          sunLight.intensity = isMobileScreen ? 0.35 : 0.28;
+        }
+        if (ambientLight) {
+          ambientLight.color.setHex(isMobileScreen ? 0x1a2436 : 0x141d2c);
+          ambientLight.intensity = isMobileScreen ? 0.44 : 0.38;
         }
       } else if (currentMode === 'rain') {
-        scene.background.setHex(isMobileScreen ? 0x0f1a30 : 0x0a1120);
+        scene.background.setHex(isMobileScreen ? 0x0d1628 : 0x08101e);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x16233d : 0x0f172a);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0012;
+          scene.fog.color.setHex(isMobileScreen ? 0x121e36 : 0x0d172b);
+          scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
         }
         if (sunLight) {
           sunLight.color.setHex(0x60a5fa);
-          sunLight.intensity = isMobileScreen ? 0.95 : 0.65;
+          sunLight.intensity = isMobileScreen ? 0.72 : 0.65;
         }
         if (ambientLight) {
           ambientLight.color.setHex(0x1e293b);
-          ambientLight.intensity = isMobileScreen ? 0.85 : 0.60;
+          ambientLight.intensity = isMobileScreen ? 0.65 : 0.58;
         }
-      } else if (currentMode === 'night_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x141e30 : 0x020306);
+      } else { // night (clear)
+        scene.background.setHex(isMobileScreen ? 0x050a14 : 0x020408);
         if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x18243a : 0x04060c);
-          scene.fog.density = isMobileScreen ? 0.0006 : 0.0012;
-        }
-        if (sunLight) {
-          sunLight.color.setHex(isMobileScreen ? 0x93c5fd : 0x64748b);
-          sunLight.intensity = isMobileScreen ? 0.90 : 0.30;
-        }
-        if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x38bdf8 : 0x1e293b);
-          ambientLight.intensity = isMobileScreen ? 0.90 : 0.38;
-        }
-        if (cornerPointLights && cornerPointLights.length && isMobileScreen) {
-          cornerPointLights.forEach(pl => {
-            pl.intensity = 1.45;
-            pl.color.setHex(0xfef08a);
-          });
-        }
-      } else { // night
-        scene.background.setHex(isMobileScreen ? 0x08101e : 0x020408);
-        if (scene.fog) {
-          scene.fog.color.setHex(isMobileScreen ? 0x0e182d : 0x03060f);
+          scene.fog.color.setHex(isMobileScreen ? 0x081020 : 0x040812);
           scene.fog.density = isMobileScreen ? 0.0004 : 0.0005;
         }
         if (sunLight) {
           sunLight.color.setHex(0x93c5fd);
-          sunLight.intensity = isMobileScreen ? 0.75 : 0.45;
+          sunLight.intensity = isMobileScreen ? 0.55 : 0.45;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x38bdf8 : 0x1e293b);
-          ambientLight.intensity = isMobileScreen ? 0.76 : 0.55;
+          ambientLight.color.setHex(isMobileScreen ? 0x223147 : 0x1a2638);
+          ambientLight.intensity = isMobileScreen ? 0.55 : 0.48;
         }
       }
     }

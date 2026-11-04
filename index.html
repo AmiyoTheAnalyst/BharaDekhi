@@ -834,7 +834,7 @@
       /* 1. Mobile 3D Canvas Base Visibility Floor */
       #dhakaCrossroads3dCanvas,
       .canvas-3d {
-        filter: contrast(1.10) saturate(1.20) brightness(1.16) !important;
+        filter: contrast(1.06) saturate(1.08) brightness(1.05) !important;
       }
 
       /* 2. Mobile Overcast & Stormy: High-Luminosity Visibility & Softened Shadows */
@@ -847,7 +847,7 @@
       #dhakaCrossroadsContainer.stormy .canvas-3d,
       .diorama-container.overcast .canvas-3d,
       .diorama-container.stormy .canvas-3d {
-        filter: contrast(1.10) saturate(1.25) brightness(1.32) !important;
+        filter: contrast(1.08) saturate(1.06) brightness(1.06) !important;
       }
       #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #surroundingBuildingsLayer polygon,
       #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] #nwBuildingsGroup,
@@ -873,7 +873,7 @@
       #dhakaCrossroadsContainer.night-smog .canvas-3d,
       .diorama-container.night .canvas-3d,
       .diorama-container.foggy .canvas-3d {
-        filter: contrast(1.10) saturate(1.28) brightness(1.32) !important;
+        filter: contrast(1.08) saturate(1.10) brightness(1.06) !important;
       }
       #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #surroundingBuildingsLayer polygon,
       #dhakaCrossroadsContainer[data-crossroads-weather*="night"] #nwBuildingsGroup,
@@ -887,25 +887,25 @@
       /* 4. Mobile Diorama Container Background Colors */
       #dhakaCrossroadsContainer[data-crossroads-weather="night"],
       #dhakaCrossroadsContainer.night {
-        background-color: #0d1829 !important;
+        background-color: #040810 !important;
       }
       #dhakaCrossroadsContainer[data-crossroads-weather="fog_night"],
       #dhakaCrossroadsContainer.foggy.night,
       #dhakaCrossroadsContainer.foggy,
       #dhakaCrossroadsContainer.night-smog {
-        background-color: #1a2538 !important;
+        background-color: #060c18 !important;
       }
       #dhakaCrossroadsContainer[data-crossroads-weather="night_overcast"],
       #dhakaCrossroadsContainer.overcast.night,
       #dhakaCrossroadsContainer.overcast,
       #dhakaCrossroadsContainer.stormy {
-        background-color: #1c2636 !important;
+        background-color: #04070e !important;
       }
       #dhakaCrossroadsContainer[data-crossroads-weather="day_overcast"] {
-        background-color: #242c3d !important;
+        background-color: #1a222e !important;
       }
       #dhakaCrossroadsContainer[data-crossroads-weather="morning_overcast"] {
-        background-color: #283244 !important;
+        background-color: #202735 !important;
       }
 
       /* 5. Mobile Atmospheric Vignette & Depth-of-Field: Softened to prevent peripheral darkness */
@@ -1089,17 +1089,17 @@
       filter: url(#crStreetlampGlow) drop-shadow(0 0 16px rgba(254, 240, 138, 0.35));
     }
 
-    /* Cinematic Atmospheric Lighting Bloom on Street Lamps, Headlights, Building Windows & Porch Lights */
+    /* Atmospheric Lighting Bloom on Street Lamps, Headlights, Building Windows & Porch Lights */
     .cr-headlight-bulb,
     #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-bulb {
-      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.85)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.95)) !important;
+      filter: drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 7px rgba(254, 240, 138, 0.55)) !important;
     }
     .cr-streetlamp-head,
     .building-window,
     .window-glow-pulse,
     .porch-light,
     #dhakaCrossroadsContainer.is-3d-drone-mode .building-window {
-      filter: drop-shadow(0 0 14px rgba(254, 240, 138, 0.85)) drop-shadow(0 0 3px rgba(255, 255, 255, 0.9)) !important;
+      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.65)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.75)) !important;
     }
 
     /* Cinematic Weather-State Ambient Contrast & Shadow Facade Gradients */
@@ -1225,34 +1225,31 @@
       background-color: #64748b;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="fog_night"] {
-      background-color: #020408;
+      background-color: #060c18;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="night_overcast"] {
-      background-color: #020306;
+      background-color: #04060c;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="rain"] {
       background-color: #0f172a;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="sunrise_overcast"] {
-      background-color: #1a1921;
+      background-color: #16131f;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="fog_sunrise"] {
-      background-color: #2e1f2f;
+      background-color: #27172b;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="morning_overcast"] {
-      background-color: #1c1f26;
+      background-color: #1a202c;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="day_overcast"] {
-      background-color: #12151b;
+      background-color: #1c2330;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="sunset_overcast"] {
-      background-color: #1c1622;
+      background-color: #1b0f17;
     }
     #dhakaCrossroadsContainer[data-crossroads-weather="fog_sunset"] {
-      background-color: #241113;
-    }
-    #dhakaCrossroadsContainer[data-crossroads-weather="night_overcast"] {
-      background-color: #07080d;
+      background-color: #24100b;
     }
 
     /* Atmosphere Overlays Transition */
@@ -1421,34 +1418,53 @@
     [data-crossroads-weather="night"] .cr-headlight-beam {
       opacity: 0.98 !important;
     }
-    [data-crossroads-weather="fog_sunrise"] .cr-headlight-beam {
-      opacity: 0.80 !important;
+    /* Atmospheric Headlight Beams across Foggy & Overcast Times of Day */
+    [data-crossroads-weather="fog_night"] .cr-headlight-beam,
+    .is-foggy-night .cr-headlight-beam {
+      opacity: 0.85 !important;
       mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.45)) !important;
+    }
+    [data-crossroads-weather="night_overcast"] .cr-headlight-beam,
+    .night-overcast .cr-headlight-beam {
+      opacity: 0.88 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.40)) !important;
+    }
+    [data-crossroads-weather="fog_sunset"] .cr-headlight-beam {
+      opacity: 0.86 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.50)) !important;
+    }
+    [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam {
+      opacity: 0.78 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.40)) !important;
+    }
+    [data-crossroads-weather="fog_sunrise"] .cr-headlight-beam {
+      opacity: 0.72 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.40)) !important;
+    }
+    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam {
+      opacity: 0.65 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.35)) !important;
+    }
+    [data-crossroads-weather="morning_overcast"] .cr-headlight-beam {
+      opacity: 0.50 !important;
+      mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.30)) !important;
     }
     [data-crossroads-weather="fog_day"] .cr-headlight-beam {
       opacity: 0.55 !important;
       mix-blend-mode: screen !important;
+      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.30)) !important;
     }
-    [data-crossroads-weather="fog_sunset"] .cr-headlight-beam {
-      opacity: 0.95 !important;
+    [data-crossroads-weather="day_overcast"] .cr-headlight-beam {
+      opacity: 0.35 !important;
       mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.65)) !important;
-    }
-    /* Atmospheric Foggy & Overcast Lighting: Tuned to 20% Intensity */
-    [data-crossroads-weather="fog_night"] .cr-headlight-beam,
-    [data-crossroads-weather="night_overcast"] .cr-headlight-beam,
-    [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam,
-    [data-crossroads-weather="fog_sunset"] .cr-headlight-beam,
-    [data-crossroads-weather="fog_sunrise"] .cr-headlight-beam,
-    [data-crossroads-weather="fog_day"] .cr-headlight-beam,
-    [data-crossroads-weather="day_overcast"] .cr-headlight-beam,
-    [data-crossroads-weather="morning_overcast"] .cr-headlight-beam,
-    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam,
-    .is-foggy-night .cr-headlight-beam,
-    .night-overcast .cr-headlight-beam {
-      opacity: 0.20 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.35)) !important;
+      filter: drop-shadow(0 0 3px rgba(254, 240, 138, 0.25)) !important;
     }
     [data-crossroads-weather="fog_night"] .cr-headlight-bulb,
     [data-crossroads-weather="night_overcast"] .cr-headlight-bulb,
@@ -1461,8 +1477,8 @@
     [data-crossroads-weather="sunrise_overcast"] .cr-headlight-bulb,
     .is-foggy-night .cr-headlight-bulb,
     .night-overcast .cr-headlight-bulb {
-      filter: drop-shadow(0 0 2px rgba(254, 240, 138, 0.45)) !important;
-      opacity: 0.85 !important;
+      filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 5px rgba(254, 240, 138, 0.50)) !important;
+      opacity: 1 !important;
     }
     [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer circle[fill="#ff2a54"],
     [data-crossroads-weather="fog_night"] #dhakaVehiclesLayer rect[fill="#ff2a54"],
