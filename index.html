@@ -102,12 +102,17 @@
       document.write('\x3Cscript src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">\x3C/script>');
     }
   </script>
-  <script src="assets/crossroads-3d.js"></script>
+  <!-- Three.js Post-processing for Cyber-Modern Dhaka Bloom & Atmospheric Glow -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
-  <!-- GSAP & ScrollTrigger for Scroll-Triggered Storytelling -->
+  <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/scroll-transit-hero.js"></script>
+  <script src="assets/crossroads-3d.js"></script>
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
@@ -970,10 +975,8 @@
       #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-beam,
       #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] .cr-headlight-beam,
       #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] .cr-headlight-beam {
-        opacity: 0.95 !important;
-        mix-blend-mode: screen !important;
-        filter: drop-shadow(0 0 12px rgba(255, 200, 80, 0.90))
-                drop-shadow(0 0 24px rgba(254, 240, 138, 0.75)) !important;
+        opacity: 0.35 !important;
+        pointer-events: none !important;
       }
 
       .cr-streetlamp-head,
@@ -1160,66 +1163,63 @@
       filter: contrast(1.06) saturate(0.95) brightness(0.98);
     }
 
-    /* Outer HUD & Controls Layer (Toggles, Badges, Buttons): Prominently visible above 3D diorama canvas & atmosphere */
+    /* Outer HUD & Controls Layer (Toggles, Badges, Buttons): Prominently visible above 3D diorama canvas & atmosphere in ALL modes */
     #landingTopHeader,
     #landingTopActions {
-      z-index: 40 !important;
-    }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopHeader,
-    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopActions {
-      z-index: 40 !important;
+      z-index: 60 !important;
       opacity: 1 !important;
       visibility: visible !important;
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopActions > *,
-    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopHeader .inline-flex {
-      background-color: rgba(15, 23, 42, 0.94) !important;
-      border: 1px solid rgba(148, 163, 184, 0.55) !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(56, 189, 248, 0.25) !important;
+    #landingTopActions > *,
+    #landingTopHeader .inline-flex {
+      background-color: rgba(15, 23, 42, 0.95) !important;
+      border: 1px solid rgba(56, 189, 248, 0.45) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85), 0 0 12px rgba(56, 189, 248, 0.25) !important;
       backdrop-filter: blur(12px) !important;
       -webkit-backdrop-filter: blur(12px) !important;
+      color: #f8fafc !important;
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopActions button {
+    #landingTopActions button {
       color: #f8fafc !important;
       opacity: 1 !important;
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsViewModeBtn {
+    #crossroadsViewModeBtn {
       border: 1px solid rgba(52, 211, 153, 0.85) !important;
       color: #34d399 !important;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 16px rgba(52, 211, 153, 0.45) !important;
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsAtmosphereBadge {
+    #crossroadsAtmosphereBadge {
       border: 1px solid rgba(129, 140, 248, 0.85) !important;
       color: #e0e7ff !important;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(99, 102, 241, 0.40) !important;
     }
-    #dhakaCrossroadsContainer.is-3d-drone-mode #trafficSignalBadge {
+    #trafficSignalBadge {
       border: 1px solid rgba(74, 222, 128, 0.75) !important;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(74, 222, 128, 0.35) !important;
     }
 
-    /* Cinematic Depth-of-Field & Peripheral Vignette Frame (Strictly on 3D canvas behind outer UI layer) */
+    /* Cinematic Depth-of-Field & Peripheral Vignette Frame (Strictly layered behind outer UI layer) */
     .cinematic-vignette-frame {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      box-shadow: inset 0 0 80px 25px rgba(2, 4, 8, 0.85),
-                  inset 0 0 160px 75px rgba(2, 4, 8, 0.65);
-      z-index: 11;
+      box-shadow: inset 0 0 80px 25px rgba(2, 4, 8, 0.70),
+                  inset 0 0 160px 75px rgba(2, 4, 8, 0.50);
+      z-index: 10;
     }
     .cinematic-dof-top {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 18%;
-      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.75) 0%, rgba(2, 6, 23, 0.3) 60%, transparent 100%);
-      backdrop-filter: blur(2.5px);
-      -webkit-backdrop-filter: blur(2.5px);
+      height: 14%;
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.55) 0%, rgba(2, 6, 23, 0.15) 60%, transparent 100%);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
       mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
       -webkit-mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
       pointer-events: none;
-      z-index: 12;
+      z-index: 10;
     }
     .cinematic-dof-bottom {
       position: absolute;
@@ -1439,76 +1439,56 @@
     [data-crossroads-weather="night_overcast"] #crOvercastLayer { opacity: 1 !important; }
     [data-crossroads-weather="night_overcast"] #crNightLayer { opacity: 0.40 !important; }
 
-    /* Dynamic Vehicle Headlights & Vivid Night/Fog/Sunset/Sunrise Illumination */
+    /* Dynamic Vehicle Headlights & Realistic Luminous Illumination */
     .cr-headlight-beam {
       transition: opacity 0.8s ease;
-      mix-blend-mode: screen;
       will-change: opacity;
+      pointer-events: none;
     }
     .cr-headlight-bulb {
       filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 5px #fef08a);
     }
     [data-crossroads-weather="sunrise"] .cr-headlight-beam {
-      opacity: 0.70 !important;
-      mix-blend-mode: screen !important;
+      opacity: 0.28 !important;
     }
     [data-crossroads-weather="sun"] .cr-headlight-beam {
-      opacity: 0.08 !important;
+      opacity: 0.04 !important;
     }
     [data-crossroads-weather="sunset"] .cr-headlight-beam {
-      opacity: 0.75 !important;
-      mix-blend-mode: screen !important;
+      opacity: 0.38 !important;
     }
     [data-crossroads-weather="night"] .cr-headlight-beam {
-      opacity: 0.98 !important;
+      opacity: 0.55 !important;
     }
     /* Atmospheric Headlight Beams across Foggy & Overcast Times of Day */
     [data-crossroads-weather="fog_night"] .cr-headlight-beam,
     .is-foggy-night .cr-headlight-beam {
-      opacity: 0.85 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.45)) !important;
+      opacity: 0.50 !important;
     }
     [data-crossroads-weather="night_overcast"] .cr-headlight-beam,
     .night-overcast .cr-headlight-beam {
-      opacity: 0.88 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.40)) !important;
+      opacity: 0.48 !important;
     }
     [data-crossroads-weather="fog_sunset"] .cr-headlight-beam {
-      opacity: 0.86 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.50)) !important;
+      opacity: 0.42 !important;
     }
     [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam {
-      opacity: 0.78 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.40)) !important;
+      opacity: 0.35 !important;
     }
     [data-crossroads-weather="fog_sunrise"] .cr-headlight-beam {
-      opacity: 0.72 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.40)) !important;
+      opacity: 0.30 !important;
     }
     [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam {
-      opacity: 0.65 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.35)) !important;
+      opacity: 0.25 !important;
     }
     [data-crossroads-weather="morning_overcast"] .cr-headlight-beam {
-      opacity: 0.50 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.30)) !important;
+      opacity: 0.20 !important;
     }
     [data-crossroads-weather="fog_day"] .cr-headlight-beam {
-      opacity: 0.55 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.30)) !important;
+      opacity: 0.22 !important;
     }
     [data-crossroads-weather="day_overcast"] .cr-headlight-beam {
-      opacity: 0.35 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 3px rgba(254, 240, 138, 0.25)) !important;
+      opacity: 0.16 !important;
     }
     [data-crossroads-weather="fog_night"] .cr-headlight-bulb,
     [data-crossroads-weather="night_overcast"] .cr-headlight-bulb,
@@ -1700,29 +1680,7 @@
       filter: none !important;
     }
     [data-crossroads-weather="rain"] .cr-headlight-beam {
-      opacity: 0.82 !important;
-      mix-blend-mode: screen !important;
-    }
-    [data-crossroads-weather="sunrise_overcast"] .cr-headlight-beam {
-      opacity: 0.75 !important;
-      mix-blend-mode: screen !important;
-    }
-    [data-crossroads-weather="morning_overcast"] .cr-headlight-beam {
-      opacity: 0.70 !important;
-      mix-blend-mode: screen !important;
-    }
-    [data-crossroads-weather="day_overcast"] .cr-headlight-beam {
-      opacity: 0.75 !important;
-      mix-blend-mode: screen !important;
-    }
-    [data-crossroads-weather="sunset_overcast"] .cr-headlight-beam {
-      opacity: 0.80 !important;
-      mix-blend-mode: screen !important;
-    }
-    [data-crossroads-weather="night_overcast"] .cr-headlight-beam {
-      opacity: 1.0 !important;
-      mix-blend-mode: screen !important;
-      filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.65)) !important;
+      opacity: 0.45 !important;
     }
 
     /* Fog Drift Animations */
@@ -5063,7 +5021,7 @@
         <div id="dhakaLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-30 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
         
         <!-- Top-Left HUD Header: Transit Grid & Slogan -->
-        <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-40 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
+        <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-50 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
             <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg w-fit">
               <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -5089,7 +5047,7 @@
         </div>
 
         <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
-        <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-40 flex items-center gap-1.5 sm:gap-2">
+        <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-50 flex items-center gap-1.5 sm:gap-2">
           <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
             <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <span id="trafficSignalText" class="truncate">🚦 N-S GREEN · TRAFFIC FLOWING</span>
@@ -7585,28 +7543,152 @@
           })();
         </script>
 
-        <!-- Bottom-Left Legend: Transport Modes (Matching User Reference Image) -->
-        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 hidden md:flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-950/90 border border-slate-800 backdrop-blur-md text-xs font-semibold text-slate-300 shadow-xl pointer-events-none">
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-1.5 rounded-full bg-sky-400"></span>
-            <span class="text-sky-300 font-bold">Metro Rail</span>
+        <!-- Bottom-Left Legend: Interactive Transport Modes & Camera Swoops -->
+        <div id="crossroadsModeLegend" class="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-40 flex flex-col gap-1 p-2 sm:p-2.5 rounded-2xl bg-slate-950/95 border border-sky-500/40 backdrop-blur-xl text-xs font-semibold text-slate-300 shadow-2xl pointer-events-auto transition-all duration-300 max-w-[210px] sm:max-w-[230px]">
+          <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-sky-400/80 font-bold px-1.5 py-0.5 flex items-center justify-between border-b border-slate-800/80 pb-1 mb-0.5">
+            <span>Dhaka Transit</span>
+            <span id="crossroadsCamModeBadge" class="text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-mono">Drone View</span>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-1.5 rounded-full bg-rose-500"></span>
-            <span class="text-rose-300 font-bold">Bus</span>
+          <!-- 1. Metro Rail -->
+          <button type="button" onclick="crossroadsFocusMode('metro')" id="legendBtn_metro" class="flex items-center justify-between gap-1.5 px-2 py-1 rounded-xl hover:bg-sky-500/15 border border-transparent hover:border-sky-500/30 text-left transition-all duration-200 cursor-pointer active:scale-95 group">
+            <div class="flex items-center gap-2">
+              <span class="w-3.5 h-1.5 rounded-full bg-sky-400 group-hover:shadow-[0_0_8px_#38bdf8]"></span>
+              <span class="text-sky-300 font-bold group-hover:text-white text-[11px] sm:text-xs">Metro Rail</span>
+            </div>
+            <span class="text-[9px] text-sky-400/70 font-mono">MRT-6</span>
+          </button>
+          <!-- 2. Bus -->
+          <button type="button" onclick="crossroadsFocusMode('bus')" id="legendBtn_bus" class="flex items-center justify-between gap-1.5 px-2 py-1 rounded-xl hover:bg-rose-500/15 border border-transparent hover:border-rose-500/30 text-left transition-all duration-200 cursor-pointer active:scale-95 group">
+            <div class="flex items-center gap-2">
+              <span class="w-3.5 h-1.5 rounded-full bg-rose-500 group-hover:shadow-[0_0_8px_#f43f5e]"></span>
+              <span class="text-rose-300 font-bold group-hover:text-white text-[11px] sm:text-xs">Bus</span>
+            </div>
+            <span class="text-[9px] text-rose-400/70 font-mono">BRTA</span>
+          </button>
+          <!-- 3. CNG / Bike / Car (With Compare Badge) -->
+          <button type="button" onclick="crossroadsFocusMode('cng_bike_car')" id="legendBtn_cng_bike_car" class="flex items-center justify-between gap-1.5 px-2 py-1 rounded-xl hover:bg-emerald-500/15 border border-transparent hover:border-emerald-500/30 text-left transition-all duration-200 cursor-pointer active:scale-95 group">
+            <div class="flex items-center gap-2">
+              <span class="w-3.5 h-1.5 rounded-full bg-emerald-400 group-hover:shadow-[0_0_8px_#34d399]"></span>
+              <span class="text-emerald-300 font-bold group-hover:text-white text-[11px] sm:text-xs">CNG / Bike / Car</span>
+            </div>
+            <span class="text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/25 text-emerald-300 font-bold">Compare</span>
+          </button>
+          <!-- 4. Rickshaw -->
+          <button type="button" onclick="crossroadsFocusMode('rickshaw')" id="legendBtn_rickshaw" class="flex items-center justify-between gap-1.5 px-2 py-1 rounded-xl hover:bg-amber-500/15 border border-transparent hover:border-amber-500/30 text-left transition-all duration-200 cursor-pointer active:scale-95 group">
+            <div class="flex items-center gap-2">
+              <span class="w-3.5 h-1.5 rounded-full bg-amber-400 group-hover:shadow-[0_0_8px_#fbbf24]"></span>
+              <span class="text-amber-300 font-bold group-hover:text-white text-[11px] sm:text-xs">Rickshaw</span>
+            </div>
+            <span class="text-[9px] text-amber-400/70 font-mono">Local</span>
+          </button>
+          <!-- 5. Walking -->
+          <button type="button" onclick="crossroadsFocusMode('walking')" id="legendBtn_walking" class="flex items-center justify-between gap-1.5 px-2 py-1 rounded-xl hover:bg-purple-500/15 border border-transparent hover:border-purple-500/30 text-left transition-all duration-200 cursor-pointer active:scale-95 group">
+            <div class="flex items-center gap-2">
+              <span class="w-3.5 border-b-2 border-dotted border-purple-400 group-hover:shadow-[0_0_8px_#c084fc]"></span>
+              <span class="text-purple-300 font-bold group-hover:text-white text-[11px] sm:text-xs">Walking</span>
+            </div>
+            <span class="text-[9px] text-purple-400/70 font-mono">Zebra</span>
+          </button>
+        </div>
+
+        <!-- Floating Glassmorphic HUD: Comparison of Bike, CNG & Car Fare -->
+        <div id="crossroadsFareComparisonCard" class="absolute bottom-20 left-3 sm:bottom-24 sm:left-6 md:left-68 z-50 hidden max-w-sm sm:max-w-md w-[calc(100vw-1.5rem)] sm:w-auto p-4 sm:p-5 rounded-3xl bg-slate-950/95 border border-emerald-500/40 backdrop-blur-2xl text-white shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_30px_rgba(16,185,129,0.25)] transition-all duration-300 pointer-events-auto">
+          <div class="flex items-start justify-between gap-3 mb-3 border-b border-slate-800/80 pb-2.5">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 mb-1">
+                <span>⚡ Mirpur 10 Crossroads Hub</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              </div>
+              <h3 class="text-sm sm:text-base font-black text-white tracking-tight">
+                Comparison of Bike, CNG &amp; Car Fare
+              </h3>
+              <p class="text-[11px] text-slate-300 font-medium">Instant multimodal fare breakdown for Dhaka commuters</p>
+            </div>
+            <button type="button" onclick="crossroadsResetCamera()" class="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer" title="Return to Drone Overview">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-emerald-300 font-bold">CNG / Bike / Car</span>
+
+          <!-- Fare Breakdown Tiers -->
+          <div class="space-y-2 mb-3">
+            <!-- 1. Bike -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-sky-500/30 hover:border-sky-500/60 transition">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">🏍️</span>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs sm:text-sm text-sky-300">Ride-Share Bike</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-200 font-semibold">Fastest</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 block">Base ৳30 + ৳12/km · Gridlock bypass</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-black text-sm sm:text-base text-sky-400 font-mono">৳85</span>
+                <span class="text-[9px] text-emerald-400 block font-bold">12 min ETA</span>
+              </div>
+            </div>
+
+            <!-- 2. CNG Auto Rickshaw -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 hover:border-emerald-500/60 transition">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">🛺</span>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs sm:text-sm text-emerald-300">CNG Auto-Rickshaw</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-200 font-semibold">Dhaka Icon</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 block">Base ৳40 + ৳15/km · Rainproof</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-black text-sm sm:text-base text-emerald-400 font-mono">৳130</span>
+                <span class="text-[9px] text-slate-400 block">22 min ETA</span>
+              </div>
+            </div>
+
+            <!-- 3. Car / AC Cab -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-indigo-500/30 hover:border-indigo-500/60 transition">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">🚗</span>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-xs sm:text-sm text-indigo-300">Car / AC Cab</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-200 font-semibold">AC Comfort</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 block">Base ৳60 + ৳22/km · Relaxed</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-black text-sm sm:text-base text-indigo-400 font-mono">৳210</span>
+                <span class="text-[9px] text-slate-400 block">35 min ETA</span>
+              </div>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-1.5 rounded-full bg-amber-400"></span>
-            <span class="text-amber-300 font-bold">Rickshaw</span>
+
+          <!-- Bottom Action Buttons -->
+          <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
+            <button type="button" onclick="crossroadsResetCamera()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 transition cursor-pointer active:scale-95 flex items-center gap-1.5">
+              <span>↺</span> <span>Overview</span>
+            </button>
+            <button type="button" onclick="navigateToRoute('#/plan-trip')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white text-xs font-black shadow-lg shadow-emerald-500/30 transition cursor-pointer active:scale-95 flex items-center gap-1.5">
+              <span>Calculate exact fare &rarr;</span>
+            </button>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="w-4 border-b-2 border-dotted border-purple-400"></span>
-            <span class="text-purple-300 font-bold">Walking</span>
+        </div>
+
+        <!-- Floating Info Pill for Metro, Bus, Rickshaw, Walking -->
+        <div id="crossroadsModePill" class="absolute bottom-20 left-3 sm:bottom-24 sm:left-6 md:left-68 z-50 hidden max-w-sm sm:max-w-md p-3 sm:p-4 rounded-2xl bg-slate-950/95 border border-sky-500/40 backdrop-blur-2xl text-white shadow-2xl transition-all duration-300 pointer-events-auto flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span id="crossroadsModePillIcon" class="text-2xl shrink-0">🚆</span>
+            <div>
+              <h4 id="crossroadsModePillTitle" class="text-xs sm:text-sm font-black text-white leading-tight">MRT Line-6 · Mirpur 10 Station</h4>
+              <p id="crossroadsModePillSub" class="text-[10px] sm:text-[11px] text-slate-300 leading-snug mt-0.5">Rapid elevated transit across Dhaka gridlock. Base fare ৳20.</p>
+            </div>
           </div>
+          <button type="button" onclick="crossroadsResetCamera()" class="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white shrink-0 cursor-pointer" title="Reset camera">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
@@ -7625,117 +7707,7 @@
       </div>
   </section>
 
-  <!-- 5-Stage 3D Scroll-Triggered Storytelling Hero for Bhara dekhi (500vh container, scrub: 1.2) -->
-  <section id="scrollTransitHeroSection" class="hidden relative w-full bg-slate-950 text-white select-none">
-    <!-- Sticky 3D Canvas Background (Scoped pointer-events-none ensures Leaflet map stays 100% interactive) -->
-    <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
-      <canvas id="scrollTransitHeroCanvas" class="w-full h-full block"></canvas>
-    </div>
 
-    <!-- Scrollable Foreground Storytelling Cards (500vh total scroll distance) -->
-    <div class="relative z-10 -mt-[100vh] pointer-events-none">
-      <!-- Stage 1 (0% – 20% Scroll) — Comparison of Bike, CNG, & Car Fare (NEW FIRST STAGE) -->
-      <div class="h-screen flex items-center px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-violet-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-violet-500/20 text-violet-300 rounded-full mb-3.5 border border-violet-500/30">
-            Bhara dekhi • Multi-Mode Comparison
-          </span>
-          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
-            Comparison of Bike, CNG &amp; Car Fare
-          </h2>
-          <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-5">
-            Compare instant side-by-side fare estimates for Ride-Share Bikes, CNG Auto-Rickshaws, and Cars across Dhaka traffic before you book.
-          </p>
-
-          <!-- 3 Mini Visual Comparison Pills -->
-          <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
-            <div class="flex flex-col items-center justify-center p-2 rounded-xl bg-violet-950/60 border border-violet-500/40 text-center">
-              <span class="text-sm">🏍️</span>
-              <span class="text-[10px] font-bold text-violet-200 mt-0.5">Bike</span>
-              <span class="text-[8px] text-violet-300/80 uppercase tracking-wider font-semibold">Fastest</span>
-            </div>
-            <div class="flex flex-col items-center justify-center p-2 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-center">
-              <span class="text-sm">🛺</span>
-              <span class="text-[10px] font-bold text-emerald-200 mt-0.5">CNG</span>
-              <span class="text-[8px] text-emerald-300/80 uppercase tracking-wider font-semibold">Balanced</span>
-            </div>
-            <div class="flex flex-col items-center justify-center p-2 rounded-xl bg-cyan-950/60 border border-cyan-500/40 text-center">
-              <span class="text-sm">🚗</span>
-              <span class="text-[10px] font-bold text-cyan-200 mt-0.5">Car</span>
-              <span class="text-[8px] text-cyan-300/80 uppercase tracking-wider font-semibold">Comfort</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stage 2 (20% – 40% Scroll) — Rickshaw Fare Estimation -->
-      <div class="h-screen flex items-center justify-end px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-amber-500/20 text-amber-300 rounded-full mb-3.5 border border-amber-500/30">
-            Bhara dekhi • Hyper-Local
-          </span>
-          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
-            Rickshaw Fare Estimation
-          </h2>
-          <p class="text-slate-300 leading-relaxed text-sm md:text-base">
-            Stop overpaying on neighborhood hops. Calculate accurate street-level rickshaw fares across Dhaka before you step outside.
-          </p>
-        </div>
-      </div>
-
-      <!-- Stage 3 (40% – 60% Scroll) — Smart Bus Route Discovery (BRTA Calibrated) -->
-      <div class="h-screen flex items-center px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-teal-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-teal-500/20 text-teal-300 rounded-full mb-3.5 border border-teal-500/30">
-            Official BRTA Calibration
-          </span>
-          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
-            Smart Bus Route Discovery
-          </h2>
-          <p class="text-slate-300 leading-relaxed text-sm md:text-base">
-            Compare city-wide bus routes with distance-verified fares calibrated directly to BRTA per-kilometer rates.
-          </p>
-        </div>
-      </div>
-
-      <!-- Stage 4 (60% – 80% Scroll) — Dhaka Metro Rail (MRT Line-6) -->
-      <div class="h-screen flex items-center justify-end px-6 md:px-16 lg:px-24">
-        <div class="max-w-md bg-slate-900/80 backdrop-blur-xl border border-emerald-500/30 p-7 sm:p-8 rounded-3xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-emerald-500/20 text-emerald-300 rounded-full mb-3.5 border border-emerald-500/30">
-            MRT Line-6 Rapid Transit
-          </span>
-          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
-            Metro Rail Route &amp; Fares
-          </h2>
-          <p class="text-slate-300 leading-relaxed text-sm md:text-base">
-            Bypass Dhaka gridlock. Check station-to-station MRT fares and combine metro hops with last-mile rickshaw connections.
-          </p>
-        </div>
-      </div>
-
-      <!-- Stage 5 (80% – 100% Scroll) — Real-Time Weather Surge Pricing & Planner CTA -->
-      <div class="h-screen flex items-center justify-center px-6 text-center">
-        <div class="max-w-lg bg-slate-900/85 backdrop-blur-xl border border-blue-500/40 p-8 md:p-10 rounded-3xl shadow-2xl pointer-events-auto">
-          <span class="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-blue-500/20 text-blue-300 rounded-full mb-3.5 border border-blue-500/30">
-            Live Open-Meteo Integration
-          </span>
-          <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white leading-tight">
-            Real-Time Weather Surge Pricing
-          </h2>
-          <p class="text-slate-300 leading-relaxed text-sm md:text-base mb-7">
-            Rain in Dhaka changes everything. Bhara dekhi checks live weather data to factor rain surge adjustments into your fare estimates automatically.
-          </p>
-          <a
-            href="#planner"
-            onclick="scrollToPlanner(event)"
-            class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all duration-200 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
-          >
-            Launch Route &amp; Fare Planner ↓
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- Screen 2: Dedicated Trip Planner Page -->
   <main id="userPlannerView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-6">
@@ -19300,7 +19272,6 @@
       const roleSelectionView = document.getElementById('roleSelectionView');
       const userLandingView = document.getElementById('userLandingView');
       const userPlannerView = document.getElementById('userPlannerView') || document.getElementById('userDashboardView');
-      const scrollTransitHeroSection = document.getElementById('scrollTransitHeroSection');
       const adminPanel = document.getElementById('adminPanel');
       const mainHeader = document.getElementById('mainHeader') || document.querySelector('header');
 
@@ -19314,12 +19285,6 @@
       if (roleSelectionView) roleSelectionView.classList.toggle('hidden', !isRole);
       if (userLandingView) userLandingView.classList.toggle('hidden', !isLanding);
       if (userPlannerView) userPlannerView.classList.toggle('hidden', !isPlanner);
-      if (scrollTransitHeroSection) {
-        scrollTransitHeroSection.classList.toggle('hidden', !isPlanner);
-        if (isPlanner && typeof initScrollTransitHero === 'function') {
-          setTimeout(initScrollTransitHero, 50);
-        }
-      }
       if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin);
 
       // Hide main header on full-screen animated landing page so it occupies the entire screen

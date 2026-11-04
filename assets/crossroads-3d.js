@@ -37,6 +37,10 @@
   let pedMeshMap = {};
   let rainParticles = null;
 
+  // Post-Processing UnrealBloomPass
+  let composer = null;
+  let bloomPass = null;
+
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
   let targetCamX = -20, targetCamY = 420;
@@ -44,13 +48,154 @@
   const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
   let camBasePos = { x: -20, y: 420, z: 500 };
   let camBaseLook = { x: 0, y: 25, z: -35 };
+  let currentCamLook = { x: 0, y: 25, z: -35 };
+  let idleDroneTime = 0;
+
+  // Multimodal Camera Choreography Presets
+  const CAM_MODES = {
+    overview: {
+      pos: { x: -20, y: 420, z: 500 },
+      look: { x: 0, y: 25, z: -35 },
+      badge: 'Drone View'
+    },
+    cng_bike_car: {
+      pos: { x: 75, y: 38, z: 120 },
+      look: { x: 5, y: 14, z: 10 },
+      badge: 'Tracking Vehicles'
+    },
+    metro: {
+      pos: { x: -160, y: 140, z: 165 },
+      look: { x: 10, y: 105, z: -25 },
+      badge: 'MRT-6 Viaduct'
+    },
+    bus: {
+      pos: { x: -95, y: 42, z: 135 },
+      look: { x: -15, y: 18, z: 20 },
+      badge: 'BRTA Bus Lane'
+    },
+    rickshaw: {
+      pos: { x: 50, y: 30, z: 85 },
+      look: { x: 15, y: 8, z: -5 },
+      badge: 'Cycle Rickshaw'
+    },
+    walking: {
+      pos: { x: 0, y: 52, z: 110 },
+      look: { x: 0, y: 6, z: 0 },
+      badge: 'Zebra Crosswalk'
+    }
+  };
+
+  let activeCamMode = 'overview';
+
+  function focusCamera(targetPos, targetLook, duration) {
+    if (typeof gsap !== 'undefined') {
+      gsap.killTweensOf(camBasePos);
+      gsap.killTweensOf(camBaseLook);
+      gsap.to(camBasePos, {
+        x: targetPos.x,
+        y: targetPos.y,
+        z: targetPos.z,
+        duration: duration || 1.6,
+        ease: 'power2.inOut'
+      });
+      gsap.to(camBaseLook, {
+        x: targetLook.x,
+        y: targetLook.y,
+        z: targetLook.z,
+        duration: duration || 1.6,
+        ease: 'power2.inOut'
+      });
+    } else {
+      camBasePos.x = targetPos.x;
+      camBasePos.y = targetPos.y;
+      camBasePos.z = targetPos.z;
+      camBaseLook.x = targetLook.x;
+      camBaseLook.y = targetLook.y;
+      camBaseLook.z = targetLook.z;
+    }
+  }
+
+  function updateLegendHUD(modeName) {
+    ['metro', 'bus', 'cng_bike_car', 'rickshaw', 'walking'].forEach(m => {
+      const btn = document.getElementById(`legendBtn_${m}`);
+      if (!btn) return;
+      if (m === modeName) {
+        btn.classList.add('bg-sky-500/25', 'border-sky-400', 'shadow-[0_0_12px_rgba(56,189,248,0.4)]');
+        btn.classList.remove('border-transparent');
+      } else {
+        btn.classList.remove('bg-sky-500/25', 'border-sky-400', 'shadow-[0_0_12px_rgba(56,189,248,0.4)]');
+        btn.classList.add('border-transparent');
+      }
+    });
+
+    const badge = document.getElementById('crossroadsCamModeBadge');
+    if (badge && CAM_MODES[modeName]) {
+      badge.textContent = CAM_MODES[modeName].badge;
+    }
+
+    const fareCard = document.getElementById('crossroadsFareComparisonCard');
+    const modePill = document.getElementById('crossroadsModePill');
+
+    if (modeName === 'cng_bike_car') {
+      if (modePill) modePill.classList.add('hidden');
+      if (fareCard) fareCard.classList.remove('hidden');
+    } else if (['metro', 'bus', 'rickshaw', 'walking'].includes(modeName)) {
+      if (fareCard) fareCard.classList.add('hidden');
+      if (modePill) {
+        modePill.classList.remove('hidden');
+        const icon = document.getElementById('crossroadsModePillIcon');
+        const title = document.getElementById('crossroadsModePillTitle');
+        const sub = document.getElementById('crossroadsModePillSub');
+        if (modeName === 'metro') {
+          if (icon) icon.textContent = '🚆';
+          if (title) title.textContent = 'MRT Line-6 · Mirpur 10 Station';
+          if (sub) sub.textContent = 'High-speed electric viaduct bypassing ground gridlock (Base ৳20 · Max ৳100)';
+        } else if (modeName === 'bus') {
+          if (icon) icon.textContent = '🚌';
+          if (title) title.textContent = 'BRTA & Dhaka City Bus Network';
+          if (sub) sub.textContent = 'Route 12, Mirpur 10 ⇄ Motijheel / Uttara (Base ৳10 · Student Concession 50%)';
+        } else if (modeName === 'rickshaw') {
+          if (icon) icon.textContent = '🛺';
+          if (title) title.textContent = 'Dhaka Traditional Cycle Rickshaw';
+          if (sub) sub.textContent = 'Zero-emission local trips inside Mirpur sectors & lanes (Typical ৳25 – ৳60)';
+        } else if (modeName === 'walking') {
+          if (icon) icon.textContent = '🚶';
+          if (title) title.textContent = 'Zebra Crossings & Pedestrian Walkway';
+          if (sub) sub.textContent = 'Synchronized pedestrian signals across Mirpur 10 Crossroads (0 carbon, 0 taka)';
+        }
+      }
+    } else {
+      if (fareCard) fareCard.classList.add('hidden');
+      if (modePill) modePill.classList.add('hidden');
+    }
+  }
+
+  window.crossroadsFocusMode = function(modeName) {
+    if (typeof window.setCrossroadsViewMode === 'function' && typeof crossroads3DMode !== 'undefined' && !crossroads3DMode) {
+      window.setCrossroadsViewMode(true);
+    }
+
+    if (activeCamMode === modeName && modeName !== 'overview') {
+      activeCamMode = 'overview';
+      focusCamera(CAM_MODES.overview.pos, CAM_MODES.overview.look, 1.6);
+      updateLegendHUD('overview');
+      return;
+    }
+
+    const targetMode = CAM_MODES[modeName] ? modeName : 'overview';
+    activeCamMode = targetMode;
+    focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.6);
+    updateLegendHUD(targetMode);
+  };
+
+  window.crossroadsResetCamera = function() {
+    window.crossroadsFocusMode('overview');
+  };
 
   function updateCameraFraming(aspect) {
     if (!camera) return;
     const baseFov = 38;
     if (aspect < 1.15) {
-      // Portrait / vertical mobile and small tablet displays (aspect < 1.15)
-      // Smoothly scale FOV and zoom distance to keep all crossroads, roads, viaduct and buildings visible
       const portraitFactor = Math.max(0, Math.min(1, (1.15 - aspect) / 0.70));
       camera.fov = baseFov + portraitFactor * 10;
       const zoomFactor = 1 + portraitFactor * 0.42;
@@ -68,16 +213,17 @@
       camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
       camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
     } else {
-      // Landscape / Desktop / Wide displays
       camera.fov = baseFov;
-      camBasePos.x = CAM_DEFAULT_POS.x;
-      camBasePos.y = CAM_DEFAULT_POS.y;
-      camBasePos.z = CAM_DEFAULT_POS.z;
-      camBaseLook.x = CAM_DEFAULT_LOOK.x;
-      camBaseLook.y = CAM_DEFAULT_LOOK.y;
-      camBaseLook.z = CAM_DEFAULT_LOOK.z;
-      camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
-      camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
+      if (activeCamMode === 'overview') {
+        camBasePos.x = CAM_DEFAULT_POS.x;
+        camBasePos.y = CAM_DEFAULT_POS.y;
+        camBasePos.z = CAM_DEFAULT_POS.z;
+        camBaseLook.x = CAM_DEFAULT_LOOK.x;
+        camBaseLook.y = CAM_DEFAULT_LOOK.y;
+        camBaseLook.z = CAM_DEFAULT_LOOK.z;
+        camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
+        camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
+      }
     }
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
@@ -188,36 +334,125 @@
     return texture;
   }
 
+  // Shared Vehicle Lighting Effects (Forward Soft Ground Pool & Taillight Trail Ribbons)
+  let sharedTailTrailMat = null;
+  let sharedHeadlightPoolMat = null;
+
+  function getSharedTailTrailMat() {
+    if (!sharedTailTrailMat) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 0, 128);
+      grad.addColorStop(0, 'rgba(255, 23, 68, 0.85)');
+      grad.addColorStop(0.35, 'rgba(255, 23, 68, 0.40)');
+      grad.addColorStop(1, 'rgba(255, 23, 68, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 64, 128);
+      const tex = new THREE.CanvasTexture(canvas);
+      sharedTailTrailMat = new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        opacity: 0.75,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+    }
+    return sharedTailTrailMat;
+  }
+
+  function getSharedHeadlightPoolMat() {
+    if (!sharedHeadlightPoolMat) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      const grad = ctx.createRadialGradient(64, 10, 8, 64, 140, 120);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 0.65)');
+      grad.addColorStop(0.25, 'rgba(254, 240, 138, 0.40)');
+      grad.addColorStop(0.65, 'rgba(251, 191, 36, 0.12)');
+      grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 256);
+      const tex = new THREE.CanvasTexture(canvas);
+      sharedHeadlightPoolMat = new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        opacity: 0.55,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+    }
+    return sharedHeadlightPoolMat;
+  }
+
+  function addVehicleLightEffects(group, length, width) {
+    // 1. Forward soft ground pool (Feathered, no harsh cones)
+    const poolGeo = new THREE.PlaneGeometry(width * 1.5, length * 0.7);
+    const poolMesh = new THREE.Mesh(poolGeo, getSharedHeadlightPoolMat());
+    poolMesh.rotation.x = -Math.PI / 2;
+    poolMesh.rotation.z = Math.PI / 2;
+    poolMesh.position.set(length / 2 + length * 0.35, 0.25, 0);
+    group.add(poolMesh);
+
+    // 2. Short glowing red taillight trails
+    const trailGeo = new THREE.PlaneGeometry(width * 0.85, length * 0.45);
+    const trailMesh = new THREE.Mesh(trailGeo, getSharedTailTrailMat());
+    trailMesh.rotation.x = -Math.PI / 2;
+    trailMesh.rotation.z = -Math.PI / 2;
+    trailMesh.position.set(-length / 2 - length * 0.22, 0.25, 0);
+    group.add(trailMesh);
+  }
+
   function createWindowFacadeTexture(floors, cols, winColor, wallColor) {
     const canvas = document.createElement('canvas');
     canvas.width = 256;
     canvas.height = 256;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = wallColor;
+    ctx.fillStyle = wallColor || '#0f172a';
     ctx.fillRect(0, 0, 256, 256);
 
     const floorH = 256 / floors;
     const colW = 256 / cols;
 
     for (let f = 0; f < floors; f++) {
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(0, f * floorH + floorH - 4, 256, 4);
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(0, f * floorH + floorH - 3, 256, 3);
 
       for (let c = 0; c < cols; c++) {
         const x = c * colW + colW * 0.18;
-        const y = f * floorH + floorH * 0.22;
+        const y = f * floorH + floorH * 0.20;
         const w = colW * 0.64;
-        const h = floorH * 0.52;
+        const h = floorH * 0.54;
 
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+        ctx.fillRect(x - 1.5, y - 1.5, w + 3, h + 3);
 
-        ctx.fillStyle = winColor;
-        ctx.fillRect(x, y, w, h);
+        // Pseudorandom window illumination (70% lit, 30% tinted glass reflection)
+        const hash = Math.sin((f + 1) * 31.7 + (c + 1) * 17.3);
+        const isLit = (hash - Math.floor(hash)) > 0.30;
 
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.fillRect(x + w / 2 - 1, y, 2, h);
+        if (isLit) {
+          ctx.fillStyle = winColor || '#fbbf24';
+          ctx.fillRect(x, y, w, h);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+          ctx.fillRect(x + w * 0.5, y, w * 0.5, h);
+        } else {
+          ctx.fillStyle = '#090d16';
+          ctx.fillRect(x, y, w, h);
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+          ctx.beginPath();
+          ctx.moveTo(x, y + h);
+          ctx.lineTo(x + w * 0.4, y);
+          ctx.lineTo(x + w * 0.7, y);
+          ctx.lineTo(x + w * 0.3, y + h);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.fillRect(x + w / 2 - 0.7, y, 1.4, h);
       }
     }
 
@@ -359,23 +594,24 @@
 
     const frontMat = new THREE.MeshStandardMaterial({
       map: frontTex,
-      roughness: 0.6,
-      metalness: 0.1,
-      emissive: new THREE.Color(winColor || 0xfef08a),
+      roughness: 0.38,
+      metalness: 0.35,
+      emissive: new THREE.Color(winColor || 0xfbbf24),
       emissiveMap: frontTex,
-      emissiveIntensity: 0.45
+      emissiveIntensity: 0.60
     });
     const sideMat = new THREE.MeshStandardMaterial({
       map: sideTex,
-      roughness: 0.7,
-      metalness: 0.1,
-      emissive: new THREE.Color(winColor || 0xfef08a),
+      roughness: 0.45,
+      metalness: 0.30,
+      emissive: new THREE.Color(winColor || 0xfbbf24),
       emissiveMap: sideTex,
-      emissiveIntensity: 0.35
+      emissiveIntensity: 0.45
     });
     const roofMat = new THREE.MeshStandardMaterial({
-      color: roofColor || 0x1e293b,
-      roughness: 0.8
+      color: roofColor || 0x0a0f1d,
+      roughness: 0.75,
+      metalness: 0.20
     });
     const bottomMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
@@ -645,6 +881,8 @@
         group.add(tl);
       });
 
+      addVehicleLightEffects(group, length, width);
+
     } else if (type === 'car') {
       const length = 44;
       const width = 18;
@@ -726,6 +964,8 @@
         tl.position.set(-length / 2 + 0.8, 5.2, tz);
         group.add(tl);
       });
+
+      addVehicleLightEffects(group, length, width);
 
     } else if (type === 'cng') {
       const length = 30;
@@ -840,6 +1080,8 @@
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-12.4, 5.5, 0);
       group.add(tl);
+
+      addVehicleLightEffects(group, length, width);
 
     } else if (type === 'rickshaw') {
       const length = 34;
@@ -1136,6 +1378,8 @@
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-9.0, 5.5, 0);
       group.add(tl);
+
+      addVehicleLightEffects(group, length, width);
     }
 
     scene.add(group);
@@ -1250,6 +1494,8 @@
       tl.position.set(-length / 2 - 0.2, 8.0, tz);
       ambGroup.add(tl);
     });
+
+    addVehicleLightEffects(ambGroup, length, width);
 
     ambGroup.visible = false;
     scene.add(ambGroup);
@@ -1454,9 +1700,9 @@
   // Primary Scene Construction
   // -------------------------------------------------------------
   function buildScene(vehiclesData, pedestriansData) {
-    // 1. Fog & Background
+    // 1. Fog & Background (Atmospheric Cyber-Modern Fog)
     scene.background = new THREE.Color(0x040814);
-    scene.fog = new THREE.FogExp2(0x060e20, 0.0005);
+    scene.fog = new THREE.FogExp2(0x070b14, 0.0018);
 
     // 2. Camera: Isometric Drone Aerial 3/4 Perspective
     let width = canvasEl.clientWidth;
@@ -1487,6 +1733,26 @@
     if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.08;
+    }
+
+    // Set up Post-Processing UnrealBloomPass if dependencies loaded
+    if (typeof THREE.EffectComposer !== 'undefined' && typeof THREE.RenderPass !== 'undefined' && typeof THREE.UnrealBloomPass !== 'undefined') {
+      try {
+        composer = new THREE.EffectComposer(renderer);
+        const renderPass = new THREE.RenderPass(scene, camera);
+        composer.addPass(renderPass);
+
+        bloomPass = new THREE.UnrealBloomPass(
+          new THREE.Vector2(width, height),
+          0.65, // strength
+          0.40, // radius
+          0.65  // threshold
+        );
+        composer.addPass(bloomPass);
+      } catch (err) {
+        console.warn('EffectComposer could not be initialized, falling back to standard renderer:', err);
+        composer = null;
+      }
     }
 
     // 4. Lighting: Ambient + Directional Sun + Corner Streetlights
@@ -1547,8 +1813,8 @@
       scene.add(head);
     });
 
-    // 5. Ground & Road Network (Deep Obsidian Asphalt for High-Contrast Cinematic Aesthetics)
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x04060c, roughness: 0.80, metalness: 0.12 });
+    // 5. Ground & Road Network (Wet-Look Obsidian Asphalt for High-Contrast Modern Aesthetics)
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x0b0f17, roughness: 0.22, metalness: 0.55 });
     roadMaterial = roadMat;
     const groundGeo = new THREE.PlaneGeometry(1600, 1200);
     const ground = new THREE.Mesh(groundGeo, roadMat);
@@ -1768,20 +2034,20 @@
 
     scene.add(trainGroup);
 
-    // 8. 4 Quadrants of Extruded 3D Buildings
+    // 8. 4 Quadrants of Extruded 3D Buildings (Cyber-Modern Architectural Slate Tones)
     // Northwest Quadrant
     create3DBuilding({
       x: -490, z: -210, width: 34, depth: 40, height: 115,
-      wallColor: '#0284c7', sideColor: '#082f49',
-      floors: 6, cols: 2, winColor: '#a5f3fc',
+      wallColor: '#0f172a', sideColor: '#090d16',
+      floors: 6, cols: 2, winColor: '#38bdf8',
       antenna: true
     });
 
     const nwComplex = create3DBuilding({
       x: -360, z: -210, width: 200, depth: 65, height: 90,
-      wallColor: '#ea580c', sideColor: '#431407',
-      floors: 4, cols: 6, winColor: '#fef08a',
-      signboard: { text: 'ঢাকা বেকারি', sub: 'Dhaka Bakery', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 85, h: 18, ox: -45, y: 15, awnCol: 0xb45309 }
+      wallColor: '#1e293b', sideColor: '#0f172a',
+      floors: 4, cols: 6, winColor: '#fbbf24',
+      signboard: { text: 'ঢাকা বেকারি', sub: 'Dhaka Bakery', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 85, h: 18, ox: -45, y: 15, awnCol: 0x0f172a }
     });
     const pharmTex = createSignboardTexture('গ্রীন ফার্মেসি', 'Pharmacy', '#0f172a', '#ffffff', '#6ee7b7', '#10b981', 256, 64);
     const pharmGeo = new THREE.BoxGeometry(85, 18, 2.5);
@@ -1808,52 +2074,52 @@
 
     create3DBuilding({
       x: -225, z: -210, width: 80, depth: 60, height: 110,
-      wallColor: '#0d9488', sideColor: '#134e4a',
-      floors: 5, cols: 3, winColor: '#fef08a',
+      wallColor: '#111827', sideColor: '#0b0f19',
+      floors: 5, cols: 3, winColor: '#fbbf24',
       waterTank: true, antenna: true
     });
 
     create3DBuilding({
       x: -150, z: -205, width: 68, depth: 55, height: 95,
-      wallColor: '#f59e0b', sideColor: '#451a03',
-      floors: 4, cols: 3, winColor: '#fef08a',
+      wallColor: '#1e293b', sideColor: '#0f172a',
+      floors: 4, cols: 3, winColor: '#fef3c7',
       antenna: true,
-      signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 62, h: 16, y: 14 }
+      signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#38bdf8', w: 62, h: 16, y: 14 }
     });
 
     // Northeast Quadrant
     create3DBuilding({
       x: 150, z: -205, width: 68, depth: 55, height: 95,
-      wallColor: '#a855f7', sideColor: '#2e1065',
-      floors: 4, cols: 3, winColor: '#f5d0fe',
+      wallColor: '#131c2e', sideColor: '#0d1527',
+      floors: 4, cols: 3, winColor: '#38bdf8',
       antenna: true,
-      signboard: { text: 'ফ্যাশন কর্নার', sub: 'Fashion Corner', bg: '#0f172a', textCol: '#ffffff', border: '#d946ef', w: 62, h: 16, y: 14, awnCol: 0x701a75 }
+      signboard: { text: 'ফ্যাশন কর্নার', sub: 'Fashion Corner', bg: '#0f172a', textCol: '#ffffff', border: '#d946ef', w: 62, h: 16, y: 14, awnCol: 0x1e1b4b }
     });
 
     create3DBuilding({
       x: 230, z: -210, width: 75, depth: 60, height: 100,
-      wallColor: '#14b8a6', sideColor: '#042f2e',
-      floors: 4, cols: 3, winColor: '#a5f3fc',
+      wallColor: '#1e293b', sideColor: '#111827',
+      floors: 4, cols: 3, winColor: '#38bdf8',
       waterTank: true,
-      signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f766e }
+      signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f172a }
     });
 
     create3DBuilding({
       x: 315, z: -215, width: 85, depth: 60, height: 115,
-      wallColor: '#f43f5e', sideColor: '#4c0519',
-      floors: 5, cols: 4, winColor: '#fef08a',
+      wallColor: '#0f172a', sideColor: '#090d16',
+      floors: 5, cols: 4, winColor: '#fbbf24',
       waterTank: true, antenna: true,
-      signboard: { text: 'সুপার শপ', sub: 'Super Shop', bg: '#0f172a', textCol: '#fef08a', border: '#ff2a54', w: 76, h: 16, y: 14, awnCol: 0xbe123c }
+      signboard: { text: 'সুপার শপ', sub: 'Super Shop', bg: '#0f172a', textCol: '#fef08a', border: '#facc15', w: 76, h: 16, y: 14, awnCol: 0x1e293b }
     });
 
     // NE-4 Mirpur Plaza Landmark High-Rise
     const plaza = create3DBuilding({
       x: 430, z: -200, width: 130, depth: 75, height: 135,
-      wallColor: '#0284c7', sideColor: '#082f49',
-      floors: 6, cols: 5, winColor: '#67e8f9',
+      wallColor: '#111827', sideColor: '#0a0e1a',
+      floors: 6, cols: 5, winColor: '#38bdf8',
       antenna: true
     });
-    const plTex = createSignboardTexture('মিরপুর প্লাজা', 'MIRPUR PLAZA', '#0369a1', '#ffffff', '#00f2fe', '#00f2fe', 380, 80);
+    const plTex = createSignboardTexture('মিরপুর প্লাজা', 'MIRPUR PLAZA', '#0f172a', '#ffffff', '#00f2fe', '#00f2fe', 380, 80);
     const plGeo = new THREE.BoxGeometry(105, 22, 3);
     const plSign = new THREE.Mesh(plGeo, new THREE.MeshBasicMaterial({ map: plTex }));
     plSign.position.set(0, 135 + 12, (75 / 2) - 10);
@@ -1863,49 +2129,49 @@
     // Southwest Quadrant
     create3DBuilding({
       x: -490, z: 185, width: 34, depth: 40, height: 85,
-      wallColor: '#fb7185', sideColor: '#4c0519',
-      floors: 4, cols: 2, winColor: '#fef08a'
+      wallColor: '#1e293b', sideColor: '#0f172a',
+      floors: 4, cols: 2, winColor: '#fbbf24'
     });
 
     create3DBuilding({
       x: -360, z: 185, width: 200, depth: 65, height: 80,
-      wallColor: '#14b8a6', sideColor: '#042f2e',
-      floors: 3, cols: 6, winColor: '#fef08a',
+      wallColor: '#0f172a', sideColor: '#090d16',
+      floors: 3, cols: 6, winColor: '#38bdf8',
       waterTank: true, antenna: true
     });
 
     create3DBuilding({
       x: -225, z: 180, width: 75, depth: 55, height: 85,
-      wallColor: '#8b5cf6', sideColor: '#2e1065',
-      floors: 3, cols: 3, winColor: '#f5d0fe',
+      wallColor: '#111827', sideColor: '#0b0f19',
+      floors: 3, cols: 3, winColor: '#fbbf24',
       antenna: true,
-      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
+      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#0f172a', textCol: '#fef08a', border: '#f97316', w: 68, h: 16, y: 14, awnCol: 0x1e293b }
     });
 
     create3DBuilding({
       x: -150, z: 175, width: 75, depth: 55, height: 82,
-      wallColor: '#f59e0b', sideColor: '#451a03',
-      floors: 3, cols: 3, winColor: '#fef08a',
+      wallColor: '#1e293b', sideColor: '#0f172a',
+      floors: 3, cols: 3, winColor: '#fbbf24',
       waterTank: true,
-      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
+      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0x1e293b }
     });
 
     // Southeast Quadrant
     create3DBuilding({
       x: 165, z: 175, width: 110, depth: 60, height: 85,
-      wallColor: '#f43f5e', sideColor: '#4c0519',
-      floors: 3, cols: 4, winColor: '#fef08a',
+      wallColor: '#111827', sideColor: '#0a0e1a',
+      floors: 3, cols: 4, winColor: '#38bdf8',
       antenna: true,
-      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#065f46', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x047857 }
+      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#064e3b', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x064e3b }
     });
 
     const seBillboardBldg = create3DBuilding({
       x: 320, z: 185, width: 180, depth: 65, height: 85,
-      wallColor: '#1e3a8a', sideColor: '#0f172a',
-      floors: 3, cols: 5, winColor: '#38bdf8',
+      wallColor: '#1e293b', sideColor: '#0f172a',
+      floors: 3, cols: 5, winColor: '#fbbf24',
       waterTank: true, antenna: true
     });
-    const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#172554', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
+    const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#0f172a', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
     const seBbGeo = new THREE.BoxGeometry(160, 42, 3);
     const seBbSign = new THREE.Mesh(seBbGeo, new THREE.MeshBasicMaterial({ map: seBbTex }));
     seBbSign.position.set(0, 46, (65 / 2) + 2);
@@ -1914,8 +2180,8 @@
 
     create3DBuilding({
       x: 450, z: 185, width: 45, depth: 45, height: 95,
-      wallColor: '#0ea5e9', sideColor: '#082f49',
-      floors: 4, cols: 2, winColor: '#a5f3fc',
+      wallColor: '#0f172a', sideColor: '#090d16',
+      floors: 4, cols: 2, winColor: '#38bdf8',
       antenna: true
     });
 
@@ -2041,6 +2307,12 @@
       const aspect = width / height;
       updateCameraFraming(aspect);
       renderer.setSize(width, height, false);
+      if (composer) {
+        composer.setSize(width, height);
+      }
+      if (bloomPass && bloomPass.resolution) {
+        bloomPass.resolution.set(width, height);
+      }
     }
   }
 
@@ -2394,24 +2666,31 @@
       boardingBadgeMesh.visible = (trainState === 'boarding');
     }
 
-    // 2. Update Live Vehicles with physically accurate lane coordinates
+    // 2. Update Live Vehicles with physically accurate lane coordinates, suspension bounce & subtle tilt
     for (const id in vehicleMeshMap) {
       const vm = vehicleMeshMap[id];
       const v = vm.data;
       if (!v || !vm.mesh) continue;
 
+      const bounce = Math.sin((v.pos || 0) * 0.12) * 0.25;
+      const tiltZ = Math.sin((v.pos || 0) * 0.08) * 0.012;
+
       if (v.dir === 'EB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? 18 : 48);
-        vm.mesh.position.set(v.pos - 600, 0, laneZ);
+        vm.mesh.position.set(v.pos - 600, bounce, laneZ);
+        vm.mesh.rotation.z = -tiltZ;
       } else if (v.dir === 'WB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? -15 : -52);
-        vm.mesh.position.set(v.pos - 600, 0, laneZ);
+        vm.mesh.position.set(v.pos - 600, bounce, laneZ);
+        vm.mesh.rotation.z = tiltZ;
       } else if (v.dir === 'SB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? -20 : -58);
-        vm.mesh.position.set(laneX, 0, v.pos - 420);
+        vm.mesh.position.set(laneX, bounce, v.pos - 420);
+        vm.mesh.rotation.x = tiltZ;
       } else if (v.dir === 'NB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? 18 : 56);
-        vm.mesh.position.set(laneX, 0, v.pos - 420);
+        vm.mesh.position.set(laneX, bounce, v.pos - 420);
+        vm.mesh.rotation.x = -tiltZ;
       }
     }
 
@@ -2565,29 +2844,44 @@
       }
     }
 
-    // Dynamic Road Wetness & Specular Sheen during Rain
+    // Dynamic Road Wetness & Specular Sheen (Modern High-Contrast Wet Asphalt)
     if (roadMaterial) {
-      const targetRoughness = isRain ? 0.28 : 0.85;
-      const targetMetalness = isRain ? 0.18 : 0.04;
+      const targetRoughness = isRain ? 0.12 : 0.22;
+      const targetMetalness = isRain ? 0.75 : 0.55;
       roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * Math.min(1, dt * 3.0);
       roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, dt * 3.0);
     }
 
-    // 7. Interactive Drone Camera Banking & Pitching (Cinematic gyroscopic damping)
-    targetCamX = camBasePos.x + mouseRelX * 65;
-    targetCamY = camBasePos.y - mouseRelY * 45;
-    const diffX = targetCamX - camera.position.x;
-    const diffY = targetCamY - camera.position.y;
-    if (Math.abs(diffX) > 0.02 || Math.abs(diffY) > 0.02) {
-      const easeFactor = Math.min(1, (dt || 0.016) * 5.0);
-      camera.position.x += diffX * easeFactor;
-      camera.position.y += diffY * easeFactor;
-      camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
-    }
+    // 7. Interactive Drone Camera Choreography: Banking, 0.05 Lerp Damping & Figure-8 Drone Sway
+    idleDroneTime += (dt || 0.016);
+    const swayIntensity = activeCamMode === 'overview' ? 1.0 : 0.35;
+    const driftX = Math.sin(idleDroneTime * 0.45) * (7.5 * swayIntensity);
+    const driftY = Math.cos(idleDroneTime * 0.35) * (4.0 * swayIntensity);
+    const driftZ = Math.sin(idleDroneTime * 0.28) * (5.5 * swayIntensity);
 
-    // 8. Render Scene & Measure Performance
+    const parallaxScale = activeCamMode === 'overview' ? 65 : 22;
+    targetCamX = camBasePos.x + mouseRelX * parallaxScale + driftX;
+    targetCamY = camBasePos.y - mouseRelY * (parallaxScale * 0.7) + driftY;
+    const targetCamZ = camBasePos.z + driftZ;
+
+    // Smooth lerp damping of 0.05
+    camera.position.x += (targetCamX - camera.position.x) * 0.05;
+    camera.position.y += (targetCamY - camera.position.y) * 0.05;
+    camera.position.z += (targetCamZ - camera.position.z) * 0.05;
+
+    currentCamLook.x += (camBaseLook.x - currentCamLook.x) * 0.05;
+    currentCamLook.y += (camBaseLook.y - currentCamLook.y) * 0.05;
+    currentCamLook.z += (camBaseLook.z - currentCamLook.z) * 0.05;
+
+    camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+
+    // 8. Render Scene with Post-Processing UnrealBloomPass (or standard fallback)
     const renderT0 = performance.now();
-    renderer.render(scene, camera);
+    if (composer) {
+      composer.render();
+    } else {
+      renderer.render(scene, camera);
+    }
     const renderTimeMs = performance.now() - renderT0;
 
     // Performance telemetry
