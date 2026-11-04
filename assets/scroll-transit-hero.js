@@ -21,19 +21,33 @@
   let isReady = false;
   let isRenderPaused = false;
   let animId = null;
+  let intersectionObserver = null;
+  let storyStageCards = [];
 
   // Master Scene Groups
   let masterGroup, roadGroup, vehicleGroup, metroGroup, weatherGroup;
   let carMesh, cngMesh, bikeMesh, rickshawMesh, busMesh, trainMesh;
+  let comparisonHub, comparisonRing;
+  let sceneModelTracks = [];
   let rainParticles = null;
   let studioSpotlight = null;
 
   // Camera animation target values
-  let currentCamPos = { x: 30, y: 18, z: 46 };
-  let targetCamPos  = { x: 30, y: 18, z: 46 };
-  let currentLookAt  = { x: 0, y: 5, z: 0 };
-  let targetLookAt   = { x: 0, y: 5, z: 0 };
-  let targetSpotPos  = { x: 0, y: 6, z: 0 };
+  let currentCamPos = { x: 0, y: 10, z: 25 };
+  let targetCamPos  = { x: 0, y: 10, z: 25 };
+  let currentLookAt  = { x: 0, y: 2, z: 0 };
+  let targetLookAt   = { x: 0, y: 2, z: 0 };
+  let targetSpotPos  = { x: 0, y: 2, z: 0 };
+  const cameraPoses = [
+    { position: { x: 0, y: 10, z: 25 }, lookAt: { x: 1.5, y: 1.5, z: 2 } },
+    { position: { x: 0, y: 9, z: 24 }, lookAt: { x: 0, y: 1.4, z: 1 } },
+    { position: { x: 0, y: 10, z: 25 }, lookAt: { x: 1.2, y: 1.5, z: 1 } },
+    { position: { x: 0, y: 18, z: 29 }, lookAt: { x: -1, y: 7, z: 0 } },
+    { position: { x: 0, y: 13, z: 25 }, lookAt: { x: 0, y: 2, z: 1.6 } }
+  ];
+  const stageLightColors = [0x06b6d4, 0xf59e0b, 0x14b8a6, 0x10b981, 0x3b82f6]
+    .map(color => new THREE.Color(color));
+  const interpolatedLightColor = new THREE.Color();
 
   // Materials Cache
   let carPaintMat, glassMat, tireMat, rimMat, chromeMat;
@@ -360,6 +374,30 @@
     bikeMesh.position.set(-4.5, 0, 2);
     vehicleGroup.add(bikeMesh);
 
+    comparisonHub = new THREE.Group();
+    const hubCore = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.1, 1.35, 0.35, 24),
+      new THREE.MeshStandardMaterial({ color: 0x172554, roughness: 0.28, metalness: 0.75 })
+    );
+    hubCore.position.y = 0.15;
+    comparisonHub.add(hubCore);
+    const hubGlow = new THREE.Mesh(
+      new THREE.TorusGeometry(1.8, 0.045, 8, 48),
+      new THREE.MeshBasicMaterial({ color: 0x8b5cf6 })
+    );
+    hubGlow.rotation.x = Math.PI / 2;
+    hubGlow.position.y = 0.12;
+    comparisonHub.add(hubGlow);
+    const orbitalRing = new THREE.Mesh(
+      new THREE.TorusGeometry(3.35, 0.025, 6, 64),
+      new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.75 })
+    );
+    orbitalRing.rotation.x = Math.PI / 2;
+    orbitalRing.position.y = 0.08;
+    comparisonHub.add(orbitalRing);
+    comparisonRing = orbitalRing;
+    masterGroup.add(comparisonHub);
+
     // Stage 2: Rickshaw
     rickshawMesh = buildRickshaw();
     rickshawMesh.position.set(-16, 0, -4);
@@ -378,104 +416,144 @@
     // Stage 5: Rain Particles
     rainParticles = buildRain();
     masterGroup.add(rainParticles);
+
+    sceneModelTracks = [
+      {
+        mesh: carMesh,
+        poses: [
+          { x: 5.2, y: 0, z: 2.4, scale: 0.55 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0.04 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
+          { x: 0, y: 0, z: 1.6, scale: 0 }
+        ]
+      },
+      {
+        mesh: cngMesh,
+        poses: [
+          { x: -0.5, y: 0, z: 2.5, scale: 0.55 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0.04 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
+          { x: 0, y: 0, z: 1.6, scale: 0 }
+        ]
+      },
+      {
+        mesh: bikeMesh,
+        poses: [
+          { x: 2.6, y: 0, z: 5.3, scale: 0.55 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0.04 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
+          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
+          { x: 0, y: 0, z: 1.6, scale: 0 }
+        ]
+      },
+      {
+        mesh: rickshawMesh,
+        poses: [
+          { x: -2.2, y: 0, z: 0.8, scale: 0 },
+          { x: -2.2, y: 0, z: 0.8, scale: 0.72 },
+          { x: -2.2, y: 0, z: 0.8, scale: 0 },
+          { x: -2.2, y: 0, z: 0.8, scale: 0 },
+          { x: 0, y: 0, z: 1.6, scale: 0 }
+        ]
+      },
+      {
+        mesh: busMesh,
+        poses: [
+          { x: 2.2, y: 0, z: 0.8, scale: 0 },
+          { x: 2.2, y: 0, z: 0.8, scale: 0 },
+          { x: 2.2, y: 0, z: 0.8, scale: 0.62, rotation: Math.PI * 2 },
+          { x: 2.2, y: 0, z: 0.8, scale: 0 },
+          { x: 0, y: 0, z: 1.6, scale: 0 }
+        ]
+      },
+      {
+        mesh: metroGroup,
+        poses: [
+          { x: -2.1, y: 0.45, z: 0.8, scale: 0 },
+          { x: -2.1, y: 0.45, z: 0.8, scale: 0 },
+          { x: -2.1, y: 0.45, z: 0.8, scale: 0 },
+          { x: -2.1, y: 0.45, z: 0.8, scale: 0.42 },
+          { x: 0, y: 0, z: 1.6, scale: 0 }
+        ]
+      },
+      {
+        mesh: comparisonHub,
+        poses: [
+          { x: 2.2, y: 0, z: 2.5, scale: 1 },
+          { x: 2.2, y: 0, z: 2.5, scale: 0.68 },
+          { x: 2.2, y: 0, z: 2.5, scale: 0.42 },
+          { x: -2.1, y: 0.45, z: 0.8, scale: 0.38 },
+          { x: 0, y: 0, z: 1.6, scale: 0.9 }
+        ]
+      }
+    ];
   }
 
   // Camera & Studio Lighting Choreography across the 5 Stages
   function applyScrollChoreography(progress) {
     const p = Math.max(0, Math.min(1, progress));
+    const stagePosition = p * 5;
+    const stageIndex = Math.min(3, Math.floor(stagePosition));
+    const stageProgress = p >= 0.8 ? 1 : stagePosition - stageIndex;
+    const mix = (from, to) => from + (to - from) * stageProgress;
+    const fromCamera = cameraPoses[stageIndex];
+    const toCamera = cameraPoses[stageIndex + 1];
+    targetCamPos = {
+      x: mix(fromCamera.position.x, toCamera.position.x),
+      y: mix(fromCamera.position.y, toCamera.position.y),
+      z: mix(fromCamera.position.z, toCamera.position.z)
+    };
+    targetLookAt = {
+      x: mix(fromCamera.lookAt.x, toCamera.lookAt.x),
+      y: mix(fromCamera.lookAt.y, toCamera.lookAt.y),
+      z: mix(fromCamera.lookAt.z, toCamera.lookAt.z)
+    };
 
-    if (p < 0.20) {
-      // Stage 1: Comparison of Bike, CNG & Car Fare
-      const stg = p / 0.20;
-      targetCamPos = {
-        x: 18 - stg * 8,
-        y: 11 - stg * 2,
-        z: 22 - stg * 4
-      };
-      targetLookAt = { x: 0.5, y: 1.2, z: 2 };
-      targetSpotPos = { x: 0, y: 1.5, z: 2 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0x06b6d4);
-      if (rainParticles) rainParticles.material.opacity = 0;
-      if (canvasEl) canvasEl.style.opacity = '1.0';
+    sceneModelTracks.forEach(({ mesh, poses }) => {
+      const from = poses[stageIndex];
+      const to = poses[stageIndex + 1];
+      mesh.position.set(mix(from.x, to.x), mix(from.y, to.y), mix(from.z, to.z));
+      const scale = mix(from.scale, to.scale);
+      mesh.scale.setScalar(scale);
+      mesh.rotation.y = mix(from.rotation || 0, to.rotation || 0);
+    });
 
-    } else if (p < 0.40) {
-      // Stage 2: Rickshaw Fare Estimation
-      const stg = (p - 0.20) / 0.20;
-      targetCamPos = {
-        x: 10 - stg * 22,
-        y: 9 - stg * 1.5,
-        z: 18 - stg * 6
-      };
-      targetLookAt = {
-        x: 0.5 - stg * 16.5,
-        y: 1.2,
-        z: 2 - stg * 6
-      };
-      targetSpotPos = { x: -16, y: 1.5, z: -4 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0xf59e0b);
-      if (rainParticles) rainParticles.material.opacity = 0;
-      if (canvasEl) canvasEl.style.opacity = '1.0';
+    const lightPosition = p * 5;
+    const lightStageIndex = Math.min(4, Math.floor(lightPosition));
+    const lightProgress = lightStageIndex === 4
+      ? 0
+      : Math.max(0, Math.min(1, (lightPosition - lightStageIndex - 0.8) / 0.2));
+    interpolatedLightColor.copy(stageLightColors[lightStageIndex]);
+    if (lightProgress > 0) {
+      interpolatedLightColor.lerp(stageLightColors[lightStageIndex + 1], lightProgress);
+    }
+    if (studioSpotlight) studioSpotlight.color.copy(interpolatedLightColor);
+    if (comparisonRing) comparisonRing.material.color.copy(interpolatedLightColor);
 
-    } else if (p < 0.60) {
-      // Stage 3: Smart Bus Route Discovery (BRTA Calibrated)
-      const stg = (p - 0.40) / 0.20;
-      targetCamPos = {
-        x: -12 + stg * 36,
-        y: 7.5 + stg * 4,
-        z: 12 + stg * 8
-      };
-      targetLookAt = {
-        x: -16 + stg * 32,
-        y: 1.2 + stg * 1.5,
-        z: -4 - stg * 2
-      };
-      targetSpotPos = { x: 16, y: 2.5, z: -6 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0x14b8a6);
-      if (rainParticles) rainParticles.material.opacity = 0;
-      if (canvasEl) canvasEl.style.opacity = '1.0';
+    const activeCardPosition = Math.min(4, p * 5);
+    storyStageCards.forEach((card, index) => {
+      const visibility = Math.max(0, 1 - Math.abs(activeCardPosition - index));
+      card.style.opacity = visibility.toFixed(3);
+      card.style.transform = `translateY(${(1 - visibility) * 14}px) scale(${0.985 + visibility * 0.015})`;
+      card.style.pointerEvents = visibility >= 0.5 ? 'auto' : 'none';
+      card.style.zIndex = String(Math.round(visibility * 10));
+      card.inert = visibility < 0.5;
+      card.setAttribute('aria-hidden', visibility < 0.5 ? 'true' : 'false');
+      const cardContent = card.querySelector('.story-hero-card');
+      if (cardContent) cardContent.style.pointerEvents = visibility >= 0.5 ? 'auto' : 'none';
+    });
 
-    } else if (p < 0.80) {
-      // Stage 4: Dhaka Metro Rail MRT Line-6
-      const stg = (p - 0.60) / 0.20;
-      targetCamPos = {
-        x: 24 - stg * 24,
-        y: 11.5 + stg * 14,
-        z: 20 + stg * 4
-      };
-      targetLookAt = {
-        x: 16 - stg * 16,
-        y: 2.7 + stg * 12.5,
-        z: -6 - stg * 12
-      };
-      targetSpotPos = { x: 0, y: 15, z: -18 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0x10b981);
-      if (rainParticles) rainParticles.material.opacity = 0;
-      if (canvasEl) canvasEl.style.opacity = '1.0';
-
-    } else {
-      // Stage 5: Weather Surge Pricing & Multimodal Overview
-      const stg = (p - 0.80) / 0.20;
-      targetCamPos = {
-        x: 0 + stg * 32,
-        y: 25.5 + stg * 16,
-        z: 24 + stg * 28
-      };
-      targetLookAt = {
-        x: 0,
-        y: 15.2 - stg * 10,
-        z: -18 + stg * 10
-      };
-      targetSpotPos = { x: 0, y: 5, z: -5 };
-      if (studioSpotlight) studioSpotlight.color.setHex(0x3b82f6);
-      if (rainParticles) rainParticles.material.opacity = Math.min(0.85, stg * 1.1);
-      if (canvasEl) {
-        if (stg > 0.25) {
-          const fadeP = (stg - 0.25) / 0.75;
-          canvasEl.style.opacity = Math.max(0.1, 1.0 - fadeP * 0.9).toFixed(3);
-        } else {
-          canvasEl.style.opacity = '1.0';
-        }
-      }
+    targetSpotPos = {
+      x: mix(fromCamera.lookAt.x, toCamera.lookAt.x),
+      y: mix(fromCamera.lookAt.y + 2, toCamera.lookAt.y + 2),
+      z: mix(fromCamera.lookAt.z, toCamera.lookAt.z)
+    };
+    if (rainParticles) rainParticles.material.opacity = p < 0.8 ? 0 : Math.min(0.85, ((p - 0.8) / 0.2) * 1.1);
+    if (canvasEl) {
+      const fadeProgress = Math.max(0, Math.min(1, (p - 0.85) / 0.15));
+      canvasEl.style.opacity = (1 - fadeProgress * 0.9).toFixed(3);
     }
   }
 
@@ -491,6 +569,7 @@
 
     renderer.setSize(width, height, false);
     renderer.setPixelRatio(width < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.25));
+    masterGroup.scale.setScalar(width < 768 ? 0.78 : 1);
   }
 
   function animate() {
@@ -498,6 +577,7 @@
     if (isRenderPaused || !renderer || !scene || !camera) return;
 
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : 0.016;
+    if (comparisonHub) comparisonHub.rotation.y += delta * 0.08;
 
     // Smooth Damped Camera Interpolation (Silky 120 FPS feel)
     const factor = Math.min(1.0, delta * 7.0);
@@ -547,6 +627,8 @@
 
     clock = new THREE.Clock();
     buildScene();
+    storyStageCards = Array.from(document.querySelectorAll('#storyHeroCardsContainer > section'));
+    applyScrollChoreography(0);
 
     const width = canvasEl.clientWidth || window.innerWidth;
     const height = canvasEl.clientHeight || window.innerHeight;
@@ -571,12 +653,18 @@
 
     // Pause render loop when user scrolls completely past the hero into #planner
     if (typeof IntersectionObserver !== 'undefined' && containerEl) {
-      const obs = new IntersectionObserver((entries) => {
+      intersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach(e => {
           isRenderPaused = !e.isIntersecting;
+          if (isRenderPaused && animId !== null) {
+            cancelAnimationFrame(animId);
+            animId = null;
+          } else if (!isRenderPaused && animId === null) {
+            animate();
+          }
         });
       }, { threshold: 0.02 });
-      obs.observe(containerEl);
+      intersectionObserver.observe(containerEl);
     }
 
     window.addEventListener('resize', onResize);
@@ -592,5 +680,34 @@
     onResize();
   };
 
-})();
+  window.destroyScrollTransitHero = function() {
+    if (animId !== null) cancelAnimationFrame(animId);
+    animId = null;
+    window.removeEventListener('resize', onResize);
+    if (intersectionObserver) intersectionObserver.disconnect();
+    intersectionObserver = null;
+    storyStageCards = [];
+    if (window.ScrollTrigger && containerEl) {
+      ScrollTrigger.getAll()
+        .filter(trigger => trigger.trigger instanceof Element && containerEl.contains(trigger.trigger))
+        .forEach(trigger => trigger.kill());
+    }
+    if (scene) {
+      scene.traverse(object => {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach(material => {
+            Object.values(material).forEach(value => {
+              if (value && value.isTexture) value.dispose();
+            });
+            material.dispose();
+          });
+        }
+      });
+    }
+    if (renderer) renderer.dispose();
+    isReady = false;
+  };
 
+})();

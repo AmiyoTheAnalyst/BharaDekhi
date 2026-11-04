@@ -690,7 +690,59 @@
       width: 100%;
       min-height: 500vh;
       background: #020408 !important;
-      overflow-x: hidden;
+      overflow-x: clip;
+      overflow-y: visible;
+      isolation: isolate;
+    }
+    #plannerScrollHero canvas {
+      pointer-events: none;
+    }
+    #storyHeroCardsContainer {
+      position: sticky;
+      top: 0;
+      display: block;
+      width: 100%;
+      height: 100vh;
+      margin-top: -100vh;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #storyHeroCardsContainer > section {
+      position: absolute;
+      inset: 0;
+      height: 100%;
+      min-height: 0;
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+    #plannerScrollHero .story-hero-card {
+      width: min(100%, 32rem);
+    }
+    #planner {
+      scroll-margin-top: 6rem;
+    }
+    @media (max-width: 767px) {
+      #plannerScrollHero .story-hero-card {
+        padding: 1.25rem;
+        max-height: calc(100svh - 2rem);
+        overflow-y: auto;
+      }
+      #storyHeroStage1,
+      #storyHeroStage2,
+      #storyHeroStage3,
+      #storyHeroStage4,
+      #storyHeroStage5 {
+        height: 100svh;
+        min-height: 100svh;
+        padding: 1rem;
+      }
+      #storyHeroCardsContainer {
+        height: 100svh;
+      }
+      #planner {
+        scroll-margin-top: 11rem;
+      }
     }
 
     #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper,
@@ -7737,7 +7789,7 @@
   <main id="userPlannerView" class="panel-section hidden w-full bg-slate-950 pb-16">
 
     <!-- 5-Stage 3D Scroll Hero Section (Scroll Transit Hero for Bhara dekhi) -->
-    <section id="plannerScrollHero" class="relative w-full min-h-[500vh] bg-slate-950 select-none overflow-x-hidden" aria-label="Bhara dekhi 3D Transit Storytelling Hero">
+    <section id="plannerScrollHero" class="relative w-full min-h-[500vh] bg-slate-950 select-none" aria-label="Bhara dekhi 3D Transit Storytelling Hero">
       
       <!-- Top Navigation Pill inside Scroll Hero to Return to City Animation -->
       <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-50 pointer-events-auto">
@@ -7759,13 +7811,13 @@
         <section id="storyHeroStage1" class="h-screen w-full flex items-center justify-start p-6 md:p-16">
           <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-sky-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider mb-3">
-              <span>⚡ Bhara dekhi • Multi-Mode Comparison</span>
+              <span>Bhara dekhi • Multi-Mode Comparison</span>
             </div>
             <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
               Comparison of Bike, CNG &amp; Car Fare
             </h3>
             <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
-              Compare instant side-by-side fare estimates for Ride-Share Bikes, CNG Auto-Rickshaws, and Cars across Dhaka traffic before you book. Choose the right ride for your budget, speed, or comfort before you step outside.
+              Compare side-by-side fare estimates for ride-share bikes, CNG auto-rickshaws, and cars across Dhaka before booking.
             </p>
             <div class="flex flex-wrap gap-2 sm:gap-3 mt-5">
               <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-md">
@@ -7851,7 +7903,7 @@
               Real-Time Weather Surge Pricing
             </h3>
             <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed max-w-md mx-auto">
-              Monsoon downpours and waterlogging in Dhaka can spike rickshaw and CNG rates by up to 1.4×. Stay ahead with live weather surge detection and smart transit alternatives.
+              Open-Meteo weather integration tracks rain in real time, helping you anticipate rain-based surge pricing and choose smarter transit alternatives across Dhaka.
             </p>
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button type="button" onclick="smoothScrollToPlanner()" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer">
@@ -7865,8 +7917,7 @@
     </section>
 
     <!-- Trip Planner Core Interface (Leaflet Map, Fares, Routes) -->
-    <div id="plannerContentWrapper" class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
-      <div id="planner" class="scroll-mt-6"></div>
+    <div id="planner" class="max-w-6xl mx-auto px-4 pt-6 space-y-6 scroll-mt-6">
 
     <!-- Top Navigation Banner: Return to City Animation & Status -->
     <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
@@ -19440,7 +19491,7 @@
       ScrollTrigger.create({
         trigger: '#plannerScrollHero',
         start: 'top top',
-        end: 'bottom bottom',
+        end: 'bottom top',
         scrub: 1.2,
         onUpdate: (self) => {
           if (typeof window.scrollTransitHeroSetProgress === 'function') {
@@ -19449,41 +19500,11 @@
         }
       });
 
-      // 2. Animate cards fading and sliding into focus across their stage sections
-      const stages = [
-        { id: '#storyHeroStage1', card: '#storyHeroStage1 .story-hero-card' },
-        { id: '#storyHeroStage2', card: '#storyHeroStage2 .story-hero-card' },
-        { id: '#storyHeroStage3', card: '#storyHeroStage3 .story-hero-card' },
-        { id: '#storyHeroStage4', card: '#storyHeroStage4 .story-hero-card' },
-        { id: '#storyHeroStage5', card: '#storyHeroStage5 .story-hero-card' }
-      ];
-
-      stages.forEach((stg, i) => {
-        const cardEl = document.querySelector(stg.card);
-        if (!cardEl) return;
-
-        gsap.fromTo(cardEl,
-          { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : 35, scale: i === 0 ? 1 : 0.96 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.5,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: stg.id,
-              start: 'top 80%',
-              end: 'bottom 20%',
-              toggleActions: 'play reverse play reverse'
-            }
-          }
-        );
-      });
     }
     window.initScrollTriggerStorytelling = initScrollTriggerStorytelling;
 
     window.smoothScrollToPlanner = function() {
-      const plannerEl = document.getElementById('planner') || document.getElementById('plannerContentWrapper');
+      const plannerEl = document.getElementById('planner');
       if (plannerEl) {
         plannerEl.scrollIntoView({ behavior: 'smooth' });
       } else {
