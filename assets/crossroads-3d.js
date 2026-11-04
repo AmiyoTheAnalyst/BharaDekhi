@@ -379,11 +379,9 @@
 
   // Dusk Sky & Vice City Neon Palette Assets
   let duskSkyTexture = null;
-  let gltfPedTemplates = [];
-  let activeMixers = [];
   let isRenderLoopPaused = false;
-  let mixerFrameCounter = 0;
   let carArchetypeCounter = 0;
+  const socialPedestrians = [];
 
   function createDuskSkyGradientTexture() {
     const canvas = document.createElement('canvas');
@@ -391,23 +389,84 @@
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
     const grad = ctx.createLinearGradient(0, 0, 0, 512);
-    // Rich dusk purple-to-magenta gradient (#1b1035 zenith blending into #5b2245 horizon)
-    grad.addColorStop(0.0, '#1b1035');  // Zenith rich purple
-    grad.addColorStop(0.35, '#2c123d');
-    grad.addColorStop(0.68, '#5b2245'); // Dusk magenta
-    grad.addColorStop(0.92, '#7a2858'); // Warm horizon sunset glow
-    grad.addColorStop(1.0, '#923368');
+    // Synthwave / Vice City dusk gradient: #1e0f2e blending into #592148 at horizon
+    grad.addColorStop(0.0, '#1e0f2e');  // Zenith deep twilight indigo/purple
+    grad.addColorStop(0.38, '#2d123d');
+    grad.addColorStop(0.70, '#592148'); // Rich radiant magenta/rose dusk
+    grad.addColorStop(0.88, '#70224d');
+    grad.addColorStop(1.0, '#592148');  // Warm horizon dusk glow
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 128, 512);
     const tex = new THREE.CanvasTexture(canvas);
     return tex;
   }
 
-  // Real 3D GLTF Vehicle & Human Asset Registry
-  const gltfCarTemplates = {};
-  const gltfHumanTemplates = [];
-  const socialPedestrians = [];
-  const CAR_TINT_COLORS = [0x0047ab, 0xef4444, 0x84cc16, 0xf8fafc, 0xcbd5e1]; // Royal Blue, Crimson Red, Lime Green, Pearl White, Silver
+  // 10-Spoke Metallic Alloy Rim Canvas Texture (128x128)
+  let cachedRimTexture = null;
+  function getMultiSpokeRimTexture() {
+    if (cachedRimTexture) return cachedRimTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const cx = 64, cy = 64;
+
+    // Dark gunmetal base disc
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Chrome outer lip
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 57, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 10 Radial Metallic Spokes
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 3.5;
+    for (let i = 0; i < 10; i++) {
+      const angle = (i * Math.PI * 2) / 10;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle) * 53, cy + Math.sin(angle) * 53);
+      ctx.stroke();
+    }
+
+    // Chrome center hub
+    ctx.fillStyle = '#f8fafc';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    cachedRimTexture = new THREE.CanvasTexture(canvas);
+    return cachedRimTexture;
+  }
+
+  // Zero-Lag Radial Ground Glow Texture (128x128) for soft additive ground light pools
+  let cachedRadialGlowTexture = null;
+  function getRadialGlowTexture() {
+    if (cachedRadialGlowTexture) return cachedRadialGlowTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grad.addColorStop(0.0, 'rgba(255, 255, 255, 0.7)');
+    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.35)');
+    grad.addColorStop(0.70, 'rgba(255, 255, 255, 0.08)');
+    grad.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 128, 128);
+    cachedRadialGlowTexture = new THREE.CanvasTexture(canvas);
+    return cachedRadialGlowTexture;
+  }
 
   function getHeading(dir) {
     if (dir === 'EB') return 0;           // Facing +X (East)
@@ -417,413 +476,364 @@
     return 0;
   }
 
-  // Replace active live cars/buses/cngs/rickshaws in the scene graph with loaded GLTF models (capped to max 8)
-  const MAX_GLTF_CARS = 8;
-  function replaceLiveCarsWithGLTF() {
-    if (!scene || !vehicleMeshMap) return;
-    const carKeys = Object.keys(gltfCarTemplates).filter(k => k !== 'truck');
-    if (carKeys.length === 0 && !gltfCarTemplates.truck) return;
+  // ---------------------------------------------------------------------------
+  // 1. Aerodynamic Extruded Sports & Street Car Factory — ZERO BoxGeometry
+  // 4 Specific Archetypes: Lime-Green i8, Silver DeLorean, White Hypercar, Night Muscle
+  // ---------------------------------------------------------------------------
+  function createAerodynamicCar(archetypeIdx) {
+    const typeIdx = (archetypeIdx !== undefined ? archetypeIdx : (carArchetypeCounter++)) % 4;
+    const group = new THREE.Group();
+    group.userData.wheels = [];
 
-    let carIdx = 0;
-    let gltfCarCount = 0;
+    // Smooth aerodynamic 2D side profile extruded along Z (Facing canonical +X)
+    const shape = new THREE.Shape();
+    // Front splitter & nose
+    shape.moveTo(2.1, 0.18);
+    shape.lineTo(2.0, 0.52);
+    // Sloped aerodynamic hood
+    shape.quadraticCurveTo(1.1, 0.68, 0.7, 0.72);
+    // Raked windshield
+    shape.lineTo(0.1, 1.18);
+    // Swept curved aerodynamic roofline
+    shape.quadraticCurveTo(-0.6, 1.22, -1.1, 1.12);
+    // Fastback rear glass
+    shape.lineTo(-1.95, 0.78);
+    // Integrated decklid spoiler
+    shape.lineTo(-2.1, 0.85);
+    // Rear diffuser
+    shape.lineTo(-2.1, 0.22);
+    // Recessed rear wheel arch
+    shape.bezierCurveTo(-1.7, 0.55, -0.9, 0.55, -0.85, 0.18);
+    shape.lineTo(0.85, 0.18);
+    // Recessed front wheel arch
+    shape.bezierCurveTo(0.9, 0.55, 1.7, 0.55, 1.75, 0.18);
+    shape.lineTo(2.1, 0.18);
 
-    for (const id in vehicleMeshMap) {
-      if (gltfCarCount >= MAX_GLTF_CARS) break;
+    const extrudeSettings = {
+      depth: 1.55,
+      bevelEnabled: true,
+      bevelThickness: 0.14,
+      bevelSize: 0.12,
+      bevelSegments: 4,
+      curveSegments: 16
+    };
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    bodyGeo.translate(0, 0, -1.55 / 2);
 
-      const vm = vehicleMeshMap[id];
-      if (!vm || !vm.data) continue;
-      const vType = vm.data.type;
+    let bodyColorHex = 0x84cc16;
+    let roughness = 0.25;
+    let metalness = 0.65;
+    let headlightColor = 0xffffff;
 
-      const isCar = (vType === 'car' || vType === 'bike');
-      const isTruck = (vType === 'bus' && gltfCarTemplates.truck);
-      const isCompact = ((vType === 'cng' || vType === 'rickshaw') && (gltfCarTemplates.toycar || carKeys.length > 0));
-
-      if ((isCar || isTruck || isCompact) && !vm.isGLTF) {
-        let chosenKey = 'ferrari';
-        if (isTruck) {
-          chosenKey = 'truck';
-        } else if (isCompact && gltfCarTemplates.toycar) {
-          chosenKey = 'toycar';
-        } else if (carKeys.length > 0) {
-          chosenKey = carKeys[carIdx % carKeys.length];
-          carIdx++;
-        }
-
-        const template = gltfCarTemplates[chosenKey];
-        if (!template) continue;
-
-        const gltfClone = template.clone(true);
-        const tint = CAR_TINT_COLORS[carIdx % CAR_TINT_COLORS.length];
-
-        // Tint body materials with diverse colors: Royal Blue, Crimson Red, Lime Green, Pearl White, Silver
-        gltfClone.traverse(child => {
-          if (child.isMesh) {
-            child.castShadow = false;
-            child.receiveShadow = false;
-            child.frustumCulled = true;
-            if (child.material) {
-              child.material = child.material.clone();
-              const nm = (child.name || '').toLowerCase();
-              const mn = (child.material.name || '').toLowerCase();
-              if (nm.includes('body') || nm.includes('paint') || nm.includes('car') ||
-                  mn.includes('body') || nm.includes('paint') || nm.includes('red') || nm.includes('car') ||
-                  (!nm.includes('wheel') && !nm.includes('tire') && !nm.includes('glass') && !nm.includes('window') && !nm.includes('glass') && !nm.includes('tire'))) {
-                if (child.material.color) {
-                  child.material.color.setHex(tint);
-                }
-              }
-            }
-          }
-        });
-
-        const prevPos = (vm.mesh && vm.mesh.position) ? vm.mesh.position.clone() : new THREE.Vector3();
-
-        // Completely remove old BoxGeometry mesh from scene graph
-        if (vm.mesh) {
-          scene.remove(vm.mesh);
-          vm.mesh.traverse(obj => {
-            if (obj.geometry) obj.geometry.dispose();
-            if (obj.material) {
-              if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
-              else obj.material.dispose();
-            }
-          });
-        }
-
-        // Situate new real GLTF model
-        gltfClone.position.copy(prevPos);
-        gltfClone.rotation.y = getHeading(vm.data.dir);
-        scene.add(gltfClone);
-
-        vm.mesh = gltfClone;
-        vm.isGLTF = true;
-        gltfCarCount++;
-      }
-    }
-  }
-
-  // Replace live pedestrians in the scene graph with loaded animated GLTF models (capped to max 6)
-  const MAX_GLTF_PEDS = 6;
-  function replaceLivePedestriansWithGLTF() {
-    if (!scene || gltfHumanTemplates.length === 0) return;
-    if (typeof THREE.SkeletonUtils === 'undefined') return;
-
-    let humanIdx = 0;
-    let gltfPedCount = 0;
-
-    if (pedMeshMap) {
-      for (const key in pedMeshMap) {
-        if (gltfPedCount >= MAX_GLTF_PEDS) break;
-
-        const pm = pedMeshMap[key];
-        if (!pm || !pm.data || pm.isGLTF) continue;
-
-        const template = gltfHumanTemplates[humanIdx % gltfHumanTemplates.length];
-        humanIdx++;
-        if (!template || !template.model) continue;
-
-        try {
-          const clone = THREE.SkeletonUtils.clone(template.model);
-          clone.traverse(child => {
-            if (child.isSkinnedMesh || child.isMesh) {
-              child.castShadow = false;
-              child.receiveShadow = false;
-              child.frustumCulled = true;
-            }
-          });
-
-          const mixer = new THREE.AnimationMixer(clone);
-          if (template.animations && template.animations.length > 0) {
-            const walkClip = template.animations.find(c => /walk|run/i.test(c.name)) || template.animations[0];
-            if (walkClip) {
-              const action = mixer.clipAction(walkClip);
-              action.play();
-            }
-          }
-          activeMixers.push(mixer);
-
-          const prevPos = (pm.mesh && pm.mesh.position) ? pm.mesh.position.clone() : new THREE.Vector3();
-          const prevRotY = pm.mesh ? pm.mesh.rotation.y : 0;
-
-          // Completely remove old procedural mesh from scene graph
-          if (pm.mesh) {
-            scene.remove(pm.mesh);
-            pm.mesh.traverse(obj => {
-              if (obj.geometry) obj.geometry.dispose();
-              if (obj.material) {
-                if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
-                else obj.material.dispose();
-              }
-            });
-          }
-
-          clone.position.copy(prevPos);
-          clone.rotation.y = prevRotY;
-          scene.add(clone);
-
-          pm.mesh = clone;
-          pm.isGLTF = true;
-          pm.mixer = mixer;
-          gltfPedCount++;
-        } catch (err) {
-          console.warn('Pedestrian replacement error:', err);
-        }
-      }
+    if (typeIdx === 0) {
+      // 1. Lime-Green Neon i8 Coupe: Toxic lime-green (#84cc16), black hood scoop, #facc15 daytime LED strips
+      bodyColorHex = 0x84cc16;
+      roughness = 0.25;
+      metalness = 0.65;
+      headlightColor = 0xfacc15;
+    } else if (typeIdx === 1) {
+      // 2. Silver Retro DeLorean Wedge Coupe: Brushed stainless silver (#cbd5e1), sharp wedge cabin, quad headlights
+      bodyColorHex = 0xcbd5e1;
+      roughness = 0.35;
+      metalness = 0.80;
+      headlightColor = 0xe0f2fe;
+    } else if (typeIdx === 2) {
+      // 3. White & Carbon Hypercar: High-gloss pearl white (#f8fafc), carbon splitter, #60a5fa ice-blue LED headlights
+      bodyColorHex = 0xf8fafc;
+      roughness = 0.15;
+      metalness = 0.20;
+      headlightColor = 0x60a5fa;
+    } else {
+      // 4. Night Muscle Sedan: Deep midnight black/navy (#0f172a), 4 ice-blue circular xenon headlights (#38bdf8), 3 red blower lights
+      bodyColorHex = 0x0f172a;
+      roughness = 0.30;
+      metalness = 0.70;
+      headlightColor = 0x38bdf8;
     }
 
-    // Also replace standing sidewalk social group pedestrians (Pose ONCE, NO continuous mixer updates)
-    socialPedestrians.forEach(sp => {
-      if (!sp || sp.isGLTF || !sp.mesh || !sp.parent) return;
-      const template = gltfHumanTemplates[humanIdx % gltfHumanTemplates.length];
-      humanIdx++;
-      if (!template || !template.model) return;
-      try {
-        const clone = THREE.SkeletonUtils.clone(template.model);
-        clone.traverse(child => {
-          if (child.isSkinnedMesh || child.isMesh) {
-            child.castShadow = false;
-            child.receiveShadow = false;
-            child.frustumCulled = true;
-          }
-        });
-        const mixer = new THREE.AnimationMixer(clone);
-        if (template.animations && template.animations.length > 0) {
-          const idleClip = template.animations.find(c => /idle|stand/i.test(c.name)) || template.animations[0];
-          if (idleClip) {
-            const action = mixer.clipAction(idleClip);
-            action.play();
-          }
-        }
-        mixer.update(0.1); // Update ONCE to pose standing character — DO NOT push into activeMixers[]!
-
-        clone.position.copy(sp.mesh.position);
-        clone.rotation.y = sp.mesh.rotation.y;
-        sp.parent.remove(sp.mesh);
-        sp.mesh.traverse(obj => {
-          if (obj.geometry) obj.geometry.dispose();
-          if (obj.material) {
-            if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
-            else obj.material.dispose();
-          }
-        });
-        sp.parent.add(clone);
-        sp.mesh = clone;
-        sp.isGLTF = true;
-      } catch (e) {}
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: bodyColorHex,
+      roughness: roughness,
+      metalness: metalness
     });
-  }
+    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    group.add(bodyMesh);
 
-  let gltfAssetManagerInitialized = false;
-  function initGLTFAssetManager() {
-    if (gltfAssetManagerInitialized) return;
-    if (typeof THREE.GLTFLoader !== 'function') return;
-    gltfAssetManagerInitialized = true;
+    // Dark Smoked Glass Windshield & Cabin Canopy (Extruded Contour)
+    const glassShape = new THREE.Shape();
+    glassShape.moveTo(0.12, 1.15);
+    glassShape.quadraticCurveTo(-0.55, 1.18, -1.05, 1.09);
+    glassShape.lineTo(-1.85, 0.78);
+    glassShape.lineTo(-1.3, 0.75);
+    glassShape.quadraticCurveTo(0.2, 0.72, 0.65, 0.72);
+    glassShape.closePath();
+    const glassGeo = new THREE.ExtrudeGeometry(glassShape, {
+      depth: 1.48,
+      bevelEnabled: true,
+      bevelThickness: 0.04,
+      bevelSize: 0.03,
+      bevelSegments: 2
+    });
+    glassGeo.translate(0, 0, -1.48 / 2);
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.1,
+      metalness: 0.9
+    });
+    const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+    group.add(glassMesh);
 
-    try {
-      const loader = new THREE.GLTFLoader();
-      if (typeof THREE.DRACOLoader === 'function') {
-        const draco = new THREE.DRACOLoader();
-        draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
-        loader.setDRACOLoader(draco);
-      }
+    // Archetype-Specific Custom Features
+    if (typeIdx === 0) {
+      // 1. Lime-Green i8: Matte black carbon hood scoop & glowing #facc15 LED daytime running light strips
+      const scoopGeo = new THREE.BoxGeometry(0.45, 0.12, 0.55);
+      const scoopMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
+      const scoop = new THREE.Mesh(scoopGeo, scoopMat);
+      scoop.position.set(1.1, 0.75, 0);
+      group.add(scoop);
 
-      // 1. Real 3D Sports Cars & Transit Vehicles (.glb)
-      const carSources = [
-        {
-          key: 'ferrari',
-          urls: [
-            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/ferrari.glb',
-            'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/ferrari.glb',
-            'https://unpkg.com/three@0.128.0/examples/models/gltf/ferrari.glb'
-          ],
-          targetLength: 46
-        },
-        {
-          key: 'toycar',
-          urls: [
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/ToyCar/glTF-Binary/ToyCar.glb',
-            'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/ToyCar/glTF-Binary/ToyCar.glb'
-          ],
-          targetLength: 42
-        },
-        {
-          key: 'truck',
-          urls: [
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
-            'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb'
-          ],
-          targetLength: 68
-        }
-      ];
-
-      function tryLoadModel(urls, uIdx, onSuccess) {
-        if (uIdx >= urls.length) return;
-        loader.load(urls[uIdx], (gltf) => {
-          onSuccess(gltf);
-        }, undefined, () => {
-          tryLoadModel(urls, uIdx + 1, onSuccess);
-        });
-      }
-
-      carSources.forEach(src => {
-        tryLoadModel(src.urls, 0, (gltf) => {
-          if (gltf && gltf.scene) {
-            const rawModel = gltf.scene;
-
-            // Strip expensive physical shaders and textures to guarantee high FPS on PC & mobile
-            rawModel.traverse(node => {
-              if (node.isMesh) {
-                node.castShadow = false;
-                node.receiveShadow = false;
-                node.frustumCulled = true;
-
-                if (node.material) {
-                  const oldMat = Array.isArray(node.material) ? node.material[0] : node.material;
-                  const baseCol = oldMat.color ? oldMat.color.clone() : new THREE.Color(0xd1d5db);
-
-                  // Dispose heavy embedded normal/roughness/metalness/transmission textures
-                  if (oldMat.map) oldMat.map.dispose();
-                  if (oldMat.normalMap) oldMat.normalMap.dispose();
-                  if (oldMat.roughnessMap) oldMat.roughnessMap.dispose();
-                  if (oldMat.metalnessMap) oldMat.metalnessMap.dispose();
-                  if (oldMat.transmissionMap) oldMat.transmissionMap.dispose();
-                  if (oldMat.clearcoatMap) oldMat.clearcoatMap.dispose();
-
-                  node.material = new THREE.MeshStandardMaterial({
-                    color: baseCol,
-                    roughness: 0.35,
-                    metalness: 0.30
-                  });
-                }
-              }
-            });
-
-            // Compute bounding box
-            const b1 = new THREE.Box3().setFromObject(rawModel);
-            const sz1 = new THREE.Vector3();
-            b1.getSize(sz1);
-            if (sz1.z > sz1.x) {
-              rawModel.rotation.y = Math.PI / 2; // Orient along +X
-            }
-
-            const wrapper = new THREE.Group();
-            wrapper.add(rawModel);
-
-            const b2 = new THREE.Box3().setFromObject(wrapper);
-            const sz2 = new THREE.Vector3();
-            b2.getSize(sz2);
-
-            const maxLen = Math.max(sz2.x, sz2.z);
-            const scale = src.targetLength / Math.max(0.1, maxLen);
-            wrapper.scale.set(scale, scale, scale);
-
-            const b3 = new THREE.Box3().setFromObject(wrapper);
-            wrapper.position.x -= (b3.min.x + b3.max.x) / 2;
-            wrapper.position.z -= (b3.min.z + b3.max.z) / 2;
-            wrapper.position.y -= b3.min.y; // Wheels sit flush on ground: y = 0
-
-            wrapper.traverse(node => {
-              if (node.isMesh) {
-                node.castShadow = false;
-                node.receiveShadow = false;
-                node.frustumCulled = true;
-              }
-            });
-
-            const templateGroup = new THREE.Group();
-            templateGroup.add(wrapper);
-            gltfCarTemplates[src.key] = templateGroup;
-
-            // Immediately replace live cars/trucks in scene
-            replaceLiveCarsWithGLTF();
-          }
-        });
+      [-0.52, 0.52].forEach(hz => {
+        const ledStrip = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.38), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        ledStrip.position.set(2.05, 0.45, hz);
+        group.add(ledStrip);
       });
-
-      // 2. Real Rigged Animated 3D Humans (.glb)
-      const humanSources = [
-        {
-          key: 'soldier',
-          urls: [
-            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Soldier.glb',
-            'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Soldier.glb',
-            'https://unpkg.com/three@0.128.0/examples/models/gltf/Soldier.glb'
-          ],
-          targetHeight: 12.5
-        },
-        {
-          key: 'michelle',
-          urls: [
-            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Michelle.glb',
-            'https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/Michelle.glb',
-            'https://unpkg.com/three@0.128.0/examples/models/gltf/Michelle.glb'
-          ],
-          targetHeight: 12.0
-        },
-        {
-          key: 'cesiumman',
-          urls: [
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb',
-            'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb'
-          ],
-          targetHeight: 12.0
-        }
-      ];
-
-      humanSources.forEach(src => {
-        tryLoadModel(src.urls, 0, (gltf) => {
-          if (gltf && gltf.scene) {
-            const rawHuman = gltf.scene;
-
-            // Align forward orientation with coordinate system facing +X
-            rawHuman.rotation.y = Math.PI / 2;
-
-            const wrapper = new THREE.Group();
-            wrapper.add(rawHuman);
-
-            const box = new THREE.Box3().setFromObject(wrapper);
-            const size = new THREE.Vector3();
-            box.getSize(size);
-            const scale = src.targetHeight / Math.max(0.1, size.y);
-            wrapper.scale.set(scale, scale, scale);
-
-            const b2 = new THREE.Box3().setFromObject(wrapper);
-            wrapper.position.y -= b2.min.y; // Shoes sit flush on ground: y = 0
-            wrapper.position.x -= (b2.min.x + b2.max.x) / 2;
-            wrapper.position.z -= (b2.min.z + b2.max.z) / 2;
-
-            wrapper.traverse(node => {
-              if (node.isSkinnedMesh || node.isMesh) {
-                node.castShadow = false;
-                node.receiveShadow = false;
-                node.frustumCulled = true;
-              }
-            });
-
-            const templateGroup = new THREE.Group();
-            templateGroup.add(wrapper);
-
-            gltfHumanTemplates.push({
-              key: src.key,
-              model: templateGroup,
-              animations: gltf.animations || []
-            });
-
-            // Immediately replace live pedestrians in scene
-            replaceLivePedestriansWithGLTF();
-          }
-        });
+    } else if (typeIdx === 1) {
+      // 2. Silver DeLorean: Rear window louvers & quad square vintage headlights
+      [-1.3, -1.5, -1.7].forEach(lx => {
+        const louver = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.03, 1.15), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        louver.position.set(lx, 0.95 - (lx + 1.3) * 0.15, 0);
+        group.add(louver);
       });
+      [-0.56, -0.38, 0.38, 0.56].forEach(hz => {
+        const qHl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.12), new THREE.MeshBasicMaterial({ color: 0xe0f2fe }));
+        qHl.position.set(2.06, 0.45, hz);
+        group.add(qHl);
+      });
+    } else if (typeIdx === 2) {
+      // 3. White & Carbon Hypercar: Carbon splitter & ice-blue LED headlights
+      const splitter = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 1.62), new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2 }));
+      splitter.position.set(2.12, 0.20, 0);
+      group.add(splitter);
 
-    } catch (e) {
-      console.warn('initGLTFAssetManager exception:', e);
+      [-0.48, 0.48].forEach(hz => {
+        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.18, 8), new THREE.MeshBasicMaterial({ color: 0x60a5fa }));
+        hl.rotation.x = Math.PI / 2;
+        hl.position.set(2.08, 0.45, hz);
+        group.add(hl);
+      });
+    } else {
+      // 4. Night Muscle: 4 ice-blue xenon headlights & dual hood scoop with 3 glowing red blower lights (#ef4444)
+      [-0.56, -0.40, 0.40, 0.56].forEach(hz => {
+        const xHl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.16, 8), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+        xHl.rotation.x = Math.PI / 2;
+        xHl.position.set(2.08, 0.44, hz);
+        group.add(xHl);
+      });
+      const blowerScoop = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.20, 0.65), new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.3 }));
+      blowerScoop.position.set(1.0, 0.80, 0);
+      group.add(blowerScoop);
+      [-0.15, 0, 0.15].forEach(bz => {
+        const blowerLight = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.08, 6), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+        blowerLight.rotation.x = Math.PI / 2;
+        blowerLight.position.set(1.28, 0.81, bz);
+        group.add(blowerLight);
+      });
     }
-  }
 
-  // Preload GLTF assets in background as soon as script evaluates
-  if (typeof window !== 'undefined') {
-    setTimeout(initGLTFAssetManager, 100);
+    // Rear Ruby-Red LED Taillight Bar
+    const tlMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
+    const tlMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.25), tlMat);
+    tlMesh.position.set(-2.08, 0.72, 0);
+    group.add(tlMesh);
+
+    // 4 Wheels: 10-Spoke Metallic Alloy Rims via Canvas Texture
+    const rimTex = getMultiSpokeRimTexture();
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    const rimFaceMat = new THREE.MeshBasicMaterial({ map: rimTex });
+    const wheelMats = [tireMat, rimFaceMat, rimFaceMat];
+    const wheelGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.20, 16);
+
+    [-0.82, 0.82].forEach(wz => {
+      [-1.3, 1.3].forEach(wx => {
+        const wheel = new THREE.Mesh(wheelGeo, wheelMats);
+        wheel.rotation.x = Math.PI / 2;
+        wheel.position.set(wx, 0.32, wz);
+        group.add(wheel);
+        group.userData.wheels.push(wheel);
+      });
+    });
+
+    // Zero-Lag Additive Headlight Ground Light Pool (Flat transparent plane at y = 0.02)
+    const headGlowMat = new THREE.MeshBasicMaterial({
+      map: getRadialGlowTexture(),
+      color: headlightColor,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const headGlow = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.0), headGlowMat);
+    headGlow.rotation.x = -Math.PI / 2;
+    headGlow.position.set(3.2, 0.02, 0);
+    group.add(headGlow);
+
+    // Coordinate scale matching crossroads traffic grid (Length ~42, Width ~17, Height ~12.5)
+    group.scale.set(10, 10, 10);
+    return group;
   }
+  window.createAerodynamicCar = createAerodynamicCar;
+  window.createCurvedSportsCar = createAerodynamicCar;
+
+  // ---------------------------------------------------------------------------
+  // 2. Articulated Multi-Part Procedural Humans — ZERO Box Cylinders, ZERO GLTF
+  // Lifelike stride kinetics using articulated limbs (userData: leftLeg, rightLeg, leftArm, rightArm)
+  // ---------------------------------------------------------------------------
+  function createArticulatedHuman(p, isSocial) {
+    const group = new THREE.Group();
+    const id = (p && p.id !== undefined) ? p.id : Math.floor(Math.random() * 1000);
+    const styleIdx = Math.abs(Math.floor(id * 13)) % 4;
+
+    const skinPalette = [0xc58f68, 0xb47b56, 0xd4a373, 0x99613d];
+    const skinHex = skinPalette[Math.abs(Math.floor(id * 7)) % skinPalette.length];
+    const skinMat = new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.7 });
+
+    // 4 Modern Streetwear Outfits
+    let topColor = 0xeab308;    // 0: Yellow cricket jersey
+    let bottomColor = 0x1d4ed8; // Blue denim
+    let hairColor = 0x1e293b;
+
+    if (styleIdx === 1) {
+      topColor = 0xf43f5e;      // 1: Coral street hoodie
+      bottomColor = 0x18181b;   // Black cargo
+      hairColor = 0x1c1917;
+    } else if (styleIdx === 2) {
+      topColor = 0xf8fafc;      // 2: White open shirt over graphic teal tee
+      bottomColor = 0x78716c;   // Khaki cargo
+      hairColor = 0x292524;
+    } else if (styleIdx === 3) {
+      topColor = 0x2563eb;      // 3: Denim jacket / vest
+      bottomColor = 0x334155;   // Slate pants
+      hairColor = 0x0f172a;
+    }
+
+    const topMat = new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.6 });
+    const bottomMat = new THREE.MeshStandardMaterial({ color: bottomColor, roughness: 0.7 });
+    const shoeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }); // White sneakers
+    const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
+
+    // 1. Hips / Pelvis
+    const pelvis = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.0, 1.1), bottomMat);
+    pelvis.position.y = 5.2;
+    group.add(pelvis);
+
+    // 2. Sculpted Torso / Chest
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.6, 1.3), topMat);
+    torso.position.y = 7.0;
+    group.add(torso);
+
+    // 3. Two Articulated 2-Segment Legs terminating in White Sneakers
+    function createLeg(xOffset) {
+      const legPivot = new THREE.Group();
+      legPivot.position.set(xOffset, 4.8, 0);
+
+      // Thigh
+      const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.72, 2.2, 0.80), bottomMat);
+      thigh.position.y = -1.1;
+      legPivot.add(thigh);
+
+      // Calf / Shin
+      const calf = new THREE.Mesh(new THREE.BoxGeometry(0.66, 2.2, 0.74), bottomMat);
+      calf.position.y = -3.2;
+      legPivot.add(calf);
+
+      // White Streetwear Sneaker
+      const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.65, 1.35), shoeMat);
+      shoe.position.set(0, -4.5, 0.22);
+      legPivot.add(shoe);
+
+      return legPivot;
+    }
+
+    const leftLeg = createLeg(-0.52);
+    const rightLeg = createLeg(0.52);
+    group.add(leftLeg);
+    group.add(rightLeg);
+
+    // 4. Two Articulated Swinging Arms
+    function createArm(xOffset) {
+      const armPivot = new THREE.Group();
+      armPivot.position.set(xOffset, 8.1, 0);
+
+      // Upper arm sleeve
+      const upper = new THREE.Mesh(new THREE.BoxGeometry(0.58, 1.6, 0.60), topMat);
+      upper.position.y = -0.8;
+      armPivot.add(upper);
+
+      // Forearm
+      const forearm = new THREE.Mesh(new THREE.BoxGeometry(0.50, 1.5, 0.52), skinMat);
+      forearm.position.y = -2.3;
+      armPivot.add(forearm);
+
+      // Hand
+      const hand = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.55, 0.44), skinMat);
+      hand.position.y = -3.2;
+      armPivot.add(hand);
+
+      return armPivot;
+    }
+
+    const leftArm = createArm(-1.42);
+    const rightArm = createArm(1.42);
+    group.add(leftArm);
+    group.add(rightArm);
+
+    // 5. Head & Distinct Hair Style
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.40, 0.6, 8), skinMat);
+    neck.position.y = 8.6;
+    group.add(neck);
+
+    const head = new THREE.Mesh(new THREE.BoxGeometry(1.25, 1.3, 1.25), skinMat);
+    head.position.y = 9.5;
+    group.add(head);
+
+    // Distinct hairstyles: 0=Baseball cap, 1=Afro curls, 2=Short fade, 3=Long dark hair
+    if (styleIdx === 0) {
+      const capDome = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.55, 1.35), hairMat);
+      capDome.position.y = 10.2;
+      group.add(capDome);
+      const capBrim = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.12, 0.75), hairMat);
+      capBrim.position.set(0, 10.0, 0.85);
+      group.add(capBrim);
+    } else if (styleIdx === 1) {
+      const afro = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.5), hairMat);
+      afro.position.y = 10.3;
+      group.add(afro);
+    } else if (styleIdx === 2) {
+      const fade = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.5, 1.35), hairMat);
+      fade.position.y = 10.25;
+      group.add(fade);
+    } else {
+      const longHair = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.8, 1.4), hairMat);
+      longHair.position.set(0, 9.8, -0.15);
+      group.add(longHair);
+    }
+
+    group.userData.leftLeg = leftLeg;
+    group.userData.rightLeg = rightLeg;
+    group.userData.leftArm = leftArm;
+    group.userData.rightArm = rightArm;
+
+    if (isSocial) {
+      leftLeg.rotation.x = (Math.random() - 0.5) * 0.2;
+      rightLeg.rotation.x = -leftLeg.rotation.x;
+      leftArm.rotation.z = 0.08 + Math.random() * 0.12;
+      rightArm.rotation.z = -0.08 - Math.random() * 0.12;
+    }
+
+    scene.add(group);
+    return group;
+  }
+  window.createArticulatedHuman = createArticulatedHuman;
 
   function getSharedBuildingDepthMat() {
     if (!sharedBuildingDepthMat) {
@@ -894,73 +904,86 @@
 
   function createWindowFacadeTexture(floors, cols, winColor, wallColor) {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = 512;
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
+    // Base wall facade color
     ctx.fillStyle = wallColor || '#0d9488';
-    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillRect(0, 0, 512, 512);
 
-    const floorH = 256 / Math.max(1, floors);
-    const colW = 256 / Math.max(1, cols);
+    const floorH = 512 / Math.max(1, floors);
+    const colW = 512 / Math.max(1, cols);
 
     for (let f = 0; f < floors; f++) {
       // Art Deco horizontal floor separator groove
-      ctx.fillStyle = 'rgba(0,0,0,0.40)';
-      ctx.fillRect(0, f * floorH + floorH - 3, 256, 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(0, f * floorH + floorH - 6, 512, 6);
 
       for (let c = 0; c < cols; c++) {
-        const x = c * colW + colW * 0.16;
-        const y = f * floorH + floorH * 0.18;
-        const w = colW * 0.68;
-        const h = floorH * 0.60;
+        const x = c * colW + colW * 0.15;
+        const y = f * floorH + floorH * 0.16;
+        const w = colW * 0.70;
+        const h = floorH * 0.64;
 
-        // Recessed outer frame
-        ctx.fillStyle = 'rgba(10, 15, 26, 0.90)';
-        ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+        // Recessed outer casement frame
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+        ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
 
-        // Pseudorandom window illumination (75% lit warm amber, 25% dark glass reflection)
+        // Pseudorandom illumination: 75% lit, 25% dark
         const hash = Math.sin((f + 1) * 37.1 + (c + 1) * 19.3);
         const isLit = (hash - Math.floor(hash)) > 0.25;
 
         if (isLit) {
-          // Warm interior amber glow (#fde68a / #fef08a)
-          const amberCol = winColor || '#fde68a';
-          ctx.fillStyle = amberCol;
-          ctx.fillRect(x, y, w, h);
-
-          // Subtle warm interior curtain / shade gradient
+          // Warm interior amber/yellow & peach glow
           const winGrad = ctx.createLinearGradient(x, y, x, y + h);
-          winGrad.addColorStop(0.0, 'rgba(254, 240, 138, 0.95)');
-          winGrad.addColorStop(0.5, 'rgba(251, 191, 36, 0.85)');
-          winGrad.addColorStop(1.0, 'rgba(245, 158, 11, 0.70)');
+          winGrad.addColorStop(0.0, '#fef08a'); // Warm yellow
+          winGrad.addColorStop(0.55, '#fed7aa'); // Soft peach
+          winGrad.addColorStop(1.0, '#f59e0b'); // Amber
           ctx.fillStyle = winGrad;
           ctx.fillRect(x, y, w, h);
+
+          // Casement Window Mullions (Multi-pane window bars)
+          ctx.strokeStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.lineWidth = 3;
+          // Vertical mullion bar
+          ctx.beginPath();
+          ctx.moveTo(x + w / 2, y);
+          ctx.lineTo(x + w / 2, y + h);
+          ctx.stroke();
+          // Horizontal mullion bar
+          ctx.beginPath();
+          ctx.moveTo(x, y + h * 0.45);
+          ctx.lineTo(x + w, y + h * 0.45);
+          ctx.stroke();
         } else {
           ctx.fillStyle = '#090d16';
           ctx.fillRect(x, y, w, h);
-          // Diagonal glass reflection
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.12)';
+
+          // Multi-pane mullions on dark glass
+          ctx.strokeStyle = 'rgba(30, 41, 59, 0.8)';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(x + w / 2, y);
+          ctx.lineTo(x + w / 2, y + h);
+          ctx.moveTo(x, y + h * 0.45);
+          ctx.lineTo(x + w, y + h * 0.45);
+          ctx.stroke();
+
+          // Subtle sky reflection
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.14)';
           ctx.beginPath();
           ctx.moveTo(x, y + h);
-          ctx.lineTo(x + w * 0.45, y);
-          ctx.lineTo(x + w * 0.75, y);
-          ctx.lineTo(x + w * 0.30, y + h);
+          ctx.lineTo(x + w * 0.5, y);
+          ctx.lineTo(x + w * 0.8, y);
+          ctx.lineTo(x + w * 0.3, y + h);
           ctx.fill();
         }
-
-        // 4-Pane Recessed Architectural Window Mullion Grid
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-        // Vertical mullion
-        ctx.fillRect(x + w / 2 - 0.9, y, 1.8, h);
-        // Horizontal mullion
-        ctx.fillRect(x, y + h / 2 - 0.9, w, 1.8);
       }
     }
 
     const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
+    texture.minFilter = THREE.LinearFilter;
     return texture;
   }
 
@@ -1316,10 +1339,20 @@
       group.add(pilasterNeon);
     });
 
-    // 5. Colored PointLight Pool washing down facades and sidewalks
-    const neonLight = new THREE.PointLight(neonHex, 1.25, 80);
-    neonLight.position.set(0, h1 - 2, (d1 / 2) + 6);
-    group.add(neonLight);
+    // 5. Zero-Lag Additive Sidewalk Ground Light Pool (No PointLight)
+    const glowPlaneGeo = new THREE.PlaneGeometry(w1 * 1.3, d1 * 1.1);
+    const glowMat = new THREE.MeshBasicMaterial({
+      map: getRadialGlowTexture(),
+      color: neonHex,
+      transparent: true,
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const glowPlane = new THREE.Mesh(glowPlaneGeo, glowMat);
+    glowPlane.rotation.x = -Math.PI / 2;
+    glowPlane.position.set(0, 0.02, (d1 / 2) + 8);
+    group.add(glowPlane);
 
     // 3D AC outdoor condenser units on exterior walls
     const acGeo = new THREE.BoxGeometry(3.6, 2.4, 2.0);
@@ -1506,287 +1539,14 @@
   // 6 Diverse Archetypes (Bugatti, White Racing, Crimson Aero, Lime Neon, Silver Wedge, Night Muscle)
   // ---------------------------------------------------------------------------
   function createCurvedSportsCar(archetypeIdx) {
-    const typeIdx = (archetypeIdx !== undefined ? archetypeIdx : (carArchetypeCounter++)) % 6;
-    const group = new THREE.Group();
-    group.userData.wheels = [];
-
-    // Smooth Aerodynamic Side Profile (THREE.Shape with bezierCurveTo)
-    const shape = new THREE.Shape();
-    // Start at rear lower bumper / diffuser
-    shape.moveTo(-2.1, 0.25);
-    // Rear diffuser curve up to decklid
-    shape.bezierCurveTo(-2.15, 0.45, -2.1, 0.65, -1.95, 0.75);
-    shape.lineTo(-1.5, 0.78);
-    // Sloping fastback rear window up to roofline
-    shape.bezierCurveTo(-1.3, 0.90, -0.85, 1.25, -0.35, 1.28);
-    // Low sleek roofline
-    shape.lineTo(0.2, 1.28);
-    // Raked aerodynamic windshield
-    shape.bezierCurveTo(0.7, 1.22, 1.15, 0.75, 1.35, 0.68);
-    // Aggressive sloping hood
-    shape.bezierCurveTo(1.55, 0.62, 1.85, 0.48, 2.05, 0.38);
-    // Front carbon splitter nose
-    shape.lineTo(2.15, 0.28);
-    shape.lineTo(2.05, 0.18);
-    shape.lineTo(1.65, 0.18);
-    // Recessed front wheel well arch
-    shape.bezierCurveTo(1.65, 0.65, 0.95, 0.65, 0.95, 0.18);
-    shape.lineTo(-0.95, 0.18);
-    // Recessed rear wheel well arch
-    shape.bezierCurveTo(-0.95, 0.65, -1.65, 0.65, -1.65, 0.18);
-    shape.lineTo(-2.1, 0.25);
-
-    const extrudeSettings = {
-      depth: 1.7,
-      bevelEnabled: true,
-      bevelThickness: 0.18,
-      bevelSize: 0.15,
-      bevelSegments: 8,
-      curveSegments: 16
-    };
-    const bodyGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    // Center extrusion across Z
-    bodyGeo.translate(0, 0, -1.7 / 2);
-
-    // 6 Specific Archetype Parameter Settings
-    let bodyColorHex = 0xf8fafc;
-    let roughness = 0.20;
-    let metalness = 0.60;
-    let rimColorHex = 0xd1d5db;
-    let darkRimCenter = false;
-
-    if (typeIdx === 0) {
-      // 1. Two-Tone Bugatti/Hypercar: Royal Blue #0047ab & Carbon Black shell
-      bodyColorHex = 0x0047ab;
-      roughness = 0.12;
-      metalness = 0.75;
-      rimColorHex = 0xe2e8f0;
-    } else if (typeIdx === 1) {
-      // 2. White Racing Supercar: Glossy pearl white #f8fafc with dual crimson racing stripes
-      bodyColorHex = 0xf8fafc;
-      roughness = 0.10;
-      metalness = 0.35;
-      rimColorHex = 0x94a3b8;
-    } else if (typeIdx === 2) {
-      // 3. Crimson & Black Aero Hypercar: Crimson red #ef4444, aggressive aero & rear spoiler wing
-      bodyColorHex = 0xef4444;
-      roughness = 0.18;
-      metalness = 0.65;
-      rimColorHex = 0x27272a;
-      darkRimCenter = true;
-    } else if (typeIdx === 3) {
-      // 4. Lime-Green Neon Coupe: #84cc16, black hood scoop, glowing neon-yellow LED strips
-      bodyColorHex = 0x84cc16;
-      roughness = 0.22;
-      metalness = 0.45;
-      rimColorHex = 0x18181b;
-      darkRimCenter = true;
-    } else if (typeIdx === 4) {
-      // 5. Silver Retro Wedge Coupe: #cbd5e1, sharp gullwing silhouette, quad headlights
-      bodyColorHex = 0xcbd5e1;
-      roughness = 0.25;
-      metalness = 0.90;
-      rimColorHex = 0xe2e8f0;
-    } else {
-      // 6. Night Muscle & Street Sedan: Midnight obsidian #0f172a, bright ice-blue xenon quad headlights + SpotLight
-      bodyColorHex = 0x0f172a;
-      roughness = 0.30;
-      metalness = 0.70;
-      rimColorHex = 0x94a3b8;
-    }
-
-    const carMat = new THREE.MeshStandardMaterial({
-      color: bodyColorHex,
-      roughness: roughness,
-      metalness: metalness
-    });
-
-    const bodyMesh = new THREE.Mesh(bodyGeo, carMat);
-    bodyMesh.castShadow = true;
-    bodyMesh.receiveShadow = true;
-    group.add(bodyMesh);
-
-    // Dark Curved Glass Canopy (THREE.Shape Extrusion)
-    const canopyShape = new THREE.Shape();
-    canopyShape.moveTo(-1.35, 0.76);
-    canopyShape.bezierCurveTo(-1.22, 0.88, -0.80, 1.24, -0.32, 1.26);
-    canopyShape.lineTo(0.18, 1.26);
-    canopyShape.bezierCurveTo(0.68, 1.20, 1.12, 0.74, 1.30, 0.68);
-    canopyShape.lineTo(0.85, 0.68);
-    canopyShape.bezierCurveTo(0.35, 0.72, -0.65, 0.72, -1.35, 0.76);
-
-    const canopyGeo = new THREE.ExtrudeGeometry(canopyShape, {
-      depth: 1.54,
-      bevelEnabled: true,
-      bevelThickness: 0.08,
-      bevelSize: 0.06,
-      bevelSegments: 6,
-      curveSegments: 16
-    });
-    canopyGeo.translate(0, 0, -1.54 / 2);
-    const canopyMat = new THREE.MeshStandardMaterial({
-      color: 0x090d16,
-      roughness: 0.08,
-      metalness: 0.85
-    });
-    const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
-    group.add(canopyMesh);
-
-    // Archetype-Specific Curved Details:
-    if (typeIdx === 0) {
-      // Bugatti Two-Tone: Curved C-Pillar side air intakes in Carbon Black
-      [-1, 1].forEach(side => {
-        const cPillarShape = new THREE.Shape();
-        cPillarShape.moveTo(-0.8, 0.3);
-        cPillarShape.bezierCurveTo(-0.8, 1.15, 0.2, 1.15, 0.2, 0.95);
-        cPillarShape.bezierCurveTo(0.2, 0.45, -0.5, 0.3, -0.8, 0.3);
-        const cPillarGeo = new THREE.ExtrudeGeometry(cPillarShape, { depth: 0.08, bevelEnabled: false });
-        cPillarGeo.translate(0, 0, side * 0.86);
-        const cPillarMesh = new THREE.Mesh(cPillarGeo, new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2, metalness: 0.8 }));
-        group.add(cPillarMesh);
-      });
-    } else if (typeIdx === 1) {
-      // White Racing Supercar: Dual crimson-red racing stripes down hood & roof
-      [-0.15, 0.15].forEach(sz => {
-        const stripeShape = new THREE.Shape();
-        stripeShape.moveTo(0.2, 1.29);
-        stripeShape.bezierCurveTo(0.7, 1.23, 1.15, 0.76, 1.35, 0.69);
-        stripeShape.bezierCurveTo(1.55, 0.63, 1.85, 0.49, 2.05, 0.39);
-        stripeShape.lineTo(2.05, 0.35);
-        stripeShape.lineTo(0.2, 1.25);
-        const stripeGeo = new THREE.ExtrudeGeometry(stripeShape, { depth: 0.12, bevelEnabled: false });
-        stripeGeo.translate(0, 0, sz - 0.06);
-        const stripeMesh = new THREE.Mesh(stripeGeo, new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
-        group.add(stripeMesh);
-      });
-    } else if (typeIdx === 2) {
-      // Crimson Aero Hypercar: Curved Front Splitter & Elevated Rear GT Wing
-      const wingGeo = new THREE.CylinderGeometry(0.08, 0.24, 1.6, 12);
-      const wingMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.3, metalness: 0.8 });
-      const wing = new THREE.Mesh(wingGeo, wingMat);
-      wing.rotation.x = Math.PI / 2;
-      wing.position.set(-1.85, 1.05, 0);
-      group.add(wing);
-
-      // Dual wing upright stanchions
-      [-0.45, 0.45].forEach(wz => {
-        const stanchion = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.32, 6), wingMat);
-        stanchion.position.set(-1.85, 0.90, wz);
-        group.add(stanchion);
-      });
-    } else if (typeIdx === 3) {
-      // Lime-Green Neon Coupe: Black hood scoop & Neon Yellow glowing LED strips
-      const scoopGeo = new THREE.CylinderGeometry(0.16, 0.22, 0.38, 8);
-      const scoopMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.3 });
-      const scoop = new THREE.Mesh(scoopGeo, scoopMat);
-      scoop.position.set(0.9, 0.82, 0);
-      group.add(scoop);
-
-      // Glowing Neon Yellow LED side skirts
-      [-0.86, 0.86].forEach(sideZ => {
-        const neonSkirt = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.8, 6), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-        neonSkirt.rotation.z = Math.PI / 2;
-        neonSkirt.position.set(0, 0.20, sideZ);
-        group.add(neonSkirt);
-      });
-    } else if (typeIdx === 4) {
-      // Silver Retro Wedge: Quad rectangular vintage headlights
-      [-0.48, 0.48].forEach(hz => {
-        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.20, 8), new THREE.MeshBasicMaterial({ color: 0xe0f2fe }));
-        hl.rotation.x = Math.PI / 2;
-        hl.position.set(2.10, 0.38, hz);
-        group.add(hl);
-      });
-    } else if (typeIdx === 5) {
-      // Night Muscle Sedan: Bright ice-blue xenon quad headlights casting real SpotLight beam
-      [-0.45, 0.45].forEach(hz => {
-        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.18, 8), new THREE.MeshBasicMaterial({ color: 0x60a5fa }));
-        hl.rotation.x = Math.PI / 2;
-        hl.position.set(2.12, 0.40, hz);
-        group.add(hl);
-      });
-
-      // Real Three.js SpotLight casting forward onto asphalt ahead
-      const xenonSpot = new THREE.SpotLight(0x60a5fa, 2.8, 140, Math.PI / 6, 0.45, 1.2);
-      xenonSpot.position.set(2.2, 0.40, 0);
-      xenonSpot.target.position.set(16, 0, 0);
-      group.add(xenonSpot);
-      group.add(xenonSpot.target);
-    }
-
-    // Common Front Headlights & Rear Taillights
-    if (typeIdx !== 4 && typeIdx !== 5) {
-      [-0.48, 0.48].forEach(hz => {
-        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.18, 8), vehicleHeadlightMat || new THREE.MeshBasicMaterial({ color: 0xffffff }));
-        hl.rotation.x = Math.PI / 2;
-        hl.position.set(2.12, 0.38, hz);
-        group.add(hl);
-      });
-    }
-
-    // Rear Ruby-Red LED Taillight Bar
-    const tlMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.25, 8), vehicleTaillightMat || new THREE.MeshBasicMaterial({ color: 0xff1744 }));
-    tlMesh.rotation.x = Math.PI / 2;
-    tlMesh.position.set(-2.08, 0.68, 0);
-    group.add(tlMesh);
-
-    // 4 Wheels: 10-Spoke Metallic Alloy Rims (radius 0.30, width 0.18)
-    const wheelRadius = 0.30;
-    const wheelWidth = 0.18;
-    [-0.86, 0.86].forEach(wz => {
-      [-1.3, 1.3].forEach(wx => {
-        const wheel = create10SpokeAlloyWheel(wheelRadius, wheelWidth, rimColorHex, darkRimCenter);
-        wheel.position.set(wx, 0.30, wz);
-        group.add(wheel);
-        group.userData.wheels.push(wheel);
-      });
-    });
-
-    // Scale whole car to coordinate scale of scene (Length 42, Width 17, Height 12.8)
-    group.scale.set(10, 10, 10);
-    return group;
+    return createAerodynamicCar(archetypeIdx);
   }
   window.createCurvedSportsCar = createCurvedSportsCar;
 
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
-    const carKeys = Object.keys(gltfCarTemplates).filter(k => k !== 'truck');
-    if ((type === 'car' || type === 'bike' || type === 'cng' || type === 'rickshaw') && carKeys.length > 0) {
-      const chosenKey = (type === 'cng' || type === 'rickshaw') && gltfCarTemplates.toycar ? 'toycar' : carKeys[Math.floor(Math.random() * carKeys.length)];
-      const template = gltfCarTemplates[chosenKey];
-      if (template) {
-        const clone = template.clone(true);
-        const tint = colorHex || CAR_TINT_COLORS[Math.floor(Math.random() * CAR_TINT_COLORS.length)];
-        clone.traverse(child => {
-          if (child.isMesh && child.material) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            child.material = child.material.clone();
-            const nm = (child.name || '').toLowerCase();
-            const mn = (child.material.name || '').toLowerCase();
-            if (nm.includes('body') || nm.includes('paint') || nm.includes('car') ||
-                mn.includes('body') || mn.includes('paint') || mn.includes('red') || mn.includes('car') ||
-                (!nm.includes('wheel') && !nm.includes('tire') && !nm.includes('glass') && !nm.includes('window') && !mn.includes('glass') && !mn.includes('tire'))) {
-              if (child.material.color) {
-                child.material.color.setHex(tint);
-              }
-            }
-          }
-        });
-        clone.userData.isGLTF = true;
-        scene.add(clone);
-        return clone;
-      }
-    }
-    if (type === 'bus' && gltfCarTemplates.truck) {
-      const clone = gltfCarTemplates.truck.clone(true);
-      clone.userData.isGLTF = true;
-      scene.add(clone);
-      return clone;
-    }
-
     if (type === 'car') {
-      return createCurvedSportsCar();
+      return createAerodynamicCar();
     }
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
     if (!sharedRimMat) sharedRimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.35, metalness: 0.75 });
@@ -2395,78 +2155,9 @@
     return ambGroup;
   }
 
-  // 3D Human Pedestrian Builder — Real Rigged Animated GLTF Humans with Skeletal AnimationMixer
+  // 3D Human Pedestrian Builder — Articulated Procedural Pedestrians
   function create3DPedestrian(p) {
-    // 1. Instantiate real rigged animated 3D human (.glb) if templates ready
-    if (gltfHumanTemplates.length > 0 && typeof THREE.SkeletonUtils !== 'undefined') {
-      const templateIdx = Math.abs(Math.floor((p.id || 0) * 17)) % gltfHumanTemplates.length;
-      const template = gltfHumanTemplates[templateIdx];
-      if (template && template.model) {
-        try {
-          const clone = THREE.SkeletonUtils.clone(template.model);
-          clone.traverse(child => {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
-          });
-          const mixer = new THREE.AnimationMixer(clone);
-          if (template.animations && template.animations.length > 0) {
-            const walkClip = template.animations.find(c => /walk|run/i.test(c.name)) || template.animations[0];
-            if (walkClip) {
-              const action = mixer.clipAction(walkClip);
-              action.play();
-            }
-          }
-          activeMixers.push(mixer);
-          clone.userData.isGLTF = true;
-          clone.userData.mixer = mixer;
-          scene.add(clone);
-          return clone;
-        } catch (e) {
-          console.warn('Failed to clone GLTF human template:', e);
-        }
-      }
-    }
-
-    // 2. Extruded contoured anatomical spline human (ZERO cylinders or spheres)
-    const group = new THREE.Group();
-    const humanShape = new THREE.Shape();
-    humanShape.moveTo(0, 0);
-    humanShape.lineTo(0.5, 0.2);
-    humanShape.lineTo(0.45, 4.2);
-    humanShape.lineTo(0.85, 5.0);
-    humanShape.lineTo(1.05, 7.5);
-    humanShape.lineTo(0.4, 8.5);
-    humanShape.bezierCurveTo(0.85, 9.2, 0.85, 11.2, 0, 11.4);
-    humanShape.bezierCurveTo(-0.85, 11.2, -0.85, 9.2, -0.4, 8.5);
-    humanShape.lineTo(-1.05, 7.5);
-    humanShape.lineTo(-0.85, 5.0);
-    humanShape.lineTo(-0.45, 4.2);
-    humanShape.lineTo(-0.5, 0.2);
-    humanShape.closePath();
-
-    const humanGeo = new THREE.ExtrudeGeometry(humanShape, {
-      depth: 1.2,
-      bevelEnabled: true,
-      bevelThickness: 0.3,
-      bevelSize: 0.2,
-      bevelSegments: 4
-    });
-    humanGeo.center();
-
-    const topPalette = [0x0284c7, 0xef4444, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899];
-    const topColor = p.color ? parseInt(p.color.replace('#', '0x'), 16) : topPalette[Math.abs(Math.floor((p.id || 0) * 7)) % topPalette.length];
-    const mesh = new THREE.Mesh(humanGeo, new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.55 }));
-    mesh.position.y = 5.8;
-    mesh.rotation.y = Math.PI / 2;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    group.add(mesh);
-
-    group.userData.isGLTF = false;
-    scene.add(group);
-    return group;
+    return createArticulatedHuman(p, false);
   }
 
   // Metro Train Coach Builder (Facing +X)
@@ -2525,7 +2216,7 @@
     // 1. Fog & Background (Dusk Sky Gradient: #1b1035 zenith to #5b2245 horizon)
     duskSkyTexture = createDuskSkyGradientTexture();
     scene.background = duskSkyTexture;
-    scene.fog = new THREE.FogExp2(0x35193d, 0.0011);
+    scene.fog = new THREE.FogExp2(0x2e1538, 0.008);
 
     // 2. Camera: Isometric Drone Aerial 3/4 Perspective
     let width = canvasEl.clientWidth;
@@ -2550,7 +2241,7 @@
     // 3. Renderer (High performance WebGL locked to 120 FPS with capped pixel ratio)
     renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(window.innerWidth < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.25));
+    renderer.setPixelRatio(window.innerWidth < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.35));
     renderer.shadowMap.enabled = false;
     if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -2581,26 +2272,13 @@
       console.warn('PMREM fallback', e);
     }
 
-    // 4. Lighting: Balanced Sky Hemisphere + Ambient + Angled Directional Sun
-    hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x1e293b, 1.4);
+    // 4. Lighting: Only 1 HemisphereLight + 1 DirectionalLight (shadowMap disabled)
+    hemiLight = new THREE.HemisphereLight(0xd8b4fe, 0x1e0f2e, 1.25);
     scene.add(hemiLight);
 
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
-
-    sunLight = new THREE.DirectionalLight(0xfffbeb, 1.8);
+    sunLight = new THREE.DirectionalLight(0xffedd5, 1.75);
     sunLight.position.set(300, 500, 250);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 50;
-    sunLight.shadow.camera.far = 1400;
-    sunLight.shadow.bias = -0.0005;
-    const d = 550;
-    sunLight.shadow.camera.left = -d;
-    sunLight.shadow.camera.right = d;
-    sunLight.shadow.camera.top = d;
-    sunLight.shadow.camera.bottom = -d;
+    sunLight.castShadow = false;
     scene.add(sunLight);
 
     // Streetlights along Crossroads & Sidewalks (Clean physical fixtures without harsh ground spotlights)
@@ -3018,14 +2696,10 @@
         friend.position.set(offset, 0, (pIdx === 0 ? 1 : -1) * 1.5);
         friend.rotation.y = (pIdx === 0 ? Math.PI * 0.7 : -Math.PI * 0.3);
         clusterGroup.add(friend);
-        socialPedestrians.push({ mesh: friend, parent: clusterGroup, isGLTF: !!friend.userData.isGLTF });
+        socialPedestrians.push({ mesh: friend, parent: clusterGroup });
       });
       scene.add(clusterGroup);
     });
-
-    // Run immediate replacement if GLTF models were already cached/preloaded
-    replaceLiveCarsWithGLTF();
-    replaceLivePedestriansWithGLTF();
 
     // 13. Realistic Slanted Rain Line Segments System (Pooled & Lightweight)
     const rainPositions = new Float32Array(rainCount * 6); // 2 vertices per streak = 6 floats
@@ -3130,7 +2804,6 @@
 
     isInitialized = true;
     scene = new THREE.Scene();
-    initGLTFAssetManager();
     buildScene(vehiclesData, pedestriansData);
   };
 
@@ -3164,15 +2837,6 @@
 
     // 120Hz Delta-Time Physics (clamped to max 0.05 to avoid frame-skip spikes)
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : (dt || 0.016);
-
-    // 0. Update Active Skeletal Animation Mixers (GLTF Pedestrians) throttled to every 2nd frame
-    mixerFrameCounter++;
-    if (mixerFrameCounter % 2 === 0) {
-      const stepDelta = delta * 2;
-      for (let m = 0; m < activeMixers.length; m++) {
-        activeMixers[m].update(stepDelta);
-      }
-    }
 
     // Atmospheric Weather Mode Transition (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
@@ -3661,10 +3325,7 @@
         }
       }
 
-      if (pm.isGLTF) {
-        pm.mesh.position.set(posX, 0, posZ);
-        pm.mesh.rotation.y = rotY;
-      } else {
+      
         const walkPhase = coord * 0.22;
         const legAngle = isMoving ? Math.sin(walkPhase) * 0.45 : 0;
         const armAngle = isMoving ? Math.sin(walkPhase) * 0.4 : 0;
@@ -3687,7 +3348,7 @@
 
         pm.mesh.position.set(posX, 1 + bob, posZ);
         pm.mesh.rotation.y = rotY;
-      }
+      
     }
 
     // 5. Update Traffic Signal Lights (Cached to eliminate redundant material uniform updates)
