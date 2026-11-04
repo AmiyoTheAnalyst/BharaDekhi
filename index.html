@@ -7618,6 +7618,7 @@
 
   <!-- Screen 2: Dedicated Trip Planner Page -->
   <main id="userPlannerView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-6">
+    <div id="planner" class="scroll-mt-6"></div>
 
     <!-- Top Navigation Banner: Return to City Animation & Status -->
     <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
@@ -16530,7 +16531,7 @@
         return;
       }
 
-      if (hash === '#/plan-trip' || hash === '#plan-trip') {
+      if (hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner') {
         showView('user-planner');
       } else {
         showView('user-landing');
