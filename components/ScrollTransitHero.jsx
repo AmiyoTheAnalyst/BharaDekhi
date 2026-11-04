@@ -560,3 +560,4 @@ export default function ScrollTransitHero({ plannerId = 'planner' }) {
     </section>
   );
 }
+
