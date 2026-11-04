@@ -238,7 +238,64 @@
   };
 
   window.crossroadsResetCamera = function() {
+    scrollProgressCameraActive = false;
     window.crossroadsFocusMode('overview');
+  };
+
+  let scrollProgressCameraActive = false;
+  window.crossroadsSetScrollProgress = function(progress) {
+    if (!camera) return;
+    scrollProgressCameraActive = true;
+    const p = Math.max(0, Math.min(1, progress));
+
+    let fromPos, toPos, fromLook, toLook, stageP;
+
+    if (p < 0.2) {
+      stageP = p / 0.2;
+      fromPos = { x: 120, y: 140, z: 230 };
+      toPos   = { x: 90,  y: 130, z: 190 };
+      fromLook = { x: 0, y: 12, z: 15 };
+      toLook   = { x: -10, y: 10, z: 5 };
+    } else if (p < 0.4) {
+      stageP = (p - 0.2) / 0.2;
+      fromPos = { x: 90,  y: 130, z: 190 };
+      toPos   = { x: -180, y: 135, z: 170 };
+      fromLook = { x: -10, y: 10, z: 5 };
+      toLook   = { x: -70, y: 10, z: 45 };
+    } else if (p < 0.6) {
+      stageP = (p - 0.4) / 0.2;
+      fromPos = { x: -180, y: 135, z: 170 };
+      toPos   = { x: 270, y: 210, z: 150 };
+      fromLook = { x: -70, y: 10, z: 45 };
+      toLook   = { x: 45, y: 16, z: -15 };
+    } else if (p < 0.8) {
+      stageP = (p - 0.6) / 0.2;
+      fromPos = { x: 270, y: 210, z: 150 };
+      toPos   = { x: 90, y: 280, z: -110 };
+      fromLook = { x: 45, y: 16, z: -15 };
+      toLook   = { x: 0, y: 92, z: -165 };
+    } else {
+      stageP = (p - 0.8) / 0.2;
+      fromPos = { x: 90, y: 280, z: -110 };
+      toPos   = { x: CAM_DEFAULT_POS.x, y: CAM_DEFAULT_POS.y, z: CAM_DEFAULT_POS.z };
+      fromLook = { x: 0, y: 92, z: -165 };
+      toLook   = { x: CAM_DEFAULT_LOOK.x, y: CAM_DEFAULT_LOOK.y, z: CAM_DEFAULT_LOOK.z };
+    }
+
+    const curCamX = fromPos.x + (toPos.x - fromPos.x) * stageP;
+    const curCamY = fromPos.y + (toPos.y - fromPos.y) * stageP;
+    const curCamZ = fromPos.z + (toPos.z - fromPos.z) * stageP;
+
+    const curLookX = fromLook.x + (toLook.x - fromLook.x) * stageP;
+    const curLookY = fromLook.y + (toLook.y - fromLook.y) * stageP;
+    const curLookZ = fromLook.z + (toLook.z - fromLook.z) * stageP;
+
+    const isMobile = (typeof window !== 'undefined' && window.innerWidth < 768);
+    const aspect = (typeof window !== 'undefined' && window.innerHeight > 0) ? (window.innerWidth / window.innerHeight) : 1;
+    const aspectCorrection = isMobile ? (1 / Math.min(aspect, 0.85)) : 1;
+
+    camera.position.set(curCamX * aspectCorrection, curCamY * aspectCorrection, curCamZ * aspectCorrection);
+    camera.lookAt(curLookX, curLookY, curLookZ);
   };
 
   function updateCameraFraming(aspect) {
@@ -247,7 +304,7 @@
     const baseFov = isMobile ? 60 : 38;
 
     if (isMobile || aspect < 1.15) {
-      const portraitCompensation = Math.max(1, 0.85 / Math.max(0.4, aspect));
+      const portraitCompensation = 1 / Math.min(aspect, 0.85);
       camera.fov = baseFov;
 
       const lookY = 25;
@@ -260,13 +317,13 @@
       camBasePos.y = CAM_DEFAULT_POS.y * portraitCompensation;
       camBasePos.z = CAM_DEFAULT_POS.z * portraitCompensation;
 
-      if (activeCamMode === 'overview') {
+      if (activeCamMode === 'overview' && !scrollProgressCameraActive) {
         camera.position.set(camBasePos.x, camBasePos.y, camBasePos.z);
         camera.lookAt(camBaseLook.x, camBaseLook.y, camBaseLook.z);
       }
     } else {
       camera.fov = baseFov;
-      if (activeCamMode === 'overview') {
+      if (activeCamMode === 'overview' && !scrollProgressCameraActive) {
         camBasePos.x = CAM_DEFAULT_POS.x;
         camBasePos.y = CAM_DEFAULT_POS.y;
         camBasePos.z = CAM_DEFAULT_POS.z;
@@ -324,6 +381,8 @@
   let duskSkyTexture = null;
   let gltfPedTemplates = [];
   let activeMixers = [];
+  let isRenderLoopPaused = false;
+  let mixerFrameCounter = 0;
   let carArchetypeCounter = 0;
 
   function createDuskSkyGradientTexture() {
@@ -358,14 +417,19 @@
     return 0;
   }
 
-  // Replace all live cars/buses/cngs/rickshaws in the scene graph with loaded GLTF models
+  // Replace active live cars/buses/cngs/rickshaws in the scene graph with loaded GLTF models (capped to max 8)
+  const MAX_GLTF_CARS = 8;
   function replaceLiveCarsWithGLTF() {
     if (!scene || !vehicleMeshMap) return;
     const carKeys = Object.keys(gltfCarTemplates).filter(k => k !== 'truck');
     if (carKeys.length === 0 && !gltfCarTemplates.truck) return;
 
     let carIdx = 0;
+    let gltfCarCount = 0;
+
     for (const id in vehicleMeshMap) {
+      if (gltfCarCount >= MAX_GLTF_CARS) break;
+
       const vm = vehicleMeshMap[id];
       if (!vm || !vm.data) continue;
       const vType = vm.data.type;
@@ -393,17 +457,20 @@
 
         // Tint body materials with diverse colors: Royal Blue, Crimson Red, Lime Green, Pearl White, Silver
         gltfClone.traverse(child => {
-          if (child.isMesh && child.material) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            child.material = child.material.clone();
-            const nm = (child.name || '').toLowerCase();
-            const mn = (child.material.name || '').toLowerCase();
-            if (nm.includes('body') || nm.includes('paint') || nm.includes('car') ||
-                mn.includes('body') || mn.includes('paint') || mn.includes('red') || mn.includes('car') ||
-                (!nm.includes('wheel') && !nm.includes('tire') && !nm.includes('glass') && !nm.includes('window') && !mn.includes('glass') && !mn.includes('tire'))) {
-              if (child.material.color) {
-                child.material.color.setHex(tint);
+          if (child.isMesh) {
+            child.castShadow = false;
+            child.receiveShadow = false;
+            child.frustumCulled = true;
+            if (child.material) {
+              child.material = child.material.clone();
+              const nm = (child.name || '').toLowerCase();
+              const mn = (child.material.name || '').toLowerCase();
+              if (nm.includes('body') || nm.includes('paint') || nm.includes('car') ||
+                  mn.includes('body') || nm.includes('paint') || nm.includes('red') || nm.includes('car') ||
+                  (!nm.includes('wheel') && !nm.includes('tire') && !nm.includes('glass') && !nm.includes('window') && !nm.includes('glass') && !nm.includes('tire'))) {
+                if (child.material.color) {
+                  child.material.color.setHex(tint);
+                }
               }
             }
           }
@@ -430,18 +497,24 @@
 
         vm.mesh = gltfClone;
         vm.isGLTF = true;
+        gltfCarCount++;
       }
     }
   }
 
-  // Replace all live pedestrians in the scene graph with loaded animated GLTF models
+  // Replace live pedestrians in the scene graph with loaded animated GLTF models (capped to max 6)
+  const MAX_GLTF_PEDS = 6;
   function replaceLivePedestriansWithGLTF() {
     if (!scene || gltfHumanTemplates.length === 0) return;
     if (typeof THREE.SkeletonUtils === 'undefined') return;
 
     let humanIdx = 0;
+    let gltfPedCount = 0;
+
     if (pedMeshMap) {
       for (const key in pedMeshMap) {
+        if (gltfPedCount >= MAX_GLTF_PEDS) break;
+
         const pm = pedMeshMap[key];
         if (!pm || !pm.data || pm.isGLTF) continue;
 
@@ -452,9 +525,10 @@
         try {
           const clone = THREE.SkeletonUtils.clone(template.model);
           clone.traverse(child => {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
+            if (child.isSkinnedMesh || child.isMesh) {
+              child.castShadow = false;
+              child.receiveShadow = false;
+              child.frustumCulled = true;
             }
           });
 
@@ -490,13 +564,14 @@
           pm.mesh = clone;
           pm.isGLTF = true;
           pm.mixer = mixer;
+          gltfPedCount++;
         } catch (err) {
           console.warn('Pedestrian replacement error:', err);
         }
       }
     }
 
-    // Also replace standing sidewalk social group pedestrians
+    // Also replace standing sidewalk social group pedestrians (Pose ONCE, NO continuous mixer updates)
     socialPedestrians.forEach(sp => {
       if (!sp || sp.isGLTF || !sp.mesh || !sp.parent) return;
       const template = gltfHumanTemplates[humanIdx % gltfHumanTemplates.length];
@@ -505,9 +580,10 @@
       try {
         const clone = THREE.SkeletonUtils.clone(template.model);
         clone.traverse(child => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
+          if (child.isSkinnedMesh || child.isMesh) {
+            child.castShadow = false;
+            child.receiveShadow = false;
+            child.frustumCulled = true;
           }
         });
         const mixer = new THREE.AnimationMixer(clone);
@@ -518,7 +594,7 @@
             action.play();
           }
         }
-        activeMixers.push(mixer);
+        mixer.update(0.1); // Update ONCE to pose standing character — DO NOT push into activeMixers[]!
 
         clone.position.copy(sp.mesh.position);
         clone.rotation.y = sp.mesh.rotation.y;
@@ -594,6 +670,34 @@
           if (gltf && gltf.scene) {
             const rawModel = gltf.scene;
 
+            // Strip expensive physical shaders and textures to guarantee high FPS on PC & mobile
+            rawModel.traverse(node => {
+              if (node.isMesh) {
+                node.castShadow = false;
+                node.receiveShadow = false;
+                node.frustumCulled = true;
+
+                if (node.material) {
+                  const oldMat = Array.isArray(node.material) ? node.material[0] : node.material;
+                  const baseCol = oldMat.color ? oldMat.color.clone() : new THREE.Color(0xd1d5db);
+
+                  // Dispose heavy embedded normal/roughness/metalness/transmission textures
+                  if (oldMat.map) oldMat.map.dispose();
+                  if (oldMat.normalMap) oldMat.normalMap.dispose();
+                  if (oldMat.roughnessMap) oldMat.roughnessMap.dispose();
+                  if (oldMat.metalnessMap) oldMat.metalnessMap.dispose();
+                  if (oldMat.transmissionMap) oldMat.transmissionMap.dispose();
+                  if (oldMat.clearcoatMap) oldMat.clearcoatMap.dispose();
+
+                  node.material = new THREE.MeshStandardMaterial({
+                    color: baseCol,
+                    roughness: 0.35,
+                    metalness: 0.30
+                  });
+                }
+              }
+            });
+
             // Compute bounding box
             const b1 = new THREE.Box3().setFromObject(rawModel);
             const sz1 = new THREE.Vector3();
@@ -620,8 +724,9 @@
 
             wrapper.traverse(node => {
               if (node.isMesh) {
-                node.castShadow = true;
-                node.receiveShadow = true;
+                node.castShadow = false;
+                node.receiveShadow = false;
+                node.frustumCulled = true;
               }
             });
 
@@ -688,9 +793,10 @@
             wrapper.position.z -= (b2.min.z + b2.max.z) / 2;
 
             wrapper.traverse(node => {
-              if (node.isMesh) {
-                node.castShadow = true;
-                node.receiveShadow = true;
+              if (node.isSkinnedMesh || node.isMesh) {
+                node.castShadow = false;
+                node.receiveShadow = false;
+                node.frustumCulled = true;
               }
             });
 
@@ -2441,15 +2547,24 @@
     camera = new THREE.PerspectiveCamera(38, aspect, 10, 4000);
     updateCameraFraming(aspect);
 
-    // 3. Renderer (High performance WebGL locked to 120 FPS with optimal pixel ratio)
+    // 3. Renderer (High performance WebGL locked to 120 FPS with capped pixel ratio)
     renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(window.innerWidth < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.25));
+    renderer.shadowMap.enabled = false;
     if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.05;
+    }
+
+    // Pause WebGL rendering loop when off-screen (e.g. scrolled down to #planner)
+    if (typeof IntersectionObserver !== 'undefined' && containerEl) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          isRenderLoopPaused = !entry.isIntersecting;
+        });
+      }, { threshold: 0.05 });
+      observer.observe(containerEl);
     }
 
     // Procedural PBR Environment reflections for automotive paint and glass
@@ -3045,13 +3160,18 @@
 
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
+    if (isRenderLoopPaused) return;
 
     // 120Hz Delta-Time Physics (clamped to max 0.05 to avoid frame-skip spikes)
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : (dt || 0.016);
 
-    // 0. Update Active Skeletal Animation Mixers (GLTF Pedestrians)
-    for (let m = 0; m < activeMixers.length; m++) {
-      activeMixers[m].update(delta);
+    // 0. Update Active Skeletal Animation Mixers (GLTF Pedestrians) throttled to every 2nd frame
+    mixerFrameCounter++;
+    if (mixerFrameCounter % 2 === 0) {
+      const stepDelta = delta * 2;
+      for (let m = 0; m < activeMixers.length; m++) {
+        activeMixers[m].update(stepDelta);
+      }
     }
 
     // Atmospheric Weather Mode Transition (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
