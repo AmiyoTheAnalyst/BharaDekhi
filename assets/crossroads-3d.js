@@ -92,10 +92,6 @@
   let treeFoliageGeo = null, treeFoliageMat = null;
   let vehicleHeadlightMat = null;
   let vehicleTaillightMat = null;
-  let vehicleVolumetricBeamMat = null;
-  let vehicleVolumetricTailMat = null;
-  let streetVolumetricBeamMat = null;
-  let streetlampVolumetricCones = [];
   let vehicleIndicatorMat = null;
   let vehicleGlassMat = null;
   let vehicleBumperMat = null;
@@ -530,44 +526,6 @@
     return { group: sigGroup, red: rMat, yellow: yMat, green: gMat };
   }
 
-  // Helper to create volumetric forward headlight beam cones (projecting forward in +X)
-  function createVehicleBeamMesh(length, radiusTop, radiusBottom, yPos, startX) {
-    if (!vehicleVolumetricBeamMat) {
-      vehicleVolumetricBeamMat = new THREE.MeshBasicMaterial({
-        color: 0xfff7ed,
-        transparent: true,
-        opacity: 0.16,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      });
-    }
-    const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 10, 1, true);
-    const mesh = new THREE.Mesh(geo, vehicleVolumetricBeamMat);
-    mesh.rotation.z = Math.PI / 2;
-    mesh.position.set(startX + length / 2, yPos, 0);
-    return mesh;
-  }
-
-  // Helper to create subtle rear taillight volumetric red glow (projecting backward in -X)
-  function createVehicleTailGlowMesh(length, radiusTop, radiusBottom, yPos, startX) {
-    if (!vehicleVolumetricTailMat) {
-      vehicleVolumetricTailMat = new THREE.MeshBasicMaterial({
-        color: 0xff1744,
-        transparent: true,
-        opacity: 0.12,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      });
-    }
-    const geo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 8, 1, true);
-    const mesh = new THREE.Mesh(geo, vehicleVolumetricTailMat);
-    mesh.rotation.z = -Math.PI / 2;
-    mesh.position.set(startX - length / 2, yPos, 0);
-    return mesh;
-  }
-
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
@@ -678,7 +636,6 @@
         hl.position.set(length / 2 + 0.7, 6.5, hz);
         group.add(hl);
       });
-      group.add(createVehicleBeamMesh(56, 3.5, 18, 6.5, length / 2 + 0.7));
 
       // Red Taillight Bars
       const tlGeo = new THREE.BoxGeometry(1.2, 4.5, 2.5);
@@ -687,7 +644,6 @@
         tl.position.set(-length / 2 - 0.7, 7.5, tz);
         group.add(tl);
       });
-      group.add(createVehicleTailGlowMesh(18, 2.5, 9, 7.5, -length / 2 - 0.7));
 
     } else if (type === 'car') {
       const length = 44;
@@ -762,7 +718,6 @@
         hl.position.set(length / 2 - 0.8, 5.0, hz);
         group.add(hl);
       });
-      group.add(createVehicleBeamMesh(46, 2.6, 14, 5.0, length / 2 - 0.8));
 
       // Rear Taillights
       const tlGeo = new THREE.BoxGeometry(1.0, 2.0, 3.0);
@@ -771,7 +726,6 @@
         tl.position.set(-length / 2 + 0.8, 5.2, tz);
         group.add(tl);
       });
-      group.add(createVehicleTailGlowMesh(15, 2.0, 7.5, 5.2, -length / 2 + 0.8));
 
     } else if (type === 'cng') {
       const length = 30;
@@ -872,7 +826,6 @@
       hl.rotation.z = Math.PI / 2;
       hl.position.set(11.2, 6.2, 0);
       group.add(hl);
-      group.add(createVehicleBeamMesh(38, 2.0, 11, 6.2, 11.2));
 
       // Front Amber Turn Signal Indicators
       const indGeo = new THREE.BoxGeometry(0.8, 1.2, 1.2);
@@ -887,7 +840,6 @@
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-12.4, 5.5, 0);
       group.add(tl);
-      group.add(createVehicleTailGlowMesh(12, 1.6, 5.5, 5.5, -12.4));
 
     } else if (type === 'rickshaw') {
       const length = 34;
@@ -1064,13 +1016,11 @@
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.position.set(11.6, 5.2, 0);
       group.add(hl);
-      group.add(createVehicleBeamMesh(28, 1.4, 8.0, 5.2, 11.6));
 
       const tlGeo = new THREE.BoxGeometry(0.6, 1.5, 1.5);
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-13.2, 5.5, 0);
       group.add(tl);
-      group.add(createVehicleTailGlowMesh(8, 1.0, 3.8, 4.0, -13.2));
 
     } else if (type === 'bike') {
       const length = 26;
@@ -1181,13 +1131,11 @@
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.position.set(9.0, 6.4, 0);
       group.add(hl);
-      group.add(createVehicleBeamMesh(36, 1.6, 9.5, 6.4, 9.0));
 
       const tlGeo = new THREE.BoxGeometry(0.8, 1.4, 1.4);
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
       tl.position.set(-9.0, 5.5, 0);
       group.add(tl);
-      group.add(createVehicleTailGlowMesh(10, 1.2, 4.5, 5.5, -9.0));
     }
 
     scene.add(group);
@@ -1294,7 +1242,6 @@
       hl.position.set(length / 2 + 0.8, 6.5, hz);
       ambGroup.add(hl);
     });
-    ambGroup.add(createVehicleBeamMesh(48, 2.8, 15, 6.5, length / 2 + 0.8));
 
     // Rear Taillights
     const tlGeo = new THREE.BoxGeometry(1.0, 4.5, 2.0);
@@ -1303,7 +1250,6 @@
       tl.position.set(-length / 2 - 0.2, 8.0, tz);
       ambGroup.add(tl);
     });
-    ambGroup.add(createVehicleTailGlowMesh(16, 2.2, 8.0, 8.0, -length / 2 - 0.2));
 
     ambGroup.visible = false;
     scene.add(ambGroup);
@@ -1491,7 +1437,6 @@
         hlMesh.position.set(35, 6, hz);
         coach.add(hlMesh);
       });
-      coach.add(createVehicleBeamMesh(65, 3.0, 18, 6.0, 36));
     }
     return coach;
   }
@@ -1581,17 +1526,6 @@
       [320, 26, 100],
       [480, 26, 100]
     ];
-    if (!streetVolumetricBeamMat) {
-      streetVolumetricBeamMat = new THREE.MeshBasicMaterial({
-        color: 0xfef08a,
-        transparent: true,
-        opacity: 0.14,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide
-      });
-    }
-    const streetlampConeGeo = new THREE.CylinderGeometry(2.5, 22, 25, 14, 1, true);
     cornerLightCoords.forEach(pos => {
       const pl = new THREE.PointLight(0xfef08a, 1.5, 260);
       pl.position.set(pos[0], pos[1], pos[2]);
@@ -1611,12 +1545,6 @@
       head.position.set(pos[0], 26, pos[2]);
       freezeStatic(head);
       scene.add(head);
-
-      const cone = new THREE.Mesh(streetlampConeGeo, streetVolumetricBeamMat);
-      cone.position.set(pos[0], 13.5, pos[2]);
-      freezeStatic(cone);
-      scene.add(cone);
-      streetlampVolumetricCones.push(cone);
     });
 
     // 5. Ground & Road Network (Deep Obsidian Asphalt for High-Contrast Cinematic Aesthetics)
@@ -2247,82 +2175,7 @@
         });
       }
 
-      // 3. Volumetric atmospheric light beams and streetlight cones calibration
-      if (vehicleVolumetricBeamMat && vehicleVolumetricTailMat && streetVolumetricBeamMat) {
-        if (currentMode === 'fog_night') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.24 : 0.20;
-          vehicleVolumetricBeamMat.color.setHex(0xfffae6);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.16 : 0.14;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.22 : 0.18;
-          streetVolumetricBeamMat.color.setHex(0xfef08a);
-        } else if (currentMode === 'night_overcast') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.20 : 0.16;
-          vehicleVolumetricBeamMat.color.setHex(0xfff7ed);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.14 : 0.11;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.15 : 0.12;
-          streetVolumetricBeamMat.color.setHex(0xfef08a);
-        } else if (currentMode === 'fog_sunset') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.22 : 0.18;
-          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.15 : 0.12;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.20 : 0.16;
-          streetVolumetricBeamMat.color.setHex(0xfeb272);
-        } else if (currentMode === 'sunset_overcast') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.18 : 0.14;
-          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.12 : 0.10;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.14 : 0.10;
-          streetVolumetricBeamMat.color.setHex(0xfeb272);
-        } else if (currentMode === 'fog_sunrise') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.20 : 0.16;
-          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.14 : 0.10;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.16 : 0.12;
-          streetVolumetricBeamMat.color.setHex(0xffedd5);
-        } else if (currentMode === 'sunrise_overcast') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.15 : 0.11;
-          vehicleVolumetricBeamMat.color.setHex(0xffedd5);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.10 : 0.08;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.08;
-          streetVolumetricBeamMat.color.setHex(0xffedd5);
-        } else if (currentMode === 'fog_day') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.16 : 0.12;
-          vehicleVolumetricBeamMat.color.setHex(0xfef9c3);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.08 : 0.06;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.08;
-          streetVolumetricBeamMat.color.setHex(0xfef9c3);
-        } else if (currentMode === 'morning_overcast') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.08;
-          vehicleVolumetricBeamMat.color.setHex(0xfef9c3);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.08 : 0.05;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.09 : 0.06;
-          streetVolumetricBeamMat.color.setHex(0xfef9c3);
-        } else if (currentMode === 'day_overcast') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.09 : 0.06;
-          vehicleVolumetricBeamMat.color.setHex(0xfff7ed);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.06 : 0.04;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.06 : 0.04;
-          streetVolumetricBeamMat.color.setHex(0xfef08a);
-        } else if (currentMode === 'rain') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.18 : 0.14;
-          vehicleVolumetricBeamMat.color.setHex(0xffffff);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.14 : 0.10;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.12 : 0.09;
-          streetVolumetricBeamMat.color.setHex(0xbae6fd);
-        } else if (currentMode === 'night') {
-          vehicleVolumetricBeamMat.opacity = isMobileScreen ? 0.14 : 0.10;
-          vehicleVolumetricBeamMat.color.setHex(0xffffff);
-          vehicleVolumetricTailMat.opacity = isMobileScreen ? 0.10 : 0.07;
-          streetVolumetricBeamMat.opacity = isMobileScreen ? 0.10 : 0.07;
-          streetVolumetricBeamMat.color.setHex(0xfef08a);
-        } else { // sun, sunrise, sunset
-          vehicleVolumetricBeamMat.opacity = 0;
-          vehicleVolumetricTailMat.opacity = 0;
-          streetVolumetricBeamMat.opacity = 0;
-        }
-      }
-
-      // 4. Vehicle headlight cluster tint calibration
+      // 3. Vehicle headlight cluster tint calibration
       if (vehicleHeadlightMat) {
         if (currentMode === 'fog_night' || currentMode === 'fog_sunset' || currentMode === 'fog_sunrise') {
           vehicleHeadlightMat.color.setHex(0xfffae6);
@@ -2331,7 +2184,7 @@
         }
       }
 
-      // 5. Environmental Sky, Fog, SunLight, and AmbientLight Calibration across all 15 modes
+      // 4. Environmental Sky, Fog, SunLight, and AmbientLight Calibration across all 15 modes
       if (currentMode === 'sunrise') {
         scene.background.setHex(isMobileScreen ? 0x24142b : 0x1e0e24);
         if (scene.fog) {
