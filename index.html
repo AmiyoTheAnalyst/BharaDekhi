@@ -122,6 +122,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="assets/crossroads-3d.js"></script>
+  <script src="assets/scroll-transit-hero.js"></script>
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
@@ -674,24 +675,38 @@
     }
 
     /* =========================================================
-       Screen 1: 5-Stage 3D Scroll Hero & Animated Dhaka Crossroads Landing
+       Screen 1: Full-Screen Animated Dhaka Crossroads Landing Page
        ========================================================= */
     #userLandingView {
-      position: relative;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
       width: 100%;
-      min-height: 500vh;
-      overflow-x: hidden;
+      height: 100vh;
+      height: 100svh;
+      height: 100dvh;
+      min-height: 100svh;
+      overflow: hidden !important;
       background: #020408 !important;
-      z-index: 20;
+      z-index: 35;
     }
     #userLandingView .dhaka-cyber-showcase {
       width: 100% !important;
       height: 100% !important;
-      min-height: 100vh !important;
+      min-height: 100svh !important;
       border-radius: 0 !important;
       border: none !important;
       box-shadow: none !important;
       overflow: hidden !important;
+    }
+
+    /* Screen 2: 5-Stage 3D Scroll Hero above Planner */
+    #plannerScrollHero {
+      position: relative;
+      width: 100%;
+      min-height: 500vh;
+      background: #020408 !important;
+      overflow-x: hidden;
     }
 
     #dhakaCrossroadsContainer.is-3d-drone-mode #dhakaCrossroadsStageWrapper,
@@ -5039,13 +5054,11 @@
     </div>
   </section>
 
-  <!-- Screen 1: Dedicated 5-Stage 3D Scroll Hero & Animated Dhaka City Landing Page -->
-  <section id="userLandingView" class="panel-section hidden relative z-20 w-full min-h-[500vh] bg-slate-950 select-none" aria-label="Dhaka Crossroads Animation Landing Page">
+  <!-- Screen 1: Dedicated Full-Screen Animated Dhaka City Landing Page -->
+  <section id="userLandingView" class="panel-section hidden fixed inset-0 z-30 w-full h-[100svh] min-h-[100svh] overflow-hidden bg-slate-950 select-none" aria-label="Dhaka Crossroads Animation Landing Page">
 
-    <!-- Sticky 100vh Viewport Wrapper for Three.js Canvas & Diorama (pointer-events-none so Leaflet map below remains 100% interactive) -->
-    <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
-      <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
-      <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase diorama-container relative w-full h-full min-h-screen overflow-hidden text-white select-none pointer-events-none">
+    <!-- Living Dhaka Crossroads: Animated 2.5D Miniature Intersection (Mirpur 10 Crossroads) -->
+    <div id="dhakaCrossroadsContainer" class="dhaka-cyber-showcase diorama-container relative w-full h-full min-h-[100svh] overflow-hidden text-white select-none">
         <!-- Synchronized Crossroads Lightning Sky Flash Overlay -->
         <div id="dhakaLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-30 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
         
@@ -5070,7 +5083,7 @@
         </div>
 
         <!-- Real 3D Miniature City Diorama WebGL Canvas (Active in 3D Drone Mode) -->
-        <canvas id="dhakaCrossroads3dCanvas" class="canvas-3d absolute inset-0 w-full h-full pointer-events-none" style="display: none;"></canvas>
+        <canvas id="dhakaCrossroads3dCanvas" class="canvas-3d absolute inset-0 w-full h-full pointer-events-auto" style="display: none;"></canvas>
 
         <!-- Top-Left HUD Header: Transit Grid & Slogan (Prominently stacked above 3D diorama & atmosphere) -->
         <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-50 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
@@ -7720,7 +7733,7 @@
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
         <div class="landing-cta-container absolute bottom-3 right-3 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 pointer-events-auto" style="bottom: max(0.75rem, env(safe-area-inset-bottom)); right: max(0.75rem, env(safe-area-inset-right));">
-          <button type="button" id="landingPlanTripBtn" onclick="smoothScrollToPlanner()" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
+          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/plan-trip')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
             <div class="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300 shrink-0">
               <i data-lucide="compass" class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white"></i>
             </div>
@@ -7732,126 +7745,145 @@
         </div>
 
       </div>
-    </div>
-
-    <!-- 5-Stage Storytelling Foreground Cards Container -->
-    <div id="storyHeroCardsContainer" class="relative z-10 -mt-[100vh] pointer-events-none flex flex-col">
-
-      <!-- Stage 1 (0% - 20%): Comparison of Bike, CNG & Car Fare (Left Card) -->
-      <section id="storyHeroStage1" class="h-screen w-full flex items-center justify-start p-6 md:p-16">
-        <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-sky-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider mb-3">
-            <span>⚡ MULTI-MODAL FARE COMPARISON</span>
-          </div>
-          <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-            Comparison of Bike, CNG &amp; Car Fare
-          </h3>
-          <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
-            Real-time side-by-side fare estimates across Dhaka traffic gridlock. Choose the right ride for your budget, speed, or comfort before you step outside.
-          </p>
-          <div class="flex flex-wrap gap-2 sm:gap-3 mt-5">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-md">
-              🏍️ Bike (Fastest) · ৳12/km
-            </span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-amber-500/50 text-amber-300 text-xs font-bold shadow-md">
-              🛺 CNG (Balanced) · ৳15/km
-            </span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-sky-500/50 text-sky-300 text-xs font-bold shadow-md">
-              🚗 Car (Comfort) · ৳22/km
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stage 2 (20% - 40%): Rickshaw Fare Estimation (Right Card) -->
-      <section id="storyHeroStage2" class="h-screen w-full flex items-center justify-end p-6 md:p-16">
-        <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-amber-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
-            <span>🛺 HYPER-LOCAL TRANSIT</span>
-          </div>
-          <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-            Rickshaw Fare Estimation
-          </h3>
-          <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
-            Instant, street-calibrated fare estimates for Dhaka's iconic cycle rickshaws. Perfect for short neighbourhood hops, alleyway shortcuts, and local market trips with fair bargaining benchmarks.
-          </p>
-          <div class="flex items-center gap-3 mt-4 text-xs font-semibold text-amber-200">
-            <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30">Base: ৳25</span>
-            <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30">Short Hop: ~৳30-50</span>
-            <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30">Fair Negotiation</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stage 3 (40% - 60%): Smart Bus Route Discovery (Left Card) -->
-      <section id="storyHeroStage3" class="h-screen w-full flex items-center justify-start p-6 md:p-16">
-        <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-rose-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-400/30 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3">
-            <span>🚌 CITY-WIDE PUBLIC TRANSIT</span>
-          </div>
-          <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-            Smart Bus Route Discovery
-          </h3>
-          <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
-            BRTA-calibrated per-kilometer government fare rates across Dhaka's major bus corridors. Discover direct routes, interchange hubs, and predictable fares across Mirpur, Farmgate, and Motijheel.
-          </p>
-          <div class="flex items-center gap-3 mt-4 text-xs font-semibold text-rose-200">
-            <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30">BRTA Rate: ৳2.45/km</span>
-            <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30">Min Fare: ৳10</span>
-            <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30">Multi-Stop Hubs</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stage 4 (60% - 80%): Dhaka Metro Rail (MRT Line-6) (Right Card) -->
-      <section id="storyHeroStage4" class="h-screen w-full flex items-center justify-end p-6 md:p-16">
-        <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-sky-400/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider mb-3">
-            <span>🚆 RAPID ELEVATED METRO</span>
-          </div>
-          <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-            Dhaka Metro Rail (MRT Line-6)
-          </h3>
-          <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
-            Bypass ground traffic with high-speed elevated transit. Accurate station-to-station fares from Uttara North to Motijheel, complete with Single Journey tickets and Rapid Pass 10% discounts.
-          </p>
-          <div class="flex items-center gap-3 mt-4 text-xs font-semibold text-sky-200">
-            <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/30">Base: ৳20</span>
-            <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/30">Rapid Pass -10%</span>
-            <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/30">Zero Traffic</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stage 5 (80% - 100%): Real-Time Weather Surge Pricing & Planner CTA (Center Card) -->
-      <section id="storyHeroStage5" class="h-screen w-full flex items-center justify-center p-6 md:p-16 text-center">
-        <div class="story-hero-card pointer-events-auto max-w-xl mx-auto rounded-3xl bg-slate-950/90 border border-indigo-500/50 p-6 md:p-10 backdrop-blur-2xl shadow-2xl transition-all duration-300">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">
-            <span>🌧️ LIVE WEATHER SURGE PRICING</span>
-          </div>
-          <h3 class="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">
-            Real-Time Weather Surge Pricing
-          </h3>
-          <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed max-w-md mx-auto">
-            Monsoon downpours and waterlogging in Dhaka can spike rickshaw and CNG rates by up to 1.4×. Stay ahead with live weather surge detection and smart transit alternatives.
-          </p>
-          <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button type="button" onclick="smoothScrollToPlanner()" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer">
-              <span>Launch Route &amp; Fare Planner</span>
-              <span class="text-xl leading-none">&rarr;</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-    </div>
   </section>
 
 
 
   <!-- Screen 2: Dedicated Trip Planner Page -->
-  <main id="userPlannerView" class="panel-section hidden max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-6">
-    <div id="planner" class="scroll-mt-6"></div>
+  <main id="userPlannerView" class="panel-section hidden w-full bg-slate-950 pb-16">
+
+    <!-- 5-Stage 3D Scroll Hero Section (Scroll Transit Hero for Bhara dekhi) -->
+    <section id="plannerScrollHero" class="relative w-full min-h-[500vh] bg-slate-950 select-none overflow-x-hidden" aria-label="Bhara dekhi 3D Transit Storytelling Hero">
+      
+      <!-- Top Navigation Pill inside Scroll Hero to Return to City Animation -->
+      <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-50 pointer-events-auto">
+        <button type="button" onclick="navigateToRoute('#/home')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-950/85 hover:bg-slate-900 text-sky-300 hover:text-white border border-sky-500/40 text-xs font-bold backdrop-blur-md shadow-2xl transition-all active:scale-95 cursor-pointer">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>&larr; Back to City Animation</span>
+        </button>
+      </div>
+
+      <!-- Sticky 100vh 3D Canvas Viewport (pointer-events-none so Leaflet map below remains 100% interactive) -->
+      <div class="sticky top-0 h-screen w-full overflow-hidden pointer-events-none z-0">
+        <canvas id="scrollTransitHeroCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+      </div>
+
+      <!-- 5-Stage Storytelling Foreground Cards Container -->
+      <div id="storyHeroCardsContainer" class="relative z-10 -mt-[100vh] pointer-events-none flex flex-col">
+
+        <!-- Stage 1 (0% - 20%): Comparison of Bike, CNG & Car Fare (Left Card) -->
+        <section id="storyHeroStage1" class="h-screen w-full flex items-center justify-start p-6 md:p-16">
+          <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-sky-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>⚡ MULTI-MODAL FARE COMPARISON</span>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
+              Comparison of Bike, CNG &amp; Car Fare
+            </h3>
+            <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
+              Real-time side-by-side fare estimates across Dhaka traffic gridlock. Choose the right ride for your budget, speed, or comfort before you step outside.
+            </p>
+            <div class="flex flex-wrap gap-2 sm:gap-3 mt-5">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-md">
+                🏍️ Bike (Fastest) · ৳12/km
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-amber-500/50 text-amber-300 text-xs font-bold shadow-md">
+                🛺 CNG (Balanced) · ৳15/km
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-sky-500/50 text-sky-300 text-xs font-bold shadow-md">
+                🚗 Car (Comfort) · ৳22/km
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stage 2 (20% - 40%): Rickshaw Fare Estimation (Right Card) -->
+        <section id="storyHeroStage2" class="h-screen w-full flex items-center justify-end p-6 md:p-16">
+          <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-amber-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>🛺 HYPER-LOCAL TRANSIT</span>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
+              Rickshaw Fare Estimation
+            </h3>
+            <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
+              Instant, street-calibrated fare estimates for Dhaka's iconic cycle rickshaws. Perfect for short neighbourhood hops, alleyway shortcuts, and local market trips with fair bargaining benchmarks.
+            </p>
+            <div class="flex items-center gap-3 mt-4 text-xs font-semibold text-amber-200">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30">Base: ৳25</span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30">Short Hop: ~৳30-50</span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30">Fair Negotiation</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stage 3 (40% - 60%): Smart Bus Route Discovery (Left Card) -->
+        <section id="storyHeroStage3" class="h-screen w-full flex items-center justify-start p-6 md:p-16">
+          <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-rose-500/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-400/30 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>🚌 CITY-WIDE PUBLIC TRANSIT</span>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
+              Smart Bus Route Discovery
+            </h3>
+            <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
+              BRTA-calibrated per-kilometer government fare rates across Dhaka's major bus corridors. Discover direct routes, interchange hubs, and predictable fares across Mirpur, Farmgate, and Motijheel.
+            </p>
+            <div class="flex items-center gap-3 mt-4 text-xs font-semibold text-rose-200">
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30">BRTA Rate: ৳2.45/km</span>
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30">Min Fare: ৳10</span>
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30">Multi-Stop Hubs</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stage 4 (60% - 80%): Dhaka Metro Rail (MRT Line-6) (Right Card) -->
+        <section id="storyHeroStage4" class="h-screen w-full flex items-center justify-end p-6 md:p-16">
+          <div class="story-hero-card pointer-events-auto max-w-lg rounded-3xl bg-slate-950/85 border border-sky-400/40 p-6 md:p-8 backdrop-blur-xl shadow-2xl transition-all duration-300">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>🚆 RAPID ELEVATED METRO</span>
+            </div>
+            <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
+              Dhaka Metro Rail (MRT Line-6)
+            </h3>
+            <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed">
+              Bypass ground traffic with high-speed elevated transit. Accurate station-to-station fares from Uttara North to Motijheel, complete with Single Journey tickets and Rapid Pass 10% discounts.
+            </p>
+            <div class="flex items-center gap-3 mt-4 text-xs font-semibold text-sky-200">
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/30">Base: ৳20</span>
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/30">Rapid Pass -10%</span>
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/30">Zero Traffic</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stage 5 (80% - 100%): Real-Time Weather Surge Pricing & Planner CTA (Center Card) -->
+        <section id="storyHeroStage5" class="h-screen w-full flex items-center justify-center p-6 md:p-16 text-center">
+          <div class="story-hero-card pointer-events-auto max-w-xl mx-auto rounded-3xl bg-slate-950/90 border border-indigo-500/50 p-6 md:p-10 backdrop-blur-2xl shadow-2xl transition-all duration-300">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">
+              <span>🌧️ LIVE WEATHER SURGE PRICING</span>
+            </div>
+            <h3 class="text-2xl md:text-4xl font-black text-white tracking-tight leading-tight">
+              Real-Time Weather Surge Pricing
+            </h3>
+            <p class="text-sm md:text-base text-slate-300 font-medium mt-3 leading-relaxed max-w-md mx-auto">
+              Monsoon downpours and waterlogging in Dhaka can spike rickshaw and CNG rates by up to 1.4×. Stay ahead with live weather surge detection and smart transit alternatives.
+            </p>
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button type="button" onclick="smoothScrollToPlanner()" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                <span>Launch Route &amp; Fare Planner</span>
+                <span class="text-xl leading-none">&rarr;</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- Trip Planner Core Interface (Leaflet Map, Fares, Routes) -->
+    <div id="plannerContentWrapper" class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+      <div id="planner" class="scroll-mt-6"></div>
 
     <!-- Top Navigation Banner: Return to City Animation & Status -->
     <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
@@ -19412,8 +19444,8 @@
       if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
       gsap.registerPlugin(ScrollTrigger);
 
-      const landingEl = document.getElementById('userLandingView');
-      if (!landingEl) return;
+      const triggerEl = document.getElementById('plannerScrollHero');
+      if (!triggerEl) return;
 
       if (scrollTriggerStorytellingInitialized) {
         ScrollTrigger.refresh();
@@ -19423,13 +19455,13 @@
 
       // 1. Master Camera Scrubbing Timeline: 0% to 100% across the 5 stages
       ScrollTrigger.create({
-        trigger: '#userLandingView',
+        trigger: '#plannerScrollHero',
         start: 'top top',
         end: 'bottom bottom',
         scrub: 1.0,
         onUpdate: (self) => {
-          if (typeof window.crossroadsSetScrollProgress === 'function') {
-            window.crossroadsSetScrollProgress(self.progress);
+          if (typeof window.scrollTransitHeroSetProgress === 'function') {
+            window.scrollTransitHeroSetProgress(self.progress);
           }
         }
       });
@@ -19468,9 +19500,7 @@
     window.initScrollTriggerStorytelling = initScrollTriggerStorytelling;
 
     window.smoothScrollToPlanner = function() {
-      const plannerEl = document.getElementById('planner') || document.getElementById('userPlannerView');
-      const userPlanner = document.getElementById('userPlannerView');
-      if (userPlanner) userPlanner.classList.remove('hidden');
+      const plannerEl = document.getElementById('planner') || document.getElementById('plannerContentWrapper');
       if (plannerEl) {
         plannerEl.scrollIntoView({ behavior: 'smooth' });
       } else {
@@ -19494,20 +19524,20 @@
 
       if (authView) authView.classList.toggle('hidden', !isAuth);
       if (roleSelectionView) roleSelectionView.classList.toggle('hidden', !isRole);
-      if (userLandingView) userLandingView.classList.toggle('hidden', !isLanding && !isPlanner);
-      if (userPlannerView) userPlannerView.classList.toggle('hidden', !isLanding && !isPlanner);
+      if (userLandingView) userLandingView.classList.toggle('hidden', !isLanding);
+      if (userPlannerView) userPlannerView.classList.toggle('hidden', !isPlanner);
       if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin);
 
       // Hide main header on full-screen animated landing page so it occupies the entire screen
       if (mainHeader) {
-        mainHeader.classList.toggle('hidden', isLanding && !isPlanner);
+        mainHeader.classList.toggle('hidden', isLanding);
       }
 
       updateAdminModeNavigation();
 
       if (isAdmin) loadAdminAccounts();
 
-      if (!isLanding && !isPlanner && window.crossroadsAudio && crossroadsAudio.isActive) {
+      if (!isLanding && window.crossroadsAudio && crossroadsAudio.isActive) {
         crossroadsAudio.pause();
       }
 
@@ -19535,9 +19565,6 @@
         if (window.crossroadsAudio && crossroadsAudio.wasEnabled) {
           crossroadsAudio.resume();
         }
-        if (typeof initScrollTriggerStorytelling === 'function') {
-          setTimeout(initScrollTriggerStorytelling, 100);
-        }
         if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       }
 
@@ -19546,10 +19573,16 @@
         if (window.location.hash !== '#/plan-trip' && window.location.hash !== '#plan-trip') {
           history.replaceState(null, '', '#/plan-trip');
         }
-        const plannerEl = document.getElementById('planner');
-        if (plannerEl) {
-          setTimeout(() => plannerEl.scrollIntoView({ behavior: 'smooth' }), 50);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        if (typeof window.initScrollTransitHero === 'function') {
+          setTimeout(() => {
+            window.initScrollTransitHero('scrollTransitHeroCanvas', 'plannerScrollHero');
+            initScrollTriggerStorytelling();
+            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+          }, 80);
         }
+
         // Pause simulation while on planner page to save CPU
         if (typeof window.endEmergencyWave === 'function') {
           window.endEmergencyWave();
