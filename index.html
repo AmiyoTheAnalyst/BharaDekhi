@@ -1155,14 +1155,52 @@
       filter: contrast(1.06) saturate(0.95) brightness(0.98);
     }
 
-    /* Cinematic Depth-of-Field & Peripheral Vignette Frame */
+    /* Outer HUD & Controls Layer (Toggles, Badges, Buttons): Prominently visible above 3D diorama canvas & atmosphere */
+    #landingTopHeader,
+    #landingTopActions {
+      z-index: 40 !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopHeader,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopActions {
+      z-index: 40 !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopActions > *,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopHeader .inline-flex {
+      background-color: rgba(15, 23, 42, 0.94) !important;
+      border: 1px solid rgba(148, 163, 184, 0.55) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 12px rgba(56, 189, 248, 0.25) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #landingTopActions button {
+      color: #f8fafc !important;
+      opacity: 1 !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsViewModeBtn {
+      border: 1px solid rgba(52, 211, 153, 0.85) !important;
+      color: #34d399 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 16px rgba(52, 211, 153, 0.45) !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsAtmosphereBadge {
+      border: 1px solid rgba(129, 140, 248, 0.85) !important;
+      color: #e0e7ff !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(99, 102, 241, 0.40) !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #trafficSignalBadge {
+      border: 1px solid rgba(74, 222, 128, 0.75) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(74, 222, 128, 0.35) !important;
+    }
+
+    /* Cinematic Depth-of-Field & Peripheral Vignette Frame (Strictly on 3D canvas behind outer UI layer) */
     .cinematic-vignette-frame {
       position: absolute;
       inset: 0;
       pointer-events: none;
       box-shadow: inset 0 0 80px 25px rgba(2, 4, 8, 0.85),
                   inset 0 0 160px 75px rgba(2, 4, 8, 0.65);
-      z-index: 21;
+      z-index: 11;
     }
     .cinematic-dof-top {
       position: absolute;
@@ -1176,7 +1214,7 @@
       mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
       -webkit-mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
       pointer-events: none;
-      z-index: 22;
+      z-index: 12;
     }
     .cinematic-dof-bottom {
       position: absolute;
@@ -1190,13 +1228,14 @@
       mask-image: linear-gradient(to top, black 25%, transparent 100%);
       -webkit-mask-image: linear-gradient(to top, black 25%, transparent 100%);
       pointer-events: none;
-      z-index: 22;
+      z-index: 12;
     }
 
     /* Cinematic Drone Atmosphere Overlay Fade In/Out */
     #crossroads3dDroneAtmosphere {
       opacity: 0;
       pointer-events: none;
+      z-index: 10 !important;
       transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
     #dhakaCrossroadsContainer.is-3d-drone-mode #crossroads3dDroneAtmosphere {
@@ -5015,7 +5054,7 @@
         <div id="dhakaLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-30 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
         
         <!-- Top-Left HUD Header: Transit Grid & Slogan -->
-        <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-20 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
+        <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-40 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
             <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg w-fit">
               <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -5041,7 +5080,7 @@
         </div>
 
         <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions -->
-        <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2">
+        <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-40 flex items-center gap-1.5 sm:gap-2">
           <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
             <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <span id="trafficSignalText" class="truncate">🚦 N-S GREEN · TRAFFIC FLOWING</span>
@@ -5081,7 +5120,7 @@
         </div>
 
         <!-- Cinematic Drone Camera Atmospheric Vignette & Depth-of-Field Overlay (Active in 3D Mode Only) -->
-        <div id="crossroads3dDroneAtmosphere" class="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+        <div id="crossroads3dDroneAtmosphere" class="pointer-events-none absolute inset-0 z-10 overflow-hidden">
           <!-- 1. Distant Atmospheric Depth Haze & Tilt-Shift Depth-of-Field Blur (Top Horizon) -->
           <div class="cinematic-dof-top"></div>
           <!-- 2. Foreground Soft Focal Falloff (Bottom Horizon) -->
@@ -7538,7 +7577,7 @@
         </script>
 
         <!-- Bottom-Left Legend: Transport Modes (Matching User Reference Image) -->
-        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-20 hidden md:flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-950/90 border border-slate-800 backdrop-blur-md text-xs font-semibold text-slate-300 shadow-xl pointer-events-none">
+        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 hidden md:flex flex-col gap-1.5 p-3 rounded-2xl bg-slate-950/90 border border-slate-800 backdrop-blur-md text-xs font-semibold text-slate-300 shadow-xl pointer-events-none">
           <div class="flex items-center gap-2">
             <span class="w-4 h-1.5 rounded-full bg-sky-400"></span>
             <span class="text-sky-300 font-bold">Metro Rail</span>
