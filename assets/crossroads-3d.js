@@ -55,10 +55,20 @@
       look: { x: 0, y: 25, z: -35 },
       badge: 'Drone View'
     },
-    cng_bike_car: {
+    bike: {
       pos: { x: 220, y: 440, z: 460 },
       look: { x: 0, y: 25, z: -35 },
-      badge: 'Vehicle Orbit · Move Pointer'
+      badge: 'Bike Orbit · Move Pointer'
+    },
+    cng: {
+      pos: { x: 220, y: 440, z: 460 },
+      look: { x: 0, y: 25, z: -35 },
+      badge: 'CNG Orbit · Move Pointer'
+    },
+    car: {
+      pos: { x: 220, y: 440, z: 460 },
+      look: { x: 0, y: 25, z: -35 },
+      badge: 'Car Orbit · Move Pointer'
     },
     metro: {
       pos: { x: -160, y: 140, z: 165 },
@@ -95,8 +105,8 @@
     }
 
     let targetTypes = [];
-    if (modeName === 'cng_bike_car') {
-      targetTypes = ['car', 'cng', 'bike'];
+    if (['bike', 'cng', 'car'].includes(modeName)) {
+      targetTypes = [modeName];
     } else if (modeName === 'bus') {
       targetTypes = ['bus'];
     } else if (modeName === 'rickshaw') {
@@ -188,7 +198,7 @@
     if (!badge || !CAM_MODES[modeName]) return;
 
     const targetType = activeTargetVehicle && activeTargetVehicle.type;
-    if (['cng_bike_car', 'rickshaw', 'bus'].includes(modeName)) {
+    if (['bike', 'cng', 'car', 'rickshaw', 'bus'].includes(modeName)) {
       badge.textContent = targetType
         ? `${targetType.charAt(0).toUpperCase()}${targetType.slice(1)} · Move Pointer to Orbit`
         : 'Waiting for vehicle';
@@ -198,7 +208,7 @@
   }
 
   function updateLegendHUD(modeName) {
-    ['metro', 'bus', 'cng_bike_car', 'rickshaw', 'walking'].forEach(m => {
+    ['metro', 'bus', 'bike', 'cng', 'car', 'rickshaw', 'walking'].forEach(m => {
       const btn = document.getElementById(`legendBtn_${m}`);
       if (!btn) return;
       if (m === modeName) {
@@ -212,14 +222,9 @@
 
     updateCameraModeBadge(modeName);
 
-    const fareCard = document.getElementById('crossroadsFareComparisonCard');
     const modePill = document.getElementById('crossroadsModePill');
 
-    if (modeName === 'cng_bike_car') {
-      if (modePill) modePill.classList.add('hidden');
-      if (fareCard) fareCard.classList.remove('hidden');
-    } else if (['metro', 'bus', 'rickshaw', 'walking'].includes(modeName)) {
-      if (fareCard) fareCard.classList.add('hidden');
+    if (['metro', 'bus', 'bike', 'cng', 'car', 'rickshaw', 'walking'].includes(modeName)) {
       if (modePill) {
         modePill.classList.remove('hidden');
         const icon = document.getElementById('crossroadsModePillIcon');
@@ -237,6 +242,18 @@
           if (icon) icon.textContent = '🛺';
           if (title) title.textContent = 'Dhaka Traditional Cycle Rickshaw';
           if (sub) sub.textContent = 'Zero-emission local trips inside Mirpur sectors & lanes (Typical ৳25 – ৳60)';
+        } else if (modeName === 'bike') {
+          if (icon) icon.textContent = '🏍️';
+          if (title) title.textContent = 'Ride-share Bike';
+          if (sub) sub.textContent = 'Fast ride-share trips through Dhaka traffic.';
+        } else if (modeName === 'cng') {
+          if (icon) icon.textContent = '🛺';
+          if (title) title.textContent = 'CNG Auto-rickshaw';
+          if (sub) sub.textContent = 'Motorized three-wheeler for comfortable local trips.';
+        } else if (modeName === 'car') {
+          if (icon) icon.textContent = '🚗';
+          if (title) title.textContent = 'Ride-share Car';
+          if (sub) sub.textContent = 'Private car trips with a comfortable ride.';
         } else if (modeName === 'walking') {
           if (icon) icon.textContent = '🚶';
           if (title) title.textContent = 'Zebra Crossings & Pedestrian Walkway';
@@ -244,7 +261,6 @@
         }
       }
     } else {
-      if (fareCard) fareCard.classList.add('hidden');
       if (modePill) modePill.classList.add('hidden');
     }
   }
@@ -271,10 +287,16 @@
       activeTargetVehicle = null;
     }
 
-    if (activeTargetVehicle && activeTargetVehicle.type === 'rickshaw') {
+    if (activeTargetVehicle && activeTargetVehicle.data) {
       const yaw = mouseRelX * Math.PI * 0.9 + 2.0;
-      const pitch = 0.2 + (0.5 - mouseRelY) * 0.72 + 0.06;
-      const pose = getVehicleCameraPose(activeTargetVehicle, yaw, 46, pitch);
+      const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
+        + (activeTargetVehicle.type === 'rickshaw' ? 0.06 : 0);
+      const radius = activeTargetVehicle.type === 'car' ? 62
+        : activeTargetVehicle.type === 'bike' ? 38
+          : activeTargetVehicle.type === 'rickshaw' ? 46
+            : activeTargetVehicle.type === 'cng' ? 48
+              : 82;
+      const pose = getVehicleCameraPose(activeTargetVehicle, yaw, radius, pitch);
       focusCamera(pose.position, pose.look, 1.6);
     } else {
       focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.6);
