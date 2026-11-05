@@ -56,9 +56,9 @@
       badge: 'Drone View'
     },
     cng_bike_car: {
-      pos: { x: 75, y: 38, z: 120 },
-      look: { x: 5, y: 14, z: 10 },
-      badge: 'Tracking Vehicles'
+      pos: { x: 220, y: 440, z: 460 },
+      look: { x: 0, y: 25, z: -35 },
+      badge: 'Vehicle Orbit · Move Pointer'
     },
     metro: {
       pos: { x: -160, y: 140, z: 165 },
@@ -71,9 +71,9 @@
       badge: 'BRTA Bus Lane'
     },
     rickshaw: {
-      pos: { x: 50, y: 30, z: 85 },
-      look: { x: 15, y: 8, z: -5 },
-      badge: 'Cycle Rickshaw'
+      pos: { x: 220, y: 440, z: 460 },
+      look: { x: 0, y: 25, z: -35 },
+      badge: 'Rickshaw Orbit · Move Pointer'
     },
     walking: {
       pos: { x: 0, y: 52, z: 110 },
@@ -94,30 +94,29 @@
       return null;
     }
 
+    let targetTypes = [];
     if (modeName === 'cng_bike_car') {
-      const eligible = Object.values(vehicleMeshMap).filter(vm => {
-        const t = vm.data?.type;
-        return (t === 'car' || t === 'cng' || t === 'bike') && Math.abs((vm.data?.pos || 0) - 600) < 550;
-      });
-      if (eligible.length > 0) {
-        eligible.sort((a, b) => Math.abs((a.data?.pos || 0) - 600) - Math.abs((b.data?.pos || 0) - 600));
-        return { type: eligible[0].data.type, mesh: eligible[0].mesh, data: eligible[0].data };
-      }
+      targetTypes = ['car', 'cng', 'bike'];
     } else if (modeName === 'bus') {
-      const eligible = Object.values(vehicleMeshMap).filter(vm => {
-        return vm.data?.type === 'bus' && Math.abs((vm.data?.pos || 0) - 600) < 550;
-      });
-      if (eligible.length > 0) {
-        eligible.sort((a, b) => Math.abs((a.data?.pos || 0) - 600) - Math.abs((b.data?.pos || 0) - 600));
-        return { type: 'bus', mesh: eligible[0].mesh, data: eligible[0].data };
-      }
+      targetTypes = ['bus'];
     } else if (modeName === 'rickshaw') {
-      const eligible = Object.values(vehicleMeshMap).filter(vm => {
-        return vm.data?.type === 'rickshaw' && Math.abs((vm.data?.pos || 0) - 600) < 550;
-      });
-      if (eligible.length > 0) {
-        eligible.sort((a, b) => Math.abs((a.data?.pos || 0) - 600) - Math.abs((b.data?.pos || 0) - 600));
-        return { type: 'rickshaw', mesh: eligible[0].mesh, data: eligible[0].data };
+      targetTypes = ['rickshaw'];
+    }
+
+    if (targetTypes.length) {
+      const eligible = Object.values(vehicleMeshMap)
+        .filter(vm => vm.mesh && vm.data && targetTypes.includes(vm.data.type))
+        .sort((a, b) => {
+          const centerA = a.data.dir === 'SB' || a.data.dir === 'NB' ? 420 : 600;
+          const centerB = b.data.dir === 'SB' || b.data.dir === 'NB' ? 420 : 600;
+          return Math.abs(a.data.pos - centerA) - Math.abs(b.data.pos - centerB);
+        });
+      if (eligible.length) {
+        return {
+          type: eligible[0].data.type,
+          mesh: eligible[0].mesh,
+          data: eligible[0].data
+        };
       }
     } else if (modeName === 'walking') {
       const eligible = Object.values(pedMeshMap).filter(pm => pm.mesh && pm.data);
@@ -157,6 +156,20 @@
     }
   }
 
+  function updateCameraModeBadge(modeName) {
+    const badge = document.getElementById('crossroadsCamModeBadge');
+    if (!badge || !CAM_MODES[modeName]) return;
+
+    const targetType = activeTargetVehicle && activeTargetVehicle.type;
+    if (['cng_bike_car', 'rickshaw', 'bus'].includes(modeName)) {
+      badge.textContent = targetType
+        ? `${targetType.charAt(0).toUpperCase()}${targetType.slice(1)} · Move Pointer to Orbit`
+        : 'Waiting for vehicle';
+    } else {
+      badge.textContent = CAM_MODES[modeName].badge;
+    }
+  }
+
   function updateLegendHUD(modeName) {
     ['metro', 'bus', 'cng_bike_car', 'rickshaw', 'walking'].forEach(m => {
       const btn = document.getElementById(`legendBtn_${m}`);
@@ -170,10 +183,7 @@
       }
     });
 
-    const badge = document.getElementById('crossroadsCamModeBadge');
-    if (badge && CAM_MODES[modeName]) {
-      badge.textContent = CAM_MODES[modeName].badge;
-    }
+    updateCameraModeBadge(modeName);
 
     const fareCard = document.getElementById('crossroadsFareComparisonCard');
     const modePill = document.getElementById('crossroadsModePill');
@@ -2743,14 +2753,14 @@
     scene.add(rainParticles);
 
     // 14. Interactive Mouse Tracking
-    containerEl.addEventListener('mousemove', (e) => {
+    containerEl.addEventListener('pointermove', (e) => {
       const rect = containerEl.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       mouseRelX = (e.clientX - rect.left) / rect.width - 0.5;
       mouseRelY = (e.clientY - rect.top) / rect.height - 0.5;
     }, { passive: true });
 
-    containerEl.addEventListener('mouseleave', () => {
+    containerEl.addEventListener('pointerleave', () => {
       mouseRelX = 0;
       mouseRelY = 0;
     }, { passive: true });
@@ -2825,7 +2835,17 @@
       drawCalls: renderer && renderer.info ? renderer.info.render.calls : 0,
       triangles: renderer && renderer.info ? renderer.info.render.triangles : 0,
       geometries: renderer && renderer.info ? renderer.info.memory.geometries : 0,
-      textures: renderer && renderer.info ? renderer.info.memory.textures : 0
+      textures: renderer && renderer.info ? renderer.info.memory.textures : 0,
+      focusedVehicle: activeTargetVehicle
+        ? { type: activeTargetVehicle.type, direction: activeTargetVehicle.data?.dir || activeTargetVehicle.dir || null }
+        : null,
+      cameraPosition: camera
+        ? {
+            x: parseFloat(camera.position.x.toFixed(1)),
+            y: parseFloat(camera.position.y.toFixed(1)),
+            z: parseFloat(camera.position.z.toFixed(1))
+          }
+        : null
     };
   };
 
@@ -3438,9 +3458,9 @@
     idleDroneTime += delta;
 
     if (activeCamMode !== 'overview') {
-      // Acquire active vehicle target if needed
-      if (!activeTargetVehicle || (activeTargetVehicle.data && Math.abs((activeTargetVehicle.data.pos || 0) - 600) > 600)) {
+      if (!activeTargetVehicle) {
         activeTargetVehicle = acquireTargetVehicle(activeCamMode);
+        if (activeTargetVehicle) updateCameraModeBadge(activeCamMode);
       }
 
       let desiredCamPos = null;
@@ -3474,27 +3494,33 @@
           };
         }
       } else if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.data) {
-        // GTA-5 Third-Person Follow: Positioned behind vehicle bumper, looking ahead through windshield
         const vPos = activeTargetVehicle.mesh.position;
         const vDir = activeTargetVehicle.data.dir;
-
-        if (vDir === 'EB') {
-          // Eastbound (+X)
-          desiredCamPos = { x: vPos.x - 52, y: vPos.y + 24, z: vPos.z + mouseRelX * 10 };
-          desiredCamLook = { x: vPos.x + 36, y: vPos.y + 5, z: vPos.z };
-        } else if (vDir === 'WB') {
-          // Westbound (-X)
-          desiredCamPos = { x: vPos.x + 52, y: vPos.y + 24, z: vPos.z - mouseRelX * 10 };
-          desiredCamLook = { x: vPos.x - 36, y: vPos.y + 5, z: vPos.z };
-        } else if (vDir === 'SB') {
-          // Southbound (+Z)
-          desiredCamPos = { x: vPos.x + mouseRelX * 10, y: vPos.y + 24, z: vPos.z - 52 };
-          desiredCamLook = { x: vPos.x, y: vPos.y + 5, z: vPos.z + 36 };
-        } else {
-          // Northbound (-Z)
-          desiredCamPos = { x: vPos.x - mouseRelX * 10, y: vPos.y + 24, z: vPos.z + 52 };
-          desiredCamLook = { x: vPos.x, y: vPos.y + 5, z: vPos.z - 36 };
-        }
+        const forward = vDir === 'EB' ? { x: 1, z: 0 }
+          : vDir === 'WB' ? { x: -1, z: 0 }
+            : vDir === 'SB' ? { x: 0, z: 1 }
+              : { x: 0, z: -1 };
+        const right = { x: -forward.z, z: forward.x };
+        const yaw = mouseRelX * Math.PI * 0.9;
+        const pitch = 0.2 + (0.5 - mouseRelY) * 0.72;
+        const radius = activeTargetVehicle.type === 'car' ? 62
+          : activeTargetVehicle.type === 'bike' ? 38
+            : activeTargetVehicle.type === 'cng' || activeTargetVehicle.type === 'rickshaw' ? 48
+              : 82;
+        const horizontalRadius = radius * Math.cos(pitch);
+        const targetX = vPos.x + forward.x * 5;
+        const targetY = vPos.y + 6;
+        const targetZ = vPos.z + forward.z * 5;
+        desiredCamPos = {
+          x: targetX - forward.x * horizontalRadius * Math.cos(yaw) + right.x * horizontalRadius * Math.sin(yaw),
+          y: targetY + radius * Math.sin(pitch),
+          z: targetZ - forward.z * horizontalRadius * Math.cos(yaw) + right.z * horizontalRadius * Math.sin(yaw)
+        };
+        desiredCamLook = {
+          x: targetX + forward.x * 8,
+          y: targetY,
+          z: targetZ + forward.z * 8
+        };
       }
 
       if (desiredCamPos && desiredCamLook) {
