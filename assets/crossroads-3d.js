@@ -2625,177 +2625,111 @@
       group.userData.rickshawPedalPhase = 0;
 
     } else if (type === 'bike') {
-      const bikePaint = new THREE.MeshStandardMaterial({
-        color: colorHex || 0xdc2626,
-        roughness: 0.3,
-        metalness: 0.22
-      });
-      const darkPaint = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.38, metalness: 0.28 });
-      const silverMetal = new THREE.MeshStandardMaterial({ color: 0xb8c3d0, roughness: 0.25, metalness: 0.82 });
-      const accentPaint = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.32, metalness: 0.2 });
+      const length = 26;
+      const width = 8;
 
-      function addFairing(points, material, depth = 4.5, bevel = 0.24) {
-        const shape = new THREE.Shape();
-        shape.moveTo(points[0][0], points[0][1]);
-        points.slice(1).forEach(([x, y]) => shape.lineTo(x, y));
-        shape.closePath();
-        const fairing = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, {
-          depth,
-          bevelEnabled: true,
-          bevelSegments: 2,
-          steps: 1,
-          bevelSize: bevel,
-          bevelThickness: bevel
-        }), material);
-        fairing.position.z = -depth / 2;
-        fairing.castShadow = true;
-        group.add(fairing);
-        return fairing;
-      }
+      // 1. Double-Cradle Tubular Steel Frame
+      const frameGeo = new THREE.CylinderGeometry(0.45, 0.45, 11, 8);
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+      const frame = new THREE.Mesh(frameGeo, frameMat);
+      frame.rotation.z = Math.PI / 3.4;
+      frame.position.set(2.8, 5.5, 0);
+      group.add(frame);
 
-      const fairingProfile = [
-        [-9.8, 4.2], [-8.0, 7.0], [-4.6, 8.0], [-1.6, 7.2],
-        [2.4, 7.6], [6.8, 8.2], [10.8, 7.1], [12.4, 5.4],
-        [10.0, 4.7], [5.0, 3.8], [0.6, 3.2], [-4.2, 3.5], [-8.4, 3.8]
-      ];
-      addFairing(fairingProfile, darkPaint, 4.6, 0.28);
-      addFairing([
-        [-8.8, 4.9], [-7.0, 6.9], [-4.4, 7.4], [-1.4, 6.7],
-        [2.8, 7.1], [7.6, 7.6], [10.8, 6.7], [8.8, 5.2],
-        [4.1, 4.8], [-0.2, 4.0], [-4.6, 4.1]
-      ], bikePaint, 4.9, 0.2);
-      [-1, 1].forEach(side => {
-        const stripe = new THREE.Mesh(new THREE.BoxGeometry(12.2, 0.34, 0.12), accentPaint);
-        stripe.position.set(1.2, 5.5, side * 2.53);
-        stripe.rotation.z = -0.12;
-        group.add(stripe);
-      });
-
-      // Sculpted tank and stepped seat form a recognizable sport-bike silhouette.
-      const tank = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10), bikePaint);
-      tank.scale.set(4.0, 1.75, 2.45);
-      tank.position.set(0.2, 7.65, 0);
+      // Streamlined Sculpted Fuel Tank
+      const tankGeo = new THREE.BoxGeometry(8.5, 3.4, 4.4);
+      const tankMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x38bdf8, roughness: 0.3 });
+      const tank = new THREE.Mesh(tankGeo, tankMat);
+      tank.position.set(1.5, 6.8, 0);
       group.add(tank);
-      const tankCap = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.12, 12), silverMetal);
-      tankCap.position.set(-0.2, 9.35, 0);
-      group.add(tankCap);
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.35, 4.0), darkPaint);
-      seat.position.set(-5.4, 7.0, 0);
-      seat.rotation.z = 0.06;
+
+      // Metallic Engine Block with Cooling Fins
+      const engGeo = new THREE.BoxGeometry(6.2, 3.2, 3.8);
+      const eng = new THREE.Mesh(engGeo, vehicleBumperMat);
+      eng.position.set(0.5, 3.8, 0);
+      group.add(eng);
+
+      // Chrome Exhaust Pipe & Muffler (Right side)
+      const exhGeo = new THREE.CylinderGeometry(0.35, 0.45, 10, 8);
+      const exhMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.85, roughness: 0.2 });
+      const exh = new THREE.Mesh(exhGeo, exhMat);
+      exh.rotation.z = Math.PI / 2;
+      exh.position.set(-3.5, 2.2, -2.3);
+      group.add(exh);
+
+      // 2. Commuter Seat & Commuter Rider Figure
+      const seatGeo = new THREE.BoxGeometry(10.5, 1.8, 4.0);
+      const seatMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.8 });
+      const seat = new THREE.Mesh(seatGeo, seatMat);
+      seat.position.set(-3.2, 6.4, 0);
       group.add(seat);
-      const tail = new THREE.Mesh(new THREE.BoxGeometry(4.8, 2.0, 4.2), bikePaint);
-      tail.position.set(-9.0, 7.8, 0);
-      tail.rotation.z = -0.18;
-      group.add(tail);
 
-      // Finite metallic engine, frame rails, and a visible exhaust on each flank.
-      const engine = new THREE.Mesh(new THREE.BoxGeometry(5.5, 3.8, 4.0), silverMetal);
-      engine.position.set(-0.1, 3.9, 0);
-      group.add(engine);
-      for (let fin = 0; fin < 5; fin++) {
-        const coolingFin = new THREE.Mesh(new THREE.BoxGeometry(5.1, 0.16, 4.35), darkPaint);
-        coolingFin.position.set(-0.1, 2.7 + fin * 0.5, 0);
-        group.add(coolingFin);
-      }
-      [-1, 1].forEach(side => {
-        addVehicleBeam([-8.1, 3.4, side * 1.5], [-1.2, 4.9, side * 1.4], 0.28, silverMetal);
-        const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.62, 8.0, 10), silverMetal);
-        exhaust.rotation.z = Math.PI / 2;
-        exhaust.position.set(-4.3, 2.8, side * 2.15);
-        group.add(exhaust);
-        const mufflerTip = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.16, 10), darkPaint);
-        mufflerTip.rotation.z = Math.PI / 2;
-        mufflerTip.position.set(-8.35, 2.8, side * 2.15);
-        group.add(mufflerTip);
-      });
-
-      // Sportbike rider leaning over the tank, wearing a full-face helmet.
-      const riderGeo = new THREE.BoxGeometry(2.8, 4.8, 3.2);
+      // Commuter Rider with Helmet (leaning naturally forward)
+      const riderGeo = new THREE.BoxGeometry(2.4, 4.6, 2.4);
       const riderShirts = [0x0f172a, 0x7c2d12, 0x1e3a8a, 0x166534, 0x7e22ce, 0x9f1239];
       const riderMat = new THREE.MeshStandardMaterial({
         color: riderShirts[appearanceSeed % riderShirts.length]
       });
       const rider = new THREE.Mesh(riderGeo, riderMat);
-      rider.position.set(-1.0, 9.3, 0);
-      rider.rotation.z = -0.52;
+      rider.position.set(-1.2, 9.4, 0);
+      rider.rotation.z = -0.15;
       group.add(rider);
 
-      const helmGeo = new THREE.SphereGeometry(1.8, 12, 10);
-      const helmMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xdc2626, roughness: 0.2, metalness: 0.2 });
+      const helmGeo = new THREE.SphereGeometry(1.5, 8, 8);
+      const helmMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x38bdf8, roughness: 0.2 });
       const helm = new THREE.Mesh(helmGeo, helmMat);
-      helm.scale.set(1.05, 1.12, 0.92);
-      helm.position.set(1.6, 12.1, 0);
+      helm.position.set(-0.5, 13.2, 0);
       group.add(helm);
-      const visor = new THREE.Mesh(
-        new THREE.SphereGeometry(1.52, 12, 8, 0, Math.PI, 0.05, Math.PI * 0.48),
-        new THREE.MeshStandardMaterial({ color: 0x26394b, roughness: 0.16, metalness: 0.42 })
-      );
-      visor.scale.set(1.1, 0.68, 0.95);
-      visor.rotation.z = -0.12;
-      visor.position.set(2.6, 11.95, 0);
-      group.add(visor);
 
-      // Bent arms reach the clip-on bars; paired forks and mirrors frame the front cowl.
+      // Rider Arms extending to handlebars
+      const rArmGeo = new THREE.BoxGeometry(3.6, 0.7, 0.7);
       [-1, 1].forEach(side => {
-        addVehicleBeam([0.0, 10.4, side * 1.25], [4.3, 8.5, side * 1.65], 0.48, riderMat);
-        addVehicleBeam([4.3, 8.5, side * 1.65], [6.2, 9.15, side * 1.7], 0.38, riderMat);
-        addVehicleBeam([4.2, 7.7, side * 1.6], [9.6, 4.2, side * 1.15], 0.28, silverMetal);
-        const mirrorStem = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.3, 6), darkPaint);
-        mirrorStem.rotation.z = -0.48;
-        mirrorStem.position.set(5.4, 10.8, side * 2.3);
-        group.add(mirrorStem);
-        const mirror = new THREE.Mesh(new THREE.SphereGeometry(0.58, 8, 6), darkPaint);
-        mirror.scale.set(0.45, 0.7, 1.15);
-        mirror.position.set(6.2, 12.0, side * 2.6);
-        group.add(mirror);
+        const arm = new THREE.Mesh(rArmGeo, riderMat);
+        arm.position.set(2.2, 9.0, side * 2.0);
+        group.add(arm);
       });
 
-      const frontCowl = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), bikePaint);
-      frontCowl.scale.set(2.1, 2.15, 2.25);
-      frontCowl.position.set(9.2, 8.0, 0);
-      group.add(frontCowl);
-      const windshield = new THREE.Mesh(
-        new THREE.SphereGeometry(1, 12, 8, 0, Math.PI, 0, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color: 0x647b8d, roughness: 0.16, metalness: 0.35, transparent: true, opacity: 0.72 })
-      );
-      windshield.scale.set(1.8, 2.2, 2.0);
-      windshield.rotation.z = -0.22;
-      windshield.position.set(8.2, 10.2, 0);
-      group.add(windshield);
-      [-1, 1].forEach(side => {
-        const headlamp = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.95, 1.15), vehicleHeadlightMat);
-        headlamp.position.set(11.13, 7.35, side * 0.92);
-        group.add(headlamp);
-      });
-      const barGeo = new THREE.BoxGeometry(0.7, 0.7, 6.4);
-      const bar = new THREE.Mesh(barGeo, darkPaint);
-      bar.position.set(5.5, 9.0, 0);
+      // 3. Front Telescopic Fork & Handlebars with Dual Mirrors
+      const forkGeo = new THREE.CylinderGeometry(0.45, 0.45, 7.2, 6);
+      const fork = new THREE.Mesh(forkGeo, vehicleBumperMat);
+      fork.rotation.z = -0.25;
+      fork.position.set(6.8, 6.0, 0);
+      group.add(fork);
+
+      const barGeo = new THREE.BoxGeometry(0.8, 0.8, 6.8);
+      const bar = new THREE.Mesh(barGeo, vehicleBumperMat);
+      bar.position.set(5.6, 9.0, 0);
       group.add(bar);
 
-      // Wheels with alloy rims, brake rotors, and front/rear fenders.
-      [-8.0, 8.0].forEach(px => {
-        addVehicleWheel(px, 3.0, 0, 3.0, 1.1);
-        [-1, 1].forEach(side => {
-          const rotor = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.18, 20), silverMetal);
-          rotor.rotation.x = Math.PI / 2;
-          rotor.position.set(px, 3.0, side * 0.62);
-          group.add(rotor);
-          const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.3, 12), darkPaint);
-          hub.rotation.x = Math.PI / 2;
-          hub.position.set(px, 3.0, side * 0.74);
-          group.add(hub);
-        });
+      // Dual Rearview Mirrors
+      const mirGeo = new THREE.BoxGeometry(0.8, 1.2, 0.8);
+      [-1, 1].forEach(side => {
+        const mir = new THREE.Mesh(mirGeo, vehicleBumperMat);
+        mir.position.set(5.8, 9.8, side * 3.6);
+        group.add(mir);
       });
 
-      [-1, 1].forEach(side => {
-        const fender = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8, 0, Math.PI), bikePaint);
-        fender.scale.set(4.2, 1.0, 1.15);
-        fender.position.set(8.0, 5.3, side * 0.05);
-        group.add(fender);
+      // 4. Wheels with Mudguards touching ground (radius 3.0, center y = 3.0)
+      [-8.0, 8.0].forEach(px => {
+        addVehicleWheel(px, 3.0, 0, 3.0, 1.1);
       });
-      const tailLight = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.55, 2.4), vehicleTaillightMat);
-      tailLight.position.set(-11.25, 7.45, 0);
-      group.add(tailLight);
+
+      // Front Mudguard
+      const fFendGeo = new THREE.BoxGeometry(4.5, 0.8, 1.8);
+      const fFend = new THREE.Mesh(fFendGeo, vehicleBumperMat);
+      fFend.position.set(8.0, 4.6, 0);
+      group.add(fFend);
+
+      // 5. Lighting
+      const hlGeo = new THREE.BoxGeometry(1.2, 1.8, 1.8);
+      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+      hl.position.set(9.0, 6.4, 0);
+      group.add(hl);
+
+      const tlGeo = new THREE.BoxGeometry(0.8, 1.4, 1.4);
+      const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
+      tl.position.set(-9.0, 5.5, 0);
+      group.add(tl);
     }
 
     scene.add(group);
@@ -3580,7 +3514,7 @@
       if (!activeTargetVehicle) return;
 
       e.preventDefault();
-      vehicleOrbitYaw += e.key === 'ArrowLeft' ? -Math.PI / 4 : Math.PI / 4;
+      vehicleOrbitYaw += e.key === 'ArrowLeft' ? Math.PI / 4 : -Math.PI / 4;
     });
 
     window.addEventListener('resize', onResize);
@@ -4107,7 +4041,7 @@
           w.rotation.z += rollAngle;
         });
         if (vm.mesh.userData.pedalCrank) {
-          vm.mesh.userData.pedalCrank.rotation.z += rollAngle * 0.72;
+          vm.mesh.userData.pedalCrank.rotation.z -= rollAngle * 0.72;
           if (vm.mesh.userData.updatePedaling) {
             vm.mesh.userData.updatePedaling(vm.mesh.userData.pedalCrank.rotation.z);
           }
