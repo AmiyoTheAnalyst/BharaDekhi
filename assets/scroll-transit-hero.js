@@ -184,10 +184,12 @@
   }
 
   // 1. Aerodynamic Sports Car
-  function buildCar() {
+  function buildCar(colorHex) {
     const car = new THREE.Group();
     // Body lower chassis
-    const body = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.75, 1.9), carPaintMat);
+    const bodyMaterial = carPaintMat.clone();
+    if (colorHex) bodyMaterial.color.setHex(colorHex);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.75, 1.9), bodyMaterial);
     body.position.y = 0.55;
     car.add(body);
     // Cabin canopy
@@ -679,7 +681,7 @@
     }
 
     const streetFixtureMat = new THREE.MeshStandardMaterial({ color: 0x353b47, roughness: 0.65, metalness: 0.5 });
-    const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xffdca1 });
+    const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xffc66e });
     const lampPoleGeo = new THREE.CylinderGeometry(0.07, 0.11, 6.4, 8);
     const lampHeadGeo = new THREE.BoxGeometry(0.95, 0.13, 0.24);
     for (let lampIndex = 0; lampIndex < 7; lampIndex++) {
@@ -696,7 +698,7 @@
         lamp.position.set(lampX - side * 0.92, 6.18, z);
         cityGroup.add(lamp);
         if (lampIndex % 2 === 0) {
-          const light = new THREE.PointLight(0xffcf8a, 1.2, 15, 2);
+          const light = new THREE.PointLight(0xffbd66, 2.0, 19, 2);
           light.position.set(lampX - side * 0.92, 5.95, z);
           cityGroup.add(light);
         }
@@ -718,14 +720,50 @@
     }
 
     const towerMaterials = [
-      0x171d34, 0x1b1c34, 0x1a2539, 0x202039, 0x172938
+      0x8c5148, 0x38716e, 0x8a7047, 0x67517d, 0x3c6387, 0x58764f, 0x874c61
     ].map(color => new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.58,
-      metalness: 0.42,
-      emissive: 0x10182b,
-      emissiveIntensity: 0.32
+      roughness: 0.68,
+      metalness: 0.2,
+      emissive: color,
+      emissiveIntensity: 0.3
     }));
+    const buildingNames = [
+      'Gulshan Heights', 'Dhanmondi Plaza', 'Mirpur Tower', 'Motijheel House',
+      'Karwan Bazar', 'Tejgaon Point', 'Uttara Square', 'Banani Arcade',
+      'Shapla Market', 'Lalbagh Plaza', 'Bijoy Sarani', 'Bashundhara View',
+      'Farmgate Center', 'Hatirjheel House', 'New Market', 'Mohakhali Tower',
+      'Azimpur Court', 'Paltan Building'
+    ];
+    const buildingSignColors = ['#9a542f', '#17635e', '#5b478b', '#a34351', '#356287'];
+    function createBuildingSignTexture(name, color) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 112;
+      const context = canvas.getContext('2d');
+      if (!context) return null;
+
+      context.fillStyle = '#171521';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = color;
+      context.fillRect(8, 8, canvas.width - 16, canvas.height - 16);
+      context.strokeStyle = '#ffe0a6';
+      context.lineWidth = 5;
+      context.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+      context.fillStyle = '#fff4dc';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.font = 'bold 42px Segoe UI, sans-serif';
+      while (context.measureText(name).width > canvas.width - 42) {
+        const fontSize = Number(context.font.match(/\d+/)[0]) - 2;
+        if (fontSize < 22) break;
+        context.font = `bold ${fontSize}px Segoe UI, sans-serif`;
+      }
+      context.fillText(name, canvas.width / 2, canvas.height / 2);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.encoding = THREE.sRGBEncoding;
+      return texture;
+    }
     const towerEdgeMaterials = [
       new THREE.MeshBasicMaterial({ color: 0x16d9d2 }),
       new THREE.MeshBasicMaterial({ color: 0x8b5cf6 }),
@@ -788,6 +826,21 @@
           );
           stripe.position.set(faceX, height * 0.51, depth * 0.32);
           building.add(stripe);
+
+          const buildingName = `${buildingNames[towerCount % buildingNames.length]} ${String(towerCount + 1).padStart(2, '0')}`;
+          const signTexture = createBuildingSignTexture(
+            buildingName,
+            buildingSignColors[towerCount % buildingSignColors.length]
+          );
+          if (signTexture) {
+            const sign = new THREE.Mesh(
+              new THREE.PlaneGeometry(Math.min(depth * 0.84, 6.8), 1.5),
+              new THREE.MeshBasicMaterial({ map: signTexture, side: THREE.DoubleSide })
+            );
+            sign.position.set(faceX * 1.02, Math.min(height - 1.2, Math.max(2.5, height * 0.3)), 0);
+            sign.rotation.y = side === -1 ? Math.PI / 2 : -Math.PI / 2;
+            building.add(sign);
+          }
 
           if (height > 18 && col % 2 === 0) {
             const antenna = new THREE.Mesh(
@@ -908,14 +961,40 @@
     const unavailable = [];
     const builtInModels = [];
     const builtInLabels = {
+      bike: 'motorbike',
       cng: 'CNG auto-rickshaw',
-      rickshaw: 'passenger cycle rickshaw'
+      corolla: 'colorful cars',
+      camry: 'colorful cars',
+      prius: 'colorful cars',
+      axio: 'colorful cars',
+      noah: 'colorful cars',
+      civic: 'colorful cars',
+      city: 'colorful cars',
+      vezel: 'colorful cars',
+      crv: 'colorful cars',
+      sports: 'colorful cars',
+      rickshaw: 'passenger cycle rickshaw',
+      bus: 'city bus'
     };
 
     function attachBuiltInModel(spec, actor, traffic) {
-      const model = spec.key === 'cng'
-        ? buildCNG()
-        : (spec.key === 'rickshaw' ? buildRickshaw() : null);
+      const carColors = {
+        corolla: 0xe9a33b,
+        camry: 0x4c79bd,
+        prius: 0x61a178,
+        axio: 0xe4ddca,
+        noah: 0x9a668f,
+        civic: 0xd95146,
+        city: 0x387d83,
+        vezel: 0xb1b5bf,
+        crv: 0x95764a,
+        sports: 0xd34f8b
+      };
+      const model = spec.key === 'bike' ? buildBike()
+        : spec.key === 'cng' ? buildCNG()
+          : spec.key === 'rickshaw' ? buildRickshaw()
+            : spec.key === 'bus' ? buildBus()
+              : carColors[spec.key] ? buildCar(carColors[spec.key]) : null;
       if (!model) return false;
 
       model.rotation.y = Math.PI / 2;
@@ -949,7 +1028,7 @@
         return;
       }
       const builtInSummary = builtInModels.length
-        ? ` Built-in local models: ${builtInModels.join(' and ')}.`
+        ? ` Built-in local models: ${Array.from(new Set(builtInModels)).join(', ')}.`
         : '';
       if (unavailable.length) {
         setVehicleAssetStatus(
@@ -993,7 +1072,7 @@
         const laneOffsets = [0, 0, 0, 0];
 
         vehicleAssetSpecs.forEach(spec => {
-          const shouldUseBuiltIn = (spec.key === 'cng' || spec.key === 'rickshaw')
+          const shouldUseBuiltIn = spec.key !== 'metro'
             && (!available.has(spec.file) || !loader);
           if (!available.has(spec.file) && !shouldUseBuiltIn) {
             unavailable.push(spec.file);
@@ -1292,6 +1371,7 @@
     if (!canvasEl) return;
 
     clock = new THREE.Clock();
+    initMaterials();
     buildScene();
     loadVehicleAssets();
     storyStageCards = Array.from(document.querySelectorAll('#storyHeroCardsContainer > section'));

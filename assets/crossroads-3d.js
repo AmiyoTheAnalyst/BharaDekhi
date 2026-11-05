@@ -3514,7 +3514,7 @@
       if (!activeTargetVehicle) return;
 
       e.preventDefault();
-      vehicleOrbitYaw += e.key === 'ArrowLeft' ? Math.PI / 4 : -Math.PI / 4;
+      vehicleOrbitYaw += e.key === 'ArrowLeft' ? -Math.PI / 4 : Math.PI / 4;
     });
 
     window.addEventListener('resize', onResize);
@@ -4041,7 +4041,7 @@
           w.rotation.z += rollAngle;
         });
         if (vm.mesh.userData.pedalCrank) {
-          vm.mesh.userData.pedalCrank.rotation.z += rollAngle * 0.72;
+          vm.mesh.userData.pedalCrank.rotation.z -= rollAngle * 0.72;
           if (vm.mesh.userData.updatePedaling) {
             vm.mesh.userData.updatePedaling(vm.mesh.userData.pedalCrank.rotation.z);
           }
