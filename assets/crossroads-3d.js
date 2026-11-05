@@ -193,6 +193,19 @@
     };
   }
 
+  function getVehicleOrbitPose(target) {
+    const yaw = mouseRelX * Math.PI * 2 + 2.0;
+    const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
+      + (target.type === 'rickshaw' ? 0.06 : 0);
+    const radius = target.type === 'car' ? 62
+      : target.type === 'bike' ? 38
+        : target.type === 'rickshaw' ? 46
+          : target.type === 'cng' ? 48
+            : 82;
+
+    return getVehicleCameraPose(target, yaw, radius, pitch);
+  }
+
   function updateCameraModeBadge(modeName) {
     const badge = document.getElementById('crossroadsCamModeBadge');
     if (!badge || !CAM_MODES[modeName]) return;
@@ -288,15 +301,7 @@
     }
 
     if (activeTargetVehicle && activeTargetVehicle.data) {
-      const yaw = mouseRelX * Math.PI * 0.9 + 2.0;
-      const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
-        + (activeTargetVehicle.type === 'rickshaw' ? 0.06 : 0);
-      const radius = activeTargetVehicle.type === 'car' ? 62
-        : activeTargetVehicle.type === 'bike' ? 38
-          : activeTargetVehicle.type === 'rickshaw' ? 46
-            : activeTargetVehicle.type === 'cng' ? 48
-              : 82;
-      const pose = getVehicleCameraPose(activeTargetVehicle, yaw, radius, pitch);
+      const pose = getVehicleOrbitPose(activeTargetVehicle);
       focusCamera(pose.position, pose.look, 1.6);
     } else {
       focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.6);
@@ -3932,16 +3937,7 @@
           };
         }
       } else if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.data) {
-        const yaw = mouseRelX * Math.PI * 0.9
-          + (activeTargetVehicle.type === 'rickshaw' ? 2.0 : 0);
-        const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
-          + (activeTargetVehicle.type === 'rickshaw' ? 0.06 : 0);
-        const radius = activeTargetVehicle.type === 'car' ? 62
-          : activeTargetVehicle.type === 'bike' ? 38
-            : activeTargetVehicle.type === 'rickshaw' ? 46
-              : activeTargetVehicle.type === 'cng' ? 48
-                : 82;
-        const pose = getVehicleCameraPose(activeTargetVehicle, yaw, radius, pitch);
+        const pose = getVehicleOrbitPose(activeTargetVehicle);
         desiredCamPos = pose.position;
         desiredCamLook = pose.look;
       }
