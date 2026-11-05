@@ -222,6 +222,115 @@ export default function ScrollTransitHero({ plannerId = 'planner' }) {
     masterGroup.add(rainParticles);
 
     // -------------------------------------------------------------
+    // Live Bidirectional Dhaka Traffic Road (Both sides of road)
+    // -------------------------------------------------------------
+    const trafficGroup = new THREE.Group();
+    scene.add(trafficGroup);
+
+    // 4-Lane Asphalt Road
+    const roadMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(16, 140),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85, metalness: 0.1 })
+    );
+    roadMesh.rotation.x = -Math.PI / 2;
+    roadMesh.position.set(0, -0.05, 0);
+    trafficGroup.add(roadMesh);
+
+    // Center divider double yellow line
+    [-0.15, 0.15].forEach(x => {
+      const line = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.08, 140),
+        new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+      );
+      line.rotation.x = -Math.PI / 2;
+      line.position.set(x, -0.04, 0);
+      trafficGroup.add(line);
+    });
+
+    // Dashed lane lines at x: -3.8 and +3.8
+    for (let z = 65; z > -75; z -= 7) {
+      [-3.8, 3.8].forEach(x => {
+        const dash = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.12, 3.2),
+          new THREE.MeshBasicMaterial({ color: 0x94a3b8 })
+        );
+        dash.rotation.x = -Math.PI / 2;
+        dash.position.set(x, -0.04, z);
+        trafficGroup.add(dash);
+      });
+    }
+
+    // Live Traffic Fleet: 16 vehicles running in both directions on both sides
+    const trafficVehicles = [];
+    const laneX = [-5.6, -1.9, 1.9, 5.6];
+    const laneDir = [1, 1, -1, -1]; // West lanes move +Z (towards camera), East lanes move -Z (away from camera)
+    const liveTrafficSpecs = [
+      // West Side (Southbound, towards camera, direction: 1)
+      { lane: 0, type: 'cng', color: 0x16a34a, speed: 6.2, z: 45 },
+      { lane: 1, type: 'bike', color: 0xef4444, speed: 8.0, z: 32 },
+      { lane: 0, type: 'car', color: 0x3b82f6, speed: 6.8, z: 18 },
+      { lane: 1, type: 'car', color: 0x10b981, speed: 7.0, z: 2 },
+      { lane: 0, type: 'rickshaw', color: 0xf59e0b, speed: 4.8, z: -14 },
+      { lane: 1, type: 'bike', color: 0x38bdf8, speed: 8.2, z: -28 },
+      { lane: 0, type: 'bus', color: 0xd95146, speed: 5.6, z: -44 },
+      { lane: 1, type: 'car', color: 0xf8fafc, speed: 7.2, z: -58 },
+
+      // East Side (Northbound, away from camera, direction: -1)
+      { lane: 2, type: 'car', color: 0xe9a33b, speed: 7.1, z: 42 },
+      { lane: 3, type: 'cng', color: 0x16a34a, speed: 6.0, z: 26 },
+      { lane: 2, type: 'bike', color: 0xef4444, speed: 8.3, z: 12 },
+      { lane: 3, type: 'bus', color: 0x059669, speed: 5.4, z: -4 },
+      { lane: 2, type: 'car', color: 0x8b5cf6, speed: 6.9, z: -18 },
+      { lane: 3, type: 'rickshaw', color: 0xec4899, speed: 4.6, z: -34 },
+      { lane: 2, type: 'bike', color: 0x06b6d4, speed: 8.1, z: -48 },
+      { lane: 3, type: 'cng', color: 0x16a34a, speed: 6.1, z: -64 }
+    ];
+
+    liveTrafficSpecs.forEach(spec => {
+      const vGroup = new THREE.Group();
+      let vMesh;
+      if (spec.type === 'bike') {
+        vMesh = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 1.8), new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.3 }));
+        vMesh.position.y = 0.35;
+      } else if (spec.type === 'cng') {
+        vMesh = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.1, 2.4), new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.4 }));
+        vMesh.position.y = 0.6;
+      } else if (spec.type === 'rickshaw') {
+        vMesh = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 2.2), new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.5 }));
+        vMesh.position.y = 0.55;
+      } else if (spec.type === 'bus') {
+        vMesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.7, 7.5), new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.3 }));
+        vMesh.position.y = 1.0;
+      } else {
+        vMesh = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.7, 4.0), new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.25, metalness: 0.4 }));
+        vMesh.position.y = 0.5;
+      }
+      vGroup.add(vMesh);
+
+      // Headlight (white)
+      const hlMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const hl = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.15, 0.1), hlMat);
+      hl.position.set(0, 0.4, laneDir[spec.lane] > 0 ? 1.5 : -1.5);
+      vGroup.add(hl);
+
+      // Taillight (ruby red)
+      const tlMat = new THREE.MeshBasicMaterial({ color: 0xff1e27 });
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.15, 0.1), tlMat);
+      tl.position.set(0, 0.4, laneDir[spec.lane] > 0 ? -1.5 : 1.5);
+      vGroup.add(tl);
+
+      vGroup.position.set(laneX[spec.lane], 0, spec.z);
+      trafficGroup.add(vGroup);
+
+      trafficVehicles.push({
+        group: vGroup,
+        direction: laneDir[spec.lane],
+        speed: spec.speed,
+        z: spec.z
+      });
+    });
+
+    // -------------------------------------------------------------
     // 4. GSAP ScrollTrigger Choreography (500vh Scrubbed Timeline)
     // -------------------------------------------------------------
     const isMobile = window.innerWidth < 768;
@@ -383,6 +492,14 @@ export default function ScrollTransitHero({ plannerId = 'planner' }) {
         }
         rainGeo.attributes.position.needsUpdate = true;
       }
+
+      // Animate live traffic vehicles running on both sides of the road
+      trafficVehicles.forEach(tv => {
+        tv.z += tv.direction * tv.speed * delta;
+        if (tv.direction > 0 && tv.z > 65) tv.z = -75;
+        if (tv.direction < 0 && tv.z < -75) tv.z = 65;
+        tv.group.position.z = tv.z;
+      });
 
       renderer.render(scene, camera);
     };

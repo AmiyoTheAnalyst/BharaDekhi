@@ -56,21 +56,53 @@
     .map(color => new THREE.Color(color));
   const interpolatedLightColor = new THREE.Color();
   const vehicleAssetSpecs = [
-    { key: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0 },
-    { key: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 1 },
-    { key: 'corolla', file: 'toyota-corolla.glb', targetLength: 4.5, lane: 2 },
-    { key: 'camry', file: 'toyota-camry.glb', targetLength: 4.9, lane: 3 },
-    { key: 'prius', file: 'toyota-prius.glb', targetLength: 4.5, lane: 0 },
-    { key: 'axio', file: 'toyota-axio.glb', targetLength: 4.3, lane: 1 },
-    { key: 'noah', file: 'toyota-noah.glb', targetLength: 4.8, lane: 2 },
-    { key: 'civic', file: 'honda-civic.glb', targetLength: 4.7, lane: 3 },
-    { key: 'city', file: 'honda-city.glb', targetLength: 4.4, lane: 0 },
-    { key: 'vezel', file: 'honda-vezel.glb', targetLength: 4.5, lane: 1 },
-    { key: 'crv', file: 'honda-cr-v.glb', targetLength: 4.7, lane: 2 },
-    { key: 'sports', file: 'sports-coupe.glb', targetLength: 4.5, lane: 3 },
-    { key: 'rickshaw', file: 'cycle-rickshaw.glb', targetLength: 3.2, lane: 0 },
-    { key: 'bus', file: 'dhaka-city-bus.glb', targetLength: 9, lane: 2 },
-    { key: 'metro', file: 'mrt-line-6-train.glb', targetLength: 18, lane: 1 }
+    // Lane 0: West Inner (Southbound, towards camera, direction: 1, x: -2.05) - Fast mix: Bikes, Sedans, Coupes
+    { key: 'bike_w1', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.2, color: 0xef4444 },
+    { key: 'corolla_w1', type: 'corolla', file: 'toyota-corolla.glb', targetLength: 4.5, lane: 0, speed: 6.2, color: 0x0047ab },
+    { key: 'prius_w1', type: 'prius', file: 'toyota-prius.glb', targetLength: 4.5, lane: 0, speed: 6.0, color: 0x10b981 },
+    { key: 'bike_w2', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.4, color: 0x3b82f6 },
+    { key: 'city_w1', type: 'city', file: 'honda-city.glb', targetLength: 4.4, lane: 0, speed: 6.3, color: 0x387d83 },
+    { key: 'sports_w1', type: 'sports', file: 'sports-coupe.glb', targetLength: 4.5, lane: 0, speed: 6.8, color: 0xd34f8b },
+    { key: 'bike_w3', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.1, color: 0xf59e0b },
+    { key: 'civic_w1', type: 'civic', file: 'honda-civic.glb', targetLength: 4.7, lane: 0, speed: 6.4, color: 0xf8fafc },
+    { key: 'camry_w1', type: 'camry', file: 'toyota-camry.glb', targetLength: 4.9, lane: 0, speed: 6.1, color: 0x1e3a8a },
+
+    // Lane 1: West Outer (Southbound, towards camera, direction: 1, x: -5.55) - Local & Transit: CNGs, Rickshaws, Microbus, Buses
+    { key: 'cng_w1', type: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 1, speed: 5.4, color: 0x16a34a },
+    { key: 'rickshaw_w1', type: 'rickshaw', file: 'cycle-rickshaw.glb', targetLength: 3.2, lane: 1, speed: 4.2, color: 0x0878d1 },
+    { key: 'axio_w1', type: 'axio', file: 'toyota-axio.glb', targetLength: 4.3, lane: 1, speed: 5.7, color: 0xe2e8f0 },
+    { key: 'cng_w2', type: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 1, speed: 5.3, color: 0x16a34a },
+    { key: 'noah_w1', type: 'noah', file: 'toyota-noah.glb', targetLength: 4.8, lane: 1, speed: 5.5, color: 0x64748b },
+    { key: 'rickshaw_w2', type: 'rickshaw', file: 'cycle-rickshaw.glb', targetLength: 3.2, lane: 1, speed: 4.0, color: 0xd97706 },
+    { key: 'vezel_w1', type: 'vezel', file: 'honda-vezel.glb', targetLength: 4.5, lane: 1, speed: 5.8, color: 0x334155 },
+    { key: 'cng_w3', type: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 1, speed: 5.2, color: 0x16a34a },
+    { key: 'bus_w1', type: 'bus', file: 'dhaka-city-bus.glb', targetLength: 9.0, lane: 1, speed: 5.0, color: 0xef4444 },
+
+    // Lane 2: East Inner (Northbound, away from camera, direction: -1, x: 2.05) - Fast mix: Sedans, Bikes, BRTA Bus, SUVs
+    { key: 'corolla_e1', type: 'corolla', file: 'toyota-corolla.glb', targetLength: 4.5, lane: 2, speed: 6.2, color: 0xe9a33b },
+    { key: 'bike_e1', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 2, speed: 7.3, color: 0xef4444 },
+    { key: 'bus_e1', type: 'bus', file: 'dhaka-city-bus.glb', targetLength: 9.0, lane: 2, speed: 5.1, color: 0x059669 },
+    { key: 'civic_e1', type: 'civic', file: 'honda-civic.glb', targetLength: 4.7, lane: 2, speed: 6.5, color: 0xd95146 },
+    { key: 'prius_e1', type: 'prius', file: 'toyota-prius.glb', targetLength: 4.5, lane: 2, speed: 6.0, color: 0x61a178 },
+    { key: 'bike_e2', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 2, speed: 7.2, color: 0x06b6d4 },
+    { key: 'crv_e1', type: 'crv', file: 'honda-cr-v.glb', targetLength: 4.7, lane: 2, speed: 6.0, color: 0x95764a },
+    { key: 'sports_e1', type: 'sports', file: 'sports-coupe.glb', targetLength: 4.5, lane: 2, speed: 6.7, color: 0x8b5cf6 },
+    { key: 'city_e1', type: 'city', file: 'honda-city.glb', targetLength: 4.4, lane: 2, speed: 6.3, color: 0x0284c7 },
+
+    // Lane 3: East Outer (Northbound, away from camera, direction: -1, x: 5.55) - Local & Transit: CNGs, Rickshaws, Microbus, Buses, Sedans
+    { key: 'cng_e1', type: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 3, speed: 5.3, color: 0x16a34a },
+    { key: 'camry_e1', type: 'camry', file: 'toyota-camry.glb', targetLength: 4.9, lane: 3, speed: 5.7, color: 0x4c79bd },
+    { key: 'rickshaw_e1', type: 'rickshaw', file: 'cycle-rickshaw.glb', targetLength: 3.2, lane: 3, speed: 4.1, color: 0xec4899 },
+    { key: 'bus_e2', type: 'bus', file: 'dhaka-city-bus.glb', targetLength: 9.0, lane: 3, speed: 5.0, color: 0xd95146 },
+    { key: 'cng_e2', type: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 3, speed: 5.4, color: 0x16a34a },
+    { key: 'noah_e1', type: 'noah', file: 'toyota-noah.glb', targetLength: 4.8, lane: 3, speed: 5.6, color: 0x9a668f },
+    { key: 'rickshaw_e2', type: 'rickshaw', file: 'cycle-rickshaw.glb', targetLength: 3.2, lane: 3, speed: 3.9, color: 0x10b981 },
+    { key: 'vezel_e1', type: 'vezel', file: 'honda-vezel.glb', targetLength: 4.5, lane: 3, speed: 5.8, color: 0xb1b5bf },
+    { key: 'cng_e3', type: 'cng', file: 'cng-auto-rickshaw.glb', targetLength: 3.2, lane: 3, speed: 5.2, color: 0x16a34a },
+
+    // Elevated MRT Line-6 Viaduct (Skyway, x: 17, y: 8.85) - High-speed electric trains
+    { key: 'metro_1', type: 'metro', file: 'mrt-line-6-train.glb', targetLength: 18, lane: 4, speed: 8.5 },
+    { key: 'metro_2', type: 'metro', file: 'mrt-line-6-train.glb', targetLength: 18, lane: 4, speed: 8.5 }
   ];
 
   // Materials Cache
@@ -260,7 +292,7 @@
     const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.65, 1.6), glassMat);
     cabin.position.set(-0.2, 1.15, 0);
     car.add(cabin);
-    // Headlights
+    // Headlights (Front, +X)
     const hlMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const hlL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 0.35), hlMat);
     hlL.position.set(2.2, 0.65, 0.65);
@@ -268,6 +300,14 @@
     const hlR = hlL.clone();
     hlR.position.set(2.2, 0.65, -0.65);
     car.add(hlR);
+    // Ruby Taillights (Rear, -X)
+    const tlMat = new THREE.MeshBasicMaterial({ color: 0xff1e27 });
+    const tlL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.38), tlMat);
+    tlL.position.set(-2.2, 0.65, 0.65);
+    car.add(tlL);
+    const tlR = tlL.clone();
+    tlR.position.set(-2.2, 0.65, -0.65);
+    car.add(tlR);
     // Wheels
     const wFL = createWheel(0.43, 0.34); wFL.position.set(1.3, 0.43, 0.95); car.add(wFL);
     const wFR = createWheel(0.43, 0.34); wFR.position.set(1.3, 0.43, -0.95); car.add(wFR);
@@ -330,6 +370,14 @@
       cng.add(headlight);
     }
 
+    // Taillights (Rear, -X) - Ruby Red
+    const cngTlMat = new THREE.MeshBasicMaterial({ color: 0xff1e27 });
+    for (const side of [-1, 1]) {
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.14, 0.22), cngTlMat);
+      tl.position.set(-1.42, 0.65, side * 0.52);
+      cng.add(tl);
+    }
+
     const frontWheel = createRoadWheel(0.31, 0.17);
     frontWheel.position.set(1.02, 0.32, 0);
     cng.add(frontWheel);
@@ -354,10 +402,13 @@
   }
 
   // 3. Sport Motorcycle / Bike
-  function buildBike() {
+  function buildBike(colorHex) {
     const bike = new THREE.Group();
     // Frame & Tank
-    const tank = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.45, 0.5), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }));
+    const tank = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.45, 0.5),
+      new THREE.MeshStandardMaterial({ color: colorHex || 0xef4444, roughness: 0.3, metalness: 0.3 })
+    );
     tank.position.set(0, 0.85, 0);
     bike.add(tank);
     // Seat
@@ -372,6 +423,14 @@
     const hBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.9), chromeMat);
     hBar.position.set(0.65, 1.15, 0);
     bike.add(hBar);
+    // Headlight (Front, +X)
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.25), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    hl.position.set(0.85, 1.05, 0);
+    bike.add(hl);
+    // Taillight (Rear, -X)
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.16), new THREE.MeshBasicMaterial({ color: 0xff1e27 }));
+    tl.position.set(-0.95, 0.95, 0);
+    bike.add(tl);
     // Wheels
     const wF = createWheel(0.35, 0.16); wF.position.set(0.9, 0.35, 0); bike.add(wF);
     const wB = createWheel(0.35, 0.16); wB.position.set(-0.85, 0.35, 0); bike.add(wB);
@@ -379,11 +438,15 @@
   }
 
   // 4. Iconic Dhaka Cycle Rickshaw
-  function buildRickshaw() {
+  function buildRickshaw(hoodColorHex) {
     const rickshaw = new THREE.Group();
     const frame = new THREE.MeshStandardMaterial({ color: 0x292d31, metalness: 0.7, roughness: 0.34 });
     const carriage = new THREE.MeshStandardMaterial({ color: 0x8b5e3c, roughness: 0.7 });
-    const blueCanopy = new THREE.MeshStandardMaterial({ color: 0x0878d1, roughness: 0.66, side: THREE.DoubleSide });
+    const blueCanopy = new THREE.MeshStandardMaterial({
+      color: hoodColorHex || 0x0878d1,
+      roughness: 0.66,
+      side: THREE.DoubleSide
+    });
     const canopyTrim = new THREE.MeshStandardMaterial({ color: 0xf4c95d, metalness: 0.35, roughness: 0.44 });
     const cushion = new THREE.MeshStandardMaterial({ color: 0x28a7a5, roughness: 0.72 });
     const seat = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.16, 1.26), cushion);
@@ -431,6 +494,11 @@
     addVehicleBeam(rickshaw, [1.0, 1.04, 0], [0.98, 0.55, 0], 0.035, frame);
     addVehicleBeam(rickshaw, [-0.28, 0.95, -0.4], [-0.28, 0.95, 0.4], 0.035, frame);
 
+    // Rear Reflector / Taillight
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.18), new THREE.MeshBasicMaterial({ color: 0xff1e27 }));
+    tl.position.set(-1.72, 0.82, 0);
+    rickshaw.add(tl);
+
     addSeatedPassenger(rickshaw, 0.02, 0.87, 0, 0x713b70, 0x3146a6);
     addSeatedPassenger(rickshaw, -1.02, 1.0, -0.36, 0xc58a43, 0x35a6a6);
     addSeatedPassenger(rickshaw, -1.02, 1.0, 0.36, 0x7256a8, 0x278caa);
@@ -438,10 +506,12 @@
   }
 
   // 5. BRTA City Transit Bus
-  function buildBus() {
+  function buildBus(colorHex) {
     const bus = new THREE.Group();
-    // Lower red half
-    const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(8.5, 1.2, 2.4), busRedMat);
+    // Lower body
+    const lowerBodyMat = busRedMat.clone();
+    if (colorHex) lowerBodyMat.color.setHex(colorHex);
+    const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(8.5, 1.2, 2.4), lowerBodyMat);
     lowerBody.position.y = 1.0;
     bus.add(lowerBody);
     // Upper cream white half with windows
@@ -463,12 +533,58 @@
     const hlR = hlL.clone();
     hlR.position.set(4.25, 0.8, -0.85);
     bus.add(hlR);
+    // Taillights (Rear, -X) - Ruby Red
+    const busTlMat = new THREE.MeshBasicMaterial({ color: 0xff1e27 });
+    const tlL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.28, 0.38), busTlMat);
+    tlL.position.set(-4.26, 0.9, 0.88);
+    bus.add(tlL);
+    const tlR = tlL.clone();
+    tlR.position.set(-4.26, 0.9, -0.88);
+    bus.add(tlR);
     // Wheels (Dual rear)
     const wF1 = createWheel(0.5, 0.3); wF1.position.set(2.8, 0.5, 1.2); bus.add(wF1);
     const wF2 = createWheel(0.5, 0.3); wF2.position.set(2.8, 0.5, -1.2); bus.add(wF2);
     const wR1 = createWheel(0.5, 0.3); wR1.position.set(-2.5, 0.5, 1.2); bus.add(wR1);
     const wR2 = createWheel(0.5, 0.3); wR2.position.set(-2.5, 0.5, -1.2); bus.add(wR2);
     return bus;
+  }
+
+  // 6a. MRT Line-6 Train (Dedicated traffic model for viaduct)
+  function buildMetroTrainOnly() {
+    const train = new THREE.Group();
+    const trainMat = metroSilverMat || new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.25, metalness: 0.65 });
+    for (let c = -1; c <= 1; c++) {
+      const coach = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(7.2, 2.4, 2.6), trainMat);
+      body.position.y = 1.4;
+      coach.add(body);
+      const win = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.8, 2.66), glassMat);
+      win.position.set(0, 1.6, 0);
+      coach.add(win);
+      const dStripe = new THREE.Mesh(
+        new THREE.BoxGeometry(7.22, 0.2, 2.64),
+        new THREE.MeshStandardMaterial({ color: 0x006a4e, roughness: 0.3 })
+      );
+      dStripe.position.set(0, 0.9, 0);
+      coach.add(dStripe);
+      const rStripe = new THREE.Mesh(
+        new THREE.BoxGeometry(7.22, 0.1, 2.65),
+        new THREE.MeshStandardMaterial({ color: 0xf42a41, roughness: 0.3 })
+      );
+      rStripe.position.set(0, 0.72, 0);
+      coach.add(rStripe);
+      coach.position.x = c * 7.8;
+      train.add(coach);
+    }
+    const hlMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const hl = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.9), hlMat);
+    hl.position.set(11.45, 1.3, 0);
+    train.add(hl);
+    const tlMat = new THREE.MeshBasicMaterial({ color: 0xff1e27 });
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.9), tlMat);
+    tl.position.set(-11.45, 1.3, 0);
+    train.add(tl);
+    return train;
   }
 
   // 6. Elevated MRT Line-6 Viaduct & Train
@@ -1049,7 +1165,8 @@
       crv: 'colorful cars',
       sports: 'colorful cars',
       rickshaw: 'passenger cycle rickshaw',
-      bus: 'city bus'
+      bus: 'city bus',
+      metro: 'MRT Line-6 train'
     };
 
     function attachBuiltInModel(spec, actor, traffic) {
@@ -1065,11 +1182,23 @@
         crv: 0x95764a,
         sports: 0xd34f8b
       };
-      const model = spec.key === 'bike' ? buildBike()
-        : spec.key === 'cng' ? buildCNG()
-          : spec.key === 'rickshaw' ? buildRickshaw()
-            : spec.key === 'bus' ? buildBus()
-              : carColors[spec.key] ? buildCar(carColors[spec.key]) : null;
+      const baseKey = spec.type || spec.key.split('_')[0];
+      const color = spec.color || carColors[baseKey] || 0x0047ab;
+
+      let model = null;
+      if (baseKey === 'bike') {
+        model = buildBike(color);
+      } else if (baseKey === 'cng') {
+        model = buildCNG();
+      } else if (baseKey === 'rickshaw') {
+        model = buildRickshaw(color);
+      } else if (baseKey === 'bus') {
+        model = buildBus(color);
+      } else if (baseKey === 'metro') {
+        model = buildMetroTrainOnly();
+      } else {
+        model = buildCar(color);
+      }
       if (!model) return false;
 
       model.rotation.y = Math.PI / 2;
@@ -1096,9 +1225,9 @@
         }
       });
       actor.add(model);
-      traffic.wheelRadius = spec.key === 'bike' ? 0.34 : 0.48;
+      traffic.wheelRadius = baseKey === 'bike' ? 0.34 : 0.48;
       traffic.loaded = true;
-      builtInModels.push(builtInLabels[spec.key]);
+      builtInModels.push(builtInLabels[baseKey] || 'Dhaka transit');
       loaded++;
       return true;
     }
@@ -1121,6 +1250,155 @@
       }
     }
 
+    function spawnTrafficFleet(available) {
+      if (generation !== assetLoadGeneration) return;
+
+      const laneDefinitions = [
+        { x: -2.05, direction: 1 },  // West inner (Southbound, towards camera)
+        { x: -5.55, direction: 1 },  // West outer (Southbound, towards camera)
+        { x: 2.05, direction: -1 },  // East inner (Northbound, away from camera)
+        { x: 5.55, direction: -1 }   // East outer (Northbound, away from camera)
+      ];
+      const laneCounts = [0, 0, 0, 0, 0];
+      vehicleAssetSpecs.forEach(spec => {
+        const laneIdx = spec.lane !== undefined ? spec.lane : 0;
+        laneCounts[laneIdx]++;
+      });
+      const laneOffsets = [0, 0, 0, 0, 0];
+      const lanePhaseStagger = [0, 4.6, 9.2, 13.8, 35.0];
+
+      vehicleAssetSpecs.forEach(spec => {
+        const isElevated = spec.lane === 4 || spec.key.startsWith('metro');
+        const shouldUseBuiltIn = !available.has(spec.file) || !loader;
+        if (!available.has(spec.file) && !shouldUseBuiltIn) {
+          unavailable.push(spec.file);
+          completed++;
+          return;
+        }
+
+        const path = `assets/models/${spec.file}`;
+        const laneIdx = isElevated ? 4 : spec.lane;
+        const lane = isElevated ? { x: 17, direction: 1 } : laneDefinitions[laneIdx];
+        const slot = laneOffsets[laneIdx]++;
+        const countInLane = Math.max(1, laneCounts[laneIdx]);
+        const laneSpacing = 165 / countInLane;
+
+        let distance;
+        if (isElevated) {
+          distance = -82 + slot * 65;
+        } else {
+          const rawOffset = slot * laneSpacing + lanePhaseStagger[laneIdx];
+          distance = 58 - (rawOffset % 165);
+        }
+
+        const actor = new THREE.Group();
+        if (!isElevated) {
+          const shadow = new THREE.Mesh(
+            new THREE.PlaneGeometry(spec.targetLength * 0.82, (spec.type === 'bike') ? 0.9 : 1.7),
+            new THREE.MeshBasicMaterial({ color: 0x03070b, transparent: true, opacity: 0.42, depthWrite: false })
+          );
+          shadow.rotation.x = -Math.PI / 2;
+          shadow.position.y = 0.025;
+          actor.add(shadow);
+        }
+        actor.position.set(isElevated ? 17 : lane.x, isElevated ? 8.85 : 0, distance);
+        actor.rotation.y = lane.direction > 0 ? Math.PI : 0;
+        cityGroup.add(actor);
+
+        const traffic = {
+          mesh: actor,
+          key: spec.key,
+          type: spec.type || spec.key.split('_')[0],
+          lane: isElevated ? 17 : lane.x,
+          laneIndex: laneIdx,
+          direction: lane.direction,
+          distance,
+          speed: spec.speed || (isElevated ? 8.5 : 5.8 + laneIdx * 0.3),
+          wheelNodes: [],
+          wheelRadius: 0.45,
+          loaded: false
+        };
+        cityTraffic.push(traffic);
+
+        if (shouldUseBuiltIn) {
+          if (attachBuiltInModel(spec, actor, traffic)) {
+            completed++;
+            updateVehicleAssetStatus();
+            return;
+          }
+          unavailable.push(`${spec.file} (built-in model failed)`);
+          completed++;
+          updateVehicleAssetStatus();
+          return;
+        }
+
+        if (!loader) {
+          unavailable.push(`${spec.file} (GLTFLoader unavailable)`);
+          completed++;
+          updateVehicleAssetStatus();
+          return;
+        }
+
+        loader.load(path, gltf => {
+          if (generation !== assetLoadGeneration) {
+            disposeObjectResources(gltf.scene);
+            return;
+          }
+          const model = gltf.scene;
+          const bounds = new THREE.Box3().setFromObject(model);
+          const size = bounds.getSize(new THREE.Vector3());
+          const center = bounds.getCenter(new THREE.Vector3());
+          const modelLength = Math.max(size.x, size.z);
+          if (!Number.isFinite(modelLength) || modelLength <= 0) {
+            disposeObjectResources(model);
+            if (attachBuiltInModel(spec, actor, traffic)) {
+              completed++;
+              console.warn(`Bhara dekhi hero: ${spec.file} has no measurable geometry; using built-in model.`);
+              updateVehicleAssetStatus();
+              return;
+            }
+            unavailable.push(`${spec.file} (empty model)`);
+            completed++;
+            updateVehicleAssetStatus();
+            console.error(`Bhara dekhi hero: ${spec.file} has no measurable geometry.`);
+            return;
+          }
+          const scale = spec.targetLength / modelLength;
+          model.scale.setScalar(scale);
+          model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+          model.traverse(object => {
+            if (object.isMesh) {
+              object.castShadow = true;
+              object.receiveShadow = true;
+            }
+            if (object.userData.isRollingWheel || /wheel|tire|tyre/i.test(object.name)) {
+              traffic.wheelNodes.push(object);
+              if (object.userData.wheelRadius) traffic.wheelRadius = object.userData.wheelRadius;
+            }
+          });
+          actor.add(model);
+          traffic.wheelRadius = (spec.type === 'bike') ? 0.34 : 0.48;
+          traffic.loaded = true;
+          loaded++;
+          completed++;
+          updateVehicleAssetStatus();
+        }, undefined, error => {
+          if (generation !== assetLoadGeneration) return;
+          if (attachBuiltInModel(spec, actor, traffic)) {
+            completed++;
+            console.warn(`Bhara dekhi hero: ${path} failed to load; using built-in model.`, error);
+            updateVehicleAssetStatus();
+            return;
+          }
+          unavailable.push(`${spec.file} (load error)`);
+          completed++;
+          console.error(`Bhara dekhi hero: failed to load ${path}.`, error);
+          updateVehicleAssetStatus();
+        });
+      });
+      updateVehicleAssetStatus();
+    }
+
     setVehicleAssetStatus('Checking local 3D vehicle assets…', false);
     fetch('assets/models/manifest.json')
       .then(response => {
@@ -1129,153 +1407,13 @@
       })
       .then(manifest => {
         if (generation !== assetLoadGeneration) return;
-        if (!manifest || !Array.isArray(manifest.models) || !manifest.models.every(file => typeof file === 'string')) {
-          throw new Error('Model manifest must contain a string array named "models".');
-        }
-
-        const available = new Set(manifest.models);
-        const allowedFiles = new Set(vehicleAssetSpecs.map(spec => spec.file));
-        const invalidFiles = manifest.models.filter(file => !allowedFiles.has(file));
-        if (invalidFiles.length) {
-          throw new Error(`Model manifest contains unsupported files: ${invalidFiles.join(', ')}.`);
-        }
-
-        const laneDefinitions = [
-          { x: -2.05, direction: 1 },
-          { x: -5.55, direction: 1 },
-          { x: 2.05, direction: -1 },
-          { x: 5.55, direction: -1 }
-        ];
-        const laneCounts = [0, 0, 0, 0];
-        vehicleAssetSpecs.forEach(spec => {
-          if (spec.key !== 'metro') laneCounts[spec.lane]++;
-        });
-        const laneOffsets = [0, 0, 0, 0];
-
-        vehicleAssetSpecs.forEach(spec => {
-          const shouldUseBuiltIn = spec.key !== 'metro'
-            && (!available.has(spec.file) || !loader);
-          if (!available.has(spec.file) && !shouldUseBuiltIn) {
-            unavailable.push(spec.file);
-            completed++;
-            return;
-          }
-
-          const path = `assets/models/${spec.file}`;
-          const lane = laneDefinitions[spec.lane];
-          const slot = laneOffsets[spec.lane]++;
-          const laneSpacing = 152 / Math.max(1, laneCounts[spec.lane]);
-          const elevated = spec.key === 'metro';
-          const distance = elevated ? -82 : 55 - slot * laneSpacing;
-          const actor = new THREE.Group();
-          if (!elevated) {
-            const shadow = new THREE.Mesh(
-              new THREE.PlaneGeometry(spec.targetLength * 0.82, spec.key === 'bike' ? 0.9 : 1.7),
-              new THREE.MeshBasicMaterial({ color: 0x03070b, transparent: true, opacity: 0.42, depthWrite: false })
-            );
-            shadow.rotation.x = -Math.PI / 2;
-            shadow.position.y = 0.025;
-            actor.add(shadow);
-          }
-          actor.position.set(elevated ? 17 : lane.x, elevated ? 8.85 : 0, distance);
-          actor.rotation.y = lane.direction > 0 ? Math.PI : 0;
-          cityGroup.add(actor);
-          const traffic = {
-            mesh: actor,
-            key: spec.key,
-            lane: elevated ? 17 : lane.x,
-            laneIndex: spec.lane,
-            direction: lane.direction,
-            distance,
-            speed: elevated ? 7.2 : 5.8 + spec.lane * 0.3,
-            wheelNodes: [],
-            wheelRadius: 0,
-            loaded: false
-          };
-          cityTraffic.push(traffic);
-
-          if (shouldUseBuiltIn) {
-            if (attachBuiltInModel(spec, actor, traffic)) {
-              completed++;
-              updateVehicleAssetStatus();
-              return;
-            }
-            unavailable.push(`${spec.file} (built-in model failed)`);
-            completed++;
-            updateVehicleAssetStatus();
-            return;
-          }
-
-          if (!loader) {
-            unavailable.push(`${spec.file} (GLTFLoader unavailable)`);
-            completed++;
-            updateVehicleAssetStatus();
-            return;
-          }
-
-          loader.load(path, gltf => {
-            if (generation !== assetLoadGeneration) {
-              disposeObjectResources(gltf.scene);
-              return;
-            }
-            const model = gltf.scene;
-            const bounds = new THREE.Box3().setFromObject(model);
-            const size = bounds.getSize(new THREE.Vector3());
-            const center = bounds.getCenter(new THREE.Vector3());
-            const modelLength = Math.max(size.x, size.z);
-            if (!Number.isFinite(modelLength) || modelLength <= 0) {
-              disposeObjectResources(model);
-              if (attachBuiltInModel(spec, actor, traffic)) {
-                completed++;
-                console.warn(`Bhara dekhi hero: ${spec.file} has no measurable geometry; using the built-in ${builtInLabels[spec.key] || spec.key} model.`);
-                updateVehicleAssetStatus();
-                return;
-              }
-              unavailable.push(`${spec.file} (empty model)`);
-              completed++;
-              updateVehicleAssetStatus();
-              console.error(`Bhara dekhi hero: ${spec.file} has no measurable geometry.`);
-              return;
-            }
-            const scale = spec.targetLength / modelLength;
-            model.scale.setScalar(scale);
-            model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
-            model.traverse(object => {
-              if (object.isMesh) {
-                object.castShadow = true;
-                object.receiveShadow = true;
-              }
-              if (object.userData.isRollingWheel || /wheel|tire|tyre/i.test(object.name)) {
-                traffic.wheelNodes.push(object);
-                if (object.userData.wheelRadius) traffic.wheelRadius = object.userData.wheelRadius;
-              }
-            });
-            actor.add(model);
-            traffic.wheelRadius = spec.key === 'bike' ? 0.34 : 0.48;
-            traffic.loaded = true;
-            loaded++;
-            completed++;
-            updateVehicleAssetStatus();
-          }, undefined, error => {
-            if (generation !== assetLoadGeneration) return;
-            if (attachBuiltInModel(spec, actor, traffic)) {
-              completed++;
-              console.warn(`Bhara dekhi hero: ${path} failed to load; using the built-in ${builtInLabels[spec.key] || spec.key} model.`, error);
-              updateVehicleAssetStatus();
-              return;
-            }
-            unavailable.push(`${spec.file} (load error)`);
-            completed++;
-            console.error(`Bhara dekhi hero: failed to load ${path}.`, error);
-            updateVehicleAssetStatus();
-          });
-        });
-        updateVehicleAssetStatus();
+        const available = (manifest && Array.isArray(manifest.models)) ? new Set(manifest.models) : new Set();
+        spawnTrafficFleet(available);
       })
       .catch(error => {
         if (generation !== assetLoadGeneration) return;
-        setVehicleAssetStatus('Could not read assets/models/manifest.json. Check the vehicle asset setup.', true);
-        console.error('Bhara dekhi hero: failed to read vehicle asset manifest.', error);
+        console.warn('Bhara dekhi hero: reading manifest failed or offline; using built-in procedural models for full 38-vehicle traffic fleet.', error);
+        spawnTrafficFleet(new Set());
       });
   }
 
@@ -1395,10 +1533,12 @@
 
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : 0.016;
     cityTraffic.forEach(vehicle => {
-      const laneSpeed = vehicle.speed + Math.sin(clock.elapsedTime * 0.22 + vehicle.laneIndex) * 0.35;
+      const isElevated = vehicle.laneIndex === 4 || vehicle.type === 'metro';
+      const speedVariation = isElevated ? 0 : Math.sin(clock.elapsedTime * 0.22 + vehicle.laneIndex) * 0.35;
+      const laneSpeed = vehicle.speed + speedVariation;
       vehicle.distance += laneSpeed * vehicle.direction * delta;
-      const upperBound = vehicle.key === 'metro' ? 25 : 60;
-      const lowerBound = vehicle.key === 'metro' ? -82 : -105;
+      const upperBound = isElevated ? 45 : 62;
+      const lowerBound = isElevated ? -95 : -108;
       if (vehicle.distance > upperBound) vehicle.distance = lowerBound;
       if (vehicle.distance < lowerBound) vehicle.distance = upperBound;
       vehicle.mesh.position.z = vehicle.distance;
