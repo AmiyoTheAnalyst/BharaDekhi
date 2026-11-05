@@ -42,6 +42,7 @@
   let targetCamX = 220, targetCamY = 440;
   const CAM_DEFAULT_POS = { x: 220, y: 440, z: 460 };
   const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
+  const VIADUCT_Z = -332;
   let camBasePos = { x: 220, y: 440, z: 460 };
   let camBaseLook = { x: 0, y: 25, z: -35 };
   let currentCamLook = { x: 0, y: 25, z: -35 };
@@ -1546,7 +1547,9 @@
   // 3D Canonical Vehicle Builders (all built facing +X direction)
   function create3DVehicle(type, colorHex) {
     if (type === 'car') {
-      return createAerodynamicCar();
+      const car = createAerodynamicCar();
+      scene.add(car);
+      return car;
     }
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
     if (!sharedRimMat) sharedRimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.35, metalness: 0.75 });
@@ -2348,7 +2351,6 @@
     });
 
     // 6. Elevated Metro Rail Viaduct Superstructure
-    const viaductZ = -332;
     const viaductY = 42;
 
     const pierXCoords = [-520, -350, -180, 0, 480];
@@ -2356,7 +2358,7 @@
     pierXCoords.forEach(px => {
       const colGeo = new THREE.BoxGeometry(18, viaductY, 18);
       const col = new THREE.Mesh(colGeo, pierMat);
-      col.position.set(px, viaductY / 2, viaductZ);
+      col.position.set(px, viaductY / 2, VIADUCT_Z);
       col.castShadow = true;
       col.receiveShadow = true;
       freezeStatic(col);
@@ -2365,7 +2367,7 @@
       // Cantilever Hammerhead Cap
       const capGeo = new THREE.BoxGeometry(32, 6, 28);
       const cap = new THREE.Mesh(capGeo, pierMat);
-      cap.position.set(px, viaductY - 3, viaductZ);
+      cap.position.set(px, viaductY - 3, VIADUCT_Z);
       cap.castShadow = true;
       freezeStatic(cap);
       scene.add(cap);
@@ -2375,7 +2377,7 @@
     const beamGeo = new THREE.BoxGeometry(1400, 7, 26);
     const beamMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
     const beam = new THREE.Mesh(beamGeo, beamMat);
-    beam.position.set(0, viaductY + 3.5, viaductZ);
+    beam.position.set(0, viaductY + 3.5, VIADUCT_Z);
     beam.castShadow = true;
     beam.receiveShadow = true;
     freezeStatic(beam);
@@ -2385,14 +2387,14 @@
     const greenRibbonGeo = new THREE.BoxGeometry(1400, 2, 0.6);
     const greenRibbonMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
     const greenRibbon = new THREE.Mesh(greenRibbonGeo, greenRibbonMat);
-    greenRibbon.position.set(0, viaductY + 5, viaductZ + 13.3);
+    greenRibbon.position.set(0, viaductY + 5, VIADUCT_Z + 13.3);
     freezeStatic(greenRibbon);
     scene.add(greenRibbon);
 
     const redRibbonGeo = new THREE.BoxGeometry(1400, 1.5, 0.6);
     const redRibbonMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     const redRibbon = new THREE.Mesh(redRibbonGeo, redRibbonMat);
-    redRibbon.position.set(0, viaductY + 3, viaductZ + 13.3);
+    redRibbon.position.set(0, viaductY + 3, VIADUCT_Z + 13.3);
     freezeStatic(redRibbon);
     scene.add(redRibbon);
 
@@ -2400,19 +2402,19 @@
     const railMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
     const rail1Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
     const rail1 = new THREE.Mesh(rail1Geo, railMat);
-    rail1.position.set(0, viaductY + 7.6, viaductZ - 4);
+    rail1.position.set(0, viaductY + 7.6, VIADUCT_Z - 4);
     freezeStatic(rail1);
     scene.add(rail1);
 
     const rail2Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
     const rail2 = new THREE.Mesh(rail2Geo, railMat);
-    rail2.position.set(0, viaductY + 7.6, viaductZ + 4);
+    rail2.position.set(0, viaductY + 7.6, VIADUCT_Z + 4);
     freezeStatic(rail2);
     scene.add(rail2);
 
     // Mirpur 10 Station Structure (x: 180 .. 440)
     const stationGroup = new THREE.Group();
-    stationGroup.position.set(310, viaductY, viaductZ);
+    stationGroup.position.set(310, viaductY, VIADUCT_Z);
 
     const stFloorGeo = new THREE.BoxGeometry(260, 8, 54);
     const stFloorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
@@ -2474,7 +2476,7 @@
 
     // 7. 3D Metro Rail 3-Coach Train
     trainGroup = new THREE.Group();
-    trainGroup.position.set(-200, viaductY + 7.5, viaductZ);
+    trainGroup.position.set(-200, viaductY + 7.5, VIADUCT_Z);
 
     const coach1 = createTrainCoach(true);
     coach1.position.x = 75;
@@ -2827,6 +2829,14 @@
     };
   };
 
+  function setSceneBackgroundColor(color) {
+    if (scene.background && scene.background.isColor) {
+      scene.background.setHex(color);
+    } else {
+      scene.background = new THREE.Color(color);
+    }
+  }
+
   let strobeTimer = 0;
   let lastWeatherMode = null;
   let lastIsMobile = null;
@@ -2939,7 +2949,7 @@
 
       // 4. Environmental Sky, Fog, SunLight, and AmbientLight Calibration across all 15 modes
       if (currentMode === 'sunrise') {
-        scene.background.setHex(isMobileScreen ? 0x24142b : 0x1e0e24);
+        setSceneBackgroundColor(isMobileScreen ? 0x24142b : 0x1e0e24);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0xa84370 : 0x863359);
           scene.fog.density = 0.0006;
@@ -2958,7 +2968,7 @@
           ambientLight.intensity = isMobileScreen ? 0.80 : 0.72;
         }
       } else if (currentMode === 'sunrise_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x1f1b29 : 0x16131f);
+        setSceneBackgroundColor(isMobileScreen ? 0x1f1b29 : 0x16131f);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d3242 : 0x2d2433);
           scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
@@ -2977,7 +2987,7 @@
           ambientLight.intensity = isMobileScreen ? 0.75 : 0.65;
         }
       } else if (currentMode === 'fog_sunrise') {
-        scene.background.setHex(isMobileScreen ? 0x342238 : 0x27172b);
+        setSceneBackgroundColor(isMobileScreen ? 0x342238 : 0x27172b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x754757 : 0x613745);
           scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
@@ -2996,7 +3006,7 @@
           ambientLight.intensity = isMobileScreen ? 0.75 : 0.68;
         }
       } else if (currentMode === 'morning_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x222836 : 0x1a202c);
+        setSceneBackgroundColor(isMobileScreen ? 0x222836 : 0x1a202c);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x333d4f : 0x27303f);
           scene.fog.density = isMobileScreen ? 0.0008 : 0.0009;
@@ -3015,7 +3025,7 @@
           ambientLight.intensity = isMobileScreen ? 0.78 : 0.70;
         }
       } else if (currentMode === 'sun') {
-        scene.background.setHex(0x0284c7);
+        setSceneBackgroundColor(0x0284c7);
         if (scene.fog) {
           scene.fog.color.setHex(0x0284c7);
           scene.fog.density = 0.0004;
@@ -3034,7 +3044,7 @@
           ambientLight.intensity = isMobileScreen ? 0.85 : 0.80;
         }
       } else if (currentMode === 'day_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x262e3d : 0x1c2330);
+        setSceneBackgroundColor(isMobileScreen ? 0x262e3d : 0x1c2330);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3f4a5c : 0x303a49);
           scene.fog.density = isMobileScreen ? 0.0007 : 0.0008;
@@ -3053,7 +3063,7 @@
           ambientLight.intensity = isMobileScreen ? 0.80 : 0.72;
         }
       } else if (currentMode === 'sunset') {
-        scene.background.setHex(isMobileScreen ? 0x3a1409 : 0x2c0d05);
+        setSceneBackgroundColor(isMobileScreen ? 0x3a1409 : 0x2c0d05);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x66220d : 0x4d1607);
           scene.fog.density = 0.0006;
@@ -3072,7 +3082,7 @@
           ambientLight.intensity = isMobileScreen ? 0.82 : 0.72;
         }
       } else if (currentMode === 'sunset_overcast') {
-        scene.background.setHex(isMobileScreen ? 0x241620 : 0x1b0f17);
+        setSceneBackgroundColor(isMobileScreen ? 0x241620 : 0x1b0f17);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x422633 : 0x321a25);
           scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
@@ -3091,7 +3101,7 @@
           ambientLight.intensity = isMobileScreen ? 0.72 : 0.65;
         }
       } else if (currentMode === 'fog_sunset') {
-        scene.background.setHex(isMobileScreen ? 0x301812 : 0x24100b);
+        setSceneBackgroundColor(isMobileScreen ? 0x301812 : 0x24100b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x6b2b18 : 0x542011);
           scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
@@ -3110,7 +3120,7 @@
           ambientLight.intensity = isMobileScreen ? 0.75 : 0.66;
         }
       } else if (currentMode === 'fog_day') {
-        scene.background.setHex(isMobileScreen ? 0x718096 : 0x64748b);
+        setSceneBackgroundColor(isMobileScreen ? 0x718096 : 0x64748b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x94a3b8 : 0x8293a7);
           scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
@@ -3130,7 +3140,7 @@
         }
       } else if (currentMode === 'fog_night') {
         // Nighttime Fog: realistic atmospheric fog with depth, diffusion, and subtle volumetric glow
-        scene.background.setHex(isMobileScreen ? 0x091020 : 0x060c18);
+        setSceneBackgroundColor(isMobileScreen ? 0x091020 : 0x060c18);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d182d : 0x0a1426);
           scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
@@ -3150,7 +3160,7 @@
         }
       } else if (currentMode === 'night_overcast') {
         // Nighttime Overcast: dark atmospheric night with clearly visible city elements
-        scene.background.setHex(isMobileScreen ? 0x080c16 : 0x050810);
+        setSceneBackgroundColor(isMobileScreen ? 0x080c16 : 0x050810);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d1422 : 0x090e18);
           scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
@@ -3169,7 +3179,7 @@
           ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
         }
       } else if (currentMode === 'rain') {
-        scene.background.setHex(isMobileScreen ? 0x0d1628 : 0x08101e);
+        setSceneBackgroundColor(isMobileScreen ? 0x0d1628 : 0x08101e);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x121e36 : 0x0d172b);
           scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
@@ -3190,8 +3200,8 @@
       } else { // night (clear) & Vice City Dusk Skyline
         if (duskSkyTexture) {
           scene.background = duskSkyTexture;
-        } else if (scene.background && scene.background.setHex) {
-          scene.background.setHex(isMobileScreen ? 0x1b1035 : 0x140b29);
+        } else if (scene.background && scene.background.isColor) {
+          setSceneBackgroundColor(isMobileScreen ? 0x1b1035 : 0x140b29);
         }
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d173d : 0x2d122e);
@@ -3441,12 +3451,12 @@
         desiredCamPos = {
           x: trainGroup.position.x - 90,
           y: 72,
-          z: viaductZ + 68
+          z: VIADUCT_Z + 68
         };
         desiredCamLook = {
           x: trainGroup.position.x + 40,
           y: 46,
-          z: viaductZ
+          z: VIADUCT_Z
         };
       } else if (activeCamMode === 'walking') {
         if (!activeTargetVehicle) activeTargetVehicle = acquireTargetVehicle('walking');
@@ -3553,4 +3563,3 @@
   };
 
 })();
-
