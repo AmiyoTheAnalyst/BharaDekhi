@@ -671,6 +671,37 @@
     const glassMesh = new THREE.Mesh(glassGeo, glassMat);
     group.add(glassMesh);
 
+    const sideGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x7dd3fc,
+      roughness: 0.18,
+      metalness: 0.35,
+      transparent: true,
+      opacity: 0.78,
+      side: THREE.DoubleSide
+    });
+    const sideWindowShapes = [
+      [[0.02, 1.05], [-0.18, 0.79], [-0.72, 0.78], [-0.72, 1.08]],
+      [[-0.28, 1.08], [-0.79, 1.07], [-1.03, 1.01], [-1.72, 0.80], [-0.87, 0.78]]
+    ];
+    [-0.79, 0.79].forEach(side => {
+      sideWindowShapes.forEach(points => {
+        const windowShape = new THREE.Shape();
+        windowShape.moveTo(points[0][0], points[0][1]);
+        points.slice(1).forEach(point => windowShape.lineTo(point[0], point[1]));
+        windowShape.closePath();
+        const windowPane = new THREE.Mesh(new THREE.ShapeGeometry(windowShape), sideGlassMat);
+        windowPane.position.z = side;
+        group.add(windowPane);
+      });
+
+      const windowDivider = new THREE.Mesh(
+        new THREE.BoxGeometry(0.045, 0.39, 0.035),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.45, roughness: 0.4 })
+      );
+      windowDivider.position.set(-0.74, 0.90, side);
+      group.add(windowDivider);
+    });
+
     // Archetype-Specific Custom Features
     if (typeIdx === 0) {
       // 1. Lime-Green i8: Matte black carbon hood scoop & glowing #facc15 LED daytime running light strips
@@ -739,13 +770,15 @@
     const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
     const rimFaceMat = new THREE.MeshBasicMaterial({ map: rimTex });
     const wheelMats = [tireMat, rimFaceMat, rimFaceMat];
-    const wheelGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.20, 16);
+    const wheelGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.20, 24);
 
     [-0.82, 0.82].forEach(wz => {
       [-1.3, 1.3].forEach(wx => {
-        const wheel = new THREE.Mesh(wheelGeo, wheelMats);
-        wheel.rotation.x = Math.PI / 2;
+        const wheel = new THREE.Group();
         wheel.position.set(wx, 0.32, wz);
+        const tire = new THREE.Mesh(wheelGeo, wheelMats);
+        tire.rotation.x = Math.PI / 2;
+        wheel.add(tire);
         group.add(wheel);
         group.userData.wheels.push(wheel);
       });
@@ -767,6 +800,7 @@
 
     // Coordinate scale matching crossroads traffic grid (Length ~42, Width ~17, Height ~12.5)
     group.scale.set(10, 10, 10);
+    group.userData.wheelRadius = 3.2;
     return group;
   }
   window.createAerodynamicCar = createAerodynamicCar;
@@ -776,33 +810,39 @@
   // 2. Articulated Multi-Part Procedural Humans — ZERO Box Cylinders, ZERO GLTF
   // Lifelike stride kinetics using articulated limbs (userData: leftLeg, rightLeg, leftArm, rightArm)
   // ---------------------------------------------------------------------------
+  function getAppearanceSeed(id) {
+    const text = String(id);
+    let seed = 2166136261;
+    for (let index = 0; index < text.length; index++) {
+      seed = Math.imul(seed ^ text.charCodeAt(index), 16777619);
+    }
+    return seed >>> 0;
+  }
+
   function createArticulatedHuman(p, isSocial) {
     const group = new THREE.Group();
     const id = (p && p.id !== undefined) ? p.id : Math.floor(Math.random() * 1000);
-    const styleIdx = Math.abs(Math.floor(id * 13)) % 4;
+    const styleSeed = getAppearanceSeed(id);
+    const styleIdx = styleSeed % 8;
 
     const skinPalette = [0xc58f68, 0xb47b56, 0xd4a373, 0x99613d];
-    const skinHex = skinPalette[Math.abs(Math.floor(id * 7)) % skinPalette.length];
+    const skinHex = skinPalette[(styleSeed >>> 3) % skinPalette.length];
     const skinMat = new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.7 });
 
-    // 4 Modern Streetwear Outfits
-    let topColor = 0xeab308;    // 0: Yellow cricket jersey
-    let bottomColor = 0x1d4ed8; // Blue denim
-    let hairColor = 0x1e293b;
-
-    if (styleIdx === 1) {
-      topColor = 0xf43f5e;      // 1: Coral street hoodie
-      bottomColor = 0x18181b;   // Black cargo
-      hairColor = 0x1c1917;
-    } else if (styleIdx === 2) {
-      topColor = 0xf8fafc;      // 2: White open shirt over graphic teal tee
-      bottomColor = 0x78716c;   // Khaki cargo
-      hairColor = 0x292524;
-    } else if (styleIdx === 3) {
-      topColor = 0x2563eb;      // 3: Denim jacket / vest
-      bottomColor = 0x334155;   // Slate pants
-      hairColor = 0x0f172a;
-    }
+    const outfits = [
+      { top: 0xeab308, bottom: 0x1d4ed8, hair: 0x1e293b },
+      { top: 0xf43f5e, bottom: 0x18181b, hair: 0x1c1917 },
+      { top: 0xf8fafc, bottom: 0x78716c, hair: 0x292524 },
+      { top: 0x2563eb, bottom: 0x334155, hair: 0x0f172a },
+      { top: 0x15803d, bottom: 0xe7d7b1, hair: 0x292016, longTop: true },
+      { top: 0xb45309, bottom: 0x374151, hair: 0x211c1a, longTop: true },
+      { top: 0xdb2777, bottom: 0x7c3aed, hair: 0x211c1a, scarf: true },
+      { top: 0x0f766e, bottom: 0x78350f, hair: 0x292016 }
+    ];
+    const outfit = outfits[styleIdx];
+    const topColor = outfit.top;
+    const bottomColor = outfit.bottom;
+    const hairColor = outfit.hair;
 
     const topMat = new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.6 });
     const bottomMat = new THREE.MeshStandardMaterial({ color: bottomColor, roughness: 0.7 });
@@ -818,6 +858,11 @@
     const torso = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.6, 1.3), topMat);
     torso.position.y = 7.0;
     group.add(torso);
+    if (outfit.longTop) {
+      const tunic = new THREE.Mesh(new THREE.BoxGeometry(2.45, 3.5, 1.42), topMat);
+      tunic.position.y = 6.35;
+      group.add(tunic);
+    }
 
     // 3. Two Articulated 2-Segment Legs terminating in White Sneakers
     function createLeg(xOffset) {
@@ -884,19 +929,27 @@
     head.position.y = 9.5;
     group.add(head);
 
-    // Distinct hairstyles: 0=Baseball cap, 1=Afro curls, 2=Short fade, 3=Long dark hair
-    if (styleIdx === 0) {
+    // Distinct hairstyles and headwear.
+    if (outfit.scarf) {
+      const headScarf = new THREE.Mesh(new THREE.SphereGeometry(0.88, 8, 6), topMat);
+      headScarf.scale.set(1.05, 1.08, 1.12);
+      headScarf.position.set(0, 9.92, -0.25);
+      group.add(headScarf);
+      const drape = new THREE.Mesh(new THREE.BoxGeometry(1.35, 2.2, 0.30), topMat);
+      drape.position.set(0, 8.55, -0.78);
+      group.add(drape);
+    } else if (styleIdx === 0) {
       const capDome = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.55, 1.35), hairMat);
       capDome.position.y = 10.2;
       group.add(capDome);
       const capBrim = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.12, 0.75), hairMat);
       capBrim.position.set(0, 10.0, 0.85);
       group.add(capBrim);
-    } else if (styleIdx === 1) {
+    } else if (styleIdx === 1 || styleIdx === 7) {
       const afro = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.5), hairMat);
       afro.position.y = 10.3;
       group.add(afro);
-    } else if (styleIdx === 2) {
+    } else if (styleIdx === 2 || styleIdx === 4) {
       const fade = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.5, 1.35), hairMat);
       fade.position.y = 10.25;
       group.add(fade);
@@ -905,6 +958,20 @@
       longHair.position.set(0, 9.8, -0.15);
       group.add(longHair);
     }
+
+    if (!outfit.scarf && styleSeed % 3 !== 0) {
+      const beardMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.92 });
+      const beard = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.42, 0.18), beardMat);
+      beard.position.set(0, 8.95, 0.68);
+      group.add(beard);
+      const moustache = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.14, 0.16), beardMat);
+      moustache.position.set(0, 9.2, 0.7);
+      group.add(moustache);
+    }
+
+    const heightScale = [0.86, 0.93, 1, 1.07, 1.14][(styleSeed >>> 5) % 5];
+    const widthScale = 0.94 + ((styleSeed >>> 8) % 4) * 0.04;
+    group.scale.set(widthScale, heightScale, widthScale);
 
     group.userData.leftLeg = leftLeg;
     group.userData.rightLeg = rightLeg;
@@ -1632,12 +1699,13 @@
   window.createCurvedSportsCar = createCurvedSportsCar;
 
   // 3D Canonical Vehicle Builders (all built facing +X direction)
-  function create3DVehicle(type, colorHex) {
+  function create3DVehicle(type, colorHex, appearanceId) {
     if (type === 'car') {
       const car = createAerodynamicCar();
       scene.add(car);
       return car;
     }
+    const appearanceSeed = getAppearanceSeed(appearanceId || type);
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
     if (!sharedRimMat) sharedRimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.35, metalness: 0.75 });
     if (!vehicleHeadlightMat) vehicleHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -1650,6 +1718,7 @@
     group.userData.wheels = [];
 
     function addVehicleWheel(wX, wY, wZ, radius, thickness) {
+      group.userData.wheelRadius = radius;
       const wGeo = getSharedWheelGeo(radius, thickness, 10);
       const rGeo = getSharedWheelGeo(radius * 0.55, thickness + 0.1, 8);
       const wMesh = new THREE.Mesh(wGeo, sharedWheelMat);
@@ -1899,7 +1968,16 @@
       });
 
       // Driver and front round headlamp.
-      addSeatedFigure(2.2, 5.7, 0, 0xe7e5df, 0x303743, true);
+      const driverShirts = [0xe7e5df, 0x166534, 0x7c2d12, 0x1d4ed8];
+      const driverTrousers = [0x303743, 0x292524, 0x334155, 0x44403c];
+      addSeatedFigure(
+        2.2,
+        5.7,
+        0,
+        driverShirts[appearanceSeed % driverShirts.length],
+        driverTrousers[(appearanceSeed >>> 3) % driverTrousers.length],
+        true
+      );
       const hlGeo = new THREE.CylinderGeometry(1.3, 1.3, 1.4, 8);
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.rotation.z = Math.PI / 2;
@@ -1961,6 +2039,8 @@
       function createRickshawPerson(role, outfit, position, options = {}) {
         const person = new THREE.Group();
         person.position.set(position[0], position[1], position[2]);
+        const height = role === 'driver' ? 1.08 : outfit.gender === 'female' ? 1.02 : 0.94;
+        person.scale.setScalar(height);
         person.userData.rickshawRole = role;
         person.userData.rickshawGender = outfit.gender || (role === 'driver' ? 'male' : 'unspecified');
         const shirt = new THREE.MeshStandardMaterial({ color: outfit.shirt, roughness: 0.68 });
@@ -2073,6 +2153,7 @@
       function createSpokedWheel(radius, width, position) {
         const wheel = new THREE.Group();
         wheel.position.set(position[0], position[1], position[2]);
+        group.userData.wheelRadius = radius;
         const tire = new THREE.Mesh(
           new THREE.TorusGeometry(radius, width * 0.72, 10, 28),
           blackRubber
@@ -2434,7 +2515,10 @@
 
       // Commuter Rider with Helmet (leaning naturally forward)
       const riderGeo = new THREE.BoxGeometry(2.4, 4.6, 2.4);
-      const riderMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+      const riderShirts = [0x0f172a, 0x7c2d12, 0x1e3a8a, 0x166534, 0x7e22ce, 0x9f1239];
+      const riderMat = new THREE.MeshStandardMaterial({
+        color: riderShirts[appearanceSeed % riderShirts.length]
+      });
       const rider = new THREE.Mesh(riderGeo, riderMat);
       rider.position.set(-1.2, 9.4, 0);
       rider.rotation.z = -0.15;
@@ -3116,8 +3200,9 @@
     if (vehiclesData && Array.isArray(vehiclesData)) {
       vehiclesData.forEach(v => {
         const colorHex = v.color ? parseInt(v.color.replace('#', '0x'), 16) : null;
-        const mesh = create3DVehicle(v.type, colorHex);
+        const mesh = create3DVehicle(v.type, colorHex, v.id);
         mesh.rotation.y = getHeading(v.dir);
+        mesh.userData.previousRoadPosition = v.pos;
         vehicleMeshMap[v.id] = {
           mesh: mesh,
           data: v
@@ -3780,14 +3865,19 @@
         vm.mesh.position.set(laneX, bounce, v.pos - 420);
         vm.mesh.rotation.x = -tiltZ;
       }
-      // Rolling wheels animation (proportional to vehicle movement)
+      // Roll wheels by the distance the vehicle actually travelled this frame.
       if (vm.mesh.userData && vm.mesh.userData.wheels) {
-        const rollSpeed = (v.speed || 30) * delta * 1.5;
+        const previousPosition = vm.mesh.userData.previousRoadPosition;
+        const roadDelta = Number.isFinite(previousPosition) ? v.pos - previousPosition : 0;
+        vm.mesh.userData.previousRoadPosition = v.pos;
+        const forwardDelta = (v.dir === 'EB' || v.dir === 'SB') ? roadDelta : -roadDelta;
+        const wheelRadius = vm.mesh.userData.wheelRadius || 3;
+        const rollAngle = Math.abs(forwardDelta) < 100 ? -forwardDelta / wheelRadius : 0;
         vm.mesh.userData.wheels.forEach(w => {
-          w.rotation.z -= rollSpeed;
+          w.rotation.z += rollAngle;
         });
         if (vm.mesh.userData.pedalCrank) {
-          vm.mesh.userData.pedalCrank.rotation.z -= rollSpeed * 0.72;
+          vm.mesh.userData.pedalCrank.rotation.z += rollAngle * 0.72;
           if (vm.mesh.userData.updatePedaling) {
             vm.mesh.userData.updatePedaling(vm.mesh.userData.pedalCrank.rotation.z);
           }
