@@ -39,6 +39,12 @@
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
+  let vehicleOrbitYaw = 2.0;
+  let vehicleOrbitPitch = 0.2;
+  let orbitPointerId = null;
+  let lastOrbitPointerX = 0;
+  let lastOrbitPointerY = 0;
+  const ORBITABLE_VEHICLE_MODES = ['bus', 'bike', 'cng', 'car', 'rickshaw'];
   let targetCamX = 220, targetCamY = 440;
   const CAM_DEFAULT_POS = { x: 220, y: 440, z: 460 };
   const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
@@ -194,9 +200,8 @@
   }
 
   function getVehicleOrbitPose(target) {
-    const yaw = mouseRelX * Math.PI * 2 + 2.0;
-    const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
-      + (target.type === 'rickshaw' ? 0.06 : 0);
+    const yaw = vehicleOrbitYaw;
+    const pitch = vehicleOrbitPitch + (target.type === 'rickshaw' ? 0.06 : 0);
     const radius = target.type === 'car' ? 62
       : target.type === 'bike' ? 38
         : target.type === 'rickshaw' ? 46
@@ -204,6 +209,10 @@
             : 82;
 
     return getVehicleCameraPose(target, yaw, radius, pitch);
+  }
+
+  function isOrbitableVehicleMode(modeName) {
+    return ORBITABLE_VEHICLE_MODES.includes(modeName);
   }
 
   function updateCameraModeBadge(modeName) {
@@ -286,6 +295,8 @@
     if (activeCamMode === modeName && modeName !== 'overview') {
       activeCamMode = 'overview';
       activeTargetVehicle = null;
+      orbitPointerId = null;
+      if (canvasEl) canvasEl.style.touchAction = 'auto';
       focusCamera(CAM_MODES.overview.pos, CAM_MODES.overview.look, 1.6);
       updateLegendHUD('overview');
       return;
@@ -293,11 +304,16 @@
 
     const targetMode = CAM_MODES[modeName] ? modeName : 'overview';
     activeCamMode = targetMode;
+    vehicleOrbitYaw = 2.0;
+    vehicleOrbitPitch = 0.2;
 
     if (targetMode !== 'overview') {
       activeTargetVehicle = acquireTargetVehicle(targetMode);
     } else {
       activeTargetVehicle = null;
+    }
+    if (canvasEl) {
+      canvasEl.style.touchAction = isOrbitableVehicleMode(targetMode) ? 'none' : 'auto';
     }
 
     if (activeTargetVehicle && activeTargetVehicle.data) {
@@ -3195,12 +3211,62 @@
       if (!rect.width || !rect.height) return;
       mouseRelX = (e.clientX - rect.left) / rect.width - 0.5;
       mouseRelY = (e.clientY - rect.top) / rect.height - 0.5;
+
+      if (e.pointerId === orbitPointerId && activeTargetVehicle) {
+        vehicleOrbitYaw -= (e.clientX - lastOrbitPointerX) * 0.012;
+        vehicleOrbitPitch = Math.max(-0.25, Math.min(0.85,
+          vehicleOrbitPitch + (e.clientY - lastOrbitPointerY) * 0.006));
+        lastOrbitPointerX = e.clientX;
+        lastOrbitPointerY = e.clientY;
+      }
     }, { passive: true });
 
     containerEl.addEventListener('pointerleave', () => {
       mouseRelX = 0;
       mouseRelY = 0;
     }, { passive: true });
+
+    canvasEl.style.touchAction = 'auto';
+    canvasEl.addEventListener('pointerdown', (e) => {
+      if (!isOrbitableVehicleMode(activeCamMode)) return;
+      if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
+      if (!activeTargetVehicle) activeTargetVehicle = acquireTargetVehicle(activeCamMode);
+      if (!activeTargetVehicle) return;
+
+      e.preventDefault();
+      orbitPointerId = e.pointerId;
+      lastOrbitPointerX = e.clientX;
+      lastOrbitPointerY = e.clientY;
+      canvasEl.setPointerCapture(e.pointerId);
+    });
+
+    const endVehicleOrbit = (e) => {
+      if (e.pointerId !== orbitPointerId) return;
+      orbitPointerId = null;
+      if (canvasEl.hasPointerCapture(e.pointerId)) {
+        canvasEl.releasePointerCapture(e.pointerId);
+      }
+    };
+    canvasEl.addEventListener('pointerup', endVehicleOrbit);
+    canvasEl.addEventListener('pointercancel', endVehicleOrbit);
+    canvasEl.addEventListener('lostpointercapture', (e) => {
+      if (e.pointerId === orbitPointerId) orbitPointerId = null;
+    });
+    canvasEl.addEventListener('contextmenu', (e) => {
+      if (isOrbitableVehicleMode(activeCamMode)) e.preventDefault();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!isOrbitableVehicleMode(activeCamMode) || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      const target = e.target;
+      if (target instanceof HTMLElement &&
+          (target.isContentEditable || target.closest('input, textarea, select, [contenteditable="true"]'))) return;
+      if (!activeTargetVehicle) activeTargetVehicle = acquireTargetVehicle(activeCamMode);
+      if (!activeTargetVehicle) return;
+
+      e.preventDefault();
+      vehicleOrbitYaw += e.key === 'ArrowLeft' ? Math.PI / 4 : -Math.PI / 4;
+    });
 
     window.addEventListener('resize', onResize);
     if (typeof ResizeObserver !== 'undefined' && containerEl) {
