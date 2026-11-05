@@ -18336,46 +18336,46 @@
       const vehicles = [
         // Eastbound (Horizontal, moving Right, Y=435 inner, Y=470 outer)
         { id: 'v_eb_car', dir: 'EB', lane: 1, defaultLane: 1, type: 'car', color: '#f8fafc', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446, currentLaneY: 438 },
-        // Exact match to user reference image: Electric Blue Sportbike, Gold USD Inverted Forks, White Dome Head with Slit Eyes, Vibrant Orange T-shirt, Charcoal Jeans
-        { id: 'v_eb_bike', dir: 'EB', lane: 1, defaultLane: 1, type: 'bike', color: '#0066f5', bikeColor: '#0066f5', helmetColor: '#f1f5f9', shirtColor: '#f97316', pantsColor: '#18181b', shoeColor: '#64748b', skinColor: '#df9b76', w: 36, h: 20, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 438 },
+        // Exact match to user reference image: Electric Blue Sportbike, Electric Blue Racing Helmet with White Aero Stripes, Vibrant Orange Hoodie, Charcoal Jeans
+        { id: 'v_eb_bike', dir: 'EB', lane: 1, defaultLane: 1, type: 'bike', color: '#0066f5', bikeColor: '#0066f5', helmetColor: '#0066f5', shirtColor: '#f97316', pantsColor: '#18181b', shoeColor: '#64748b', skinColor: '#df9b76', w: 36, h: 20, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 438 },
         { id: 'v_eb_bus', dir: 'EB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_cng', dir: 'EB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: -80, speed: 40, maxSpeed: 48, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_rickshaw', dir: 'EB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: -210, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_rickshaw_2', dir: 'EB', lane: 1, defaultLane: 1, type: 'rickshaw', color: '#a855f7', w: 34, h: 18, pos: -340, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 438 },
-        // Vibrant Orange Sportbike with White Helmet, Crisp White Shirt & Charcoal Pants
-        { id: 'v_eb_bike_2', dir: 'EB', lane: 2, defaultLane: 2, type: 'bike', color: '#ea580c', bikeColor: '#ea580c', helmetColor: '#f1f5f9', shirtColor: '#f8fafc', pantsColor: '#18181b', shoeColor: '#f8fafc', skinColor: '#f59e0b', w: 36, h: 20, pos: -390, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 468 },
+        // Vibrant Orange Sportbike with Vibrant Orange Racing Helmet
+        { id: 'v_eb_bike_2', dir: 'EB', lane: 2, defaultLane: 2, type: 'bike', color: '#ea580c', bikeColor: '#ea580c', helmetColor: '#ea580c', shirtColor: '#f8fafc', pantsColor: '#18181b', shoeColor: '#f8fafc', skinColor: '#f59e0b', w: 36, h: 20, pos: -390, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 468 },
 
         // Westbound (Horizontal, moving Left, Y=405 inner, Y=370 outer)
         { id: 'v_wb_car', dir: 'WB', lane: 1, defaultLane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 405 },
-        // Pearl White Superbike with White Dome Head, Sky Blue Shirt & Charcoal Jeans
-        { id: 'v_wb_bike', dir: 'WB', lane: 1, defaultLane: 1, type: 'bike', color: '#f8fafc', bikeColor: '#f8fafc', helmetColor: '#f1f5f9', shirtColor: '#0284c7', pantsColor: '#18181b', shoeColor: '#64748b', skinColor: '#fcd34d', w: 36, h: 20, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 405 },
+        // Pearl White Superbike with Gloss White Racing Helmet
+        { id: 'v_wb_bike', dir: 'WB', lane: 1, defaultLane: 1, type: 'bike', color: '#f8fafc', bikeColor: '#f8fafc', helmetColor: '#f8fafc', shirtColor: '#0284c7', pantsColor: '#18181b', shoeColor: '#64748b', skinColor: '#fcd34d', w: 36, h: 20, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 405 },
         { id: 'v_wb_bus', dir: 'WB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_cng', dir: 'WB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: 1270, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_rickshaw', dir: 'WB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: 1420, speed: 25, maxSpeed: 28, stopLine: 752, currentLaneY: 368 },
-        // Stealth Black Superbike (DARK BIKE: Crisp Pure White Shirt & Light Grey Pants!)
-        { id: 'v_wb_bike_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'bike', color: '#111827', bikeColor: '#111827', helmetColor: '#f1f5f9', shirtColor: '#f8fafc', pantsColor: '#cbd5e1', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 36, h: 20, pos: 1650, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 368 },
+        // Stealth Black Superbike with Stealth Black Racing Helmet (White Attire)
+        { id: 'v_wb_bike_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'bike', color: '#111827', bikeColor: '#111827', helmetColor: '#111827', shirtColor: '#f8fafc', pantsColor: '#cbd5e1', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 36, h: 20, pos: 1650, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_cng_2', dir: 'WB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 32, h: 16, pos: 1540, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 405 },
         { id: 'v_wb_car_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'car', color: '#f472b6', w: 44, h: 20, pos: 1770, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 368 },
 
         // Southbound (Vertical, moving Down, X=580 inner, X=544 outer)
         { id: 'v_sb_car', dir: 'SB', lane: 1, defaultLane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304, currentLaneX: 580 },
-        // Deep Navy Blue Sportbike (DARK BIKE: Soft Cream/White Shirt & Light Grey Pants!)
-        { id: 'v_sb_bike', dir: 'SB', lane: 1, defaultLane: 1, type: 'bike', color: '#172554', bikeColor: '#172554', helmetColor: '#f1f5f9', shirtColor: '#fef08a', pantsColor: '#cbd5e1', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 14, h: 36, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 580 },
+        // Deep Navy Blue Sportbike with Deep Navy Racing Helmet
+        { id: 'v_sb_bike', dir: 'SB', lane: 1, defaultLane: 1, type: 'bike', color: '#172554', bikeColor: '#172554', helmetColor: '#172554', shirtColor: '#fef08a', pantsColor: '#cbd5e1', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 14, h: 36, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 580 },
         { id: 'v_sb_bus', dir: 'SB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_cng', dir: 'SB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 30, speed: 40, maxSpeed: 48, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_rickshaw', dir: 'SB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: -120, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_rickshaw_2', dir: 'SB', lane: 1, defaultLane: 1, type: 'rickshaw', color: '#ec4899', w: 18, h: 34, pos: -190, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 580 },
-        // Vibrant Saffron Orange Sportbike with White Shirt & Dark Pants
-        { id: 'v_sb_bike_2', dir: 'SB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', bikeColor: '#f97316', helmetColor: '#f1f5f9', shirtColor: '#ffffff', pantsColor: '#1e293b', shoeColor: '#f8fafc', skinColor: '#fdba74', w: 14, h: 36, pos: -220, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 542 },
+        // Vibrant Saffron Orange Sportbike with Saffron Orange Racing Helmet
+        { id: 'v_sb_bike_2', dir: 'SB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', bikeColor: '#f97316', helmetColor: '#f97316', shirtColor: '#ffffff', pantsColor: '#1e293b', shoeColor: '#f8fafc', skinColor: '#fdba74', w: 14, h: 36, pos: -220, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 542 },
 
         // Northbound (Vertical, moving Up, X=620 inner, X=656 outer)
         { id: 'v_nb_car', dir: 'NB', lane: 1, defaultLane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 618 },
-        // Pearl White Sportbike with Electric Cyan Shirt & Charcoal Pants
-        { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', color: '#f8fafc', bikeColor: '#f8fafc', helmetColor: '#f1f5f9', shirtColor: '#0284c7', pantsColor: '#18181b', shoeColor: '#64748b', skinColor: '#fed7aa', w: 14, h: 36, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
+        // Pearl White Sportbike with Crimson Red Racing Helmet
+        { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', color: '#f8fafc', bikeColor: '#f8fafc', helmetColor: '#dc2626', shirtColor: '#0284c7', pantsColor: '#18181b', shoeColor: '#64748b', skinColor: '#fed7aa', w: 14, h: 36, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
         { id: 'v_nb_bus', dir: 'NB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_cng', dir: 'NB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 680, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 656 },
-        // Midnight Black Superbike (DARK BIKE: Crisp Pure White Shirt & Light Slate Pants!)
-        { id: 'v_nb_bike_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'bike', color: '#090d12', bikeColor: '#090d12', helmetColor: '#f1f5f9', shirtColor: '#ffffff', pantsColor: '#d1d5db', shoeColor: '#ffffff', skinColor: '#fcd34d', w: 14, h: 36, pos: 980, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 656 },
+        // Midnight Black Superbike with Cyber Yellow Racing Helmet
+        { id: 'v_nb_bike_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'bike', color: '#090d12', bikeColor: '#090d12', helmetColor: '#facc15', shirtColor: '#ffffff', pantsColor: '#d1d5db', shoeColor: '#ffffff', skinColor: '#fcd34d', w: 14, h: 36, pos: 980, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_cng_2', dir: 'NB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 16, h: 32, pos: 900, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 618 },
         { id: 'v_nb_car_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'car', color: '#a855f7', w: 20, h: 44, pos: 1060, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 656 }

@@ -430,11 +430,14 @@
     // Mascot Character Palettes based on reference image & dark bike contrast rule:
     // "if the bike color is dark then the bikers attire should be light colour."
     let shirtColor = bikeIsDark ? 0xf8fafc : 0xf97316; // Crisp Pure White on dark bikes, Vibrant Orange on others
-    let headColor = 0xf1f5f9;  // Smooth Porcelain White Spherical Head
+    let helmetColor = activeColor; // Full-Face Aerodynamic Racing Helmet matching bike or stylish accent
     let pantsColor = bikeIsDark ? 0xcbd5e1 : 0x18181b; // Light Grey / Slate Khaki on dark bikes, Charcoal Slim Jeans on others
     let shoeColor = bikeIsDark ? 0xffffff : 0x64748b;  // Crisp White on dark bikes, Lavender-Grey Sneaker on others
 
     const bikeMat = new THREE.MeshStandardMaterial({ color: activeColor, roughness: 0.18, metalness: 0.35 });
+    const helmetMat = new THREE.MeshStandardMaterial({ color: helmetColor, roughness: 0.14, metalness: 0.35 });
+    const visorMat = new THREE.MeshStandardMaterial({ color: 0x070b12, roughness: 0.05, metalness: 0.88 });
+    const stripeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.20 });
     const darkMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.5 });
     const silverMat = new THREE.MeshStandardMaterial({ color: 0xcfd6df, roughness: 0.2, metalness: 0.85 });
     const goldForkMat = new THREE.MeshStandardMaterial({ color: 0xca8a04, roughness: 0.22, metalness: 0.88 });
@@ -542,18 +545,45 @@
     torso.rotation.z = -0.52;
     bike.add(torso);
 
-    // THE ICONIC CHARACTER HEAD: Smooth White Sphere with Two Vertical Black Capsule Eyes (| |)
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 18, 16), headMat);
-    head.position.set(0.25, 1.48, 0);
-    bike.add(head);
+    // FULL-FACE AERODYNAMIC RACING HELMET (Exact Reference Image Match)
+    const helmetGroup = new THREE.Group();
+    helmetGroup.position.set(0.25, 1.48, 0);
+    helmetGroup.rotation.z = -0.25;
 
-    // Two Vertical Black Capsule/Pill Eyes (| |)
-    for (const eyeSide of [-1, 1]) {
-      const eye = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.035), eyeMat);
-      eye.position.set(0.46, 1.48, eyeSide * 0.06);
-      eye.rotation.z = -0.15;
-      bike.add(eye);
-    }
+    // Aerodynamic Helmet Shell
+    const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(0.24, 18, 16), helmetMat);
+    helmetShell.scale.set(1.4, 1.3, 1.25);
+    helmetGroup.add(helmetShell);
+
+    // Chin Bar & Jaw Guard
+    const chinBar = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.28), helmetMat);
+    chinBar.position.set(0.20, -0.09, 0);
+    helmetGroup.add(chinBar);
+
+    // Dark Smoked Curved Racing Visor Shield
+    const visor = new THREE.Mesh(new THREE.SphereGeometry(0.23, 16, 12), visorMat);
+    visor.scale.set(1.15, 0.60, 1.08);
+    visor.position.set(0.11, 0.02, 0);
+    helmetGroup.add(visor);
+
+    // White Racing Crown Aero Stripe
+    const crownStripe = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.02, 0.06), stripeMat);
+    crownStripe.position.set(-0.02, 0.28, 0);
+    crownStripe.rotation.z = 0.08;
+    helmetGroup.add(crownStripe);
+
+    // White Forehead Brow Arc Stripe
+    const browStripe = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.26), stripeMat);
+    browStripe.position.set(0.16, 0.14, 0);
+    helmetGroup.add(browStripe);
+
+    // Rear Aero Diffuser Spoiler
+    const rearSpoiler = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.06, 0.22), helmetMat);
+    rearSpoiler.position.set(-0.24, 0.08, 0);
+    rearSpoiler.rotation.z = 0.35;
+    helmetGroup.add(rearSpoiler);
+
+    bike.add(helmetGroup);
 
     // Bare Forearms Reaching to Handlebars & Legs on Footrests (Completely outside and 100% visible)
     for (const side of [-1, 1]) {

@@ -2587,19 +2587,19 @@
 
     } else if (type === 'bike') {
       // 8 Diverse High-Contrast Bike & Biker Palettes
-      // Palette 0 is an exact match to the user's reference image:
-      // Electric Blue Sportbike, Gold USD Inverted Forks, White Dome Head with Vertical Slit Eyes, Vibrant Orange T-shirt, Charcoal Jeans!
-      // Requested core colors: White, Black, Navy Blue, Orange, Electric Blue
+      // Matching user reference image (media_1793919979374_c5baeb87.jpg):
+      // Full-Face Aerodynamic Racing Helmet with Curved Smoked Visor, White Racing Aero Stripes, and Upswept Rear Spoiler!
+      // Diverse Helmet Colors across the fleet: Electric Blue, Pearl White, Stealth Black, Deep Navy, Vibrant Orange, Crimson Red, Cyber Yellow, Cyan Sport.
       // Rule: "if the bike color is dark then the bikers attire should be light colour."
       const bikePalettes = [
-        { bike: 0x0066f5, head: 0xf1f5f9, shirt: 0xf97316, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 1. Electric Blue & Orange (Exact Reference Image Match)
-        { bike: 0xf8fafc, head: 0xf1f5f9, shirt: 0x0284c7, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 2. White Superbike with Sky Blue Shirt & Charcoal Pants
-        { bike: 0x111827, head: 0xf1f5f9, shirt: 0xf8fafc, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b }, // 3. Stealth Black (DARK BIKE: Crisp Pure White Shirt & Light Grey Pants!)
-        { bike: 0x172554, head: 0xf1f5f9, shirt: 0xfef08a, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b }, // 4. Navy Blue Sportbike (DARK BIKE: Soft Cream/White Shirt & Light Grey Pants!)
-        { bike: 0xea580c, head: 0xf1f5f9, shirt: 0xf8fafc, pants: 0x18181b, shoe: 0xf8fafc, caliper: 0xd97706 }, // 5. Vibrant Orange with White Shirt & Charcoal Pants
-        { bike: 0xf8fafc, head: 0xf1f5f9, shirt: 0xf97316, pants: 0x334155, shoe: 0xf8fafc, caliper: 0xd97706 }, // 6. White Racing Edition with Orange Shirt & Slate Pants
-        { bike: 0x090d12, head: 0xf1f5f9, shirt: 0xffffff, pants: 0xd1d5db, shoe: 0xffffff, caliper: 0xf59e0b }, // 7. Midnight Black (DARK BIKE: Pure White Shirt & Light Slate Pants!)
-        { bike: 0x1e3a8a, head: 0xf1f5f9, shirt: 0xe0f2fe, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xd97706 }  // 8. Deep Navy Blue (DARK BIKE: Ice-Cyan/White Shirt & Light Grey Pants!)
+        { bike: 0x0066f5, helmet: 0x0066f5, shirt: 0xf97316, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 1. Electric Blue Helmet & Bike (Exact Image Match!)
+        { bike: 0xf8fafc, helmet: 0xf8fafc, shirt: 0x0284c7, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 2. Pearl White Racing Helmet & White Superbike
+        { bike: 0x111827, helmet: 0x111827, shirt: 0xf8fafc, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b }, // 3. Stealth Black Helmet & Bike (White Attire)
+        { bike: 0x172554, helmet: 0x172554, shirt: 0xfef08a, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b }, // 4. Navy Blue Racing Helmet & Navy Bike (Light Attire)
+        { bike: 0xea580c, helmet: 0xea580c, shirt: 0xf8fafc, pants: 0x18181b, shoe: 0xf8fafc, caliper: 0xd97706 }, // 5. Vibrant Orange Racing Helmet & Orange Bike
+        { bike: 0xf8fafc, helmet: 0xdc2626, shirt: 0xf97316, pants: 0x334155, shoe: 0xf8fafc, caliper: 0xd97706 }, // 6. Crimson Red Racing Helmet on White Superbike
+        { bike: 0x090d12, helmet: 0xfacc15, shirt: 0xffffff, pants: 0xd1d5db, shoe: 0xffffff, caliper: 0xf59e0b }, // 7. Cyber Yellow Racing Helmet on Midnight Black Bike
+        { bike: 0x1e3a8a, helmet: 0x0284c7, shirt: 0xe0f2fe, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xd97706 }  // 8. Cyan Sport Helmet on Deep Navy Bike
       ];
       const palette = bikePalettes[appearanceSeed % bikePalettes.length];
       const parseHex = (hexStr, fallback) => {
@@ -2629,7 +2629,7 @@
       }
 
       const activeBikeColor = (vData && vData.bikeColor && vData.bikeColor !== '#dc2626') ? parseHex(vData.bikeColor, palette.bike) : (colorHex && colorHex !== 0xdc2626 ? colorHex : palette.bike);
-      const activeHeadColor = vData && (vData.headColor || vData.helmetColor) ? parseHex(vData.headColor || vData.helmetColor, palette.head) : palette.head;
+      const activeHelmetColor = vData && (vData.helmetColor || vData.headColor) ? parseHex(vData.helmetColor || vData.headColor, palette.helmet) : palette.helmet;
       let activeShirtColor = vData && vData.shirtColor ? parseHex(vData.shirtColor, palette.shirt) : palette.shirt;
       let activePantsColor = vData && vData.pantsColor ? parseHex(vData.pantsColor, palette.pants) : palette.pants;
       let activeShoeColor = vData && vData.shoeColor ? parseHex(vData.shoeColor, palette.shoe) : palette.shoe;
@@ -2662,12 +2662,25 @@
         opacity: 0.68
       });
 
-      // Biker Materials
+      // Biker Materials: Full-Face Aerodynamic Helmet, Visor & Attire
+      const helmetMat = new THREE.MeshStandardMaterial({
+        color: activeHelmetColor,
+        roughness: 0.14,
+        metalness: 0.35
+      });
+      const visorMat = new THREE.MeshStandardMaterial({
+        color: 0x070b12,
+        roughness: 0.05,
+        metalness: 0.88
+      });
+      const helmetStripeMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.22,
+        metalness: 0.15
+      });
       const shirtMat = new THREE.MeshStandardMaterial({ color: activeShirtColor, roughness: 0.65 });
       const pantsMat = new THREE.MeshStandardMaterial({ color: activePantsColor, roughness: 0.82 });
       const skinMat = new THREE.MeshStandardMaterial({ color: activeSkinColor, roughness: 0.75 });
-      const headMat = new THREE.MeshStandardMaterial({ color: activeHeadColor, roughness: 0.18, metalness: 0.05 });
-      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x0a0c10 });
       const shoeUpperMat = new THREE.MeshStandardMaterial({ color: activeShoeColor, roughness: 0.7 });
       const shoeSoleWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
 
@@ -3003,30 +3016,105 @@
       torso.rotation.z = -0.65;
       group.add(torso);
 
-      // Neck & Round Crew-Neck Collar
+      // Neck & Athletic Hoodie Collar
       const riderNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 1.2, 10), skinMat);
       riderNeck.position.set(1.1, 11.4, 0);
       riderNeck.rotation.z = -0.3;
       group.add(riderNeck);
-      const neckCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.72, 0.28, 12), shirtMat);
+      const neckCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.78, 0.35, 12), shirtMat);
       neckCollar.position.set(1.0, 11.1, 0);
       neckCollar.rotation.z = -0.3;
       group.add(neckCollar);
 
-      // THE ICONIC CHARACTER HEAD: Smooth White / Soft-Lavender Sphere with Two Vertical Black Capsule Eyes (| |)
-      const head = new THREE.Mesh(new THREE.SphereGeometry(1.52, 24, 20), headMat);
-      head.position.set(1.65, 12.35, 0);
-      head.rotation.z = -0.22; // Tilted slightly looking down the road
-      group.add(head);
+      // ==============================================================
+      // FULL-FACE AERODYNAMIC RACING HELMET (Exact Reference Image Match)
+      // Different Colors across fleet (Electric Blue, White, Black, Navy, Orange, Red, Yellow)
+      // With Dark Curved Visor, White Aerodynamic Crown & Brow Stripes, and Rear Diffuser Spoiler
+      // ==============================================================
+      const helmetGroup = new THREE.Group();
+      helmetGroup.position.set(1.65, 12.35, 0);
+      helmetGroup.rotation.z = -0.26; // Aggressive forward tuck looking down the road
 
-      // Two Vertical Black Capsule/Pill Eyes (| |) in the center of the face
-      [-1, 1].forEach(eyeSide => {
-        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.62, 0.18), eyeMat);
-        eye.position.set(2.92, 12.35, eyeSide * 0.35);
-        eye.rotation.z = -0.22;
-        eye.rotation.y = eyeSide * 0.12;
-        group.add(eye);
+      // 1. Aerodynamic Contoured Outer Shell (Teardrop sportbike helmet profile)
+      const shellGeom = new THREE.SphereGeometry(1.52, 24, 20);
+      const helmetShell = new THREE.Mesh(shellGeom, helmetMat);
+      helmetShell.scale.set(1.42, 1.35, 1.28);
+      helmetGroup.add(helmetShell);
+
+      // 2. Full-Face Chin Bar & Jaw Guard (Extends forward to shield rider's jaw)
+      const chinBar = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.95, 1.88), helmetMat);
+      chinBar.position.set(1.25, -0.62, 0);
+      chinBar.rotation.z = 0.22;
+      helmetGroup.add(chinBar);
+
+      // Rounded Front Chin Cone Tip
+      const chinTip = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 12), helmetMat);
+      chinTip.scale.set(0.85, 0.85, 1.6);
+      chinTip.position.set(1.78, -0.62, 0);
+      helmetGroup.add(chinTip);
+
+      // 3. Front Chin Air Intake Grille (Matte black vent at the mouth)
+      const chinVent = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.38, 0.72), darkPaint);
+      chinVent.position.set(2.18, -0.62, 0);
+      helmetGroup.add(chinVent);
+
+      // 4. Curved Dark Smoked Panoramic Racing Visor Shield (Mirror-tint reflection)
+      const visor = new THREE.Mesh(new THREE.SphereGeometry(1.48, 22, 16), visorMat);
+      visor.scale.set(1.18, 0.62, 1.10);
+      visor.position.set(0.68, 0.08, 0);
+      helmetGroup.add(visor);
+
+      // Visor Pivot Hinge Plates & Pivot Screws on Temple Sides
+      [-1, 1].forEach(side => {
+        const pivotPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.10, 14), darkPaint);
+        pivotPlate.rotation.x = Math.PI / 2;
+        pivotPlate.position.set(0.14, 0.14, side * 1.50);
+        helmetGroup.add(pivotPlate);
+
+        const pivotScrew = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.14, 10), silverMetal);
+        pivotScrew.rotation.x = Math.PI / 2;
+        pivotScrew.position.set(0.14, 0.14, side * 1.53);
+        helmetGroup.add(pivotScrew);
       });
+
+      // 5. Signature White Aerodynamic Racing Crown Stripe & Forehead Brow Arc (Signature Image Feature)
+      // Top Center Racing Stripe running over the dome from brow to back
+      const crownStripe = new THREE.Mesh(new THREE.BoxGeometry(2.95, 0.12, 0.36), helmetStripeMat);
+      crownStripe.position.set(-0.12, 1.76, 0);
+      crownStripe.rotation.z = 0.08;
+      helmetGroup.add(crownStripe);
+
+      // Curved Forehead Brow Arc Stripe just above the top edge of the visor
+      const browArc = new THREE.Mesh(new THREE.TorusGeometry(1.40, 0.085, 8, 24, Math.PI * 0.64), helmetStripeMat);
+      browArc.rotation.y = Math.PI / 2;
+      browArc.rotation.x = -Math.PI * 0.18;
+      browArc.position.set(0.42, 0.86, 0);
+      browArc.scale.set(0.85, 1.0, 1.05);
+      helmetGroup.add(browArc);
+
+      // 6. Rear Aerodynamic Diffuser / Spoiler Fin (High-speed stability winglet)
+      const spoilerShape = new THREE.Shape();
+      spoilerShape.moveTo(-1.1, 0.75);
+      spoilerShape.lineTo(-2.05, 0.45);
+      spoilerShape.lineTo(-1.85, 0.10);
+      spoilerShape.lineTo(-1.0, 0.30);
+      spoilerShape.closePath();
+      const spoiler = new THREE.Mesh(new THREE.ExtrudeGeometry(spoilerShape, {
+        depth: 1.38,
+        bevelEnabled: true,
+        bevelSize: 0.06,
+        bevelThickness: 0.06
+      }), helmetMat);
+      spoiler.position.z = -0.69;
+      helmetGroup.add(spoiler);
+
+      // 7. Rubber Neck Seal / Base Gasket around lower rim
+      const baseGasket = new THREE.Mesh(new THREE.TorusGeometry(1.22, 0.12, 8, 20), darkPaint);
+      baseGasket.rotation.x = Math.PI / 2;
+      baseGasket.position.set(-0.08, -1.15, 0);
+      helmetGroup.add(baseGasket);
+
+      group.add(helmetGroup);
 
       // Biker Arms & Bare Forearms Reaching to Handlebars
       [-1, 1].forEach(side => {
