@@ -44,6 +44,7 @@
   let orbitPointerId = null;
   let lastOrbitPointerX = 0;
   let lastOrbitPointerY = 0;
+  let buildingNameCounter = 0;
   const ORBITABLE_VEHICLE_MODES = ['bus', 'bike', 'cng', 'car', 'rickshaw'];
   let targetCamX = 220, targetCamY = 440;
   const CAM_DEFAULT_POS = { x: 220, y: 440, z: 460 };
@@ -926,8 +927,51 @@
     group.add(neck);
 
     const head = new THREE.Mesh(new THREE.BoxGeometry(1.25, 1.3, 1.25), skinMat);
+    head.scale.set(
+      0.9 + ((styleSeed >>> 9) % 4) * 0.06,
+      0.92 + ((styleSeed >>> 11) % 3) * 0.08,
+      0.92 + ((styleSeed >>> 13) % 3) * 0.08
+    );
     head.position.y = 9.5;
     group.add(head);
+
+    const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xfff8ef, roughness: 0.35 });
+    const irisMat = new THREE.MeshStandardMaterial({
+      color: [0x211c1a, 0x3f2a1d, 0x243b53, 0x4b3621][(styleSeed >>> 12) % 4],
+      roughness: 0.42
+    });
+    const browMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
+    const eyeRadius = 0.13 + ((styleSeed >>> 15) % 3) * 0.025;
+    const eyeSpacing = 0.27 + ((styleSeed >>> 17) % 3) * 0.045;
+    [-1, 1].forEach(side => {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(eyeRadius, 8, 6), eyeWhiteMat);
+      eye.scale.set(1, 1.25, 0.55);
+      eye.position.set(side * eyeSpacing, 9.58, 0.64);
+      group.add(eye);
+
+      const iris = new THREE.Mesh(new THREE.SphereGeometry(0.075, 7, 5), irisMat);
+      iris.position.set(side * eyeSpacing, 9.57, 0.72);
+      group.add(iris);
+
+      const brow = new THREE.Mesh(new THREE.BoxGeometry(eyeSpacing * 1.2, 0.09, 0.12), browMat);
+      brow.position.set(side * eyeSpacing, 9.82, 0.66);
+      brow.rotation.z = side * (styleSeed % 2 ? 0.08 : -0.08);
+      group.add(brow);
+    });
+
+    const nose = new THREE.Mesh(
+      new THREE.ConeGeometry(0.13 + ((styleSeed >>> 19) % 3) * 0.025, 0.28 + ((styleSeed >>> 21) % 3) * 0.06, 5),
+      skinMat
+    );
+    nose.rotation.x = Math.PI / 2;
+    nose.position.set(0, 9.37, 0.72);
+    group.add(nose);
+
+    const mouthMat = new THREE.MeshStandardMaterial({ color: 0x6b3030, roughness: 0.8 });
+    const mouthWidth = 0.22 + ((styleSeed >>> 23) % 4) * 0.04;
+    const mouth = new THREE.Mesh(new THREE.BoxGeometry(mouthWidth, 0.075, 0.1), mouthMat);
+    mouth.position.set(0, 9.08, 0.66);
+    group.add(mouth);
 
     // Distinct hairstyles and headwear.
     if (outfit.scarf) {
@@ -959,14 +1003,31 @@
       group.add(longHair);
     }
 
-    if (!outfit.scarf && styleSeed % 3 !== 0) {
+    if (styleIdx === 4 || styleIdx === 7) {
+      const sideburns = [-1, 1].map(side => {
+        const sideburn = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.62, 0.22), hairMat);
+        sideburn.position.set(side * 0.58, 9.32, 0.43);
+        group.add(sideburn);
+        return sideburn;
+      });
+      group.userData.sideburns = sideburns;
+    }
+
+    if (!outfit.scarf && styleSeed % 4 !== 0) {
       const beardMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.92 });
-      const beard = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.42, 0.18), beardMat);
-      beard.position.set(0, 8.95, 0.68);
-      group.add(beard);
-      const moustache = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.14, 0.16), beardMat);
-      moustache.position.set(0, 9.2, 0.7);
-      group.add(moustache);
+      if (styleSeed % 3 === 0) {
+        const moustache = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.14, 0.16), beardMat);
+        moustache.position.set(0, 9.2, 0.7);
+        group.add(moustache);
+      } else {
+        const beardHeight = styleSeed % 2 === 0 ? 0.42 : 0.72;
+        const beard = new THREE.Mesh(new THREE.BoxGeometry(0.82, beardHeight, 0.18), beardMat);
+        beard.position.set(0, 9.0 - beardHeight * 0.25, 0.68);
+        group.add(beard);
+        const moustache = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.14, 0.16), beardMat);
+        moustache.position.set(0, 9.2, 0.7);
+        group.add(moustache);
+      }
     }
 
     const heightScale = [0.86, 0.93, 1, 1.07, 1.14][(styleSeed >>> 5) % 5];
@@ -1364,6 +1425,8 @@
       signboard, waterTank, antenna
     } = config;
 
+    buildingNameCounter += 1;
+    const displayName = config.name || `MIRPUR BLOCK ${String(buildingNameCounter).padStart(2, '0')}`;
     const group = new THREE.Group();
     group.position.set(x, 0, z);
 
@@ -1554,19 +1617,32 @@
     }
 
     // Authentic Signboard and Awning
-    if (signboard) {
-      const sTex = createSignboardTexture(signboard.text, signboard.sub, signboard.bg, signboard.textCol, signboard.subCol, signboard.border, signboard.tw, signboard.th);
-      const sGeo = new THREE.BoxGeometry(signboard.w || (w1 * 0.75), signboard.h || 16, 2.5);
+    {
+      const buildingSign = signboard || {
+        text: displayName,
+        sub: 'Mirpur 10 · Dhaka',
+        bg: '#0f172a',
+        textCol: '#fff7ed',
+        subCol: '#fbbf24',
+        border: '#fb923c',
+        tw: 256,
+        th: 64,
+        w: Math.min(110, Math.max(50, w1 * 0.78)),
+        h: 13,
+        y: 13
+      };
+      const sTex = createSignboardTexture(buildingSign.text, buildingSign.sub, buildingSign.bg, buildingSign.textCol, buildingSign.subCol, buildingSign.border, buildingSign.tw, buildingSign.th);
+      const sGeo = new THREE.BoxGeometry(buildingSign.w || (w1 * 0.75), buildingSign.h || 16, 2.5);
       const sMat = new THREE.MeshBasicMaterial({ map: sTex });
       const signMesh = new THREE.Mesh(sGeo, sMat);
-      signMesh.position.set(signboard.ox || 0, signboard.y || 15, (d1 / 2) + 2.0);
+      signMesh.position.set(buildingSign.ox || 0, buildingSign.y || 15, (d1 / 2) + 2.0);
       group.add(signMesh);
 
-      if (signboard.awnCol) {
-        const awnGeo = new THREE.BoxGeometry((signboard.w || (w1 * 0.75)) + 3, 2.8, 8);
-        const awnMat = new THREE.MeshStandardMaterial({ color: signboard.awnCol, roughness: 0.5 });
+      if (buildingSign.awnCol) {
+        const awnGeo = new THREE.BoxGeometry((buildingSign.w || (w1 * 0.75)) + 3, 2.8, 8);
+        const awnMat = new THREE.MeshStandardMaterial({ color: buildingSign.awnCol, roughness: 0.5 });
         const awn = new THREE.Mesh(awnGeo, awnMat);
-        awn.position.set(signboard.ox || 0, (signboard.y || 15) + (signboard.h || 16) / 2 + 1.4, (d1 / 2) + 4.5);
+        awn.position.set(buildingSign.ox || 0, (buildingSign.y || 15) + (buildingSign.h || 16) / 2 + 1.4, (d1 / 2) + 4.5);
         awn.rotation.x = 0.25;
         group.add(awn);
       }
@@ -1794,7 +1870,7 @@
       body.castShadow = true;
       group.add(body);
 
-      // Dhaka Transit Green Accent Stripe
+      // Dhaka Transit green accent on the red passenger body.
       const strGeo = new THREE.BoxGeometry(length + 0.4, 1.8, width + 0.4);
       const strMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
       const str = new THREE.Mesh(strGeo, strMat);
@@ -1808,25 +1884,79 @@
       cab.position.y = 16.5;
       group.add(cab);
 
-      // White Aerodynamic Roof Cap
+      // Red roof cap with a lighter edge above the passenger windows.
       const roofGeo = new THREE.BoxGeometry(length, 2.5, width);
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38 });
       const roof = new THREE.Mesh(roofGeo, roofMat);
       roof.position.y = 20.8;
       group.add(roof);
 
-      // Passenger Side Glass Windows
-      const winGeo = new THREE.BoxGeometry(length * 0.88, 5, width + 0.4);
-      const winMat = new THREE.MeshBasicMaterial({ color: 0x7dd3fc });
-      const win = new THREE.Mesh(winGeo, winMat);
-      win.position.y = 16.5;
-      group.add(win);
+      const cabinGlassMat = new THREE.MeshStandardMaterial({
+        color: 0x9bdcf5,
+        roughness: 0.24,
+        metalness: 0.12,
+        transparent: true,
+        opacity: 0.36,
+        depthWrite: false
+      });
+
+      // Seats and riders sit behind separate large windows on both sides.
+      const seatMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.88 });
+      const passengerColors = [0xf59e0b, 0x0f766e, 0x7c3aed, 0xe11d48, 0x2563eb];
+      [-25, -13, -1, 11, 23].forEach((x, index) => {
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(7.5, 1.2, 13), seatMat);
+        seat.position.set(x, 13.8, 0);
+        group.add(seat);
+
+        const torso = new THREE.Mesh(
+          new THREE.BoxGeometry(3.2, 3.2, 3.5),
+          new THREE.MeshStandardMaterial({ color: passengerColors[index], roughness: 0.82 })
+        );
+        torso.position.set(x, 16.1, 0);
+        group.add(torso);
+
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(1.25, 9, 7),
+          new THREE.MeshStandardMaterial({ color: [0xb47b56, 0xd4a373, 0x99613d][index % 3], roughness: 0.82 })
+        );
+        head.position.set(x, 18.5, 0);
+        group.add(head);
+      });
+
+      const windowXs = [-27, -16, -5, 6, 17, 28];
+      [-1, 1].forEach(side => {
+        windowXs.forEach(x => {
+          const window = new THREE.Mesh(new THREE.BoxGeometry(9.4, 4.9, 0.3), cabinGlassMat);
+          window.position.set(x, 16.6, side * (width / 2 + 0.12));
+          group.add(window);
+        });
+
+        const lowerWindowRail = new THREE.Mesh(
+          new THREE.BoxGeometry(length * 0.92, 0.55, 0.7),
+          bodyMat
+        );
+        lowerWindowRail.position.set(0, 13.9, side * (width / 2));
+        group.add(lowerWindowRail);
+      });
 
       // Front Windshield
-      const fWinGeo = new THREE.BoxGeometry(1.4, 7.0, width * 0.9);
-      const fWin = new THREE.Mesh(fWinGeo, winMat);
-      fWin.position.set(length / 2 - 0.2, 16.5, 0);
+      const fWinGeo = new THREE.BoxGeometry(0.35, 6.6, width * 0.88);
+      const fWin = new THREE.Mesh(fWinGeo, cabinGlassMat);
+      fWin.position.set(length / 2 + 0.12, 16.5, 0);
       group.add(fWin);
+
+      const driverTorso = new THREE.Mesh(
+        new THREE.BoxGeometry(3.5, 3.4, 3.8),
+        new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.82 })
+      );
+      driverTorso.position.set(31, 15.8, 0);
+      group.add(driverTorso);
+      const driverHead = new THREE.Mesh(
+        new THREE.SphereGeometry(1.3, 9, 7),
+        new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.82 })
+      );
+      driverHead.position.set(31, 18.4, 0);
+      group.add(driverHead);
 
       // Front Destination LED Route Board (Mirpur 10)
       const destTex = createSignboardTexture('মিরপুর ১০', 'MIRPUR 10', '#0f172a', '#fef08a', '#38bdf8', '#facc15', 128, 48);
@@ -1881,13 +2011,21 @@
       const length = 30;
       const width = 16;
 
-      // Yellow auto-rickshaw body and enclosed passenger cabin.
-      const bodyGeo = new THREE.BoxGeometry(20, 6.8, width - 1);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.45 });
+      // Bangladesh-style green auto-rickshaw body and enclosed passenger cabin.
+      const bodyGeo = new THREE.BoxGeometry(20, 4.0, width - 1);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x159447, roughness: 0.45 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.set(-2, 5.8, 0);
+      body.position.set(-2, 4.2, 0);
       body.castShadow = true;
       group.add(body);
+
+      const yellowTrimMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.42 });
+      const sideStripe = new THREE.Mesh(new THREE.BoxGeometry(17, 1.2, 0.3), yellowTrimMat);
+      [-1, 1].forEach(side => {
+        const stripe = sideStripe.clone();
+        stripe.position.set(-2, 7.1, side * (width / 2 + 0.08));
+        group.add(stripe);
+      });
 
       // Passenger bench and driver seating.
       const pSeatGeo = new THREE.BoxGeometry(7.5, 3.2, width - 2.5);
@@ -1902,28 +2040,30 @@
       dSeat.position.set(1.5, 5.5, 0);
       group.add(dSeat);
 
-      // Dark curved canopy, as on Dhaka CNG auto-rickshaws.
-      const roofGeo = new THREE.CylinderGeometry(width * 0.52, width * 0.52, 22, 14, 1, false, 0, Math.PI);
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0x35383a, roughness: 0.68 });
+      // Flat covered roof leaves the side openings clear so riders remain visible.
+      const roofGeo = new THREE.BoxGeometry(22, 1.5, width);
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x176b38, roughness: 0.58 });
       const roof = new THREE.Mesh(roofGeo, roofMat);
-      roof.rotation.z = Math.PI / 2;
       roof.position.set(-2, 13.2, 0);
       group.add(roof);
+      const roofTrim = new THREE.Mesh(new THREE.BoxGeometry(22.5, 0.55, width + 0.5), yellowTrimMat);
+      roofTrim.position.set(-2, 12.35, 0);
+      group.add(roofTrim);
 
       // Yellow brow and dark front glass.
       const visorGeo = new THREE.BoxGeometry(2.0, 0.8, width - 1.2);
-      const visor = new THREE.Mesh(visorGeo, bodyMat);
+      const visor = new THREE.Mesh(visorGeo, yellowTrimMat);
       visor.position.set(8.2, 12.8, 0);
       group.add(visor);
 
       // Tinted windshield and side windows.
       const winGeo = new THREE.BoxGeometry(1.2, 5.6, width - 2.5);
       const winMat = new THREE.MeshStandardMaterial({
-        color: 0x17202a,
+        color: 0xa5dfec,
         roughness: 0.24,
         metalness: 0.15,
         transparent: true,
-        opacity: 0.62,
+        opacity: 0.28,
         depthWrite: false
       });
       const win = new THREE.Mesh(winGeo, winMat);
@@ -1933,18 +2073,18 @@
       [-1, 1].forEach(side => {
         const sideWindowGeo = new THREE.BoxGeometry(12.5, 4.5, 0.24);
         const sideWindow = new THREE.Mesh(sideWindowGeo, winMat);
-        sideWindow.position.set(-2, 10.1, side * (width / 2 - 0.65));
+        sideWindow.position.set(-2, 10.1, side * (width / 2 + 0.1));
         group.add(sideWindow);
 
         const pillarGeo = new THREE.BoxGeometry(0.8, 5.4, 0.65);
         [-8, -2.2, 3.8].forEach(x => {
           const pillar = new THREE.Mesh(pillarGeo, bodyMat);
-          pillar.position.set(x, 10.0, side * (width / 2 - 0.72));
+          pillar.position.set(x, 10.0, side * (width / 2 + 0.15));
           group.add(pillar);
         });
 
-        const yellowDoor = new THREE.Mesh(new THREE.BoxGeometry(4.0, 5.1, 0.34), bodyMat);
-        yellowDoor.position.set(-5.3, 5.9, side * (width / 2 - 0.62));
+        const yellowDoor = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.6, 0.34), yellowTrimMat);
+        yellowDoor.position.set(-5.3, 5.0, side * (width / 2 + 0.15));
         group.add(yellowDoor);
       });
 
@@ -1978,6 +2118,17 @@
         driverTrousers[(appearanceSeed >>> 3) % driverTrousers.length],
         true
       );
+      const passengerShirts = [0xeab308, 0xdb2777];
+      passengerShirts.forEach((shirtColor, index) => {
+        addSeatedFigure(
+          index === 0 ? -9.0 : -3.5,
+          5.5,
+          2.8,
+          shirtColor,
+          index === 0 ? 0x334155 : 0x1f2937,
+          false
+        );
+      });
       const hlGeo = new THREE.CylinderGeometry(1.3, 1.3, 1.4, 8);
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.rotation.z = Math.PI / 2;
@@ -2863,6 +3014,13 @@
       head.position.set(pos[0], 26, pos[2]);
       freezeStatic(head);
       scene.add(head);
+
+      if (Math.abs(pos[0]) === 135 && Math.abs(pos[2]) === 100) {
+        const streetGlow = new THREE.PointLight(0xffbd66, 1.25, 135, 2);
+        streetGlow.position.set(pos[0], 24, pos[2]);
+        cornerPointLights.push(streetGlow);
+        scene.add(streetGlow);
+      }
     });
 
     // 5. Ground & Road Network (Procedural Canvas Matte Slate Asphalt)
@@ -3296,6 +3454,12 @@
       if (!rect.width || !rect.height) return;
       mouseRelX = (e.clientX - rect.left) / rect.width - 0.5;
       mouseRelY = (e.clientY - rect.top) / rect.height - 0.5;
+
+      if (e.pointerType === 'mouse' && orbitPointerId === null &&
+          isOrbitableVehicleMode(activeCamMode) && activeTargetVehicle) {
+        vehicleOrbitYaw = 2.0 + mouseRelX * Math.PI * 2;
+        vehicleOrbitPitch = Math.max(-0.25, Math.min(0.85, 0.2 - mouseRelY * 0.9));
+      }
 
       if (e.pointerId === orbitPointerId && activeTargetVehicle) {
         vehicleOrbitYaw -= (e.clientX - lastOrbitPointerX) * 0.012;
@@ -3872,7 +4036,7 @@
         vm.mesh.userData.previousRoadPosition = v.pos;
         const forwardDelta = (v.dir === 'EB' || v.dir === 'SB') ? roadDelta : -roadDelta;
         const wheelRadius = vm.mesh.userData.wheelRadius || 3;
-        const rollAngle = Math.abs(forwardDelta) < 100 ? -forwardDelta / wheelRadius : 0;
+        const rollAngle = Math.abs(forwardDelta) < 100 ? forwardDelta / wheelRadius : 0;
         vm.mesh.userData.wheels.forEach(w => {
           w.rotation.z += rollAngle;
         });
@@ -3933,11 +4097,11 @@
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
-          rotY = (p.dirForward !== false) ? 0 : Math.PI;
+          rotY = (p.dirForward !== false) ? Math.PI / 2 : -Math.PI / 2;
         } else {
           posX = p.x - 600;
           posZ = coord - 420;
-          rotY = (p.dirForward !== false) ? -Math.PI / 2 : Math.PI / 2;
+          rotY = (p.dirForward !== false) ? 0 : Math.PI;
         }
       } else {
         // Crosswalk pedestrian
@@ -3946,11 +4110,11 @@
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
-          rotY = (p.end > p.start) ? 0 : Math.PI;
+          rotY = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
         } else {
           posX = p.x - 600;
           posZ = coord - 420;
-          rotY = (p.end > p.start) ? -Math.PI / 2 : Math.PI / 2;
+          rotY = (p.end > p.start) ? 0 : Math.PI;
         }
       }
 

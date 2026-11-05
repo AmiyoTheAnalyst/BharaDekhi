@@ -106,7 +106,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=vehicle-details-20261105-v1"></script>
+  <script src="assets/crossroads-3d.js?v=vehicle-details-20261105-v5"></script>
   <script src="assets/scroll-transit-hero.js"></script>
 
   <style>
@@ -7683,7 +7683,7 @@
             <span class="text-[9px] text-purple-400/70 font-mono">Zebra</span>
           </button>
           <div class="px-1.5 pt-1 border-t border-slate-800/80 text-[9px] leading-relaxed text-slate-400">
-            Drag or swipe to orbit<span class="hidden sm:inline"> · PC: use ← / → keys</span>
+            Move pointer, drag or swipe to orbit<span class="hidden sm:inline"> · PC: use ← / → keys</span>
           </div>
         </div>
 
@@ -18316,6 +18316,8 @@
         { id: 'v_eb_bus', dir: 'EB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_cng', dir: 'EB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: -80, speed: 40, maxSpeed: 48, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_rickshaw', dir: 'EB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: -210, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 468 },
+        { id: 'v_eb_rickshaw_2', dir: 'EB', lane: 1, defaultLane: 1, type: 'rickshaw', color: '#a855f7', w: 34, h: 18, pos: -340, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 438 },
+        { id: 'v_eb_bike_2', dir: 'EB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', w: 24, h: 12, pos: -390, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 468 },
 
         // Westbound (Horizontal, moving Left, Y=405 inner, Y=370 outer)
         { id: 'v_wb_car', dir: 'WB', lane: 1, defaultLane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 405 },
@@ -18323,6 +18325,8 @@
         { id: 'v_wb_bus', dir: 'WB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_cng', dir: 'WB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: 1270, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_rickshaw', dir: 'WB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: 1420, speed: 25, maxSpeed: 28, stopLine: 752, currentLaneY: 368 },
+        { id: 'v_wb_cng_2', dir: 'WB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 32, h: 16, pos: 1540, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 405 },
+        { id: 'v_wb_car_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'car', color: '#f472b6', w: 44, h: 20, pos: 1570, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 368 },
 
         // Southbound (Vertical, moving Down, X=580 inner, X=544 outer)
         { id: 'v_sb_car', dir: 'SB', lane: 1, defaultLane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304, currentLaneX: 580 },
@@ -18330,13 +18334,17 @@
         { id: 'v_sb_bus', dir: 'SB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_cng', dir: 'SB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 30, speed: 40, maxSpeed: 48, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_rickshaw', dir: 'SB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: -120, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 542 },
+        { id: 'v_sb_rickshaw_2', dir: 'SB', lane: 1, defaultLane: 1, type: 'rickshaw', color: '#ec4899', w: 18, h: 34, pos: -190, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 580 },
+        { id: 'v_sb_bike_2', dir: 'SB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', w: 12, h: 24, pos: -220, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 542 },
 
         // Northbound (Vertical, moving Up, X=620 inner, X=656 outer)
         { id: 'v_nb_car', dir: 'NB', lane: 1, defaultLane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 618 },
         { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
         { id: 'v_nb_bus', dir: 'NB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_cng', dir: 'NB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 680, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 656 },
-        { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536, currentLaneX: 656 }
+        { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536, currentLaneX: 656 },
+        { id: 'v_nb_cng_2', dir: 'NB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 16, h: 32, pos: 900, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 618 },
+        { id: 'v_nb_car_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'car', color: '#a855f7', w: 20, h: 44, pos: 950, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 656 }
       ];
 
       // Build Vehicle SVG Elements with Bright Warm Gold/White Headlights & Glowing Red Taillights
@@ -18618,6 +18626,8 @@
         { id: 'ped_sw3', axis: 'H', y: 508, start: 435, end: 270, speed: 17, isSidewalk: true, color: '#f472b6', umbrellaColor: '#ef4444', umbrellaRim: '#fecaca' },
         // SE Sidewalk: between road curb (y=500) and building facade (y=518) -> y=508
         { id: 'ped_sw4', axis: 'H', y: 508, start: 925, end: 765, speed: 19, isSidewalk: true, color: '#fbbf24', umbrellaColor: '#0f172a', umbrellaRim: '#facc15' },
+        { id: 'ped_sw5', axis: 'H', y: 329, start: 300, end: 440, speed: 14, isSidewalk: true, color: '#f97316', umbrellaColor: '#7c3aed', umbrellaRim: '#ddd6fe' },
+        { id: 'ped_sw6', axis: 'H', y: 515, start: 900, end: 780, speed: 15, isSidewalk: true, color: '#0ea5e9', umbrellaColor: '#f59e0b', umbrellaRim: '#fef3c7' },
 
         // ----------------------------------------------------
         // Vertical Sidewalk Pedestrians (Continuous stroll along vertical sidewalk strips between building walls and vertical road curb)
@@ -18629,7 +18639,9 @@
         // SW Vertical Sidewalk: between SW building wall (x=468) and vertical curb (x=490) -> x=478
         { id: 'ped_vsw3', axis: 'V', x: 478, start: 535, end: 655, speed: 17, isSidewalk: true, color: '#38bdf8', umbrellaColor: '#0ea5e9', umbrellaRim: '#e0f2fe' },
         // SE Vertical Sidewalk: between vertical curb (x=710) and SE building wall (x=730) -> x=720
-        { id: 'ped_vsw4', axis: 'V', x: 720, start: 655, end: 535, speed: 18, isSidewalk: true, color: '#4ade80', umbrellaColor: '#16a34a', umbrellaRim: '#dcfce7' }
+        { id: 'ped_vsw4', axis: 'V', x: 720, start: 655, end: 535, speed: 18, isSidewalk: true, color: '#4ade80', umbrellaColor: '#16a34a', umbrellaRim: '#dcfce7' },
+        { id: 'ped_vsw5', axis: 'V', x: 474, start: 210, end: 305, speed: 13, isSidewalk: true, color: '#fb7185', umbrellaColor: '#0284c7', umbrellaRim: '#bae6fd' },
+        { id: 'ped_vsw6', axis: 'V', x: 724, start: 650, end: 540, speed: 14, isSidewalk: true, color: '#facc15', umbrellaColor: '#db2777', umbrellaRim: '#fbcfe8' }
       ];
 
       if (pedsLayer) {
