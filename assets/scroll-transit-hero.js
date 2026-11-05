@@ -57,13 +57,13 @@
   const interpolatedLightColor = new THREE.Color();
   const vehicleAssetSpecs = [
     // Lane 0: West Inner (Southbound, towards camera, direction: 1, x: -2.05) - Fast mix: Bikes, Sedans, Coupes
-    { key: 'bike_w1', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.2, color: 0xef4444 },
+    { key: 'bike_w1', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.2, color: 0x0066f5 }, // Electric Blue (Mascot Match)
     { key: 'corolla_w1', type: 'corolla', file: 'toyota-corolla.glb', targetLength: 4.5, lane: 0, speed: 6.2, color: 0x0047ab },
     { key: 'prius_w1', type: 'prius', file: 'toyota-prius.glb', targetLength: 4.5, lane: 0, speed: 6.0, color: 0x10b981 },
-    { key: 'bike_w2', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.4, color: 0x3b82f6 },
+    { key: 'bike_w2', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.4, color: 0x111827 }, // Stealth Black (Dark -> White Attire!)
     { key: 'city_w1', type: 'city', file: 'honda-city.glb', targetLength: 4.4, lane: 0, speed: 6.3, color: 0x387d83 },
     { key: 'sports_w1', type: 'sports', file: 'sports-coupe.glb', targetLength: 4.5, lane: 0, speed: 6.8, color: 0xd34f8b },
-    { key: 'bike_w3', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.1, color: 0xf59e0b },
+    { key: 'bike_w3', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 0, speed: 7.1, color: 0xea580c }, // Vibrant Orange
     { key: 'civic_w1', type: 'civic', file: 'honda-civic.glb', targetLength: 4.7, lane: 0, speed: 6.4, color: 0xf8fafc },
     { key: 'camry_w1', type: 'camry', file: 'toyota-camry.glb', targetLength: 4.9, lane: 0, speed: 6.1, color: 0x1e3a8a },
 
@@ -80,11 +80,11 @@
 
     // Lane 2: East Inner (Northbound, away from camera, direction: -1, x: 2.05) - Fast mix: Sedans, Bikes, BRTA Bus, SUVs
     { key: 'corolla_e1', type: 'corolla', file: 'toyota-corolla.glb', targetLength: 4.5, lane: 2, speed: 6.2, color: 0xe9a33b },
-    { key: 'bike_e1', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 2, speed: 7.3, color: 0xef4444 },
+    { key: 'bike_e1', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 2, speed: 7.3, color: 0xf8fafc }, // White Superbike
     { key: 'bus_e1', type: 'bus', file: 'dhaka-city-bus.glb', targetLength: 9.0, lane: 2, speed: 5.1, color: 0x059669 },
     { key: 'civic_e1', type: 'civic', file: 'honda-civic.glb', targetLength: 4.7, lane: 2, speed: 6.5, color: 0xd95146 },
     { key: 'prius_e1', type: 'prius', file: 'toyota-prius.glb', targetLength: 4.5, lane: 2, speed: 6.0, color: 0x61a178 },
-    { key: 'bike_e2', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 2, speed: 7.2, color: 0x06b6d4 },
+    { key: 'bike_e2', type: 'bike', file: 'bike.glb', targetLength: 2.2, lane: 2, speed: 7.2, color: 0x172554 }, // Navy Blue (Dark -> Light Attire!)
     { key: 'crv_e1', type: 'crv', file: 'honda-cr-v.glb', targetLength: 4.7, lane: 2, speed: 6.0, color: 0x95764a },
     { key: 'sports_e1', type: 'sports', file: 'sports-coupe.glb', targetLength: 4.5, lane: 2, speed: 6.7, color: 0x8b5cf6 },
     { key: 'city_e1', type: 'city', file: 'honda-city.glb', targetLength: 4.4, lane: 2, speed: 6.3, color: 0x0284c7 },
@@ -406,11 +406,33 @@
     const bike = new THREE.Group();
     const activeColor = colorHex || 0x0066f5; // Electric Blue
 
-    // Mascot Character Palettes based on reference image
-    let shirtColor = 0xf97316; // Vibrant Orange T-shirt
+    function isDarkColor(col) {
+      let r, g, b;
+      if (typeof col === 'string') {
+        const hex = col.replace('#', '');
+        const num = parseInt(hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex, 16);
+        r = (num >> 16) & 255;
+        g = (num >> 8) & 255;
+        b = num & 255;
+      } else if (typeof col === 'number') {
+        r = (col >> 16) & 255;
+        g = (col >> 8) & 255;
+        b = col & 255;
+      } else {
+        return false;
+      }
+      const lum = (0.299 * r + 0.587 * g + 0.114 * b);
+      return lum < 100 || col === 0x111827 || col === 0x18181b || col === 0x090d12 || col === 0x172554 || col === 0x1e3a8a;
+    }
+
+    const bikeIsDark = isDarkColor(activeColor);
+
+    // Mascot Character Palettes based on reference image & dark bike contrast rule:
+    // "if the bike color is dark then the bikers attire should be light colour."
+    let shirtColor = bikeIsDark ? 0xf8fafc : 0xf97316; // Crisp Pure White on dark bikes, Vibrant Orange on others
     let headColor = 0xf1f5f9;  // Smooth Porcelain White Spherical Head
-    let pantsColor = 0x18181b; // Charcoal Black Slim Jeans
-    let shoeColor = 0x64748b;  // Lavender-Grey Sneaker
+    let pantsColor = bikeIsDark ? 0xcbd5e1 : 0x18181b; // Light Grey / Slate Khaki on dark bikes, Charcoal Slim Jeans on others
+    let shoeColor = bikeIsDark ? 0xffffff : 0x64748b;  // Crisp White on dark bikes, Lavender-Grey Sneaker on others
 
     const bikeMat = new THREE.MeshStandardMaterial({ color: activeColor, roughness: 0.18, metalness: 0.35 });
     const darkMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.5 });
@@ -419,8 +441,8 @@
     const sportsHlMat = new THREE.MeshBasicMaterial({ color: 0xa5f3fc });
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
 
-    // Sculpted Fuel Tank with Knee Indents
-    const tank = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.44, 0.46), bikeMat);
+    // Sculpted Fuel Tank with Narrow Waist (depth: 0.40)
+    const tank = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.44, 0.40), bikeMat);
     tank.position.set(0.12, 0.86, 0);
     bike.add(tank);
 
@@ -436,22 +458,22 @@
     bike.add(windscreen);
 
     // Upswept Tail Cowl & Stepped Saddle
-    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.34, 0.38), bikeMat);
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.34, 0.36), bikeMat);
     tail.position.set(-0.78, 1.0, 0);
     tail.rotation.z = 0.24;
     bike.add(tail);
-    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.14, 0.38), darkMat);
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.14, 0.34), darkMat);
     seat.position.set(-0.32, 0.94, 0);
     bike.add(seat);
 
     // Engine Block, Silver Crankcase & Right-Side Polished Canister Muffler
-    const engine = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.45, 0.42), silverMat);
+    const engine = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.45, 0.38), silverMat);
     engine.position.set(0.08, 0.52, 0);
     bike.add(engine);
     for (const side of [-1, 1]) {
       const crank = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.06, 12), silverMat);
       crank.rotation.x = Math.PI / 2;
-      crank.position.set(0.12, 0.5, side * 0.23);
+      crank.position.set(0.12, 0.5, side * 0.21);
       bike.add(crank);
 
       if (side === 1) {
@@ -497,19 +519,24 @@
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0x0a0c10 });
     const shoeMat = new THREE.MeshStandardMaterial({ color: shoeColor, roughness: 0.7 });
 
-    // CNC Billet Rearset Footrests on both sides
+    // CNC Billet Rearset Footrests on both sides (Z = side * 0.24 to 0.36)
     for (const side of [-1, 1]) {
       const rearset = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.04), silverMat);
-      rearset.position.set(-0.24, 0.52, side * 0.22);
+      rearset.position.set(-0.24, 0.52, side * 0.24);
       bike.add(rearset);
 
-      const footpeg = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.16, 8), silverMat);
+      const footpeg = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.20, 10), silverMat);
       footpeg.rotation.x = Math.PI / 2;
-      footpeg.position.set(-0.24, 0.49, side * 0.28);
+      footpeg.position.set(-0.24, 0.48, side * 0.32);
       bike.add(footpeg);
+
+      const pegTip = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.05, 10), darkMat);
+      pegTip.rotation.x = Math.PI / 2;
+      pegTip.position.set(-0.24, 0.48, side * 0.40);
+      bike.add(pegTip);
     }
 
-    // Torso Leaning Forward in Orange T-shirt
+    // Torso Leaning Forward
     const torso = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.26, 0.36), shirtMat);
     torso.position.set(-0.06, 1.22, 0);
     torso.rotation.z = -0.52;
@@ -528,33 +555,38 @@
       bike.add(eye);
     }
 
-    // Bare Forearms Reaching to Handlebars & Legs on Footrests
+    // Bare Forearms Reaching to Handlebars & Legs on Footrests (Completely outside and 100% visible)
     for (const side of [-1, 1]) {
       const arm = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.08, 0.08), skinMat);
       arm.position.set(0.34, 1.15, side * 0.22);
       arm.rotation.z = -0.42;
       bike.add(arm);
 
-      // Thigh in Charcoal Jeans hugging the blue tank
-      const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.12, 0.12), pantsMat);
-      thigh.position.set(-0.06, 0.92, side * 0.22);
+      // Thigh hugging the outside of the tank
+      const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.14), pantsMat);
+      thigh.position.set(-0.06, 0.92, side * 0.28);
       thigh.rotation.z = -0.55;
       bike.add(thigh);
 
+      // Knee joint
+      const knee = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), pantsMat);
+      knee.position.set(0.08, 0.80, side * 0.28);
+      bike.add(knee);
+
       // Shin angling back-down directly to the footrest peg
-      const shin = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.1, 0.1), pantsMat);
-      shin.position.set(-0.16, 0.68, side * 0.26);
+      const shin = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.12, 0.12), pantsMat);
+      shin.position.set(-0.14, 0.64, side * 0.32);
       shin.rotation.z = -0.62;
       bike.add(shin);
 
-      // Casual Riding Sneaker: Grey with Crisp White Rubber Sole
+      // Casual Riding Sneaker: resting squarely on footpeg at X = -0.24, Y = 0.48
       const bootGroup = new THREE.Group();
-      bootGroup.position.set(-0.22, 0.52, side * 0.28);
-      const sneakerUpper = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.07, 0.1), shoeMat);
+      bootGroup.position.set(-0.20, 0.50, side * 0.32);
+      const sneakerUpper = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.12), shoeMat);
       sneakerUpper.position.set(0, 0.02, 0);
       bootGroup.add(sneakerUpper);
-      const sneakerSole = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 0.11), whiteMat);
-      sneakerSole.position.set(0, -0.025, 0);
+      const sneakerSole = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.035, 0.13), whiteMat);
+      sneakerSole.position.set(0, -0.03, 0);
       bootGroup.add(sneakerSole);
       bike.add(bootGroup);
     }
