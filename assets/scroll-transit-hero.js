@@ -97,9 +97,57 @@
     const tire = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, width, 16), tireMat);
     tire.rotation.z = Math.PI / 2;
     wheel.add(tire);
-    const rim = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.6, radius * 0.6, width * 1.02, 12), rimMat);
-    rim.rotation.z = Math.PI / 2;
-    wheel.add(rim);
+
+    const rotorMat = new THREE.MeshStandardMaterial({ color: 0x64707a, roughness: 0.48, metalness: 0.72 });
+    const rotor = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.56, radius * 0.56, width * 0.58, 16), rotorMat);
+    rotor.rotation.z = Math.PI / 2;
+    wheel.add(rotor);
+
+    const spokeGeometry = new THREE.CylinderGeometry(radius * 0.035, radius * 0.035, radius * 0.52, 6);
+    const spokes = new THREE.InstancedMesh(spokeGeometry, rimMat, 20);
+    const matrix = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3(1, 1, 1);
+    let spokeIndex = 0;
+    for (const side of [-1, 1]) {
+      for (let spoke = 0; spoke < 10; spoke++) {
+        const angle = spoke * Math.PI / 5;
+        const direction = new THREE.Vector3(0, Math.cos(angle), Math.sin(angle));
+        position.set(side * (width / 2 + 0.012), Math.cos(angle) * radius * 0.43, Math.sin(angle) * radius * 0.43);
+        quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+        matrix.compose(position, quaternion, scale);
+        spokes.setMatrixAt(spokeIndex++, matrix);
+      }
+    }
+    spokes.instanceMatrix.needsUpdate = true;
+    wheel.add(spokes);
+
+    const lipGeometry = new THREE.TorusGeometry(radius * 0.72, radius * 0.035, 5, 24);
+    const sidewallGeometry = new THREE.TorusGeometry(radius * 0.82, radius * 0.018, 5, 24);
+    const sidewallMat = new THREE.MeshStandardMaterial({ color: 0x34383d, roughness: 0.76 });
+    for (const side of [-1, 1]) {
+      const lip = new THREE.Mesh(lipGeometry, rimMat);
+      lip.rotation.y = Math.PI / 2;
+      lip.position.x = side * (width / 2 + 0.012);
+      wheel.add(lip);
+
+      const sidewall = new THREE.Mesh(sidewallGeometry, sidewallMat);
+      sidewall.rotation.y = Math.PI / 2;
+      sidewall.position.x = side * width * 0.37;
+      wheel.add(sidewall);
+    }
+
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.21, radius * 0.21, width * 1.12, 12), chromeMat);
+    hub.rotation.z = Math.PI / 2;
+    wheel.add(hub);
+    const centerCap = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.12, radius * 0.12, width * 1.18, 12), rimMat);
+    centerCap.rotation.z = Math.PI / 2;
+    wheel.add(centerCap);
+
+    wheel.name = 'vehicle-wheel';
+    wheel.userData.isRollingWheel = true;
+    wheel.userData.wheelRadius = radius;
     return wheel;
   }
 
@@ -720,13 +768,15 @@
     }
 
     const towerMaterials = [
-      0x8c5148, 0x38716e, 0x8a7047, 0x67517d, 0x3c6387, 0x58764f, 0x874c61
+      0xb99578, 0x8c9b82, 0x768ca1, 0xb27873, 0x9b8ba6, 0x69918a,
+      0xc1aa80, 0x7f8972, 0xa98570, 0x778698, 0x9d7e82, 0x739185,
+      0xb0a18a, 0x8c7c69, 0x7f96a1, 0xa08c68, 0x8b7b91, 0x7c9080
     ].map(color => new THREE.MeshStandardMaterial({
       color,
       roughness: 0.68,
       metalness: 0.2,
       emissive: color,
-      emissiveIntensity: 0.3
+      emissiveIntensity: 0.16
     }));
     const buildingNames = [
       'Gulshan Heights', 'Dhanmondi Plaza', 'Mirpur Tower', 'Motijheel House',
@@ -735,7 +785,7 @@
       'Farmgate Center', 'Hatirjheel House', 'New Market', 'Mohakhali Tower',
       'Azimpur Court', 'Paltan Building'
     ];
-    const buildingSignColors = ['#9a542f', '#17635e', '#5b478b', '#a34351', '#356287'];
+    const buildingSignColors = ['#8f5f45', '#426d66', '#685f86', '#974f53', '#4a657c'];
     function createBuildingSignTexture(name, color) {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
@@ -765,9 +815,9 @@
       return texture;
     }
     const towerEdgeMaterials = [
-      new THREE.MeshBasicMaterial({ color: 0x16d9d2 }),
-      new THREE.MeshBasicMaterial({ color: 0x8b5cf6 }),
-      new THREE.MeshBasicMaterial({ color: 0xff4fac })
+      new THREE.MeshBasicMaterial({ color: 0xd7b879 }),
+      new THREE.MeshBasicMaterial({ color: 0x73aaa0 }),
+      new THREE.MeshBasicMaterial({ color: 0xc88377 })
     ];
     const windowCounts = [0, 0, 0];
     const windowPlacements = [[], [], []];
@@ -788,7 +838,7 @@
 
           const body = new THREE.Mesh(
             new THREE.BoxGeometry(width, height, depth),
-            towerMaterials[Math.floor(Math.random() * towerMaterials.length)]
+            towerMaterials[towerCount % towerMaterials.length]
           );
           body.position.y = height / 2;
           building.add(body);
@@ -856,7 +906,7 @@
     }
 
     const windowGeometry = new THREE.BoxGeometry(0.07, 0.68, 0.82);
-    const windowColors = [0x55e6e1, 0xb48cff, 0xff70ba];
+    const windowColors = [0xf3d19b, 0xc9d8e6, 0xe2c3bd];
     cityWindowMaterials = windowColors.map(color => new THREE.MeshBasicMaterial({
       color,
       transparent: true,
@@ -1108,6 +1158,7 @@
             distance,
             speed: elevated ? 7.2 : 5.8 + spec.lane * 0.3,
             wheelNodes: [],
+            wheelRadius: 0,
             loaded: false
           };
           cityTraffic.push(traffic);
@@ -1159,9 +1210,14 @@
             model.scale.setScalar(scale);
             model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
             model.traverse(object => {
-              if (!object.isMesh) return;
-              object.castShadow = true;
-              object.receiveShadow = true;
+              if (object.isMesh) {
+                object.castShadow = true;
+                object.receiveShadow = true;
+              }
+              if (object.userData.isRollingWheel) {
+                traffic.wheelNodes.push(object);
+                traffic.wheelRadius = object.userData.wheelRadius;
+              }
               if (/wheel|tire|tyre/i.test(object.name)) traffic.wheelNodes.push(object);
             });
             actor.add(model);

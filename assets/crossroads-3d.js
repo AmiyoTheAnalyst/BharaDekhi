@@ -460,6 +460,8 @@
   let sharedUmbHandleGeo = null;
   let sharedUmbShaftMat = null;
   let sharedBuildingDepthMat = null;
+  let alloyRimMat = null;
+  let tireSidewallMat = null;
   let lastSignalStateKey = '';
   let roadMaterial = null;
   let rainSpeeds = null;
@@ -488,54 +490,6 @@
     ctx.fillRect(0, 0, 128, 512);
     const tex = new THREE.CanvasTexture(canvas);
     return tex;
-  }
-
-  // 10-Spoke Metallic Alloy Rim Canvas Texture (128x128)
-  let cachedRimTexture = null;
-  function getMultiSpokeRimTexture() {
-    if (cachedRimTexture) return cachedRimTexture;
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    const cx = 64, cy = 64;
-
-    // Dark gunmetal base disc
-    ctx.fillStyle = '#1e293b';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 60, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Chrome outer lip
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 57, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // 10 Radial Metallic Spokes
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 3.5;
-    for (let i = 0; i < 10; i++) {
-      const angle = (i * Math.PI * 2) / 10;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + Math.cos(angle) * 53, cy + Math.sin(angle) * 53);
-      ctx.stroke();
-    }
-
-    // Chrome center hub
-    ctx.fillStyle = '#f8fafc';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath();
-    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    cachedRimTexture = new THREE.CanvasTexture(canvas);
-    return cachedRimTexture;
   }
 
   // Zero-Lag Radial Ground Glow Texture (128x128) for soft additive ground light pools
@@ -766,20 +720,11 @@
     tlMesh.position.set(-2.08, 0.72, 0);
     group.add(tlMesh);
 
-    // 4 Wheels: 10-Spoke Metallic Alloy Rims via Canvas Texture
-    const rimTex = getMultiSpokeRimTexture();
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
-    const rimFaceMat = new THREE.MeshBasicMaterial({ map: rimTex });
-    const wheelMats = [tireMat, rimFaceMat, rimFaceMat];
-    const wheelGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.20, 24);
-
+    // Four road-ready tires with modeled alloy rims on both visible sides.
     [-0.82, 0.82].forEach(wz => {
       [-1.3, 1.3].forEach(wx => {
-        const wheel = new THREE.Group();
+        const wheel = create10SpokeAlloyWheel(0.32, 0.20, 0xcbd5e1, false);
         wheel.position.set(wx, 0.32, wz);
-        const tire = new THREE.Mesh(wheelGeo, wheelMats);
-        tire.rotation.x = Math.PI / 2;
-        wheel.add(tire);
         group.add(wheel);
         group.userData.wheels.push(wheel);
       });
@@ -1469,7 +1414,7 @@
         metalness: 0.25,
         emissive: new THREE.Color(0xfbbf24),
         emissiveMap: frontT,
-        emissiveIntensity: 0.65
+        emissiveIntensity: 0.22
       });
       const sideM = new THREE.MeshStandardMaterial({
         map: sideT,
@@ -1477,7 +1422,7 @@
         metalness: 0.20,
         emissive: new THREE.Color(0xfbbf24),
         emissiveMap: sideT,
-        emissiveIntensity: 0.45
+        emissiveIntensity: 0.16
       });
       const roofM = new THREE.MeshStandardMaterial({ color: roofColor || 0x0f172a, roughness: 0.75, metalness: 0.2 });
       const botM = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -1715,20 +1660,34 @@
   function create10SpokeAlloyWheel(radius, width, rimColorHex, darkCenter) {
     const wheelGroup = new THREE.Group();
 
-    // 1. Rubber Tire (Cylinder oriented to roll around Z)
+    // 1. Rubber tire with subtle sidewall bead detail.
     const tireGeo = new THREE.CylinderGeometry(radius, radius, width, 24);
-    const tireMat = sharedWheelMat || new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
+    const tireMat = sharedWheelMat;
     const tire = new THREE.Mesh(tireGeo, tireMat);
     tire.rotation.x = Math.PI / 2;
     wheelGroup.add(tire);
 
+    if (!tireSidewallMat) tireSidewallMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.7 });
+    [-1, 1].forEach(side => {
+      const bead = new THREE.Mesh(
+        new THREE.TorusGeometry(radius * 0.80, radius * 0.025, 5, 24),
+        tireSidewallMat
+      );
+      bead.position.z = side * width * 0.36;
+      wheelGroup.add(bead);
+    });
+
     // 2. Metallic Outer Rim Lip
     const rimGeo = new THREE.CylinderGeometry(radius * 0.74, radius * 0.72, width + 0.03, 20);
-    const rimMat = new THREE.MeshStandardMaterial({
-      color: rimColorHex || 0xd1d5db,
-      metalness: 0.85,
-      roughness: 0.25
-    });
+    if (!alloyRimMat) {
+      alloyRimMat = new THREE.MeshStandardMaterial({
+        color: rimColorHex || 0xd1d5db,
+        metalness: 0.85,
+        roughness: 0.25
+      });
+    }
+    const rimMat = alloyRimMat;
     const rim = new THREE.Mesh(rimGeo, rimMat);
     rim.rotation.x = Math.PI / 2;
     wheelGroup.add(rim);
@@ -1746,14 +1705,16 @@
 
     // 4. 10 Radial Metallic Alloy Spokes
     const spokeGeo = new THREE.CylinderGeometry(radius * 0.045, radius * 0.04, radius * 0.52, 6);
-    for (let s = 0; s < 10; s++) {
-      const angle = s * (Math.PI * 2 / 10);
-      const spoke = new THREE.Mesh(spokeGeo, rimMat);
-      const dist = radius * 0.48;
-      spoke.position.set(Math.cos(angle) * dist, Math.sin(angle) * dist, (width / 2) + 0.015);
-      spoke.rotation.z = angle + Math.PI / 2;
-      wheelGroup.add(spoke);
-    }
+    [-1, 1].forEach(side => {
+      for (let s = 0; s < 10; s++) {
+        const angle = s * (Math.PI * 2 / 10);
+        const spoke = new THREE.Mesh(spokeGeo, rimMat);
+        const dist = radius * 0.48;
+        spoke.position.set(Math.cos(angle) * dist, Math.sin(angle) * dist, side * ((width / 2) + 0.015));
+        spoke.rotation.z = angle + Math.PI / 2;
+        wheelGroup.add(spoke);
+      }
+    });
 
     // 5. Internal Brake Rotor Disc
     const rotorGeo = new THREE.CylinderGeometry(radius * 0.52, radius * 0.52, width * 0.45, 16);
@@ -3276,15 +3237,15 @@
     // Northwest Quadrant
     create3DBuilding({
       x: -490, z: -210, width: 34, depth: 40, height: 115,
-      wallColor: '#0284c7', sideColor: '#082f49',
-      floors: 6, cols: 2, winColor: '#bae6fd',
+      wallColor: '#8da6b6', sideColor: '#405966',
+      floors: 6, cols: 2, winColor: '#f3ddb0',
       antenna: true
     });
 
     const nwComplex = create3DBuilding({
       x: -360, z: -210, width: 200, depth: 65, height: 90,
-      wallColor: '#ea580c', sideColor: '#431407',
-      floors: 4, cols: 6, winColor: '#fef08a',
+      wallColor: '#b97863', sideColor: '#633f38',
+      floors: 4, cols: 6, winColor: '#f1d9a8',
       signboard: { text: 'ঢাকা বেকারি', sub: 'Dhaka Bakery', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 85, h: 18, ox: -45, y: 15, awnCol: 0xb45309 }
     });
     const pharmTex = createSignboardTexture('গ্রীন ফার্মেসি', 'Pharmacy', '#0f172a', '#ffffff', '#6ee7b7', '#10b981', 256, 64);
@@ -3312,15 +3273,15 @@
 
     create3DBuilding({
       x: -225, z: -210, width: 80, depth: 60, height: 110,
-      wallColor: '#0d9488', sideColor: '#134e4a',
-      floors: 5, cols: 3, winColor: '#fef08a',
+      wallColor: '#6f9887', sideColor: '#3e5b53',
+      floors: 5, cols: 3, winColor: '#f2dfb6',
       waterTank: true, antenna: true
     });
 
     create3DBuilding({
       x: -150, z: -205, width: 68, depth: 55, height: 95,
-      wallColor: '#f59e0b', sideColor: '#451a03',
-      floors: 4, cols: 3, winColor: '#fef08a',
+      wallColor: '#bba77e', sideColor: '#62563f',
+      floors: 4, cols: 3, winColor: '#f4dfaa',
       antenna: true,
       signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 62, h: 16, y: 14 }
     });
@@ -3328,24 +3289,24 @@
     // Northeast Quadrant
     create3DBuilding({
       x: 150, z: -205, width: 68, depth: 55, height: 95,
-      wallColor: '#a855f7', sideColor: '#2e1065',
-      floors: 4, cols: 3, winColor: '#bae6fd',
+      wallColor: '#8e829b', sideColor: '#51495e',
+      floors: 4, cols: 3, winColor: '#ead9bd',
       antenna: true,
       signboard: { text: 'ফ্যাশন কর্নার', sub: 'Fashion Corner', bg: '#0f172a', textCol: '#ffffff', border: '#d946ef', w: 62, h: 16, y: 14, awnCol: 0x701a75 }
     });
 
     create3DBuilding({
       x: 230, z: -210, width: 75, depth: 60, height: 100,
-      wallColor: '#14b8a6', sideColor: '#042f2e',
-      floors: 4, cols: 3, winColor: '#bae6fd',
+      wallColor: '#5d8d89', sideColor: '#344f50',
+      floors: 4, cols: 3, winColor: '#e9dbb9',
       waterTank: true,
       signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f766e }
     });
 
     create3DBuilding({
       x: 315, z: -215, width: 85, depth: 60, height: 115,
-      wallColor: '#f43f5e', sideColor: '#4c0519',
-      floors: 5, cols: 4, winColor: '#fef08a',
+      wallColor: '#ad7180', sideColor: '#5d3d4a',
+      floors: 5, cols: 4, winColor: '#f3d9aa',
       waterTank: true, antenna: true,
       signboard: { text: 'সুপার শপ', sub: 'Super Shop', bg: '#0f172a', textCol: '#fef08a', border: '#ff2a54', w: 76, h: 16, y: 14, awnCol: 0xbe123c }
     });
@@ -3353,8 +3314,8 @@
     // NE-4 Mirpur Plaza Landmark High-Rise
     const plaza = create3DBuilding({
       x: 430, z: -200, width: 130, depth: 75, height: 135,
-      wallColor: '#0284c7', sideColor: '#082f49',
-      floors: 6, cols: 5, winColor: '#bae6fd',
+      wallColor: '#728ca8', sideColor: '#3d5067',
+      floors: 6, cols: 5, winColor: '#eeddbb',
       antenna: true
     });
     const plTex = createSignboardTexture('মিরপুর প্লাজা', 'MIRPUR PLAZA', '#0369a1', '#ffffff', '#00f2fe', '#00f2fe', 380, 80);
@@ -3367,29 +3328,29 @@
     // Southwest Quadrant
     create3DBuilding({
       x: -490, z: 185, width: 34, depth: 40, height: 85,
-      wallColor: '#fb7185', sideColor: '#4c0519',
-      floors: 4, cols: 2, winColor: '#fef08a'
+      wallColor: '#b98983', sideColor: '#604745',
+      floors: 4, cols: 2, winColor: '#f2d9a9'
     });
 
     create3DBuilding({
       x: -360, z: 185, width: 200, depth: 65, height: 80,
-      wallColor: '#14b8a6', sideColor: '#042f2e',
-      floors: 3, cols: 6, winColor: '#fef08a',
+      wallColor: '#8c9870', sideColor: '#4d5744',
+      floors: 3, cols: 6, winColor: '#f0dcb0',
       waterTank: true, antenna: true
     });
 
     create3DBuilding({
       x: -225, z: 180, width: 75, depth: 55, height: 85,
-      wallColor: '#8b5cf6', sideColor: '#2e1065',
-      floors: 3, cols: 3, winColor: '#bae6fd',
+      wallColor: '#8f8067', sideColor: '#534b3e',
+      floors: 3, cols: 3, winColor: '#f1dda9',
       antenna: true,
       signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
     });
 
     create3DBuilding({
       x: -150, z: 175, width: 75, depth: 55, height: 82,
-      wallColor: '#f59e0b', sideColor: '#451a03',
-      floors: 3, cols: 3, winColor: '#fef08a',
+      wallColor: '#bd9a5c', sideColor: '#665334',
+      floors: 3, cols: 3, winColor: '#f4dfaa',
       waterTank: true,
       signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
     });
@@ -3397,16 +3358,16 @@
     // Southeast Quadrant
     create3DBuilding({
       x: 165, z: 175, width: 110, depth: 60, height: 85,
-      wallColor: '#f43f5e', sideColor: '#4c0519',
-      floors: 3, cols: 4, winColor: '#fef08a',
+      wallColor: '#9b7c88', sideColor: '#584650',
+      floors: 3, cols: 4, winColor: '#f0dcad',
       antenna: true,
       signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#065f46', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x047857 }
     });
 
     const seBillboardBldg = create3DBuilding({
       x: 320, z: 185, width: 180, depth: 65, height: 85,
-      wallColor: '#1e3a8a', sideColor: '#0f172a',
-      floors: 3, cols: 5, winColor: '#bae6fd',
+      wallColor: '#657d95', sideColor: '#354454',
+      floors: 3, cols: 5, winColor: '#efdbb2',
       waterTank: true, antenna: true
     });
     const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#172554', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
@@ -3418,8 +3379,8 @@
 
     create3DBuilding({
       x: 450, z: 185, width: 45, depth: 45, height: 95,
-      wallColor: '#0ea5e9', sideColor: '#082f49',
-      floors: 4, cols: 2, winColor: '#bae6fd',
+      wallColor: '#769aa0', sideColor: '#40565d',
+      floors: 4, cols: 2, winColor: '#f0ddb3',
       antenna: true
     });
 
