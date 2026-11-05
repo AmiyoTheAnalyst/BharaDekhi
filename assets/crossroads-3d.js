@@ -2658,21 +2658,22 @@
         return fairing;
       }
 
-      // Sportbike fairings, stepped seat, and paired wheels use one centered silhouette
-      // so the same complete rider and bike appear from either traffic direction.
+      // Separate tank, front cowl, side panels, and tail keep the wheels and engine visible.
       addFairing([
-        [-10.2, 4.8], [-8.2, 6.8], [-4.7, 7.8], [-1.4, 7.1],
-        [2.4, 7.7], [6.9, 8.2], [10.5, 7.0], [12.0, 5.35],
-        [9.5, 5.2], [5.1, 5.0], [0.2, 4.95], [-4.4, 4.9], [-8.8, 4.65]
-      ], bikePaint, 3.6, 0.24);
+        [-5.8, 5.1], [-4.6, 7.0], [-2.7, 7.55], [0.8, 7.0],
+        [2.5, 5.35], [0.7, 4.85], [-3.6, 4.8]
+      ], bikePaint, 3.6, 0.2);
       addFairing([
-        [-8.7, 5.25], [-7.0, 6.75], [-4.2, 7.25], [-1.2, 6.7],
-        [2.8, 7.15], [7.6, 7.55], [10.2, 6.7], [8.6, 5.55],
-        [4.1, 5.35], [-0.2, 5.25], [-4.6, 5.2]
-      ], darkPaint, 3.75, 0.14);
+        [2.0, 5.1], [4.0, 7.15], [7.3, 8.1], [10.0, 7.1],
+        [12.0, 5.35], [9.4, 4.9], [6.2, 4.85], [4.2, 5.1]
+      ], bikePaint, 3.6, 0.22);
+      addFairing([
+        [-5.0, 5.25], [-3.8, 6.55], [-1.5, 6.7], [0.9, 6.1],
+        [1.9, 5.25], [-0.2, 4.95], [-3.5, 4.95]
+      ], darkPaint, 3.72, 0.12);
       [-1, 1].forEach(side => {
-        const stripe = new THREE.Mesh(new THREE.BoxGeometry(11.5, 0.28, 0.1), accentPaint);
-        stripe.position.set(1.1, 5.7, side * 1.9);
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.24, 0.1), accentPaint);
+        stripe.position.set(6.6, 5.75, side * 1.9);
         stripe.rotation.z = -0.12;
         group.add(stripe);
       });
