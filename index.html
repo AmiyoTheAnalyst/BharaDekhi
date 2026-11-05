@@ -18312,39 +18312,49 @@
       const vehicles = [
         // Eastbound (Horizontal, moving Right, Y=435 inner, Y=470 outer)
         { id: 'v_eb_car', dir: 'EB', lane: 1, defaultLane: 1, type: 'car', color: '#f8fafc', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446, currentLaneY: 438 },
-        { id: 'v_eb_bike', dir: 'EB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 24, h: 12, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 438 },
+        // Exact match to user reference image: Crimson Red Sports Bike, Red Helmet, Royal Blue T-shirt, Denim Jeans
+        { id: 'v_eb_bike', dir: 'EB', lane: 1, defaultLane: 1, type: 'bike', color: '#dc2626', bikeColor: '#dc2626', helmetColor: '#dc2626', shirtColor: '#2563eb', pantsColor: '#1e3a8a', visorColor: '#e2e8f0', skinColor: '#fed7aa', w: 36, h: 20, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 438 },
         { id: 'v_eb_bus', dir: 'EB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_cng', dir: 'EB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: -80, speed: 40, maxSpeed: 48, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_rickshaw', dir: 'EB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: -210, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 468 },
         { id: 'v_eb_rickshaw_2', dir: 'EB', lane: 1, defaultLane: 1, type: 'rickshaw', color: '#a855f7', w: 34, h: 18, pos: -340, speed: 25, maxSpeed: 28, stopLine: 446, currentLaneY: 438 },
-        { id: 'v_eb_bike_2', dir: 'EB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', w: 24, h: 12, pos: -390, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 468 },
+        // Saffron Orange Bike with Dark Helmet & Crimson Shirt
+        { id: 'v_eb_bike_2', dir: 'EB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', bikeColor: '#f97316', helmetColor: '#0f172a', shirtColor: '#ef4444', pantsColor: '#1e293b', visorColor: '#e0f2fe', skinColor: '#f59e0b', w: 36, h: 20, pos: -390, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 468 },
 
         // Westbound (Horizontal, moving Left, Y=405 inner, Y=370 outer)
         { id: 'v_wb_car', dir: 'WB', lane: 1, defaultLane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 405 },
-        { id: 'v_wb_bike', dir: 'WB', lane: 1, defaultLane: 1, type: 'bike', color: '#f43f5e', w: 24, h: 12, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 405 },
+        // Electric Cyan Bike with Pearl White Helmet & Vibrant Orange Shirt
+        { id: 'v_wb_bike', dir: 'WB', lane: 1, defaultLane: 1, type: 'bike', color: '#06b6d4', bikeColor: '#06b6d4', helmetColor: '#f8fafc', shirtColor: '#ea580c', pantsColor: '#0f172a', visorColor: '#38bdf8', skinColor: '#fcd34d', w: 36, h: 20, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 405 },
         { id: 'v_wb_bus', dir: 'WB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_cng', dir: 'WB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 32, h: 16, pos: 1270, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_rickshaw', dir: 'WB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 34, h: 18, pos: 1420, speed: 25, maxSpeed: 28, stopLine: 752, currentLaneY: 368 },
+        // Neon Purple Bike with Violet Helmet & Mint Shirt
+        { id: 'v_wb_bike_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'bike', color: '#9333ea', bikeColor: '#9333ea', helmetColor: '#a855f7', shirtColor: '#10b981', pantsColor: '#334155', visorColor: '#f1f5f9', skinColor: '#fed7aa', w: 36, h: 20, pos: 1650, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_cng_2', dir: 'WB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 32, h: 16, pos: 1540, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 405 },
-        { id: 'v_wb_car_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'car', color: '#f472b6', w: 44, h: 20, pos: 1570, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 368 },
+        { id: 'v_wb_car_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'car', color: '#f472b6', w: 44, h: 20, pos: 1770, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 368 },
 
         // Southbound (Vertical, moving Down, X=580 inner, X=544 outer)
         { id: 'v_sb_car', dir: 'SB', lane: 1, defaultLane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304, currentLaneX: 580 },
-        { id: 'v_sb_bike', dir: 'SB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 580 },
+        // Kawasaki Green Bike with Green Helmet & Stealth Black Shirt
+        { id: 'v_sb_bike', dir: 'SB', lane: 1, defaultLane: 1, type: 'bike', color: '#16a34a', bikeColor: '#16a34a', helmetColor: '#15803d', shirtColor: '#0f172a', pantsColor: '#475569', visorColor: '#fef08a', skinColor: '#fed7aa', w: 14, h: 36, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 580 },
         { id: 'v_sb_bus', dir: 'SB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_cng', dir: 'SB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 30, speed: 40, maxSpeed: 48, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_rickshaw', dir: 'SB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: -120, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 542 },
         { id: 'v_sb_rickshaw_2', dir: 'SB', lane: 1, defaultLane: 1, type: 'rickshaw', color: '#ec4899', w: 18, h: 34, pos: -190, speed: 25, maxSpeed: 28, stopLine: 304, currentLaneX: 580 },
-        { id: 'v_sb_bike_2', dir: 'SB', lane: 2, defaultLane: 2, type: 'bike', color: '#f97316', w: 12, h: 24, pos: -220, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 542 },
+        // Cyber Yellow Bike with Gold Helmet & Crisp White Shirt
+        { id: 'v_sb_bike_2', dir: 'SB', lane: 2, defaultLane: 2, type: 'bike', color: '#eab308', bikeColor: '#eab308', helmetColor: '#ca8a04', shirtColor: '#f8fafc', pantsColor: '#1e3a8a', visorColor: '#94a3b8', skinColor: '#fdba74', w: 14, h: 36, pos: -220, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 542 },
 
         // Northbound (Vertical, moving Up, X=620 inner, X=656 outer)
         { id: 'v_nb_car', dir: 'NB', lane: 1, defaultLane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 618 },
-        { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', color: '#38bdf8', w: 12, h: 24, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
+        // Pearl White & Red Superbike with Sky Blue Shirt
+        { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', color: '#f8fafc', bikeColor: '#f8fafc', helmetColor: '#dc2626', shirtColor: '#0284c7', pantsColor: '#0f172a', visorColor: '#38bdf8', skinColor: '#fed7aa', w: 14, h: 36, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
         { id: 'v_nb_bus', dir: 'NB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_cng', dir: 'NB', lane: 2, defaultLane: 2, type: 'cng', color: '#16a34a', w: 16, h: 32, pos: 680, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 656 },
+        // Crimson & Carbon Superbike with Gold Shirt
+        { id: 'v_nb_bike_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'bike', color: '#dc2626', bikeColor: '#dc2626', helmetColor: '#18181b', shirtColor: '#facc15', pantsColor: '#0f172a', visorColor: '#fde047', skinColor: '#fcd34d', w: 14, h: 36, pos: 980, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_cng_2', dir: 'NB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 16, h: 32, pos: 900, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 618 },
-        { id: 'v_nb_car_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'car', color: '#a855f7', w: 20, h: 44, pos: 950, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 656 }
+        { id: 'v_nb_car_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'car', color: '#a855f7', w: 20, h: 44, pos: 1060, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 656 }
       ];
 
       // Build Vehicle SVG Elements with Bright Warm Gold/White Headlights & Glowing Red Taillights
@@ -18403,15 +18413,54 @@
                 <path d="M 21,4 L 19,8 L 24,11" stroke="#fde047" stroke-width="1.8" fill="none"/>
               `;
             } else if (v.type === 'bike') {
+              const bCol = v.bikeColor || v.color || '#dc2626';
+              const hCol = v.helmetColor || bCol;
+              const sCol = v.shirtColor || '#2563eb';
+              const pCol = v.pantsColor || '#1e3a8a';
+              const vCol = v.visorColor || '#e2e8f0';
+              const skCol = v.skinColor || '#fed7aa';
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="23,6 68,0 68,12" fill="url(#crHeadlightBeamGradEB)"/>
-                <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-                <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-                <path d="M 3,6 L 10,2 L 16,2 L 20,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
-                <path d="M 8.5,1.3 A 3.5,3.5 0 0 1 15.5,1.3 L 15.2,3.1 L 9,3.1 Z" fill="#ef4444" stroke="#fecaca" stroke-width="0.6"/>
-                <path d="M 13.8,1.7 L 17,2.1 L 16.4,2.8 L 14,2.5 Z" fill="#26394b"/>
-                <circle class="cr-headlight-bulb" cx="23" cy="6" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
-                <circle cx="1" cy="5" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <polygon class="cr-headlight-beam" points="30,11.5 85,2 85,21" fill="url(#crHeadlightBeamGradEB)"/>
+                <!-- Wheels: Alloy Sports Wheels with Rotor & Caliper -->
+                <circle cx="7" cy="15.5" r="4.5" fill="#0f172a"/>
+                <circle cx="7" cy="15.5" r="3" fill="none" stroke="#94a3b8" stroke-width="0.8"/>
+                <circle cx="7" cy="15.5" r="1.5" fill="#334155"/>
+                <circle cx="29" cy="15.5" r="4.5" fill="#0f172a"/>
+                <circle cx="29" cy="15.5" r="3" fill="none" stroke="#94a3b8" stroke-width="0.8"/>
+                <circle cx="29" cy="15.5" r="2.2" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="1.2 0.8"/>
+                <rect x="26.8" y="14" width="1.6" height="2.2" rx="0.4" fill="${bCol}"/>
+                <line x1="29" y1="15.5" x2="25.5" y2="7.5" stroke="#64748b" stroke-width="1.3" stroke-linecap="round"/>
+                <!-- Swingarm, Engine & Silver Crankcase Cover -->
+                <line x1="7" y1="15.5" x2="16" y2="14.5" stroke="#334155" stroke-width="2.2"/>
+                <rect x="14" y="11.5" width="7.2" height="5.5" rx="1.5" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+                <circle cx="17.5" cy="14.8" r="2" fill="#94a3b8" stroke="#e2e8f0" stroke-width="0.5"/>
+                <circle cx="17.5" cy="14.8" r="0.7" fill="#0f172a"/>
+                <!-- Exhaust Pipe & Upswept Muffler -->
+                <path d="M 17,15.8 L 13.5,15.5 Q 11,15.5 10,14" fill="none" stroke="#64748b" stroke-width="1.2"/>
+                <path d="M 12.5,15.2 L 9,13.2 L 9.6,12.2 L 13.2,14.2 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.5"/>
+                <circle cx="9.3" cy="12.7" r="0.6" fill="#0f172a"/>
+                <!-- Bike Chassis, Rear Cowl & Fuel Tank -->
+                <path d="M 5,11 L 8,11 L 7,12.5 Z" fill="#0f172a"/>
+                <path d="M 7,11 L 13,8 L 16.5,10.5 L 11,11.5 Z" fill="${bCol}"/>
+                <circle cx="6.8" cy="11" r="1.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.6"/>
+                <path d="M 13,9 Q 15,10 17.5,9 L 17,10.5 L 13,10.5 Z" fill="#0f172a"/>
+                <path d="M 17,9 Q 19.5,5.8 23.5,7.2 L 24.2,10.2 Q 20,10.8 17,9 Z" fill="${bCol}"/>
+                <path d="M 18.2,7.8 Q 20.5,6.5 22.5,7.2" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+                <path d="M 23.5,7.2 L 28.5,8.8 L 30,12 L 26.5,13 L 24.2,10.2 Z" fill="${bCol}"/>
+                <path d="M 23.5,7.2 L 27,4.6 L 28.5,8.8 Z" fill="#7dd3fc" opacity="0.85"/>
+                <circle class="cr-headlight-bulb" cx="29.8" cy="11.8" r="1.6" fill="#ffffff" stroke="#fef08a" stroke-width="0.8"/>
+                <!-- Biker: Athletic Racing Tuck Posture (~40° Lean over Tank) -->
+                <rect x="14.8" y="14.6" width="2" height="1.2" rx="0.4" fill="#0f172a"/>
+                <path d="M 15.5,15 L 19,10.8 L 14.8,8.8 L 16.5,8.8 L 20.2,11 L 16.5,15.5 Z" fill="${pCol}"/>
+                <path d="M 14.2,8.2 L 19.2,4.8 L 22.8,7.2 L 17.8,10.2 Z" fill="${sCol}"/>
+                <path d="M 19.2,4.8 L 21.8,6.2 L 20.5,7.2 L 18.2,5.8 Z" fill="${sCol}"/>
+                <path d="M 20.8,6.5 L 25.2,8.4 L 24.6,9.4 L 20.2,7.5 Z" fill="${skCol}"/>
+                <circle cx="25.2" cy="8.6" r="1.1" fill="${skCol}"/>
+                <rect x="24.8" y="7.8" width="1.8" height="1.2" rx="0.4" fill="#334155"/>
+                <!-- Aerodynamic Full-Face Helmet with Gloss Highlight & Reflective Visor -->
+                <path d="M 19.5,3.2 C 19.5,1 21.8,0.5 24.2,1.3 C 25.8,1.9 26.5,3.4 26.2,5.1 C 25.8,6.6 23.8,7.2 21.8,6.5 C 20.2,6 19.5,4.8 19.5,3.2 Z" fill="${hCol}"/>
+                <path d="M 20.8,1.4 Q 23,1.1 24.6,2.2" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+                <path d="M 24.2,1.9 Q 26,2.8 25.5,4.5 Q 24.2,4.1 23.5,2.8 Z" fill="${vCol}" stroke="#ffffff" stroke-width="0.3"/>
               `;
             }
           } else if (v.dir === 'WB') {
@@ -18463,15 +18512,56 @@
                 <path d="M 11,4 L 13,8 L 8,11" stroke="#fde047" stroke-width="1.8" fill="none"/>
               `;
             } else if (v.type === 'bike') {
+              const bCol = v.bikeColor || v.color || '#06b6d4';
+              const hCol = v.helmetColor || '#f8fafc';
+              const sCol = v.shirtColor || '#ea580c';
+              const pCol = v.pantsColor || '#0f172a';
+              const vCol = v.visorColor || '#38bdf8';
+              const skCol = v.skinColor || '#fcd34d';
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="1,6 -45,0 -45,12" fill="url(#crHeadlightBeamGradWB)"/>
-                <circle cx="20" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-                <circle cx="3" cy="6" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-                <path d="M 20,6 L 13,2 L 7,2 L 3,6" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
-                <path d="M 7.5,1.3 A 3.5,3.5 0 0 1 14.5,1.3 L 14,3.1 L 7.8,3.1 Z" fill="#ef4444" stroke="#fecaca" stroke-width="0.6"/>
-                <path d="M 9.2,1.7 L 6,2.1 L 6.6,2.8 L 9,2.5 Z" fill="#26394b"/>
-                <circle class="cr-headlight-bulb" cx="1" cy="6" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
-                <circle cx="22" cy="5" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <polygon class="cr-headlight-beam" points="6,11.5 -49,2 -49,21" fill="url(#crHeadlightBeamGradWB)"/>
+                <g transform="translate(36, 0) scale(-1, 1)">
+                  <!-- Wheels: Alloy Sports Wheels with Rotor & Caliper -->
+                  <circle cx="7" cy="15.5" r="4.5" fill="#0f172a"/>
+                  <circle cx="7" cy="15.5" r="3" fill="none" stroke="#94a3b8" stroke-width="0.8"/>
+                  <circle cx="7" cy="15.5" r="1.5" fill="#334155"/>
+                  <circle cx="29" cy="15.5" r="4.5" fill="#0f172a"/>
+                  <circle cx="29" cy="15.5" r="3" fill="none" stroke="#94a3b8" stroke-width="0.8"/>
+                  <circle cx="29" cy="15.5" r="2.2" fill="none" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="1.2 0.8"/>
+                  <rect x="26.8" y="14" width="1.6" height="2.2" rx="0.4" fill="${bCol}"/>
+                  <line x1="29" y1="15.5" x2="25.5" y2="7.5" stroke="#64748b" stroke-width="1.3" stroke-linecap="round"/>
+                  <!-- Swingarm, Engine & Silver Crankcase Cover -->
+                  <line x1="7" y1="15.5" x2="16" y2="14.5" stroke="#334155" stroke-width="2.2"/>
+                  <rect x="14" y="11.5" width="7.2" height="5.5" rx="1.5" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+                  <circle cx="17.5" cy="14.8" r="2" fill="#94a3b8" stroke="#e2e8f0" stroke-width="0.5"/>
+                  <circle cx="17.5" cy="14.8" r="0.7" fill="#0f172a"/>
+                  <!-- Exhaust Pipe & Upswept Muffler -->
+                  <path d="M 17,15.8 L 13.5,15.5 Q 11,15.5 10,14" fill="none" stroke="#64748b" stroke-width="1.2"/>
+                  <path d="M 12.5,15.2 L 9,13.2 L 9.6,12.2 L 13.2,14.2 Z" fill="#cbd5e1" stroke="#475569" stroke-width="0.5"/>
+                  <circle cx="9.3" cy="12.7" r="0.6" fill="#0f172a"/>
+                  <!-- Bike Chassis, Rear Cowl & Fuel Tank -->
+                  <path d="M 5,11 L 8,11 L 7,12.5 Z" fill="#0f172a"/>
+                  <path d="M 7,11 L 13,8 L 16.5,10.5 L 11,11.5 Z" fill="${bCol}"/>
+                  <circle cx="6.8" cy="11" r="1.2" fill="#ff2a54" stroke="#ff1744" stroke-width="0.6"/>
+                  <path d="M 13,9 Q 15,10 17.5,9 L 17,10.5 L 13,10.5 Z" fill="#0f172a"/>
+                  <path d="M 17,9 Q 19.5,5.8 23.5,7.2 L 24.2,10.2 Q 20,10.8 17,9 Z" fill="${bCol}"/>
+                  <path d="M 18.2,7.8 Q 20.5,6.5 22.5,7.2" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+                  <path d="M 23.5,7.2 L 28.5,8.8 L 30,12 L 26.5,13 L 24.2,10.2 Z" fill="${bCol}"/>
+                  <path d="M 23.5,7.2 L 27,4.6 L 28.5,8.8 Z" fill="#7dd3fc" opacity="0.85"/>
+                  <circle class="cr-headlight-bulb" cx="29.8" cy="11.8" r="1.6" fill="#ffffff" stroke="#fef08a" stroke-width="0.8"/>
+                  <!-- Biker: Athletic Racing Tuck Posture (~40° Lean over Tank) -->
+                  <rect x="14.8" y="14.6" width="2" height="1.2" rx="0.4" fill="#0f172a"/>
+                  <path d="M 15.5,15 L 19,10.8 L 14.8,8.8 L 16.5,8.8 L 20.2,11 L 16.5,15.5 Z" fill="${pCol}"/>
+                  <path d="M 14.2,8.2 L 19.2,4.8 L 22.8,7.2 L 17.8,10.2 Z" fill="${sCol}"/>
+                  <path d="M 19.2,4.8 L 21.8,6.2 L 20.5,7.2 L 18.2,5.8 Z" fill="${sCol}"/>
+                  <path d="M 20.8,6.5 L 25.2,8.4 L 24.6,9.4 L 20.2,7.5 Z" fill="${skCol}"/>
+                  <circle cx="25.2" cy="8.6" r="1.1" fill="${skCol}"/>
+                  <rect x="24.8" y="7.8" width="1.8" height="1.2" rx="0.4" fill="#334155"/>
+                  <!-- Aerodynamic Full-Face Helmet with Gloss Highlight & Reflective Visor -->
+                  <path d="M 19.5,3.2 C 19.5,1 21.8,0.5 24.2,1.3 C 25.8,1.9 26.5,3.4 26.2,5.1 C 25.8,6.6 23.8,7.2 21.8,6.5 C 20.2,6 19.5,4.8 19.5,3.2 Z" fill="${hCol}"/>
+                  <path d="M 20.8,1.4 Q 23,1.1 24.6,2.2" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="0.5"/>
+                  <path d="M 24.2,1.9 Q 26,2.8 25.5,4.5 Q 24.2,4.1 23.5,2.8 Z" fill="${vCol}" stroke="#ffffff" stroke-width="0.3"/>
+                </g>
               `;
             }
           } else if (v.dir === 'SB') {
@@ -18513,13 +18603,41 @@
                 <circle cx="9" cy="1" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'bike') {
+              const bCol = v.bikeColor || v.color || '#16a34a';
+              const hCol = v.helmetColor || '#15803d';
+              const sCol = v.shirtColor || '#0f172a';
+              const pCol = v.pantsColor || '#475569';
+              const vCol = v.visorColor || '#fef08a';
+              const skCol = v.skinColor || '#fed7aa';
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="6,23 0,68 12,68" fill="url(#crHeadlightBeamGradSB)"/>
-                <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
-                <path d="M 3.1,10 A 2.9,2.9 0 0 1 8.9,10 L 8.5,12 L 3.5,12 Z" fill="#ef4444" stroke="#fecaca" stroke-width="0.55"/>
-                <path d="M 4,12 L 5,14.2 L 7,14.2 L 8,12 Z" fill="#26394b"/>
-                <circle class="cr-headlight-bulb" cx="6" cy="22" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
-                <circle cx="6" cy="1" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <polygon class="cr-headlight-beam" points="7,35 -1,90 15,90" fill="url(#crHeadlightBeamGradSB)"/>
+                <!-- Rear Tire & Upswept Tail Cowl -->
+                <rect x="5.5" y="0.5" width="3" height="6.5" rx="1.5" fill="#0f172a"/>
+                <polygon points="4.5,4 9.5,4 8.5,10 5.5,10" fill="${bCol}"/>
+                <circle cx="7" cy="4.2" r="1.3" fill="#ff2a54" stroke="#ff1744" stroke-width="0.6"/>
+                <!-- Rider Legs / Jeans hugging tank -->
+                <path d="M 3.8,10 Q 3,13 4.2,16 L 9.8,16 Q 11,13 10.2,10 Z" fill="${pCol}"/>
+                <!-- Fuel Tank -->
+                <path d="M 4.5,17 Q 3.5,20 4.5,23 L 9.5,23 Q 10.5,20 9.5,17 Z" fill="${bCol}"/>
+                <circle cx="7" cy="20" r="0.9" fill="#cbd5e1"/>
+                <!-- Rider Torso, Short Sleeves & Bare Arms -->
+                <path d="M 2.8,14.5 Q 7,12.5 11.2,14.5 L 10.2,18.5 Q 7,17.5 3.8,18.5 Z" fill="${sCol}"/>
+                <rect x="2.5" y="14" width="2.2" height="3" rx="1" fill="${sCol}"/>
+                <rect x="9.3" y="14" width="2.2" height="3" rx="1" fill="${sCol}"/>
+                <line x1="3.5" y1="17" x2="2.2" y2="23" stroke="${skCol}" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="10.5" y1="17" x2="11.8" y2="23" stroke="${skCol}" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Aerodynamic Full-Face Helmet with Visor facing South -->
+                <ellipse cx="7" cy="18.5" rx="3.4" ry="4.2" fill="${hCol}"/>
+                <path d="M 4.6,20.2 Q 7,22.2 9.4,20.2" stroke="${vCol}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                <!-- Handlebars, Front Cowl & Front Tire -->
+                <line x1="1.5" y1="23.5" x2="12.5" y2="23.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round"/>
+                <rect x="1" y="22.5" width="2" height="2" rx="0.5" fill="#0f172a"/>
+                <rect x="11" y="22.5" width="2" height="2" rx="0.5" fill="#0f172a"/>
+                <path d="M 4,24 L 10,24 L 8.5,28 L 5.5,28 Z" fill="${bCol}"/>
+                <path d="M 5,23 L 9,23 L 8,26 L 6,26 Z" fill="#7dd3fc" opacity="0.85"/>
+                <rect x="5.5" y="27" width="3" height="7.5" rx="1.5" fill="#0f172a"/>
+                <rect x="5" y="25" width="4" height="4" rx="1.2" fill="${bCol}"/>
+                <circle class="cr-headlight-bulb" cx="7" cy="28.5" r="1.5" fill="#ffffff" stroke="#fef08a" stroke-width="0.8"/>
               `;
             }
           } else if (v.dir === 'NB') {
@@ -18561,13 +18679,43 @@
                 <circle cx="9" cy="31" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
               `;
             } else if (v.type === 'bike') {
+              const bCol = v.bikeColor || v.color || '#f8fafc';
+              const hCol = v.helmetColor || '#dc2626';
+              const sCol = v.shirtColor || '#0284c7';
+              const pCol = v.pantsColor || '#0f172a';
+              const vCol = v.visorColor || '#38bdf8';
+              const skCol = v.skinColor || '#fed7aa';
               g.innerHTML = `
-                <polygon class="cr-headlight-beam" points="6,1 0,-45 12,-45" fill="url(#crHeadlightBeamGradNB)"/>
-                <rect x="3" y="2" width="6" height="20" rx="3" fill="#38bdf8"/>
-                <path d="M 3.1,12 A 2.9,2.9 0 0 1 8.9,12 L 8.5,10 L 3.5,10 Z" fill="#ef4444" stroke="#fecaca" stroke-width="0.55"/>
-                <path d="M 4,10 L 5,7.8 L 7,7.8 L 8,10 Z" fill="#26394b"/>
-                <circle class="cr-headlight-bulb" cx="6" cy="1" r="1.8" fill="#ffffff" stroke="#fef08a" stroke-width="1.2"/>
-                <circle cx="6" cy="22" r="1.8" fill="#ff2a54" stroke="#ff1744" stroke-width="0.8"/>
+                <polygon class="cr-headlight-beam" points="7,1 -1,-54 15,-54" fill="url(#crHeadlightBeamGradNB)"/>
+                <g transform="translate(0, 36) scale(1, -1)">
+                  <!-- Rear Tire & Upswept Tail Cowl -->
+                  <rect x="5.5" y="0.5" width="3" height="6.5" rx="1.5" fill="#0f172a"/>
+                  <polygon points="4.5,4 9.5,4 8.5,10 5.5,10" fill="${bCol}"/>
+                  <circle cx="7" cy="4.2" r="1.3" fill="#ff2a54" stroke="#ff1744" stroke-width="0.6"/>
+                  <!-- Rider Legs / Jeans hugging tank -->
+                  <path d="M 3.8,10 Q 3,13 4.2,16 L 9.8,16 Q 11,13 10.2,10 Z" fill="${pCol}"/>
+                  <!-- Fuel Tank -->
+                  <path d="M 4.5,17 Q 3.5,20 4.5,23 L 9.5,23 Q 10.5,20 9.5,17 Z" fill="${bCol}"/>
+                  <circle cx="7" cy="20" r="0.9" fill="#cbd5e1"/>
+                  <!-- Rider Torso, Short Sleeves & Bare Arms -->
+                  <path d="M 2.8,14.5 Q 7,12.5 11.2,14.5 L 10.2,18.5 Q 7,17.5 3.8,18.5 Z" fill="${sCol}"/>
+                  <rect x="2.5" y="14" width="2.2" height="3" rx="1" fill="${sCol}"/>
+                  <rect x="9.3" y="14" width="2.2" height="3" rx="1" fill="${sCol}"/>
+                  <line x1="3.5" y1="17" x2="2.2" y2="23" stroke="${skCol}" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="10.5" y1="17" x2="11.8" y2="23" stroke="${skCol}" stroke-width="1.5" stroke-linecap="round"/>
+                  <!-- Aerodynamic Full-Face Helmet with Visor facing South (mirrored to North) -->
+                  <ellipse cx="7" cy="18.5" rx="3.4" ry="4.2" fill="${hCol}"/>
+                  <path d="M 4.6,20.2 Q 7,22.2 9.4,20.2" stroke="${vCol}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                  <!-- Handlebars, Front Cowl & Front Tire -->
+                  <line x1="1.5" y1="23.5" x2="12.5" y2="23.5" stroke="#334155" stroke-width="1.8" stroke-linecap="round"/>
+                  <rect x="1" y="22.5" width="2" height="2" rx="0.5" fill="#0f172a"/>
+                  <rect x="11" y="22.5" width="2" height="2" rx="0.5" fill="#0f172a"/>
+                  <path d="M 4,24 L 10,24 L 8.5,28 L 5.5,28 Z" fill="${bCol}"/>
+                  <path d="M 5,23 L 9,23 L 8,26 L 6,26 Z" fill="#7dd3fc" opacity="0.85"/>
+                  <rect x="5.5" y="27" width="3" height="7.5" rx="1.5" fill="#0f172a"/>
+                  <rect x="5" y="25" width="4" height="4" rx="1.2" fill="${bCol}"/>
+                  <circle class="cr-headlight-bulb" cx="7" cy="28.5" r="1.5" fill="#ffffff" stroke="#fef08a" stroke-width="0.8"/>
+                </g>
               `;
             }
           }
