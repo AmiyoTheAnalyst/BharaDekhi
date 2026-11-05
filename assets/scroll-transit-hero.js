@@ -23,6 +23,10 @@
   let animId = null;
   let intersectionObserver = null;
   let storyStageCards = [];
+  let cityGroup = null;
+  let cityTraffic = [];
+  let cityNeonMaterials = [];
+  let cityWindowMaterials = [];
 
   // Master Scene Groups
   let masterGroup, roadGroup, vehicleGroup, metroGroup, weatherGroup;
@@ -39,11 +43,11 @@
   let targetLookAt   = { x: 0, y: 2, z: 0 };
   let targetSpotPos  = { x: 0, y: 2, z: 0 };
   const cameraPoses = [
-    { position: { x: 0, y: 10, z: 25 }, lookAt: { x: 1.5, y: 1.5, z: 2 } },
-    { position: { x: 0, y: 9, z: 24 }, lookAt: { x: 0, y: 1.4, z: 1 } },
-    { position: { x: 0, y: 10, z: 25 }, lookAt: { x: 1.2, y: 1.5, z: 1 } },
-    { position: { x: 0, y: 18, z: 29 }, lookAt: { x: -1, y: 7, z: 0 } },
-    { position: { x: 0, y: 13, z: 25 }, lookAt: { x: 0, y: 2, z: 1.6 } }
+    { position: { x: 0, y: 13, z: 34 }, lookAt: { x: 0, y: 5, z: -13 } },
+    { position: { x: -8, y: 11, z: 30 }, lookAt: { x: -2, y: 7, z: -25 } },
+    { position: { x: 0, y: 17, z: 35 }, lookAt: { x: 0, y: 10, z: -38 } },
+    { position: { x: 8, y: 16, z: 37 }, lookAt: { x: 1, y: 9, z: -49 } },
+    { position: { x: 0, y: 23, z: 43 }, lookAt: { x: 0, y: 9, z: -61 } }
   ];
   const stageLightColors = [0x06b6d4, 0xf59e0b, 0x14b8a6, 0x10b981, 0x3b82f6]
     .map(color => new THREE.Color(color));
@@ -314,181 +318,288 @@
   }
 
   function buildScene() {
+    cityTraffic = [];
+    cityNeonMaterials = [];
+    cityWindowMaterials = [];
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020408);
-    scene.fog = new THREE.FogExp2(0x020408, 0.012);
-
-    initMaterials();
-
+    scene.background = new THREE.Color(0x050817);
+    scene.fog = new THREE.FogExp2(0x080d20, 0.0045);
     masterGroup = new THREE.Group();
     scene.add(masterGroup);
+    cityGroup = new THREE.Group();
+    masterGroup.add(cityGroup);
 
-    // Studio Lighting
-    const ambient = new THREE.AmbientLight(0xdbeafe, 1.25);
+    const ambient = new THREE.AmbientLight(0x7183b8, 0.85);
     scene.add(ambient);
-
-    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x020408, 0.8);
+    const hemiLight = new THREE.HemisphereLight(0x5169c7, 0x11101f, 1.15);
     scene.add(hemiLight);
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
-    keyLight.position.set(40, 60, 40);
+    const keyLight = new THREE.DirectionalLight(0xc3d8ff, 1.3);
+    keyLight.position.set(-25, 50, 30);
     scene.add(keyLight);
-
-    const rimLight = new THREE.DirectionalLight(0x0284c7, 1.8);
-    rimLight.position.set(-40, 30, -30);
+    const rimLight = new THREE.DirectionalLight(0x5d46ff, 1.7);
+    rimLight.position.set(35, 25, -50);
     scene.add(rimLight);
-
-    studioSpotlight = new THREE.SpotLight(0x67e8f9, 4.0, 70, Math.PI / 4, 0.45, 1.2);
-    studioSpotlight.position.set(0, 35, 15);
-    studioSpotlight.target.position.set(0, 0, 0);
+    studioSpotlight = new THREE.SpotLight(0x14b8a6, 2.8, 110, Math.PI / 3, 0.5, 1.1);
+    studioSpotlight.position.set(0, 38, 22);
+    studioSpotlight.target.position.set(0, 6, -25);
     scene.add(studioSpotlight);
     scene.add(studioSpotlight.target);
 
-    // Asphalt Ground
-    const groundGeo = new THREE.PlaneGeometry(160, 160);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0f18, roughness: 0.85, metalness: 0.1 });
+    const groundGeo = new THREE.PlaneGeometry(180, 190);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x101522,
+      roughness: 0.52,
+      metalness: 0.35
+    });
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.05;
-    masterGroup.add(ground);
+    ground.position.y = -0.12;
+    cityGroup.add(ground);
 
-    // Road Markings (Grid Lines)
-    const grid = new THREE.GridHelper(120, 24, 0x0284c7, 0x1e293b);
-    grid.position.y = 0.02;
-    masterGroup.add(grid);
-
-    // Vehicles Group
-    vehicleGroup = new THREE.Group();
-    masterGroup.add(vehicleGroup);
-
-    // Stage 1 Fleet: Car, CNG & Bike side-by-side
-    carMesh = buildCar();
-    carMesh.position.set(5.5, 0, 2);
-    vehicleGroup.add(carMesh);
-
-    cngMesh = buildCNG();
-    cngMesh.position.set(0, 0, 2);
-    vehicleGroup.add(cngMesh);
-
-    bikeMesh = buildBike();
-    bikeMesh.position.set(-4.5, 0, 2);
-    vehicleGroup.add(bikeMesh);
-
-    comparisonHub = new THREE.Group();
-    const hubCore = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.1, 1.35, 0.35, 24),
-      new THREE.MeshStandardMaterial({ color: 0x172554, roughness: 0.28, metalness: 0.75 })
+    const road = new THREE.Mesh(
+      new THREE.PlaneGeometry(17, 170),
+      new THREE.MeshStandardMaterial({ color: 0x171b29, roughness: 0.38, metalness: 0.42 })
     );
-    hubCore.position.y = 0.15;
-    comparisonHub.add(hubCore);
-    const hubGlow = new THREE.Mesh(
-      new THREE.TorusGeometry(1.8, 0.045, 8, 48),
-      new THREE.MeshBasicMaterial({ color: 0x8b5cf6 })
-    );
-    hubGlow.rotation.x = Math.PI / 2;
-    hubGlow.position.y = 0.12;
-    comparisonHub.add(hubGlow);
-    const orbitalRing = new THREE.Mesh(
-      new THREE.TorusGeometry(3.35, 0.025, 6, 64),
-      new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.75 })
-    );
-    orbitalRing.rotation.x = Math.PI / 2;
-    orbitalRing.position.y = 0.08;
-    comparisonHub.add(orbitalRing);
-    comparisonRing = orbitalRing;
-    masterGroup.add(comparisonHub);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(0, 0.01, -24);
+    cityGroup.add(road);
 
-    // Stage 2: Rickshaw
-    rickshawMesh = buildRickshaw();
-    rickshawMesh.position.set(-16, 0, -4);
-    vehicleGroup.add(rickshawMesh);
+    const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x24283a, roughness: 0.72 });
+    const curbMat = new THREE.MeshBasicMaterial({ color: 0x14b8a6 });
+    [-1, 1].forEach(side => {
+      const sidewalk = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.28, 170), sidewalkMat);
+      sidewalk.position.set(side * 10.1, 0.08, -24);
+      cityGroup.add(sidewalk);
 
-    // Stage 3: BRTA City Bus
-    busMesh = buildBus();
-    busMesh.position.set(16, 0, -6);
-    vehicleGroup.add(busMesh);
+      const curb = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 170), curbMat);
+      curb.position.set(side * 8.55, 0.24, -24);
+      cityGroup.add(curb);
+    });
 
-    // Stage 4: Metro Rail Elevated Viaduct
-    metroGroup = buildMetro();
-    metroGroup.position.set(0, 0, -18);
-    masterGroup.add(metroGroup);
+    const laneMat = new THREE.MeshBasicMaterial({ color: 0x60718e, transparent: true, opacity: 0.58 });
+    for (let z = 55; z > -105; z -= 8) {
+      const dash = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.025, 3.2), laneMat);
+      dash.position.set(0, 0.035, z);
+      cityGroup.add(dash);
+    }
 
-    // Stage 5: Rain Particles
-    rainParticles = buildRain();
-    masterGroup.add(rainParticles);
-
-    sceneModelTracks = [
-      {
-        mesh: carMesh,
-        poses: [
-          { x: 5.2, y: 0, z: 2.4, scale: 0.55 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0.04 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
-          { x: 0, y: 0, z: 1.6, scale: 0 }
-        ]
-      },
-      {
-        mesh: cngMesh,
-        poses: [
-          { x: -0.5, y: 0, z: 2.5, scale: 0.55 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0.04 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
-          { x: 0, y: 0, z: 1.6, scale: 0 }
-        ]
-      },
-      {
-        mesh: bikeMesh,
-        poses: [
-          { x: 2.6, y: 0, z: 5.3, scale: 0.55 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0.04 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
-          { x: 2.2, y: 0.2, z: 2.4, scale: 0 },
-          { x: 0, y: 0, z: 1.6, scale: 0 }
-        ]
-      },
-      {
-        mesh: rickshawMesh,
-        poses: [
-          { x: -2.2, y: 0, z: 0.8, scale: 0 },
-          { x: -2.2, y: 0, z: 0.8, scale: 0.72 },
-          { x: -2.2, y: 0, z: 0.8, scale: 0 },
-          { x: -2.2, y: 0, z: 0.8, scale: 0 },
-          { x: 0, y: 0, z: 1.6, scale: 0 }
-        ]
-      },
-      {
-        mesh: busMesh,
-        poses: [
-          { x: 2.2, y: 0, z: 0.8, scale: 0 },
-          { x: 2.2, y: 0, z: 0.8, scale: 0 },
-          { x: 2.2, y: 0, z: 0.8, scale: 0.62, rotation: Math.PI * 2 },
-          { x: 2.2, y: 0, z: 0.8, scale: 0 },
-          { x: 0, y: 0, z: 1.6, scale: 0 }
-        ]
-      },
-      {
-        mesh: metroGroup,
-        poses: [
-          { x: -2.1, y: 0.45, z: 0.8, scale: 0 },
-          { x: -2.1, y: 0.45, z: 0.8, scale: 0 },
-          { x: -2.1, y: 0.45, z: 0.8, scale: 0 },
-          { x: -2.1, y: 0.45, z: 0.8, scale: 0.42 },
-          { x: 0, y: 0, z: 1.6, scale: 0 }
-        ]
-      },
-      {
-        mesh: comparisonHub,
-        poses: [
-          { x: 2.2, y: 0, z: 2.5, scale: 1 },
-          { x: 2.2, y: 0, z: 2.5, scale: 0.68 },
-          { x: 2.2, y: 0, z: 2.5, scale: 0.42 },
-          { x: -2.1, y: 0.45, z: 0.8, scale: 0.38 },
-          { x: 0, y: 0, z: 1.6, scale: 0.9 }
-        ]
-      }
+    const towerMaterials = [
+      0x171d34, 0x1b1c34, 0x1a2539, 0x202039, 0x172938
+    ].map(color => new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.58,
+      metalness: 0.42,
+      emissive: 0x10182b,
+      emissiveIntensity: 0.32
+    }));
+    const towerEdgeMaterials = [
+      new THREE.MeshBasicMaterial({ color: 0x16d9d2 }),
+      new THREE.MeshBasicMaterial({ color: 0x8b5cf6 }),
+      new THREE.MeshBasicMaterial({ color: 0xff4fac })
     ];
+    const windowCounts = [0, 0, 0];
+    const windowPlacements = [[], [], []];
+    let towerCount = 0;
+
+    for (let row = 0; row < 7; row++) {
+      const z = 22 - row * 17;
+      for (const side of [-1, 1]) {
+        const buildingCount = row < 2 ? 3 : 4;
+        for (let col = 0; col < buildingCount; col++) {
+          const width = 4.5 + Math.random() * 4.5;
+          const depth = 5.5 + Math.random() * 5;
+          const height = 8 + Math.random() * (row === 0 ? 13 : 25);
+          const x = side * (14.2 + col * 8 + Math.random() * 2.5);
+          const building = new THREE.Group();
+          building.position.set(x, 0, z + (Math.random() - 0.5) * 7);
+          cityGroup.add(building);
+
+          const body = new THREE.Mesh(
+            new THREE.BoxGeometry(width, height, depth),
+            towerMaterials[Math.floor(Math.random() * towerMaterials.length)]
+          );
+          body.position.y = height / 2;
+          building.add(body);
+
+          const roof = new THREE.Mesh(
+            new THREE.BoxGeometry(width * 0.72, 0.32, depth * 0.72),
+            towerEdgeMaterials[(row + col + side + 3) % towerEdgeMaterials.length]
+          );
+          roof.position.y = height + 0.16;
+          building.add(roof);
+
+          const faceX = -side * (width / 2 + 0.055);
+          const windowColumns = Math.max(2, Math.floor(depth / 1.5));
+          const floors = Math.floor(height / 2.1);
+          for (let floor = 0; floor < floors; floor++) {
+            for (let window = 0; window < windowColumns; window++) {
+              if (Math.random() < 0.28) continue;
+              const colorIndex = Math.random() < 0.13
+                ? 2
+                : (Math.random() < 0.42 ? 1 : 0);
+              const windowZ = (window - (windowColumns - 1) / 2) * 1.35;
+              const windowY = 1.25 + floor * 2.05;
+              windowPlacements[colorIndex].push([
+                building.position.x + faceX,
+                windowY,
+                building.position.z + windowZ
+              ]);
+              windowCounts[colorIndex]++;
+            }
+          }
+
+          const stripe = new THREE.Mesh(
+            new THREE.BoxGeometry(0.12, height * 0.82, 0.16),
+            towerEdgeMaterials[(row + col) % towerEdgeMaterials.length]
+          );
+          stripe.position.set(faceX, height * 0.51, depth * 0.32);
+          building.add(stripe);
+
+          if (height > 18 && col % 2 === 0) {
+            const antenna = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.045, 0.11, 3.2, 6),
+              towerEdgeMaterials[(row + col + 1) % towerEdgeMaterials.length]
+            );
+            antenna.position.y = height + 1.75;
+            building.add(antenna);
+          }
+          towerCount++;
+        }
+      }
+    }
+
+    const windowGeometry = new THREE.BoxGeometry(0.07, 0.68, 0.82);
+    const windowColors = [0x55e6e1, 0xb48cff, 0xff70ba];
+    cityWindowMaterials = windowColors.map(color => new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.72
+    }));
+    windowPlacements.forEach((placements, index) => {
+      const windows = new THREE.InstancedMesh(windowGeometry, cityWindowMaterials[index], placements.length);
+      const matrix = new THREE.Matrix4();
+      placements.forEach(([x, y, z], placementIndex) => {
+        matrix.makeTranslation(x, y, z);
+        windows.setMatrixAt(placementIndex, matrix);
+      });
+      windows.instanceMatrix.needsUpdate = true;
+      cityGroup.add(windows);
+    });
+
+    const skywayMaterial = new THREE.MeshStandardMaterial({
+      color: 0x292d42,
+      roughness: 0.42,
+      metalness: 0.55,
+      emissive: 0x11152b,
+      emissiveIntensity: 0.55
+    });
+    const skyway = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.55, 115), skywayMaterial);
+    skyway.position.set(17, 8.5, -31);
+    cityGroup.add(skyway);
+    const skywayEdge = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 0.09, 115),
+      new THREE.MeshBasicMaterial({ color: 0xff4fac })
+    );
+    skywayEdge.position.set(14.75, 8.25, -31);
+    cityGroup.add(skywayEdge);
+    for (let z = 35; z > -94; z -= 22) {
+      const support = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.38, 0.56, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x35384c, roughness: 0.6, metalness: 0.35 })
+      );
+      support.position.set(17, 4.25, z);
+      cityGroup.add(support);
+    }
+
+    const sign = new THREE.Group();
+    sign.position.set(-15.8, 13, -35);
+    sign.rotation.y = Math.PI / 2;
+    cityGroup.add(sign);
+    const signPanel = new THREE.Mesh(
+      new THREE.BoxGeometry(8, 3.6, 0.3),
+      new THREE.MeshStandardMaterial({
+        color: 0x10162b,
+        emissive: 0x122554,
+        emissiveIntensity: 0.9,
+        metalness: 0.45
+      })
+    );
+    sign.add(signPanel);
+    const signFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(8.25, 3.85, 0.12),
+      new THREE.MeshBasicMaterial({ color: 0x31d7e8, wireframe: true })
+    );
+    sign.position.z -= 0.22;
+    sign.add(signFrame);
+    const signSupport = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.16, 0.22, 6, 8),
+      skywayMaterial
+    );
+    signSupport.position.set(-15.8, 9.8, -35);
+    cityGroup.add(signSupport);
+
+    const carColors = [0x21c8f6, 0xff4fac, 0x8b78ff, 0x36e0b2, 0xf3b84b, 0x48a7ff];
+    carColors.forEach((color, index) => {
+      const vehicle = new THREE.Group();
+      cityGroup.add(vehicle);
+      const bodyMaterial = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.24,
+        metalness: 0.76,
+        emissive: color,
+        emissiveIntensity: 0.18
+      });
+      const glassMaterial = new THREE.MeshStandardMaterial({
+        color: 0x111629,
+        roughness: 0.14,
+        metalness: 0.65
+      });
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.56, 1.15), bodyMaterial);
+      chassis.position.y = 0.48;
+      vehicle.add(chassis);
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.48, 0.92), glassMaterial);
+      canopy.position.set(-0.15, 0.98, 0);
+      vehicle.add(canopy);
+      const lightMaterial = new THREE.MeshBasicMaterial({ color: 0x9befff });
+      const headlight = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.34), lightMaterial);
+      headlight.position.set(1.27, 0.5, 0.34);
+      vehicle.add(headlight);
+      const secondHeadlight = headlight.clone();
+      secondHeadlight.position.z = -0.34;
+      vehicle.add(secondHeadlight);
+      const tailMaterial = new THREE.MeshBasicMaterial({ color: 0xff386d });
+      const tailLight = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.13, 0.28), tailMaterial);
+      tailLight.position.set(-1.27, 0.48, 0.34);
+      vehicle.add(tailLight);
+      const secondTailLight = tailLight.clone();
+      secondTailLight.position.z = -0.34;
+      vehicle.add(secondTailLight);
+
+      vehicle.rotation.y = index % 2 === 0 ? -Math.PI / 2 : Math.PI / 2;
+      const lane = [-5.7, -3.2, 3.2, 5.7][index % 4];
+      vehicle.position.set(lane, 0, -88 + index * 29);
+      cityTraffic.push({
+        mesh: vehicle,
+        speed: 5.5 + (index % 3) * 1.7,
+        direction: index % 2 === 0 ? 1 : -1,
+        lane,
+        distance: index % 2 === 0 ? -88 + index * 29 : 82 - index * 23
+      });
+    });
+
+    cityNeonMaterials = towerEdgeMaterials.concat(curbMat);
+    cityGroup.userData.towerCount = towerCount;
+    cityGroup.userData.windowCount = windowCounts.reduce((sum, count) => sum + count, 0);
+    cityGroup.userData.skyway = skyway;
+
+    vehicleGroup = cityGroup;
+    sceneModelTracks = [];
+    comparisonRing = null;
+    comparisonHub = null;
+    rainParticles = buildRain();
+    rainParticles.material.opacity = 0;
+    rainParticles.position.set(0, 0, -24);
+    cityGroup.add(rainParticles);
   }
 
   // Camera & Studio Lighting Choreography across the 5 Stages
@@ -531,10 +642,25 @@
     }
     if (studioSpotlight) studioSpotlight.color.copy(interpolatedLightColor);
     if (comparisonRing) comparisonRing.material.color.copy(interpolatedLightColor);
+    cityNeonMaterials.forEach(material => material.color.copy(interpolatedLightColor));
 
-    const activeCardPosition = Math.min(4, p * 5);
+    const activeCardPosition = p * 5;
     storyStageCards.forEach((card, index) => {
-      const visibility = Math.max(0, 1 - Math.abs(activeCardPosition - index));
+      const transitionHalfWidth = 0.08;
+      const clamp = value => Math.max(0, Math.min(1, value));
+      let visibility = 1;
+      if (index > 0) {
+        visibility = Math.min(
+          visibility,
+          clamp((activeCardPosition - index + transitionHalfWidth) / (transitionHalfWidth * 2))
+        );
+      }
+      if (index < 4) {
+        visibility = Math.min(
+          visibility,
+          clamp((index + 1 + transitionHalfWidth - activeCardPosition) / (transitionHalfWidth * 2))
+        );
+      }
       card.style.opacity = visibility.toFixed(3);
       card.style.transform = `translateY(${(1 - visibility) * 14}px) scale(${0.985 + visibility * 0.015})`;
       card.style.pointerEvents = visibility >= 0.5 ? 'auto' : 'none';
@@ -577,7 +703,17 @@
     if (isRenderPaused || !renderer || !scene || !camera) return;
 
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : 0.016;
-    if (comparisonHub) comparisonHub.rotation.y += delta * 0.08;
+    cityTraffic.forEach(vehicle => {
+      vehicle.distance += vehicle.speed * vehicle.direction * delta;
+      if (vehicle.distance > 72) vehicle.distance = -102;
+      if (vehicle.distance < -102) vehicle.distance = 72;
+      vehicle.mesh.position.z = vehicle.distance;
+    });
+
+    const cityPulse = 0.64 + Math.sin(clock.elapsedTime * 1.5) * 0.08;
+    cityWindowMaterials.forEach(material => {
+      material.opacity = cityPulse;
+    });
 
     // Smooth Damped Camera Interpolation (Silky 120 FPS feel)
     const factor = Math.min(1.0, delta * 7.0);
@@ -594,12 +730,6 @@
 
     if (studioSpotlight) {
       studioSpotlight.target.position.set(targetSpotPos.x, targetSpotPos.y, targetSpotPos.z);
-    }
-
-    // Gentle Metro Train Glide
-    if (trainMesh) {
-      trainMesh.position.x = (trainMesh.position.x + delta * 2.5);
-      if (trainMesh.position.x > 18) trainMesh.position.x = -18;
     }
 
     // Monsoon Rain particle fall in Stage 5
@@ -687,6 +817,10 @@
     if (intersectionObserver) intersectionObserver.disconnect();
     intersectionObserver = null;
     storyStageCards = [];
+    cityTraffic = [];
+    cityNeonMaterials = [];
+    cityWindowMaterials = [];
+    cityGroup = null;
     if (window.ScrollTrigger && containerEl) {
       ScrollTrigger.getAll()
         .filter(trigger => trigger.trigger instanceof Element && containerEl.contains(trigger.trigger))
