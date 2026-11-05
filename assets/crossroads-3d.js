@@ -156,6 +156,33 @@
     }
   }
 
+  function getVehicleCameraPose(target, yaw, radius, pitch) {
+    const position = target.mesh.position;
+    const direction = target.data ? target.data.dir : target.dir;
+    const forward = direction === 'EB' ? { x: 1, z: 0 }
+      : direction === 'WB' ? { x: -1, z: 0 }
+        : direction === 'SB' ? { x: 0, z: 1 }
+          : { x: 0, z: -1 };
+    const right = { x: -forward.z, z: forward.x };
+    const horizontalRadius = radius * Math.cos(pitch);
+    const targetX = position.x + forward.x * 5;
+    const targetY = position.y + 6;
+    const targetZ = position.z + forward.z * 5;
+
+    return {
+      position: {
+        x: targetX - forward.x * horizontalRadius * Math.cos(yaw) + right.x * horizontalRadius * Math.sin(yaw),
+        y: targetY + radius * Math.sin(pitch),
+        z: targetZ - forward.z * horizontalRadius * Math.cos(yaw) + right.z * horizontalRadius * Math.sin(yaw)
+      },
+      look: {
+        x: targetX + forward.x * 8,
+        y: targetY,
+        z: targetZ + forward.z * 8
+      }
+    };
+  }
+
   function updateCameraModeBadge(modeName) {
     const badge = document.getElementById('crossroadsCamModeBadge');
     if (!badge || !CAM_MODES[modeName]) return;
@@ -244,7 +271,14 @@
       activeTargetVehicle = null;
     }
 
-    focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.6);
+    if (activeTargetVehicle && activeTargetVehicle.type === 'rickshaw') {
+      const yaw = mouseRelX * Math.PI * 0.9 + 2.0;
+      const pitch = 0.2 + (0.5 - mouseRelY) * 0.72 + 0.06;
+      const pose = getVehicleCameraPose(activeTargetVehicle, yaw, 46, pitch);
+      focusCamera(pose.position, pose.look, 1.6);
+    } else {
+      focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.6);
+    }
     updateLegendHUD(targetMode);
   };
 
@@ -3876,13 +3910,6 @@
           };
         }
       } else if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.data) {
-        const vPos = activeTargetVehicle.mesh.position;
-        const vDir = activeTargetVehicle.data.dir;
-        const forward = vDir === 'EB' ? { x: 1, z: 0 }
-          : vDir === 'WB' ? { x: -1, z: 0 }
-            : vDir === 'SB' ? { x: 0, z: 1 }
-              : { x: 0, z: -1 };
-        const right = { x: -forward.z, z: forward.x };
         const yaw = mouseRelX * Math.PI * 0.9
           + (activeTargetVehicle.type === 'rickshaw' ? 2.0 : 0);
         const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
@@ -3891,21 +3918,10 @@
           : activeTargetVehicle.type === 'bike' ? 38
             : activeTargetVehicle.type === 'rickshaw' ? 46
               : activeTargetVehicle.type === 'cng' ? 48
-              : 82;
-        const horizontalRadius = radius * Math.cos(pitch);
-        const targetX = vPos.x + forward.x * 5;
-        const targetY = vPos.y + 6;
-        const targetZ = vPos.z + forward.z * 5;
-        desiredCamPos = {
-          x: targetX - forward.x * horizontalRadius * Math.cos(yaw) + right.x * horizontalRadius * Math.sin(yaw),
-          y: targetY + radius * Math.sin(pitch),
-          z: targetZ - forward.z * horizontalRadius * Math.cos(yaw) + right.z * horizontalRadius * Math.sin(yaw)
-        };
-        desiredCamLook = {
-          x: targetX + forward.x * 8,
-          y: targetY,
-          z: targetZ + forward.z * 8
-        };
+                : 82;
+        const pose = getVehicleCameraPose(activeTargetVehicle, yaw, radius, pitch);
+        desiredCamPos = pose.position;
+        desiredCamLook = pose.look;
       }
 
       if (desiredCamPos && desiredCamLook) {
