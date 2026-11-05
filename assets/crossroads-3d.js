@@ -2661,56 +2661,56 @@
       // Sportbike fairings, stepped seat, and paired wheels use one centered silhouette
       // so the same complete rider and bike appear from either traffic direction.
       addFairing([
-        [-10.2, 4.1], [-8.2, 6.8], [-4.7, 7.8], [-1.4, 7.1],
-        [2.4, 7.7], [6.9, 8.2], [10.5, 7.0], [12.0, 5.25],
-        [9.5, 4.65], [5.1, 4.0], [0.2, 3.35], [-4.4, 3.55], [-8.8, 3.75]
-      ], bikePaint, 4.8, 0.24);
+        [-10.2, 4.8], [-8.2, 6.8], [-4.7, 7.8], [-1.4, 7.1],
+        [2.4, 7.7], [6.9, 8.2], [10.5, 7.0], [12.0, 5.35],
+        [9.5, 5.2], [5.1, 5.0], [0.2, 4.95], [-4.4, 4.9], [-8.8, 4.65]
+      ], bikePaint, 3.6, 0.24);
       addFairing([
-        [-8.7, 4.9], [-7.0, 6.75], [-4.2, 7.25], [-1.2, 6.7],
-        [2.8, 7.15], [7.6, 7.55], [10.2, 6.7], [8.6, 5.15],
-        [4.1, 4.75], [-0.2, 4.05], [-4.6, 4.1]
-      ], darkPaint, 4.95, 0.14);
+        [-8.7, 5.25], [-7.0, 6.75], [-4.2, 7.25], [-1.2, 6.7],
+        [2.8, 7.15], [7.6, 7.55], [10.2, 6.7], [8.6, 5.55],
+        [4.1, 5.35], [-0.2, 5.25], [-4.6, 5.2]
+      ], darkPaint, 3.75, 0.14);
       [-1, 1].forEach(side => {
         const stripe = new THREE.Mesh(new THREE.BoxGeometry(11.5, 0.28, 0.1), accentPaint);
-        stripe.position.set(1.1, 5.55, side * 2.52);
+        stripe.position.set(1.1, 5.7, side * 1.9);
         stripe.rotation.z = -0.12;
         group.add(stripe);
       });
 
       const tank = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10), bikePaint);
-      tank.scale.set(3.9, 1.65, 2.35);
+      tank.scale.set(3.9, 1.65, 1.8);
       tank.position.set(0.25, 7.65, 0);
       group.add(tank);
       const tankCap = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.12, 12), silverMetal);
       tankCap.position.set(-0.2, 9.28, 0);
       group.add(tankCap);
 
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(6.7, 1.05, 3.75), darkPaint);
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(6.7, 1.05, 3.0), darkPaint);
       seat.position.set(-5.4, 7.05, 0);
       seat.rotation.z = 0.06;
       group.add(seat);
-      const tail = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.65, 3.9), bikePaint);
+      const tail = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.65, 3.0), bikePaint);
       tail.position.set(-9.0, 7.6, 0);
       tail.rotation.z = -0.16;
       group.add(tail);
 
-      const engine = new THREE.Mesh(new THREE.BoxGeometry(5.1, 3.4, 3.7), silverMetal);
+      const engine = new THREE.Mesh(new THREE.BoxGeometry(5.1, 3.4, 2.8), silverMetal);
       engine.position.set(-0.2, 3.9, 0);
       group.add(engine);
       for (let fin = 0; fin < 5; fin++) {
-        const coolingFin = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.14, 4.0), darkPaint);
+        const coolingFin = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.14, 3.0), darkPaint);
         coolingFin.position.set(-0.2, 2.8 + fin * 0.44, 0);
         group.add(coolingFin);
       }
       [-1, 1].forEach(side => {
-        addVehicleBeam([-8.1, 3.4, side * 1.25], [-1.2, 4.8, side * 1.25], 0.24, silverMetal);
+        addVehicleBeam([-8.1, 3.4, side * 1.15], [-1.2, 4.8, side * 1.15], 0.24, silverMetal);
         const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.55, 7.8, 10), silverMetal);
         exhaust.rotation.z = Math.PI / 2;
-        exhaust.position.set(-4.3, 2.8, side * 2.15);
+        exhaust.position.set(-4.3, 2.8, side * 1.65);
         group.add(exhaust);
         const mufflerTip = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.16, 10), darkPaint);
         mufflerTip.rotation.z = Math.PI / 2;
-        mufflerTip.position.set(-8.25, 2.8, side * 2.15);
+        mufflerTip.position.set(-8.25, 2.8, side * 1.65);
         group.add(mufflerTip);
       });
 
@@ -2734,17 +2734,17 @@
 
       // Forks, clip-on bars, and mirrors are mirrored for a complete two-sided bike.
       [-1, 1].forEach(side => {
-        addVehicleBeam([5.0, 8.3, side * 1.35], [8.1, 3.2, side * 1.05], 0.24, silverMetal);
+        addVehicleBeam([5.0, 8.3, side * 1.05], [8.1, 3.2, side * 0.9], 0.24, silverMetal);
         const mirrorStem = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.6, 6), darkPaint);
         mirrorStem.rotation.z = -0.45;
-        mirrorStem.position.set(5.2, 10.1, side * 2.2);
+        mirrorStem.position.set(5.2, 10.1, side * 1.8);
         group.add(mirrorStem);
         const mirror = new THREE.Mesh(new THREE.SphereGeometry(0.46, 8, 6), darkPaint);
         mirror.scale.set(0.45, 0.72, 1.2);
-        mirror.position.set(5.8, 11.1, side * 2.5);
+        mirror.position.set(5.8, 11.1, side * 2.0);
         group.add(mirror);
         const headlamp = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.05, 1.0), vehicleHeadlightMat);
-        headlamp.position.set(11.0, 6.65, side * 0.72);
+        headlamp.position.set(11.0, 6.65, side * 0.55);
         group.add(headlamp);
       });
       const bar = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 5.4), darkPaint);
