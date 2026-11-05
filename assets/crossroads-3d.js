@@ -4116,7 +4116,7 @@
           w.rotation.z += rollAngle;
         });
         if (vm.mesh.userData.pedalCrank) {
-          vm.mesh.userData.pedalCrank.rotation.z += Math.abs(rollAngle) * 0.72;
+          vm.mesh.userData.pedalCrank.rotation.z -= Math.abs(rollAngle) * 0.72;
           if (vm.mesh.userData.updatePedaling) {
             vm.mesh.userData.updatePedaling(vm.mesh.userData.pedalCrank.rotation.z);
           }
