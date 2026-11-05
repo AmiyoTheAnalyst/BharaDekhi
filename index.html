@@ -714,8 +714,10 @@
       height: 100%;
       min-height: 0;
       opacity: 0;
-      transform: translateY(14px) scale(0.985);
-      transition: opacity 240ms ease, transform 240ms ease;
+      transform: translate3d(0, 14px, 0) scale(0.985);
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
     #plannerScrollHero .story-hero-card {
       width: min(100%, 32rem);
@@ -7703,7 +7705,7 @@
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
         <div class="landing-cta-container absolute bottom-3 right-3 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 pointer-events-auto" style="bottom: max(0.75rem, env(safe-area-inset-bottom)); right: max(0.75rem, env(safe-area-inset-right));">
-          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/plan-trip')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
+          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/story')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
             <div class="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300 shrink-0">
               <i data-lucide="compass" class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white"></i>
             </div>
@@ -7719,17 +7721,20 @@
 
 
 
-  <!-- Screen 2: Dedicated Trip Planner Page -->
-  <main id="userPlannerView" class="panel-section hidden w-full bg-slate-950 pb-16">
+  <!-- Screen 2: Dedicated 3D Scroll Transit Story Hero Page -->
+  <main id="storyHeroView" class="panel-section hidden w-full bg-slate-950 select-none" aria-label="Bhara dekhi 3D Transit Storytelling Hero">
 
     <!-- 5-Stage 3D Scroll Hero Section (Scroll Transit Hero for Bhara dekhi) -->
     <section id="plannerScrollHero" class="relative w-full min-h-[500vh] bg-slate-950 select-none" aria-label="Bhara dekhi 3D Transit Storytelling Hero">
       
-      <!-- Top Navigation Pill inside Scroll Hero to Return to City Animation -->
-      <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-50 pointer-events-auto">
+      <!-- Top Navigation Bar inside Scroll Hero to Return to City Animation or Skip to Planner -->
+      <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-50 pointer-events-auto flex items-center gap-2 sm:gap-3">
         <button type="button" onclick="navigateToRoute('#/home')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-950/85 hover:bg-slate-900 text-sky-300 hover:text-white border border-sky-500/40 text-xs font-bold backdrop-blur-md shadow-2xl transition-all active:scale-95 cursor-pointer">
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
           <span>&larr; Back to City Animation</span>
+        </button>
+        <button type="button" onclick="launchPlannerPage()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-blue-600/80 hover:bg-blue-600 text-white border border-blue-400/40 text-xs font-bold backdrop-blur-md shadow-2xl transition-all active:scale-95 cursor-pointer">
+          <span>Skip to Planner &rarr;</span>
         </button>
       </div>
 
@@ -7843,8 +7848,8 @@
               Open-Meteo weather integration tracks rain in real time, helping you anticipate rain-based surge pricing and choose smarter transit alternatives across Dhaka.
             </p>
             <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button type="button" onclick="smoothScrollToPlanner()" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer">
-                <span>Launch Route &amp; Fare Planner &darr;</span>
+              <button type="button" onclick="launchPlannerPage()" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                <span>Launch Route &amp; Fare Planner &rarr;</span>
               </button>
             </div>
           </div>
@@ -7852,16 +7857,26 @@
 
       </div>
     </section>
+  </main> <!-- /storyHeroView -->
+
+  <!-- Screen 3: Dedicated Trip Planner Page -->
+  <main id="userPlannerView" class="panel-section hidden w-full bg-slate-50 dark:bg-slate-950 pb-16">
 
     <!-- Trip Planner Core Interface (Leaflet Map, Fares, Routes) -->
     <div id="planner" class="max-w-6xl mx-auto px-4 pt-6 space-y-6 scroll-mt-6">
 
-    <!-- Top Navigation Banner: Return to City Animation & Status -->
+    <!-- Top Navigation Banner: Return to City Animation, Transit Story & Status -->
     <div class="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 shadow-sm">
-      <button type="button" onclick="navigateToRoute('#/home')" class="inline-flex items-center gap-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-700 dark:text-sky-300 border border-blue-200/60 dark:border-slate-700 px-3.5 py-2 text-xs font-bold transition active:scale-95 shadow-sm" aria-label="Return to animated Dhaka city landing page">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        <span>&larr; Back to City Animation</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="navigateToRoute('#/story')" class="inline-flex items-center gap-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-700 dark:text-sky-300 border border-blue-200/60 dark:border-slate-700 px-3.5 py-2 text-xs font-bold transition active:scale-95 shadow-sm" aria-label="Return to 3D Transit Story">
+          <i data-lucide="sparkles" class="w-4 h-4 text-sky-400"></i>
+          <span>&larr; Transit Story</span>
+        </button>
+        <button type="button" onclick="navigateToRoute('#/home')" class="inline-flex items-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-bold transition active:scale-95 shadow-sm" aria-label="Return to animated Dhaka city landing page">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">City Crossroads</span>
+        </button>
+      </div>
       <div class="flex items-center gap-3">
         <div class="text-right hidden sm:block">
           <div class="flex items-center gap-1.5 justify-end">
@@ -16735,7 +16750,7 @@
     }
 
     // =========================================================
-    // SPA Route Navigation System (Screen 1: Landing vs Screen 2: Trip Planner)
+    // SPA Route Navigation System (Screen 1: Landing, Screen 2: 3D Story Hero, Screen 3: Planner)
     // =========================================================
     function navigateToRoute(route) {
       if (window.location.hash !== route) {
@@ -16753,12 +16768,19 @@
       const role = localStorage.getItem('commuteHubRole') || (isTestBypass ? 'user' : null);
       const isLoggedIn = (localStorage.getItem('commuteHubLoggedIn') === 'true' && Boolean(currentUser)) || isTestBypass;
 
+      const isStoryRoute = hash === '#/story' || hash === '#story' || hash === '#/transit-story' || hash === '#transit-story';
+      const isPlannerRoute = hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner';
+
       if (!isLoggedIn) {
-        if (hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner') {
+        if (isPlannerRoute || isStoryRoute) {
           localStorage.setItem('commuteHubLoggedIn', 'true');
           localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Dhaka Commuter', email: 'demo@bharadekhi.com' }));
           localStorage.setItem('commuteHubRole', 'user');
-          showView('user-planner');
+          if (isStoryRoute) {
+            showView('story-hero');
+          } else {
+            showView('user-planner');
+          }
           return;
         }
         showView('auth');
@@ -16774,7 +16796,9 @@
         return;
       }
 
-      if (hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner') {
+      if (isStoryRoute) {
+        showView('story-hero');
+      } else if (isPlannerRoute) {
         showView('user-planner');
       } else {
         showView('user-landing');
@@ -19574,7 +19598,7 @@
       }
     }
 
-    let scrollTriggerStorytellingInitialized = false;
+    let storyScrollTriggerInstance = null;
     function initScrollTriggerStorytelling() {
       if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
       gsap.registerPlugin(ScrollTrigger);
@@ -19582,14 +19606,13 @@
       const triggerEl = document.getElementById('plannerScrollHero');
       if (!triggerEl) return;
 
-      if (scrollTriggerStorytellingInitialized) {
-        ScrollTrigger.refresh();
-        return;
+      if (storyScrollTriggerInstance) {
+        storyScrollTriggerInstance.kill();
+        storyScrollTriggerInstance = null;
       }
-      scrollTriggerStorytellingInitialized = true;
 
-      // 1. Master Camera Scrubbing Timeline: 0% to 100% across the 5 stages
-      ScrollTrigger.create({
+      // Master Camera Scrubbing Timeline: 0% to 100% across the 5 stages
+      storyScrollTriggerInstance = ScrollTrigger.create({
         trigger: '#plannerScrollHero',
         start: 'top top',
         end: 'bottom top',
@@ -19600,28 +19623,29 @@
           }
         }
       });
-
+      ScrollTrigger.refresh();
     }
     window.initScrollTriggerStorytelling = initScrollTriggerStorytelling;
 
-    window.smoothScrollToPlanner = function() {
-      const plannerEl = document.getElementById('planner');
-      if (plannerEl) {
-        plannerEl.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        navigateToRoute('#/plan-trip');
+    window.launchPlannerPage = function() {
+      if (typeof window.destroyScrollTransitHero === 'function') {
+        window.destroyScrollTransitHero();
       }
+      navigateToRoute('#/plan-trip');
     };
+    window.smoothScrollToPlanner = window.launchPlannerPage;
 
     function showView(view) {
       const authView = document.getElementById('authView');
       const roleSelectionView = document.getElementById('roleSelectionView');
       const userLandingView = document.getElementById('userLandingView');
+      const storyHeroView = document.getElementById('storyHeroView');
       const userPlannerView = document.getElementById('userPlannerView') || document.getElementById('userDashboardView');
       const adminPanel = document.getElementById('adminPanel');
       const mainHeader = document.getElementById('mainHeader') || document.querySelector('header');
 
       const isLanding = view === 'user-landing' || view === 'landing';
+      const isStory = view === 'story-hero' || view === 'story' || view === 'transit-story';
       const isPlanner = view === 'user-planner' || view === 'planner' || view === 'user';
       const isAuth = view === 'auth';
       const isRole = view === 'role';
@@ -19630,12 +19654,13 @@
       if (authView) authView.classList.toggle('hidden', !isAuth);
       if (roleSelectionView) roleSelectionView.classList.toggle('hidden', !isRole);
       if (userLandingView) userLandingView.classList.toggle('hidden', !isLanding);
+      if (storyHeroView) storyHeroView.classList.toggle('hidden', !isStory);
       if (userPlannerView) userPlannerView.classList.toggle('hidden', !isPlanner);
       if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin);
 
-      // Hide main header on full-screen animated landing page so it occupies the entire screen
+      // Hide main header on full-screen animated landing page and 3D story hero page
       if (mainHeader) {
-        mainHeader.classList.toggle('hidden', isLanding);
+        mainHeader.classList.toggle('hidden', isLanding || isStory);
       }
 
       updateAdminModeNavigation();
@@ -19644,6 +19669,11 @@
 
       if (!isLanding && window.crossroadsAudio && crossroadsAudio.isActive) {
         crossroadsAudio.pause();
+      }
+
+      // If leaving story hero, destroy/free WebGL canvas resources
+      if (!isStory && typeof window.destroyScrollTransitHero === 'function') {
+        window.destroyScrollTransitHero();
       }
 
       if (isLanding) {
@@ -19673,20 +19703,41 @@
         if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       }
 
+      if (isStory) {
+        // Sync URL hash
+        if (window.location.hash !== '#/story' && window.location.hash !== '#story') {
+          history.replaceState(null, '', '#/story');
+        }
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        // Pause crossroads simulation while on story hero page to save CPU/GPU
+        if (typeof window.endEmergencyWave === 'function') {
+          window.endEmergencyWave();
+        }
+        if (dhakaCrossroadsAnimId) {
+          cancelAnimationFrame(dhakaCrossroadsAnimId);
+          dhakaCrossroadsAnimId = null;
+          dhakaCrossroadsRunning = false;
+        }
+
+        if (typeof window.initScrollTransitHero === 'function') {
+          setTimeout(() => {
+            window.initScrollTransitHero('scrollTransitHeroCanvas', 'plannerScrollHero');
+            if (typeof initScrollTriggerStorytelling === 'function') {
+              initScrollTriggerStorytelling();
+            }
+            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+          }, 60);
+        }
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      }
+
       if (isPlanner) {
         // Sync URL hash
         if (window.location.hash !== '#/plan-trip' && window.location.hash !== '#plan-trip') {
           history.replaceState(null, '', '#/plan-trip');
         }
         window.scrollTo({ top: 0, behavior: 'instant' });
-
-        if (typeof window.initScrollTransitHero === 'function') {
-          setTimeout(() => {
-            window.initScrollTransitHero('scrollTransitHeroCanvas', 'plannerScrollHero');
-            initScrollTriggerStorytelling();
-            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
-          }, 80);
-        }
 
         // Pause simulation while on planner page to save CPU
         if (typeof window.endEmergencyWave === 'function') {

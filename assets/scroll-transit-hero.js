@@ -854,24 +854,29 @@
     cityGroup = new THREE.Group();
     masterGroup.add(cityGroup);
 
-    const ambient = new THREE.AmbientLight(0x7183b8, 0.85);
+    const ambient = new THREE.AmbientLight(0x7183b8, 0.95);
     scene.add(ambient);
-    const hemiLight = new THREE.HemisphereLight(0x5169c7, 0x11101f, 1.15);
+    const hemiLight = new THREE.HemisphereLight(0x5169c7, 0x11101f, 1.2);
     scene.add(hemiLight);
-    const keyLight = new THREE.DirectionalLight(0xc3d8ff, 1.3);
+    const keyLight = new THREE.DirectionalLight(0xc3d8ff, 1.35);
     keyLight.position.set(-25, 50, 30);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(768, 768);
-    keyLight.shadow.camera.left = -38;
-    keyLight.shadow.camera.right = 38;
-    keyLight.shadow.camera.top = 45;
-    keyLight.shadow.camera.bottom = -45;
-    keyLight.shadow.camera.near = 1;
-    keyLight.shadow.camera.far = 120;
+    if (!isLowEndDevice) {
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.set(512, 512);
+      keyLight.shadow.camera.left = -38;
+      keyLight.shadow.camera.right = 38;
+      keyLight.shadow.camera.top = 45;
+      keyLight.shadow.camera.bottom = -45;
+      keyLight.shadow.camera.near = 1;
+      keyLight.shadow.camera.far = 120;
+    }
     scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0x5d46ff, 1.7);
+    const rimLight = new THREE.DirectionalLight(0x5d46ff, 1.6);
     rimLight.position.set(35, 25, -50);
     scene.add(rimLight);
+    const streetFillLight = new THREE.DirectionalLight(0xffbd66, 0.45);
+    streetFillLight.position.set(-15, 12, 10);
+    scene.add(streetFillLight);
     studioSpotlight = new THREE.SpotLight(0x14b8a6, 2.8, 110, Math.PI / 3, 0.5, 1.1);
     studioSpotlight.position.set(0, 38, 22);
     studioSpotlight.target.position.set(0, 6, -25);
@@ -958,7 +963,7 @@
     }
 
     const streetFixtureMat = new THREE.MeshStandardMaterial({ color: 0x353b47, roughness: 0.65, metalness: 0.5 });
-    const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xffc66e });
+    const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xffd17a });
     const lampPoleGeo = new THREE.CylinderGeometry(0.07, 0.11, 6.4, 8);
     const lampHeadGeo = new THREE.BoxGeometry(0.95, 0.13, 0.24);
     for (let lampIndex = 0; lampIndex < 7; lampIndex++) {
@@ -974,11 +979,6 @@
         const lamp = new THREE.Mesh(lampHeadGeo, lampGlowMat);
         lamp.position.set(lampX - side * 0.92, 6.18, z);
         cityGroup.add(lamp);
-        if (lampIndex % 2 === 0) {
-          const light = new THREE.PointLight(0xffbd66, 2.0, 19, 2);
-          light.position.set(lampX - side * 0.92, 5.95, z);
-          cityGroup.add(light);
-        }
       }
     }
 
@@ -1023,33 +1023,38 @@
       'Farmgate Center', 'Hatirjheel House', 'New Market', 'Mohakhali Tower',
       'Azimpur Court', 'Paltan Building'
     ];
-    const buildingSignColors = ['#594b70', '#35656a', '#80505f', '#3e5e80', '#87664e'];
-    function createBuildingSignTexture(name, color) {
+    const cachedSignTextures = [];
+    function getBuildingSignTexture(index) {
+      const idx = index % 5;
+      if (cachedSignTextures[idx]) return cachedSignTextures[idx];
+      const signConfigs = [
+        { name: 'Gulshan Heights', color: '#594b70' },
+        { name: 'Dhanmondi Plaza', color: '#35656a' },
+        { name: 'Mirpur Tower', color: '#80505f' },
+        { name: 'Motijheel House', color: '#3e5e80' },
+        { name: 'Uttara Square', color: '#87664e' }
+      ];
+      const config = signConfigs[idx];
       const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 112;
+      canvas.width = 256;
+      canvas.height = 64;
       const context = canvas.getContext('2d');
       if (!context) return null;
-
       context.fillStyle = '#171521';
       context.fillRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = color;
-      context.fillRect(8, 8, canvas.width - 16, canvas.height - 16);
+      context.fillStyle = config.color;
+      context.fillRect(4, 4, canvas.width - 8, canvas.height - 8);
       context.strokeStyle = '#ffe0a6';
-      context.lineWidth = 5;
-      context.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+      context.lineWidth = 3;
+      context.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
       context.fillStyle = '#fff4dc';
       context.textAlign = 'center';
       context.textBaseline = 'middle';
-      context.font = 'bold 42px Segoe UI, sans-serif';
-      while (context.measureText(name).width > canvas.width - 42) {
-        const fontSize = Number(context.font.match(/\d+/)[0]) - 2;
-        if (fontSize < 22) break;
-        context.font = `bold ${fontSize}px Segoe UI, sans-serif`;
-      }
-      context.fillText(name, canvas.width / 2, canvas.height / 2);
+      context.font = 'bold 24px Segoe UI, sans-serif';
+      context.fillText(config.name, canvas.width / 2, canvas.height / 2);
       const texture = new THREE.CanvasTexture(canvas);
       texture.encoding = THREE.sRGBEncoding;
+      cachedSignTextures[idx] = texture;
       return texture;
     }
     const towerEdgeMaterials = [
@@ -1115,11 +1120,7 @@
           stripe.position.set(faceX, height * 0.51, depth * 0.32);
           building.add(stripe);
 
-          const buildingName = `${buildingNames[towerCount % buildingNames.length]} ${String(towerCount + 1).padStart(2, '0')}`;
-          const signTexture = createBuildingSignTexture(
-            buildingName,
-            buildingSignColors[towerCount % buildingSignColors.length]
-          );
+          const signTexture = getBuildingSignTexture(towerCount);
           if (signTexture) {
             const sign = new THREE.Mesh(
               new THREE.PlaneGeometry(Math.min(depth * 0.84, 6.8), 1.5),
@@ -1356,15 +1357,18 @@
         { x: 2.05, direction: -1 },  // East inner (Northbound, away from camera)
         { x: 5.55, direction: -1 }   // East outer (Northbound, away from camera)
       ];
+      const activeSpecs = isLowEndDevice
+        ? vehicleAssetSpecs.filter((spec, idx) => idx % 2 === 0 || spec.key.startsWith('metro'))
+        : vehicleAssetSpecs;
       const laneCounts = [0, 0, 0, 0, 0];
-      vehicleAssetSpecs.forEach(spec => {
+      activeSpecs.forEach(spec => {
         const laneIdx = spec.lane !== undefined ? spec.lane : 0;
         laneCounts[laneIdx]++;
       });
       const laneOffsets = [0, 0, 0, 0, 0];
       const lanePhaseStagger = [0, 4.6, 9.2, 13.8, 35.0];
 
-      vehicleAssetSpecs.forEach(spec => {
+      activeSpecs.forEach(spec => {
         const isElevated = spec.lane === 4 || spec.key.startsWith('metro');
         const shouldUseBuiltIn = !available.has(spec.file) || !loader;
         if (!available.has(spec.file) && !shouldUseBuiltIn) {
@@ -1571,7 +1575,9 @@
     cityNeonMaterials.forEach(material => material.color.copy(interpolatedLightColor));
 
     const activeCardPosition = p * 5;
-    storyStageCards.forEach((card, index) => {
+    storyStageCards.forEach((item, index) => {
+      const card = item.el;
+      const content = item.content;
       const transitionHalfWidth = 0.08;
       const clamp = value => Math.max(0, Math.min(1, value));
       let visibility = 1;
@@ -1588,13 +1594,15 @@
         );
       }
       card.style.opacity = visibility.toFixed(3);
-      card.style.transform = `translateY(${(1 - visibility) * 14}px) scale(${0.985 + visibility * 0.015})`;
-      card.style.pointerEvents = visibility >= 0.5 ? 'auto' : 'none';
-      card.style.zIndex = String(Math.round(visibility * 10));
-      card.inert = visibility < 0.5;
-      card.setAttribute('aria-hidden', visibility < 0.5 ? 'true' : 'false');
-      const cardContent = card.querySelector('.story-hero-card');
-      if (cardContent) cardContent.style.pointerEvents = visibility >= 0.5 ? 'auto' : 'none';
+      card.style.transform = `translate3d(0, ${(1 - visibility) * 14}px, 0) scale(${0.985 + visibility * 0.015})`;
+      const isVisible = visibility >= 0.5;
+      if (item.lastVisible !== isVisible) {
+        item.lastVisible = isVisible;
+        card.style.pointerEvents = isVisible ? 'auto' : 'none';
+        card.style.zIndex = isVisible ? '10' : '0';
+        card.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
+        if (content) content.style.pointerEvents = isVisible ? 'auto' : 'none';
+      }
     });
 
     targetSpotPos = {
@@ -1620,7 +1628,7 @@
     camera.updateProjectionMatrix();
 
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(width < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.25));
+    renderer.setPixelRatio(isLowEndDevice ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 1.5));
     masterGroup.scale.setScalar(width < 768 ? 0.78 : 1);
   }
 
@@ -1639,7 +1647,7 @@
       if (vehicle.distance > upperBound) vehicle.distance = lowerBound;
       if (vehicle.distance < lowerBound) vehicle.distance = upperBound;
       vehicle.mesh.position.z = vehicle.distance;
-      if (vehicle.loaded && vehicle.wheelNodes.length) {
+      if (vehicle.loaded && vehicle.wheelNodes.length && vehicle.distance > -75 && vehicle.distance < 40) {
         const rotation = laneSpeed * delta;
         vehicle.wheelNodes.forEach(wheel => {
           const radius = wheel.userData.wheelRadius || vehicle.wheelRadius;
@@ -1649,20 +1657,15 @@
       }
     });
 
-    const cityPulse = 0.64 + Math.sin(clock.elapsedTime * 1.5) * 0.08;
-    cityWindowMaterials.forEach(material => {
-      material.opacity = cityPulse;
-    });
+    // Smooth Exponential Damping for Camera (Framerate-independent 120 FPS feel)
+    const damping = 1.0 - Math.exp(-8.5 * delta);
+    currentCamPos.x += (targetCamPos.x - currentCamPos.x) * damping;
+    currentCamPos.y += (targetCamPos.y - currentCamPos.y) * damping;
+    currentCamPos.z += (targetCamPos.z - currentCamPos.z) * damping;
 
-    // Smooth Damped Camera Interpolation (Silky 120 FPS feel)
-    const factor = Math.min(1.0, delta * 7.0);
-    currentCamPos.x += (targetCamPos.x - currentCamPos.x) * factor;
-    currentCamPos.y += (targetCamPos.y - currentCamPos.y) * factor;
-    currentCamPos.z += (targetCamPos.z - currentCamPos.z) * factor;
-
-    currentLookAt.x += (targetLookAt.x - currentLookAt.x) * factor;
-    currentLookAt.y += (targetLookAt.y - currentLookAt.y) * factor;
-    currentLookAt.z += (targetLookAt.z - currentLookAt.z) * factor;
+    currentLookAt.x += (targetLookAt.x - currentLookAt.x) * damping;
+    currentLookAt.y += (targetLookAt.y - currentLookAt.y) * damping;
+    currentLookAt.z += (targetLookAt.z - currentLookAt.z) * damping;
 
     camera.position.set(currentCamPos.x, currentCamPos.y, currentCamPos.z);
     camera.lookAt(currentLookAt.x, currentLookAt.y, currentLookAt.z);
@@ -1672,7 +1675,7 @@
     }
 
     // Monsoon Rain particle fall in Stage 5
-    if (rainParticles && rainParticles.material.opacity > 0.02) {
+    if (rainParticles && rainParticles.material.opacity > 0.04) {
       const positions = rainParticles.geometry.attributes.position.array;
       for (let i = 1; i < positions.length; i += 3) {
         positions[i] -= delta * 32;
@@ -1699,7 +1702,11 @@
     initMaterials();
     buildScene();
     loadVehicleAssets();
-    storyStageCards = Array.from(document.querySelectorAll('#storyHeroCardsContainer > section'));
+    storyStageCards = Array.from(document.querySelectorAll('#storyHeroCardsContainer > section')).map(section => ({
+      el: section,
+      content: section.querySelector('.story-hero-card'),
+      lastVisible: null
+    }));
     applyScrollChoreography(0);
 
     const width = canvasEl.clientWidth || window.innerWidth;
@@ -1712,14 +1719,19 @@
 
     renderer = new THREE.WebGLRenderer({
       canvas: canvasEl,
-      antialias: true,
+      antialias: !isLowEndDevice,
       alpha: false,
-      powerPreference: 'high-performance'
+      powerPreference: 'high-performance',
+      precision: isLowEndDevice ? 'mediump' : 'highp'
     });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(width < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.25));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(isLowEndDevice ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 1.5));
+    if (!isLowEndDevice) {
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    } else {
+      renderer.shadowMap.enabled = false;
+    }
     if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.1;

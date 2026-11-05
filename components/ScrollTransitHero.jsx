@@ -15,7 +15,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
  * 4. Stage 4 (60% - 80%): Dhaka Metro Rail (MRT Line-6 elevated viaduct & train)
  * 5. Stage 5 (80% - 100%): Weather Surge Pricing & Map Handoff (Monsoon rain particles & CTA)
  */
-export default function ScrollTransitHero({ plannerId = 'planner' }) {
+export default function ScrollTransitHero({ plannerId = 'planner', onLaunchPlanner }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const cardRefs = useRef([]);
@@ -524,10 +524,16 @@ export default function ScrollTransitHero({ plannerId = 'planner' }) {
     };
   }, []);
 
-  const smoothScrollToPlanner = () => {
+  const handleLaunchPlanner = () => {
+    if (typeof onLaunchPlanner === 'function') {
+      onLaunchPlanner();
+      return;
+    }
     const el = document.getElementById(plannerId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
+    } else if (typeof window !== 'undefined') {
+      window.location.hash = '#/plan-trip';
     }
   };
 
@@ -664,10 +670,10 @@ export default function ScrollTransitHero({ plannerId = 'planner' }) {
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={smoothScrollToPlanner}
+                onClick={handleLaunchPlanner}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-base shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
-                <span>Launch Route &amp; Fare Planner ↓</span>
+                <span>Launch Route &amp; Fare Planner &rarr;</span>
               </button>
             </div>
           </div>
