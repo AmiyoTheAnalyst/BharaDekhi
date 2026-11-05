@@ -1997,33 +1997,34 @@
         const wheel = new THREE.Group();
         wheel.position.set(position[0], position[1], position[2]);
         const tire = new THREE.Mesh(
-          new THREE.TorusGeometry(radius, width, 8, 20),
+          new THREE.TorusGeometry(radius, width * 0.72, 10, 28),
           blackRubber
         );
         wheel.add(tire);
         const rim = new THREE.Mesh(
-          new THREE.TorusGeometry(radius - width * 0.72, 0.12, 6, 20),
+          new THREE.TorusGeometry(radius - width * 0.72, 0.075, 6, 28),
           chromeMat
         );
         wheel.add(rim);
 
-        const spokeGeometry = new THREE.CylinderGeometry(0.11, 0.11, 1, 6);
-        const spokes = new THREE.InstancedMesh(spokeGeometry, chromeMat, 24);
+        const spokeCount = 18;
+        const spokeGeometry = new THREE.CylinderGeometry(0.045, 0.045, 1, 5);
+        const spokes = new THREE.InstancedMesh(spokeGeometry, chromeMat, spokeCount * 2);
         const spokeMatrix = new THREE.Matrix4();
         const spokePosition = new THREE.Vector3();
         const spokeRotation = new THREE.Quaternion();
         const spokeScale = new THREE.Vector3(1, 1, 1);
         let spokeIndex = 0;
-        for (let spoke = 0; spoke < 12; spoke++) {
-          const angle = spoke * Math.PI / 6;
+        for (let spoke = 0; spoke < spokeCount; spoke++) {
+          const angle = spoke * Math.PI * 2 / spokeCount;
           const endpoint = [
-            Math.cos(angle) * (radius - width),
-            Math.sin(angle) * (radius - width),
+            Math.cos(angle) * (radius - width * 0.9),
+            Math.sin(angle) * (radius - width * 0.9),
             0
           ];
           for (const side of [-1, 1]) {
-            const from = new THREE.Vector3(0, 0, side * 0.18);
-            const to = new THREE.Vector3(endpoint[0], endpoint[1], side * 0.1);
+            const from = new THREE.Vector3(0, 0, side * 0.13);
+            const to = new THREE.Vector3(endpoint[0], endpoint[1], side * 0.13);
             const direction = to.clone().sub(from);
             spokePosition.copy(from).add(to).multiplyScalar(0.5);
             spokeRotation.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
@@ -2034,10 +2035,10 @@
         }
         spokes.instanceMatrix.needsUpdate = true;
         wheel.add(spokes);
-        const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.72, 10), chromeMat);
+        const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.48, 10), chromeMat);
         hub.rotation.x = Math.PI / 2;
         wheel.add(hub);
-        const centerCap = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.84, 8), orangeLight);
+        const centerCap = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.58, 8), orangeLight);
         centerCap.rotation.x = Math.PI / 2;
         wheel.add(centerCap);
         wheel.userData.rickshawWheel = true;
@@ -2110,14 +2111,32 @@
       const lowerTub = new THREE.Mesh(new THREE.BoxGeometry(12.2, 2.6, 13.6), turquoise);
       lowerTub.position.set(-6.6, 6.8, 0);
       group.add(lowerTub);
-      const sidePanel = new THREE.Mesh(new THREE.BoxGeometry(10.5, 2.15, 0.48), turquoiseLight);
+      const sidePanel = new THREE.Mesh(new THREE.BoxGeometry(10.5, 1.7, 0.48), turquoiseLight);
       for (const side of [-1, 1]) {
         const panel = sidePanel.clone();
-        panel.position.set(-6.6, 8.05, side * 6.95);
+        panel.position.set(-6.6, 7.82, side * 6.95);
         group.add(panel);
         const rail = new THREE.Mesh(new THREE.BoxGeometry(10.8, 0.36, 0.55), magenta);
         rail.position.set(-6.6, 9.13, side * 7.0);
         group.add(rail);
+
+        const ornamentColors = [orangeLight, magenta, turquoise];
+        for (let motif = 0; motif < 3; motif++) {
+          const x = -10.0 + motif * 3.35;
+          const flower = new THREE.Mesh(
+            new THREE.TorusGeometry(0.72, 0.12, 5, 10),
+            ornamentColors[motif]
+          );
+          flower.position.set(x, 7.82, side * 7.22);
+          if (side < 0) flower.rotation.y = Math.PI;
+          group.add(flower);
+          const jewel = new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.36, 0),
+            motif === 1 ? orangeLight : magenta
+          );
+          jewel.position.set(x, 7.82, side * 7.28);
+          group.add(jewel);
+        }
       }
       const rearPanel = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.2, 13.7), orange);
       rearPanel.position.set(-12.75, 8.05, 0);
@@ -2267,6 +2286,32 @@
       );
       canopyHem.position.set(canopyCenterX - canopyRadiusX, canopyBaseY, 0);
       group.add(canopyHem);
+
+      const canopyTrimMat = new THREE.MeshStandardMaterial({ color: 0xff4fa3, roughness: 0.42, emissive: 0x4a102b, emissiveIntensity: 0.18 });
+      for (const side of [-1, 1]) {
+        const trimPoints = [];
+        for (let step = 0; step <= canopySegments; step++) {
+          const angle = Math.PI * step / canopySegments;
+          trimPoints.push(new THREE.Vector3(
+            canopyCenterX + Math.cos(angle) * canopyRadiusX,
+            canopyBaseY + Math.sin(angle) * canopyRadiusY,
+            side * (canopyHalfWidth + 0.08)
+          ));
+        }
+        const trimCurve = new THREE.CatmullRomCurve3(trimPoints);
+        group.add(new THREE.Mesh(new THREE.TubeGeometry(trimCurve, 24, 0.13, 5, false), canopyTrimMat));
+      }
+      const tasselMat = new THREE.MeshStandardMaterial({ color: 0xffc857, roughness: 0.62, emissive: 0x4a3208, emissiveIntensity: 0.12 });
+      for (let tassel = 0; tassel < 9; tassel++) {
+        const z = -canopyHalfWidth + 2 * canopyHalfWidth * tassel / 8;
+        const fringe = new THREE.Mesh(
+          new THREE.ConeGeometry(0.2, 0.75, 5),
+          tasselMat
+        );
+        fringe.rotation.z = Math.PI;
+        fringe.position.set(canopyCenterX - canopyRadiusX, canopyBaseY - 0.48, z);
+        group.add(fringe);
+      }
 
       group.userData.rickshawPedalPhase = 0;
 
@@ -3844,7 +3889,7 @@
           + (activeTargetVehicle.type === 'rickshaw' ? 0.06 : 0);
         const radius = activeTargetVehicle.type === 'car' ? 62
           : activeTargetVehicle.type === 'bike' ? 38
-            : activeTargetVehicle.type === 'rickshaw' ? 58
+            : activeTargetVehicle.type === 'rickshaw' ? 46
               : activeTargetVehicle.type === 'cng' ? 48
               : 82;
         const horizontalRadius = radius * Math.cos(pitch);
