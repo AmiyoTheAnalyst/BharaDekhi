@@ -80,8 +80,14 @@
   function initMaterials() {
     carPaintMat = new THREE.MeshStandardMaterial({ color: 0x0047ab, roughness: 0.25, metalness: 0.45 });
     glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
-    tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9, metalness: 0.05 });
-    rimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3, metalness: 0.8 });
+    tireMat = new THREE.MeshStandardMaterial({ color: 0x090d12, roughness: 0.94, metalness: 0.02 });
+    rimMat = new THREE.MeshStandardMaterial({
+      color: 0xaab8c8,
+      roughness: 0.28,
+      metalness: 0.72,
+      emissive: 0x172b40,
+      emissiveIntensity: 0.4
+    });
     chromeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.9 });
 
     cngGreenMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.35, metalness: 0.25 });
@@ -95,12 +101,12 @@
   function createWheel(radius, width) {
     const wheel = new THREE.Group();
     const tire = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, width, 16), tireMat);
-    tire.rotation.z = Math.PI / 2;
+    tire.rotation.x = Math.PI / 2;
     wheel.add(tire);
 
     const rotorMat = new THREE.MeshStandardMaterial({ color: 0x64707a, roughness: 0.48, metalness: 0.72 });
     const rotor = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.56, radius * 0.56, width * 0.58, 16), rotorMat);
-    rotor.rotation.z = Math.PI / 2;
+    rotor.rotation.x = Math.PI / 2;
     wheel.add(rotor);
 
     const spokeGeometry = new THREE.CylinderGeometry(radius * 0.035, radius * 0.035, radius * 0.52, 6);
@@ -113,8 +119,12 @@
     for (const side of [-1, 1]) {
       for (let spoke = 0; spoke < 10; spoke++) {
         const angle = spoke * Math.PI / 5;
-        const direction = new THREE.Vector3(0, Math.cos(angle), Math.sin(angle));
-        position.set(side * (width / 2 + 0.012), Math.cos(angle) * radius * 0.43, Math.sin(angle) * radius * 0.43);
+        const direction = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0);
+        position.set(
+          Math.cos(angle) * radius * 0.43,
+          Math.sin(angle) * radius * 0.43,
+          side * (width / 2 + 0.012)
+        );
         quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
         matrix.compose(position, quaternion, scale);
         spokes.setMatrixAt(spokeIndex++, matrix);
@@ -125,29 +135,28 @@
 
     const lipGeometry = new THREE.TorusGeometry(radius * 0.72, radius * 0.035, 5, 24);
     const sidewallGeometry = new THREE.TorusGeometry(radius * 0.82, radius * 0.018, 5, 24);
-    const sidewallMat = new THREE.MeshStandardMaterial({ color: 0x34383d, roughness: 0.76 });
+    const sidewallMat = new THREE.MeshStandardMaterial({ color: 0x394553, roughness: 0.62, metalness: 0.18 });
     for (const side of [-1, 1]) {
       const lip = new THREE.Mesh(lipGeometry, rimMat);
-      lip.rotation.y = Math.PI / 2;
-      lip.position.x = side * (width / 2 + 0.012);
+      lip.position.z = side * (width / 2 + 0.012);
       wheel.add(lip);
 
       const sidewall = new THREE.Mesh(sidewallGeometry, sidewallMat);
-      sidewall.rotation.y = Math.PI / 2;
-      sidewall.position.x = side * width * 0.37;
+      sidewall.position.z = side * width * 0.37;
       wheel.add(sidewall);
     }
 
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.21, radius * 0.21, width * 1.12, 12), chromeMat);
-    hub.rotation.z = Math.PI / 2;
+    hub.rotation.x = Math.PI / 2;
     wheel.add(hub);
     const centerCap = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.12, radius * 0.12, width * 1.18, 12), rimMat);
-    centerCap.rotation.z = Math.PI / 2;
+    centerCap.rotation.x = Math.PI / 2;
     wheel.add(centerCap);
 
     wheel.name = 'vehicle-wheel';
     wheel.userData.isRollingWheel = true;
     wheel.userData.wheelRadius = radius;
+    wheel.userData.rollingAxis = 'z';
     return wheel;
   }
 
@@ -205,6 +214,10 @@
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.16, radius * 0.16, width * 1.12, 12), metalMaterial);
     cap.rotation.x = Math.PI / 2;
     wheel.add(cap);
+    wheel.name = 'vehicle-wheel';
+    wheel.userData.isRollingWheel = true;
+    wheel.userData.wheelRadius = radius;
+    wheel.userData.rollingAxis = 'z';
     return wheel;
   }
 
@@ -228,6 +241,9 @@
     axle.rotation.x = Math.PI / 2;
     wheel.add(axle);
     wheel.name = 'rickshaw-wheel';
+    wheel.userData.isRollingWheel = true;
+    wheel.userData.wheelRadius = radius;
+    wheel.userData.rollingAxis = 'z';
     return wheel;
   }
 
@@ -253,10 +269,10 @@
     hlR.position.set(2.2, 0.65, -0.65);
     car.add(hlR);
     // Wheels
-    const wFL = createWheel(0.38, 0.26); wFL.position.set(1.3, 0.38, 0.95); car.add(wFL);
-    const wFR = createWheel(0.38, 0.26); wFR.position.set(1.3, 0.38, -0.95); car.add(wFR);
-    const wBL = createWheel(0.38, 0.26); wBL.position.set(-1.3, 0.38, 0.95); car.add(wBL);
-    const wBR = createWheel(0.38, 0.26); wBR.position.set(-1.3, 0.38, -0.95); car.add(wBR);
+    const wFL = createWheel(0.43, 0.34); wFL.position.set(1.3, 0.43, 0.95); car.add(wFL);
+    const wFR = createWheel(0.43, 0.34); wFR.position.set(1.3, 0.43, -0.95); car.add(wFR);
+    const wBL = createWheel(0.43, 0.34); wBL.position.set(-1.3, 0.43, 0.95); car.add(wBL);
+    const wBR = createWheel(0.43, 0.34); wBR.position.set(-1.3, 0.43, -0.95); car.add(wBR);
     return car;
   }
 
@@ -768,16 +784,25 @@
     }
 
     const towerMaterials = [
-      0xb99578, 0x8c9b82, 0x768ca1, 0xb27873, 0x9b8ba6, 0x69918a,
-      0xc1aa80, 0x7f8972, 0xa98570, 0x778698, 0x9d7e82, 0x739185,
-      0xb0a18a, 0x8c7c69, 0x7f96a1, 0xa08c68, 0x8b7b91, 0x7c9080
+      0x37404a, 0x292f39, 0x595b5e, 0x344047, 0x464049, 0x68696a,
+      0x303944, 0x55464a, 0x3a4850, 0x4c4a4e, 0x5d6266, 0x3b4842,
+      0x514649, 0x394550, 0x49464c, 0x605b54, 0x35474a, 0x4d4850
     ].map(color => new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.68,
-      metalness: 0.2,
-      emissive: color,
-      emissiveIntensity: 0.16
+      roughness: 0.56,
+      metalness: 0.34,
+      emissive: 0x080b10,
+      emissiveIntensity: 0.08
     }));
+    const glassTowerMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x58a5b8,
+      roughness: 0.18,
+      metalness: 0.3,
+      transparent: true,
+      opacity: 0.38,
+      emissive: 0x0b2433,
+      emissiveIntensity: 0.2
+    });
     const buildingNames = [
       'Gulshan Heights', 'Dhanmondi Plaza', 'Mirpur Tower', 'Motijheel House',
       'Karwan Bazar', 'Tejgaon Point', 'Uttara Square', 'Banani Arcade',
@@ -785,7 +810,7 @@
       'Farmgate Center', 'Hatirjheel House', 'New Market', 'Mohakhali Tower',
       'Azimpur Court', 'Paltan Building'
     ];
-    const buildingSignColors = ['#8f5f45', '#426d66', '#685f86', '#974f53', '#4a657c'];
+    const buildingSignColors = ['#594b70', '#35656a', '#80505f', '#3e5e80', '#87664e'];
     function createBuildingSignTexture(name, color) {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
@@ -815,9 +840,9 @@
       return texture;
     }
     const towerEdgeMaterials = [
-      new THREE.MeshBasicMaterial({ color: 0xd7b879 }),
-      new THREE.MeshBasicMaterial({ color: 0x73aaa0 }),
-      new THREE.MeshBasicMaterial({ color: 0xc88377 })
+      new THREE.MeshBasicMaterial({ color: 0x617786 }),
+      new THREE.MeshBasicMaterial({ color: 0x627c76 }),
+      new THREE.MeshBasicMaterial({ color: 0x806d7b })
     ];
     const windowCounts = [0, 0, 0];
     const windowPlacements = [[], [], []];
@@ -838,7 +863,7 @@
 
           const body = new THREE.Mesh(
             new THREE.BoxGeometry(width, height, depth),
-            towerMaterials[towerCount % towerMaterials.length]
+            towerCount === 0 ? glassTowerMaterial : towerMaterials[towerCount % towerMaterials.length]
           );
           body.position.y = height / 2;
           building.add(body);
@@ -856,9 +881,9 @@
           for (let floor = 0; floor < floors; floor++) {
             for (let window = 0; window < windowColumns; window++) {
               if (Math.random() < 0.28) continue;
-              const colorIndex = Math.random() < 0.13
+              const colorIndex = Math.random() < 0.1
                 ? 2
-                : (Math.random() < 0.42 ? 1 : 0);
+                : (Math.random() < 0.28 ? 1 : 0);
               const windowZ = (window - (windowColumns - 1) / 2) * 1.35;
               const windowY = 1.25 + floor * 2.05;
               windowPlacements[colorIndex].push([
@@ -906,7 +931,7 @@
     }
 
     const windowGeometry = new THREE.BoxGeometry(0.07, 0.68, 0.82);
-    const windowColors = [0xf3d19b, 0xc9d8e6, 0xe2c3bd];
+    const windowColors = [0xd8c9a7, 0x9dc6ca, 0xc3a8c0];
     cityWindowMaterials = windowColors.map(color => new THREE.MeshBasicMaterial({
       color,
       transparent: true,
@@ -1061,11 +1086,17 @@
       model.scale.setScalar(scale);
       model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
       model.traverse(object => {
-        if (!object.isMesh) return;
-        object.castShadow = true;
-        object.receiveShadow = true;
+        if (object.isMesh) {
+          object.castShadow = true;
+          object.receiveShadow = true;
+        }
+        if (object.userData.isRollingWheel) {
+          traffic.wheelNodes.push(object);
+          object.userData.wheelRadius *= scale;
+        }
       });
       actor.add(model);
+      traffic.wheelRadius = spec.key === 'bike' ? 0.34 : 0.48;
       traffic.loaded = true;
       builtInModels.push(builtInLabels[spec.key]);
       loaded++;
@@ -1214,11 +1245,10 @@
                 object.castShadow = true;
                 object.receiveShadow = true;
               }
-              if (object.userData.isRollingWheel) {
+              if (object.userData.isRollingWheel || /wheel|tire|tyre/i.test(object.name)) {
                 traffic.wheelNodes.push(object);
-                traffic.wheelRadius = object.userData.wheelRadius;
+                if (object.userData.wheelRadius) traffic.wheelRadius = object.userData.wheelRadius;
               }
-              if (/wheel|tire|tyre/i.test(object.name)) traffic.wheelNodes.push(object);
             });
             actor.add(model);
             traffic.wheelRadius = spec.key === 'bike' ? 0.34 : 0.48;
@@ -1373,9 +1403,11 @@
       if (vehicle.distance < lowerBound) vehicle.distance = upperBound;
       vehicle.mesh.position.z = vehicle.distance;
       if (vehicle.loaded && vehicle.wheelNodes.length) {
-        const rotation = laneSpeed * delta / vehicle.wheelRadius;
+        const rotation = laneSpeed * delta;
         vehicle.wheelNodes.forEach(wheel => {
-          wheel.rotation.x += vehicle.direction > 0 ? rotation : -rotation;
+          const radius = wheel.userData.wheelRadius || vehicle.wheelRadius;
+          const axis = wheel.userData.rollingAxis || 'x';
+          wheel.rotation[axis] += rotation / radius;
         });
       }
     });
