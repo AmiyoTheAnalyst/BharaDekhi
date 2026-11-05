@@ -2765,7 +2765,7 @@
       group.add(riderHead);
       const helmet = new THREE.Mesh(
         new THREE.SphereGeometry(1.35, 16, 12),
-        new THREE.MeshStandardMaterial({ color: colorHex || 0xdc2626, roughness: 0.24, metalness: 0.12 })
+        new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.24, metalness: 0.12 })
       );
       helmet.scale.set(1.18, 1.18, 1.1);
       helmet.position.set(1.65, 12.85, 0);
@@ -2776,6 +2776,20 @@
       );
       visor.position.set(2.88, 12.62, 0);
       group.add(visor);
+      [-1, 1].forEach(side => {
+        const sideVisor = new THREE.Mesh(
+          new THREE.BoxGeometry(1.0, 0.62, 0.12),
+          new THREE.MeshStandardMaterial({ color: 0x26394b, roughness: 0.16, metalness: 0.42 })
+        );
+        sideVisor.position.set(1.85, 12.72, side * 1.39);
+        group.add(sideVisor);
+        const helmetStripe = new THREE.Mesh(
+          new THREE.BoxGeometry(1.05, 0.12, 0.08),
+          accentPaint
+        );
+        helmetStripe.position.set(1.55, 13.62, side * 1.18);
+        group.add(helmetStripe);
+      });
 
       [-1, 1].forEach(side => {
         addVehicleBeam([-0.5, 10.7, side * 0.82], [3.4, 9.3, side * 1.2], 0.42, riderMat);
