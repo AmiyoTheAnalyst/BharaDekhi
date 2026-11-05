@@ -2610,7 +2610,7 @@
       const activeShirtColor = vData && vData.shirtColor ? parseHex(vData.shirtColor, palette.shirt) : palette.shirt;
       const activePantsColor = vData && vData.pantsColor ? parseHex(vData.pantsColor, palette.pants) : palette.pants;
       const activeVisorColor = vData && vData.visorColor ? parseHex(vData.visorColor, palette.visor) : palette.visor;
-      const activeSkinColor = vData && vData.skinColor ? parseHex(vData.skinColor, 0xfcd34d) : 0xfcd34d;
+      const activeSkinColor = vData && vData.skinColor ? parseHex(vData.skinColor, 0xdf9b76) : 0xdf9b76;
 
       const bikePaint = new THREE.MeshStandardMaterial({
         color: activeBikeColor,
@@ -2686,20 +2686,58 @@
       windscreenMesh.position.z = -1.4;
       group.add(windscreenMesh);
 
-      // 2. Sculpted Fuel Tank & Filler Cap
-      const tank = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), bikePaint);
-      tank.scale.set(3.9, 1.7, 1.8);
-      tank.position.set(0.25, 7.7, 0);
-      group.add(tank);
-      const tankCap = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.12, 12), silverMetal);
-      tankCap.position.set(-0.2, 9.35, 0);
-      group.add(tankCap);
+      // 2. Sculpted Aerodynamic Fuel Tank with Knee Indents & Racing Filler Cap
+      const tankShape = new THREE.Shape();
+      tankShape.moveTo(-2.2, 7.2);
+      tankShape.lineTo(-1.0, 8.8);
+      tankShape.lineTo(1.8, 9.1);
+      tankShape.lineTo(4.4, 8.1);
+      tankShape.lineTo(4.4, 6.7);
+      tankShape.lineTo(1.6, 6.6);
+      tankShape.lineTo(-2.2, 7.0);
+      tankShape.closePath();
+      const tankMesh = new THREE.Mesh(new THREE.ExtrudeGeometry(tankShape, {
+        depth: 3.3,
+        bevelEnabled: true,
+        bevelSegments: 4,
+        bevelSize: 0.28,
+        bevelThickness: 0.25
+      }), bikePaint);
+      tankMesh.position.z = -1.65;
+      group.add(tankMesh);
 
-      // 3. Contoured Dark Rider Seat
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(6.6, 1.0, 2.8), darkPaint);
-      seat.position.set(-5.4, 7.1, 0);
-      seat.rotation.z = 0.08;
-      group.add(seat);
+      // Matte Black Knee Traction Pads on Tank Sides
+      [-1, 1].forEach(side => {
+        const kneePad = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.3, 0.12), darkPaint);
+        kneePad.position.set(0.6, 7.8, side * 1.95);
+        kneePad.rotation.z = -0.15;
+        group.add(kneePad);
+      });
+
+      // Aircraft-Style Billet Aluminum Gas Cap
+      const tankCap = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 0.14, 16), silverMetal);
+      tankCap.position.set(0.8, 9.42, 0);
+      group.add(tankCap);
+      const tankCapBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.18, 12), darkPaint);
+      tankCapBolt.position.set(0.8, 9.44, 0);
+      group.add(tankCapBolt);
+
+      // 3. Ergonomic Contoured Rider Saddle & Upswept Pillion
+      const seatShape = new THREE.Shape();
+      seatShape.moveTo(-5.4, 7.4);
+      seatShape.lineTo(-2.0, 7.2);
+      seatShape.lineTo(-1.8, 6.6);
+      seatShape.lineTo(-5.6, 6.7);
+      seatShape.closePath();
+      const seatMesh = new THREE.Mesh(new THREE.ExtrudeGeometry(seatShape, {
+        depth: 2.7,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        bevelSize: 0.18,
+        bevelThickness: 0.18
+      }), darkPaint);
+      seatMesh.position.z = -1.35;
+      group.add(seatMesh);
 
       // 4. Sharply Upswept Rear Tail Cowl
       const tailShape = new THREE.Shape();
@@ -2802,61 +2840,188 @@
       bar.position.set(5.2, 9.0, 0);
       group.add(bar);
 
-      // 9. THE BIKER (RIDER) - Aggressive Athletic Racing Tuck Posture
-      // Torso leaning forward at ~40 degrees in vibrant T-Shirt
+      // 9. CNC BILLET ALUMINUM REARSETS (FOOTRESTS & CONTROLS ON BOTH SIDES)
+      [-1, 1].forEach(side => {
+        // Rearset Mounting Bracket Plate bolted to the frame behind the engine
+        const rearsetPlate = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.8, 0.22), silverMetal);
+        rearsetPlate.position.set(-2.8, 4.8, side * 1.55);
+        rearsetPlate.rotation.z = 0.22;
+        group.add(rearsetPlate);
+
+        // Triangular Heel Guard (protects boot from swingarm and chain)
+        const heelGuardShape = new THREE.Shape();
+        heelGuardShape.moveTo(-0.7, -0.6);
+        heelGuardShape.lineTo(0.7, -0.2);
+        heelGuardShape.lineTo(0.3, 0.9);
+        heelGuardShape.closePath();
+        const heelGuard = new THREE.Mesh(new THREE.ExtrudeGeometry(heelGuardShape, {
+          depth: 0.1,
+          bevelEnabled: true,
+          bevelSegments: 1,
+          bevelSize: 0.05,
+          bevelThickness: 0.05
+        }), silverMetal);
+        heelGuard.position.set(-3.1, 4.6, side * 1.72);
+        heelGuard.rotation.y = side === 1 ? 0 : Math.PI;
+        group.add(heelGuard);
+
+        // Knurled Rider Footrest Peg extending outward on Z-axis
+        const footpeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.88, 14), silverMetal);
+        footpeg.rotation.x = Math.PI / 2;
+        footpeg.position.set(-2.8, 4.3, side * 2.05);
+        group.add(footpeg);
+
+        // Knurled grip grooves on the footpeg
+        for (let ring = -1; ring <= 1; ring++) {
+          const gripRing = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.1, 12), darkPaint);
+          gripRing.rotation.x = Math.PI / 2;
+          gripRing.position.set(-2.8, 4.3, side * (2.05 + ring * 0.22));
+          group.add(gripRing);
+        }
+
+        // Outer End Cap / Crash Slider on Footpeg tip
+        const pegEndCap = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.12, 14), darkPaint);
+        pegEndCap.rotation.x = Math.PI / 2;
+        pegEndCap.position.set(-2.8, 4.3, side * 2.5);
+        group.add(pegEndCap);
+
+        // Foot Controls (Gear Shift Lever on Left side, Rear Brake Pedal on Right side)
+        const leverArm = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.16, 0.14), silverMetal);
+        leverArm.position.set(-2.0, 4.15, side * 1.95);
+        leverArm.rotation.z = -0.15;
+        group.add(leverArm);
+        const toePeg = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.42, 10), darkPaint);
+        toePeg.rotation.x = Math.PI / 2;
+        toePeg.position.set(-1.4, 4.05, side * 2.05);
+        group.add(toePeg);
+
+        // Folded Passenger (Pillion) Rear Footpegs on Subframe
+        const pillionBracket = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.18), darkPaint);
+        pillionBracket.position.set(-6.8, 6.2, side * 1.48);
+        pillionBracket.rotation.z = 0.55;
+        group.add(pillionBracket);
+        const pillionPeg = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.55, 10), silverMetal);
+        pillionPeg.rotation.z = 0.4;
+        pillionPeg.position.set(-6.9, 6.1, side * 1.7);
+        group.add(pillionPeg);
+      });
+
+      // 10. THE BIKER (RIDER) - Natural Sportbike Tuck Posture with Legs ON the Footrests
+      // Pelvis / Hips firmly seated on the rider saddle
+      const pelvis = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 12), pantsMat);
+      pelvis.scale.set(1.4, 1.15, 1.35);
+      pelvis.position.set(-3.5, 7.8, 0);
+      group.add(pelvis);
+
+      // Torso leaning forward in aerodynamic racing posture (~38° tuck)
       const torso = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 12), shirtMat);
-      torso.scale.set(1.4, 2.3, 1.35);
-      torso.position.set(-0.8, 10.2, 0);
-      torso.rotation.z = -0.68; // Forward racing lean!
+      torso.scale.set(1.45, 2.3, 1.35);
+      torso.position.set(-1.0, 9.8, 0);
+      torso.rotation.z = -0.65;
       group.add(torso);
 
-      // Head Base
-      const riderHead = new THREE.Mesh(new THREE.SphereGeometry(1.0, 12, 10), skinMat);
-      riderHead.position.set(1.8, 12.4, 0);
-      group.add(riderHead);
+      // Head Base / Neck
+      const riderNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 1.2, 10), skinMat);
+      riderNeck.position.set(1.1, 11.4, 0);
+      riderNeck.rotation.z = -0.3;
+      group.add(riderNeck);
 
-      // Aerodynamic Full-Face Helmet with Rear Spoiler
-      const helmet = new THREE.Mesh(new THREE.SphereGeometry(1.42, 18, 14), helmetMat);
-      helmet.scale.set(1.22, 1.15, 1.12);
-      helmet.position.set(1.9, 12.9, 0);
-      helmet.rotation.z = -0.25; // Tucked head looking forward
+      // Aerodynamic Full-Face Helmet with Chin Bar & Rear Spoiler
+      const helmet = new THREE.Mesh(new THREE.SphereGeometry(1.4, 18, 14), helmetMat);
+      helmet.scale.set(1.26, 1.15, 1.12);
+      helmet.position.set(1.9, 12.6, 0);
+      helmet.rotation.z = -0.22;
       group.add(helmet);
 
-      // Aerodynamic Visor with Light Silver / White Reflection Sheen
-      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.88, 1.85), visorMat);
-      visor.position.set(3.2, 12.75, 0);
+      // Sculpted Aerodynamic Chin Bar
+      const chinBar = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.75, 1.7), helmetMat);
+      chinBar.position.set(2.6, 12.0, 0);
+      chinBar.rotation.z = -0.35;
+      group.add(chinBar);
+
+      // Aerodynamic Rear Helmet Spoiler Lip
+      const helmetSpoiler = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.28, 1.5), darkPaint);
+      helmetSpoiler.position.set(0.7, 13.0, 0);
+      helmetSpoiler.rotation.z = 0.25;
+      group.add(helmetSpoiler);
+
+      // Tinted Aerodynamic Sports Visor with Silver Reflection Sheen
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.85, 1.76), visorMat);
+      visor.position.set(2.9, 12.55, 0);
       visor.rotation.z = -0.22;
       group.add(visor);
-      [-1, 1].forEach(side => {
-        const sideVisor = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.65, 0.12), visorMat);
-        sideVisor.position.set(2.2, 12.85, side * 1.4);
-        sideVisor.rotation.z = -0.22;
-        group.add(sideVisor);
-      });
 
-      // Short Sleeves (T-Shirt) + Skin-Toned Forearms reaching to Handlebars
+      // Biker Arms & Gloved Hands gripping Handlebars
       [-1, 1].forEach(side => {
-        // Upper arm in T-Shirt
-        addVehicleBeam([-0.4, 11.2, side * 1.1], [2.2, 10.3, side * 1.45], 0.52, shirtMat);
-        // Forearm with bare skin reaching forward to clip-on grips
-        addVehicleBeam([2.2, 10.3, side * 1.45], [5.0, 9.1, side * 1.55], 0.38, skinMat);
-        // Gloved hand gripping handlebar
-        const hand = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), darkPaint);
-        hand.position.set(5.1, 9.1, side * 1.55);
+        // Upper arm in T-Shirt sleeve
+        addVehicleBeam([-0.6, 10.7, side * 1.2], [1.9, 10.1, side * 1.6], 0.52, shirtMat);
+        // Bare forearm reaching forward to the clip-on bars
+        addVehicleBeam([1.9, 10.1, side * 1.6], [4.9, 9.1, side * 1.85], 0.38, skinMat);
+        // Gloved hand wrapping around handlebar grip
+        const hand = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.45, 0.55), darkPaint);
+        hand.position.set(5.0, 9.1, side * 1.85);
         group.add(hand);
 
-        // Bent Legs in Dark Jeans / Pants
-        // Thigh hugging the tank
-        addVehicleBeam([-1.6, 8.2, side * 0.9], [0.8, 5.6, side * 1.1], 0.55, pantsMat);
-        // Shin angled back to footpeg
-        addVehicleBeam([0.8, 5.6, side * 1.1], [2.6, 3.4, side * 1.15], 0.45, pantsMat);
-        // Riding boot / sneaker
-        const boot = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.6, 0.85), darkPaint);
-        boot.position.set(2.8, 3.2, side * 1.25);
-        group.add(boot);
+        // ==============================================================
+        // BIKER LEGS ON THE FOOTRESTS (Strict User Requirement)
+        // ==============================================================
+        // 1. Thigh: Runs forward and down from hip, snugly hugging the tank
+        addVehicleBeam([-3.2, 7.6, side * 0.95], [-0.8, 6.1, side * 1.68], 0.58, pantsMat);
+
+        // 2. Knee Joint: Formed at the front of the tank with knee slider puck
+        const knee = new THREE.Mesh(new THREE.SphereGeometry(0.62, 12, 10), pantsMat);
+        knee.position.set(-0.8, 6.1, side * 1.68);
+        group.add(knee);
+        const kneeSlider = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.45, 0.18), darkPaint);
+        kneeSlider.position.set(-0.8, 6.0, side * (1.68 + 0.52));
+        kneeSlider.rotation.z = -0.3;
+        group.add(kneeSlider);
+
+        // 3. Shin / Calf: Angles BACKWARD and DOWNWARD directly to the footrest peg!
+        addVehicleBeam([-0.8, 6.1, side * 1.68], [-2.8, 4.7, side * 1.95], 0.50, pantsMat);
+
+        // 4. Ankle Joint
+        const ankle = new THREE.Mesh(new THREE.SphereGeometry(0.48, 10, 8), darkPaint);
+        ankle.position.set(-2.8, 4.7, side * 1.95);
+        group.add(ankle);
+
+        // 5. Riding Boot: Firmly planted on the footrest peg!
+        // Sole rests right on the knurled footpeg at X = -2.8, Y = 4.3!
+        const bootGroup = new THREE.Group();
+        bootGroup.position.set(-2.3, 4.45, side * 2.05);
+
+        // Boot Main Upper
+        const bootUpper = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.72, 0.75), darkPaint);
+        bootUpper.position.set(-0.15, 0.28, 0);
+        bootUpper.rotation.z = -0.12;
+        bootGroup.add(bootUpper);
+
+        // High-Traction Rubber Boot Sole
+        const bootSole = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.24, 0.78), new THREE.MeshStandardMaterial({
+          color: 0x111317,
+          roughness: 0.9
+        }));
+        bootSole.position.set(-0.15, -0.12, 0);
+        bootSole.rotation.z = -0.12;
+        bootGroup.add(bootSole);
+
+        // Boot Heel Block (Locks onto the rear of the footpeg)
+        const bootHeel = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.35, 0.76), new THREE.MeshStandardMaterial({
+          color: 0x171923,
+          roughness: 0.85
+        }));
+        bootHeel.position.set(-0.7, -0.25, 0);
+        bootGroup.add(bootHeel);
+
+        // Racing Toe-Slider on Outer Edge of Boot
+        const toeSlider = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.25, 0.16), silverMetal);
+        toeSlider.position.set(0.65, -0.05, side * 0.36);
+        bootGroup.add(toeSlider);
+
+        group.add(bootGroup);
       });
 
-      // 10. Glowing Ruby Red LED Taillight at Rear Tip
+      // 11. Glowing Ruby Red LED Taillight at Rear Tip
       const tailLight = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 2.0), vehicleTaillightMat);
       tailLight.position.set(-12.1, 8.2, 0);
       group.add(tailLight);

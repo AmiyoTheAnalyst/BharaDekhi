@@ -490,9 +490,21 @@
     // BIKER: Leaning forward in athletic racing tuck posture (~40° lean)
     const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.65 });
     const pantsMat = new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.78 });
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfcd34d, roughness: 0.8 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xdf9b76, roughness: 0.75 });
     const helmetMat = new THREE.MeshStandardMaterial({ color: helmetColor, roughness: 0.22, metalness: 0.2 });
     const visorMat = new THREE.MeshStandardMaterial({ color: visorColor, roughness: 0.15, metalness: 0.6 });
+
+    // CNC Billet Rearset Footrests on both sides
+    for (const side of [-1, 1]) {
+      const rearset = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.04), silverMat);
+      rearset.position.set(-0.24, 0.52, side * 0.22);
+      bike.add(rearset);
+
+      const footpeg = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.16, 8), silverMat);
+      footpeg.rotation.x = Math.PI / 2;
+      footpeg.position.set(-0.24, 0.49, side * 0.28);
+      bike.add(footpeg);
+    }
 
     // Torso Leaning Forward
     const torso = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.26, 0.36), shirtMat);
@@ -510,24 +522,28 @@
     visor.rotation.z = -0.22;
     bike.add(visor);
 
-    // Bare Skin Forearms Reaching to Handlebars
+    // Bare Forearms Reaching to Handlebars & Legs on Footrests
     for (const side of [-1, 1]) {
       const arm = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.08, 0.08), skinMat);
       arm.position.set(0.34, 1.15, side * 0.22);
       arm.rotation.z = -0.42;
       bike.add(arm);
 
-      // Bent Legs in Jeans / Pants hugging the tank
-      const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.12, 0.11), pantsMat);
-      thigh.position.set(-0.08, 0.95, side * 0.22);
-      thigh.rotation.z = -0.48;
+      // Thigh hugging the tank
+      const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.12, 0.12), pantsMat);
+      thigh.position.set(-0.06, 0.92, side * 0.22);
+      thigh.rotation.z = -0.55;
       bike.add(thigh);
-      const shin = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.1, 0.1), pantsMat);
-      shin.position.set(0.12, 0.68, side * 0.22);
-      shin.rotation.z = 0.58;
+
+      // Shin angling back-down directly to the footrest peg
+      const shin = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.1, 0.1), pantsMat);
+      shin.position.set(-0.16, 0.68, side * 0.26);
+      shin.rotation.z = -0.62;
       bike.add(shin);
-      const boot = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.08, 0.1), darkMat);
-      boot.position.set(0.22, 0.52, side * 0.22);
+
+      // Riding boot resting firmly on the footpeg
+      const boot = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.09, 0.1), darkMat);
+      boot.position.set(-0.22, 0.52, side * 0.28);
       bike.add(boot);
     }
 
