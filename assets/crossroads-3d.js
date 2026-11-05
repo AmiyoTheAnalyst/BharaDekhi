@@ -3514,7 +3514,7 @@
       if (!activeTargetVehicle) return;
 
       e.preventDefault();
-      vehicleOrbitYaw += e.key === 'ArrowLeft' ? -Math.PI / 4 : Math.PI / 4;
+      vehicleOrbitYaw += e.key === 'ArrowLeft' ? Math.PI / 4 : -Math.PI / 4;
     });
 
     window.addEventListener('resize', onResize);
