@@ -1588,6 +1588,53 @@
       group.userData.wheels.push(wSub);
     }
 
+    function addVehicleBeam(start, end, radius, material) {
+      const from = new THREE.Vector3(start[0], start[1], start[2]);
+      const to = new THREE.Vector3(end[0], end[1], end[2]);
+      const direction = to.clone().sub(from);
+      const beam = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius, radius, direction.length(), 7),
+        material
+      );
+      beam.position.copy(from.add(to).multiplyScalar(0.5));
+      beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+      group.add(beam);
+      return beam;
+    }
+
+    function addSeatedFigure(x, y, z, shirtColor, trouserColor, reaching, reachDistance = 3.8, pedalY = null) {
+      const shirt = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.8 });
+      const trousers = new THREE.MeshStandardMaterial({ color: trouserColor, roughness: 0.82 });
+      const skin = new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.9 });
+      const hair = new THREE.MeshStandardMaterial({ color: 0x211c1a, roughness: 0.95 });
+      const torso = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), shirt);
+      torso.scale.set(1.05, 1.65, 0.9);
+      torso.position.set(x, y + 2.0, z);
+      group.add(torso);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.92, 10, 8), skin);
+      head.position.set(x + 0.2, y + 4.25, z);
+      group.add(head);
+      const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.94, 10, 7, 0, Math.PI * 2, 0, Math.PI * 0.58), hair);
+      hairCap.position.set(x + 0.2, y + 4.42, z);
+      group.add(hairCap);
+
+      const armTarget = reaching ? [x + reachDistance, y + 2.0, z] : [x + 0.8, y + 1.3, z];
+      addVehicleBeam([x + 0.2, y + 2.7, z - 0.62], armTarget, 0.34, shirt);
+      addVehicleBeam([x + 0.2, y + 2.7, z + 0.62], armTarget, 0.34, shirt);
+      if (pedalY !== null) {
+        [-1, 1].forEach(side => {
+          addVehicleBeam([x - 0.15, y + 1.15, z + side * 0.42], [x + 1.1, y - 0.2, z + side * 0.8], 0.45, trousers);
+          addVehicleBeam([x + 1.1, y - 0.2, z + side * 0.8], [x + 0.2, pedalY + 0.35, side * 2.2], 0.38, trousers);
+        });
+        return;
+      }
+      addVehicleBeam([x - 0.15, y + 1.15, z - 0.42], [x + 1.15, y + 0.45, z - 0.42], 0.45, trousers);
+      addVehicleBeam([x + 1.15, y + 0.45, z - 0.42], [x + 2.2, y + 0.45, z - 0.42], 0.38, trousers);
+      addVehicleBeam([x - 0.15, y + 1.15, z + 0.42], [x + 1.15, y + 0.45, z + 0.42], 0.45, trousers);
+      addVehicleBeam([x + 1.15, y + 0.45, z + 0.42], [x + 2.2, y + 0.45, z + 0.42], 0.38, trousers);
+    }
+
     if (type === 'bus') {
       const length = 76;
       const width = 22;
@@ -1687,17 +1734,16 @@
     } else if (type === 'cng') {
       const length = 30;
       const width = 16;
-      const height = 16;
 
-      // Dark Green Metal Lower Cabin
+      // Yellow auto-rickshaw body and enclosed passenger cabin.
       const bodyGeo = new THREE.BoxGeometry(20, 6.8, width - 1);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0x15803d, roughness: 0.45 });
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.45 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
       body.position.set(-2, 5.8, 0);
       body.castShadow = true;
       group.add(body);
 
-      // Passenger Bench Seat inside cabin
+      // Passenger bench and driver seating.
       const pSeatGeo = new THREE.BoxGeometry(7.5, 3.2, width - 2.5);
       const pSeatMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
       const pSeat = new THREE.Mesh(pSeatGeo, pSeatMat);
@@ -1710,33 +1756,51 @@
       dSeat.position.set(1.5, 5.5, 0);
       group.add(dSeat);
 
-      // Signature Dhaka Yellow Curved Canvas Dome Roof
+      // Dark curved canopy, as on Dhaka CNG auto-rickshaws.
       const roofGeo = new THREE.CylinderGeometry(width * 0.52, width * 0.52, 22, 14, 1, false, 0, Math.PI);
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.6 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x35383a, roughness: 0.68 });
       const roof = new THREE.Mesh(roofGeo, roofMat);
       roof.rotation.z = Math.PI / 2;
       roof.position.set(-2, 13.2, 0);
       group.add(roof);
 
-      // Front Sun Visor brow over windshield
+      // Yellow brow and dark front glass.
       const visorGeo = new THREE.BoxGeometry(2.0, 0.8, width - 1.2);
-      const visor = new THREE.Mesh(visorGeo, roofMat);
+      const visor = new THREE.Mesh(visorGeo, bodyMat);
       visor.position.set(8.2, 12.8, 0);
       group.add(visor);
 
-      // Front Windshield Frame and Tinted Glass
+      // Tinted windshield and side windows.
       const winGeo = new THREE.BoxGeometry(1.2, 5.6, width - 2.5);
-      const winMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+      const winMat = new THREE.MeshStandardMaterial({
+        color: 0x17202a,
+        roughness: 0.24,
+        metalness: 0.15,
+        transparent: true,
+        opacity: 0.62,
+        depthWrite: false
+      });
       const win = new THREE.Mesh(winGeo, winMat);
       win.position.set(7.0, 10.2, 0);
       group.add(win);
 
-      // Side Wire Safety Grill Mesh / Cage Doors (Both flanks)
-      const grillGeo = new THREE.BoxGeometry(13.5, 5.5, width + 0.3);
-      const grillMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, wireframe: true });
-      const grill = new THREE.Mesh(grillGeo, grillMat);
-      grill.position.set(-2, 10.0, 0);
-      group.add(grill);
+      [-1, 1].forEach(side => {
+        const sideWindowGeo = new THREE.BoxGeometry(12.5, 4.5, 0.24);
+        const sideWindow = new THREE.Mesh(sideWindowGeo, winMat);
+        sideWindow.position.set(-2, 10.1, side * (width / 2 - 0.65));
+        group.add(sideWindow);
+
+        const pillarGeo = new THREE.BoxGeometry(0.8, 5.4, 0.65);
+        [-8, -2.2, 3.8].forEach(x => {
+          const pillar = new THREE.Mesh(pillarGeo, bodyMat);
+          pillar.position.set(x, 10.0, side * (width / 2 - 0.72));
+          group.add(pillar);
+        });
+
+        const yellowDoor = new THREE.Mesh(new THREE.BoxGeometry(4.0, 5.1, 0.34), bodyMat);
+        yellowDoor.position.set(-5.3, 5.9, side * (width / 2 - 0.62));
+        group.add(yellowDoor);
+      });
 
       // Front Single Wheel Fork & Handlebars
       const forkGeo = new THREE.CylinderGeometry(0.7, 0.7, 6.2, 8);
@@ -1757,7 +1821,8 @@
         addVehicleWheel(-7.5, 2.6, wz * (width / 2), 2.6, 1.4);
       });
 
-      // Front Round Chrome Headlamp
+      // Driver and front round headlamp.
+      addSeatedFigure(2.2, 5.7, 0, 0xe7e5df, 0x303743, true);
       const hlGeo = new THREE.CylinderGeometry(1.3, 1.3, 1.4, 8);
       const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
       hl.rotation.z = Math.PI / 2;
@@ -1779,165 +1844,431 @@
       group.add(tl);
 
     } else if (type === 'rickshaw') {
-      const length = 34;
-      const width = 18;
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x202431, metalness: 0.72, roughness: 0.32 });
+      const chromeMat = new THREE.MeshStandardMaterial({ color: 0xd9e4ff, metalness: 0.78, roughness: 0.24 });
+      const blackRubber = new THREE.MeshStandardMaterial({ color: 0x11131b, roughness: 0.88 });
+      const turquoise = new THREE.MeshStandardMaterial({ color: 0x14b8a6, roughness: 0.38, metalness: 0.12 });
+      const turquoiseLight = new THREE.MeshStandardMaterial({ color: 0x5eead4, roughness: 0.4 });
+      const orange = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.42, metalness: 0.12 });
+      const orangeLight = new THREE.MeshStandardMaterial({ color: 0xfb923c, roughness: 0.4 });
+      const magenta = new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.42, emissive: 0x4a102b, emissiveIntensity: 0.24 });
 
-      // 1. Rear Passenger Wooden Upholstered Seat Box
-      const seatGeo = new THREE.BoxGeometry(11, 4.2, width - 2);
-      const seatMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.6 });
-      const seat = new THREE.Mesh(seatGeo, seatMat);
-      seat.position.set(-6.5, 5.8, 0);
-      group.add(seat);
+      function addBeam(parent, start, end, radius, material, segments = 8) {
+        const from = new THREE.Vector3(start[0], start[1], start[2]);
+        const to = new THREE.Vector3(end[0], end[1], end[2]);
+        const direction = to.clone().sub(from);
+        const beam = new THREE.Mesh(
+          new THREE.CylinderGeometry(radius, radius, direction.length(), segments),
+          material
+        );
+        beam.position.copy(from.add(to).multiplyScalar(0.5));
+        beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+        parent.add(beam);
+        return beam;
+      }
 
-      // Passenger Backrest
-      const backGeo = new THREE.BoxGeometry(1.6, 7.2, width - 2.5);
-      const backMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.6 });
-      const back = new THREE.Mesh(backGeo, backMat);
-      back.position.set(-11.5, 9.5, 0);
-      group.add(back);
+      function addBlockLimb(parent, start, end, width, depth, material) {
+        const from = new THREE.Vector3(start[0], start[1], start[2]);
+        const to = new THREE.Vector3(end[0], end[1], end[2]);
+        const direction = to.clone().sub(from);
+        const limb = new THREE.Mesh(
+          new THREE.BoxGeometry(width, direction.length(), depth),
+          material
+        );
+        limb.position.copy(from.add(to).multiplyScalar(0.5));
+        limb.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+        parent.add(limb);
+        return limb;
+      }
 
-      // Left & Right Armrests
-      const armGeo = new THREE.BoxGeometry(9.5, 1.4, 1.2);
-      [-1, 1].forEach(side => {
-        const arm = new THREE.Mesh(armGeo, seatMat);
-        arm.position.set(-6.5, 8.8, side * (width / 2 - 1.2));
-        group.add(arm);
+      function createRickshawPerson(role, outfit, position, options = {}) {
+        const person = new THREE.Group();
+        person.position.set(position[0], position[1], position[2]);
+        person.userData.rickshawRole = role;
+        person.userData.rickshawGender = outfit.gender || (role === 'driver' ? 'male' : 'unspecified');
+        const shirt = new THREE.MeshStandardMaterial({ color: outfit.shirt, roughness: 0.68 });
+        const pants = new THREE.MeshStandardMaterial({ color: outfit.pants, roughness: 0.72 });
+        const skin = new THREE.MeshStandardMaterial({ color: outfit.skin || 0xd58c69, roughness: 0.78 });
+        const hair = new THREE.MeshStandardMaterial({ color: 0x211c25, roughness: 0.82 });
+        const shoe = new THREE.MeshStandardMaterial({ color: 0x211a23, roughness: 0.7 });
+        const faceDetail = new THREE.MeshStandardMaterial({ color: 0x211821, roughness: 0.8 });
+        const scarf = outfit.scarf ? new THREE.MeshStandardMaterial({ color: outfit.scarf, roughness: 0.72 }) : null;
+
+        function box(size, at, material, rotationZ = 0) {
+          const mesh = new THREE.Mesh(new THREE.BoxGeometry(size[0], size[1], size[2]), material);
+          mesh.position.set(at[0], at[1], at[2]);
+          mesh.rotation.z = rotationZ;
+          person.add(mesh);
+          return mesh;
+        }
+
+        box([2.9, 4.0, 2.7], [0, 3.2, 0], shirt, role === 'driver' ? -0.12 : 0);
+        box([2.35, 0.46, 2.5], [-0.05, 1.12, 0], pants);
+        box([0.72, 0.8, 0.82], [0.16, 5.25, 0], skin);
+        box([1.9, 2.15, 1.82], [0.24, 6.56, 0], skin);
+        box([2.04, 0.62, 1.94], [-0.04, 7.76, 0], hair);
+        box([0.62, 1.2, 1.88], [-0.73, 6.55, 0], hair);
+
+        const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xfff8ef, roughness: 0.45 });
+        for (const side of [-1, 1]) {
+          box([0.12, 0.25, 0.22], [1.205, 6.77, side * 0.48], eyeWhite);
+          box([0.1, 0.19, 0.12], [1.28, 6.77, side * 0.48], faceDetail);
+          box([0.15, 0.09, 0.3], [1.23, 7.02, side * 0.49], hair);
+        }
+        box([0.22, 0.3, 0.22], [1.33, 6.42, 0], skin);
+        box([0.09, 0.1, 0.55], [1.29, 6.12, 0], faceDetail);
+        if (role === 'driver' || outfit.mustache) {
+          box([0.18, 0.16, 0.68], [1.31, 6.3, 0], hair);
+        }
+
+        if (scarf) {
+          box([1.2, 1.6, 2.1], [-0.48, 6.82, 0], scarf);
+          box([1.1, 1.75, 0.46], [0.65, 6.56, -0.91], scarf, -0.14);
+          box([1.1, 1.75, 0.46], [0.65, 6.56, 0.91], scarf, -0.14);
+          box([0.78, 3.2, 2.06], [-0.58, 4.42, 0], scarf, -0.12);
+        }
+
+        if (role === 'driver') {
+          const pedalLegs = [];
+          const handleTargets = options.handleTargets;
+          for (const side of [-1, 1]) {
+            const shoulder = [0.45, 4.45, side * 1.0];
+            const elbow = [2.65, 3.62, side * 1.45];
+            const hand = handleTargets[side < 0 ? 0 : 1];
+            addBlockLimb(person, shoulder, elbow, 0.9, 0.88, shirt);
+            addBlockLimb(person, elbow, hand, 0.72, 0.72, shirt);
+            const glove = new THREE.MeshStandardMaterial({ color: outfit.skin || 0xd58c69, roughness: 0.74 });
+            box([0.72, 0.54, 0.72], hand, glove);
+          }
+
+          for (const side of [-1, 1]) {
+            const knee = side < 0 ? [2.3, 0.75, -0.88] : [1.0, 0.8, 0.85];
+            const pedal = side < 0 ? [1.81, 1.7, -1.12] : [1.81, 4.9, 1.12];
+            addBlockLimb(person, [-0.2, 1.55, side * 0.58], knee, 1.2, 1.1, pants);
+            const shin = addBlockLimb(person, knee, pedal, 0.95, 0.9, pants);
+            const shoeMesh = box([1.18, 0.56, 0.76], [pedal[0] + 0.52, pedal[1] - 0.02, pedal[2]], shoe);
+            pedalLegs.push({
+              knee,
+              side,
+              shin,
+              shoe: shoeMesh,
+              initialLength: shin.geometry.parameters.height
+            });
+          }
+          person.userData.pedalLegs = pedalLegs;
+        } else {
+          for (const side of [-1, 1]) {
+            const shoulder = [0.2, 4.42, side * 0.77];
+            const elbow = [1.28, 3.25, side * 0.9];
+            const hand = [2.1, 2.05, side * 0.86];
+            addBlockLimb(person, shoulder, elbow, 0.72, 0.74, shirt);
+            addBlockLimb(person, elbow, hand, 0.62, 0.64, skin);
+            box([0.56, 0.42, 0.62], hand, skin);
+
+            const knee = [1.3, 0.3, side * 0.72];
+            const ankle = [2.15, -0.88, side * 0.72];
+            addBlockLimb(person, [-0.1, 1.1, side * 0.46], knee, 1.05, 0.94, pants);
+            addBlockLimb(person, knee, ankle, 0.84, 0.82, pants);
+            box([1.14, 0.46, 0.74], [ankle[0] + 0.45, ankle[1] - 0.06, ankle[2]], shoe);
+          }
+        }
+        group.add(person);
+        return person;
+      }
+
+      function updatePedalingLegs(person, phase) {
+        const pivot = new THREE.Vector3(1.35, 3.3, 0);
+        const axis = new THREE.Vector3(0, 0, 1);
+        person.userData.pedalLegs.forEach(leg => {
+          const pedalTarget = new THREE.Vector3(0.46, leg.side * 1.6, leg.side * 1.12)
+            .applyAxisAngle(axis, phase)
+            .add(pivot)
+            .sub(person.position);
+          const knee = new THREE.Vector3(leg.knee[0], leg.knee[1], leg.knee[2]);
+          const direction = pedalTarget.clone().sub(knee);
+          leg.shin.position.copy(knee).add(pedalTarget).multiplyScalar(0.5);
+          leg.shin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+          leg.shin.scale.y = direction.length() / leg.initialLength;
+          leg.shoe.position.set(pedalTarget.x + 0.52, pedalTarget.y - 0.02, pedalTarget.z);
+        });
+      }
+
+      function createSpokedWheel(radius, width, position) {
+        const wheel = new THREE.Group();
+        wheel.position.set(position[0], position[1], position[2]);
+        const tire = new THREE.Mesh(
+          new THREE.TorusGeometry(radius, width, 8, 20),
+          blackRubber
+        );
+        wheel.add(tire);
+        const rim = new THREE.Mesh(
+          new THREE.TorusGeometry(radius - width * 0.72, 0.12, 6, 20),
+          chromeMat
+        );
+        wheel.add(rim);
+
+        const spokeGeometry = new THREE.CylinderGeometry(0.11, 0.11, 1, 6);
+        const spokes = new THREE.InstancedMesh(spokeGeometry, chromeMat, 24);
+        const spokeMatrix = new THREE.Matrix4();
+        const spokePosition = new THREE.Vector3();
+        const spokeRotation = new THREE.Quaternion();
+        const spokeScale = new THREE.Vector3(1, 1, 1);
+        let spokeIndex = 0;
+        for (let spoke = 0; spoke < 12; spoke++) {
+          const angle = spoke * Math.PI / 6;
+          const endpoint = [
+            Math.cos(angle) * (radius - width),
+            Math.sin(angle) * (radius - width),
+            0
+          ];
+          for (const side of [-1, 1]) {
+            const from = new THREE.Vector3(0, 0, side * 0.18);
+            const to = new THREE.Vector3(endpoint[0], endpoint[1], side * 0.1);
+            const direction = to.clone().sub(from);
+            spokePosition.copy(from).add(to).multiplyScalar(0.5);
+            spokeRotation.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+            spokeScale.y = direction.length();
+            spokeMatrix.compose(spokePosition, spokeRotation, spokeScale);
+            spokes.setMatrixAt(spokeIndex++, spokeMatrix);
+          }
+        }
+        spokes.instanceMatrix.needsUpdate = true;
+        wheel.add(spokes);
+        const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.72, 10), chromeMat);
+        hub.rotation.x = Math.PI / 2;
+        wheel.add(hub);
+        const centerCap = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.84, 8), orangeLight);
+        centerCap.rotation.x = Math.PI / 2;
+        wheel.add(centerCap);
+        wheel.userData.rickshawWheel = true;
+        group.add(wheel);
+        group.userData.wheels.push(wheel);
+        return wheel;
+      }
+
+      function addMudguard(centerX, centerY, centerZ, radius, side) {
+        const inset = radius + 0.72;
+        const points = [];
+        for (let step = 0; step <= 16; step++) {
+          const angle = Math.PI * step / 16;
+          points.push(new THREE.Vector3(
+            centerX + Math.cos(angle) * inset,
+            centerY + Math.sin(angle) * inset,
+            centerZ
+          ));
+        }
+        const curve = new THREE.CatmullRomCurve3(points);
+        const guard = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, 0.52, 6, false), orange);
+        group.add(guard);
+        const sidePlate = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.42, 0.58), orange);
+        sidePlate.position.set(centerX, centerY + radius + 0.7, centerZ + side * 0.4);
+        group.add(sidePlate);
+      }
+
+      group.userData.rickshawOccupants = [];
+
+      const frontHub = [10.5, 4.58, 0];
+      const rearHub = [-7.8, 4.58, 7.3];
+      const wheelRadius = 4.1;
+      createSpokedWheel(wheelRadius, 0.48, frontHub);
+      createSpokedWheel(wheelRadius, 0.48, [-7.8, 4.58, -7.3]);
+      createSpokedWheel(wheelRadius, 0.48, rearHub);
+      addMudguard(-7.8, 4.58, -7.3, wheelRadius, -1);
+      addMudguard(-7.8, 4.58, 7.3, wheelRadius, 1);
+
+      const framePoints = [
+        [[10.5, 4.58, 0], [1.35, 3.3, 0]],
+        [[1.35, 3.3, 0], [-1.6, 6.1, 0]],
+        [[-1.6, 6.1, 0], [-7.8, 4.58, 0]],
+        [[-1.6, 6.1, 0], [0.35, 6.8, 0]],
+        [[1.35, 3.3, 0], [0.35, 6.8, 0]],
+        [[-7.8, 4.58, -7.3], [-6.6, 7.0, -7.3]],
+        [[-7.8, 4.58, 7.3], [-6.6, 7.0, 7.3]],
+        [[-6.6, 7.0, -7.3], [-6.6, 7.0, 7.3]],
+        [[-1.6, 6.1, 0], [-6.6, 7.0, 0]]
+      ];
+      framePoints.forEach(([start, end], index) => {
+        addBeam(group, start, end, index < 5 ? 0.28 : 0.36, index < 5 ? frameMat : turquoiseLight);
       });
 
-      // 2. Decorative Folk-Art Backplate (Rickshaw Art Plate)
-      const plateGeo = new THREE.BoxGeometry(0.8, 6.8, width - 2);
-      const plateMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.35 });
-      const plate = new THREE.Mesh(plateGeo, plateMat);
-      plate.position.set(-12.5, 8.2, 0);
-      group.add(plate);
+      const crank = new THREE.Group();
+      crank.position.set(1.35, 3.3, 0);
+      const crankAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 2.8, 8), chromeMat);
+      crankAxle.rotation.x = Math.PI / 2;
+      crank.add(crankAxle);
+      for (const side of [-1, 1]) {
+        const crankArm = new THREE.Mesh(new THREE.BoxGeometry(0.34, 1.75, 0.34), frameMat);
+        crankArm.position.set(0, side * 0.85, side * 1.12);
+        crank.add(crankArm);
+        const pedal = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.48, 0.92), orange);
+        pedal.position.set(0.46, side * 1.6, side * 1.12);
+        crank.add(pedal);
+      }
+      group.add(crank);
+      group.userData.pedalCrank = crank;
 
-      // Traditional Art Border Accent
-      const borderGeo = new THREE.BoxGeometry(0.9, 1.0, width - 1.6);
-      const borderMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
-      const border = new THREE.Mesh(borderGeo, borderMat);
-      border.position.set(-12.5, 11.4, 0);
-      group.add(border);
+      const lowerTub = new THREE.Mesh(new THREE.BoxGeometry(12.2, 2.6, 13.6), turquoise);
+      lowerTub.position.set(-6.6, 6.8, 0);
+      group.add(lowerTub);
+      const sidePanel = new THREE.Mesh(new THREE.BoxGeometry(10.5, 2.15, 0.48), turquoiseLight);
+      for (const side of [-1, 1]) {
+        const panel = sidePanel.clone();
+        panel.position.set(-6.6, 8.05, side * 6.95);
+        group.add(panel);
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(10.8, 0.36, 0.55), magenta);
+        rail.position.set(-6.6, 9.13, side * 7.0);
+        group.add(rail);
+      }
+      const rearPanel = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.2, 13.7), orange);
+      rearPanel.position.set(-12.75, 8.05, 0);
+      group.add(rearPanel);
 
-      // 3. Passenger Curved Folding Hood Canopy (Rear at -X)
-      const hoodGeo = new THREE.CylinderGeometry(7.4, 7.4, width - 2.2, 14, 1, false, 0, Math.PI);
-      const hoodMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.7 });
-      const hood = new THREE.Mesh(hoodGeo, hoodMat);
-      hood.rotation.z = Math.PI / 2;
-      hood.position.set(-6.2, 13.2, 0);
-      group.add(hood);
+      const benchBase = new THREE.Mesh(new THREE.BoxGeometry(9.4, 0.8, 12.6), turquoiseLight);
+      benchBase.position.set(-6.8, 8.55, 0);
+      group.add(benchBase);
+      const benchCushion = new THREE.Mesh(
+        new THREE.BoxGeometry(8.7, 0.55, 11.8),
+        new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.7 })
+      );
+      benchCushion.position.set(-6.7, 9.16, 0);
+      group.add(benchCushion);
+      const backrest = new THREE.Mesh(new THREE.BoxGeometry(1.05, 4.0, 12.8), orange);
+      backrest.position.set(-11.65, 10.1, 0);
+      group.add(backrest);
+      const backrestInset = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.1, 11.4), turquoise);
+      backrestInset.position.set(-11.08, 10.14, 0);
+      group.add(backrestInset);
 
-      // Canopy folding rib braces
-      const ribGeo = new THREE.BoxGeometry(6.5, 0.4, 0.5);
-      const ribMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.7 });
-      [-1, 1].forEach(side => {
-        const rib = new THREE.Mesh(ribGeo, ribMat);
-        rib.position.set(-6.2, 13.2, side * (width / 2 - 0.9));
-        group.add(rib);
+      const driverSeat = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.8, 3.4), blackRubber);
+      driverSeat.position.set(0.2, 6.65, 0);
+      group.add(driverSeat);
+      const seatPost = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.3, 0.5), frameMat);
+      seatPost.position.set(-0.2, 5.7, 0);
+      group.add(seatPost);
+
+      const steeringPivot = [8.8, 8.9, 0];
+      addBeam(group, [10.3, 4.75, -1.1], steeringPivot, 0.34, chromeMat);
+      addBeam(group, [10.3, 4.75, 1.1], steeringPivot, 0.34, frameMat);
+      const handleTargets = [
+        [8.25, 9.25, -2.5],
+        [8.25, 9.25, 2.5]
+      ];
+      addBeam(group, handleTargets[0], handleTargets[1], 0.3, chromeMat);
+      const gripMat = new THREE.MeshStandardMaterial({ color: 0x16141c, roughness: 0.8 });
+      handleTargets.forEach(target => {
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.48, 0.72), gripMat);
+        grip.position.set(target[0], target[1], target[2]);
+        group.add(grip);
       });
+      const headlight = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.0, 1.0, 0.8, 10),
+        vehicleHeadlightMat
+      );
+      headlight.rotation.x = Math.PI / 2;
+      headlight.position.set(9.05, 7.15, 0);
+      group.add(headlight);
 
-      // 4. Slanted Tubular Bicycle Frame
-      const frameGeo = new THREE.CylinderGeometry(0.5, 0.5, 11, 8);
-      const frameMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
-      const frame = new THREE.Mesh(frameGeo, frameMat);
-      frame.rotation.z = Math.PI / 3.2;
-      frame.position.set(4.2, 5.8, 0);
-      group.add(frame);
+      const driver = createRickshawPerson('driver', {
+        shirt: 0x7625a9,
+        pants: 0x4549df,
+        skin: 0xe9a17c,
+        gender: 'male',
+        mustache: true
+      }, [0.15, 5.25, 0], { handleTargets: handleTargets.map(point => [point[0] - 0.15, point[1] - 5.25, point[2]]) });
+      group.userData.rickshawOccupants.push(driver);
+      group.userData.updatePedaling = phase => updatePedalingLegs(driver, phase);
+      group.userData.updatePedaling(0);
 
-      // Rear carriage connecting support tubes
-      const stayGeo = new THREE.CylinderGeometry(0.4, 0.4, 9, 6);
-      [-1, 1].forEach(side => {
-        const stay = new THREE.Mesh(stayGeo, frameMat);
-        stay.rotation.y = side * 0.5;
-        stay.position.set(-2.5, 4.8, side * 4.0);
-        group.add(stay);
-      });
+      const malePassenger = createRickshawPerson('passenger', {
+        shirt: 0x7432b3,
+        pants: 0x168be0,
+        skin: 0xe9a17c,
+        gender: 'male',
+        mustache: true
+      }, [-7.6, 8.65, -3.2]);
+      const femalePassenger = createRickshawPerson('passenger', {
+        shirt: 0xf28a1c,
+        pants: 0x36b7d5,
+        skin: 0xeeb38d,
+        scarf: 0xffa51e,
+        gender: 'female'
+      }, [-7.6, 8.65, 3.2]);
+      group.userData.rickshawOccupants.push(malePassenger, femalePassenger);
 
-      // 5. Crank, Chain & Foot Pedals
-      const bbGeo = new THREE.CylinderGeometry(0.6, 0.6, 4.4, 8);
-      const bb = new THREE.Mesh(bbGeo, frameMat);
-      bb.rotation.x = Math.PI / 2;
-      bb.position.set(1.6, 3.2, 0);
-      group.add(bb);
+      const canopyBaseY = 12.8;
+      const canopyCenterX = -6.0;
+      const canopyRadiusX = 7.4;
+      const canopyRadiusY = 7.0;
+      const canopyHalfWidth = 8.2;
+      const canopyPalette = [
+        0x075be8, 0x0879ff, 0x1264f5, 0x1997ff, 0x064bd1, 0x1685f3
+      ];
+      const canopySegments = 12;
+      const canopyPositions = [];
+      const canopyColors = [];
+      const canopyIndices = [];
+      for (let segment = 0; segment < canopySegments; segment++) {
+        const start = Math.PI * segment / canopySegments;
+        const end = Math.PI * (segment + 1) / canopySegments;
+        const vertices = [
+          canopyCenterX + Math.cos(start) * canopyRadiusX, canopyBaseY + Math.sin(start) * canopyRadiusY, -canopyHalfWidth,
+          canopyCenterX + Math.cos(end) * canopyRadiusX, canopyBaseY + Math.sin(end) * canopyRadiusY, -canopyHalfWidth,
+          canopyCenterX + Math.cos(end) * canopyRadiusX, canopyBaseY + Math.sin(end) * canopyRadiusY, canopyHalfWidth,
+          canopyCenterX + Math.cos(start) * canopyRadiusX, canopyBaseY + Math.sin(start) * canopyRadiusY, canopyHalfWidth
+        ];
+        const vertexOffset = segment * 4;
+        const color = new THREE.Color(canopyPalette[segment % canopyPalette.length]);
+        canopyPositions.push(...vertices);
+        for (let vertex = 0; vertex < 4; vertex++) {
+          canopyColors.push(color.r, color.g, color.b);
+        }
+        canopyIndices.push(
+          vertexOffset, vertexOffset + 1, vertexOffset + 2,
+          vertexOffset, vertexOffset + 2, vertexOffset + 3
+        );
+      }
+      const canopyGeometry = new THREE.BufferGeometry();
+      canopyGeometry.setAttribute('position', new THREE.Float32BufferAttribute(canopyPositions, 3));
+      canopyGeometry.setAttribute('color', new THREE.Float32BufferAttribute(canopyColors, 3));
+      canopyGeometry.setIndex(canopyIndices);
+      canopyGeometry.computeVertexNormals();
+      const canopy = new THREE.Mesh(
+        canopyGeometry,
+        new THREE.MeshStandardMaterial({
+          vertexColors: true,
+          roughness: 0.36,
+          metalness: 0.08,
+          side: THREE.DoubleSide,
+          emissive: 0x063887,
+          emissiveIntensity: 0.08
+        })
+      );
+      canopy.castShadow = true;
+      group.add(canopy);
+      const canopyRibMat = new THREE.MeshStandardMaterial({ color: 0x202c48, metalness: 0.62, roughness: 0.3 });
+      for (let rib = 0; rib <= 6; rib++) {
+        const angle = Math.PI * rib / 6;
+        const points = [];
+        for (let step = 0; step <= 12; step++) {
+          const across = -canopyHalfWidth + 2 * canopyHalfWidth * step / 12;
+          const lift = Math.sqrt(Math.max(0, 1 - (across / canopyHalfWidth) ** 2));
+          points.push([
+            canopyCenterX + Math.cos(angle) * canopyRadiusX,
+            canopyBaseY + Math.sin(angle) * canopyRadiusY * lift,
+            across
+          ]);
+        }
+        const ribCurve = new THREE.CatmullRomCurve3(points.map(point => new THREE.Vector3(...point)));
+        group.add(new THREE.Mesh(new THREE.TubeGeometry(ribCurve, 14, 0.105, 5, false), canopyRibMat));
+      }
+      const canopyHem = new THREE.Mesh(
+        new THREE.BoxGeometry(0.55, 0.55, canopyHalfWidth * 2 + 0.5),
+        new THREE.MeshStandardMaterial({ color: 0x0879ff, roughness: 0.36, metalness: 0.08 })
+      );
+      canopyHem.position.set(canopyCenterX - canopyRadiusX, canopyBaseY, 0);
+      group.add(canopyHem);
 
-      const pedalGeo = new THREE.BoxGeometry(0.6, 0.4, 1.6);
-      [-1, 1].forEach(side => {
-        const pedal = new THREE.Mesh(pedalGeo, vehicleBumperMat);
-        pedal.position.set(1.6, 3.2, side * 2.5);
-        group.add(pedal);
-      });
-
-      // 6. Bicycle Saddle
-      const saddleGeo = new THREE.BoxGeometry(3.0, 1.0, 2.2);
-      const saddleMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.8 });
-      const saddle = new THREE.Mesh(saddleGeo, saddleMat);
-      saddle.position.set(0.5, 7.2, 0);
-      group.add(saddle);
-
-      // 7. Pedaler Figure (Torso, Head with Gamcha, Arms reaching handlebars)
-      const pedBodyGeo = new THREE.BoxGeometry(2.4, 4.0, 2.2);
-      const pedBodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7 });
-      const pedBody = new THREE.Mesh(pedBodyGeo, pedBodyMat);
-      pedBody.position.set(1.4, 9.4, 0);
-      pedBody.rotation.z = -0.1;
-      group.add(pedBody);
-
-      const headGeo = new THREE.SphereGeometry(1.3, 8, 8);
-      const headMat = new THREE.MeshStandardMaterial({ color: 0xfde047 });
-      const head = new THREE.Mesh(headGeo, headMat);
-      head.position.set(1.6, 12.8, 0);
-      group.add(head);
-
-      // Gamcha / Scarf wrap around head
-      const gamchaGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.6, 8);
-      const gamchaMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
-      const gamcha = new THREE.Mesh(gamchaGeo, gamchaMat);
-      gamcha.position.set(1.6, 13.0, 0);
-      group.add(gamcha);
-
-      // Pedaler Arms reaching handlebars
-      const pArmGeo = new THREE.BoxGeometry(3.8, 0.7, 0.7);
-      [-1, 1].forEach(side => {
-        const arm = new THREE.Mesh(pArmGeo, pedBodyMat);
-        arm.position.set(4.6, 9.2, side * 2.0);
-        group.add(arm);
-      });
-
-      // 8. Handlebars & Brass Bell
-      const forkGeo = new THREE.CylinderGeometry(0.5, 0.5, 7.0, 6);
-      const fork = new THREE.Mesh(forkGeo, frameMat);
-      fork.position.set(9.5, 6.2, 0);
-      group.add(fork);
-
-      const barGeo = new THREE.BoxGeometry(0.9, 0.8, 7.5);
-      const bar = new THREE.Mesh(barGeo, vehicleBumperMat);
-      bar.position.set(8.0, 9.2, 0);
-      group.add(bar);
-
-      const bellGeo = new THREE.SphereGeometry(0.6, 6, 6);
-      const bellMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.85 });
-      const bell = new THREE.Mesh(bellGeo, bellMat);
-      bell.position.set(8.2, 9.8, 2.0);
-      group.add(bell);
-
-      // 9. 3 Spoke Wheels touching ground (1 front bicycle wheel at +X, 2 large rear carriage wheels at -X)
-      // Front wheel touches ground: radius 3.5, center y = 3.5
-      addVehicleWheel(10.5, 3.5, 0, 3.5, 0.9);
-
-      // Rear wheels touch ground: radius 4.5, center y = 4.5
-      [-1, 1].forEach(wz => {
-        addVehicleWheel(-7.5, 4.5, wz * (width / 2 - 0.5), 4.5, 1.1);
-      });
-
-      // Front Brass Headlamp & Rear Safety Reflector
-      const hlGeo = new THREE.BoxGeometry(1.2, 1.8, 1.8);
-      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-      hl.position.set(11.6, 5.2, 0);
-      group.add(hl);
-
-      const tlGeo = new THREE.BoxGeometry(0.6, 1.5, 1.5);
-      const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
-      tl.position.set(-13.2, 5.5, 0);
-      group.add(tl);
+      group.userData.rickshawPedalPhase = 0;
 
     } else if (type === 'bike') {
       const length = 26;
@@ -3283,6 +3614,12 @@
         vm.mesh.userData.wheels.forEach(w => {
           w.rotation.z -= rollSpeed;
         });
+        if (vm.mesh.userData.pedalCrank) {
+          vm.mesh.userData.pedalCrank.rotation.z -= rollSpeed * 0.72;
+          if (vm.mesh.userData.updatePedaling) {
+            vm.mesh.userData.updatePedaling(vm.mesh.userData.pedalCrank.rotation.z);
+          }
+        }
       }
     }
 
@@ -3501,11 +3838,14 @@
             : vDir === 'SB' ? { x: 0, z: 1 }
               : { x: 0, z: -1 };
         const right = { x: -forward.z, z: forward.x };
-        const yaw = mouseRelX * Math.PI * 0.9;
-        const pitch = 0.2 + (0.5 - mouseRelY) * 0.72;
+        const yaw = mouseRelX * Math.PI * 0.9
+          + (activeTargetVehicle.type === 'rickshaw' ? 2.0 : 0);
+        const pitch = 0.2 + (0.5 - mouseRelY) * 0.72
+          + (activeTargetVehicle.type === 'rickshaw' ? 0.06 : 0);
         const radius = activeTargetVehicle.type === 'car' ? 62
           : activeTargetVehicle.type === 'bike' ? 38
-            : activeTargetVehicle.type === 'cng' || activeTargetVehicle.type === 'rickshaw' ? 48
+            : activeTargetVehicle.type === 'rickshaw' ? 58
+              : activeTargetVehicle.type === 'cng' ? 48
               : 82;
         const horizontalRadius = radius * Math.cos(pitch);
         const targetX = vPos.x + forward.x * 5;

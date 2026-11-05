@@ -1,6 +1,8 @@
 # Vehicle model assets
 
-The hero loads optimized, locally licensed GLB files from this folder. No vehicle models are included in the repository, so the hero will show a status message until the required files are added.
+The hero can load optimized, locally licensed GLB files from this folder. Models not included in the manifest are skipped, and the page reports any missing models.
+
+The hero also includes built-in Three.js models for the cycle rickshaw and CNG auto-rickshaw when their GLB files are not listed in the manifest or fail to load. The rickshaw carries a driver and passengers beneath a blue canopy; the CNG has a yellow body, dark canopy, and driver. Add a licensed GLB for either vehicle to replace its built-in model.
 
 Use these exact filenames:
 

@@ -103,6 +103,86 @@
     return wheel;
   }
 
+  function addVehicleBeam(parent, start, end, radius, material) {
+    const from = new THREE.Vector3(start[0], start[1], start[2]);
+    const to = new THREE.Vector3(end[0], end[1], end[2]);
+    const direction = to.clone().sub(from);
+    const beam = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius, direction.length(), 8),
+      material
+    );
+    beam.position.copy(from.add(to).multiplyScalar(0.5));
+    beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+    parent.add(beam);
+    return beam;
+  }
+
+  function addSeatedPassenger(parent, x, y, z, shirtColor, trouserColor) {
+    const shirt = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.78 });
+    const trousers = new THREE.MeshStandardMaterial({ color: trouserColor, roughness: 0.82 });
+    const skin = new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.9 });
+    const hair = new THREE.MeshStandardMaterial({ color: 0x211c1a, roughness: 0.95 });
+    const torso = new THREE.Mesh(new THREE.SphereGeometry(0.23, 12, 10), shirt);
+    torso.scale.set(0.9, 1.25, 0.8);
+    torso.position.set(x + 0.03, y + 0.35, z);
+    torso.rotation.z = -0.12;
+    parent.add(torso);
+
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), skin);
+    head.position.set(x + 0.1, y + 0.76, z);
+    parent.add(head);
+    const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.58), hair);
+    hairCap.position.copy(head.position);
+    hairCap.position.y += 0.035;
+    parent.add(hairCap);
+
+    addVehicleBeam(parent, [x + 0.12, y + 0.47, z], [x + 0.42, y + 0.2, z], 0.055, shirt);
+    addVehicleBeam(parent, [x - 0.04, y + 0.45, z], [x + 0.22, y + 0.18, z], 0.05, shirt);
+    addVehicleBeam(parent, [x, y + 0.12, z], [x + 0.2, y - 0.13, z], 0.075, trousers);
+    addVehicleBeam(parent, [x + 0.2, y - 0.13, z], [x + 0.48, y - 0.16, z], 0.065, trousers);
+    const shoe = new THREE.MeshStandardMaterial({ color: 0x30251f, roughness: 0.86 });
+    addVehicleBeam(parent, [x + 0.43, y - 0.16, z], [x + 0.56, y - 0.16, z], 0.045, shoe);
+  }
+
+  function createRoadWheel(radius, width) {
+    const wheel = new THREE.Group();
+    const tireMaterial = new THREE.MeshStandardMaterial({ color: 0x17191b, roughness: 0.88 });
+    const metalMaterial = new THREE.MeshStandardMaterial({ color: 0xb9c2c9, metalness: 0.66, roughness: 0.35 });
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, width, 20), tireMaterial);
+    tire.rotation.x = Math.PI / 2;
+    wheel.add(tire);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.48, radius * 0.48, width * 1.08, 16), metalMaterial);
+    hub.rotation.x = Math.PI / 2;
+    wheel.add(hub);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.16, radius * 0.16, width * 1.12, 12), metalMaterial);
+    cap.rotation.x = Math.PI / 2;
+    wheel.add(cap);
+    return wheel;
+  }
+
+  function createRickshawWheel(radius) {
+    const wheel = new THREE.Group();
+    const tireMaterial = new THREE.MeshStandardMaterial({ color: 0x17191b, roughness: 0.88 });
+    const metalMaterial = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.65, roughness: 0.32 });
+    const tire = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.045, 7, 24), tireMaterial);
+    wheel.add(tire);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.88, 0.018, 5, 24), metalMaterial);
+    wheel.add(rim);
+    for (let side of [-1, 1]) {
+      for (let spoke = 0; spoke < 10; spoke++) {
+        const angle = spoke * Math.PI / 5;
+        const edgeX = Math.cos(angle) * radius * 0.88;
+        const edgeY = Math.sin(angle) * radius * 0.88;
+        addVehicleBeam(wheel, [0, 0, side * 0.035], [edgeX, edgeY, side * 0.035], 0.009, metalMaterial);
+      }
+    }
+    const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.14, 10), metalMaterial);
+    axle.rotation.x = Math.PI / 2;
+    wheel.add(axle);
+    wheel.name = 'rickshaw-wheel';
+    return wheel;
+  }
+
   // 1. Aerodynamic Sports Car
   function buildCar() {
     const car = new THREE.Group();
@@ -133,27 +213,77 @@
   // 2. Dhaka CNG Auto-Rickshaw
   function buildCNG() {
     const cng = new THREE.Group();
-    // Lower body (Green)
-    const base = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.8, 1.5), cngGreenMat);
-    base.position.y = 0.65;
-    cng.add(base);
-    // Yellow Curved Canopy
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.85, 1.45), cngYellowMat);
-    roof.position.set(-0.25, 1.4, 0);
+    const yellow = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.42, metalness: 0.12 });
+    const darkCanopy = new THREE.MeshStandardMaterial({ color: 0x35383a, roughness: 0.72 });
+    const canopyEdge = new THREE.MeshStandardMaterial({ color: 0x55585a, roughness: 0.64 });
+    const window = new THREE.MeshStandardMaterial({ color: 0x17202a, roughness: 0.22, metalness: 0.18 });
+    const lamp = new THREE.MeshStandardMaterial({ color: 0xfff0a3, emissive: 0xffbd38, emissiveIntensity: 0.5 });
+    const trimMetal = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.7, roughness: 0.28 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.78, 0.68, 1.4), yellow);
+    body.position.set(-0.02, 0.58, 0);
+    cng.add(body);
+
+    const frontCowl = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.7, 1.28), yellow);
+    frontCowl.position.set(0.92, 0.91, 0);
+    frontCowl.rotation.z = -0.12;
+    cng.add(frontCowl);
+    const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.66, 1.13), window);
+    windshield.position.set(1.18, 1.34, 0);
+    windshield.rotation.z = -0.2;
+    cng.add(windshield);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(1.72, 0.16, 1.4), canopyEdge);
+    roof.position.set(-0.2, 2.0, 0);
     cng.add(roof);
-    // Windshield
-    const ws = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.6, 1.3), glassMat);
-    ws.position.set(0.78, 1.25, 0);
-    cng.add(ws);
-    // Front Single Wheel + Dual Rear Wheels
-    const wF = createWheel(0.32, 0.2); wF.position.set(1.1, 0.32, 0); cng.add(wF);
-    const wRL = createWheel(0.32, 0.2); wRL.position.set(-0.9, 0.32, 0.75); cng.add(wRL);
-    const wRR = createWheel(0.32, 0.2); wRR.position.set(-0.9, 0.32, -0.75); cng.add(wRR);
-    // Front Round Headlight
-    const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.1, 8), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
-    hl.rotation.z = Math.PI / 2;
-    hl.position.set(1.4, 0.75, 0);
-    cng.add(hl);
+    const canopy = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), darkCanopy);
+    canopy.scale.set(0.92, 0.5, 0.72);
+    canopy.position.set(-0.22, 1.82, 0);
+    cng.add(canopy);
+
+    for (const side of [-1, 1]) {
+      const sideWindow = new THREE.Mesh(new THREE.BoxGeometry(1.16, 0.45, 0.045), window);
+      sideWindow.position.set(-0.22, 1.55, side * 0.7);
+      cng.add(sideWindow);
+      const lowerPanel = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.43, 0.08), yellow);
+      lowerPanel.position.set(-0.76, 0.89, side * 0.71);
+      cng.add(lowerPanel);
+      const badge = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.17, 0.035),
+        new THREE.MeshStandardMaterial({ color: 0xfff7dc, roughness: 0.6 })
+      );
+      badge.position.set(-0.77, 0.91, side * 0.76);
+      cng.add(badge);
+    }
+
+    const bumper = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.13, 1.34), trimMetal);
+    bumper.position.set(1.38, 0.45, 0);
+    cng.add(bumper);
+    for (const side of [-1, 1]) {
+      const headlight = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), lamp);
+      headlight.scale.set(0.7, 0.75, 1);
+      headlight.position.set(1.32, 0.78, side * 0.48);
+      cng.add(headlight);
+    }
+
+    const frontWheel = createRoadWheel(0.31, 0.17);
+    frontWheel.position.set(1.02, 0.32, 0);
+    cng.add(frontWheel);
+    for (const side of [-1, 1]) {
+      const rearWheel = createRoadWheel(0.31, 0.17);
+      rearWheel.position.set(-0.94, 0.32, side * 0.63);
+      cng.add(rearWheel);
+    }
+
+    const driverSeat = new THREE.Mesh(
+      new THREE.BoxGeometry(0.48, 0.15, 0.58),
+      new THREE.MeshStandardMaterial({ color: 0x292d31, roughness: 0.88 })
+    );
+    driverSeat.position.set(0.43, 1.0, 0);
+    cng.add(driverSeat);
+    addSeatedPassenger(cng, 0.32, 0.92, 0, 0xe7e5df, 0x303743);
+    const steering = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.025, 6, 12), trimMetal);
+    steering.position.set(0.85, 1.13, 0);
+    steering.rotation.y = Math.PI / 2;
+    cng.add(steering);
     return cng;
   }
 
@@ -185,33 +315,59 @@
   // 4. Iconic Dhaka Cycle Rickshaw
   function buildRickshaw() {
     const rickshaw = new THREE.Group();
-    // Tricycle frame
-    const frame = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8), chromeMat);
-    frame.rotation.z = Math.PI / 2;
-    frame.position.set(0.2, 0.6, 0);
-    rickshaw.add(frame);
-    // Passenger Seat Bench
-    const seatBase = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.4, 1.2), new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }));
-    seatBase.position.set(-0.5, 0.7, 0);
-    rickshaw.add(seatBase);
-    // Authentic Curved Rickshaw Hood (Red with gold trim)
-    const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 1.25, 12, 1, false, 0, Math.PI), rickshawHoodMat);
-    hood.rotation.z = -Math.PI / 2;
-    hood.position.set(-0.65, 1.35, 0);
-    rickshaw.add(hood);
-    // Hood Gold Trim
-    const trim = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.3), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.5 }));
-    trim.position.set(-0.15, 1.35, 0);
-    rickshaw.add(trim);
-    // Front Bicycle Wheel (Thin Spoke)
-    const wF = createWheel(0.42, 0.1); wF.position.set(1.2, 0.42, 0); rickshaw.add(wF);
-    // Rear Dual Carriage Wheels
-    const wRL = createWheel(0.44, 0.1); wRL.position.set(-0.5, 0.44, 0.7); rickshaw.add(wRL);
-    const wRR = createWheel(0.44, 0.1); wRR.position.set(-0.5, 0.44, -0.7); rickshaw.add(wRR);
-    // Handlebars
-    const hb = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.75), chromeMat);
-    hb.position.set(0.95, 1.2, 0);
-    rickshaw.add(hb);
+    const frame = new THREE.MeshStandardMaterial({ color: 0x292d31, metalness: 0.7, roughness: 0.34 });
+    const carriage = new THREE.MeshStandardMaterial({ color: 0x8b5e3c, roughness: 0.7 });
+    const blueCanopy = new THREE.MeshStandardMaterial({ color: 0x0878d1, roughness: 0.66, side: THREE.DoubleSide });
+    const canopyTrim = new THREE.MeshStandardMaterial({ color: 0xf4c95d, metalness: 0.35, roughness: 0.44 });
+    const cushion = new THREE.MeshStandardMaterial({ color: 0x28a7a5, roughness: 0.72 });
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.16, 1.26), cushion);
+    seat.position.set(-0.82, 1.0, 0);
+    rickshaw.add(seat);
+    const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.64, 1.3), carriage);
+    seatBack.position.set(-1.3, 1.3, 0);
+    rickshaw.add(seatBack);
+    const carriageBase = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.32, 1.45), carriage);
+    carriageBase.position.set(-0.82, 0.76, 0);
+    rickshaw.add(carriageBase);
+
+    const frontCenter = [1.32, 0.43, 0];
+    const rearNear = [-1.0, 0.43, 0.73];
+    const rearFar = [-1.0, 0.43, -0.73];
+    addVehicleBeam(rickshaw, frontCenter, [0.15, 0.53, 0], 0.045, frame);
+    addVehicleBeam(rickshaw, [0.15, 0.53, 0], rearNear, 0.045, frame);
+    addVehicleBeam(rickshaw, [0.15, 0.53, 0], rearFar, 0.045, frame);
+    addVehicleBeam(rickshaw, [0.15, 0.53, 0], [0.08, 1.04, 0], 0.04, frame);
+    addVehicleBeam(rickshaw, [0.08, 1.04, 0], [-0.31, 1.04, 0], 0.045, frame);
+    addVehicleBeam(rickshaw, [-0.82, 0.86, 0], [-0.82, 0.45, 0], 0.045, frame);
+
+    const frontWheel = createRickshawWheel(0.43);
+    frontWheel.position.copy(new THREE.Vector3(frontCenter[0], frontCenter[1], frontCenter[2]));
+    rickshaw.add(frontWheel);
+    for (const point of [rearNear, rearFar]) {
+      const rearWheel = createRickshawWheel(0.42);
+      rearWheel.position.set(point[0], point[1], point[2]);
+      rickshaw.add(rearWheel);
+    }
+
+    const canopy = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), blueCanopy);
+    canopy.scale.set(0.95, 0.42, 0.86);
+    canopy.position.set(-0.88, 2.02, 0);
+    rickshaw.add(canopy);
+    const rearCurtain = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.66, 1.65), blueCanopy);
+    rearCurtain.position.set(-1.68, 1.84, 0);
+    rickshaw.add(rearCurtain);
+    for (const side of [-1, 1]) {
+      addVehicleBeam(rickshaw, [-1.56, 1.32, side * 0.67], [-1.5, 2.02, side * 0.63], 0.025, canopyTrim);
+      addVehicleBeam(rickshaw, [-0.26, 1.35, side * 0.67], [-0.3, 2.03, side * 0.63], 0.025, canopyTrim);
+      addVehicleBeam(rickshaw, [-0.88, 1.55, side * 0.7], [-0.88, 2.02, side * 0.82], 0.014, canopyTrim);
+    }
+    addVehicleBeam(rickshaw, [1.0, 1.04, -0.38], [1.0, 1.04, 0.38], 0.035, frame);
+    addVehicleBeam(rickshaw, [1.0, 1.04, 0], [0.98, 0.55, 0], 0.035, frame);
+    addVehicleBeam(rickshaw, [-0.28, 0.95, -0.4], [-0.28, 0.95, 0.4], 0.035, frame);
+
+    addSeatedPassenger(rickshaw, 0.02, 0.87, 0, 0x713b70, 0x3146a6);
+    addSeatedPassenger(rickshaw, -1.02, 1.0, -0.36, 0xc58a43, 0x35a6a6);
+    addSeatedPassenger(rickshaw, -1.02, 1.0, 0.36, 0x7256a8, 0x278caa);
     return rickshaw;
   }
 
@@ -739,30 +895,69 @@
   }
 
   function loadVehicleAssets() {
-    if (!window.THREE || !THREE.GLTFLoader) {
-      setVehicleAssetStatus('GLTFLoader unavailable. Add the GLTFLoader script to load realistic vehicle models.', true);
-      console.error('Bhara dekhi hero: THREE.GLTFLoader is unavailable.');
+    if (!window.THREE) {
+      setVehicleAssetStatus('Three.js unavailable. The 3D transit scene cannot load.', true);
+      console.error('Bhara dekhi hero: THREE is unavailable.');
       return;
     }
 
     const generation = ++assetLoadGeneration;
-    const loader = new THREE.GLTFLoader();
+    const loader = THREE.GLTFLoader ? new THREE.GLTFLoader() : null;
     let completed = 0;
     let loaded = 0;
     const unavailable = [];
+    const builtInModels = [];
+    const builtInLabels = {
+      cng: 'CNG auto-rickshaw',
+      rickshaw: 'passenger cycle rickshaw'
+    };
+
+    function attachBuiltInModel(spec, actor, traffic) {
+      const model = spec.key === 'cng'
+        ? buildCNG()
+        : (spec.key === 'rickshaw' ? buildRickshaw() : null);
+      if (!model) return false;
+
+      model.rotation.y = Math.PI / 2;
+      const bounds = new THREE.Box3().setFromObject(model);
+      const size = bounds.getSize(new THREE.Vector3());
+      const center = bounds.getCenter(new THREE.Vector3());
+      const modelLength = Math.max(size.x, size.z);
+      if (!Number.isFinite(modelLength) || modelLength <= 0) {
+        console.error(`Bhara dekhi hero: built-in ${spec.key} model has no measurable geometry.`);
+        return false;
+      }
+
+      const scale = spec.targetLength / modelLength;
+      model.scale.setScalar(scale);
+      model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+      model.traverse(object => {
+        if (!object.isMesh) return;
+        object.castShadow = true;
+        object.receiveShadow = true;
+      });
+      actor.add(model);
+      traffic.loaded = true;
+      builtInModels.push(builtInLabels[spec.key]);
+      loaded++;
+      return true;
+    }
 
     function updateVehicleAssetStatus() {
       if (completed !== vehicleAssetSpecs.length) {
         setVehicleAssetStatus(`Loading vehicle models… ${loaded} of ${vehicleAssetSpecs.length} found.`, false);
         return;
       }
+      const builtInSummary = builtInModels.length
+        ? ` Built-in local models: ${builtInModels.join(' and ')}.`
+        : '';
       if (unavailable.length) {
         setVehicleAssetStatus(
-          `${loaded} of ${vehicleAssetSpecs.length} vehicle models loaded. Add missing GLB files in assets/models/; see assets/models/README.md.`,
+          `${loaded} of ${vehicleAssetSpecs.length} vehicle visuals ready.${builtInSummary} Add missing GLB files in assets/models/; see assets/models/README.md.`,
           true
         );
       } else {
-        setVehicleAssetStatus('Realistic local GLB vehicle fleet loaded.', false);
+        setVehicleAssetStatus(`All ${vehicleAssetSpecs.length} vehicle visuals ready.${builtInSummary}`, false);
       }
     }
 
@@ -798,7 +993,9 @@
         const laneOffsets = [0, 0, 0, 0];
 
         vehicleAssetSpecs.forEach(spec => {
-          if (!available.has(spec.file)) {
+          const shouldUseBuiltIn = (spec.key === 'cng' || spec.key === 'rickshaw')
+            && (!available.has(spec.file) || !loader);
+          if (!available.has(spec.file) && !shouldUseBuiltIn) {
             unavailable.push(spec.file);
             completed++;
             return;
@@ -836,6 +1033,25 @@
           };
           cityTraffic.push(traffic);
 
+          if (shouldUseBuiltIn) {
+            if (attachBuiltInModel(spec, actor, traffic)) {
+              completed++;
+              updateVehicleAssetStatus();
+              return;
+            }
+            unavailable.push(`${spec.file} (built-in model failed)`);
+            completed++;
+            updateVehicleAssetStatus();
+            return;
+          }
+
+          if (!loader) {
+            unavailable.push(`${spec.file} (GLTFLoader unavailable)`);
+            completed++;
+            updateVehicleAssetStatus();
+            return;
+          }
+
           loader.load(path, gltf => {
             if (generation !== assetLoadGeneration) {
               disposeObjectResources(gltf.scene);
@@ -847,6 +1063,13 @@
             const center = bounds.getCenter(new THREE.Vector3());
             const modelLength = Math.max(size.x, size.z);
             if (!Number.isFinite(modelLength) || modelLength <= 0) {
+              disposeObjectResources(model);
+              if (attachBuiltInModel(spec, actor, traffic)) {
+                completed++;
+                console.warn(`Bhara dekhi hero: ${spec.file} has no measurable geometry; using the built-in ${builtInLabels[spec.key] || spec.key} model.`);
+                updateVehicleAssetStatus();
+                return;
+              }
               unavailable.push(`${spec.file} (empty model)`);
               completed++;
               updateVehicleAssetStatus();
@@ -870,6 +1093,12 @@
             updateVehicleAssetStatus();
           }, undefined, error => {
             if (generation !== assetLoadGeneration) return;
+            if (attachBuiltInModel(spec, actor, traffic)) {
+              completed++;
+              console.warn(`Bhara dekhi hero: ${path} failed to load; using the built-in ${builtInLabels[spec.key] || spec.key} model.`, error);
+              updateVehicleAssetStatus();
+              return;
+            }
             unavailable.push(`${spec.file} (load error)`);
             completed++;
             console.error(`Bhara dekhi hero: failed to load ${path}.`, error);
