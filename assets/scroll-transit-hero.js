@@ -30,6 +30,8 @@
   let cityWindowMaterials = [];
   let vehicleAssetStatusEl = null;
   let assetLoadGeneration = 0;
+  const isLowEndDevice = typeof navigator !== 'undefined' &&
+    ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4);
 
   // Master Scene Groups
   let masterGroup, roadGroup, vehicleGroup, metroGroup, weatherGroup;
@@ -522,7 +524,6 @@
     const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.65 });
     const pantsMat = new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.82 });
     const skinMat = new THREE.MeshStandardMaterial({ color: 0xdf9b76, roughness: 0.75 });
-    const headMat = new THREE.MeshStandardMaterial({ color: headColor, roughness: 0.18, metalness: 0.05 });
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0x0a0c10 });
     const shoeMat = new THREE.MeshStandardMaterial({ color: shoeColor, roughness: 0.7 });
 
@@ -1276,24 +1277,26 @@
     }
 
     const towerMaterials = [
-      0x37404a, 0x292f39, 0x595b5e, 0x344047, 0x464049, 0x68696a,
-      0x303944, 0x55464a, 0x3a4850, 0x4c4a4e, 0x5d6266, 0x3b4842,
-      0x514649, 0x394550, 0x49464c, 0x605b54, 0x35474a, 0x4d4850
+      0x101a36, 0x171632, 0x132b38, 0x25152f, 0x14233d, 0x2b1634,
+      0x102c32, 0x24182d, 0x18223d, 0x32182f, 0x132a3c, 0x241d3d,
+      0x172b32, 0x2b1d31, 0x18243a, 0x301b39, 0x14283a, 0x24172d
     ].map(color => new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.56,
-      metalness: 0.34,
-      emissive: 0x080b10,
-      emissiveIntensity: 0.08
+      roughness: 0.34,
+      metalness: 0.5,
+      emissive: new THREE.Color(color).multiplyScalar(0.18),
+      emissiveIntensity: 0.24
     }));
     const glassTowerMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x58a5b8,
-      roughness: 0.18,
-      metalness: 0.3,
+      color: 0x17657b,
+      roughness: 0.1,
+      metalness: 0.34,
       transparent: true,
-      opacity: 0.38,
-      emissive: 0x0b2433,
-      emissiveIntensity: 0.2
+      opacity: 0.46,
+      clearcoat: 0.9,
+      clearcoatRoughness: 0.12,
+      emissive: 0x062b48,
+      emissiveIntensity: 0.32
     });
     const buildingNames = [
       'Gulshan Heights', 'Dhanmondi Plaza', 'Mirpur Tower', 'Motijheel House',
@@ -1337,9 +1340,11 @@
       return texture;
     }
     const towerEdgeMaterials = [
-      new THREE.MeshBasicMaterial({ color: 0x617786 }),
-      new THREE.MeshBasicMaterial({ color: 0x627c76 }),
-      new THREE.MeshBasicMaterial({ color: 0x806d7b })
+      new THREE.MeshBasicMaterial({ color: 0x00e5ff }),
+      new THREE.MeshBasicMaterial({ color: 0xff32d2 }),
+      new THREE.MeshBasicMaterial({ color: 0x9b6bff }),
+      new THREE.MeshBasicMaterial({ color: 0x39ffb6 }),
+      new THREE.MeshBasicMaterial({ color: 0xffb52e })
     ];
     const windowCounts = [0, 0, 0];
     const windowPlacements = [[], [], []];
@@ -1424,7 +1429,7 @@
     }
 
     const windowGeometry = new THREE.BoxGeometry(0.07, 0.68, 0.82);
-    const windowColors = [0xd8c9a7, 0x9dc6ca, 0xc3a8c0];
+    const windowColors = [0x33dfff, 0xff47cf, 0xffc45a];
     cityWindowMaterials = windowColors.map(color => new THREE.MeshBasicMaterial({
       color,
       transparent: true,
@@ -1927,7 +1932,7 @@
       if (vehicle.distance < lowerBound) vehicle.distance = upperBound;
       vehicle.mesh.position.z = vehicle.distance;
       if (vehicle.loaded && vehicle.wheelNodes.length && vehicle.distance > -75 && vehicle.distance < 40) {
-        const rotation = laneSpeed * delta;
+        const rotation = laneSpeed * vehicle.direction * delta;
         vehicle.wheelNodes.forEach(wheel => {
           const radius = wheel.userData.wheelRadius || vehicle.wheelRadius;
           const axis = wheel.userData.rollingAxis || 'x';

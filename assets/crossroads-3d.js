@@ -2586,22 +2586,17 @@
       group.userData.rickshawPedalPhase = 0;
 
     } else if (type === 'bike') {
-      // 8 Diverse High-Contrast Bike & Biker Palettes
-      // Matching user reference image (media_1793920786693_42103874.jpg):
-      // Retro Open-Face 3/4 Moto Helmet with Bold Racing Stripe, Chrome Brow Snaps,
-      // Visible Stylized Character Face, Cute Bulbous Nose, Friendly Smile & Cool Sunglasses!
-      // Diverse Helmet Colors across the fleet: Retro Moto Green (exact reference match), Electric Blue, Pearl White, Stealth Black, Deep Navy, Vibrant Orange, Crimson Red, Cyber Yellow.
-      // Diverse Multi-Colored Sunglasses Fleet: Classic Black (media_1793945720644_cd0d28da.png), Vibrant Magenta/Pink (media_1793945720645_90763308.jpg), Racing Red (media_1793945720765_b6a744ac.png), Saffron Orange (media_1793945720817_5f7c7b46.png), Crisp White, Electric Cyan, Cyber Yellow, Emerald Green!
-      // Rule: "if the bike color is dark then the bikers attire should be light colour."
+      // 8 high-contrast bike and rider clothing palettes; headgear follows the reference design.
+      // If the bike color is dark, keep the rider's attire light.
       const bikePalettes = [
-        { bike: 0x0066f5, helmet: 0x1b4332, shirt: 0xf97316, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706, sunglasses: 0x090d12 }, // 1. Retro Moto Green Helmet (Exact Match to Reference Image!) on Electric Blue Bike + Classic Black Sunglasses
-        { bike: 0xf8fafc, helmet: 0xf8fafc, shirt: 0x0284c7, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706, sunglasses: 0xea580c }, // 2. Pearl White Racing Helmet & White Superbike + Saffron Orange Sunglasses
-        { bike: 0x111827, helmet: 0x111827, shirt: 0xf8fafc, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b, sunglasses: 0xf8fafc }, // 3. Stealth Black Helmet & Bike (White Attire) + Crisp White Sunglasses
-        { bike: 0x172554, helmet: 0x172554, shirt: 0xfef08a, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b, sunglasses: 0xdb2777 }, // 4. Navy Blue Racing Helmet & Navy Bike (Light Attire) + Vibrant Magenta/Pink Sunglasses
-        { bike: 0xea580c, helmet: 0xea580c, shirt: 0xf8fafc, pants: 0x18181b, shoe: 0xf8fafc, caliper: 0xd97706, sunglasses: 0xdc2626 }, // 5. Vibrant Orange Racing Helmet & Orange Bike + Racing Red Sunglasses
-        { bike: 0xf8fafc, helmet: 0xdc2626, shirt: 0xf97316, pants: 0x334155, shoe: 0xf8fafc, caliper: 0xd97706, sunglasses: 0xfacc15 }, // 6. Crimson Red Racing Helmet on White Superbike + Cyber Yellow Sunglasses
-        { bike: 0x090d12, helmet: 0xfacc15, shirt: 0xffffff, pants: 0xd1d5db, shoe: 0xffffff, caliper: 0xf59e0b, sunglasses: 0x0284c7 }, // 7. Cyber Yellow Racing Helmet on Midnight Black Bike + Electric Cyan Sunglasses
-        { bike: 0x1e3a8a, helmet: 0x0066f5, shirt: 0xe0f2fe, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xd97706, sunglasses: 0x16a34a }  // 8. Electric Blue Helmet on Deep Navy Bike + Emerald Green Sunglasses
+        { bike: 0x0066f5, shirt: 0xf97316, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 },
+        { bike: 0xf8fafc, shirt: 0x0284c7, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 },
+        { bike: 0x111827, shirt: 0xf8fafc, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b },
+        { bike: 0x172554, shirt: 0xfef08a, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b },
+        { bike: 0xea580c, shirt: 0xf8fafc, pants: 0x18181b, shoe: 0xf8fafc, caliper: 0xd97706 },
+        { bike: 0xf8fafc, shirt: 0xf97316, pants: 0x334155, shoe: 0xf8fafc, caliper: 0xd97706 },
+        { bike: 0x090d12, shirt: 0xffffff, pants: 0xd1d5db, shoe: 0xffffff, caliper: 0xf59e0b },
+        { bike: 0x1e3a8a, shirt: 0xe0f2fe, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xd97706 }
       ];
       const palette = bikePalettes[appearanceSeed % bikePalettes.length];
       const parseHex = (hexStr, fallback) => {
@@ -2631,8 +2626,6 @@
       }
 
       const activeBikeColor = (vData && vData.bikeColor && vData.bikeColor !== '#dc2626') ? parseHex(vData.bikeColor, palette.bike) : (colorHex && colorHex !== 0xdc2626 ? colorHex : palette.bike);
-      const activeHelmetColor = vData && (vData.helmetColor || vData.headColor) ? parseHex(vData.helmetColor || vData.headColor, palette.helmet) : palette.helmet;
-      const activeSunglassesColor = vData && vData.sunglassesColor ? parseHex(vData.sunglassesColor, palette.sunglasses) : palette.sunglasses;
       let activeShirtColor = vData && vData.shirtColor ? parseHex(vData.shirtColor, palette.shirt) : palette.shirt;
       let activePantsColor = vData && vData.pantsColor ? parseHex(vData.pantsColor, palette.pants) : palette.pants;
       let activeShoeColor = vData && vData.shoeColor ? parseHex(vData.shoeColor, palette.shoe) : palette.shoe;
@@ -2667,10 +2660,15 @@
 
       // Biker Materials: Modern Full-Face Sport Helmet with Lifted Visor, Face Skin & Attire (Matching Picture 4)
       const helmetMat = new THREE.MeshStandardMaterial({
-        color: activeHelmetColor,
-        roughness: 0.16,
-        metalness: 0.35,
+        color: 0x075be8,
+        roughness: 0.14,
+        metalness: 0.48,
         side: THREE.DoubleSide
+      });
+      const helmetNavyMat = new THREE.MeshStandardMaterial({
+        color: 0x07152f,
+        roughness: 0.28,
+        metalness: 0.32
       });
       const sideGraphicMat = new THREE.MeshStandardMaterial({
         color: 0xf8fafc, // Crisp white side racing swooshes (Picture 4 signature graphic)
@@ -2678,25 +2676,27 @@
         metalness: 0.15
       });
       const visorShieldMat = new THREE.MeshPhysicalMaterial({
-        color: 0x38bdf8,
-        roughness: 0.08,
-        metalness: 0.15,
+        color: 0xc5ddff,
+        roughness: 0.12,
+        metalness: 0.04,
         transparent: true,
-        opacity: 0.52
+        opacity: 0.2,
+        depthWrite: false,
+        side: THREE.DoubleSide
       });
       const lipMat = new THREE.MeshStandardMaterial({
         color: 0xcc7563, // Natural warm lip tone from Picture 4
         roughness: 0.65
       });
       const sunglassFrameMat = new THREE.MeshStandardMaterial({
-        color: activeSunglassesColor,
-        roughness: 0.22,
-        metalness: 0.35
+        color: 0x080a0e,
+        roughness: 0.2,
+        metalness: 0.16
       });
       const sunglassLensMat = new THREE.MeshStandardMaterial({
-        color: 0x030712,
-        roughness: 0.04,
-        metalness: 0.96
+        color: 0x020306,
+        roughness: 0.12,
+        metalness: 0.22
       });
       const shirtMat = new THREE.MeshStandardMaterial({ color: activeShirtColor, roughness: 0.65 });
       const pantsMat = new THREE.MeshStandardMaterial({ color: activePantsColor, roughness: 0.82 });
@@ -3046,243 +3046,384 @@
       neckCollar.rotation.z = -0.3;
       group.add(neckCollar);
 
-      // ==============================================================
-      // 10. THE BIKER (RIDER): MODERN FULL-FACE SPORT HELMET WITH LIFTED VISOR
-      // & HANDSOME STYLIZED CHARACTER FACE (EXACT MATCH TO PICTURE 4 media_1793947640551_5a7f18cf.jpg)
-      // ==============================================================
+      // 10. Rider head assembly: shaped face, fitted eyewear and full-face helmet.
       const riderHeadGroup = new THREE.Group();
       riderHeadGroup.position.set(1.55, 12.35, 0);
-      riderHeadGroup.rotation.z = -0.15; // Natural posture looking down the road
+      riderHeadGroup.rotation.z = -0.15;
 
-      // --- A. THE CHARACTER FACE & HEAD (Natural Facial Sculpt Matching Picture 4) ---
-      // 1. Head Cranium & Temples
-      const headCranium = new THREE.Mesh(new THREE.SphereGeometry(1.08, 20, 18), skinMat);
-      headCranium.scale.set(0.95, 1.12, 0.88);
-      headCranium.position.set(0.12, 0.12, 0);
-      riderHeadGroup.add(headCranium);
+      const faceGroup = new THREE.Group();
+      const headProfile = [
+        [-0.88, 0.08, 0.20, 0.16], [-0.78, 0.36, 0.53, 0.42],
+        [-0.55, 0.59, 0.78, 0.62], [-0.25, 0.70, 0.87, 0.72],
+        [0.00, 0.75, 0.90, 0.77], [0.36, 0.74, 0.87, 0.77],
+        [0.68, 0.64, 0.76, 0.69], [0.90, 0.42, 0.55, 0.49],
+        [1.02, 0.04, 0.08, 0.08]
+      ];
+      const interpolateProfile = (height, column) => {
+        for (let i = 0; i < headProfile.length - 1; i++) {
+          const lower = headProfile[i];
+          const upper = headProfile[i + 1];
+          if (height <= upper[0]) {
+            const t = (height - lower[0]) / (upper[0] - lower[0]);
+            return lower[column] + (upper[column] - lower[column]) * t;
+          }
+        }
+        return headProfile[headProfile.length - 1][column];
+      };
+      const headVertices = [];
+      const headIndices = [];
+      const headRows = 48;
+      const headSides = 56;
+      for (let row = 0; row <= headRows; row++) {
+        const y = headProfile[0][0] + (headProfile[headProfile.length - 1][0] - headProfile[0][0]) * row / headRows;
+        const width = interpolateProfile(y, 1);
+        const frontDepth = interpolateProfile(y, 2);
+        const rearDepth = interpolateProfile(y, 3);
+        for (let side = 0; side <= headSides; side++) {
+          const angle = side / headSides * Math.PI * 2;
+          const sin = Math.sin(angle);
+          const depth = sin >= 0 ? frontDepth : rearDepth;
+          headVertices.push(0.04 + depth * sin, y, width * Math.cos(angle));
+        }
+      }
+      for (let row = 0; row < headRows; row++) {
+        for (let side = 0; side < headSides; side++) {
+          const a = row * (headSides + 1) + side;
+          const b = a + headSides + 1;
+          headIndices.push(a, a + 1, b, a + 1, b + 1, b);
+        }
+      }
+      const headGeometry = new THREE.BufferGeometry();
+      headGeometry.setAttribute('position', new THREE.Float32BufferAttribute(headVertices, 3));
+      headGeometry.setIndex(headIndices);
+      headGeometry.computeVertexNormals();
+      const headMesh = new THREE.Mesh(headGeometry, skinMat);
+      headMesh.castShadow = true;
+      faceGroup.add(headMesh);
 
-      // 2. Tapered Lower Face / Jaw & Cheeks (Clean masculine low-poly contour)
-      const jawMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.62, 0.95, 16), skinMat);
-      jawMesh.scale.set(0.92, 1.0, 0.78);
-      jawMesh.position.set(0.20, -0.32, 0);
-      riderHeadGroup.add(jawMesh);
-
-      // 3. Sculpted Defined Chin (Rests comfortably behind the chin bar)
-      const chinMesh = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), skinMat);
-      chinMesh.scale.set(0.95, 0.85, 0.85);
-      chinMesh.position.set(0.55, -0.58, 0);
-      riderHeadGroup.add(chinMesh);
-
-      // 4. Sleek, Proportionate Human Nose (Straight bridge & refined tip - NOT a clown sphere!)
-      const noseBridge = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.42, 0.16), skinMat);
-      noseBridge.position.set(0.92, 0.08, 0);
-      noseBridge.rotation.z = -0.18;
-      riderHeadGroup.add(noseBridge);
-
-      const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 10), skinMat);
-      noseTip.scale.set(1.20, 0.95, 0.95);
-      noseTip.position.set(1.02, -0.06, 0);
-      riderHeadGroup.add(noseTip);
-
+      const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xfaf7f0, roughness: 0.42 });
+      const irisMat = new THREE.MeshStandardMaterial({ color: 0x463126, roughness: 0.34 });
       [-1, 1].forEach(side => {
-        const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), skinMat);
-        nostril.position.set(0.96, -0.09, side * 0.13);
-        riderHeadGroup.add(nostril);
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 16), eyeWhiteMat);
+        eye.scale.set(0.065, 0.09, 0.155);
+        eye.position.set(0.84, 0.27, side * 0.30);
+        faceGroup.add(eye);
+        const iris = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), irisMat);
+        iris.scale.set(0.035, 0.055, 0.052);
+        iris.position.set(0.90, 0.27, side * 0.30);
+        faceGroup.add(iris);
       });
 
-      // 5. Gentle, Confident Closed-Lip Smile (Warm lip tone from reference image)
-      const upperLip = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.42), lipMat);
-      upperLip.position.set(0.85, -0.26, 0);
-      riderHeadGroup.add(upperLip);
+      const noseProfile = [
+        [-0.20, 0.075, 0.84, 0.07], [-0.12, 0.11, 0.87, 0.12],
+        [-0.04, 0.105, 0.91, 0.16], [0.16, 0.075, 0.91, 0.15],
+        [0.34, 0.055, 0.86, 0.10], [0.40, 0.025, 0.84, 0.045]
+      ];
+      const noseVertices = [];
+      const noseIndices = [];
+      const noseSegments = 32;
+      noseProfile.forEach(([y, width, centerX, depth]) => {
+        for (let segment = 0; segment <= noseSegments; segment++) {
+          const angle = segment / noseSegments * Math.PI * 2;
+          noseVertices.push(centerX + depth * Math.cos(angle), y, width * Math.sin(angle));
+        }
+      });
+      for (let row = 0; row < noseProfile.length - 1; row++) {
+        for (let segment = 0; segment < noseSegments; segment++) {
+          const a = row * (noseSegments + 1) + segment;
+          const b = a + noseSegments + 1;
+          noseIndices.push(a, b, a + 1, a + 1, b, b + 1);
+        }
+      }
+      const noseGeometry = new THREE.BufferGeometry();
+      noseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(noseVertices, 3));
+      noseGeometry.setIndex(noseIndices);
+      noseGeometry.computeVertexNormals();
+      faceGroup.add(new THREE.Mesh(noseGeometry, skinMat));
 
-      const lowerLip = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.07, 0.38), lipMat);
-      lowerLip.position.set(0.84, -0.33, 0);
-      riderHeadGroup.add(lowerLip);
-
-      const smileLine = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.44), darkPaint);
-      smileLine.position.set(0.88, -0.29, 0);
-      riderHeadGroup.add(smileLine);
-
-      // 6. Refined Groomed Eyebrows
+      const nostrilMat = new THREE.MeshStandardMaterial({ color: 0x8c5141, roughness: 0.8 });
       [-1, 1].forEach(side => {
-        const brow = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.36), darkPaint);
-        brow.position.set(0.92, 0.42, side * 0.38);
-        brow.rotation.z = -0.12;
-        brow.rotation.y = side * 0.10;
-        riderHeadGroup.add(brow);
+        const nostril = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), nostrilMat);
+        nostril.scale.set(0.018, 0.018, 0.032);
+        nostril.position.set(1.005, -0.105, side * 0.071);
+        faceGroup.add(nostril);
       });
 
-      // 7. Character Neck Cylinder connecting down to collar
-      const neckCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 1.25, 16), skinMat);
-      neckCyl.position.set(0.05, -0.92, 0);
-      neckCyl.rotation.z = -0.18;
-      riderHeadGroup.add(neckCyl);
-
-      // --- B. THE WAYFARER SUNGLASSES (Picture 4 Styling) ---
-      // Flat-top Brow Bar & Keyhole Center Bridge
-      const sunglassBridge = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.08, 0.22), sunglassFrameMat);
-      sunglassBridge.position.set(1.05, 0.22, 0);
-      riderHeadGroup.add(sunglassBridge);
-
-      const sunglassBrowBar = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.07, 1.15), sunglassFrameMat);
-      sunglassBrowBar.position.set(1.02, 0.32, 0);
-      riderHeadGroup.add(sunglassBrowBar);
-
+      const makeFaceLine = (points, material, radius) => {
+        const curve = new THREE.CatmullRomCurve3(points.map(point => new THREE.Vector3(point[0], point[1], point[2])));
+        return new THREE.Mesh(new THREE.TubeGeometry(curve, 20, radius, 8, false), material);
+      };
+      faceGroup.add(makeFaceLine([
+        [0.84, -0.34, -0.22], [0.88, -0.37, -0.11], [0.89, -0.38, 0],
+        [0.88, -0.37, 0.11], [0.84, -0.34, 0.22]
+      ], lipMat, 0.026));
+      faceGroup.add(makeFaceLine([
+        [0.855, -0.405, -0.17], [0.88, -0.415, 0], [0.855, -0.405, 0.17]
+      ], lipMat, 0.024));
+      const browMat = new THREE.MeshStandardMaterial({ color: 0x3d2922, roughness: 0.78 });
       [-1, 1].forEach(side => {
-        // Dark Polarized Rectangular Lens
-        const lens = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.34, 0.44), sunglassLensMat);
-        lens.position.set(1.01, 0.20, side * 0.38);
-        lens.rotation.y = side * 0.08;
-        riderHeadGroup.add(lens);
-
-        // Beveled Frame Border
-        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.38, 0.48), sunglassFrameMat);
-        frame.position.set(0.99, 0.20, side * 0.38);
-        frame.rotation.y = side * 0.08;
-        riderHeadGroup.add(frame);
-
-        // Silver Temple Hinge Pin
-        const hingePin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.05, 0.05), silverMetal);
-        hingePin.position.set(1.01, 0.32, side * 0.62);
-        riderHeadGroup.add(hingePin);
-
-        // Temple Arms extending back into helmet interior
-        const templeArm = new THREE.Mesh(new THREE.BoxGeometry(1.20, 0.06, 0.06), sunglassFrameMat);
-        templeArm.position.set(0.42, 0.24, side * 0.68);
-        templeArm.rotation.y = side * 0.12;
-        riderHeadGroup.add(templeArm);
+        faceGroup.add(makeFaceLine([
+          [0.87, 0.43, side * 0.49], [0.91, 0.48, side * 0.34], [0.86, 0.44, side * 0.18]
+        ], browMat, 0.035));
       });
 
-      // --- C. MODERN FULL-FACE SPORT HELMET WITH LIFTED VISOR (Exact Picture 4 Match) ---
-      // 1. Aerodynamic Main Outer Shell (Seamless Crown, Back Occiput, and Side Flanks)
+      const hairMat = new THREE.MeshStandardMaterial({ color: 0x211710, roughness: 0.78 });
+      const hairVertices = [];
+      const hairIndices = [];
+      const hairRows = 18;
+      const hairColumns = 40;
+      for (let row = 0; row <= hairRows; row++) {
+        const t = row / hairRows;
+        for (let column = 0; column <= hairColumns; column++) {
+          const u = -1 + 2 * column / hairColumns;
+          const side = Math.abs(u);
+          const lowerY = 0.53 + 0.04 * side;
+          const upperY = 0.93 - 0.12 * side;
+          const y = lowerY + (upperY - lowerY) * t;
+          const width = interpolateProfile(y, 1);
+          const z = u * Math.min(width * 0.94, 0.63);
+          const x = 0.04 + interpolateProfile(y, 2) * Math.sqrt(Math.max(0, 1 - (z / width) ** 2)) + 0.018;
+          hairVertices.push(x, y, z);
+        }
+      }
+      for (let row = 0; row < hairRows; row++) {
+        for (let column = 0; column < hairColumns; column++) {
+          const a = row * (hairColumns + 1) + column;
+          const b = a + hairColumns + 1;
+          hairIndices.push(a, b, a + 1, a + 1, b, b + 1);
+        }
+      }
+      const hairGeometry = new THREE.BufferGeometry();
+      hairGeometry.setAttribute('position', new THREE.Float32BufferAttribute(hairVertices, 3));
+      hairGeometry.setIndex(hairIndices);
+      hairGeometry.computeVertexNormals();
+      const hairMesh = new THREE.Mesh(hairGeometry, hairMat);
+      hairMesh.material.side = THREE.DoubleSide;
+      faceGroup.add(hairMesh);
+
+      riderHeadGroup.add(faceGroup);
+
+      const glassesGroup = new THREE.Group();
+      const makeRoundedLens = (width, height, radius) => {
+        const shape = new THREE.Shape();
+        shape.moveTo(-width / 2 + radius, -height / 2);
+        shape.lineTo(width / 2 - radius, -height / 2);
+        shape.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + radius);
+        shape.lineTo(width / 2, height / 2 - radius);
+        shape.quadraticCurveTo(width / 2, height / 2, width / 2 - radius, height / 2);
+        shape.lineTo(-width / 2 + radius, height / 2);
+        shape.quadraticCurveTo(-width / 2, height / 2, -width / 2, height / 2 - radius);
+        shape.lineTo(-width / 2, -height / 2 + radius);
+        shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + radius, -height / 2);
+        return new THREE.ExtrudeGeometry(shape, {
+          depth: 0.035,
+          bevelEnabled: true,
+          bevelSegments: 2,
+          bevelSize: 0.012,
+          bevelThickness: 0.012
+        });
+      };
+      [-1, 1].forEach(side => {
+        const frame = new THREE.Mesh(makeRoundedLens(0.58, 0.38, 0.075), sunglassFrameMat);
+        frame.rotation.y = Math.PI / 2;
+        frame.position.set(0.96, 0.27, side * 0.33);
+        glassesGroup.add(frame);
+        const lens = new THREE.Mesh(makeRoundedLens(0.48, 0.275, 0.065), sunglassLensMat);
+        lens.rotation.y = Math.PI / 2;
+        lens.position.set(1.015, 0.27, side * 0.33);
+        glassesGroup.add(lens);
+      });
+      glassesGroup.add(makeFaceLine([
+        [1.015, 0.31, -0.075], [1.045, 0.34, 0], [1.015, 0.31, 0.075]
+      ], sunglassFrameMat, 0.035));
+      [-1, 1].forEach(side => {
+        glassesGroup.add(makeFaceLine([
+          [0.99, 0.27, side * 0.59], [0.72, 0.25, side * 0.68],
+          [0.30, 0.17, side * 0.65], [-0.12, 0.10, side * 0.54]
+        ], sunglassFrameMat, 0.035));
+      });
+      riderHeadGroup.add(glassesGroup);
+
+      const helmetGroup = new THREE.Group();
       const helmetShellGeom = new THREE.SphereGeometry(
-        1.48, 28, 24,
-        -Math.PI * 0.65, Math.PI * 1.30, 0, Math.PI * 0.78
+        1.48, 48, 36, -Math.PI * 0.65, Math.PI * 1.30, 0, Math.PI * 0.84
       );
       const helmetShell = new THREE.Mesh(helmetShellGeom, helmetMat);
-      helmetShell.scale.set(1.26, 1.25, 1.22);
-      helmetShell.position.set(-0.15, 0.08, 0);
-      riderHeadGroup.add(helmetShell);
+      helmetShell.scale.set(1.20, 1.22, 1.16);
+      helmetShell.position.set(-0.16, 0.10, 0);
+      helmetShell.castShadow = true;
+      helmetGroup.add(helmetShell);
 
-      // 2. Rear Occipital Shell (Extends down to collar, 100% enclosing the back of the skull)
-      const rearOcciputGeom = new THREE.CylinderGeometry(
-        1.45, 1.35, 1.35, 24, 1, false,
-        -Math.PI * 0.85, Math.PI * 1.70
-      );
-      const rearOcciputShell = new THREE.Mesh(rearOcciputGeom, helmetMat);
-      rearOcciputShell.position.set(-0.18, -0.42, 0);
-      riderHeadGroup.add(rearOcciputShell);
-
-      // 3. Lower Rim Rubber Neck Gasket Trim
-      const neckGasketGeom = new THREE.TorusGeometry(1.38, 0.08, 8, 24, Math.PI * 1.30);
-      const neckGasket = new THREE.Mesh(neckGasketGeom, darkPaint);
-      neckGasket.rotation.x = Math.PI / 2;
-      neckGasket.rotation.z = Math.PI * 0.85;
-      neckGasket.position.set(-0.20, -0.95, 0);
-      riderHeadGroup.add(neckGasket);
-
-      // 4. FULL-FACE SOLID CHIN BAR (The defining full-face feature of Picture 4!)
-      const chinBarGeom = new THREE.BoxGeometry(0.85, 0.48, 2.10);
-      const chinBar = new THREE.Mesh(chinBarGeom, helmetMat);
-      chinBar.position.set(0.72, -0.62, 0);
-      chinBar.rotation.z = -0.15;
-      riderHeadGroup.add(chinBar);
-
-      // Central Chin Vent Slot on Chin Bar
-      const chinVent = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.85), darkPaint);
-      chinVent.position.set(1.15, -0.60, 0);
-      chinVent.rotation.z = -0.15;
-      riderHeadGroup.add(chinVent);
-
-      // Dark Lower Chin Spoiler / Bezel (Black aerodynamic chin rim)
-      const chinSpoiler = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.22, 2.05), darkPaint);
-      chinSpoiler.position.set(0.68, -0.88, 0);
-      chinSpoiler.rotation.z = -0.18;
-      riderHeadGroup.add(chinSpoiler);
-
-      // 5. BLACK RUBBER EYEPORT GASKET & CHEEK PADDING
-      // Top Brow Lip Framing the Visor Eyeport
-      const browLip = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.15, 2.05), darkPaint);
-      browLip.position.set(0.92, 0.62, 0);
-      browLip.rotation.z = -0.15;
-      riderHeadGroup.add(browLip);
-
-      // Padded Cheek Guards & Liners
+      const blackRubberMat = new THREE.MeshStandardMaterial({ color: 0x080c14, roughness: 0.64 });
+      const innerPaddingMat = new THREE.MeshStandardMaterial({ color: 0x141923, roughness: 0.9 });
       [-1, 1].forEach(side => {
-        const cheekLiner = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.95, 0.18), darkPaint);
-        cheekLiner.position.set(0.55, 0.05, side * 1.05);
-        riderHeadGroup.add(cheekLiner);
-
-        const cheekShell = new THREE.Mesh(new THREE.BoxGeometry(0.75, 1.05, 0.22), helmetMat);
-        cheekShell.position.set(0.50, 0.05, side * 1.18);
-        riderHeadGroup.add(cheekShell);
+        const cheekPad = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), innerPaddingMat);
+        cheekPad.scale.set(0.24, 0.42, 0.13);
+        cheekPad.position.set(0.48, 0.02, side * 0.79);
+        helmetGroup.add(cheekPad);
       });
 
-      // 6. LIFTED / FLIPPED-UP VISOR SHIELD (The open visor position in Picture 4!)
-      const visorShieldGeom = new THREE.CylinderGeometry(
-        1.42, 1.48, 0.65, 24, 1, true,
-        -Math.PI * 0.48, Math.PI * 0.96
-      );
-      const visorShield = new THREE.Mesh(visorShieldGeom, visorShieldMat);
-      visorShield.position.set(0.35, 1.05, 0);
-      visorShield.rotation.z = Math.PI * 0.16; // Lifted upward & forward over forehead
-      riderHeadGroup.add(visorShield);
+      const chinShape = new THREE.Shape();
+      chinShape.moveTo(-0.48, -0.92);
+      chinShape.lineTo(0.48, -0.92);
+      chinShape.quadraticCurveTo(0.84, -0.91, 1.03, -0.64);
+      chinShape.lineTo(1.20, -0.43);
+      chinShape.quadraticCurveTo(1.22, -0.38, 1.12, -0.37);
+      chinShape.lineTo(0.66, -0.55);
+      chinShape.lineTo(-0.48, -0.55);
+      chinShape.closePath();
+      const chinGuardGeom = new THREE.ExtrudeGeometry(chinShape, {
+        depth: 1.62,
+        bevelEnabled: true,
+        bevelSegments: 4,
+        bevelSize: 0.085,
+        bevelThickness: 0.085,
+        curveSegments: 12
+      });
+      chinGuardGeom.translate(0, 0, -0.81);
+      helmetGroup.add(new THREE.Mesh(chinGuardGeom, helmetMat));
 
-      // Visor Bottom Edge Trim
-      const visorTrimGeom = new THREE.TorusGeometry(1.46, 0.035, 6, 24, Math.PI * 0.96);
-      const visorTrim = new THREE.Mesh(visorTrimGeom, darkPaint);
-      visorTrim.rotation.x = Math.PI / 2;
-      visorTrim.rotation.z = Math.PI * 0.02;
-      visorTrim.position.set(0.48, 0.78, 0);
-      riderHeadGroup.add(visorTrim);
+      const chinLowerShape = new THREE.Shape();
+      chinLowerShape.moveTo(-0.43, -0.87);
+      chinLowerShape.lineTo(0.45, -0.87);
+      chinLowerShape.quadraticCurveTo(0.70, -0.87, 0.90, -0.69);
+      chinLowerShape.lineTo(0.98, -0.61);
+      chinLowerShape.lineTo(0.62, -0.65);
+      chinLowerShape.lineTo(-0.43, -0.65);
+      chinLowerShape.closePath();
+      const chinLowerGeom = new THREE.ExtrudeGeometry(chinLowerShape, {
+        depth: 1.48,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        bevelSize: 0.045,
+        bevelThickness: 0.045,
+        curveSegments: 10
+      });
+      chinLowerGeom.translate(0, 0, -0.74);
+      helmetGroup.add(new THREE.Mesh(chinLowerGeom, helmetNavyMat));
 
-      // Brow Visor Peak Overhang
-      const visorTopLip = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, 1.95), helmetMat);
-      visorTopLip.position.set(0.65, 1.25, 0);
-      visorTopLip.rotation.z = -0.15;
-      riderHeadGroup.add(visorTopLip);
-
-      // Circular Visor Pivot Ratchets on Temples (Picture 4 Signature)
       [-1, 1].forEach(side => {
-        const pivotDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.10, 16), darkPaint);
-        pivotDisc.rotation.x = Math.PI / 2;
-        pivotDisc.position.set(0.18, 0.38, side * 1.42);
-        riderHeadGroup.add(pivotDisc);
-
-        const pivotPin = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.12, 14), silverMetal);
-        pivotPin.rotation.x = Math.PI / 2;
-        pivotPin.position.set(0.18, 0.38, side * 1.43);
-        riderHeadGroup.add(pivotPin);
+        const pivot = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 32), blackRubberMat);
+        pivot.rotation.x = Math.PI / 2;
+        pivot.position.set(0.13, 0.40, side * 1.49);
+        helmetGroup.add(pivot);
+        const pivotCap = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.14, 32), helmetNavyMat);
+        pivotCap.rotation.x = Math.PI / 2;
+        pivotCap.position.set(0.13, 0.40, side * 1.53);
+        helmetGroup.add(pivotCap);
+        const pivotBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.15, 20), silverMetal);
+        pivotBolt.rotation.x = Math.PI / 2;
+        pivotBolt.position.set(0.13, 0.40, side * 1.57);
+        helmetGroup.add(pivotBolt);
       });
 
-      // 7. DYNAMIC WHITE SIDE RACING GRAPHICS (Picture 4 Diagonal Jawline Swoosh)
-      [-1, 1].forEach(side => {
-        // Main diagonal white slash along jawline
-        const sideSwoop = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.14, 0.06), sideGraphicMat);
-        sideSwoop.position.set(-0.15, -0.22, side * 1.40);
-        sideSwoop.rotation.z = -0.38;
-        sideSwoop.rotation.y = side * 0.12;
-        riderHeadGroup.add(sideSwoop);
+      const curveTube = (points, radius, material) => {
+        const curve = new THREE.CatmullRomCurve3(points.map(point => new THREE.Vector3(point[0], point[1], point[2])));
+        return new THREE.Mesh(new THREE.TubeGeometry(curve, 32, radius, 8, false), material);
+      };
+      const visorVertices = [];
+      const visorIndices = [];
+      const visorRows = 12;
+      const visorSides = 40;
+      for (let row = 0; row <= visorRows; row++) {
+        const y = -0.30 + 1.20 * row / visorRows;
+        for (let side = 0; side <= visorSides; side++) {
+          const u = -1 + 2 * side / visorSides;
+          const z = 0.98 * u;
+          const x = 1.17 - 0.22 * Math.pow(Math.abs(u), 1.8) - 0.035 * u * u * (y - 0.25);
+          visorVertices.push(x, y, z);
+        }
+      }
+      for (let row = 0; row < visorRows; row++) {
+        for (let side = 0; side < visorSides; side++) {
+          const a = row * (visorSides + 1) + side;
+          const b = a + visorSides + 1;
+          visorIndices.push(a, a + 1, b, a + 1, b + 1, b);
+        }
+      }
+      const visorGeometry = new THREE.BufferGeometry();
+      visorGeometry.setAttribute('position', new THREE.Float32BufferAttribute(visorVertices, 3));
+      visorGeometry.setIndex(visorIndices);
+      visorGeometry.computeVertexNormals();
+      const visorShield = new THREE.Mesh(visorGeometry, visorShieldMat);
+      visorShield.renderOrder = 2;
+      helmetGroup.add(visorShield);
 
-        // Secondary upper accent swoop
-        const subSwoop = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.08, 0.06), sideGraphicMat);
-        subSwoop.position.set(-0.45, 0.12, side * 1.42);
-        subSwoop.rotation.z = -0.38;
-        subSwoop.rotation.y = side * 0.12;
-        riderHeadGroup.add(subSwoop);
+      const visorX = u => 1.17 - 0.22 * Math.pow(Math.abs(u), 1.8);
+      helmetGroup.add(curveTube(
+        Array.from({ length: 17 }, (_, i) => {
+          const u = -1 + 2 * i / 16;
+          return [visorX(u), 0.90, 0.98 * u];
+        }), 0.035, blackRubberMat
+      ));
+      helmetGroup.add(curveTube(
+        Array.from({ length: 17 }, (_, i) => {
+          const u = -1 + 2 * i / 16;
+          return [visorX(u), -0.30, 0.98 * u];
+        }), 0.028, blackRubberMat
+      ));
+
+      const ventMat = new THREE.MeshStandardMaterial({ color: 0x101827, roughness: 0.4, metalness: 0.24 });
+      [-0.21, 0, 0.21].forEach(offset => {
+        const vent = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.045, 0.075), ventMat);
+        vent.position.set(-0.16, 1.82, offset);
+        vent.rotation.z = -0.13;
+        helmetGroup.add(vent);
+      });
+      [-0.24, 0.24].forEach(offset => {
+        const chinVent = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.075, 0.22), ventMat);
+        chinVent.position.set(1.24, -0.67, offset);
+        helmetGroup.add(chinVent);
       });
 
-      // 8. TOP FOREHEAD AIR INTAKE VENT & AERO CROWN RIDGE
-      const topVent = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.15, 0.65), darkPaint);
-      topVent.position.set(0.25, 1.82, 0);
-      topVent.rotation.z = 0.08;
-      riderHeadGroup.add(topVent);
+      const sideStripeShape = new THREE.Shape();
+      sideStripeShape.moveTo(-0.79, -0.54);
+      sideStripeShape.lineTo(-0.33, -0.43);
+      sideStripeShape.lineTo(0.43, 0.10);
+      sideStripeShape.lineTo(0.20, 0.19);
+      sideStripeShape.lineTo(-0.43, -0.18);
+      sideStripeShape.closePath();
+      const sideStripeMat = sideGraphicMat.clone();
+      sideStripeMat.side = THREE.DoubleSide;
+      [-1, 1].forEach(side => {
+        const stripe = new THREE.Mesh(new THREE.ShapeGeometry(sideStripeShape), sideStripeMat);
+        stripe.position.set(0, 0, side * 1.63);
+        helmetGroup.add(stripe);
+        const secondaryStripeShape = new THREE.Shape();
+        secondaryStripeShape.moveTo(-0.70, -0.19);
+        secondaryStripeShape.lineTo(-0.28, -0.07);
+        secondaryStripeShape.lineTo(0.28, 0.30);
+        secondaryStripeShape.lineTo(0.10, 0.34);
+        secondaryStripeShape.lineTo(-0.40, 0.04);
+        secondaryStripeShape.closePath();
+        const secondaryStripe = new THREE.Mesh(new THREE.ShapeGeometry(secondaryStripeShape), sideStripeMat);
+        secondaryStripe.position.set(0, 0, side * 1.64);
+        helmetGroup.add(secondaryStripe);
 
-      const crownRidge = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.08, 0.35), darkPaint);
-      crownRidge.position.set(-0.35, 1.85, 0);
-      crownRidge.rotation.z = 0.04;
-      riderHeadGroup.add(crownRidge);
+        const lowerShellShape = new THREE.Shape();
+        lowerShellShape.moveTo(-0.78, -0.48);
+        lowerShellShape.lineTo(-0.24, -0.57);
+        lowerShellShape.lineTo(0.58, -0.35);
+        lowerShellShape.lineTo(0.70, -0.16);
+        lowerShellShape.lineTo(0.12, -0.30);
+        lowerShellShape.lineTo(-0.52, -0.24);
+        lowerShellShape.closePath();
+        const lowerShellPanel = new THREE.Mesh(new THREE.ShapeGeometry(lowerShellShape), helmetNavyMat);
+        lowerShellPanel.position.set(0, 0, side * 1.645);
+        helmetGroup.add(lowerShellPanel);
+      });
 
+      helmetGroup.add(curveTube([
+        [-0.58, -0.60, -0.73], [-0.30, -0.69, -0.78], [0.10, -0.68, -0.80],
+        [0.54, -0.56, -0.79], [0.87, -0.42, -0.70]
+      ], 0.035, blackRubberMat));
+      helmetGroup.add(curveTube([
+        [-0.58, -0.60, 0.73], [-0.30, -0.69, 0.78], [0.10, -0.68, 0.80],
+        [0.54, -0.56, 0.79], [0.87, -0.42, 0.70]
+      ], 0.035, blackRubberMat));
+
+      riderHeadGroup.add(helmetGroup);
+      helmetGroup.scale.setScalar(0.86);
       group.add(riderHeadGroup);
 
       // Biker Arms & Bare Forearms Reaching to Handlebars
