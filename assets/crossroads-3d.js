@@ -2587,19 +2587,20 @@
 
     } else if (type === 'bike') {
       // 8 Diverse High-Contrast Bike & Biker Palettes
-      // Matching user reference image (media_1793919979374_c5baeb87.jpg):
-      // Full-Face Aerodynamic Racing Helmet with Curved Smoked Visor, White Racing Aero Stripes, and Upswept Rear Spoiler!
-      // Diverse Helmet Colors across the fleet: Electric Blue, Pearl White, Stealth Black, Deep Navy, Vibrant Orange, Crimson Red, Cyber Yellow, Cyan Sport.
+      // Matching user reference image (media_1793920786693_42103874.jpg):
+      // Retro Open-Face 3/4 Moto Helmet with Bold Racing Stripe, Chrome Brow Snaps,
+      // Visible Stylized Character Face, Cute Bulbous Nose, Friendly Smile & Cool Sunglasses!
+      // Diverse Helmet Colors across the fleet: Retro Moto Green (exact reference match), Electric Blue, Pearl White, Stealth Black, Deep Navy, Vibrant Orange, Crimson Red, Cyber Yellow.
       // Rule: "if the bike color is dark then the bikers attire should be light colour."
       const bikePalettes = [
-        { bike: 0x0066f5, helmet: 0x0066f5, shirt: 0xf97316, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 1. Electric Blue Helmet & Bike (Exact Image Match!)
+        { bike: 0x0066f5, helmet: 0x1b4332, shirt: 0xf97316, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 1. Retro Moto Green Helmet (Exact Match to Reference Image!) on Electric Blue Bike
         { bike: 0xf8fafc, helmet: 0xf8fafc, shirt: 0x0284c7, pants: 0x18181b, shoe: 0x64748b, caliper: 0xd97706 }, // 2. Pearl White Racing Helmet & White Superbike
         { bike: 0x111827, helmet: 0x111827, shirt: 0xf8fafc, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b }, // 3. Stealth Black Helmet & Bike (White Attire)
         { bike: 0x172554, helmet: 0x172554, shirt: 0xfef08a, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xf59e0b }, // 4. Navy Blue Racing Helmet & Navy Bike (Light Attire)
         { bike: 0xea580c, helmet: 0xea580c, shirt: 0xf8fafc, pants: 0x18181b, shoe: 0xf8fafc, caliper: 0xd97706 }, // 5. Vibrant Orange Racing Helmet & Orange Bike
         { bike: 0xf8fafc, helmet: 0xdc2626, shirt: 0xf97316, pants: 0x334155, shoe: 0xf8fafc, caliper: 0xd97706 }, // 6. Crimson Red Racing Helmet on White Superbike
         { bike: 0x090d12, helmet: 0xfacc15, shirt: 0xffffff, pants: 0xd1d5db, shoe: 0xffffff, caliper: 0xf59e0b }, // 7. Cyber Yellow Racing Helmet on Midnight Black Bike
-        { bike: 0x1e3a8a, helmet: 0x0284c7, shirt: 0xe0f2fe, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xd97706 }  // 8. Cyan Sport Helmet on Deep Navy Bike
+        { bike: 0x1e3a8a, helmet: 0x0066f5, shirt: 0xe0f2fe, pants: 0xcbd5e1, shoe: 0xffffff, caliper: 0xd97706 }  // 8. Electric Blue Helmet on Deep Navy Bike
       ];
       const palette = bikePalettes[appearanceSeed % bikePalettes.length];
       const parseHex = (hexStr, fallback) => {
@@ -2662,25 +2663,30 @@
         opacity: 0.68
       });
 
-      // Biker Materials: Full-Face Aerodynamic Helmet, Visor & Attire
+      // Biker Materials: Retro Open-Face Moto Helmet, Sunglasses, Face Skin & Attire
       const helmetMat = new THREE.MeshStandardMaterial({
         color: activeHelmetColor,
-        roughness: 0.14,
-        metalness: 0.35
-      });
-      const visorMat = new THREE.MeshStandardMaterial({
-        color: 0x070b12,
-        roughness: 0.05,
-        metalness: 0.88
+        roughness: 0.16,
+        metalness: 0.25
       });
       const helmetStripeMat = new THREE.MeshStandardMaterial({
-        color: 0xf8fafc,
+        color: 0xfef08a, // Warm cream-white retro racing stripe (exact match to reference image!)
+        roughness: 0.25,
+        metalness: 0.08
+      });
+      const sunglassFrameMat = new THREE.MeshStandardMaterial({
+        color: 0x090d12,
         roughness: 0.22,
-        metalness: 0.15
+        metalness: 0.45
+      });
+      const sunglassLensMat = new THREE.MeshStandardMaterial({
+        color: 0x020617,
+        roughness: 0.04,
+        metalness: 0.95
       });
       const shirtMat = new THREE.MeshStandardMaterial({ color: activeShirtColor, roughness: 0.65 });
       const pantsMat = new THREE.MeshStandardMaterial({ color: activePantsColor, roughness: 0.82 });
-      const skinMat = new THREE.MeshStandardMaterial({ color: activeSkinColor, roughness: 0.75 });
+      const skinMat = new THREE.MeshStandardMaterial({ color: activeSkinColor, roughness: 0.65 });
       const shoeUpperMat = new THREE.MeshStandardMaterial({ color: activeShoeColor, roughness: 0.7 });
       const shoeSoleWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
 
@@ -3016,7 +3022,7 @@
       torso.rotation.z = -0.65;
       group.add(torso);
 
-      // Neck & Athletic Hoodie Collar
+      // Neck & Athletic Shirt/Jacket Collar
       const riderNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 1.2, 10), skinMat);
       riderNeck.position.set(1.1, 11.4, 0);
       riderNeck.rotation.z = -0.3;
@@ -3027,94 +3033,163 @@
       group.add(neckCollar);
 
       // ==============================================================
-      // FULL-FACE AERODYNAMIC RACING HELMET (Exact Reference Image Match)
-      // Different Colors across fleet (Electric Blue, White, Black, Navy, Orange, Red, Yellow)
-      // With Dark Curved Visor, White Aerodynamic Crown & Brow Stripes, and Rear Diffuser Spoiler
+      // 10. THE BIKER (RIDER): STYLIZED 3D CHARACTER WITH OPEN-FACE HELMET,
+      // VISIBLE EXPRESSIVE FACE, SCULPTED NOSE, FRIENDLY SMILE & COOL SUNGLASSES!
+      // (Exact match to user's uploaded reference image media_1793920786693_42103874.jpg)
       // ==============================================================
-      const helmetGroup = new THREE.Group();
-      helmetGroup.position.set(1.65, 12.35, 0);
-      helmetGroup.rotation.z = -0.26; // Aggressive forward tuck looking down the road
+      const riderHeadGroup = new THREE.Group();
+      riderHeadGroup.position.set(1.55, 12.35, 0);
+      riderHeadGroup.rotation.z = -0.15; // Natural posture looking down the road
 
-      // 1. Aerodynamic Contoured Outer Shell (Teardrop sportbike helmet profile)
-      const shellGeom = new THREE.SphereGeometry(1.52, 24, 20);
-      const helmetShell = new THREE.Mesh(shellGeom, helmetMat);
-      helmetShell.scale.set(1.42, 1.35, 1.28);
-      helmetGroup.add(helmetShell);
+      // --- A. THE CHARACTER FACE & HEAD (Warm Natural Skin Tone) ---
+      // Head Cranium & Face Volume
+      const faceCranium = new THREE.Mesh(new THREE.SphereGeometry(1.26, 22, 18), skinMat);
+      faceCranium.scale.set(1.14, 1.25, 1.15);
+      faceCranium.position.set(0.10, 0.05, 0);
+      riderHeadGroup.add(faceCranium);
 
-      // 2. Full-Face Chin Bar & Jaw Guard (Extends forward to shield rider's jaw)
-      const chinBar = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.95, 1.88), helmetMat);
-      chinBar.position.set(1.25, -0.62, 0);
-      chinBar.rotation.z = 0.22;
-      helmetGroup.add(chinBar);
+      // Cute Rounded Sculpted Cartoon Nose (Exact match to reference image!)
+      const cartoonNose = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 14), skinMat);
+      cartoonNose.scale.set(1.30, 0.95, 0.95);
+      cartoonNose.position.set(1.32, -0.05, 0);
+      riderHeadGroup.add(cartoonNose);
 
-      // Rounded Front Chin Cone Tip
-      const chinTip = new THREE.Mesh(new THREE.SphereGeometry(0.55, 14, 12), helmetMat);
-      chinTip.scale.set(0.85, 0.85, 1.6);
-      chinTip.position.set(1.78, -0.62, 0);
-      helmetGroup.add(chinTip);
+      // Friendly Cheerful Smile Mouth Curve
+      const smileGeom = new THREE.TorusGeometry(0.36, 0.045, 8, 16, Math.PI * 0.75);
+      const smile = new THREE.Mesh(smileGeom, darkPaint);
+      smile.rotation.y = Math.PI / 2;
+      smile.rotation.x = -Math.PI * 0.12;
+      smile.position.set(1.22, -0.38, 0);
+      riderHeadGroup.add(smile);
 
-      // 3. Front Chin Air Intake Grille (Matte black vent at the mouth)
-      const chinVent = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.38, 0.72), darkPaint);
-      chinVent.position.set(2.18, -0.62, 0);
-      helmetGroup.add(chinVent);
+      // Inner White Teeth Accent
+      const smileTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.10, 0.36), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }));
+      smileTeeth.position.set(1.20, -0.34, 0);
+      riderHeadGroup.add(smileTeeth);
 
-      // 4. Curved Dark Smoked Panoramic Racing Visor Shield (Mirror-tint reflection)
-      const visor = new THREE.Mesh(new THREE.SphereGeometry(1.48, 22, 16), visorMat);
-      visor.scale.set(1.18, 0.62, 1.10);
-      visor.position.set(0.68, 0.08, 0);
-      helmetGroup.add(visor);
-
-      // Visor Pivot Hinge Plates & Pivot Screws on Temple Sides
+      // Arched Cartoon Eyebrows
       [-1, 1].forEach(side => {
-        const pivotPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.10, 14), darkPaint);
-        pivotPlate.rotation.x = Math.PI / 2;
-        pivotPlate.position.set(0.14, 0.14, side * 1.50);
-        helmetGroup.add(pivotPlate);
-
-        const pivotScrew = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.14, 10), silverMetal);
-        pivotScrew.rotation.x = Math.PI / 2;
-        pivotScrew.position.set(0.14, 0.14, side * 1.53);
-        helmetGroup.add(pivotScrew);
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.36), darkPaint);
+        brow.position.set(1.18, 0.56, side * 0.42);
+        brow.rotation.z = -0.15;
+        brow.rotation.y = side * 0.14;
+        riderHeadGroup.add(brow);
       });
 
-      // 5. Signature White Aerodynamic Racing Crown Stripe & Forehead Brow Arc (Signature Image Feature)
-      // Top Center Racing Stripe running over the dome from brow to back
-      const crownStripe = new THREE.Mesh(new THREE.BoxGeometry(2.95, 0.12, 0.36), helmetStripeMat);
-      crownStripe.position.set(-0.12, 1.76, 0);
-      crownStripe.rotation.z = 0.08;
-      helmetGroup.add(crownStripe);
+      // Cute Rounded Cartoon Ears on Sides
+      [-1, 1].forEach(side => {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.30, 12, 10), skinMat);
+        ear.scale.set(0.65, 1.1, 0.75);
+        ear.position.set(0.12, -0.06, side * 1.25);
+        riderHeadGroup.add(ear);
+      });
 
-      // Curved Forehead Brow Arc Stripe just above the top edge of the visor
-      const browArc = new THREE.Mesh(new THREE.TorusGeometry(1.40, 0.085, 8, 24, Math.PI * 0.64), helmetStripeMat);
-      browArc.rotation.y = Math.PI / 2;
-      browArc.rotation.x = -Math.PI * 0.18;
-      browArc.position.set(0.42, 0.86, 0);
-      browArc.scale.set(0.85, 1.0, 1.05);
-      helmetGroup.add(browArc);
+      // --- B. THE COOL SUNGLASSES ("put a sunglass") ---
+      // Sunglasses Center Nose Bridge
+      const sunglassBridge = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.09, 0.32), sunglassFrameMat);
+      sunglassBridge.position.set(1.38, 0.22, 0);
+      riderHeadGroup.add(sunglassBridge);
 
-      // 6. Rear Aerodynamic Diffuser / Spoiler Fin (High-speed stability winglet)
-      const spoilerShape = new THREE.Shape();
-      spoilerShape.moveTo(-1.1, 0.75);
-      spoilerShape.lineTo(-2.05, 0.45);
-      spoilerShape.lineTo(-1.85, 0.10);
-      spoilerShape.lineTo(-1.0, 0.30);
-      spoilerShape.closePath();
-      const spoiler = new THREE.Mesh(new THREE.ExtrudeGeometry(spoilerShape, {
-        depth: 1.38,
-        bevelEnabled: true,
-        bevelSize: 0.06,
-        bevelThickness: 0.06
-      }), helmetMat);
-      spoiler.position.z = -0.69;
-      helmetGroup.add(spoiler);
+      // Dark Polarized Lenses with High-Gloss Sheen & Acetate Frames
+      [-1, 1].forEach(side => {
+        // Dark Tinted Polarized Lens
+        const lens = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.42, 0.52), sunglassLensMat);
+        lens.position.set(1.32, 0.22, side * 0.44);
+        lens.rotation.y = side * 0.16;
+        riderHeadGroup.add(lens);
 
-      // 7. Rubber Neck Seal / Base Gasket around lower rim
-      const baseGasket = new THREE.Mesh(new THREE.TorusGeometry(1.22, 0.12, 8, 20), darkPaint);
-      baseGasket.rotation.x = Math.PI / 2;
-      baseGasket.position.set(-0.08, -1.15, 0);
-      helmetGroup.add(baseGasket);
+        // Outer Beveled Sunglass Frame Border
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.48, 0.58), sunglassFrameMat);
+        frame.position.set(1.29, 0.22, side * 0.44);
+        frame.rotation.y = side * 0.16;
+        riderHeadGroup.add(frame);
 
-      group.add(helmetGroup);
+        // Sunglass Temple Arms Extending Back Over the Ears into Helmet Padding
+        const templeArm = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.08, 0.07), sunglassFrameMat);
+        templeArm.position.set(0.64, 0.24, side * 0.74);
+        templeArm.rotation.y = side * 0.16;
+        riderHeadGroup.add(templeArm);
+
+        // Silver Metal Hinge Rivet on Temple Corner
+        const hingePin = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.08, 8), silverMetal);
+        hingePin.rotation.z = Math.PI / 2;
+        hingePin.position.set(1.30, 0.38, side * 0.72);
+        riderHeadGroup.add(hingePin);
+      });
+
+      // --- C. THE RETRO OPEN-FACE 3/4 MOTORCYCLE HELMET ---
+      // Wraps cleanly around top, sides & rear of the head, leaving the face completely open!
+      // 1. Top Crown Dome
+      const crownDome = new THREE.Mesh(
+        new THREE.SphereGeometry(1.52, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.48),
+        helmetMat
+      );
+      crownDome.scale.set(1.24, 1.24, 1.24);
+      crownDome.position.set(-0.05, 0.15, 0);
+      riderHeadGroup.add(crownDome);
+
+      // 2. Rear & Neck Protective Shell (Covers back half of head)
+      const rearShellGeom = new THREE.CylinderGeometry(1.46, 1.50, 1.55, 24, 1, false, Math.PI * 0.42, Math.PI * 1.16);
+      const rearShell = new THREE.Mesh(rearShellGeom, helmetMat);
+      rearShell.position.set(-0.15, -0.35, 0);
+      riderHeadGroup.add(rearShell);
+
+      // 3. Side Cheek Guards (Framing the open face cutout)
+      [-1, 1].forEach(side => {
+        const cheekGuard = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.28, 0.22), helmetMat);
+        cheekGuard.position.set(0.18, -0.22, side * 1.38);
+        riderHeadGroup.add(cheekGuard);
+
+        // Black Foam / Cushion Interior Padding Liner visible along face rim
+        const foamPadding = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.18, 0.10), darkPaint);
+        foamPadding.position.set(0.18, -0.22, side * 1.26);
+        riderHeadGroup.add(foamPadding);
+
+        // Chrome Opening Border Trim Bead along Cheek Opening
+        const cheekTrim = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 1.30, 10), silverMetal);
+        cheekTrim.position.set(0.65, -0.22, side * 1.40);
+        riderHeadGroup.add(cheekTrim);
+      });
+
+      // 4. Front Brow Visor Peak / Overhang Lip
+      const browPeak = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.18, 1.95), helmetMat);
+      browPeak.position.set(1.02, 0.86, 0);
+      browPeak.rotation.z = -0.15;
+      riderHeadGroup.add(browPeak);
+
+      // Chrome Brow Rim Trim Bead
+      const browTrim = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 1.95, 12), silverMetal);
+      browTrim.rotation.z = Math.PI / 2;
+      browTrim.position.set(1.18, 0.82, 0);
+      riderHeadGroup.add(browTrim);
+
+      // 5. Signature Thick Racing Center Stripe (Bold White/Cream feature from reference image!)
+      const crownStripe = new THREE.Mesh(new THREE.BoxGeometry(3.05, 0.14, 0.52), helmetStripeMat);
+      crownStripe.position.set(-0.12, 1.74, 0);
+      crownStripe.rotation.z = 0.06;
+      riderHeadGroup.add(crownStripe);
+
+      const browStripe = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.19, 0.52), helmetStripeMat);
+      browStripe.position.set(1.03, 0.87, 0);
+      browStripe.rotation.z = -0.15;
+      riderHeadGroup.add(browStripe);
+
+      // 6. Classic 3 Chrome Snap Studs on Brow (Retro Moto Helmet Rivets)
+      [-0.65, 0, 0.65].forEach(z => {
+        const snap = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.10, 10), silverMetal);
+        snap.rotation.z = Math.PI / 2;
+        snap.position.set(1.16, 0.92, z);
+        riderHeadGroup.add(snap);
+      });
+
+      // 7. Chinstrap with Chrome Buckle
+      addVehicleBeam([0.2, -0.3, -1.25], [0.45, -0.85, 0], 0.08, darkPaint);
+      addVehicleBeam([0.45, -0.85, 0], [0.2, -0.3, 1.25], 0.08, darkPaint);
+      const chinstrapBuckle = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.22), silverMetal);
+      chinstrapBuckle.position.set(0.48, -0.85, 0);
+      riderHeadGroup.add(chinstrapBuckle);
+
+      group.add(riderHeadGroup);
 
       // Biker Arms & Bare Forearms Reaching to Handlebars
       [-1, 1].forEach(side => {
