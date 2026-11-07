@@ -106,8 +106,8 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=smooth-60-120hz-v1"></script>
-  <script src="assets/scroll-transit-hero.js?v=smooth-60-120hz-v1"></script>
+  <script src="assets/crossroads-3d.js?v=restore-2d-mode-v1"></script>
+  <script src="assets/scroll-transit-hero.js?v=restore-2d-mode-v1"></script>
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
@@ -1034,21 +1034,25 @@
         opacity: 0.98 !important;
       }
 
-      .cr-headlight-beam,
-      #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-beam,
-      #dhakaCrossroadsContainer[data-crossroads-weather*="fog"] .cr-headlight-beam,
-      #dhakaCrossroadsContainer[data-crossroads-weather*="overcast"] .cr-headlight-beam {
+      /* Headlight cones hidden ONLY in 3D Drone Mode */
+      #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-beam {
         display: none !important;
         opacity: 0 !important;
         pointer-events: none !important;
+      }
+      #dhakaCrossroadsContainer:not(.is-3d-drone-mode) .cr-headlight-beam {
+        display: inline !important;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+        pointer-events: none;
       }
 
       .cr-streetlamp-head {
         filter: drop-shadow(0 0 6px rgba(254, 240, 138, 0.95)) !important;
       }
 
-      ellipse[fill="url(#streetlampPoolGrad)"],
-      #dhakaCrossroadsContainer.is-3d-drone-mode ellipse[fill="url(#streetlampPoolGrad)"] {
+      ellipse[fill*="streetlampPoolGrad"],
+      #dhakaCrossroadsContainer ellipse[fill*="streetlampPoolGrad"] {
         display: none !important;
       }
 
@@ -1077,15 +1081,9 @@
         opacity: 0.98 !important;
       }
 
-      /* Ensure moving vehicles do NOT have transition: all or filter transitions on mobile */
       #dhakaVehiclesLayer,
-      #dhakaVehiclesLayer > g,
-      #emergencyAmbulanceVehicle,
-      #emergencyAmbulanceMover,
-      #crossroadsMetroTrain,
-      .ambulance-mover {
-        transition: none !important;
-        will-change: transform !important;
+      #crossroadsMetroTrain {
+        will-change: transform;
       }
 
       /* Mobile Entryway / Porch Lights */
@@ -1216,11 +1214,6 @@
       filter: blur(1px);
     }
 
-    /* Volumetric Warm Streetlight Road Surface Illumination & Soft Bloom */
-    #dhakaCrossroadsContainer.is-3d-drone-mode ellipse[fill="url(#streetlampPoolGrad)"] {
-      opacity: 0.72;
-      filter: url(#crStreetlampGlow) drop-shadow(0 0 16px rgba(254, 240, 138, 0.35));
-    }
 
     /* Atmospheric Lighting Bloom on Street Lamps, Headlights, Building Windows & Porch Lights */
     .cr-headlight-bulb,
@@ -1572,8 +1565,24 @@
     [data-crossroads-weather="night_overcast"] #crOvercastLayer { opacity: 1 !important; }
     [data-crossroads-weather="night_overcast"] #crNightLayer { opacity: 0.40 !important; }
 
-    /* Dynamic Vehicle Headlights & Realistic Luminous Illumination */
+    /* Dynamic Vehicle Headlights: Sharp Directional Headlight Cones in 2D Flat Mode */
     .cr-headlight-beam {
+      display: inline !important;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      opacity: 0.88;
+      filter: url(#crHeadlightBeamGlow);
+    }
+    [data-crossroads-weather="sun"] .cr-headlight-beam {
+      opacity: 0.12 !important;
+    }
+    [data-crossroads-weather="rain"] .cr-headlight-beam {
+      opacity: 0.92 !important;
+      filter: drop-shadow(0 0 10px rgba(186, 230, 253, 0.9)) !important;
+    }
+    /* Headlight cones hidden ONLY in 3D Drone Mode where 3D WebGL diorama renders realistic 3D lighting */
+    #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-beam {
       display: none !important;
       opacity: 0 !important;
       pointer-events: none !important;
@@ -1690,21 +1699,6 @@
     .night-overcast [filter*="crWindowGlow"] {
       filter: drop-shadow(0 0 3px rgba(254, 240, 138, 0.45)) !important;
       opacity: 0.90 !important;
-    }
-    /* 20% Intensity for Streetlamp Ground Pools in Foggy & Overcast */
-    [data-crossroads-weather="fog_night"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="night_overcast"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="sunset_overcast"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="fog_sunset"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="fog_sunrise"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="fog_day"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="day_overcast"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="morning_overcast"] ellipse[fill*="streetlampPoolGrad"],
-    [data-crossroads-weather="sunrise_overcast"] ellipse[fill*="streetlampPoolGrad"],
-    .is-foggy-night ellipse[fill*="streetlampPoolGrad"],
-    .night-overcast ellipse[fill*="streetlampPoolGrad"] {
-      opacity: 0.20 !important;
-      filter: none !important;
     }
     /* 20% Intensity for Streetlamp Lantern Head Glow in Foggy & Overcast */
     [data-crossroads-weather="fog_night"] circle[filter*="crLightGlow"],
@@ -1885,87 +1879,51 @@
       pointer-events: none;
     }
 
-    /* GPU Layer Isolation & Anti-Flicker Promotion for Buttery-Smooth 60/90/120fps */
-    /* Backface culling and translateZ(0) across animated vehicles, lights, crosswalks & atmosphere */
-    #dhakaVehiclesLayer,
-    #dhakaVehiclesLayer > g,
-    #emergencyAmbulanceMover,
-    #emergencyAmbulanceVehicle,
-    .ambulance-mover,
-    #dhakaPedestriansLayer,
-    #dhakaPedestriansLayer > g,
-    #crossroadsMetroTrain,
-    .cr-headlight-bulb,
-    .cr-headlight-beam,
-    .cr-streetlamp-head,
-    .vehicle-headlight,
-    .headlight-glow,
-    .amb-strobe-red,
-    .amb-strobe-blue,
-    .amb-beacon-red,
-    .amb-beacon-blue,
-    .amb-headlight-pulse,
-    #crossroadsPavementMarkings,
-    .crosswalk-marking,
-    #crAtmosphereOverlays,
-    #crAtmosphereOverlays > g,
-    #crossroadsWeatherRain,
-    #crossroadsWeatherHaze,
-    #headerLightningFlashOverlay,
-    #crossroadsVolumetricFogHaze,
-    #crNightLayer,
-    #crSunriseLayer {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      transform: translateZ(0);
-    }
-
-    /* Distinct translate3d Z-separation to eliminate Z-fighting across overlapping layers */
-    /* Level 0: Ground roadbeds & asphalt */
+    /* ========================================================
+       2D FLAT MODE: RESTORE VEHICLES, LAYER ORDER & CLEAN LIGHTING
+       ======================================================== */
+    /* Strict 2D Layer Ordering (z-index hierarchy) */
     #crossroadsRoadbeds,
     #dhakaCrossroadsContainer svg > rect[fill="url(#crAsphaltGrad)"] {
-      contain: paint layout;
-      transform: translate3d(0, 0, 0px);
+      z-index: 1;
     }
 
-    /* Level 1: Lane markings, curbs & zebra crosswalks */
+    #crossroadsSidewalks {
+      z-index: 2;
+    }
+
     #crossroadsPavementMarkings,
-    #crossroadsSidewalks,
     .crosswalk-marking {
-      contain: paint layout;
-      transform: translate3d(0, 0, 1px);
+      z-index: 3;
     }
 
-    /* Level 2: Ground illumination pools & ambient cast shadows */
-    ellipse[fill="url(#streetlampPoolGrad)"],
-    ellipse[fill="url(#ambRoadPoolRed)"],
-    ellipse[fill="url(#ambRoadPoolBlue)"],
-    ellipse[fill="url(#entrywayDownlightPoolGrad)"],
-    #fogBloomsGroup {
-      transform: translate3d(0, 0, 2px);
+    #crossroadsSignals {
+      z-index: 5;
     }
 
-    /* Level 3: Sweeping vehicle light cones & strobe flares */
-    .cr-headlight-beam,
-    .amb-headlight-pulse,
-    polygon[fill="url(#ambFlareConeRed)"],
-    polygon[fill="url(#ambFlareConeBlue)"] {
-      transform: translate3d(0, 0, 3px);
+    #surroundingBuildingsLayer {
+      z-index: 8;
     }
 
-    /* Level 4: Moving vehicles & pedestrians */
+    /* Moving 2D Vehicles and Emergency Units on Top of Asphalt and Markings */
     #dhakaVehiclesLayer,
-    #dhakaVehiclesLayer > g,
     #emergencyAmbulanceMover,
-    #emergencyAmbulanceVehicle,
-    .ambulance-mover,
-    #dhakaPedestriansLayer,
-    #dhakaPedestriansLayer > g {
-      transform: translate3d(0, 0, 4px);
+    .ambulance-mover {
+      z-index: 10;
+      pointer-events: auto;
+    }
+
+    #dhakaVehiclesLayer {
       will-change: transform;
     }
 
-    /* Level 5: Elevated Viaduct Superstructure & Metro Train */
+    /* 2D Pedestrians on Top of Crosswalks & Vehicles */
+    #dhakaPedestriansLayer {
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    /* Elevated Viaduct Superstructure & Metro Rail */
     #metroViaductStructureGroup,
     #metroViaductPillarsGroup,
     #metroViaductTrackGroup,
@@ -1973,30 +1931,29 @@
     #mirpur10StationGroup,
     #mirpur10StationGroup3d,
     #crossroadsMetroTrain {
-      transform: translate3d(0, 0, 5px);
+      z-index: 15;
+    }
+    #crossroadsMetroTrain {
       will-change: transform;
     }
 
-    /* Level 6: Surrounding Buildings & Traffic Signals */
-    #surroundingBuildingsLayer,
-    #nw3dBuildingsGroup,
-    #ne3dBuildingsGroup,
-    #sw3dBuildingsGroup,
-    #se3dBuildingsGroup,
-    #crossroadsSignals {
-      contain: paint layout;
-      transform: translate3d(0, 0, 6px);
-    }
-
-    /* Level 7: Weather overlays & atmospheric mist */
+    /* Atmosphere Overlays */
     #crAtmosphereOverlays,
-    #crAtmosphereOverlays > g,
     #crossroadsVolumetricFogHaze,
     #crossroadsWeatherRain,
     #crossroadsWeatherHaze,
     #headerLightningFlashOverlay {
-      transform: translate3d(0, 0, 7px);
-      will-change: transform;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    /* Eliminate Muddy Yellow Radial-Gradient Intersection Overlays */
+    ellipse[fill*="streetlampPoolGrad"],
+    #dhakaCrossroadsContainer ellipse[fill*="streetlampPoolGrad"] {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
     }
 
     /* Vibrant Neon Drop-Shadow Effects for Buildings, Shops, Metro & Signals */
@@ -7154,23 +7111,6 @@
           <!-- ========================================================
                6. WARM STREETLIGHTS & TREES (Dhaka Evening Ambience)
                ======================================================== -->
-
-          <!-- Enhanced Streetlight Radial Illumination Pools on Asphalt (High Luminance) -->
-          <!-- 4 Corner Intersection Illumination Pools -->
-          <ellipse cx="460" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="740" cy="320" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="460" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="740" cy="520" rx="115" ry="85" fill="url(#streetlampPoolGrad)" opacity="0.65" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-
-          <!-- Sidewalk Illumination Pools along East/West Avenues -->
-          <ellipse cx="180" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="325" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="180" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="325" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="880" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="1030" cy="325" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="880" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
-          <ellipse cx="1030" cy="515" rx="90" ry="65" fill="url(#streetlampPoolGrad)" opacity="0.6" filter="url(#crStreetlampGlow)" style="mix-blend-mode: screen;"/>
 
           <!-- Streetlight Poles & Fixtures with Glowing Warm Lantern Heads -->
           <g stroke="#64748b" stroke-width="2">
