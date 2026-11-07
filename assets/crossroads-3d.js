@@ -3708,7 +3708,7 @@
     // 3. Renderer (High performance WebGL locked to 120 FPS with capped pixel ratio)
     renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(window.innerWidth < 768 ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.35));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
     renderer.shadowMap.enabled = false;
     if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -4319,6 +4319,7 @@
     if (width > 0 && height > 0) {
       const aspect = width / height;
       updateCameraFraming(aspect);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
       renderer.setSize(width, height, false);
     }
   }

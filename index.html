@@ -106,8 +106,8 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=vehicle-details-20261106-v14"></script>
-  <script src="assets/scroll-transit-hero.js?v=cyberpunk-wheels-20261106-v3"></script>
+  <script src="assets/crossroads-3d.js?v=smooth-60-120hz-v1"></script>
+  <script src="assets/scroll-transit-hero.js?v=smooth-60-120hz-v1"></script>
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
@@ -1025,14 +1025,13 @@
       }
 
       /* 6. Mobile High-Intensity Headlights, Streetlamps & Window Glow */
+      /* Replaced heavy per-frame drop-shadow on moving vehicles with GPU-friendly opacity */
       .cr-headlight-bulb,
       #dhakaCrossroadsContainer.is-3d-drone-mode .cr-headlight-bulb,
       .vehicle-headlight,
       .headlight-glow {
-        filter: drop-shadow(0 0 16px rgba(56, 189, 248, 1))
-                drop-shadow(0 0 28px rgba(56, 189, 248, 0.85))
-                drop-shadow(0 0 6px rgba(255, 255, 255, 1)) !important;
-        opacity: 1 !important;
+        filter: none !important;
+        opacity: 0.98 !important;
       }
 
       .cr-headlight-beam,
@@ -1070,12 +1069,23 @@
         opacity: 0.75 !important;
       }
 
-      /* Mobile Vehicle Tail Lights Piercing Glow */
+      /* Mobile Vehicle Tail Lights - Lightweight GPU rendering without frame-stalling multi-shadows */
       #dhakaCrossroadsContainer #dhakaVehiclesLayer circle[fill="#ff2a54"],
       #dhakaCrossroadsContainer #dhakaVehiclesLayer rect[fill="#ff2a54"],
       #dhakaCrossroadsContainer #crossroadsMetroTrain circle[fill="#ff2a54"] {
-        filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 10px #ff2a54) drop-shadow(0 0 18px rgba(255, 42, 84, 0.85)) !important;
-        opacity: 1 !important;
+        filter: none !important;
+        opacity: 0.98 !important;
+      }
+
+      /* Ensure moving vehicles do NOT have transition: all or filter transitions on mobile */
+      #dhakaVehiclesLayer,
+      #dhakaVehiclesLayer > g,
+      #emergencyAmbulanceVehicle,
+      #emergencyAmbulanceMover,
+      #crossroadsMetroTrain,
+      .ambulance-mover {
+        transition: none !important;
+        will-change: transform !important;
       }
 
       /* Mobile Entryway / Porch Lights */
@@ -1875,24 +1885,117 @@
       pointer-events: none;
     }
 
-    /* GPU Layer Isolation & Promotion for Buttery-Smooth 60/120fps Rendering */
-    #surroundingBuildingsLayer,
-    #crossroadsRoadbeds,
-    #crossroadsSidewalks,
+    /* GPU Layer Isolation & Anti-Flicker Promotion for Buttery-Smooth 60/90/120fps */
+    /* Backface culling and translateZ(0) across animated vehicles, lights, crosswalks & atmosphere */
+    #dhakaVehiclesLayer,
+    #dhakaVehiclesLayer > g,
+    #emergencyAmbulanceMover,
+    #emergencyAmbulanceVehicle,
+    .ambulance-mover,
+    #dhakaPedestriansLayer,
+    #dhakaPedestriansLayer > g,
+    #crossroadsMetroTrain,
+    .cr-headlight-bulb,
+    .cr-headlight-beam,
+    .cr-streetlamp-head,
+    .vehicle-headlight,
+    .headlight-glow,
+    .amb-strobe-red,
+    .amb-strobe-blue,
+    .amb-beacon-red,
+    .amb-beacon-blue,
+    .amb-headlight-pulse,
     #crossroadsPavementMarkings,
-    #crossroadsSignals,
-    #metroViaductPillarsGroup,
-    #metroViaductTrackGroup {
-      contain: paint layout;
+    .crosswalk-marking,
+    #crAtmosphereOverlays,
+    #crAtmosphereOverlays > g,
+    #crossroadsWeatherRain,
+    #crossroadsWeatherHaze,
+    #headerLightningFlashOverlay,
+    #crossroadsVolumetricFogHaze,
+    #crNightLayer,
+    #crSunriseLayer {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       transform: translateZ(0);
     }
+
+    /* Distinct translate3d Z-separation to eliminate Z-fighting across overlapping layers */
+    /* Level 0: Ground roadbeds & asphalt */
+    #crossroadsRoadbeds,
+    #dhakaCrossroadsContainer svg > rect[fill="url(#crAsphaltGrad)"] {
+      contain: paint layout;
+      transform: translate3d(0, 0, 0px);
+    }
+
+    /* Level 1: Lane markings, curbs & zebra crosswalks */
+    #crossroadsPavementMarkings,
+    #crossroadsSidewalks,
+    .crosswalk-marking {
+      contain: paint layout;
+      transform: translate3d(0, 0, 1px);
+    }
+
+    /* Level 2: Ground illumination pools & ambient cast shadows */
+    ellipse[fill="url(#streetlampPoolGrad)"],
+    ellipse[fill="url(#ambRoadPoolRed)"],
+    ellipse[fill="url(#ambRoadPoolBlue)"],
+    ellipse[fill="url(#entrywayDownlightPoolGrad)"],
+    #fogBloomsGroup {
+      transform: translate3d(0, 0, 2px);
+    }
+
+    /* Level 3: Sweeping vehicle light cones & strobe flares */
+    .cr-headlight-beam,
+    .amb-headlight-pulse,
+    polygon[fill="url(#ambFlareConeRed)"],
+    polygon[fill="url(#ambFlareConeBlue)"] {
+      transform: translate3d(0, 0, 3px);
+    }
+
+    /* Level 4: Moving vehicles & pedestrians */
     #dhakaVehiclesLayer,
+    #dhakaVehiclesLayer > g,
+    #emergencyAmbulanceMover,
+    #emergencyAmbulanceVehicle,
+    .ambulance-mover,
     #dhakaPedestriansLayer,
-    #crAtmosphereOverlays {
-      transform: translateZ(0);
+    #dhakaPedestriansLayer > g {
+      transform: translate3d(0, 0, 4px);
       will-change: transform;
     }
+
+    /* Level 5: Elevated Viaduct Superstructure & Metro Train */
+    #metroViaductStructureGroup,
+    #metroViaductPillarsGroup,
+    #metroViaductTrackGroup,
+    #metro3dViaductGroup,
+    #mirpur10StationGroup,
+    #mirpur10StationGroup3d,
     #crossroadsMetroTrain {
+      transform: translate3d(0, 0, 5px);
+      will-change: transform;
+    }
+
+    /* Level 6: Surrounding Buildings & Traffic Signals */
+    #surroundingBuildingsLayer,
+    #nw3dBuildingsGroup,
+    #ne3dBuildingsGroup,
+    #sw3dBuildingsGroup,
+    #se3dBuildingsGroup,
+    #crossroadsSignals {
+      contain: paint layout;
+      transform: translate3d(0, 0, 6px);
+    }
+
+    /* Level 7: Weather overlays & atmospheric mist */
+    #crAtmosphereOverlays,
+    #crAtmosphereOverlays > g,
+    #crossroadsVolumetricFogHaze,
+    #crossroadsWeatherRain,
+    #crossroadsWeatherHaze,
+    #headerLightningFlashOverlay {
+      transform: translate3d(0, 0, 7px);
       will-change: transform;
     }
 

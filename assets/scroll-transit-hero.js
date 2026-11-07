@@ -1202,7 +1202,13 @@
       cityGroup.add(curb);
     });
 
-    const laneMat = new THREE.MeshStandardMaterial({ color: 0xd9d3ba, roughness: 0.8 });
+    const laneMat = new THREE.MeshStandardMaterial({
+      color: 0xd9d3ba,
+      roughness: 0.8,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1
+    });
     for (let z = 55; z > -105; z -= 8) {
       [-3.9, 3.9].forEach(x => {
         const dash = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.025, 3.1), laneMat);
@@ -1210,7 +1216,13 @@
         cityGroup.add(dash);
       });
     }
-    const centerLineMat = new THREE.MeshStandardMaterial({ color: 0xf1c84b, roughness: 0.72 });
+    const centerLineMat = new THREE.MeshStandardMaterial({
+      color: 0xf1c84b,
+      roughness: 0.72,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1
+    });
     [-0.12, 0.12].forEach(x => {
       const centerLine = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.025, 170), centerLineMat);
       centerLine.position.set(x, 0.035, -24);
@@ -1912,7 +1924,7 @@
     camera.updateProjectionMatrix();
 
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(isLowEndDevice ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
     masterGroup.scale.setScalar(width < 768 ? 0.78 : 1);
   }
 
@@ -2009,7 +2021,7 @@
       precision: isLowEndDevice ? 'mediump' : 'highp'
     });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(isLowEndDevice ? Math.min(window.devicePixelRatio || 1, 1.15) : Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
     if (!isLowEndDevice) {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
