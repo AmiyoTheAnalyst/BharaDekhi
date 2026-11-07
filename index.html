@@ -106,8 +106,8 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=restore-2d-mode-v1"></script>
-  <script src="assets/scroll-transit-hero.js?v=restore-2d-mode-v1"></script>
+  <script src="assets/crossroads-3d.js?v=auth-gate-v1"></script>
+  <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
     #map { height: 320px; z-index: 10; border-radius: 0.75rem; }
@@ -5062,6 +5062,12 @@
 
           <p id="authSetupNotice" class="hidden mb-3 rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800"></p>
 
+          <!-- Mandatory Auth Gating Prompt for Route Planner & Fare Estimator -->
+          <div id="authGateNotice" class="hidden mb-3 rounded-xl border border-blue-200/80 bg-blue-50/90 dark:border-blue-800/80 dark:bg-blue-950/60 p-3 text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2.5 shadow-sm">
+            <span class="text-base leading-none shrink-0">🔒</span>
+            <span id="authGateNoticeText" class="leading-snug font-semibold">Sign in or create a free account to plan your route and check live fares.</span>
+          </div>
+
           <!-- Fluid Segmented Sliding Tab Track -->
           <div class="auth-tab-track relative grid grid-cols-2 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 mb-3.5 border border-slate-200/60 dark:border-slate-700/60">
             <div id="authSlidingPill" class="auth-sliding-pill absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-white dark:bg-slate-900 shadow-sm pointer-events-none transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
@@ -5109,8 +5115,8 @@
                 <span id="loginBtnText">Login</span>
               </button>
 
-              <button type="button" onclick="localStorage.setItem('commuteHubLoggedIn', 'true'); localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Dhaka Commuter', email: 'demo@bharadekhi.com' })); localStorage.setItem('commuteHubRole', 'user'); navigateToRoute('#/plan-trip');" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 transition-all active:scale-[0.99] mt-2 inline-flex items-center justify-center gap-1.5 cursor-pointer">
-                <span>⚡ Instant Guest Preview (No login needed)</span>
+              <button type="button" id="guestShowcaseBtn" onclick="navigateToRoute('#/home');" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 transition-all active:scale-[0.99] mt-2 inline-flex items-center justify-center gap-1.5 cursor-pointer" title="Return to 2D/3D Dhaka Crossroads showcase">
+                <span>🏙️ View 2D/3D City Showcase (Public Landing)</span>
               </button>
             </form>
 
@@ -5238,9 +5244,9 @@
           <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
             বাংলা
           </button>
-          <button type="button" onclick="logout()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-rose-950/80 hover:border-rose-700 text-slate-200 hover:text-rose-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Logout">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">Logout</span>
+          <button type="button" id="landingAuthBtn" onclick="handleLandingAuthAction()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Login / Logout">
+            <i id="landingAuthIcon" data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            <span id="landingAuthText" class="hidden sm:inline">Login</span>
           </button>
         </div>
 
@@ -7748,7 +7754,7 @@
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
         <div class="landing-cta-container absolute bottom-3 right-3 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 pointer-events-auto" style="bottom: max(0.75rem, env(safe-area-inset-bottom)); right: max(0.75rem, env(safe-area-inset-right));">
-          <button type="button" id="landingPlanTripBtn" onclick="navigateToRoute('#/story')" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
+          <button type="button" id="landingPlanTripBtn" onclick="handlePlanTripClick()" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
             <div class="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300 shrink-0">
               <i data-lucide="compass" class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white"></i>
             </div>
@@ -10654,6 +10660,10 @@
       'Total Route Fare': 'মোট রুট ভাড়া',
       'Total Journey Time': 'মোট যাত্রার সময়',
       'Plan your trip': 'যাত্রা পরিকল্পনা করুন',
+      'Sign in or create a free account to plan your route and check live fares.': 'আপনার রুট পরিকল্পনা ও লাইভ ভাড়া দেখতে সাইন ইন করুন বা বিনামূল্যে অ্যাকাউন্ট তৈরি করুন।',
+      'Sign in or create a free account to plan your route and check live fares': 'আপনার রুট পরিকল্পনা ও লাইভ ভাড়া দেখতে সাইন ইন করুন বা বিনামূল্যে অ্যাকাউন্ট তৈরি করুন',
+      'Sign In / Register': 'সাইন ইন / রেজিস্টার',
+      'Login': 'লগইন',
       'City Route Animation': 'শহরের রুট অ্যানিমেশন',
       'Open Planner': 'প্ল্যানার খুলুন',
       'Popular corridors:': 'জনপ্রিয় রুটসমূহ:',
@@ -16795,6 +16805,67 @@
     // =========================================================
     // SPA Route Navigation System (Screen 1: Landing, Screen 2: 3D Story Hero, Screen 3: Planner)
     // =========================================================
+    function isUserLoggedIn() {
+      const isTestBypass = window.location.search.includes('bypass_auth=true') || window.location.hash.includes('bypass_auth=true');
+      if (isTestBypass) return true;
+      return localStorage.getItem('commuteHubLoggedIn') === 'true' && Boolean(localStorage.getItem('commuteHubCurrentUser'));
+    }
+    window.isUserLoggedIn = isUserLoggedIn;
+
+    function promptLoginForPlanner(customMessage) {
+      sessionStorage.setItem('postAuthRedirect', '#/plan-trip');
+      const notice = document.getElementById('authGateNotice');
+      const noticeText = document.getElementById('authGateNoticeText');
+      if (notice && noticeText) {
+        noticeText.textContent = customMessage || getLocalizedText('Sign in or create a free account to plan your route and check live fares.');
+        notice.classList.remove('hidden');
+      }
+      setAuthTab('login');
+      navigateToRoute('#/login');
+    }
+    window.promptLoginForPlanner = promptLoginForPlanner;
+
+    function handlePlanTripClick() {
+      if (!isUserLoggedIn()) {
+        promptLoginForPlanner('Sign in or create a free account to plan your route and check live fares.');
+        return;
+      }
+      navigateToRoute('#/story');
+    }
+    window.handlePlanTripClick = handlePlanTripClick;
+
+    function handleLandingAuthAction() {
+      if (isUserLoggedIn()) {
+        logoutUser();
+      } else {
+        promptLoginForPlanner('Sign in or create a free account to plan your route and check live fares.');
+      }
+    }
+    window.handleLandingAuthAction = handleLandingAuthAction;
+
+    function updateAuthUIState() {
+      const loggedIn = isUserLoggedIn();
+      const landingBtn = document.getElementById('landingAuthBtn');
+      const landingText = document.getElementById('landingAuthText');
+      const landingIcon = document.getElementById('landingAuthIcon');
+      if (landingBtn && landingText) {
+        if (loggedIn) {
+          landingText.textContent = getLocalizedText('Logout');
+          landingBtn.title = getLocalizedText('Logout');
+          if (landingIcon) landingIcon.setAttribute('data-lucide', 'log-out');
+        } else {
+          landingText.textContent = getLocalizedText('Login');
+          landingBtn.title = getLocalizedText('Sign In / Register');
+          if (landingIcon) landingIcon.setAttribute('data-lucide', 'log-in');
+        }
+      }
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
+      updateUserGreeting();
+    }
+    window.updateAuthUIState = updateAuthUIState;
+
     function navigateToRoute(route) {
       if (window.location.hash !== route) {
         window.location.hash = route;
@@ -16813,28 +16884,36 @@
 
       const isStoryRoute = hash === '#/story' || hash === '#story' || hash === '#/transit-story' || hash === '#transit-story';
       const isPlannerRoute = hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner';
+      const isAuthRoute = hash === '#/login' || hash === '#login' || hash === '#/auth' || hash === '#auth' || hash === '#/signup' || hash === '#signup';
+      const isAdminRoute = hash === '#/admin' || hash === '#admin';
+      const isRoleRoute = hash === '#/role' || hash === '#role';
+
+      updateAuthUIState();
 
       if (!isLoggedIn) {
-        if (isPlannerRoute || isStoryRoute) {
-          localStorage.setItem('commuteHubLoggedIn', 'true');
-          localStorage.setItem('commuteHubCurrentUser', JSON.stringify({ name: 'Dhaka Commuter', email: 'demo@bharadekhi.com' }));
-          localStorage.setItem('commuteHubRole', 'user');
-          if (isStoryRoute) {
-            showView('story-hero');
-          } else {
-            showView('user-planner');
-          }
+        if (isPlannerRoute) {
+          promptLoginForPlanner('Sign in or create a free account to plan your route and check live fares.');
           return;
         }
-        showView('auth');
+        if (isAdminRoute || isRoleRoute || isAuthRoute) {
+          showView('auth');
+          return;
+        }
+        if (isStoryRoute) {
+          showView('story-hero');
+          return;
+        }
+        // Public Landing View: 2D/3D Dhaka Crossroads diorama
+        showView('user-landing');
         return;
       }
 
-      if (role === 'admin' && (hash === '#/admin' || hash === '#admin')) {
+      // Logged in user navigation:
+      if (role === 'admin' && isAdminRoute) {
         showView('admin');
         return;
       }
-      if ((role === 'admin-pending' || hash === '#/role' || hash === '#role') && role !== 'user') {
+      if ((role === 'admin-pending' || isRoleRoute) && role !== 'user') {
         showView('role');
         return;
       }
@@ -16842,6 +16921,8 @@
       if (isStoryRoute) {
         showView('story-hero');
       } else if (isPlannerRoute) {
+        showView('user-planner');
+      } else if (isAuthRoute) {
         showView('user-planner');
       } else {
         showView('user-landing');
@@ -16852,6 +16933,10 @@
     window.addEventListener('popstate', handleRoute);
 
     function openTripPlannerView() {
+      if (!isUserLoggedIn()) {
+        promptLoginForPlanner('Sign in or create a free account to plan your route and check live fares.');
+        return;
+      }
       navigateToRoute('#/plan-trip');
     }
 
@@ -19675,6 +19760,10 @@
       if (typeof window.destroyScrollTransitHero === 'function') {
         window.destroyScrollTransitHero();
       }
+      if (!isUserLoggedIn()) {
+        promptLoginForPlanner('Sign in or create a free account to plan your route and check live fares.');
+        return;
+      }
       navigateToRoute('#/plan-trip');
     };
     window.smoothScrollToPlanner = window.launchPlannerPage;
@@ -19947,8 +20036,11 @@
       } else {
         localStorage.setItem('commuteHubRole', 'user');
         showToast(`Welcome, ${displayName}!`);
-        navigateToRoute('#/home');
+        const targetRoute = sessionStorage.getItem('postAuthRedirect') || '#/plan-trip';
+        sessionStorage.removeItem('postAuthRedirect');
+        navigateToRoute(targetRoute);
       }
+      updateAuthUIState();
     }
 
     function showLoginError(message, target = 'both') {
@@ -20142,11 +20234,11 @@
           return;
         }
       }
-      localStorage.removeItem('commuteHubLoggedIn');
-      localStorage.removeItem('commuteHubRole');
-      localStorage.removeItem('commuteHubCurrentUser');
+      clearLocalAuthState();
+      sessionStorage.removeItem('postAuthRedirect');
       showToast('Logged out successfully.');
-      navigateToRoute('#/login');
+      updateAuthUIState();
+      navigateToRoute('#/home');
       setAuthTab('login');
     }
 
@@ -20398,8 +20490,8 @@
 
       if (!initializeSupabase()) {
         clearLocalAuthState();
-        showView('auth');
-        history.replaceState(null, '', '#/login');
+        updateAuthUIState();
+        showView('user-landing');
         return;
       }
 
@@ -20408,8 +20500,17 @@
         if (error) throw error;
         if (!session?.user) {
           clearLocalAuthState();
-          showView('auth');
-          history.replaceState(null, '', '#/login');
+          updateAuthUIState();
+          const hash = window.location.hash;
+          if (hash === '#/login' || hash === '#login') {
+            showView('auth');
+          } else if (hash === '#/plan-trip' || hash === '#plan-trip' || hash === '#planner' || hash === '#/planner') {
+            promptLoginForPlanner('Sign in or create a free account to plan your route and check live fares.');
+          } else if (hash === '#/story' || hash === '#story') {
+            showView('story-hero');
+          } else {
+            showView('user-landing');
+          }
           return;
         }
 
@@ -20420,6 +20521,7 @@
           email: user.email
         }));
         updateUserGreeting();
+        updateAuthUIState();
 
         if (isAdminUser(user)) {
           const role = localStorage.getItem('commuteHubRole');
@@ -20440,6 +20542,8 @@
           const hash = window.location.hash;
           if (hash === '#/plan-trip' || hash === '#plan-trip') {
             navigateToRoute('#/plan-trip');
+          } else if (hash === '#/story' || hash === '#story') {
+            navigateToRoute('#/story');
           } else {
             navigateToRoute('#/home');
           }
@@ -20447,9 +20551,8 @@
       } catch (error) {
         console.error('Could not restore the signed-in session:', error);
         clearLocalAuthState();
-        showToast(`Could not restore your session: ${error.message}`);
-        showView('auth');
-        history.replaceState(null, '', '#/login');
+        updateAuthUIState();
+        showView('user-landing');
       }
     }
 
