@@ -5519,29 +5519,29 @@
       setTimeout(() => {
         const bikeObj = vehicleMeshMap['v_eb_bike'];
         const bikeMesh = bikeObj ? bikeObj.mesh : null;
-        const bikeChildren = [];
-        if (bikeMesh) {
-          bikeMesh.traverse(c => {
-            if (c.isMesh) {
-              const b = new THREE.Box3().setFromObject(c);
-              const sz = new THREE.Vector3();
-              b.getSize(sz);
-              const cnt = new THREE.Vector3();
-              b.getCenter(cnt);
-              bikeChildren.push({
-                name: c.name,
-                mat: c.material ? c.material.name : null,
-                color: c.material?.color ? '#' + c.material.color.getHexString() : null,
-                size: [sz.x, sz.y, sz.z],
-                center: [cnt.x, cnt.y, cnt.z]
-              });
-            }
-          });
-        }
+        const targetV = new THREE.Vector3(0, 5.56, 18);
+        const projectedTarget = targetV.clone().project(camera);
+
+        // Raycast from camera to center of screen (NDC 0, 0)
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        const hits = intersects.slice(0, 5).map(hit => ({
+          name: hit.object.name,
+          parent: hit.object.parent?.name,
+          distance: hit.distance,
+          point: hit.point,
+          mat: hit.object.material?.name || hit.object.material?.type
+        }));
+
         const info = {
           camPos: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
           camLook: currentCamLook,
-          bikeChildren: bikeChildren
+          fov: camera.fov,
+          near: camera.near,
+          far: camera.far,
+          projectedTarget: { x: projectedTarget.x, y: projectedTarget.y, z: projectedTarget.z },
+          hitsAtScreenCenter: hits
         };
         fetch('/__log', { method: 'POST', body: JSON.stringify(info, null, 2) });
       }, 2000);
