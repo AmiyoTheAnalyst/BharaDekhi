@@ -36,6 +36,7 @@
   let vehicleMeshMap = {};
   let pedMeshMap = {};
   let rainParticles = null;
+  let cycleRickshawModelPromise = null;
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
@@ -203,13 +204,16 @@
   function getVehicleOrbitPose(target) {
     const yaw = vehicleOrbitYaw;
     const pitch = vehicleOrbitPitch + (target.type === 'rickshaw' ? 0.06 : 0);
-    const radius = target.type === 'car' ? 62
+    const baseRadius = target.type === 'car' ? 62
       : target.type === 'bike' ? 38
         : target.type === 'rickshaw' ? 46
           : target.type === 'cng' ? 48
             : 82;
+    const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+    const desktopCoverage = Math.tan(THREE.MathUtils.degToRad(38 / 2)) * 1.6;
+    const framingScale = horizontalCoverage > 0 ? Math.max(1, desktopCoverage / horizontalCoverage) : 1;
 
-    return getVehicleCameraPose(target, yaw, radius, pitch);
+    return getVehicleCameraPose(target, yaw, baseRadius * framingScale, pitch);
   }
 
   function isOrbitableVehicleMode(modeName) {
@@ -3991,6 +3995,65 @@
     return group;
   }
 
+  function loadCycleRickshawModel() {
+    if (!cycleRickshawModelPromise) {
+      cycleRickshawModelPromise = new Promise((resolve, reject) => {
+        if (typeof THREE.GLTFLoader !== 'function') {
+          reject(new Error('Three.js GLTFLoader is unavailable'));
+          return;
+        }
+
+        new THREE.GLTFLoader().load(
+          'assets/models/cycle-rickshaw.glb',
+          gltf => resolve(gltf.scene),
+          undefined,
+          reject
+        );
+      });
+    }
+    return cycleRickshawModelPromise;
+  }
+
+  function replaceRickshawWithModel(vehicle, prototype) {
+    const model = prototype.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) {
+      throw new Error('The Blender cycle-rickshaw model has invalid dimensions');
+    }
+
+    const scale = 26 / dimensions.x;
+    model.scale.setScalar(scale);
+    model.position.set(
+      -(bounds.min.x + bounds.max.x) * scale / 2,
+      -bounds.min.y * scale,
+      -(bounds.min.z + bounds.max.z) * scale / 2
+    );
+
+    const wheels = [];
+    let pedalCrank = null;
+    model.traverse(node => {
+      const name = node.name.toLowerCase();
+      if (/^wheel_(front|rear_(left|right))$/.test(name)) wheels.push(node);
+      if (name === 'pedal_crank') pedalCrank = node;
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+
+    if (wheels.length !== 3) {
+      throw new Error(`The Blender cycle-rickshaw model must contain three named wheel pivots; found ${wheels.length}`);
+    }
+
+    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    vehicle.add(model);
+    vehicle.userData.wheels = wheels;
+    vehicle.userData.wheelRadius = 3.65;
+    vehicle.userData.pedalCrank = pedalCrank;
+    delete vehicle.userData.updatePedaling;
+  }
+
   // 3D Ambulance Builder (High-Roof Emergency Van facing +X)
   function create3DAmbulance() {
     const ambGroup = new THREE.Group();
@@ -4683,6 +4746,17 @@
         };
       });
     }
+    if (Object.values(vehicleMeshMap).some(vehicle => vehicle.data && vehicle.data.type === 'rickshaw')) {
+      loadCycleRickshawModel()
+        .then(prototype => {
+          Object.values(vehicleMeshMap).forEach(vehicle => {
+            if (vehicle.data && vehicle.data.type === 'rickshaw') {
+              replaceRickshawWithModel(vehicle.mesh, prototype);
+            }
+          });
+        })
+        .catch(error => console.error('Unable to load the Blender cycle-rickshaw model; using the built-in fallback.', error));
+    }
 
     // 11. Instantiate 3D Emergency Ambulance (EB -> Heading 0)
     ambulanceGroup = create3DAmbulance();
@@ -5055,6 +5129,10 @@
       updateCameraFraming(aspect);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
       renderer.setSize(width, height, false);
+      if (activeTargetVehicle && isOrbitableVehicleMode(activeCamMode) && !scrollProgressCameraActive) {
+        const pose = getVehicleOrbitPose(activeTargetVehicle);
+        focusCamera(pose.position, pose.look, 0.2);
+      }
     }
   }
 
