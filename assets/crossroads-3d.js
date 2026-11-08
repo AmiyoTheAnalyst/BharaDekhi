@@ -1,5 +1,5 @@
 /**
- * BharaDekhi — Dhaka Mirpur 10 Crossroads
+ * Bhara dekhi — Dhaka Mirpur 10 Crossroads
  * Genuine 3D Miniature Diorama Engine using Three.js (WebGL)
  * 
  * Target Architecture:
@@ -1148,6 +1148,173 @@
     return texture;
   }
 
+  // ---------------------------------------------------------------------------
+  // Reusable Procedural Dhaka Textures (Cached singletons, 0 file requests)
+  // ---------------------------------------------------------------------------
+  let sharedCurbTexture = null;
+  function getCurbCanvasTexture() {
+    if (sharedCurbTexture) return sharedCurbTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    // Alternating 45-degree Dhaka municipal safety hazard stripes
+    ctx.fillStyle = '#facc15'; // Dhaka municipal yellow
+    ctx.fillRect(0, 0, 128, 32);
+    ctx.fillStyle = '#1e293b'; // Charcoal dark stripe
+    const stripeW = 16;
+    for (let x = -32; x < 160; x += stripeW * 2) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 16, 0);
+      ctx.lineTo(x + 16 + 18, 32);
+      ctx.lineTo(x + 18, 32);
+      ctx.closePath();
+      ctx.fill();
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(16, 1);
+    sharedCurbTexture = texture;
+    return sharedCurbTexture;
+  }
+
+  let sharedCngDecalTexture = null;
+  function getCngSideDecalTexture() {
+    if (sharedCngDecalTexture) return sharedCngDecalTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    // Emerald Green background
+    ctx.fillStyle = '#15803d';
+    ctx.fillRect(0, 0, 256, 128);
+
+    // Upper Diamond Wire Mesh Area
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 1.8;
+    const meshStep = 16;
+    for (let x = -64; x < 320; x += meshStep) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 64, 64);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x, 64);
+      ctx.lineTo(x + 64, 0);
+      ctx.stroke();
+    }
+
+    // Mid white banner: "★ FOR HIRE ★"
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(10, 68, 236, 26);
+    ctx.strokeStyle = '#dc2626';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 68, 236, 26);
+
+    ctx.fillStyle = '#dc2626';
+    ctx.font = 'bold 15px "Segoe UI", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('★ FOR HIRE ★', 128, 81);
+
+    // Lower Lemon-Yellow Band: "ONE PARIBAHAN · MIRPUR 10"
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(10, 98, 236, 24);
+    ctx.fillStyle = '#14532d';
+    ctx.font = 'bold 12px "Segoe UI", Arial, sans-serif';
+    ctx.fillText('ONE PARIBAHAN · MIRPUR 10', 128, 110);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    sharedCngDecalTexture = texture;
+    return sharedCngDecalTexture;
+  }
+
+  let sharedRickshawArtTexture = null;
+  function getRickshawArtTexture() {
+    if (sharedRickshawArtTexture) return sharedRickshawArtTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 160;
+    const ctx = canvas.getContext('2d');
+
+    // Traditional Rickshaw Tinplate Art: Turquoise / Midnight Blue base with gold rim
+    const grad = ctx.createLinearGradient(0, 0, 256, 160);
+    grad.addColorStop(0, '#0284c7');
+    grad.addColorStop(0.5, '#0f172a');
+    grad.addColorStop(1, '#db2777');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 160);
+
+    // Decorative Gold Filigree Border
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 244, 148);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(12, 12, 232, 136);
+
+    // Stylized Peacock / Floral Motifs
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.arc(128, 70, 38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.arc(128, 70, 24, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(128, 70, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Authentic Bengali Typography: "ঢাকা"
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px "Segoe UI", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('ঢাকা', 128, 124);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearFilter;
+    sharedRickshawArtTexture = texture;
+    return sharedRickshawArtTexture;
+  }
+
+  let sharedRollerShutterTexture = null;
+  function getRollerShutterTexture() {
+    if (sharedRollerShutterTexture) return sharedRollerShutterTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    // Galvanized Corrugated Metal Rollup Shutter
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(0, 0, 128, 128);
+
+    const slatH = 8;
+    for (let y = 0; y < 128; y += slatH) {
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(0, y, 128, 3);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(0, y + 3, 128, 3);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(0, y + 6, 128, 2);
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 4);
+    sharedRollerShutterTexture = texture;
+    return sharedRollerShutterTexture;
+  }
+
   // Procedural 2048x2048 Matte Slate Asphalt Road Network Texture (Zero z-fighting, Zero light bleed, 1 draw call)
   function createRoadCanvasTexture() {
     const canvas = document.createElement('canvas');
@@ -1290,6 +1457,175 @@
     drawZebra(false, 0, -92, 220, 22);
     drawZebra(false, 0, 92, 220, 22);
 
+    // 7. Yellow Box Junction Cross-Hatch Grid (Mirpur 10 Intersection Center)
+    const boxX1 = toPx(-120);
+    const boxX2 = toPx(120);
+    const boxY1 = toPy(-92);
+    const boxY2 = toPy(92);
+    const boxW = boxX2 - boxX1;
+    const boxH = boxY2 - boxY1;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(boxX1, boxY1, boxW, boxH);
+    ctx.clip();
+
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.42)';
+    ctx.lineWidth = 3.2;
+    const dStep = 32 * scale;
+    for (let x = boxX1 - boxH * 1.5; x < boxX2 + boxH * 1.5; x += dStep) {
+      ctx.beginPath();
+      ctx.moveTo(x, boxY1);
+      ctx.lineTo(x + boxH, boxY2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x, boxY2);
+      ctx.lineTo(x + boxH, boxY1);
+      ctx.stroke();
+    }
+    // Solid Yellow Perimeter Box
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 4.5;
+    ctx.strokeRect(boxX1, boxY1, boxW, boxH);
+    ctx.restore();
+
+    // 8. Directional White Lane Markings (Straight, Left, Right turn arrows)
+    function drawRoadArrow(px, py, angleRad, type) {
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(angleRad);
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (type === 'straight') {
+        // Arrow stem
+        ctx.fillRect(-3.2, -8, 6.4, 28);
+        // Pointed head
+        ctx.beginPath();
+        ctx.moveTo(0, -26);
+        ctx.lineTo(12, -8);
+        ctx.lineTo(5, -8);
+        ctx.lineTo(5, -6);
+        ctx.lineTo(-5, -6);
+        ctx.lineTo(-5, -8);
+        ctx.lineTo(-12, -8);
+        ctx.closePath();
+        ctx.fill();
+      } else if (type === 'straight-left') {
+        // Straight stem
+        ctx.fillRect(-3, -8, 6, 28);
+        ctx.beginPath();
+        ctx.moveTo(0, -26);
+        ctx.lineTo(11, -8);
+        ctx.lineTo(-11, -8);
+        ctx.closePath();
+        ctx.fill();
+        // Left turn branch
+        ctx.lineWidth = 5.2;
+        ctx.beginPath();
+        ctx.moveTo(0, 4);
+        ctx.quadraticCurveTo(-2, -6, -14, -10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-22, -10);
+        ctx.lineTo(-12, -18);
+        ctx.lineTo(-12, -2);
+        ctx.closePath();
+        ctx.fill();
+      } else if (type === 'straight-right') {
+        // Straight stem
+        ctx.fillRect(-3, -8, 6, 28);
+        ctx.beginPath();
+        ctx.moveTo(0, -26);
+        ctx.lineTo(11, -8);
+        ctx.lineTo(-11, -8);
+        ctx.closePath();
+        ctx.fill();
+        // Right turn branch
+        ctx.lineWidth = 5.2;
+        ctx.beginPath();
+        ctx.moveTo(0, 4);
+        ctx.quadraticCurveTo(2, -6, 14, -10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(22, -10);
+        ctx.lineTo(12, -18);
+        ctx.lineTo(12, -2);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Eastbound approaches (traffic moving +X)
+    [-210, -320].forEach(x => {
+      drawRoadArrow(toPx(x), toPy(18), Math.PI / 2, 'straight-right');
+      drawRoadArrow(toPx(x), toPy(48), Math.PI / 2, 'straight-left');
+    });
+
+    // Westbound approaches (traffic moving -X)
+    [210, 320].forEach(x => {
+      drawRoadArrow(toPx(x), toPy(-18), -Math.PI / 2, 'straight-right');
+      drawRoadArrow(toPx(x), toPy(-48), -Math.PI / 2, 'straight-left');
+    });
+
+    // Southbound approaches (traffic moving +Z)
+    [-170, -270].forEach(z => {
+      drawRoadArrow(toPx(-20), toPy(z), Math.PI, 'straight-right');
+      drawRoadArrow(toPx(-58), toPy(z), Math.PI, 'straight-left');
+    });
+
+    // Northbound approaches (traffic moving -Z)
+    [170, 270].forEach(z => {
+      drawRoadArrow(toPx(18), toPy(z), 0, 'straight-right');
+      drawRoadArrow(toPx(56), toPy(z), 0, 'straight-left');
+    });
+
+    // 9. Realistic Tarmac Repair Patches & Cast-Iron Utility Manholes
+    const roadPatches = [
+      { x: -240, z: 24, w: 42, h: 22 },
+      { x: 260, z: -32, w: 38, h: 26 },
+      { x: -35, z: -190, w: 28, h: 36 },
+      { x: 32, z: 210, w: 30, h: 32 }
+    ];
+    roadPatches.forEach(p => {
+      const px = toPx(p.x);
+      const py = toPy(p.z);
+      const pw = p.w * scale;
+      const ph = p.h * scale;
+      ctx.fillStyle = '#14181f'; // Fresh dark asphalt patch
+      ctx.fillRect(px - pw / 2, py - ph / 2, pw, ph);
+      ctx.strokeStyle = '#0a0d12'; // Tar sealant boundary
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(px - pw / 2, py - ph / 2, pw, ph);
+    });
+
+    // Cast-iron Manhole Covers
+    const manholes = [
+      { x: -170, z: 32 },
+      { x: 180, z: -34 },
+      { x: -38, z: -150 },
+      { x: 36, z: 160 }
+    ];
+    manholes.forEach(m => {
+      const px = toPx(m.x);
+      const py = toPy(m.z);
+      const r = 5.2 * scale;
+      ctx.fillStyle = '#26303c';
+      ctx.beginPath();
+      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(px, py, r * 0.55, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
     const texture = new THREE.CanvasTexture(canvas);
     texture.anisotropy = 8;
     texture.wrapS = THREE.ClampToEdgeWrapping;
@@ -1297,10 +1633,12 @@
     return texture;
   }
 
-  // Sidewalk Corners with Curbs
+  // Sidewalk Corners with Curbs & Pedestrian Safety Railings
+  let railingMat = null;
   function addSidewalkCorner(w, d, x, z) {
     if (!sidewalkMat) sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9, metalness: 0.05 });
-    if (!curbMat) curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+    if (!curbMat) curbMat = new THREE.MeshStandardMaterial({ map: getCurbCanvasTexture(), roughness: 0.65, metalness: 0.1 });
+    if (!railingMat) railingMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5, roughness: 0.4 });
 
     const swGeo = new THREE.BoxGeometry(w, 2, d);
     const sw = new THREE.Mesh(swGeo, sidewalkMat);
@@ -1316,6 +1654,31 @@
     curb.matrixAutoUpdate = false;
     curb.updateMatrix();
     scene.add(curb);
+
+    // Dhaka Corner Steel Pedestrian Safety Guardrail
+    const railGroup = new THREE.Group();
+    const cornerSignZ = z > 0 ? 1 : -1;
+    const cornerSignX = x > 0 ? 1 : -1;
+    const railX = cornerSignX * 138;
+    const railZ = cornerSignZ * 108;
+
+    // Safety Posts
+    const postGeo = new THREE.CylinderGeometry(0.35, 0.35, 6, 6);
+    [-12, 0, 12].forEach(pOff => {
+      const post = new THREE.Mesh(postGeo, railingMat);
+      post.position.set(railX + (cornerSignX > 0 ? -Math.abs(pOff) : Math.abs(pOff)), 5, railZ);
+      railGroup.add(post);
+    });
+    // Double Crossbars
+    const barGeo = new THREE.CylinderGeometry(0.24, 0.24, 26, 6);
+    [4.5, 7.2].forEach(by => {
+      const bar = new THREE.Mesh(barGeo, railingMat);
+      bar.rotation.z = Math.PI / 2;
+      bar.position.set(railX - cornerSignX * 6, by, railZ);
+      railGroup.add(bar);
+    });
+    freezeStatic(railGroup);
+    scene.add(railGroup);
   }
 
   // Multi-Layered Organic Dhaka Trees (Textured trunk + 4–5 overlapping foliage clusters in rich natural greens)
@@ -1821,174 +2184,257 @@
     if (type === 'bus') {
       const length = 76;
       const width = 22;
-      const height = 22;
+      const height = 23;
 
-      // Lower Chassis Body
-      const bodyGeo = new THREE.BoxGeometry(length, 10, width);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xdc2626, roughness: 0.4 });
+      // 1. Lower Chassis & Red BRTA / Dhaka City Livery (Matching Picture 5)
+      const bodyGeo = new THREE.BoxGeometry(length, 9.5, width);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xdc2626, roughness: 0.35, metalness: 0.15 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = 8;
+      body.position.y = 8.5;
       body.castShadow = true;
       group.add(body);
 
-      // Dhaka Transit green accent on the red passenger body.
-      const strGeo = new THREE.BoxGeometry(length + 0.4, 1.8, width + 0.4);
-      const strMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
-      const str = new THREE.Mesh(strGeo, strMat);
-      str.position.y = 12.2;
-      group.add(str);
+      // Dhaka Transit Green Speedline & White Accent Band
+      const strWhiteGeo = new THREE.BoxGeometry(length + 0.3, 1.2, width + 0.3);
+      const strWhiteMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+      const strWhite = new THREE.Mesh(strWhiteGeo, strWhiteMat);
+      strWhite.position.y = 11.8;
+      group.add(strWhite);
 
-      // Upper Passenger Cabin with Windows
-      const cabGeo = new THREE.BoxGeometry(length * 0.98, 7.5, width * 0.96);
-      const cabMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
+      const strGreenGeo = new THREE.BoxGeometry(length + 0.35, 1.6, width + 0.35);
+      const strGreenMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
+      const strGreen = new THREE.Mesh(strGreenGeo, strGreenMat);
+      strGreen.position.y = 13.1;
+      group.add(strGreen);
+
+      // 2. Upper Passenger Cabin with Panoramic Tinted Windows
+      const cabGeo = new THREE.BoxGeometry(length * 0.98, 7.8, width * 0.96);
+      const cabMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2 });
       const cab = new THREE.Mesh(cabGeo, cabMat);
-      cab.position.y = 16.5;
+      cab.position.y = 17.5;
       group.add(cab);
 
-      // Red roof cap with a lighter edge above the passenger windows.
-      const roofGeo = new THREE.BoxGeometry(length, 2.5, width);
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38 });
+      // Curved Red Roof Cap with Water Gutter
+      const roofGeo = new THREE.BoxGeometry(length, 2.2, width);
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38, metalness: 0.15 });
       const roof = new THREE.Mesh(roofGeo, roofMat);
-      roof.position.y = 20.8;
+      roof.position.y = 22.0;
       group.add(roof);
 
+      // Rooftop Luggage Carrier Rack & Rear Access Ladder
+      const rackMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+      const rackGeo = new THREE.BoxGeometry(length * 0.65, 1.8, width * 0.75);
+      const rack = new THREE.Mesh(rackGeo, rackMat);
+      rack.position.set(-4, 23.6, 0);
+      group.add(rack);
+
+      // Rear ladder
+      [-1, 1].forEach(side => {
+        const ladderRail = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 14, 6), rackMat);
+        ladderRail.position.set(-length / 2 - 0.5, 14, side * 2.5);
+        group.add(ladderRail);
+      });
+      for (let r = 0; r < 5; r++) {
+        const rung = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.25, 5.0), rackMat);
+        rung.position.set(-length / 2 - 0.5, 8.5 + r * 2.5, 0);
+        group.add(rung);
+      }
+
+      // Panoramic Tinted Cabin Glass
       const cabinGlassMat = new THREE.MeshStandardMaterial({
         color: 0x9bdcf5,
-        roughness: 0.24,
-        metalness: 0.12,
+        roughness: 0.15,
+        metalness: 0.15,
         transparent: true,
-        opacity: 0.36,
+        opacity: 0.38,
         depthWrite: false
       });
 
-      // Seats and riders sit behind separate large windows on both sides.
-      const seatMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.88 });
-      const passengerColors = [0xf59e0b, 0x0f766e, 0x7c3aed, 0xe11d48, 0x2563eb];
-      [-25, -13, -1, 11, 23].forEach((x, index) => {
-        const seat = new THREE.Mesh(new THREE.BoxGeometry(7.5, 1.2, 13), seatMat);
-        seat.position.set(x, 13.8, 0);
+      // 3. Interior Layout: Driver with Steering Wheel + 6 Seated Passengers (Matching Picture 5)
+      const seatMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+      const passengerPalette = [0xf97316, 0x0284c7, 0x8b5cf6, 0xec4899, 0x22c55e, 0xfacc15];
+      const passengerPositions = [-28, -18, -8, 2, 12, 22];
+
+      passengerPositions.forEach((px, idx) => {
+        // High-back bus seat
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.4, 14), seatMat);
+        seat.position.set(px, 14.2, 0);
         group.add(seat);
 
-        const torso = new THREE.Mesh(
-          new THREE.BoxGeometry(3.2, 3.2, 3.5),
-          new THREE.MeshStandardMaterial({ color: passengerColors[index], roughness: 0.82 })
-        );
-        torso.position.set(x, 16.1, 0);
+        // Seated Passenger Figure
+        const pShirt = new THREE.MeshStandardMaterial({ color: passengerPalette[idx % passengerPalette.length], roughness: 0.75 });
+        const pSkin = new THREE.MeshStandardMaterial({ color: [0xb87958, 0xd4a373, 0xa1623e][idx % 3], roughness: 0.8 });
+        
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(3.4, 3.8, 3.6), pShirt);
+        torso.position.set(px, 16.8, idx % 2 === 0 ? 3.5 : -3.5);
         group.add(torso);
 
-        const head = new THREE.Mesh(
-          new THREE.SphereGeometry(1.25, 9, 7),
-          new THREE.MeshStandardMaterial({ color: [0xb47b56, 0xd4a373, 0x99613d][index % 3], roughness: 0.82 })
-        );
-        head.position.set(x, 18.5, 0);
-        group.add(head);
+        // Head
+        const pHead = new THREE.Mesh(new THREE.SphereGeometry(1.35, 10, 8), pSkin);
+        pHead.position.set(px, 19.5, idx % 2 === 0 ? 3.5 : -3.5);
+        group.add(pHead);
       });
 
-      const windowXs = [-27, -16, -5, 6, 17, 28];
+      // Front Bus Driver with Angled Steering Wheel
+      const driverShirt = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+      const driverSkin = new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.8 });
+      const dTorso = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.8, 4.0), driverShirt);
+      dTorso.position.set(30, 16.5, -3.2);
+      group.add(dTorso);
+      const dHead = new THREE.Mesh(new THREE.SphereGeometry(1.4, 10, 8), driverSkin);
+      dHead.position.set(30, 19.2, -3.2);
+      group.add(dHead);
+
+      // Steering Wheel
+      const steeringGeo = new THREE.TorusGeometry(1.8, 0.24, 8, 16);
+      const steeringMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+      const steeringWheel = new THREE.Mesh(steeringGeo, steeringMat);
+      steeringWheel.position.set(33.2, 17.5, -3.2);
+      steeringWheel.rotation.y = Math.PI / 2;
+      steeringWheel.rotation.x = 0.55;
+      group.add(steeringWheel);
+
+      // Panoramic Continuous Side Window Bays
+      const windowXs = [-29, -17, -5, 7, 19, 30];
       [-1, 1].forEach(side => {
-        windowXs.forEach(x => {
-          const window = new THREE.Mesh(new THREE.BoxGeometry(9.4, 4.9, 0.3), cabinGlassMat);
-          window.position.set(x, 16.6, side * (width / 2 + 0.12));
-          group.add(window);
+        windowXs.forEach(wx => {
+          const winMesh = new THREE.Mesh(new THREE.BoxGeometry(10.2, 5.8, 0.35), cabinGlassMat);
+          winMesh.position.set(wx, 17.5, side * (width / 2 + 0.12));
+          group.add(winMesh);
+
+          // Vertical Black Window Pillar (Mullion)
+          const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.8, 6.2, 0.5), vehicleBumperMat);
+          mullion.position.set(wx + 5.5, 17.5, side * (width / 2 + 0.14));
+          group.add(mullion);
         });
 
-        const lowerWindowRail = new THREE.Mesh(
-          new THREE.BoxGeometry(length * 0.92, 0.55, 0.7),
-          bodyMat
-        );
-        lowerWindowRail.position.set(0, 13.9, side * (width / 2));
-        group.add(lowerWindowRail);
+        // Lower Chrome Window Guard Rail
+        const lowerRail = new THREE.Mesh(new THREE.BoxGeometry(length * 0.94, 0.55, 0.65), rackMat);
+        lowerRail.position.set(0, 14.4, side * (width / 2 + 0.12));
+        group.add(lowerRail);
       });
 
       // Front Windshield
-      const fWinGeo = new THREE.BoxGeometry(0.35, 6.6, width * 0.88);
-      const fWin = new THREE.Mesh(fWinGeo, cabinGlassMat);
-      fWin.position.set(length / 2 + 0.12, 16.5, 0);
+      const fWin = new THREE.Mesh(new THREE.BoxGeometry(0.35, 7.2, width * 0.9), cabinGlassMat);
+      fWin.position.set(length / 2 + 0.12, 17.2, 0);
       group.add(fWin);
 
-      const driverTorso = new THREE.Mesh(
-        new THREE.BoxGeometry(3.5, 3.4, 3.8),
-        new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.82 })
-      );
-      driverTorso.position.set(31, 15.8, 0);
-      group.add(driverTorso);
-      const driverHead = new THREE.Mesh(
-        new THREE.SphereGeometry(1.3, 9, 7),
-        new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.82 })
-      );
-      driverHead.position.set(31, 18.4, 0);
-      group.add(driverHead);
-
-      // Front Destination LED Route Board (Mirpur 10)
-      const destTex = createSignboardTexture('মিরপুর ১০', 'MIRPUR 10', '#0f172a', '#fef08a', '#38bdf8', '#facc15', 128, 48);
-      const destGeo = new THREE.BoxGeometry(1.5, 4.2, 14);
+      // Front Destination LED Route Board: "মিরপুর ১০ ➔ মতিঝিল"
+      const destTex = createSignboardTexture('মিরপুর ১০ ➔ মতিঝিল', 'MIRPUR 10 · MOTIJHEEL', '#090d16', '#fef08a', '#38bdf8', '#facc15', 256, 64);
+      const destGeo = new THREE.BoxGeometry(1.6, 4.4, 16);
       const dest = new THREE.Mesh(destGeo, new THREE.MeshBasicMaterial({ map: destTex }));
-      dest.position.set(length / 2 + 0.4, 19.5, 0);
+      dest.position.set(length / 2 + 0.45, 20.8, 0);
       group.add(dest);
 
-      // Heavy Duty Bumpers & License Plate
-      const fBumpGeo = new THREE.BoxGeometry(2.0, 3.6, width + 0.8);
-      const fBump = new THREE.Mesh(fBumpGeo, vehicleBumperMat);
-      fBump.position.set(length / 2 + 0.8, 4.0, 0);
-      group.add(fBump);
+      // Heavy Duty Steel Crash Guard / Bull Bar on Front
+      const bullBarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.25 });
+      const bullBarGeo = new THREE.CylinderGeometry(0.7, 0.7, width * 0.92, 10);
+      const bullBar = new THREE.Mesh(bullBarGeo, bullBarMat);
+      bullBar.rotation.x = Math.PI / 2;
+      bullBar.position.set(length / 2 + 2.2, 5.0, 0);
+      group.add(bullBar);
+      [-7, 7].forEach(bz => {
+        const barStalk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 2.6, 8), bullBarMat);
+        barStalk.rotation.z = Math.PI / 2;
+        barStalk.position.set(length / 2 + 1.1, 5.0, bz);
+        group.add(barStalk);
+      });
 
-      const rBumpGeo = new THREE.BoxGeometry(2.0, 3.6, width + 0.8);
-      const rBump = new THREE.Mesh(rBumpGeo, vehicleBumperMat);
+      // Rear Heavy Bumper
+      const rBump = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.8, width + 0.8), vehicleBumperMat);
       rBump.position.set(-length / 2 - 0.8, 4.0, 0);
       group.add(rBump);
 
-      // Left & Right Side Mirrors
-      const mirrorGeo = new THREE.BoxGeometry(1.6, 3.2, 1.2);
+      // Left & Right Side Rearview Mirrors on Extended Stalks
       [-1, 1].forEach(side => {
-        const mirror = new THREE.Mesh(mirrorGeo, vehicleBumperMat);
-        mirror.position.set(length / 2 - 2, 15, side * (width / 2 + 1.6));
+        const mirrorStalk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 3.2, 6), vehicleBumperMat);
+        mirrorStalk.position.set(length / 2 - 1, 16.5, side * (width / 2 + 1.6));
+        group.add(mirrorStalk);
+        const mirror = new THREE.Mesh(new THREE.BoxGeometry(1.6, 3.6, 1.2), vehicleBumperMat);
+        mirror.position.set(length / 2 - 1, 16.5, side * (width / 2 + 2.4));
         group.add(mirror);
       });
 
-      // 4 Wheels touching ground (radius 4.0, center y = 4.0)
+      // 4 Heavy-Duty Bus Wheels touching ground (radius 4.2, center y = 4.2)
       [-1, 1].forEach(wz => {
         [-23, 23].forEach(wx => {
-          addVehicleWheel(wx, 4.0, wz * (width / 2), 4.0, 2.2);
+          addVehicleWheel(wx, 4.2, wz * (width / 2), 4.2, 2.4);
         });
       });
 
-      // Front Headlight Clusters (White beam + Amber Indicator)
-      const hlGeo = new THREE.BoxGeometry(1.2, 2.8, 3.6);
-      [-6, 6].forEach(hz => {
-        const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
+      // Front Dual Round Headlight Clusters
+      [-6.5, 6.5].forEach(hz => {
+        const hl = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 1.2, 12), vehicleHeadlightMat);
+        hl.rotation.z = Math.PI / 2;
         hl.position.set(length / 2 + 0.7, 6.5, hz);
         group.add(hl);
+        const ind = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 1.6), vehicleIndicatorMat);
+        ind.position.set(length / 2 + 0.7, 6.5, hz > 0 ? hz + 2.2 : hz - 2.2);
+        group.add(ind);
       });
 
-      // Red Taillight Bars
-      const tlGeo = new THREE.BoxGeometry(1.2, 4.5, 2.5);
-      [-7, 7].forEach(tz => {
-        const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
-        tl.position.set(-length / 2 - 0.7, 7.5, tz);
-        group.add(tl);
+      // Vertical Rear Triple Taillight Clusters
+      [-8, 8].forEach(tz => {
+        const tlRed = new THREE.Mesh(new THREE.BoxGeometry(1.0, 2.0, 1.8), vehicleTaillightMat);
+        tlRed.position.set(-length / 2 - 0.6, 8.5, tz);
+        group.add(tlRed);
+        const tlAmber = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.6, 1.8), vehicleIndicatorMat);
+        tlAmber.position.set(-length / 2 - 0.6, 6.2, tz);
+        group.add(tlAmber);
       });
 
     } else if (type === 'cng') {
-      const length = 30;
-      const width = 16;
+      const length = 31;
+      const width = 16.5;
 
-      // Bangladesh-style green auto-rickshaw body and enclosed passenger cabin.
-      const bodyGeo = new THREE.BoxGeometry(20, 4.0, width - 1);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x159447, roughness: 0.45 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.set(-2, 4.2, 0);
+      // 1. Bangladesh-Style Emerald Green Auto-Rickshaw Body (Exact Match to Picture 3)
+      const bodyGeo = new THREE.BoxGeometry(20, 4.5, width - 1.2);
+      const cngGreenMat = new THREE.MeshStandardMaterial({
+        color: 0x15803d, // Rich Dhaka CNG Emerald Green
+        roughness: 0.35,
+        metalness: 0.22
+      });
+      const body = new THREE.Mesh(bodyGeo, cngGreenMat);
+      body.position.set(-2, 4.4, 0);
       body.castShadow = true;
       group.add(body);
 
-      const yellowTrimMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.42 });
-      const sideStripe = new THREE.Mesh(new THREE.BoxGeometry(17, 1.2, 0.3), yellowTrimMat);
+      // Yellow Lower Rocker Panel & Side Trim
+      const yellowTrimMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.45 });
+      const sideStripe = new THREE.Mesh(new THREE.BoxGeometry(18, 1.4, 0.35), yellowTrimMat);
       [-1, 1].forEach(side => {
         const stripe = sideStripe.clone();
-        stripe.position.set(-2, 7.1, side * (width / 2 + 0.08));
+        stripe.position.set(-2, 6.8, side * (width / 2 + 0.08));
         group.add(stripe);
       });
 
-      // Passenger bench and driver seating.
+      // 2. Side Door Panels with Protective Diamond Wire Mesh & "FOR HIRE / ONE PARIBAHAN" Decals
+      const decalMat = new THREE.MeshBasicMaterial({
+        map: getCngSideDecalTexture(),
+        transparent: true,
+        side: THREE.DoubleSide
+      });
+      [-1, 1].forEach(side => {
+        const doorPanel = new THREE.Mesh(new THREE.PlaneGeometry(16, 8.5), decalMat);
+        doorPanel.position.set(-2.5, 8.8, side * (width / 2 + 0.18));
+        if (side < 0) doorPanel.rotation.y = Math.PI;
+        group.add(doorPanel);
+      });
+
+      // 3. Festive Colorful Dangling Triangular Bunting Flags (Matching Picture 3 Under Visor)
+      const buntingColors = [0xef4444, 0xfacc15, 0x2563eb, 0xf97316, 0x22c55e];
+      for (let f = 0; f < 7; f++) {
+        const bz = -width / 2 + 2.2 + (f * (width - 4.4) / 6);
+        const flagGeo = new THREE.ConeGeometry(0.7, 1.8, 3);
+        const flagMat = new THREE.MeshBasicMaterial({ color: buntingColors[f % buntingColors.length] });
+        const flag = new THREE.Mesh(flagGeo, flagMat);
+        flag.rotation.z = Math.PI;
+        flag.position.set(7.8, 12.0, bz);
+        group.add(flag);
+      }
+
+      // 4. Passenger Bench & Driver Seating
       const pSeatGeo = new THREE.BoxGeometry(7.5, 3.2, width - 2.5);
       const pSeatMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
       const pSeat = new THREE.Mesh(pSeatGeo, pSeatMat);
@@ -1996,81 +2442,84 @@
       group.add(pSeat);
 
       // Driver Seat
-      const dSeatGeo = new THREE.BoxGeometry(4.0, 3.2, 9);
+      const dSeatGeo = new THREE.BoxGeometry(4.2, 3.2, 9);
       const dSeat = new THREE.Mesh(dSeatGeo, pSeatMat);
       dSeat.position.set(1.5, 5.5, 0);
       group.add(dSeat);
 
-      // Flat covered roof leaves the side openings clear so riders remain visible.
-      const roofGeo = new THREE.BoxGeometry(22, 1.5, width);
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0x176b38, roughness: 0.58 });
-      const roof = new THREE.Mesh(roofGeo, roofMat);
-      roof.position.set(-2, 13.2, 0);
-      group.add(roof);
-      const roofTrim = new THREE.Mesh(new THREE.BoxGeometry(22.5, 0.55, width + 0.5), yellowTrimMat);
-      roofTrim.position.set(-2, 12.35, 0);
+      // 5. Sculpted Dark Green / Black Leather Canopy with Scalloped Yellow Border
+      const canopyGeo = new THREE.BoxGeometry(22.5, 2.2, width);
+      const canopyMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.65 });
+      const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+      canopy.position.set(-2, 13.5, 0);
+      group.add(canopy);
+
+      const roofTrim = new THREE.Mesh(new THREE.BoxGeometry(23.0, 0.65, width + 0.5), yellowTrimMat);
+      roofTrim.position.set(-2, 12.4, 0);
       group.add(roofTrim);
 
-      // Yellow brow and dark front glass.
-      const visorGeo = new THREE.BoxGeometry(2.0, 0.8, width - 1.2);
+      // Front Visor Brow
+      const visorGeo = new THREE.BoxGeometry(2.4, 0.9, width - 1.0);
       const visor = new THREE.Mesh(visorGeo, yellowTrimMat);
-      visor.position.set(8.2, 12.8, 0);
+      visor.position.set(8.5, 13.0, 0);
       group.add(visor);
 
-      // Tinted windshield and side windows.
+      // Tinted Front Windshield
       const winGeo = new THREE.BoxGeometry(1.2, 5.6, width - 2.5);
       const winMat = new THREE.MeshStandardMaterial({
         color: 0xa5dfec,
-        roughness: 0.24,
+        roughness: 0.22,
         metalness: 0.15,
         transparent: true,
-        opacity: 0.28,
+        opacity: 0.32,
         depthWrite: false
       });
       const win = new THREE.Mesh(winGeo, winMat);
-      win.position.set(7.0, 10.2, 0);
+      win.position.set(7.2, 10.2, 0);
       group.add(win);
 
-      [-1, 1].forEach(side => {
-        const sideWindowGeo = new THREE.BoxGeometry(12.5, 4.5, 0.24);
-        const sideWindow = new THREE.Mesh(sideWindowGeo, winMat);
-        sideWindow.position.set(-2, 10.1, side * (width / 2 + 0.1));
-        group.add(sideWindow);
-
-        const pillarGeo = new THREE.BoxGeometry(0.8, 5.4, 0.65);
-        [-8, -2.2, 3.8].forEach(x => {
-          const pillar = new THREE.Mesh(pillarGeo, bodyMat);
-          pillar.position.set(x, 10.0, side * (width / 2 + 0.15));
-          group.add(pillar);
-        });
-
-        const yellowDoor = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.6, 0.34), yellowTrimMat);
-        yellowDoor.position.set(-5.3, 5.0, side * (width / 2 + 0.15));
-        group.add(yellowDoor);
-      });
-
-      // Front Single Wheel Fork & Handlebars
-      const forkGeo = new THREE.CylinderGeometry(0.7, 0.7, 6.2, 8);
-      const fork = new THREE.Mesh(forkGeo, vehicleBumperMat);
-      fork.position.set(9.5, 5.6, 0);
+      // 6. Front Single Wheel Fork with Coiled Suspension Spring
+      const forkGeo = new THREE.CylinderGeometry(0.75, 0.75, 6.4, 8);
+      const chromeMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.85, roughness: 0.25 });
+      const fork = new THREE.Mesh(forkGeo, chromeMat);
+      fork.position.set(9.8, 5.6, 0);
       group.add(fork);
 
-      const hbarGeo = new THREE.BoxGeometry(1.0, 0.8, 8);
+      // Handlebars
+      const hbarGeo = new THREE.BoxGeometry(1.0, 0.8, 8.5);
       const hbar = new THREE.Mesh(hbarGeo, vehicleBumperMat);
-      hbar.position.set(7.2, 8.5, 0);
+      hbar.position.set(7.5, 8.6, 0);
       group.add(hbar);
 
-      // 3 Wheels touching ground (1 front at +X, 2 rear at -X; radius 2.6, center y = 2.6)
-      // Front Wheel
-      addVehicleWheel(9.5, 2.6, 0, 2.6, 1.4);
-      // Rear Wheels
+      // Digital Fare Meter Box on Dashboard (Mirpur 10 Standard)
+      const meterGeo = new THREE.BoxGeometry(1.2, 1.2, 2.0);
+      const meterMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+      const meter = new THREE.Mesh(meterGeo, meterMat);
+      meter.position.set(7.8, 9.4, 2.4);
+      group.add(meter);
+      const meterLed = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.6, 1.2), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
+      meterLed.position.set(7.25, 9.4, 2.4);
+      group.add(meterLed);
+
+      // 7. Wheels: 1 Front (at +X), 2 Rear (at -X; radius 2.6, center y = 2.6)
+      addVehicleWheel(9.8, 2.6, 0, 2.6, 1.4);
       [-1, 1].forEach(wz => {
-        addVehicleWheel(-7.5, 2.6, wz * (width / 2), 2.6, 1.4);
+        addVehicleWheel(-7.8, 2.6, wz * (width / 2), 2.6, 1.4);
       });
 
-      // Driver and front round headlamp.
-      const driverShirts = [0xe7e5df, 0x166534, 0x7c2d12, 0x1d4ed8];
-      const driverTrousers = [0x303743, 0x292524, 0x334155, 0x44403c];
+      // Rear Mounted Spare Tire on Back Hatch (Signature Dhaka CNG Feature)
+      const spareTire = new THREE.Mesh(getSharedWheelGeo(2.4, 1.2, 10), sharedWheelMat);
+      spareTire.rotation.y = Math.PI / 2;
+      spareTire.position.set(-12.8, 6.2, 0);
+      group.add(spareTire);
+      const spareCap = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1.3, 8), yellowTrimMat);
+      spareCap.rotation.z = Math.PI / 2;
+      spareCap.position.set(-12.8, 6.2, 0);
+      group.add(spareCap);
+
+      // 8. Seated Driver & Seated Passengers
+      const driverShirts = [0xf8fafc, 0x166534, 0x1d4ed8, 0x7c2d12];
+      const driverTrousers = [0x334155, 0x292524, 0x1e293b, 0x475569];
       addSeatedFigure(
         2.2,
         5.7,
@@ -2079,35 +2528,43 @@
         driverTrousers[(appearanceSeed >>> 3) % driverTrousers.length],
         true
       );
-      const passengerShirts = [0xeab308, 0xdb2777];
+      // Seated Passengers
+      const passengerShirts = [0xf59e0b, 0xdb2777];
       passengerShirts.forEach((shirtColor, index) => {
         addSeatedFigure(
           index === 0 ? -9.0 : -3.5,
           5.5,
-          2.8,
+          2.6,
           shirtColor,
           index === 0 ? 0x334155 : 0x1f2937,
           false
         );
       });
-      const hlGeo = new THREE.CylinderGeometry(1.3, 1.3, 1.4, 8);
-      const hl = new THREE.Mesh(hlGeo, vehicleHeadlightMat);
-      hl.rotation.z = Math.PI / 2;
-      hl.position.set(11.2, 6.2, 0);
-      group.add(hl);
 
-      // Front Amber Turn Signal Indicators
-      const indGeo = new THREE.BoxGeometry(0.8, 1.2, 1.2);
-      [-4.8, 4.8].forEach(iz => {
-        const ind = new THREE.Mesh(indGeo, vehicleIndicatorMat);
-        ind.position.set(9.2, 5.8, iz);
+      // 9. Chrome Front Round Headlight with Polished Bezel Ring (Matching Picture 3)
+      const hlCasingGeo = new THREE.CylinderGeometry(1.6, 1.6, 1.6, 16);
+      const hlCasing = new THREE.Mesh(hlCasingGeo, chromeMat);
+      hlCasing.rotation.z = Math.PI / 2;
+      hlCasing.position.set(11.4, 6.2, 0);
+      group.add(hlCasing);
+
+      const hlLensGeo = new THREE.CylinderGeometry(1.3, 1.3, 0.4, 16);
+      const hlLens = new THREE.Mesh(hlLensGeo, vehicleHeadlightMat);
+      hlLens.rotation.z = Math.PI / 2;
+      hlLens.position.set(12.2, 6.2, 0);
+      group.add(hlLens);
+
+      // Front Amber Turn Signal Indicators on Fenders
+      [-5.0, 5.0].forEach(iz => {
+        const ind = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 1.2), vehicleIndicatorMat);
+        ind.position.set(9.4, 5.8, iz);
         group.add(ind);
       });
 
-      // Rear Taillights & Number Plate
+      // Rear Taillights & Bengali Number Plate: "ঢাকা মেট্রো-থ ১১-৪৫৬৭"
       const tlGeo = new THREE.BoxGeometry(0.8, 1.8, 2.5);
       const tl = new THREE.Mesh(tlGeo, vehicleTaillightMat);
-      tl.position.set(-12.4, 5.5, 0);
+      tl.position.set(-12.4, 4.8, 0);
       group.add(tl);
 
     } else if (type === 'rickshaw') {
@@ -2585,6 +3042,17 @@
 
       group.userData.rickshawPedalPhase = 0;
 
+      // Traditional Hand-Painted Dhaka Rickshaw Art Tinplate Backboard
+      const artPlateGeo = new THREE.BoxGeometry(0.35, 7.2, 14.6);
+      const artPlateMat = new THREE.MeshStandardMaterial({
+        map: getRickshawArtTexture(),
+        roughness: 0.35,
+        metalness: 0.25
+      });
+      const artPlate = new THREE.Mesh(artPlateGeo, artPlateMat);
+      artPlate.position.set(-11.5, 6.2, 0);
+      group.add(artPlate);
+
     } else if (type === 'bike') {
       // 8 high-contrast bike and rider clothing palettes; headgear follows the reference design.
       // If the bike color is dark, keep the rider's attire light.
@@ -2659,8 +3127,11 @@
       });
 
       // Biker Materials: Modern Full-Face Sport Helmet with Lifted Visor, Face Skin & Attire (Matching Picture 4)
+      // Diverse Sport Helmet Color Palettes across Bikers
+      const helmetColors = [0x075be8, 0x0f172a, 0xf8fafc, 0xdc2626, 0x16a34a, 0x1e3a8a];
+      const activeHelmetColor = helmetColors[appearanceSeed % helmetColors.length];
       const helmetMat = new THREE.MeshStandardMaterial({
-        color: 0x075be8,
+        color: activeHelmetColor,
         roughness: 0.14,
         metalness: 0.48,
         side: THREE.DoubleSide
@@ -2688,15 +3159,26 @@
         color: 0xcc7563, // Natural warm lip tone from Picture 4
         roughness: 0.65
       });
+
+      // Different Colour Sunglasses for Each Biker (Matching User Request #5)
+      const sunglassStyles = [
+        { frame: 0x080a0e, lens: 0x020306 }, // Midnight Smoke Black
+        { frame: 0xd97706, lens: 0x78350f }, // Aviator Gold & Amber
+        { frame: 0x0284c7, lens: 0x0369a1 }, // Electric Blue Mirror
+        { frame: 0xdc2626, lens: 0x991b1b }, // Ruby Crimson Sport
+        { frame: 0x16a34a, lens: 0x14532d }, // Emerald Polarized
+        { frame: 0x94a3b8, lens: 0x1e293b }  // Chrome Titanium Silver
+      ];
+      const activeSunglasses = sunglassStyles[(appearanceSeed >>> 2) % sunglassStyles.length];
       const sunglassFrameMat = new THREE.MeshStandardMaterial({
-        color: 0x080a0e,
+        color: activeSunglasses.frame,
         roughness: 0.2,
-        metalness: 0.16
+        metalness: 0.4
       });
       const sunglassLensMat = new THREE.MeshStandardMaterial({
-        color: 0x020306,
+        color: activeSunglasses.lens,
         roughness: 0.12,
-        metalness: 0.22
+        metalness: 0.65
       });
       const shirtMat = new THREE.MeshStandardMaterial({ color: activeShirtColor, roughness: 0.65 });
       const pantsMat = new THREE.MeshStandardMaterial({ color: activePantsColor, roughness: 0.82 });
@@ -3245,14 +3727,21 @@
       riderHeadGroup.add(glassesGroup);
 
       const helmetGroup = new THREE.Group();
-      const helmetShellGeom = new THREE.SphereGeometry(
-        1.48, 48, 36, -Math.PI * 0.65, Math.PI * 1.30, 0, Math.PI * 0.84
-      );
+      // Complete 360-degree aerodynamic sports helmet shell (zero gap at back or crown)
+      const helmetShellGeom = new THREE.SphereGeometry(1.48, 48, 36, 0, Math.PI * 2, 0, Math.PI * 0.94);
       const helmetShell = new THREE.Mesh(helmetShellGeom, helmetMat);
       helmetShell.scale.set(1.20, 1.22, 1.16);
       helmetShell.position.set(-0.16, 0.10, 0);
       helmetShell.castShadow = true;
       helmetGroup.add(helmetShell);
+
+      // Aerodynamic Rear Neck Spoiler Cowl (Fully covers nape and neck at rear - solves User Request #5)
+      const rearNeckCowl = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.36, 1.48, 0.85, 32, 1, false, Math.PI * 0.45, Math.PI * 1.1),
+        helmetMat
+      );
+      rearNeckCowl.position.set(-0.24, -0.62, 0);
+      helmetGroup.add(rearNeckCowl);
 
       const blackRubberMat = new THREE.MeshStandardMaterial({ color: 0x080c14, roughness: 0.64 });
       const innerPaddingMat = new THREE.MeshStandardMaterial({ color: 0x141923, roughness: 0.9 });
@@ -3942,8 +4431,67 @@
     stairs.rotation.x = 0.55;
     stationGroup.add(stairs);
 
+    // Platform Edge Yellow Tactile Warning Paving Strip
+    const tactilePaving = new THREE.Mesh(
+      new THREE.BoxGeometry(240, 0.4, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 })
+    );
+    tactilePaving.position.set(0, 8.2, 11);
+    stationGroup.add(tactilePaving);
+
+    // Structural Space-Frame Steel Canopy Trusses (Arched ribs under roof)
+    const trussMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.3 });
+    for (let tx = -100; tx <= 100; tx += 40) {
+      const archTruss = new THREE.Mesh(
+        new THREE.CylinderGeometry(28.2, 28.2, 1.2, 24, 1, false, 0, Math.PI),
+        trussMat
+      );
+      archTruss.rotation.z = Math.PI / 2;
+      archTruss.rotation.y = Math.PI / 2;
+      archTruss.position.set(tx, 14, 0);
+      stationGroup.add(archTruss);
+    }
+
+    // Bilingual Passenger Information LED Display: "● ট্রেন আসছে: ২ মিনিট"
+    const nextTrainTex = createSignboardTexture('● ট্রেন আসছে: ২ মিনিট', 'NEXT TRAIN: 2 MIN', '#020617', '#38bdf8', '#4ade80', '#00f2fe', 256, 64);
+    const nextTrainMesh = new THREE.Mesh(new THREE.BoxGeometry(90, 16, 2), new THREE.MeshBasicMaterial({ map: nextTrainTex }));
+    nextTrainMesh.position.set(-85, 20, 2);
+    stationGroup.add(nextTrainMesh);
+
     freezeStatic(stationGroup);
     scene.add(stationGroup);
+
+    // Tangled Overhead Utility Cables (Dhaka Street Signature Skyline)
+    function createDhakaOverheadCables() {
+      const cableGroup = new THREE.Group();
+      const cableMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
+
+      const cableSpans = [
+        // Northwest corner crossing to Southwest corner
+        [[-150, 48, -170], [-162, 38, -10], [-150, 46, 140]],
+        [[-148, 49, -168], [-160, 39, -5], [-148, 47, 142]],
+        [[-146, 47, -172], [-158, 37, -15], [-146, 45, 138]],
+        // Northeast corner crossing to Southeast corner
+        [[150, 48, -170], [162, 38, -10], [150, 46, 140]],
+        [[148, 49, -168], [160, 39, -5], [148, 47, 142]],
+        [[146, 47, -172], [158, 37, -15], [146, 45, 138]],
+        // Diagonal street crossing NW to SE
+        [[-140, 52, -160], [-25, 42, -15], [140, 48, 140]],
+        // Viaduct utility conduit bundle along the metro box girder
+        [[-600, 44, VIADUCT_Z + 13.5], [0, 44, VIADUCT_Z + 13.5], [600, 44, VIADUCT_Z + 13.5]]
+      ];
+
+      cableSpans.forEach(pts => {
+        const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], p[2])));
+        const cableGeo = new THREE.TubeGeometry(curve, 20, 0.24, 4, false);
+        const cableMesh = new THREE.Mesh(cableGeo, cableMat);
+        cableGroup.add(cableMesh);
+      });
+
+      freezeStatic(cableGroup);
+      scene.add(cableGroup);
+    }
+    createDhakaOverheadCables();
 
     // 7. 3D Metro Rail 3-Coach Train
     trainGroup = new THREE.Group();
@@ -4005,7 +4553,8 @@
       x: -225, z: -210, width: 80, depth: 60, height: 110,
       wallColor: '#6f9887', sideColor: '#3e5b53',
       floors: 5, cols: 3, winColor: '#f2dfb6',
-      waterTank: true, antenna: true
+      waterTank: true, antenna: true,
+      signboard: { text: 'মিরপুর ১০ শপিং কমপ্লেক্স', sub: 'Shopping Complex', bg: '#0369a1', textCol: '#ffffff', border: '#38bdf8', w: 74, h: 16, y: 14 }
     });
 
     create3DBuilding({
@@ -4013,7 +4562,7 @@
       wallColor: '#bba77e', sideColor: '#62563f',
       floors: 4, cols: 3, winColor: '#f4dfaa',
       antenna: true,
-      signboard: { text: 'ঢাকা বুক ডিপো', sub: 'Book Depot', bg: '#0f172a', textCol: '#ffffff', border: '#fbbf24', w: 62, h: 16, y: 14 }
+      signboard: { text: 'বিকাশ ও নগদ এজেন্ট', sub: 'bKash & Nagad Agent', bg: '#be185d', textCol: '#ffffff', border: '#f43f5e', w: 64, h: 16, y: 14 }
     });
 
     // Northeast Quadrant
@@ -4030,7 +4579,7 @@
       wallColor: '#5d8d89', sideColor: '#344f50',
       floors: 4, cols: 3, winColor: '#e9dbb9',
       waterTank: true,
-      signboard: { text: 'বাংলা টেক', sub: 'Bangla Tech', bg: '#0f172a', textCol: '#00f2fe', border: '#00f2fe', w: 68, h: 16, y: 14, awnCol: 0x0f766e }
+      signboard: { text: 'ঢাকা ব্যাংক এটিএম 🏧', sub: 'Dhaka Bank ATM 24/7', bg: '#065f46', textCol: '#facc15', border: '#10b981', w: 68, h: 16, y: 14, awnCol: 0x0f766e }
     });
 
     create3DBuilding({
@@ -4066,7 +4615,8 @@
       x: -360, z: 185, width: 200, depth: 65, height: 80,
       wallColor: '#8c9870', sideColor: '#4d5744',
       floors: 3, cols: 6, winColor: '#f0dcb0',
-      waterTank: true, antenna: true
+      waterTank: true, antenna: true,
+      signboard: { text: 'হাজী বিরিয়ানি ও নান্না কাবাব', sub: 'Authentic Dhaka Biryani', bg: '#78350f', textCol: '#fef08a', border: '#f59e0b', w: 88, h: 16, ox: -40, y: 14, awnCol: 0xb45309 }
     });
 
     create3DBuilding({
@@ -4241,8 +4791,16 @@
       mouseRelY = 0;
     }, { passive: true });
 
+    let pointerDownStartX = 0;
+    let pointerDownStartY = 0;
+    let pointerDownStartTime = 0;
+
     canvasEl.style.touchAction = 'auto';
     canvasEl.addEventListener('pointerdown', (e) => {
+      pointerDownStartX = e.clientX;
+      pointerDownStartY = e.clientY;
+      pointerDownStartTime = performance.now();
+
       if (!isOrbitableVehicleMode(activeCamMode)) return;
       if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
       if (!activeTargetVehicle) activeTargetVehicle = acquireTargetVehicle(activeCamMode);
@@ -4256,10 +4814,19 @@
     });
 
     const endVehicleOrbit = (e) => {
-      if (e.pointerId !== orbitPointerId) return;
-      orbitPointerId = null;
-      if (canvasEl.hasPointerCapture(e.pointerId)) {
-        canvasEl.releasePointerCapture(e.pointerId);
+      const elapsed = performance.now() - pointerDownStartTime;
+      const dist = Math.hypot(e.clientX - pointerDownStartX, e.clientY - pointerDownStartY);
+
+      if (e.pointerId === orbitPointerId) {
+        orbitPointerId = null;
+        if (canvasEl.hasPointerCapture(e.pointerId)) {
+          canvasEl.releasePointerCapture(e.pointerId);
+        }
+      }
+
+      // If user tapped or clicked without dragging, raycast to select clicked object/vehicle!
+      if (dist < 8 && elapsed < 400) {
+        handleSceneRaycastClick(e.clientX, e.clientY);
       }
     };
     canvasEl.addEventListener('pointerup', endVehicleOrbit);
@@ -4270,6 +4837,173 @@
     canvasEl.addEventListener('contextmenu', (e) => {
       if (isOrbitableVehicleMode(activeCamMode)) e.preventDefault();
     });
+
+    // -------------------------------------------------------------
+    // Interactive 3D Raycaster & Object Telemetry HUD
+    // -------------------------------------------------------------
+    function handleSceneRaycastClick(clientX, clientY) {
+      if (!renderer || !camera || !scene || !canvasEl) return;
+      const rect = canvasEl.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const mouse = new THREE.Vector2(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        -((clientY - rect.top) / rect.height) * 2 + 1
+      );
+
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+
+      const candidateMeshes = [];
+      const hitMap = new Map();
+
+      // 1. Vehicles
+      Object.keys(vehicleMeshMap).forEach(vId => {
+        const entry = vehicleMeshMap[vId];
+        if (entry && entry.mesh && entry.mesh.visible !== false) {
+          entry.mesh.traverse(child => {
+            if (child.isMesh) {
+              candidateMeshes.push(child);
+              hitMap.set(child, {
+                kind: 'vehicle',
+                id: vId,
+                type: entry.data.type || 'car',
+                data: entry.data,
+                mesh: entry.mesh
+              });
+            }
+          });
+        }
+      });
+
+      // 2. Metro Train
+      if (trainGroup && trainGroup.visible !== false) {
+        trainGroup.traverse(child => {
+          if (child.isMesh) {
+            candidateMeshes.push(child);
+            hitMap.set(child, {
+              kind: 'metro',
+              id: 'train_mrt6',
+              type: 'metro',
+              mesh: trainGroup
+            });
+          }
+        });
+      }
+
+      // 3. Ambulance
+      if (ambulanceGroup && ambulanceGroup.visible) {
+        ambulanceGroup.traverse(child => {
+          if (child.isMesh) {
+            candidateMeshes.push(child);
+            hitMap.set(child, {
+              kind: 'ambulance',
+              id: 'emergency_ambulance',
+              type: 'ambulance',
+              mesh: ambulanceGroup
+            });
+          }
+        });
+      }
+
+      // 4. Pedestrians
+      Object.keys(pedMeshMap).forEach(pId => {
+        const entry = pedMeshMap[pId];
+        if (entry && entry.mesh) {
+          entry.mesh.traverse(child => {
+            if (child.isMesh) {
+              candidateMeshes.push(child);
+              hitMap.set(child, {
+                kind: 'walking',
+                id: pId,
+                type: 'walking',
+                data: entry.data,
+                mesh: entry.mesh
+              });
+            }
+          });
+        }
+      });
+
+      const intersects = raycaster.intersectObjects(candidateMeshes, false);
+      if (intersects && intersects.length > 0) {
+        const hit = intersects[0];
+        const info = hitMap.get(hit.object);
+        if (info) {
+          onInteractiveObjectSelected(info);
+        }
+      }
+    }
+
+    function onInteractiveObjectSelected(info) {
+      if (!info) return;
+
+      if (info.kind === 'vehicle') {
+        const vType = info.type;
+        activeCamMode = vType;
+        activeTargetVehicle = {
+          id: info.id,
+          type: vType,
+          mesh: info.mesh,
+          data: info.data,
+          speed: info.data.speed || (vType === 'bike' ? 44 : vType === 'bus' ? 26 : vType === 'cng' ? 34 : 38)
+        };
+        if (canvasEl) canvasEl.style.touchAction = isOrbitableVehicleMode(vType) ? 'none' : 'auto';
+        updateLegendHUD(vType);
+
+        const modePill = document.getElementById('crossroadsModePill');
+        const icon = document.getElementById('crossroadsModePillIcon');
+        const title = document.getElementById('crossroadsModePillTitle');
+        const sub = document.getElementById('crossroadsModePillSub');
+
+        if (modePill && icon && title && sub) {
+          modePill.classList.remove('hidden');
+          const dirLabel = info.data.dir === 'EB' ? 'Eastbound' : info.data.dir === 'WB' ? 'Westbound' : info.data.dir === 'SB' ? 'Southbound' : 'Northbound';
+          const speedKmh = Math.round(activeTargetVehicle.speed);
+
+          if (vType === 'bike') {
+            icon.textContent = '🏍️';
+            title.textContent = `Ride-share Sports Bike · ${dirLabel}`;
+            sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
+          } else if (vType === 'cng') {
+            icon.textContent = '🛺';
+            title.textContent = `CNG Auto-Rickshaw · One Paribahan (${dirLabel})`;
+            sub.textContent = `Speed: ${speedKmh} km/h · Reg: ঢাকা মেট্রো-থ ১১-৪৫৬৭ · Base ৳40 + ৳12/km`;
+          } else if (vType === 'bus') {
+            icon.textContent = '🚌';
+            title.textContent = `BRTA City Transit Bus · ${dirLabel}`;
+            sub.textContent = `Speed: ${speedKmh} km/h · Mirpur 10 ➔ Motijheel · Fare ৳10 – ৳35`;
+          } else if (vType === 'rickshaw') {
+            icon.textContent = '🛺';
+            title.textContent = `Dhaka Cycle Rickshaw · ${dirLabel}`;
+            sub.textContent = `Speed: ${speedKmh} km/h · Traditional Rickshaw Art · Local Mirpur fare ৳25 – ৳50`;
+          } else if (vType === 'car') {
+            icon.textContent = '🚗';
+            title.textContent = `Aerodynamic Ride-share Car · ${dirLabel}`;
+            sub.textContent = `Speed: ${speedKmh} km/h · AC Ride · Base ৳60 + ৳18/km`;
+          }
+        }
+
+        const pose = getVehicleOrbitPose(activeTargetVehicle);
+        focusCamera(pose.position, pose.look, 1.4);
+
+      } else if (info.kind === 'metro') {
+        window.crossroadsFocusMode('metro');
+      } else if (info.kind === 'walking') {
+        window.crossroadsFocusMode('walking');
+      } else if (info.kind === 'ambulance') {
+        const modePill = document.getElementById('crossroadsModePill');
+        const icon = document.getElementById('crossroadsModePillIcon');
+        const title = document.getElementById('crossroadsModePillTitle');
+        const sub = document.getElementById('crossroadsModePillSub');
+        if (modePill && icon && title && sub) {
+          modePill.classList.remove('hidden');
+          icon.textContent = '🚨';
+          title.textContent = 'Emergency Cardiac Ambulance';
+          sub.textContent = 'Priority Green Wave Active · High-Intensity Strobes · Emergency Lane Clear';
+        }
+      }
+    }
 
     window.addEventListener('keydown', (e) => {
       if (!isOrbitableVehicleMode(activeCamMode) || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
