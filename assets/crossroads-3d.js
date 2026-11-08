@@ -36,7 +36,7 @@
   let vehicleMeshMap = {};
   let pedMeshMap = {};
   let rainParticles = null;
-  let cycleRickshawModelPromise = null;
+  const gltfModelPromises = {};
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
@@ -3995,23 +3995,54 @@
     return group;
   }
 
-  function loadCycleRickshawModel() {
-    if (!cycleRickshawModelPromise) {
-      cycleRickshawModelPromise = new Promise((resolve, reject) => {
+  function loadGLBModel(path) {
+    if (!gltfModelPromises[path]) {
+      gltfModelPromises[path] = new Promise((resolve, reject) => {
         if (typeof THREE.GLTFLoader !== 'function') {
           reject(new Error('Three.js GLTFLoader is unavailable'));
           return;
         }
-
         new THREE.GLTFLoader().load(
-          'assets/models/cycle-rickshaw.glb',
+          path,
           gltf => resolve(gltf.scene),
           undefined,
           reject
         );
       });
     }
-    return cycleRickshawModelPromise;
+    return gltfModelPromises[path];
+  }
+
+  function loadCycleRickshawModel() {
+    return loadGLBModel('assets/models/cycle-rickshaw.glb');
+  }
+
+  function loadSportbikeModel() {
+    return loadGLBModel('assets/models/sportbike-rider.glb');
+  }
+
+  function loadCNGModel() {
+    return loadGLBModel('assets/models/cng-autorickshaw.glb');
+  }
+
+  function loadBusModel() {
+    return loadGLBModel('assets/models/dhaka-bus.glb');
+  }
+
+  function loadCarModel() {
+    return loadGLBModel('assets/models/private-car.glb');
+  }
+
+  function loadMetroModel() {
+    return loadGLBModel('assets/models/dhaka-metro.glb');
+  }
+
+  function loadPedestriansModel() {
+    return loadGLBModel('assets/models/pedestrians.glb');
+  }
+
+  function loadEnvironmentModel() {
+    return loadGLBModel('assets/models/mirpur10-environment.glb');
   }
 
   function replaceRickshawWithModel(vehicle, prototype) {
@@ -4051,7 +4082,213 @@
     vehicle.userData.wheels = wheels;
     vehicle.userData.wheelRadius = 3.65;
     vehicle.userData.pedalCrank = pedalCrank;
-    delete vehicle.userData.updatePedaling;
+
+    const thighL = model.getObjectByName('Puller_Thigh_L');
+    const shinL = model.getObjectByName('Puller_Shin_L');
+    const thighR = model.getObjectByName('Puller_Thigh_R');
+    const shinR = model.getObjectByName('Puller_Shin_R');
+
+    vehicle.userData.updatePedaling = function(phase) {
+      if (pedalCrank) pedalCrank.rotation.z = phase;
+      const sinL = Math.sin(phase);
+      const cosL = Math.cos(phase);
+      if (thighL) thighL.rotation.z = sinL * 0.38;
+      if (shinL) shinL.rotation.z = cosL * 0.45;
+      if (thighR) thighR.rotation.z = -sinL * 0.38;
+      if (shinR) shinR.rotation.z = -cosL * 0.45;
+    };
+  }
+
+  function replaceBikeWithModel(vehicle, prototype, bikeColor) {
+    const model = prototype.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) return;
+
+    const scale = 23 / dimensions.x;
+    model.scale.setScalar(scale);
+    model.position.set(
+      -(bounds.min.x + bounds.max.x) * scale / 2,
+      -bounds.min.y * scale,
+      -(bounds.min.z + bounds.max.z) * scale / 2
+    );
+
+    const wheels = [];
+    model.traverse(node => {
+      const name = node.name.toLowerCase();
+      if (name === 'wheel_front' || name === 'wheel_rear') wheels.push(node);
+      if (bikeColor && node.isMesh && node.material && (node.material.name === 'Fairing_Blue' || node.material.name === 'Helmet_BlueGloss')) {
+        node.material = node.material.clone();
+        node.material.color.setHex(bikeColor);
+      }
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+
+    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    vehicle.add(model);
+    vehicle.userData.wheels = wheels;
+    vehicle.userData.wheelRadius = 3.0;
+  }
+
+  function replaceCNGWithModel(vehicle, prototype) {
+    const model = prototype.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) return;
+
+    const scale = 31 / dimensions.x;
+    model.scale.setScalar(scale);
+    model.position.set(
+      -(bounds.min.x + bounds.max.x) * scale / 2,
+      -bounds.min.y * scale,
+      -(bounds.min.z + bounds.max.z) * scale / 2
+    );
+
+    const wheels = [];
+    model.traverse(node => {
+      const name = node.name.toLowerCase();
+      if (name === 'wheel_front' || name === 'wheel_rear_left' || name === 'wheel_rear_right') wheels.push(node);
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+
+    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    vehicle.add(model);
+    vehicle.userData.wheels = wheels;
+    vehicle.userData.wheelRadius = 2.6;
+  }
+
+  function replaceBusWithModel(vehicle, prototype) {
+    const model = prototype.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) return;
+
+    const scale = 76 / dimensions.x;
+    model.scale.setScalar(scale);
+    model.position.set(
+      -(bounds.min.x + bounds.max.x) * scale / 2,
+      -bounds.min.y * scale,
+      -(bounds.min.z + bounds.max.z) * scale / 2
+    );
+
+    const wheels = [];
+    model.traverse(node => {
+      const name = node.name.toLowerCase();
+      if (name.startsWith('wheel_')) wheels.push(node);
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+
+    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    vehicle.add(model);
+    vehicle.userData.wheels = wheels;
+    vehicle.userData.wheelRadius = 5.2;
+  }
+
+  function replaceCarWithModel(vehicle, prototype) {
+    const model = prototype.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) return;
+
+    const scale = 46 / dimensions.x;
+    model.scale.setScalar(scale);
+    model.position.set(
+      -(bounds.min.x + bounds.max.x) * scale / 2,
+      -bounds.min.y * scale,
+      -(bounds.min.z + bounds.max.z) * scale / 2
+    );
+
+    const wheels = [];
+    model.traverse(node => {
+      const name = node.name.toLowerCase();
+      if (name.startsWith('wheel_')) wheels.push(node);
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+
+    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    vehicle.add(model);
+    vehicle.userData.wheels = wheels;
+    vehicle.userData.wheelRadius = 3.3;
+  }
+
+  function replaceMetroTrainWithModel(prototype) {
+    if (!trainGroup) return;
+    const bounds = new THREE.Box3().setFromObject(prototype);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0) return;
+
+    const scale = 72 / dimensions.x;
+    while (trainGroup.children.length) trainGroup.remove(trainGroup.children[0]);
+
+    [-75, 0, 75].forEach(xOffset => {
+      const coach = prototype.clone(true);
+      coach.scale.setScalar(scale);
+      coach.position.set(xOffset - (bounds.min.x + bounds.max.x) * scale / 2, -bounds.min.y * scale, -(bounds.min.z + bounds.max.z) * scale / 2);
+      coach.traverse(n => {
+        if (n.isMesh) {
+          n.castShadow = true;
+          n.receiveShadow = true;
+        }
+      });
+      trainGroup.add(coach);
+    });
+  }
+
+  function replacePedestriansWithModel(prototype) {
+    const maleProto = prototype.getObjectByName('Pedestrian_Male') || prototype;
+    const femaleProto = prototype.getObjectByName('Pedestrian_Female') || prototype;
+
+    Object.values(pedMeshMap).forEach((pedEntry, idx) => {
+      if (!pedEntry || !pedEntry.mesh) return;
+      const isFemale = idx % 2 === 1;
+      const charProto = isFemale ? femaleProto : maleProto;
+      const clone = charProto.clone(true);
+      const bounds = new THREE.Box3().setFromObject(clone);
+      const dims = bounds.getSize(new THREE.Vector3());
+      if (dims.y > 0) {
+        const scale = 16 / dims.y;
+        clone.scale.setScalar(scale);
+        clone.position.set(0, -bounds.min.y * scale, 0);
+      }
+      clone.traverse(n => {
+        if (n.isMesh) {
+          n.castShadow = true;
+          n.receiveShadow = true;
+        }
+      });
+      while (pedEntry.mesh.children.length) pedEntry.mesh.remove(pedEntry.mesh.children[0]);
+      pedEntry.mesh.add(clone);
+    });
+  }
+
+  function addMirpur10EnvironmentModel(prototype) {
+    const model = prototype.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const dims = bounds.getSize(new THREE.Vector3());
+    if (dims.x > 0) {
+      const scale = 4.0;
+      model.scale.setScalar(scale);
+      model.position.set(0, 0, 0);
+      model.traverse(node => {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+      });
+      scene.add(model);
+    }
   }
 
   // 3D Ambulance Builder (High-Roof Emergency Van facing +X)
@@ -4746,17 +4983,59 @@
         };
       });
     }
-    if (Object.values(vehicleMeshMap).some(vehicle => vehicle.data && vehicle.data.type === 'rickshaw')) {
-      loadCycleRickshawModel()
-        .then(prototype => {
-          Object.values(vehicleMeshMap).forEach(vehicle => {
-            if (vehicle.data && vehicle.data.type === 'rickshaw') {
-              replaceRickshawWithModel(vehicle.mesh, prototype);
-            }
-          });
-        })
-        .catch(error => console.error('Unable to load the Blender cycle-rickshaw model; using the built-in fallback.', error));
-    }
+    // Asynchronously load and integrate Blender 5.2 GTA V-Grade 3D models with fallback
+    loadCycleRickshawModel().then(prototype => {
+      Object.values(vehicleMeshMap).forEach(vehicle => {
+        if (vehicle.data && vehicle.data.type === 'rickshaw') {
+          replaceRickshawWithModel(vehicle.mesh, prototype);
+        }
+      });
+    }).catch(err => console.warn('Cycle Rickshaw GLB fallback:', err));
+
+    loadSportbikeModel().then(prototype => {
+      Object.values(vehicleMeshMap).forEach(vehicle => {
+        if (vehicle.data && vehicle.data.type === 'bike') {
+          const colorHex = (vehicle.data.bikeColor || vehicle.data.color) ? parseInt((vehicle.data.bikeColor || vehicle.data.color).replace('#', '0x'), 16) : null;
+          replaceBikeWithModel(vehicle.mesh, prototype, colorHex);
+        }
+      });
+    }).catch(err => console.warn('Sportbike GLB fallback:', err));
+
+    loadCNGModel().then(prototype => {
+      Object.values(vehicleMeshMap).forEach(vehicle => {
+        if (vehicle.data && vehicle.data.type === 'cng') {
+          replaceCNGWithModel(vehicle.mesh, prototype);
+        }
+      });
+    }).catch(err => console.warn('CNG GLB fallback:', err));
+
+    loadBusModel().then(prototype => {
+      Object.values(vehicleMeshMap).forEach(vehicle => {
+        if (vehicle.data && vehicle.data.type === 'bus') {
+          replaceBusWithModel(vehicle.mesh, prototype);
+        }
+      });
+    }).catch(err => console.warn('Bus GLB fallback:', err));
+
+    loadCarModel().then(prototype => {
+      Object.values(vehicleMeshMap).forEach(vehicle => {
+        if (vehicle.data && vehicle.data.type === 'car') {
+          replaceCarWithModel(vehicle.mesh, prototype);
+        }
+      });
+    }).catch(err => console.warn('Car GLB fallback:', err));
+
+    loadMetroModel().then(prototype => {
+      replaceMetroTrainWithModel(prototype);
+    }).catch(err => console.warn('Metro GLB fallback:', err));
+
+    loadPedestriansModel().then(prototype => {
+      replacePedestriansWithModel(prototype);
+    }).catch(err => console.warn('Pedestrians GLB fallback:', err));
+
+    loadEnvironmentModel().then(prototype => {
+      addMirpur10EnvironmentModel(prototype);
+    }).catch(err => console.warn('Environment GLB fallback:', err));
 
     // 11. Instantiate 3D Emergency Ambulance (EB -> Heading 0)
     ambulanceGroup = create3DAmbulance();

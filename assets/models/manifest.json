@@ -1,5 +1,12 @@
 {
   "models": [
-    "cycle-rickshaw.glb"
+    "cycle-rickshaw.glb",
+    "sportbike-rider.glb",
+    "cng-autorickshaw.glb",
+    "dhaka-bus.glb",
+    "private-car.glb",
+    "dhaka-metro.glb",
+    "pedestrians.glb",
+    "mirpur10-environment.glb"
   ]
 }

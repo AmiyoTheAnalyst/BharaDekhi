@@ -1,515 +1,539 @@
 import bpy
+import bmesh
 import math
 import os
-from mathutils import Vector
-
+from mathutils import Vector, Matrix, Euler
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUTPUT = os.path.join(ROOT, "cycle-rickshaw.glb")
 
-
-def material(name, color, metallic=0.0, roughness=0.6):
-    mat = bpy.data.materials.new(name)
-    mat.diffuse_color = (*color, 1.0)
-    shader = mat.node_tree.nodes.get("Principled BSDF")
-    shader.inputs["Base Color"].default_value = (*color, 1.0)
-    shader.inputs["Metallic"].default_value = metallic
-    shader.inputs["Roughness"].default_value = roughness
-    return mat
-
-
-def assign(obj, mat):
-    obj.data.materials.append(mat)
-    return obj
-
-
-def uv_sphere(name, location, scale, mat, segments=24, rings=16):
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        segments=segments, ring_count=rings, location=location
-    )
-    obj = bpy.context.object
-    obj.name = name
-    obj.scale = scale
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    for polygon in obj.data.polygons:
-        polygon.use_smooth = True
-    return assign(obj, mat)
-
-
-def cylinder_between(name, start, end, radius, mat, vertices=12, radius_end=None):
-    start_v = Vector(start)
-    end_v = Vector(end)
-    direction = end_v - start_v
-    bpy.ops.mesh.primitive_cone_add(
-        vertices=vertices,
-        radius1=radius if radius_end is None else radius_end,
-        radius2=radius,
-        depth=direction.length,
-        location=(start_v + end_v) * 0.5,
-    )
-    obj = bpy.context.object
-    obj.name = name
-    obj.rotation_mode = "QUATERNION"
-    obj.rotation_quaternion = direction.to_track_quat("Z", "Y")
-    return assign(obj, mat)
-
-
-def tube(name, points, radius, mat, resolution=2):
-    curve = bpy.data.curves.new(name, "CURVE")
-    curve.dimensions = "3D"
-    curve.resolution_u = 12
-    curve.bevel_depth = radius
-    curve.bevel_resolution = resolution
-    spline = curve.splines.new("POLY")
-    spline.points.add(len(points) - 1)
-    for point, co in zip(spline.points, points):
-        point.co = (*co, 1.0)
-    obj = bpy.data.objects.new(name, curve)
-    bpy.context.collection.objects.link(obj)
-    return assign(obj, mat)
-
-
-def cube(name, location, scale, mat, bevel=0.0):
-    bpy.ops.mesh.primitive_cube_add(size=1, location=location)
-    obj = bpy.context.object
-    obj.name = name
-    obj.dimensions = scale
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    if bevel:
-        modifier = obj.modifiers.new("Soft formed edges", "BEVEL")
-        modifier.width = bevel
-        modifier.segments = 3
-        obj.modifiers.new("Weighted corner normals", "WEIGHTED_NORMAL")
-    return assign(obj, mat)
-
-
-def parent_keep_transform(obj, parent):
-    matrix = obj.matrix_world.copy()
-    obj.parent = parent
-    obj.matrix_world = matrix
-
-
-def wheel(name, x, y, z, radius, tire_mat, steel_mat, hub_mat):
-    pivot = bpy.data.objects.new(name, None)
-    bpy.context.collection.objects.link(pivot)
-    pivot.location = (x, y, z)
-
-    bpy.ops.mesh.primitive_torus_add(
-        major_radius=radius - 0.055,
-        minor_radius=0.055,
-        major_segments=48,
-        minor_segments=10,
-        location=(x, y, z),
-        rotation=(math.pi / 2, 0, 0),
-    )
-    tire = assign(bpy.context.object, tire_mat)
-    tire.name = name + "_rubber_tire"
-    parent_keep_transform(tire, pivot)
-
-    bpy.ops.mesh.primitive_torus_add(
-        major_radius=radius - 0.105,
-        minor_radius=0.014,
-        major_segments=48,
-        minor_segments=8,
-        location=(x, y, z),
-        rotation=(math.pi / 2, 0, 0),
-    )
-    rim = assign(bpy.context.object, steel_mat)
-    rim.name = name + "_rim"
-    parent_keep_transform(rim, pivot)
-
-    for side in (-1, 1):
-        side_y = y + side * 0.045
-        bpy.ops.mesh.primitive_torus_add(
-            major_radius=radius - 0.15,
-            minor_radius=0.012,
-            major_segments=40,
-            minor_segments=6,
-            location=(x, side_y, z),
-            rotation=(math.pi / 2, 0, 0),
-        )
-        spoke_ring = assign(bpy.context.object, steel_mat)
-        spoke_ring.name = name + "_spoke_ring"
-        parent_keep_transform(spoke_ring, pivot)
-
-        for index in range(24):
-            angle = math.tau * index / 24
-            endpoint = (
-                x + math.cos(angle) * (radius - 0.12),
-                side_y,
-                z + math.sin(angle) * (radius - 0.12),
-            )
-            hub = (x, side_y, z)
-            spoke = cylinder_between(
-                name + "_spoke",
-                hub,
-                endpoint,
-                0.006,
-                steel_mat,
-                vertices=5,
-            )
-            parent_keep_transform(spoke, pivot)
-
-    hub = cylinder_between(
-        name + "_hub",
-        (x, y - 0.09, z),
-        (x, y + 0.09, z),
-        0.065,
-        hub_mat,
-        vertices=16,
-    )
-    parent_keep_transform(hub, pivot)
-    return pivot
-
-
-def canopy_panel(name, x_start, x_end, y_center, y_edge, half_width, mat):
-    verts = []
-    faces = []
-    length_steps = 8
-    width_steps = 12
-    for row in range(length_steps + 1):
-        x = x_start + (x_end - x_start) * row / length_steps
-        for column in range(width_steps + 1):
-            lateral = -half_width + 2 * half_width * column / width_steps
-            arch = (1 - (lateral / half_width) ** 2)
-            verts.append((x, lateral, y_edge + (y_center - y_edge) * arch))
-    for row in range(length_steps):
-        for column in range(width_steps):
-            lower = row * (width_steps + 1) + column
-            faces.append((lower, lower + width_steps + 1, lower + width_steps + 2, lower + 1))
-    mesh = bpy.data.meshes.new(name)
-    mesh.from_pydata(verts, [], faces)
-    mesh.materials.append(mat)
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    solidify = obj.modifiers.new("Canvas thickness", "SOLIDIFY")
-    solidify.thickness = 0.018
-    return obj
-
-
-def consolidate_meshes():
-    for obj in list(bpy.context.scene.objects):
-        if obj.type != "CURVE":
-            continue
-        bpy.ops.object.select_all(action="DESELECT")
-        obj.select_set(True)
-        bpy.context.view_layer.objects.active = obj
-        bpy.ops.object.convert(target="MESH")
-
-    pivots = [
-        obj for obj in bpy.context.scene.objects
-        if obj.type == "EMPTY" and (obj.name.startswith("wheel_") or obj.name == "pedal_crank")
-    ]
-    for parent in [None] + pivots:
-        meshes = [
-            obj for obj in bpy.context.scene.objects
-            if obj.type == "MESH" and obj.parent is parent
-        ]
-        by_material = {}
-        for obj in meshes:
-            for modifier in list(obj.modifiers):
-                bpy.context.view_layer.objects.active = obj
-                bpy.ops.object.modifier_apply(modifier=modifier.name)
-            key = obj.data.materials[0] if obj.data.materials else None
-            by_material.setdefault(key, []).append(obj)
-
-        for mat, objects in by_material.items():
-            if len(objects) < 2:
-                continue
-            bpy.ops.object.select_all(action="DESELECT")
-            for obj in objects:
-                obj.select_set(True)
-            active = objects[0]
-            bpy.context.view_layer.objects.active = active
-            bpy.ops.object.join()
-            parent_name = parent.name if parent else "Rickshaw"
-            active.name = parent_name + "_" + (mat.name if mat else "detail")
-
-
-def person(name, center, skin, shirt, trousers, hair, seated=False, scarf=None, cycling=False):
-    x, y, z = center
-    torso = uv_sphere(name + "_torso", (x, y, z + 0.36), (0.25, 0.19, 0.39), shirt)
-    head = uv_sphere(name + "_head", (x + 0.05, y, z + 0.91), (0.17, 0.155, 0.21), skin)
-    uv_sphere(name + "_hair", (x + 0.02, y, z + 1.055), (0.18, 0.16, 0.12), hair)
-    uv_sphere(name + "_ear_l", (x + 0.05, y - 0.16, z + 0.91), (0.045, 0.04, 0.065), skin)
-    uv_sphere(name + "_ear_r", (x + 0.05, y + 0.16, z + 0.91), (0.045, 0.04, 0.065), skin)
-    # Eyes and nose face the travel direction (+X).
-    eye = material(name + "_eye", (0.055, 0.035, 0.025), roughness=0.4)
-    for side in (-1, 1):
-        uv_sphere(name + "_eye", (x + 0.196, y + side * 0.055, z + 0.94), (0.025, 0.023, 0.025), eye, 12, 8)
-    uv_sphere(name + "_nose", (x + 0.215, y, z + 0.89), (0.045, 0.04, 0.055), skin, 16, 10)
-
-    if seated:
-        leg_pairs = [
-            ((x + 0.02, y - 0.1, z + 0.13), (x + 0.34, y - 0.1, z + 0.08)),
-            ((x + 0.02, y + 0.1, z + 0.13), (x + 0.38, y + 0.1, z + 0.19)),
-        ]
-    else:
-        leg_pairs = [
-            ((x + 0.02, y - 0.1, z + 0.1), (x + 0.16, y - 0.11, z - 0.27)),
-            ((x + 0.02, y + 0.1, z + 0.1), (x - 0.08, y + 0.11, z - 0.27)),
-        ]
-    for index, (hip, ankle) in enumerate(leg_pairs):
-        if cycling:
-            knee = (
-                (x - 0.18, y - 0.1, z + 0.02)
-                if index == 0
-                else (x + 0.1, y + 0.1, z + 0.02)
-            )
-            ankle = (
-                (x - 0.5, y - 0.1, z - 0.38)
-                if index == 0
-                else (x + 0.18, y + 0.1, z - 0.38)
-            )
-        else:
-            knee = ((hip[0] + ankle[0]) * 0.5, (hip[1] + ankle[1]) * 0.5, z + 0.02)
-        cylinder_between(name + "_trouser_leg", hip, knee, 0.09, trousers, 16, 0.12)
-        cylinder_between(name + "_trouser_shin", knee, ankle, 0.07, trousers, 16, 0.09)
-        uv_sphere(name + "_shoe", (ankle[0] + 0.08, ankle[1], ankle[2] - 0.04), (0.14, 0.075, 0.065), hair)
-
-    if cycling:
-        arms = []
-    elif seated:
-        arms = [
-            ((x + 0.04, y - 0.17, z + 0.62), (x + 0.52, y - 0.36, z + 0.45)),
-            ((x + 0.04, y + 0.17, z + 0.62), (x + 0.52, y + 0.36, z + 0.45)),
-        ]
-    else:
-        arms = [
-            ((x + 0.05, y - 0.2, z + 0.63), (x + 0.21, y - 0.27, z + 0.12)),
-            ((x + 0.05, y + 0.2, z + 0.63), (x + 0.21, y + 0.27, z + 0.12)),
-        ]
-    for shoulder, hand in arms:
-        elbow = ((shoulder[0] + hand[0]) * 0.5, (shoulder[1] + hand[1]) * 0.5, (shoulder[2] + hand[2]) * 0.5)
-        cylinder_between(name + "_sleeve", shoulder, elbow, 0.07, shirt, 16, 0.09)
-        cylinder_between(name + "_forearm", elbow, hand, 0.05, skin, 16, 0.065)
-        uv_sphere(name + "_hand", hand, (0.065, 0.06, 0.065), skin, 16, 10)
-    if scarf:
-        wrap = uv_sphere(name + "_scarf", (x - 0.03, y, z + 0.56), (0.23, 0.22, 0.1), scarf)
-        tail = uv_sphere(name + "_scarf_tail", (x - 0.15, y + 0.1, z + 0.33), (0.09, 0.08, 0.28), scarf)
-    return torso, head
-
-
-def build():
+def clear_scene():
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
-    for datablocks in (bpy.data.materials, bpy.data.curves, bpy.data.meshes):
+    for datablocks in (bpy.data.materials, bpy.data.curves, bpy.data.meshes, bpy.data.actions, bpy.data.armatures):
         for datablock in list(datablocks):
             if datablock.users == 0:
                 datablocks.remove(datablock)
 
-    steel = material("Frame | enamelled graphite", (0.055, 0.075, 0.08), 0.72, 0.28)
-    chrome = material("Bright nickel and spokes", (0.65, 0.72, 0.7), 0.82, 0.23)
-    rubber = material("Road rubber", (0.018, 0.021, 0.024), 0.0, 0.88)
-    hub_gold = material("Brass hub caps", (0.66, 0.34, 0.07), 0.72, 0.3)
-    teal = material("Hand-painted deep teal", (0.015, 0.29, 0.27), 0.12, 0.45)
-    teal_light = material("Hand-painted turquoise", (0.04, 0.68, 0.59), 0.08, 0.45)
-    red = material("Vermilion lacquer", (0.78, 0.105, 0.065), 0.1, 0.35)
-    gold = material("Folk-art gold", (0.95, 0.57, 0.09), 0.38, 0.32)
-    ivory = material("Warm ivory trim", (0.95, 0.83, 0.56), 0.12, 0.38)
-    blue = material("Canopy indigo", (0.025, 0.17, 0.7), 0.0, 0.82)
-    sky = material("Canopy blue", (0.035, 0.38, 0.92), 0.0, 0.82)
-    cyan = material("Canopy turquoise", (0.02, 0.58, 0.65), 0.0, 0.8)
-    white = material("Canopy ivory", (0.94, 0.87, 0.71), 0.0, 0.78)
-    leather = material("Ox-blood leather", (0.22, 0.055, 0.035), 0.0, 0.54)
-    dark = material("Darkened steel", (0.03, 0.04, 0.045), 0.42, 0.38)
+def create_material(name, color, metallic=0.0, roughness=0.6, emission=None, emission_strength=1.0):
+    mat = bpy.data.materials.new(name)
+    mat.diffuse_color = (*color[:3], 1.0)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get("Principled BSDF")
+    if bsdf:
+        bsdf.inputs["Base Color"].default_value = (*color[:3], 1.0)
+        bsdf.inputs["Metallic"].default_value = metallic
+        bsdf.inputs["Roughness"].default_value = roughness
+        if emission and "Emission Color" in bsdf.inputs:
+            bsdf.inputs["Emission Color"].default_value = (*emission[:3], 1.0)
+            if "Emission Strength" in bsdf.inputs:
+                bsdf.inputs["Emission Strength"].default_value = emission_strength
+    return mat
 
-    tire_radius = 0.56
-    wheel("wheel_front", 1.38, 0, tire_radius, tire_radius, rubber, chrome, hub_gold)
-    wheel("wheel_rear_left", -1.13, -0.78, tire_radius, tire_radius, rubber, chrome, hub_gold)
-    wheel("wheel_rear_right", -1.13, 0.78, tire_radius, tire_radius, rubber, chrome, hub_gold)
+def assign_material(obj, mat):
+    if obj.data.materials:
+        obj.data.materials[0] = mat
+    else:
+        obj.data.materials.append(mat)
+    return obj
 
-    # Diamond bicycle frame and fork.
-    frame = [
-        ((1.38, 0, 0.56), (0.12, 0, 0.76)),
-        ((0.12, 0, 0.76), (-0.62, 0, 0.62)),
-        ((-0.62, 0, 0.62), (-1.13, 0, 0.56)),
-        ((-0.62, 0, 0.62), (-0.52, 0, 1.06)),
-        ((-0.52, 0, 1.06), (0.12, 0, 0.76)),
-        ((0.12, 0, 0.76), (-0.52, 0, 1.06)),
-        ((1.38, -0.06, 0.56), (0.91, -0.06, 1.48)),
-        ((1.38, 0.06, 0.56), (0.91, 0.06, 1.48)),
-    ]
-    for start, end in frame:
-        tube("Brazed cycle frame", [start, end], 0.035, steel)
-    cylinder_between("Front fork crown", (0.91, -0.07, 1.43), (0.91, 0.07, 1.43), 0.065, chrome, 16)
+def smooth_mesh(obj):
+    for poly in obj.data.polygons:
+        poly.use_smooth = True
 
-    # Pedal crank and chain ring.
-    crank = bpy.data.objects.new("pedal_crank", None)
-    bpy.context.collection.objects.link(crank)
-    crank.location = (0.12, 0, 0.76)
-    bpy.ops.mesh.primitive_torus_add(
-        major_radius=0.13,
-        minor_radius=0.018,
-        major_segments=32,
-        minor_segments=8,
-        location=(0.12, 0, 0.76),
-        rotation=(math.pi / 2, 0, 0),
+def create_sphere(name, loc, radius, scale, mat, segs=16, rings=12, parent=None):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=segs, ring_count=rings, radius=radius, location=loc)
+    obj = bpy.context.object
+    obj.name = name
+    obj.scale = scale
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    smooth_mesh(obj)
+    assign_material(obj, mat)
+    if parent:
+        obj.parent = parent
+    return obj
+
+def create_box(name, loc, dimensions, mat, bevel=0.0, parent=None):
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+    obj = bpy.context.object
+    obj.name = name
+    obj.dimensions = dimensions
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    if bevel > 0.001:
+        mod = obj.modifiers.new("Bevel", "BEVEL")
+        mod.width = bevel
+        mod.segments = 2
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    smooth_mesh(obj)
+    assign_material(obj, mat)
+    if parent:
+        obj.parent = parent
+    return obj
+
+def create_cylinder_between(name, p1, p2, radius, mat, verts=12, parent=None, radius2=None):
+    p1_v = Vector(p1)
+    p2_v = Vector(p2)
+    dir_v = p2_v - p1_v
+    length = dir_v.length
+    if length < 1e-5:
+        length = 1e-4
+    mid = (p1_v + p2_v) * 0.5
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=verts,
+        radius1=radius if radius2 is None else radius2,
+        radius2=radius,
+        depth=length,
+        location=mid
     )
-    chainring = assign(bpy.context.object, gold)
-    parent_keep_transform(chainring, crank)
-    for side in (-1, 1):
-        crank_arm = cylinder_between(
-            "Crank arm",
-            (0.12, side * 0.12, 0.76),
-            (0.12 + (0.34 if side > 0 else -0.34), side * 0.12, 0.76),
-            0.025,
-            chrome,
-            10,
+    obj = bpy.context.object
+    obj.name = name
+    obj.rotation_mode = "QUATERNION"
+    obj.rotation_quaternion = dir_v.to_track_quat("Z", "Y")
+    smooth_mesh(obj)
+    assign_material(obj, mat)
+    if parent:
+        obj.parent = parent
+    return obj
+
+def create_spoked_wheel(name, center, radius, width, tire_mat, rim_mat, spoke_mat, hub_mat):
+    pivot = bpy.data.objects.new(name, None)
+    bpy.context.collection.objects.link(pivot)
+    pivot.location = center
+    
+    # Outer rubber tire
+    bpy.ops.mesh.primitive_torus_add(
+        major_radius=radius - 0.045,
+        minor_radius=0.045,
+        major_segments=36,
+        minor_segments=10,
+        location=center,
+        rotation=(math.pi / 2, 0, 0)
+    )
+    tire = assign_material(bpy.context.object, tire_mat)
+    tire.name = name + "_tire"
+    tire.parent = pivot
+    smooth_mesh(tire)
+    
+    # Chrome rim
+    bpy.ops.mesh.primitive_torus_add(
+        major_radius=radius - 0.08,
+        minor_radius=0.015,
+        major_segments=36,
+        minor_segments=8,
+        location=center,
+        rotation=(math.pi / 2, 0, 0)
+    )
+    rim = assign_material(bpy.context.object, rim_mat)
+    rim.name = name + "_rim"
+    rim.parent = pivot
+    smooth_mesh(rim)
+    
+    # Center brass hub
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=16,
+        radius=0.055,
+        depth=width * 1.6,
+        location=center,
+        rotation=(math.pi / 2, 0, 0)
+    )
+    hub = assign_material(bpy.context.object, hub_mat)
+    hub.name = name + "_hub"
+    hub.parent = pivot
+    smooth_mesh(hub)
+    
+    # 24 Wire Spokes (laced in cross pattern)
+    spoke_count = 24
+    for i in range(spoke_count):
+        angle = (i / spoke_count) * math.tau
+        rim_x = center[0] + (radius - 0.09) * math.cos(angle)
+        rim_z = center[2] + (radius - 0.09) * math.sin(angle)
+        side = 0.035 if (i % 2 == 0) else -0.035
+        spoke = create_cylinder_between(
+            f"{name}_spoke_{i}",
+            (center[0], center[1] + side, center[2]),
+            (rim_x, center[1] + side * 0.2, rim_z),
+            0.0035,
+            spoke_mat,
+            verts=4,
+            parent=pivot
         )
-        parent_keep_transform(crank_arm, crank)
-        pedal = cube(
-            "Rubber pedal",
-            (0.12 + (0.34 if side > 0 else -0.34), side * 0.12, 0.76),
-            (0.2, 0.09, 0.035),
-            dark,
-            0.025,
-        )
-        parent_keep_transform(pedal, crank)
+    return pivot
 
-    # Chain runs on both sides of the rear sprocket.
-    for side in (-1, 1):
-        tube(
-            "Drive chain",
-            [
-                (0.12, side * 0.16, 0.76),
-                (-0.94, side * 0.16, 0.61),
-                (-1.02, side * 0.16, 0.59),
-            ],
-            0.012,
-            chrome,
-            1,
-        )
+def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None, parent=None, is_female=False):
+    x, y, z = center
+    head_group = bpy.data.objects.new(f"{name_prefix}_HeadGroup", None)
+    bpy.context.collection.objects.link(head_group)
+    head_group.location = (x, y, z)
+    if parent:
+        head_group.parent = parent
+        
+    # Cranium / Head base (facing +X)
+    head = create_sphere(f"{name_prefix}_Cranium", (0, 0, 0), 0.13, (1.05, 0.92, 1.18), skin_mat, segs=20, rings=16, parent=head_group)
+    
+    # Jaw and Chin
+    create_sphere(f"{name_prefix}_Jaw", (0.045, 0, -0.05), 0.08, (1.0, 0.78, 0.85), skin_mat, segs=14, rings=10, parent=head_group)
+    
+    # Hair
+    if is_female:
+        create_sphere(f"{name_prefix}_Hair", (-0.02, 0, 0.04), 0.135, (1.05, 0.98, 1.15), hair_mat, segs=16, rings=12, parent=head_group)
+        # Hair bun on back of head
+        create_sphere(f"{name_prefix}_HairBun", (-0.14, 0, 0.02), 0.065, (0.85, 0.95, 0.95), hair_mat, segs=14, rings=10, parent=head_group)
+    else:
+        create_sphere(f"{name_prefix}_Hair", (-0.015, 0, 0.045), 0.132, (1.04, 0.96, 1.12), hair_mat, segs=16, rings=12, parent=head_group)
+        # Sideburns
+        create_box(f"{name_prefix}_Sideburn_L", (0.01, -0.11, -0.02), (0.035, 0.015, 0.08), hair_mat, parent=head_group)
+        create_box(f"{name_prefix}_Sideburn_R", (0.01, 0.11, -0.02), (0.035, 0.015, 0.08), hair_mat, parent=head_group)
+    
+    # Left & Right Ears
+    create_sphere(f"{name_prefix}_Ear_L", (0.0, -0.12, -0.01), 0.035, (0.6, 0.35, 1.1), skin_mat, segs=10, rings=8, parent=head_group)
+    create_sphere(f"{name_prefix}_Ear_R", (0.0, 0.12, -0.01), 0.035, (0.6, 0.35, 1.1), skin_mat, segs=10, rings=8, parent=head_group)
+    
+    # Eyeballs & Pupils (facing forward +X)
+    for side, sign in [("L", -1), ("R", 1)]:
+        eye_y = sign * 0.046
+        # Eye white
+        create_sphere(f"{name_prefix}_EyeWhite_{side}", (0.115, eye_y, 0.015), 0.022, (0.6, 1.0, 0.8), eye_white_mat, segs=10, rings=8, parent=head_group)
+        # Dark Iris / Pupil
+        create_sphere(f"{name_prefix}_Pupil_{side}", (0.128, eye_y, 0.015), 0.011, (0.5, 0.9, 0.9), iris_mat, segs=8, rings=6, parent=head_group)
+        # Eyebrow arch
+        create_box(f"{name_prefix}_Eyebrow_{side}", (0.118, eye_y, 0.042), (0.015, 0.042, 0.01), hair_mat, bevel=0.003, parent=head_group)
+    
+    # Nose (bridge, tip, and nostrils)
+    create_cylinder_between(f"{name_prefix}_NoseBridge", (0.105, 0, 0.035), (0.142, 0, -0.015), 0.014, skin_mat, verts=8, parent=head_group)
+    create_sphere(f"{name_prefix}_NoseTip", (0.145, 0, -0.018), 0.018, (1.0, 1.0, 0.9), skin_mat, segs=10, rings=8, parent=head_group)
+    create_sphere(f"{name_prefix}_Nostril_L", (0.136, -0.02, -0.022), 0.011, (1.0, 0.9, 0.8), skin_mat, segs=8, rings=6, parent=head_group)
+    create_sphere(f"{name_prefix}_Nostril_R", (0.136, 0.02, -0.022), 0.011, (1.0, 0.9, 0.8), skin_mat, segs=8, rings=6, parent=head_group)
+    
+    # Lips / Mouth
+    create_box(f"{name_prefix}_LipUpper", (0.126, 0, -0.048), (0.016, 0.048, 0.01), lip_mat, bevel=0.002, parent=head_group)
+    create_box(f"{name_prefix}_LipLower", (0.122, 0, -0.062), (0.016, 0.042, 0.011), lip_mat, bevel=0.002, parent=head_group)
+    
+    # Authentic Mustache for Male characters
+    if mustache_mat and not is_female:
+        create_sphere(f"{name_prefix}_Mustache_L", (0.133, -0.022, -0.042), 0.016, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6, parent=head_group)
+        create_sphere(f"{name_prefix}_Mustache_R", (0.133, 0.022, -0.042), 0.016, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6, parent=head_group)
+        
+    return head_group
 
-    # Handlebar, grips, lamps and rear reflector.
-    tube("Handlebar stem", [(0.92, 0, 1.45), (1.0, 0, 1.66)], 0.035, chrome)
-    tube("Wide handlebar", [(1.0, -0.38, 1.66), (1.0, 0.38, 1.66)], 0.028, steel)
-    for side in (-1, 1):
-        uv_sphere("Handlebar grip", (1.0, side * 0.36, 1.66), (0.11, 0.045, 0.045), dark)
-    lamp = material("Glass headlamp", (0.98, 0.82, 0.48), 0.12, 0.16)
-    cube("Headlamp shell", (1.08, 0, 1.34), (0.19, 0.21, 0.18), chrome, 0.055)
-    uv_sphere("Headlamp lens", (1.18, 0, 1.34), (0.055, 0.075, 0.075), lamp, 24, 16)
-    cube("Rear reflector", (-1.25, 0, 1.06), (0.055, 0.23, 0.1), red, 0.025)
+def build():
+    clear_scene()
+    
+    # Materials
+    m_frame = create_material("Rickshaw_Frame", (0.08, 0.10, 0.12), metallic=0.75, roughness=0.3)
+    m_chrome = create_material("Rickshaw_Chrome", (0.88, 0.90, 0.92), metallic=0.95, roughness=0.15)
+    m_rubber = create_material("Rickshaw_TireRubber", (0.03, 0.03, 0.035), metallic=0.0, roughness=0.85)
+    m_brass = create_material("Rickshaw_Brass", (0.85, 0.65, 0.18), metallic=0.88, roughness=0.25)
+    m_teal = create_material("Rickshaw_TealArt", (0.03, 0.52, 0.48), metallic=0.1, roughness=0.45)
+    m_yellow = create_material("Rickshaw_YellowGold", (0.96, 0.72, 0.08), metallic=0.2, roughness=0.4)
+    m_red = create_material("Rickshaw_VermilionRed", (0.88, 0.12, 0.08), metallic=0.1, roughness=0.4)
+    m_blue = create_material("Rickshaw_IndigoBlue", (0.06, 0.22, 0.75), metallic=0.05, roughness=0.6)
+    m_cyan = create_material("Rickshaw_CyanStripe", (0.10, 0.78, 0.88), metallic=0.05, roughness=0.5)
+    m_white = create_material("Rickshaw_IvoryWhite", (0.95, 0.93, 0.88), metallic=0.05, roughness=0.5)
+    m_wood = create_material("Rickshaw_FloorboardWood", (0.35, 0.20, 0.10), metallic=0.0, roughness=0.75)
+    m_leather = create_material("Rickshaw_SeatLeather", (0.45, 0.08, 0.06), metallic=0.05, roughness=0.65)
+    m_dark = create_material("Rickshaw_DarkPedal", (0.05, 0.05, 0.06), metallic=0.3, roughness=0.7)
+    
+    # Human Materials
+    m_puller_skin = create_material("Puller_Skin", (0.42, 0.24, 0.14), metallic=0.0, roughness=0.75)
+    m_puller_shirt = create_material("Puller_FatuaShirt", (0.15, 0.35, 0.68), metallic=0.0, roughness=0.85)
+    m_puller_lungi = create_material("Puller_Lungi", (0.12, 0.48, 0.42), metallic=0.0, roughness=0.85)
+    m_gamcha = create_material("Puller_GamchaScarf", (0.85, 0.22, 0.18), metallic=0.0, roughness=0.9)
+    m_sandal = create_material("Sandal_Leather", (0.18, 0.12, 0.08), metallic=0.0, roughness=0.8)
+    
+    m_pass_m_skin = create_material("PassMale_Skin", (0.50, 0.30, 0.18), metallic=0.0, roughness=0.75)
+    m_pass_m_shirt = create_material("PassMale_Panjabi", (0.92, 0.90, 0.85), metallic=0.0, roughness=0.8)
+    m_pass_m_pants = create_material("PassMale_Pajama", (0.85, 0.85, 0.82), metallic=0.0, roughness=0.85)
+    
+    m_pass_f_skin = create_material("PassFem_Skin", (0.55, 0.34, 0.22), metallic=0.0, roughness=0.72)
+    m_pass_f_saree = create_material("PassFem_Saree", (0.85, 0.18, 0.45), metallic=0.0, roughness=0.75)
+    m_pass_f_orna = create_material("PassFem_Orna", (0.95, 0.75, 0.12), metallic=0.0, roughness=0.65)
+    
+    m_hair = create_material("Human_Hair", (0.03, 0.025, 0.02), metallic=0.0, roughness=0.9)
+    m_eye_white = create_material("Eye_Sclera", (0.95, 0.95, 0.95), metallic=0.0, roughness=0.2)
+    m_iris = create_material("Eye_Iris", (0.12, 0.08, 0.05), metallic=0.0, roughness=0.2)
+    m_lip = create_material("Human_Lips", (0.52, 0.22, 0.18), metallic=0.0, roughness=0.5)
 
-    # Rear passenger carriage frame, suspension and detailed body panels.
-    tube("Carriage lower rail left", [(-1.32, -0.88, 0.58), (-0.97, -0.88, 0.77), (-0.23, -0.88, 0.74), (0.02, -0.88, 0.58)], 0.05, steel)
-    tube("Carriage lower rail right", [(-1.32, 0.88, 0.58), (-0.97, 0.88, 0.77), (-0.23, 0.88, 0.74), (0.02, 0.88, 0.58)], 0.05, steel)
-    for side in (-1, 1):
-        y = side * 0.88
-        tube("Carriage upright", [(-1.12, y, 0.6), (-1.05, y, 1.15)], 0.035, chrome)
-        tube("Carriage front upright", [(-0.2, y, 0.64), (-0.2, y, 1.18)], 0.035, chrome)
-        cube("Painted passenger side", (-0.67, y, 0.92), (0.98, 0.045, 0.43), teal, 0.08)
-        tube("Gold pinstripe", [(-1.1, y + side * 0.03, 0.75), (-0.95, y + side * 0.03, 0.81), (-0.4, y + side * 0.03, 0.81), (-0.22, y + side * 0.03, 0.73)], 0.018, gold, 1)
-        tube("Vermilion pinstripe", [(-1.07, y + side * 0.035, 1.08), (-0.88, y + side * 0.035, 1.13), (-0.43, y + side * 0.035, 1.13), (-0.23, y + side * 0.035, 1.08)], 0.016, red, 1)
-        for motif_x in (-0.92, -0.66, -0.4):
-            uv_sphere("Hand-painted jewel", (motif_x, y + side * 0.04, 0.92), (0.055, 0.025, 0.055), ivory, 16, 10)
-            for petal in range(6):
-                angle = petal * math.tau / 6
-                uv_sphere(
-                    "Painted floral rosette",
-                    (motif_x + math.cos(angle) * 0.075, y + side * 0.045, 0.92 + math.sin(angle) * 0.075),
-                    (0.027, 0.014, 0.04),
-                    gold if petal % 2 == 0 else red,
-                    12,
-                    8,
-                )
+    # -------------------------------------------------------------
+    # 1. THREE WHEELS (Named pivots for Three.js rotation)
+    # -------------------------------------------------------------
+    wheel_radius = 0.56
+    w_front = create_spoked_wheel("wheel_front", (1.38, 0.0, wheel_radius), wheel_radius, 0.07, m_rubber, m_chrome, m_chrome, m_brass)
+    w_rear_l = create_spoked_wheel("wheel_rear_left", (-1.13, -0.78, wheel_radius), wheel_radius, 0.07, m_rubber, m_chrome, m_chrome, m_brass)
+    w_rear_r = create_spoked_wheel("wheel_rear_right", (-1.13, 0.78, wheel_radius), wheel_radius, 0.07, m_rubber, m_chrome, m_chrome, m_brass)
 
-    cube("Carriage floor", (-0.67, 0, 0.79), (1.0, 1.62, 0.12), steel, 0.05)
-    cube("Passenger seat base", (-0.68, 0, 1.04), (0.73, 1.48, 0.15), leather, 0.08)
-    cube("Upholstered seat cushion", (-0.65, 0, 1.14), (0.64, 1.38, 0.13), red, 0.08)
-    cube("Carriage backrest", (-1.15, 0, 1.28), (0.13, 1.5, 0.52), teal_light, 0.06)
-    cube("Backrest upholstery", (-1.07, 0, 1.29), (0.08, 1.3, 0.34), teal, 0.04)
+    # -------------------------------------------------------------
+    # 2. CHASSIS, FRAME & DRIVETRAIN
+    # -------------------------------------------------------------
+    # Front bicycle fork & crown
+    create_cylinder_between("Fork_L", (1.38, -0.06, wheel_radius), (1.0, -0.06, 1.48), 0.024, m_chrome)
+    create_cylinder_between("Fork_R", (1.38, 0.06, wheel_radius), (1.0, 0.06, 1.48), 0.024, m_chrome)
+    create_box("ForkCrown", (1.0, 0, 1.48), (0.08, 0.16, 0.05), m_chrome, bevel=0.01)
+    create_cylinder_between("HeadTube", (1.0, 0, 1.48), (0.95, 0, 1.62), 0.032, m_frame)
+    create_cylinder_between("Stem", (0.95, 0, 1.62), (0.98, 0, 1.68), 0.028, m_chrome)
+    
+    # Wide curved handlebars
+    create_cylinder_between("BarCenter", (0.98, -0.36, 1.68), (0.98, 0.36, 1.68), 0.022, m_chrome)
+    create_sphere("Grip_L", (0.98, -0.36, 1.68), 0.034, (1.4, 1.0, 1.0), m_rubber)
+    create_sphere("Grip_R", (0.98, 0.36, 1.68), 0.034, (1.4, 1.0, 1.0), m_rubber)
+    # Brass bell on left bar
+    create_sphere("Bell", (0.98, -0.25, 1.72), 0.038, (1.0, 1.0, 0.7), m_brass)
+    # Headlamp with lens
+    create_box("HeadlampHousing", (1.12, 0, 1.44), (0.16, 0.16, 0.14), m_chrome, bevel=0.02)
+    m_lens = create_material("HeadlampLens", (1.0, 0.95, 0.8), metallic=0.2, roughness=0.1, emission=(1.0, 0.9, 0.6), emission_strength=2.0)
+    create_sphere("HeadlampGlass", (1.20, 0, 1.44), 0.065, (0.4, 1.0, 1.0), m_lens)
 
-    # Driver's sprung seat and curved back support.
-    cylinder_between("Driver seat post", (-0.2, 0, 0.8), (-0.03, 0, 1.17), 0.035, chrome, 12)
-    cube("Driver saddle", (-0.02, 0, 1.18), (0.38, 0.34, 0.11), leather, 0.07)
-    tube("Driver back rest", [(-0.2, -0.24, 1.16), (-0.34, -0.28, 1.4), (-0.34, 0.28, 1.4), (-0.2, 0.24, 1.16)], 0.03, chrome)
+    # Front mudguard
+    create_cylinder_between("MudguardFront", (1.15, 0, 0.88), (1.62, 0, 0.82), 0.08, m_red, verts=8)
 
-    # Sculpted curved canopy with stitched segmented panels and a scalloped edge.
-    half_width = 1.02
-    x_start, x_end = -1.62, 0.08
-    panel_mats = [sky, cyan, white, sky, blue, cyan, sky, white]
-    for index, panel_mat in enumerate(panel_mats):
-        panel_start = x_start + (x_end - x_start) * index / len(panel_mats)
-        panel_end = x_start + (x_end - x_start) * (index + 1) / len(panel_mats)
-        canopy_panel("Hand-stitched canopy panel", panel_start, panel_end, 2.385, 2.19, half_width, panel_mat)
-    tube("Canopy crown seam", [(x_start, 0, 2.405), (x_end, 0, 2.405)], 0.018, ivory, 1)
-    for side in (-1, 1):
-        y = side * half_width
-        tube("Canopy gold piping", [(x_start - 0.02, y, 2.19), (x_end + 0.02, y, 2.19)], 0.027, gold)
-        for index in range(13):
-            x = x_start + (x_end - x_start) * index / 12
-            uv_sphere("Canopy scalloped tassel", (x, y, 2.16), (0.045, 0.028, 0.065), gold, 12, 8)
-        tube("Canopy support bow", [(x_start + 0.17, -half_width, 1.32), (x_start + 0.17, -0.55, 2.31), (x_start + 0.17, 0, 2.42), (x_start + 0.17, 0.55, 2.31), (x_start + 0.17, half_width, 1.32)], 0.025, steel)
-        tube("Canopy rear bow", [(x_end - 0.08, -half_width, 1.42), (x_end - 0.08, -0.55, 2.31), (x_end - 0.08, 0, 2.42), (x_end - 0.08, 0.55, 2.31), (x_end - 0.08, half_width, 1.42)], 0.025, steel)
-        cylinder_between("Canopy post", (-1.02, side * 0.88, 1.12), (-1.02, side * 0.88, 2.18), 0.025, chrome, 10)
-        cylinder_between("Canopy front post", (-0.15, side * 0.88, 1.18), (-0.15, side * 0.88, 2.19), 0.025, chrome, 10)
+    # Diamond cycle frame
+    create_cylinder_between("TopTube", (0.95, 0, 1.55), (0.0, 0, 1.15), 0.028, m_frame)
+    create_cylinder_between("DownTube", (0.95, 0, 1.50), (0.12, 0, 0.76), 0.032, m_frame)
+    create_cylinder_between("SeatTube", (0.0, 0, 1.15), (0.12, 0, 0.76), 0.032, m_frame)
+    create_cylinder_between("ChainStay_L", (0.12, 0, 0.76), (-0.70, -0.25, 0.60), 0.026, m_frame)
+    create_cylinder_between("ChainStay_R", (0.12, 0, 0.76), (-0.70, 0.25, 0.60), 0.026, m_frame)
+    create_cylinder_between("SeatStay_L", (0.0, 0, 1.15), (-0.70, -0.25, 0.60), 0.024, m_frame)
+    create_cylinder_between("SeatStay_R", (0.0, 0, 1.15), (-0.70, 0.25, 0.60), 0.024, m_frame)
 
-    # Hand-painted flower medallions on the passenger back and rear valance.
-    cube("Rear decorative valance", (-1.3, 0, 0.91), (0.08, 1.64, 0.32), red, 0.04)
-    for side in (-1, 1):
-        y = side * 0.055
-        for z_offset in (-0.42, 0, 0.42):
-            uv_sphere("Rear gold rosette center", (-1.35, y, 0.91 + z_offset), (0.025, 0.055, 0.055), gold, 16, 10)
-            for petal in range(8):
-                angle = petal * math.tau / 8
-                uv_sphere(
-                    "Rear hand-painted petal",
-                    (-1.35, y + math.cos(angle) * 0.07, 0.91 + z_offset + math.sin(angle) * 0.07),
-                    (0.022, 0.028, 0.05),
-                    ivory if petal % 2 == 0 else gold,
-                    12,
-                    8,
-                )
+    # Driver saddle
+    create_box("SaddleBase", (0.0, 0, 1.17), (0.34, 0.28, 0.08), m_leather, bevel=0.03)
+    create_cylinder_between("SaddlePost", (0.0, 0, 1.15), (0.04, 0, 0.95), 0.026, m_chrome)
+    create_sphere("Spring_L", (-0.10, -0.09, 1.14), 0.035, (1.0, 1.0, 1.2), m_chrome)
+    create_sphere("Spring_R", (-0.10, 0.09, 1.14), 0.035, (1.0, 1.0, 1.2), m_chrome)
 
-    # Seated occupants are shaped and layered as separate, textured meshes.
-    driver_skin = material("Driver | warm brown skin", (0.37, 0.18, 0.1), 0.0, 0.72)
-    driver_shirt = material("Driver | indigo cotton shirt", (0.12, 0.22, 0.52), 0.0, 0.86)
-    driver_trousers = material("Driver | charcoal trousers", (0.075, 0.09, 0.13), 0.0, 0.87)
-    passenger_skin_a = material("Passenger | medium brown skin", (0.47, 0.25, 0.14), 0.0, 0.73)
-    passenger_skin_b = material("Passenger | warm brown skin", (0.32, 0.14, 0.08), 0.0, 0.75)
-    passenger_shirt_a = material("Passenger | saffron cotton", (0.76, 0.3, 0.07), 0.0, 0.86)
-    passenger_shirt_b = material("Passenger | rose cotton", (0.52, 0.08, 0.2), 0.0, 0.86)
-    passenger_trousers = material("Passenger | dark cotton", (0.08, 0.1, 0.15), 0.0, 0.88)
-    hair = material("Natural dark hair", (0.025, 0.018, 0.014), 0.0, 0.88)
-    scarf = material("Passenger | saffron orna", (0.92, 0.49, 0.08), 0.0, 0.82)
+    # -------------------------------------------------------------
+    # 3. PEDAL CRANK & ARTICULATED PEDALS
+    # -------------------------------------------------------------
+    crank_pivot = bpy.data.objects.new("pedal_crank", None)
+    bpy.context.collection.objects.link(crank_pivot)
+    crank_pivot.location = (0.12, 0, 0.76)
+    
+    # Gold chainring
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=24,
+        radius=0.14,
+        depth=0.015,
+        location=(0.12, 0.04, 0.76),
+        rotation=(math.pi / 2, 0, 0)
+    )
+    chainring = assign_material(bpy.context.object, m_yellow)
+    chainring.name = "Chainring"
+    chainring.parent = crank_pivot
+    
+    # Crank arms (180 deg offset)
+    crank_radius = 0.17
+    # Left crank arm pointing forward-up (+X)
+    c_arm_l = create_cylinder_between("CrankArm_L", (0.12, -0.13, 0.76), (0.12 + crank_radius, -0.13, 0.76), 0.018, m_chrome, parent=crank_pivot)
+    # Right crank arm pointing backward-down (-X)
+    c_arm_r = create_cylinder_between("CrankArm_R", (0.12, 0.13, 0.76), (0.12 - crank_radius, 0.13, 0.76), 0.018, m_chrome, parent=crank_pivot)
+    
+    # Left Pedal
+    pedal_l = create_box("Pedal_L", (0.12 + crank_radius, -0.17, 0.76), (0.12, 0.08, 0.035), m_dark, bevel=0.008, parent=crank_pivot)
+    # Right Pedal
+    pedal_r = create_box("Pedal_R", (0.12 - crank_radius, 0.17, 0.76), (0.12, 0.08, 0.035), m_dark, bevel=0.008, parent=crank_pivot)
 
-    person("Driver", (0.28, 0, 1.14), driver_skin, driver_shirt, driver_trousers, hair, seated=True, cycling=True)
-    person("Passenger left", (-0.69, -0.36, 1.18), passenger_skin_a, passenger_shirt_a, passenger_trousers, hair, seated=False)
-    person("Passenger right", (-0.69, 0.36, 1.18), passenger_skin_b, passenger_shirt_b, passenger_trousers, hair, seated=False, scarf=scarf)
+    # -------------------------------------------------------------
+    # 4. CARRIAGE, PASSENGER CABIN & FOLK ART
+    # -------------------------------------------------------------
+    # Main carriage chassis frame
+    create_box("CarriageFloor", (-0.72, 0, 0.78), (1.10, 1.56, 0.06), m_wood)
+    create_box("FloorboardFrame", (-0.72, 0, 0.74), (1.12, 1.58, 0.04), m_frame)
+    create_cylinder_between("RearAxle", (-1.13, -0.78, wheel_radius), (-1.13, 0.78, wheel_radius), 0.035, m_frame)
+    # Leaf springs
+    create_box("LeafSpring_L", (-1.13, -0.65, 0.68), (0.45, 0.08, 0.05), m_frame)
+    create_box("LeafSpring_R", (-1.13, 0.65, 0.68), (0.45, 0.08, 0.05), m_frame)
 
-    # The driver reaches and holds the handlebar grips.
-    for side in (-1, 1):
-        tube("Driver sleeve", [(0.44, side * 0.13, 1.75), (0.82, side * 0.28, 1.65)], 0.08, driver_shirt)
-        tube("Driver forearm", [(0.82, side * 0.28, 1.65), (1.0, side * 0.34, 1.66)], 0.05, driver_skin)
-        uv_sphere("Driver hand on grip", (1.0, side * 0.36, 1.66), (0.075, 0.055, 0.06), driver_skin, 16, 10)
+    # Passenger Footrest
+    create_box("FootrestBoard", (-0.28, 0, 0.72), (0.36, 1.30, 0.04), m_wood, bevel=0.01)
 
-    # Front and rear mudguards, with rolled edges and structural stays.
-    for side in (-1, 1):
-        y = side * 0.82
-        tube("Rear wheel mudguard", [(-1.72, y, 0.6), (-1.62, y, 0.93), (-1.3, y, 1.12), (-0.96, y, 0.99), (-0.68, y, 0.68)], 0.035, teal_light)
-        tube("Rear mudguard stay", [(-1.13, y, 0.6), (-1.42, y, 0.79)], 0.018, chrome)
-    tube("Front mudguard", [(1.05, -0.13, 0.58), (1.18, -0.13, 0.91), (1.42, -0.13, 1.05), (1.63, -0.13, 0.88), (1.72, -0.13, 0.58)], 0.035, red)
+    # Rear seat base & cushion
+    create_box("SeatBaseBox", (-0.85, 0, 0.94), (0.64, 1.44, 0.32), m_teal, bevel=0.02)
+    create_box("SeatCushion", (-0.80, 0, 1.14), (0.58, 1.40, 0.12), m_leather, bevel=0.04)
+    create_box("SeatBackrest", (-1.18, 0, 1.42), (0.12, 1.40, 0.48), m_leather, bevel=0.04)
 
-    # Keep animation pivots while merging static meshes into material batches.
-    consolidate_meshes()
+    # Carriage Painted Side Panels with Dhaka Folk Art
+    for side, sign in [("L", -1), ("R", 1)]:
+        y = sign * 0.76
+        # Side wall
+        create_box(f"CarriageWall_{side}", (-0.82, y, 1.05), (0.84, 0.04, 0.44), m_teal, bevel=0.01)
+        # Gold accent trim
+        create_box(f"CarriageTrim_{side}", (-0.82, y + sign * 0.022, 1.05), (0.80, 0.01, 0.03), m_yellow)
+        # Brass armrest rail
+        create_cylinder_between(f"ArmrestRail_{side}", (-1.18, y, 1.32), (-0.42, y, 1.18), 0.018, m_brass)
+        create_cylinder_between(f"ArmrestPost_{side}", (-0.42, y, 0.78), (-0.42, y, 1.18), 0.018, m_brass)
+        # Rear mudguard
+        create_cylinder_between(f"RearMudguard_{side}", (-1.45, y, 0.88), (-0.80, y, 0.88), 0.08, m_teal, verts=8)
+
+    # Scalloped Canopy Roof & Folding Bows
+    canopy_start_x, canopy_end_x = -1.48, -0.15
+    canopy_z_top = 2.24
+    canopy_width = 1.62
+    create_cylinder_between("CanopyBowFront", (-0.35, -0.78, 1.25), (-0.35, -0.78, canopy_z_top - 0.2), 0.022, m_chrome)
+    create_cylinder_between("CanopyBowFront_R", (-0.35, 0.78, 1.25), (-0.35, 0.78, canopy_z_top - 0.2), 0.022, m_chrome)
+    create_cylinder_between("CanopyBowRear_L", (-1.25, -0.78, 1.25), (-1.25, -0.78, canopy_z_top - 0.1), 0.022, m_chrome)
+    create_cylinder_between("CanopyBowRear_R", (-1.25, 0.78, 1.25), (-1.25, 0.78, canopy_z_top - 0.1), 0.022, m_chrome)
+
+    # Canopy arched roof segments (colorful stitched panels)
+    panel_colors = [m_blue, m_cyan, m_white, m_yellow, m_red, m_cyan, m_blue]
+    panel_count = len(panel_colors)
+    step_x = (canopy_end_x - canopy_start_x) / panel_count
+    for i, p_mat in enumerate(panel_colors):
+        px = canopy_start_x + (i + 0.5) * step_x
+        create_box(f"CanopyPanel_{i}", (px, 0, canopy_z_top), (step_x * 0.96, canopy_width, 0.03), p_mat, bevel=0.01)
+
+    # Hanging decorative tassels along side rim
+    for i in range(10):
+        tx = canopy_start_x + (i / 9.0) * (canopy_end_x - canopy_start_x)
+        for sign in [-1, 1]:
+            ty = sign * (canopy_width * 0.5 + 0.01)
+            t_mat = m_yellow if (i % 2 == 0) else m_red
+            create_sphere(f"Tassel_{i}_{sign}", (tx, ty, canopy_z_top - 0.08), 0.032, (0.8, 0.8, 1.8), t_mat, segs=8, rings=6)
+
+    # Rear Folk Art Tin Plate ("আল্লাহর দান" / peacock folk art plate)
+    create_box("RearTinPlate", (-1.28, 0, 1.05), (0.04, 1.25, 0.42), m_yellow, bevel=0.01)
+    create_box("RearArtEmblem", (-1.31, 0, 1.05), (0.02, 0.85, 0.28), m_red, bevel=0.008)
+    create_sphere("RearRosetteCenter", (-1.33, 0, 1.05), 0.045, (0.4, 1.0, 1.0), m_teal, segs=10, rings=8)
+    create_box("RearSafetyReflector", (-1.33, 0, 0.78), (0.03, 0.24, 0.08), m_red, bevel=0.005)
+
+    # -------------------------------------------------------------
+    # 5. RICKSHAW PULLER (FULL BODY: HEAD, FACE, ARMS, TORSO, PELVIS, LEGS, FEET)
+    # -------------------------------------------------------------
+    puller_group = bpy.data.objects.new("RickshawPuller", None)
+    bpy.context.collection.objects.link(puller_group)
+    puller_group.location = (0.0, 0.0, 0.0)
+
+    # Saddle / Pelvis
+    puller_pelvis = create_box("Puller_Pelvis", (0.02, 0.0, 1.22), (0.24, 0.28, 0.16), m_puller_lungi, bevel=0.02, parent=puller_group)
+    
+    # Torso (leaning forward toward handlebars)
+    create_box("Puller_Torso", (0.16, 0.0, 1.44), (0.26, 0.36, 0.38), m_puller_shirt, bevel=0.04, parent=puller_group)
+    
+    # Gamcha scarf draped around neck & chest
+    create_cylinder_between("Puller_Gamcha_L", (0.24, -0.12, 1.62), (0.18, -0.06, 1.34), 0.042, m_gamcha, verts=8, parent=puller_group)
+    create_cylinder_between("Puller_Gamcha_R", (0.24, 0.12, 1.62), (0.18, 0.06, 1.34), 0.042, m_gamcha, verts=8, parent=puller_group)
+    create_sphere("Puller_GamchaKnot", (0.24, 0.0, 1.42), 0.05, (1.0, 1.2, 1.0), m_gamcha, segs=10, rings=8, parent=puller_group)
+
+    # Neck
+    create_cylinder_between("Puller_Neck", (0.22, 0.0, 1.58), (0.26, 0.0, 1.70), 0.055, m_puller_skin, verts=10, parent=puller_group)
+
+    # Full Realistic 3D Face
+    build_head_and_face("Puller", (0.28, 0.0, 1.82), m_puller_skin, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, parent=puller_group, is_female=False)
+
+    # Arms reaching forward to grip handlebars
+    # Left Arm
+    create_cylinder_between("Puller_UpperArm_L", (0.20, -0.18, 1.56), (0.54, -0.26, 1.50), 0.052, m_puller_shirt, verts=10, parent=puller_group)
+    create_cylinder_between("Puller_Forearm_L", (0.54, -0.26, 1.50), (0.95, -0.34, 1.66), 0.042, m_puller_skin, verts=10, parent=puller_group)
+    create_sphere("Puller_Hand_L", (0.96, -0.35, 1.67), 0.048, (1.2, 0.9, 0.9), m_puller_skin, segs=10, rings=8, parent=puller_group)
+    
+    # Right Arm
+    create_cylinder_between("Puller_UpperArm_R", (0.20, 0.18, 1.56), (0.54, 0.26, 1.50), 0.052, m_puller_shirt, verts=10, parent=puller_group)
+    create_cylinder_between("Puller_Forearm_R", (0.54, 0.26, 1.50), (0.95, 0.34, 1.66), 0.042, m_puller_skin, verts=10, parent=puller_group)
+    create_sphere("Puller_Hand_R", (0.96, 0.35, 1.67), 0.048, (1.2, 0.9, 0.9), m_puller_skin, segs=10, rings=8, parent=puller_group)
+
+    # Articulated Pedaling Legs (Named for Three.js kinetics & live pedaling loop)
+    # Left Leg (pedal at forward position: X = 0.12 + 0.17 = 0.29, Y = -0.17, Z = 0.76)
+    hip_l = (0.05, -0.12, 1.18)
+    knee_l = (0.26, -0.16, 0.98)
+    ankle_l = (0.28, -0.17, 0.78)
+    create_cylinder_between("Puller_Thigh_L", hip_l, knee_l, 0.068, m_puller_lungi, verts=12, parent=puller_group)
+    create_cylinder_between("Puller_Shin_L", knee_l, ankle_l, 0.052, m_puller_skin, verts=10, parent=puller_group)
+    create_box("Puller_Foot_L", (ankle_l[0] + 0.04, ankle_l[1], ankle_l[2] - 0.02), (0.16, 0.075, 0.04), m_sandal, bevel=0.01, parent=puller_group)
+
+    # Right Leg (pedal at rear position: X = 0.12 - 0.17 = -0.05, Y = 0.17, Z = 0.76)
+    hip_r = (0.05, 0.12, 1.18)
+    knee_r = (0.02, 0.16, 0.94)
+    ankle_r = (-0.05, 0.17, 0.78)
+    create_cylinder_between("Puller_Thigh_R", hip_r, knee_r, 0.068, m_puller_lungi, verts=12, parent=puller_group)
+    create_cylinder_between("Puller_Shin_R", knee_r, ankle_r, 0.052, m_puller_skin, verts=10, parent=puller_group)
+    create_box("Puller_Foot_R", (ankle_r[0] + 0.04, ankle_r[1], ankle_r[2] - 0.02), (0.16, 0.075, 0.04), m_sandal, bevel=0.01, parent=puller_group)
+
+    # -------------------------------------------------------------
+    # 6. PASSENGER LEFT: MALE IN PANJABI (100% COMPLETE ANATOMY)
+    # -------------------------------------------------------------
+    pass_m_group = bpy.data.objects.new("Passenger_Male", None)
+    bpy.context.collection.objects.link(pass_m_group)
+    pass_m_group.location = (-0.72, -0.32, 0.0)
+
+    # Pelvis resting on seat cushion
+    create_box("PassM_Pelvis", (0, 0, 1.18), (0.28, 0.32, 0.16), m_pass_m_pants, bevel=0.02, parent=pass_m_group)
+    # Torso leaning slightly back against upholstered backrest
+    create_box("PassM_Torso", (-0.04, 0, 1.44), (0.24, 0.36, 0.40), m_pass_m_shirt, bevel=0.03, parent=pass_m_group)
+    # Panjabi button placket
+    create_box("PassM_Placket", (0.09, 0, 1.48), (0.02, 0.04, 0.26), m_frame, parent=pass_m_group)
+    # Neck
+    create_cylinder_between("PassM_Neck", (-0.02, 0, 1.62), (0.0, 0, 1.72), 0.05, m_pass_m_skin, verts=10, parent=pass_m_group)
+    # 3D Face
+    build_head_and_face("PassM", (0.02, 0, 1.84), m_pass_m_skin, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, parent=pass_m_group, is_female=False)
+
+    # Arms resting on lap
+    create_cylinder_between("PassM_Arm_L", (-0.02, -0.18, 1.56), (0.16, -0.16, 1.30), 0.05, m_pass_m_shirt, verts=10, parent=pass_m_group)
+    create_cylinder_between("PassM_Forearm_L", (0.16, -0.16, 1.30), (0.26, -0.06, 1.24), 0.042, m_pass_m_skin, verts=10, parent=pass_m_group)
+    create_sphere("PassM_Hand_L", (0.27, -0.05, 1.24), 0.045, (1.2, 0.9, 0.9), m_pass_m_skin, segs=8, rings=6, parent=pass_m_group)
+    
+    create_cylinder_between("PassM_Arm_R", (-0.02, 0.18, 1.56), (0.16, 0.16, 1.30), 0.05, m_pass_m_shirt, verts=10, parent=pass_m_group)
+    create_cylinder_between("PassM_Forearm_R", (0.16, 0.16, 1.30), (0.26, 0.06, 1.24), 0.042, m_pass_m_skin, verts=10, parent=pass_m_group)
+    create_sphere("PassM_Hand_R", (0.27, 0.05, 1.24), 0.045, (1.2, 0.9, 0.9), m_pass_m_skin, segs=8, rings=6, parent=pass_m_group)
+
+    # LOWER BODY: Thighs extending horizontally forward over cushion, knees bent 90 deg, shins down to floorboard!
+    for side, sign in [("L", -1), ("R", 1)]:
+        leg_y = sign * 0.10
+        # Horizontal thigh
+        create_cylinder_between(f"PassM_Thigh_{side}", (0.02, leg_y, 1.18), (0.36, leg_y, 1.18), 0.065, m_pass_m_pants, verts=12, parent=pass_m_group)
+        # Vertical shin down to floorboard
+        create_cylinder_between(f"PassM_Shin_{side}", (0.36, leg_y, 1.18), (0.36, leg_y, 0.82), 0.054, m_pass_m_pants, verts=10, parent=pass_m_group)
+        # Foot wearing sandal resting on floorboard
+        create_box(f"PassM_Foot_{side}", (0.42, leg_y, 0.80), (0.16, 0.075, 0.038), m_sandal, bevel=0.01, parent=pass_m_group)
+
+    # -------------------------------------------------------------
+    # 7. PASSENGER RIGHT: FEMALE IN SAREE (100% COMPLETE ANATOMY)
+    # -------------------------------------------------------------
+    pass_f_group = bpy.data.objects.new("Passenger_Female", None)
+    bpy.context.collection.objects.link(pass_f_group)
+    pass_f_group.location = (-0.72, 0.32, 0.0)
+
+    # Pelvis on seat cushion
+    create_box("PassF_Pelvis", (0, 0, 1.18), (0.28, 0.32, 0.16), m_pass_f_saree, bevel=0.02, parent=pass_f_group)
+    # Torso
+    create_box("PassF_Torso", (-0.04, 0, 1.42), (0.22, 0.34, 0.38), m_pass_f_saree, bevel=0.03, parent=pass_f_group)
+    # Orna / Saree pallu drape across chest
+    create_cylinder_between("PassF_OrnaDrape", (0.06, -0.14, 1.54), (-0.02, 0.14, 1.30), 0.046, m_pass_f_orna, verts=8, parent=pass_f_group)
+    create_box("PassF_PalluTail", (-0.12, 0.16, 1.18), (0.06, 0.14, 0.35), m_pass_f_orna, bevel=0.02, parent=pass_f_group)
+    # Neck
+    create_cylinder_between("PassF_Neck", (-0.02, 0, 1.60), (0.0, 0, 1.70), 0.045, m_pass_f_skin, verts=10, parent=pass_f_group)
+    # 3D Face with earrings & hair bun
+    build_head_and_face("PassF", (0.02, 0, 1.82), m_pass_f_skin, m_hair, m_eye_white, m_iris, m_lip, parent=pass_f_group, is_female=True)
+    # Gold Earrings
+    create_sphere("PassF_Earring_L", (0.02, -0.13, 1.79), 0.016, (1.0, 1.0, 1.5), m_yellow, segs=8, rings=6, parent=pass_f_group)
+    create_sphere("PassF_Earring_R", (0.02, 0.13, 1.79), 0.016, (1.0, 1.0, 1.5), m_yellow, segs=8, rings=6, parent=pass_f_group)
+
+    # Arms folded gracefully in lap
+    create_cylinder_between("PassF_Arm_L", (-0.02, -0.17, 1.52), (0.14, -0.14, 1.28), 0.045, m_pass_f_saree, verts=10, parent=pass_f_group)
+    create_cylinder_between("PassF_Forearm_L", (0.14, -0.14, 1.28), (0.24, -0.04, 1.22), 0.038, m_pass_f_skin, verts=10, parent=pass_f_group)
+    create_sphere("PassF_Hand_L", (0.25, -0.03, 1.22), 0.04, (1.2, 0.9, 0.9), m_pass_f_skin, segs=8, rings=6, parent=pass_f_group)
+    
+    create_cylinder_between("PassF_Arm_R", (-0.02, 0.17, 1.52), (0.14, 0.14, 1.28), 0.045, m_pass_f_saree, verts=10, parent=pass_f_group)
+    create_cylinder_between("PassF_Forearm_R", (0.14, 0.14, 1.28), (0.24, 0.04, 1.22), 0.038, m_pass_f_skin, verts=10, parent=pass_f_group)
+    create_sphere("PassF_Hand_R", (0.25, 0.03, 1.22), 0.04, (1.2, 0.9, 0.9), m_pass_f_skin, segs=8, rings=6, parent=pass_f_group)
+
+    # LOWER BODY: Saree-draped thighs extending forward, shins down, sandals on floorboard!
+    for side, sign in [("L", -1), ("R", 1)]:
+        leg_y = sign * 0.09
+        create_cylinder_between(f"PassF_Thigh_{side}", (0.02, leg_y, 1.18), (0.35, leg_y, 1.18), 0.068, m_pass_f_saree, verts=12, parent=pass_f_group)
+        create_cylinder_between(f"PassF_Shin_{side}", (0.35, leg_y, 1.18), (0.35, leg_y, 0.82), 0.056, m_pass_f_saree, verts=10, parent=pass_f_group)
+        create_box(f"PassF_Foot_{side}", (0.41, leg_y, 0.80), (0.15, 0.07, 0.035), m_sandal, bevel=0.01, parent=pass_f_group)
+
+    # -------------------------------------------------------------
+    # 8. EXPORT TO GLTF/GLB
+    # -------------------------------------------------------------
     bpy.ops.object.select_all(action="SELECT")
-    bpy.context.view_layer.objects.active = None
     bpy.ops.export_scene.gltf(
         filepath=OUTPUT,
         export_format="GLB",
         use_selection=False,
-        export_apply=True,
+        export_apply=False, # Preserve pivots and parent transforms!
         export_yup=True,
-        export_animations=False,
-        export_lights=False,
-        export_cameras=False,
         export_materials="EXPORT",
-        export_image_format="AUTO",
     )
-    print("EXPORTED", OUTPUT)
-    print("OBJECTS", len(bpy.context.scene.objects))
+    print("SUCCESSFULLY EXPORTED CYCLE RICKSHAW TO:", OUTPUT)
 
-
-build()
+if __name__ == "__main__":
+    build()
