@@ -41,26 +41,26 @@
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
   let vehicleOrbitYaw = 0.35;
-  let vehicleOrbitPitch = 0.28;
+  let vehicleOrbitPitch = 0.32;
   let orbitPointerId = null;
   let lastOrbitPointerX = 0;
   let lastOrbitPointerY = 0;
   let buildingNameCounter = 0;
   const ORBITABLE_VEHICLE_MODES = ['bus', 'bike', 'cng', 'car', 'rickshaw'];
-  let targetCamX = 180, targetCamY = 520;
-  const CAM_DEFAULT_POS = { x: 180, y: 520, z: 460 };
-  const CAM_DEFAULT_LOOK = { x: 0, y: 15, z: -15 };
+  let targetCamX = 220, targetCamY = 460;
+  const CAM_DEFAULT_POS = { x: 220, y: 460, z: 460 };
+  const CAM_DEFAULT_LOOK = { x: 0, y: 20, z: -30 };
   const VIADUCT_Z = -332;
-  let camBasePos = { x: 180, y: 520, z: 460 };
-  let camBaseLook = { x: 0, y: 15, z: -15 };
-  let currentCamLook = { x: 0, y: 15, z: -15 };
+  let camBasePos = { x: 220, y: 460, z: 460 };
+  let camBaseLook = { x: 0, y: 20, z: -30 };
+  let currentCamLook = { x: 0, y: 20, z: -30 };
   let idleDroneTime = 0;
 
   // Multimodal Camera Choreography Presets
   const CAM_MODES = {
     overview: {
-      pos: { x: 180, y: 520, z: 460 },
-      look: { x: 0, y: 15, z: -15 },
+      pos: { x: 220, y: 460, z: 460 },
+      look: { x: 0, y: 20, z: -30 },
       badge: 'Drone View'
     },
     bike: {
@@ -204,11 +204,11 @@
   function getVehicleOrbitPose(target) {
     const yaw = vehicleOrbitYaw;
     const pitch = Math.max(0.12, Math.min(0.55, vehicleOrbitPitch));
-    const baseRadius = target.type === 'car' ? 65
-      : target.type === 'bike' ? 42
-        : target.type === 'rickshaw' ? 48
-          : target.type === 'cng' ? 50
-            : 95;
+    const baseRadius = target.type === 'car' ? 36
+      : target.type === 'bike' ? 22
+        : target.type === 'rickshaw' ? 26
+          : target.type === 'cng' ? 28
+            : 56;
     const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const desktopCoverage = Math.tan(THREE.MathUtils.degToRad(38 / 2)) * 1.6;
     const framingScale = horizontalCoverage > 0 ? Math.max(1, desktopCoverage / horizontalCoverage) : 1;
@@ -310,7 +310,7 @@
     const targetMode = CAM_MODES[modeName] ? modeName : 'overview';
     activeCamMode = targetMode;
     vehicleOrbitYaw = 0.35;
-    vehicleOrbitPitch = 0.28;
+    vehicleOrbitPitch = 0.32;
 
     if (targetMode !== 'overview') {
       activeTargetVehicle = acquireTargetVehicle(targetMode);
@@ -1733,6 +1733,46 @@
     scene.add(treeGroup);
   }
 
+  // Realistic Dhaka Rooftop Texture (Paving tiles, gravel texture, parapet border, subtle warm emissive)
+  const roofTextureCache = {};
+  function getRoofCanvasTexture(baseColorHex) {
+    if (!roofTextureCache[baseColorHex]) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = baseColorHex || '#475569';
+      ctx.fillRect(0, 0, 256, 256);
+
+      // Paving tile grid
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.lineWidth = 2;
+      for (let x = 0; x <= 256; x += 32) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 256);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 256; y += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(256, y);
+        ctx.stroke();
+      }
+
+      // Parapet border
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(4, 4, 248, 248);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      roofTextureCache[baseColorHex] = tex;
+    }
+    return roofTextureCache[baseColorHex];
+  }
+
   // 3D Building Builder — GTA Vice City Definitive Edition Art-Deco & Modern Multi-Tier Architecture
   function create3DBuilding(config) {
     const {
@@ -1798,7 +1838,14 @@
         emissiveMap: sideT,
         emissiveIntensity: 0.40
       });
-      const roofM = new THREE.MeshStandardMaterial({ color: roofColor || 0x334155, roughness: 0.65, metalness: 0.2 });
+      const roofT = getRoofCanvasTexture(roofColor || (isSouth ? '#52525b' : '#3f3f46'));
+      const roofM = new THREE.MeshStandardMaterial({
+        map: roofT,
+        roughness: 0.55,
+        metalness: 0.15,
+        emissive: new THREE.Color(0x38bdf8),
+        emissiveIntensity: 0.12
+      });
       const botM = new THREE.MeshBasicMaterial({ color: 0x1e293b });
       return [sideM, sideM, roofM, botM, frontM, frontM];
     }
@@ -1953,6 +2000,13 @@
       signMesh.position.set(buildingSign.ox || 0, buildingSign.y || 15, signZ);
       signMesh.rotation.y = isSouth ? Math.PI : 0;
       group.add(signMesh);
+
+      if (isSouth) {
+        const southSign = signMesh.clone();
+        southSign.position.set(buildingSign.ox || 0, (buildingSign.y || 15) + 4, (d1 / 2) + 2.0);
+        southSign.rotation.y = 0;
+        group.add(southSign);
+      }
 
       if (buildingSign.awnCol) {
         const awnGeo = new THREE.BoxGeometry((buildingSign.w || (w1 * 0.75)) + 3, 2.8, 8);
@@ -4895,13 +4949,13 @@
 
     // Southwest Quadrant (Low-rise vibrant street shops)
     create3DBuilding({
-      x: -490, z: 185, width: 34, depth: 40, height: 32,
+      x: -490, z: 235, width: 34, depth: 36, height: 32,
       wallColor: '#b98983', sideColor: '#604745',
       floors: 2, cols: 2, winColor: '#f2d9a9'
     });
 
     create3DBuilding({
-      x: -360, z: 185, width: 140, depth: 50, height: 36,
+      x: -360, z: 235, width: 140, depth: 40, height: 36,
       wallColor: '#8c9870', sideColor: '#4d5744',
       floors: 2, cols: 5, winColor: '#f0dcb0',
       waterTank: true, antenna: true,
@@ -4909,14 +4963,14 @@
     });
 
     create3DBuilding({
-      x: -225, z: 175, width: 55, depth: 38, height: 18,
+      x: -225, z: 225, width: 55, depth: 32, height: 18,
       wallColor: '#8f8067', sideColor: '#534b3e',
       floors: 1, cols: 2, winColor: '#f1dda9',
       signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 46, h: 10, y: 9, awnCol: 0xb45309 }
     });
 
     create3DBuilding({
-      x: -150, z: 175, width: 65, depth: 42, height: 30,
+      x: -150, z: 225, width: 65, depth: 34, height: 30,
       wallColor: '#bd9a5c', sideColor: '#665334',
       floors: 2, cols: 3, winColor: '#f4dfaa',
       waterTank: true,
@@ -4925,7 +4979,7 @@
 
     // Southeast Quadrant (Low-rise vibrant street shops)
     create3DBuilding({
-      x: 165, z: 175, width: 85, depth: 45, height: 32,
+      x: 165, z: 225, width: 85, depth: 36, height: 32,
       wallColor: '#9b7c88', sideColor: '#584650',
       floors: 2, cols: 3, winColor: '#f0dcad',
       antenna: true,
@@ -4933,21 +4987,21 @@
     });
 
     const seBillboardBldg = create3DBuilding({
-      x: 320, z: 185, width: 140, depth: 48, height: 32,
+      x: 320, z: 235, width: 140, depth: 40, height: 32,
       wallColor: '#657d95', sideColor: '#354454',
       floors: 2, cols: 4, winColor: '#efdbb2',
       waterTank: true, antenna: true
     });
     const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#172554', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
-    const seBbGeo = new THREE.BoxGeometry(120, 28, 2.5);
+    const seBbGeo = new THREE.BoxGeometry(120, 24, 2.5);
     const seBbSign = new THREE.Mesh(seBbGeo, new THREE.MeshBasicMaterial({ map: seBbTex }));
-    seBbSign.position.set(0, 32, -(48 / 2) - 2);
-    seBbSign.rotation.y = Math.PI;
+    seBbSign.position.set(0, 36, 0);
+    seBbSign.rotation.x = -0.22;
     seBillboardBldg.add(seBbSign);
     freezeStatic(seBillboardBldg);
 
     create3DBuilding({
-      x: 450, z: 185, width: 45, depth: 45, height: 36,
+      x: 450, z: 235, width: 45, depth: 38, height: 36,
       wallColor: '#769aa0', sideColor: '#40565d',
       floors: 2, cols: 2, winColor: '#f0ddb3',
       antenna: true
