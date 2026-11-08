@@ -8,8 +8,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 OUTPUT = os.path.join(ROOT, "cng-autorickshaw.glb")
 
 def clear_scene():
-    bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.object.delete(use_global=False)
+    bpy.ops.wm.read_factory_settings(use_empty=True)
     for datablocks in (bpy.data.materials, bpy.data.curves, bpy.data.meshes, bpy.data.actions, bpy.data.armatures):
         for datablock in list(datablocks):
             if datablock.users == 0:

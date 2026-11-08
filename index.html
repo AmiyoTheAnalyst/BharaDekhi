@@ -18985,6 +18985,27 @@
       crossroadsVehiclesData = vehicles;
       crossroadsPedestriansData = pedestrians;
 
+      // Check URL search params for 3D view and camera presets (e.g. ?view=3d&cam=bike)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('view') === '3d') {
+          setCrossroadsViewMode(true);
+        }
+        const targetCam = urlParams.get('cam');
+        if (targetCam) {
+          if (urlParams.get('center') === '1') {
+            const v = vehicles.find(veh => veh.type === targetCam);
+            if (v) {
+              v.pos = (v.dir === 'SB' || v.dir === 'NB') ? 420 : 600;
+              v.speed = 0;
+            }
+          }
+          if (typeof window.crossroadsFocusMode === 'function') {
+            setTimeout(() => window.crossroadsFocusMode(targetCam), 600);
+          }
+        }
+      } catch (e) {}
+
       // If user is already in 3D mode, initialize diorama immediately
       if (crossroads3DMode && typeof window.initDhakaCrossroads3D === 'function') {
         const isReady = typeof window.isDhakaCrossroads3DReady === 'function' && window.isDhakaCrossroads3DReady();

@@ -26,7 +26,7 @@
   let isReady = false;
 
   // Scene elements
-  let sunLight, ambientLight, hemiLight;
+  let sunLight, ambientLight, hemiLight, chaseCamLight;
   let cornerPointLights = [];
   let trainGroup, boardingBadgeMesh;
   let ambulanceGroup, ambStrobeRed, ambStrobeBlue;
@@ -40,27 +40,27 @@
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
-  let vehicleOrbitYaw = 2.0;
-  let vehicleOrbitPitch = 0.2;
+  let vehicleOrbitYaw = 0.35;
+  let vehicleOrbitPitch = 0.28;
   let orbitPointerId = null;
   let lastOrbitPointerX = 0;
   let lastOrbitPointerY = 0;
   let buildingNameCounter = 0;
   const ORBITABLE_VEHICLE_MODES = ['bus', 'bike', 'cng', 'car', 'rickshaw'];
-  let targetCamX = 220, targetCamY = 440;
-  const CAM_DEFAULT_POS = { x: 220, y: 440, z: 460 };
-  const CAM_DEFAULT_LOOK = { x: 0, y: 25, z: -35 };
+  let targetCamX = 180, targetCamY = 520;
+  const CAM_DEFAULT_POS = { x: 180, y: 520, z: 460 };
+  const CAM_DEFAULT_LOOK = { x: 0, y: 15, z: -15 };
   const VIADUCT_Z = -332;
-  let camBasePos = { x: 220, y: 440, z: 460 };
-  let camBaseLook = { x: 0, y: 25, z: -35 };
-  let currentCamLook = { x: 0, y: 25, z: -35 };
+  let camBasePos = { x: 180, y: 520, z: 460 };
+  let camBaseLook = { x: 0, y: 15, z: -15 };
+  let currentCamLook = { x: 0, y: 15, z: -15 };
   let idleDroneTime = 0;
 
   // Multimodal Camera Choreography Presets
   const CAM_MODES = {
     overview: {
-      pos: { x: 220, y: 440, z: 460 },
-      look: { x: 0, y: 25, z: -35 },
+      pos: { x: 180, y: 520, z: 460 },
+      look: { x: 0, y: 15, z: -15 },
       badge: 'Drone View'
     },
     bike: {
@@ -183,9 +183,9 @@
           : { x: 0, z: -1 };
     const right = { x: -forward.z, z: forward.x };
     const horizontalRadius = radius * Math.cos(pitch);
-    const targetX = position.x + forward.x * 5;
-    const targetY = position.y + 6;
-    const targetZ = position.z + forward.z * 5;
+    const targetX = position.x;
+    const targetY = position.y + (target.type === 'bike' ? 4.5 : 6.0);
+    const targetZ = position.z;
 
     return {
       position: {
@@ -194,21 +194,21 @@
         z: targetZ - forward.z * horizontalRadius * Math.cos(yaw) + right.z * horizontalRadius * Math.sin(yaw)
       },
       look: {
-        x: targetX + forward.x * 8,
-        y: targetY,
-        z: targetZ + forward.z * 8
+        x: targetX,
+        y: targetY + 1.0,
+        z: targetZ
       }
     };
   }
 
   function getVehicleOrbitPose(target) {
     const yaw = vehicleOrbitYaw;
-    const pitch = vehicleOrbitPitch + (target.type === 'rickshaw' ? 0.06 : 0);
-    const baseRadius = target.type === 'car' ? 62
-      : target.type === 'bike' ? 38
-        : target.type === 'rickshaw' ? 46
-          : target.type === 'cng' ? 48
-            : 82;
+    const pitch = Math.max(0.12, Math.min(0.55, vehicleOrbitPitch));
+    const baseRadius = target.type === 'car' ? 65
+      : target.type === 'bike' ? 42
+        : target.type === 'rickshaw' ? 48
+          : target.type === 'cng' ? 50
+            : 95;
     const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const desktopCoverage = Math.tan(THREE.MathUtils.degToRad(38 / 2)) * 1.6;
     const framingScale = horizontalCoverage > 0 ? Math.max(1, desktopCoverage / horizontalCoverage) : 1;
@@ -309,8 +309,8 @@
 
     const targetMode = CAM_MODES[modeName] ? modeName : 'overview';
     activeCamMode = targetMode;
-    vehicleOrbitYaw = 2.0;
-    vehicleOrbitPitch = 0.2;
+    vehicleOrbitYaw = 0.35;
+    vehicleOrbitPitch = 0.28;
 
     if (targetMode !== 'overview') {
       activeTargetVehicle = acquireTargetVehicle(targetMode);
@@ -323,9 +323,14 @@
 
     if (activeTargetVehicle && activeTargetVehicle.data) {
       const pose = getVehicleOrbitPose(activeTargetVehicle);
-      focusCamera(pose.position, pose.look, 1.6);
+      camera.position.set(pose.position.x, pose.position.y, pose.position.z);
+      currentCamLook.x = pose.look.x;
+      currentCamLook.y = pose.look.y;
+      currentCamLook.z = pose.look.z;
+      camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+      focusCamera(pose.position, pose.look, 0.3);
     } else {
-      focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.6);
+      focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.2);
     }
     updateLegendHUD(targetMode);
   };
@@ -1688,14 +1693,14 @@
   // Multi-Layered Organic Dhaka Trees (Textured trunk + 4–5 overlapping foliage clusters in rich natural greens)
   let organicTreeMats = null;
   function addTree(x, z) {
-    if (!treeTrunkGeo) treeTrunkGeo = new THREE.CylinderGeometry(1.2, 1.8, 10, 8);
-    if (!treeTrunkMat) treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2e18, roughness: 0.95 });
+    if (!treeTrunkGeo) treeTrunkGeo = new THREE.CylinderGeometry(0.7, 1.0, 8, 8);
+    if (!treeTrunkMat) treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2e18, roughness: 0.85 });
     if (!organicTreeMats) {
       organicTreeMats = [
-        new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 }),
-        new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.80 }),
-        new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.90 }),
-        new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.80 })
+        new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.65, metalness: 0.0, emissive: new THREE.Color(0x0e3a1d), emissiveIntensity: 0.32 }),
+        new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.60, metalness: 0.0, emissive: new THREE.Color(0x134825), emissiveIntensity: 0.30 }),
+        new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.70, metalness: 0.0, emissive: new THREE.Color(0x0c3118), emissiveIntensity: 0.35 }),
+        new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.60, metalness: 0.0, emissive: new THREE.Color(0x1a522d), emissiveIntensity: 0.28 })
       ];
     }
 
@@ -1703,20 +1708,20 @@
     treeGroup.position.set(x, 2, z);
 
     const trunk = new THREE.Mesh(treeTrunkGeo, treeTrunkMat);
-    trunk.position.y = 5;
+    trunk.position.y = 4;
     trunk.castShadow = true;
     treeGroup.add(trunk);
 
     const clusters = [
-      { x: 0, y: 13, z: 0, r: 6.8, m: 0 },
-      { x: -3.2, y: 11.5, z: 2.5, r: 5.2, m: 1 },
-      { x: 3.0, y: 11.8, z: -2.0, r: 5.0, m: 2 },
-      { x: -2.2, y: 12.2, z: -2.8, r: 4.8, m: 3 },
-      { x: 2.5, y: 13.5, z: 2.2, r: 4.6, m: 1 }
+      { x: 0, y: 10.0, z: 0, r: 2.8, m: 0 },
+      { x: -1.4, y: 9.2, z: 1.1, r: 2.3, m: 1 },
+      { x: 1.4, y: 9.4, z: -1.0, r: 2.2, m: 2 },
+      { x: -1.0, y: 9.7, z: -1.2, r: 2.1, m: 3 },
+      { x: 1.2, y: 10.4, z: 1.0, r: 2.0, m: 1 }
     ];
 
     clusters.forEach(c => {
-      const geo = new THREE.SphereGeometry(c.r, 8, 8);
+      const geo = new THREE.SphereGeometry(c.r, 14, 10);
       const mat = organicTreeMats[c.m % organicTreeMats.length];
       const cluster = new THREE.Mesh(geo, mat);
       cluster.position.set(c.x, c.y, c.z);
@@ -1774,6 +1779,8 @@
     const sideTex2 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.40)), Math.max(2, Math.floor((cols || 4) * 0.5)), chosenWinColor, chosenSideColor);
     const sideTex3 = createWindowFacadeTexture(Math.max(1, Math.round(numFloors * 0.24)), Math.max(2, Math.floor((cols || 4) * 0.4)), chosenWinColor, chosenSideColor);
 
+    const isSouth = z > 0;
+
     function createTierMaterials(frontT, sideT) {
       const frontM = new THREE.MeshStandardMaterial({
         map: frontT,
@@ -1781,7 +1788,7 @@
         metalness: 0.25,
         emissive: new THREE.Color(0xfbbf24),
         emissiveMap: frontT,
-        emissiveIntensity: 0.22
+        emissiveIntensity: 0.55
       });
       const sideM = new THREE.MeshStandardMaterial({
         map: sideT,
@@ -1789,11 +1796,11 @@
         metalness: 0.20,
         emissive: new THREE.Color(0xfbbf24),
         emissiveMap: sideT,
-        emissiveIntensity: 0.16
+        emissiveIntensity: 0.40
       });
-      const roofM = new THREE.MeshStandardMaterial({ color: roofColor || 0x0f172a, roughness: 0.75, metalness: 0.2 });
-      const botM = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      return [sideM, sideM, roofM, botM, frontM, sideM];
+      const roofM = new THREE.MeshStandardMaterial({ color: roofColor || 0x334155, roughness: 0.65, metalness: 0.2 });
+      const botM = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+      return [sideM, sideM, roofM, botM, frontM, frontM];
     }
 
     // Tier 1: Base Podium
@@ -1831,58 +1838,53 @@
     tier3Mesh.customDepthMaterial = getSharedBuildingDepthMat();
     group.add(tier3Mesh);
 
-    // Decorative Art Deco Stepped Spire / Crown Top
-    const crownGeo = new THREE.BoxGeometry(w3 * 0.65, 4.2, d3 * 0.65);
-    const crownMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.5 });
+    // Parapet ledge around the roof perimeter
+    const parapetGeo = new THREE.BoxGeometry(w3 + 1.6, 2.4, d3 + 1.6);
+    const parapetMat = new THREE.MeshStandardMaterial({ color: chosenWallColor, roughness: 0.5 });
+    const parapet = new THREE.Mesh(parapetGeo, parapetMat);
+    parapet.position.y = height + 1.2;
+    group.add(parapet);
+
+    // Decorative Art Deco Stepped Spire / Lift Penthouse
+    const crownGeo = new THREE.BoxGeometry(w3 * 0.55, 4.8, d3 * 0.55);
+    const crownMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.3 });
     const crown = new THREE.Mesh(crownGeo, crownMat);
-    crown.position.y = height + 2.1;
+    crown.position.y = height + 2.4;
     group.add(crown);
 
     // Neon Tube Building Trim & Vertical Pilasters (Vice City Definitive Edition)
-    // Bright emissive neon tubes: Hot Pink (#ff007f), Electric Cyan (#00f5d4), Neon Lime (#39ff14), Warm Gold (#facc15)
     const neonPalette = [0xff007f, 0x00f5d4, 0x39ff14, 0xfacc15];
     const neonHex = neonPalette[Math.abs(Math.floor((x * 11 + z * 17) / 100)) % neonPalette.length];
     const neonMat = new THREE.MeshBasicMaterial({ color: neonHex });
 
+    const frontZ1 = isSouth ? (-(d1 + 3.5) / 2) : ((d1 + 3.5) / 2);
+    const frontZ2 = isSouth ? (-(d2 + 2.5) / 2) : ((d2 + 2.5) / 2);
+    const frontZ3 = isSouth ? (-(d3 + 1.8) / 2) : ((d3 + 1.8) / 2);
+
     // 1. Ground Overhang Neon Tube Trim
     const neonStrip1 = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, w1 + 3.2, 8), neonMat);
     neonStrip1.rotation.z = Math.PI / 2;
-    neonStrip1.position.set(0, h1 + 0.8, (d1 + 3.5) / 2);
+    neonStrip1.position.set(0, h1 + 0.8, frontZ1);
     group.add(neonStrip1);
 
     // 2. Mid-Tier Roofline Neon Tube
     const neonStrip2 = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, w2 + 2.2, 8), neonMat);
     neonStrip2.rotation.z = Math.PI / 2;
-    neonStrip2.position.set(0, h1 + h2 + 0.7, (d2 + 2.5) / 2);
+    neonStrip2.position.set(0, h1 + h2 + 0.7, frontZ2);
     group.add(neonStrip2);
 
     // 3. Crown Roofline Neon Tube
     const neonStrip3 = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, w3 + 1.4, 8), neonMat);
     neonStrip3.rotation.z = Math.PI / 2;
-    neonStrip3.position.set(0, height + 0.5, (d3 + 1.8) / 2);
+    neonStrip3.position.set(0, height + 0.5, frontZ3);
     group.add(neonStrip3);
 
     // 4. Vertical Art Deco Pilasters (corner neon tubes)
     [-w2 / 2 + 0.5, w2 / 2 - 0.5].forEach(px => {
       const pilasterNeon = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, h2, 8), neonMat);
-      pilasterNeon.position.set(px, h1 + h2 / 2, d2 / 2 + 0.3);
+      pilasterNeon.position.set(px, h1 + h2 / 2, isSouth ? (-d2 / 2 - 0.3) : (d2 / 2 + 0.3));
       group.add(pilasterNeon);
     });
-
-    // 5. Zero-Lag Additive Sidewalk Ground Light Pool (No PointLight)
-    const glowPlaneGeo = new THREE.PlaneGeometry(w1 * 1.3, d1 * 1.1);
-    const glowMat = new THREE.MeshBasicMaterial({
-      map: getRadialGlowTexture(),
-      color: neonHex,
-      transparent: true,
-      opacity: 0.45,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    const glowPlane = new THREE.Mesh(glowPlaneGeo, glowMat);
-    glowPlane.rotation.x = -Math.PI / 2;
-    glowPlane.position.set(0, 0.02, (d1 / 2) + 8);
-    group.add(glowPlane);
 
     // 3D AC outdoor condenser units on exterior walls
     const acGeo = new THREE.BoxGeometry(3.6, 2.4, 2.0);
@@ -1890,7 +1892,7 @@
     for (let f = 1; f < Math.min(numFloors, 4); f++) {
       const ac = new THREE.Mesh(acGeo, acMat);
       const sideX = (f % 2 === 0) ? (w1 / 2 - 6) : (-w1 / 2 + 6);
-      ac.position.set(sideX, f * (h1 / 2) + 2.0, d1 / 2 + 1.0);
+      ac.position.set(sideX, f * (h1 / 2) + 2.0, frontZ1 + (isSouth ? -1.0 : 1.0));
       group.add(ac);
     }
 
@@ -1947,15 +1949,18 @@
       const sGeo = new THREE.BoxGeometry(buildingSign.w || (w1 * 0.75), buildingSign.h || 16, 2.5);
       const sMat = new THREE.MeshBasicMaterial({ map: sTex });
       const signMesh = new THREE.Mesh(sGeo, sMat);
-      signMesh.position.set(buildingSign.ox || 0, buildingSign.y || 15, (d1 / 2) + 2.0);
+      const signZ = isSouth ? (-(d1 / 2) - 2.0) : ((d1 / 2) + 2.0);
+      signMesh.position.set(buildingSign.ox || 0, buildingSign.y || 15, signZ);
+      signMesh.rotation.y = isSouth ? Math.PI : 0;
       group.add(signMesh);
 
       if (buildingSign.awnCol) {
         const awnGeo = new THREE.BoxGeometry((buildingSign.w || (w1 * 0.75)) + 3, 2.8, 8);
         const awnMat = new THREE.MeshStandardMaterial({ color: buildingSign.awnCol, roughness: 0.5 });
         const awn = new THREE.Mesh(awnGeo, awnMat);
-        awn.position.set(buildingSign.ox || 0, (buildingSign.y || 15) + (buildingSign.h || 16) / 2 + 1.4, (d1 / 2) + 4.5);
-        awn.rotation.x = 0.25;
+        const awnZ = isSouth ? (-(d1 / 2) - 4.5) : ((d1 / 2) + 4.5);
+        awn.position.set(buildingSign.ox || 0, (buildingSign.y || 15) + (buildingSign.h || 16) / 2 + 1.4, awnZ);
+        awn.rotation.x = isSouth ? -0.25 : 0.25;
         group.add(awn);
       }
     }
@@ -4041,10 +4046,6 @@
     return loadGLBModel('assets/models/pedestrians.glb');
   }
 
-  function loadEnvironmentModel() {
-    return loadGLBModel('assets/models/mirpur10-environment.glb');
-  }
-
   function replaceRickshawWithModel(vehicle, prototype) {
     const model = prototype.clone(true);
     const bounds = new THREE.Box3().setFromObject(model);
@@ -4271,24 +4272,6 @@
       while (pedEntry.mesh.children.length) pedEntry.mesh.remove(pedEntry.mesh.children[0]);
       pedEntry.mesh.add(clone);
     });
-  }
-
-  function addMirpur10EnvironmentModel(prototype) {
-    const model = prototype.clone(true);
-    const bounds = new THREE.Box3().setFromObject(model);
-    const dims = bounds.getSize(new THREE.Vector3());
-    if (dims.x > 0) {
-      const scale = 4.0;
-      model.scale.setScalar(scale);
-      model.position.set(0, 0, 0);
-      model.traverse(node => {
-        if (node.isMesh) {
-          node.castShadow = true;
-          node.receiveShadow = true;
-        }
-      });
-      scene.add(model);
-    }
   }
 
   // 3D Ambulance Builder (High-Roof Emergency Van facing +X)
@@ -4528,9 +4511,15 @@
       console.warn('PMREM fallback', e);
     }
 
-    // 4. Lighting: Only 1 HemisphereLight + 1 DirectionalLight (shadowMap disabled)
+    // 4. Lighting: AmbientLight + HemisphereLight + DirectionalLight
+    ambientLight = new THREE.AmbientLight(0x64748b, 0.95);
+    scene.add(ambientLight);
+
     hemiLight = new THREE.HemisphereLight(0xd8b4fe, 0x1e0f2e, 1.25);
     scene.add(hemiLight);
+
+    chaseCamLight = new THREE.PointLight(0xfff1dc, 0, 160);
+    scene.add(chaseCamLight);
 
     sunLight = new THREE.DirectionalLight(0xffedd5, 1.75);
     sunLight.position.set(300, 500, 250);
@@ -4904,63 +4893,63 @@
     plaza.add(plSign);
     freezeStatic(plaza);
 
-    // Southwest Quadrant
+    // Southwest Quadrant (Low-rise vibrant street shops)
     create3DBuilding({
-      x: -490, z: 185, width: 34, depth: 40, height: 85,
+      x: -490, z: 185, width: 34, depth: 40, height: 32,
       wallColor: '#b98983', sideColor: '#604745',
-      floors: 4, cols: 2, winColor: '#f2d9a9'
+      floors: 2, cols: 2, winColor: '#f2d9a9'
     });
 
     create3DBuilding({
-      x: -360, z: 185, width: 200, depth: 65, height: 80,
+      x: -360, z: 185, width: 140, depth: 50, height: 36,
       wallColor: '#8c9870', sideColor: '#4d5744',
-      floors: 3, cols: 6, winColor: '#f0dcb0',
+      floors: 2, cols: 5, winColor: '#f0dcb0',
       waterTank: true, antenna: true,
-      signboard: { text: 'হাজী বিরিয়ানি ও নান্না কাবাব', sub: 'Authentic Dhaka Biryani', bg: '#78350f', textCol: '#fef08a', border: '#f59e0b', w: 88, h: 16, ox: -40, y: 14, awnCol: 0xb45309 }
+      signboard: { text: 'হাজী বিরিয়ানি ও নান্না কাবাব', sub: 'Authentic Dhaka Biryani', bg: '#78350f', textCol: '#fef08a', border: '#f59e0b', w: 88, h: 14, ox: -20, y: 12, awnCol: 0xb45309 }
     });
 
     create3DBuilding({
-      x: -225, z: 180, width: 75, depth: 55, height: 85,
+      x: -225, z: 175, width: 55, depth: 38, height: 18,
       wallColor: '#8f8067', sideColor: '#534b3e',
-      floors: 3, cols: 3, winColor: '#f1dda9',
-      antenna: true,
-      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
+      floors: 1, cols: 2, winColor: '#f1dda9',
+      signboard: { text: 'চায়ের টং', sub: 'Traditional Tea Stall', bg: '#78350f', textCol: '#fef08a', border: '#fbbf24', w: 46, h: 10, y: 9, awnCol: 0xb45309 }
     });
 
     create3DBuilding({
-      x: -150, z: 175, width: 75, depth: 55, height: 82,
+      x: -150, z: 175, width: 65, depth: 42, height: 30,
       wallColor: '#bd9a5c', sideColor: '#665334',
-      floors: 3, cols: 3, winColor: '#f4dfaa',
+      floors: 2, cols: 3, winColor: '#f4dfaa',
       waterTank: true,
-      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 68, h: 16, y: 14, awnCol: 0xb45309 }
+      signboard: { text: 'সোনালী জুয়েলার্স', sub: 'Sonali Jewelers', bg: '#0f172a', textCol: '#fde047', border: '#fbbf24', w: 56, h: 12, y: 11, awnCol: 0xb45309 }
     });
 
-    // Southeast Quadrant
+    // Southeast Quadrant (Low-rise vibrant street shops)
     create3DBuilding({
-      x: 165, z: 175, width: 110, depth: 60, height: 85,
+      x: 165, z: 175, width: 85, depth: 45, height: 32,
       wallColor: '#9b7c88', sideColor: '#584650',
-      floors: 3, cols: 4, winColor: '#f0dcad',
+      floors: 2, cols: 3, winColor: '#f0dcad',
       antenna: true,
-      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#065f46', textCol: '#ffffff', border: '#10b981', w: 100, h: 16, y: 14, awnCol: 0x047857 }
+      signboard: { text: 'জনতা ফার্মেসি ✚', sub: 'Clinic & Medicine', bg: '#065f46', textCol: '#ffffff', border: '#10b981', w: 75, h: 12, y: 12, awnCol: 0x047857 }
     });
 
     const seBillboardBldg = create3DBuilding({
-      x: 320, z: 185, width: 180, depth: 65, height: 85,
+      x: 320, z: 185, width: 140, depth: 48, height: 32,
       wallColor: '#657d95', sideColor: '#354454',
-      floors: 3, cols: 5, winColor: '#efdbb2',
+      floors: 2, cols: 4, winColor: '#efdbb2',
       waterTank: true, antenna: true
     });
     const seBbTex = createSignboardTexture('সবাই মিলে একটি ভালো ঢাকা', 'TOWARDS A SMARTER COMMUTE', '#172554', '#ffffff', '#38bdf8', '#00f2fe', 512, 128);
-    const seBbGeo = new THREE.BoxGeometry(160, 42, 3);
+    const seBbGeo = new THREE.BoxGeometry(120, 28, 2.5);
     const seBbSign = new THREE.Mesh(seBbGeo, new THREE.MeshBasicMaterial({ map: seBbTex }));
-    seBbSign.position.set(0, 46, (65 / 2) + 2);
+    seBbSign.position.set(0, 32, -(48 / 2) - 2);
+    seBbSign.rotation.y = Math.PI;
     seBillboardBldg.add(seBbSign);
     freezeStatic(seBillboardBldg);
 
     create3DBuilding({
-      x: 450, z: 185, width: 45, depth: 45, height: 95,
+      x: 450, z: 185, width: 45, depth: 45, height: 36,
       wallColor: '#769aa0', sideColor: '#40565d',
-      floors: 4, cols: 2, winColor: '#f0ddb3',
+      floors: 2, cols: 2, winColor: '#f0ddb3',
       antenna: true
     });
 
@@ -5032,10 +5021,6 @@
     loadPedestriansModel().then(prototype => {
       replacePedestriansWithModel(prototype);
     }).catch(err => console.warn('Pedestrians GLB fallback:', err));
-
-    loadEnvironmentModel().then(prototype => {
-      addMirpur10EnvironmentModel(prototype);
-    }).catch(err => console.warn('Environment GLB fallback:', err));
 
     // 11. Instantiate 3D Emergency Ambulance (EB -> Heading 0)
     ambulanceGroup = create3DAmbulance();
@@ -5126,8 +5111,8 @@
 
       if (e.pointerType === 'mouse' && orbitPointerId === null &&
           isOrbitableVehicleMode(activeCamMode) && activeTargetVehicle) {
-        vehicleOrbitYaw = 2.0 + mouseRelX * Math.PI * 2;
-        vehicleOrbitPitch = Math.max(-0.25, Math.min(0.85, 0.2 - mouseRelY * 0.9));
+        vehicleOrbitYaw = 0.35 + mouseRelX * Math.PI * 1.5;
+        vehicleOrbitPitch = Math.max(0.12, Math.min(0.75, 0.28 - mouseRelY * 0.5));
       }
 
       if (e.pointerId === orbitPointerId && activeTargetVehicle) {
@@ -5805,8 +5790,8 @@
           sunLight.intensity = isMobileScreen ? 0.65 : 0.55;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x283344);
-          ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
+          ambientLight.color.setHex(isMobileScreen ? 0x475569 : 0x3b4759);
+          ambientLight.intensity = isMobileScreen ? 0.92 : 0.85;
         }
       } else if (currentMode === 'rain') {
         setSceneBackgroundColor(isMobileScreen ? 0x0d1628 : 0x08101e);
@@ -5824,8 +5809,8 @@
           sunLight.intensity = isMobileScreen ? 1.05 : 0.95;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x243248);
-          ambientLight.intensity = isMobileScreen ? 0.78 : 0.70;
+          ambientLight.color.setHex(isMobileScreen ? 0x475569 : 0x3b4759);
+          ambientLight.intensity = isMobileScreen ? 0.92 : 0.85;
         }
       } else { // night (clear) & Vice City Dusk Skyline
         if (duskSkyTexture) {
@@ -5848,7 +5833,7 @@
         }
         if (ambientLight) {
           ambientLight.color.setHex(isMobileScreen ? 0x8b5cf6 : 0x6d28d9);
-          ambientLight.intensity = isMobileScreen ? 0.75 : 0.68;
+          ambientLight.intensity = isMobileScreen ? 0.90 : 0.82;
         }
       }
     }
@@ -6165,6 +6150,15 @@
       currentCamLook.z += (camBaseLook.z - currentCamLook.z) * lerpFactor;
 
       camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+    }
+
+    if (chaseCamLight) {
+      if (activeCamMode !== 'overview' && activeTargetVehicle) {
+        chaseCamLight.position.copy(camera.position);
+        chaseCamLight.intensity = isMobileScreen ? 1.4 : 1.15;
+      } else {
+        chaseCamLight.intensity = 0;
+      }
     }
 
     // 8. Crisp Direct WebGL Render (No Blur or Washout)
