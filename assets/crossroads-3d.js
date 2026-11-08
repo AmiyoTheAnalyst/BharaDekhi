@@ -5526,13 +5526,21 @@
         const raycaster = new THREE.Raycaster();
         raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
-        const hits = intersects.slice(0, 5).map(hit => ({
-          name: hit.object.name,
-          parent: hit.object.parent?.name,
-          distance: hit.distance,
-          point: hit.point,
-          mat: hit.object.material?.name || hit.object.material?.type
-        }));
+        const hits = intersects.slice(0, 5).map(hit => {
+          let root = hit.object;
+          const chain = [];
+          while (root) {
+            chain.push({ name: root.name, type: root.type, pos: { x: root.position.x, y: root.position.y, z: root.position.z } });
+            root = root.parent;
+          }
+          return {
+            name: hit.object.name,
+            chain: chain,
+            distance: hit.distance,
+            point: hit.point,
+            mat: hit.object.material?.name || hit.object.material?.type
+          };
+        });
 
         const info = {
           camPos: { x: camera.position.x, y: camera.position.y, z: camera.position.z },

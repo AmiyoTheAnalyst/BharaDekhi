@@ -20,7 +20,44 @@
   "hitsAtScreenCenter": [
     {
       "name": "FrontBumper",
-      "parent": "Scene",
+      "chain": [
+        {
+          "name": "FrontBumper",
+          "type": "Mesh",
+          "pos": {
+            "x": 2.2200000286102295,
+            "y": 0.5400000214576721,
+            "z": 0
+          }
+        },
+        {
+          "name": "Scene",
+          "type": "Group",
+          "pos": {
+            "x": 0,
+            "y": -2.2772276261798585,
+            "z": 0
+          }
+        },
+        {
+          "name": "",
+          "type": "Group",
+          "pos": {
+            "x": 152,
+            "y": 0.19046615833990824,
+            "z": -15
+          }
+        },
+        {
+          "name": "",
+          "type": "Scene",
+          "pos": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
       "distance": 13.463158951678608,
       "point": {
         "x": -7.449689681573229,
@@ -31,7 +68,44 @@
     },
     {
       "name": "ChassisFloor",
-      "parent": "Scene",
+      "chain": [
+        {
+          "name": "ChassisFloor",
+          "type": "Mesh",
+          "pos": {
+            "x": 0,
+            "y": 0.3499999940395355,
+            "z": 0
+          }
+        },
+        {
+          "name": "Scene",
+          "type": "Group",
+          "pos": {
+            "x": 0,
+            "y": -2.2772276261798585,
+            "z": 0
+          }
+        },
+        {
+          "name": "",
+          "type": "Group",
+          "pos": {
+            "x": 152,
+            "y": 0.19046615833990824,
+            "z": -15
+          }
+        },
+        {
+          "name": "",
+          "type": "Scene",
+          "pos": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
       "distance": 16.692103074604795,
       "point": {
         "x": -4.5315148550180595,
@@ -42,7 +116,44 @@
     },
     {
       "name": "FrontBumper",
-      "parent": "Scene",
+      "chain": [
+        {
+          "name": "FrontBumper",
+          "type": "Mesh",
+          "pos": {
+            "x": 2.2200000286102295,
+            "y": 0.5400000214576721,
+            "z": 0
+          }
+        },
+        {
+          "name": "Scene",
+          "type": "Group",
+          "pos": {
+            "x": 0,
+            "y": -2.2772276261798585,
+            "z": 0
+          }
+        },
+        {
+          "name": "",
+          "type": "Group",
+          "pos": {
+            "x": -20,
+            "y": -0.053563135073971924,
+            "z": -160
+          }
+        },
+        {
+          "name": "",
+          "type": "Scene",
+          "pos": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
       "distance": 24.592828732837003,
       "point": {
         "x": 2.6088065161916205,
@@ -53,7 +164,44 @@
     },
     {
       "name": "ChassisFloor",
-      "parent": "Scene",
+      "chain": [
+        {
+          "name": "ChassisFloor",
+          "type": "Mesh",
+          "pos": {
+            "x": 0,
+            "y": 0.3499999940395355,
+            "z": 0
+          }
+        },
+        {
+          "name": "Scene",
+          "type": "Group",
+          "pos": {
+            "x": 0,
+            "y": -2.2772276261798585,
+            "z": 0
+          }
+        },
+        {
+          "name": "",
+          "type": "Group",
+          "pos": {
+            "x": -20,
+            "y": -0.053563135073971924,
+            "z": -160
+          }
+        },
+        {
+          "name": "",
+          "type": "Scene",
+          "pos": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
       "distance": 26.115726776431366,
       "point": {
         "x": 3.985133440734316,
@@ -64,7 +212,44 @@
     },
     {
       "name": "LowerSill",
-      "parent": "Scene",
+      "chain": [
+        {
+          "name": "LowerSill",
+          "type": "Mesh",
+          "pos": {
+            "x": 0,
+            "y": 0.5199999809265137,
+            "z": 0
+          }
+        },
+        {
+          "name": "Scene",
+          "type": "Group",
+          "pos": {
+            "x": 0,
+            "y": -2.2772276261798585,
+            "z": 0
+          }
+        },
+        {
+          "name": "",
+          "type": "Group",
+          "pos": {
+            "x": 152,
+            "y": 0.19046615833990824,
+            "z": -15
+          }
+        },
+        {
+          "name": "",
+          "type": "Scene",
+          "pos": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
       "distance": 27.627452837791473,
       "point": {
         "x": 5.35136362898254,
