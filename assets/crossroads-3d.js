@@ -5514,6 +5514,39 @@
     if (!isReady || !renderer || !scene || !camera) return;
     if (isRenderLoopPaused) return;
 
+    if (new URLSearchParams(window.location.search).get('probe') === '1' && !window.__dumpedBike) {
+      window.__dumpedBike = true;
+      setTimeout(() => {
+        const bikeObj = vehicleMeshMap['v_eb_bike'];
+        const bikeMesh = bikeObj ? bikeObj.mesh : null;
+        const bikeChildren = [];
+        if (bikeMesh) {
+          bikeMesh.traverse(c => {
+            if (c.isMesh) {
+              const b = new THREE.Box3().setFromObject(c);
+              const sz = new THREE.Vector3();
+              b.getSize(sz);
+              const cnt = new THREE.Vector3();
+              b.getCenter(cnt);
+              bikeChildren.push({
+                name: c.name,
+                mat: c.material ? c.material.name : null,
+                color: c.material?.color ? '#' + c.material.color.getHexString() : null,
+                size: [sz.x, sz.y, sz.z],
+                center: [cnt.x, cnt.y, cnt.z]
+              });
+            }
+          });
+        }
+        const info = {
+          camPos: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+          camLook: currentCamLook,
+          bikeChildren: bikeChildren
+        };
+        fetch('/__log', { method: 'POST', body: JSON.stringify(info, null, 2) });
+      }, 2000);
+    }
+
     // 120Hz Delta-Time Physics (clamped to max 0.05 to avoid frame-skip spikes)
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : (dt || 0.016);
 
