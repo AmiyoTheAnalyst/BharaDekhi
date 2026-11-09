@@ -44,6 +44,12 @@ def smooth_mesh(obj):
     for poly in obj.data.polygons:
         poly.use_smooth = True
 
+def set_parent_keep_transform(obj, parent):
+    if parent:
+        mat = obj.matrix_world.copy()
+        obj.parent = parent
+        obj.matrix_world = mat
+
 def create_sphere(name, loc, radius, scale, mat, segs=16, rings=12, parent=None):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=segs, ring_count=rings, radius=radius, location=loc)
     obj = bpy.context.object
@@ -52,8 +58,7 @@ def create_sphere(name, loc, radius, scale, mat, segs=16, rings=12, parent=None)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     smooth_mesh(obj)
     assign_material(obj, mat)
-    if parent:
-        obj.parent = parent
+    set_parent_keep_transform(obj, parent)
     return obj
 
 def create_box(name, loc, dimensions, mat, bevel=0.0, parent=None):
@@ -69,8 +74,7 @@ def create_box(name, loc, dimensions, mat, bevel=0.0, parent=None):
         bpy.ops.object.modifier_apply(modifier=mod.name)
     smooth_mesh(obj)
     assign_material(obj, mat)
-    if parent:
-        obj.parent = parent
+    set_parent_keep_transform(obj, parent)
     return obj
 
 def create_cylinder_between(name, p1, p2, radius, mat, verts=12, parent=None, radius2=None):
@@ -94,8 +98,7 @@ def create_cylinder_between(name, p1, p2, radius, mat, verts=12, parent=None, ra
     obj.rotation_quaternion = dir_v.to_track_quat("Z", "Y")
     smooth_mesh(obj)
     assign_material(obj, mat)
-    if parent:
-        obj.parent = parent
+    set_parent_keep_transform(obj, parent)
     return obj
 
 def create_car_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
@@ -113,7 +116,7 @@ def create_car_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
     )
     tire = assign_material(bpy.context.object, tire_mat)
     tire.name = name + "_tire"
-    tire.parent = pivot
+    set_parent_keep_transform(tire, pivot)
     smooth_mesh(tire)
     
     bpy.ops.mesh.primitive_cylinder_add(
@@ -125,7 +128,7 @@ def create_car_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
     )
     rim = assign_material(bpy.context.object, rim_mat)
     rim.name = name + "_rim"
-    rim.parent = pivot
+    set_parent_keep_transform(rim, pivot)
     smooth_mesh(rim)
     
     create_cylinder_between(f"{name}_hub", (center[0], center[1] - width * 0.5, center[2]), (center[0], center[1] + width * 0.5, center[2]), 0.045, hub_mat, verts=10, parent=pivot)
@@ -136,8 +139,7 @@ def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, 
     head_group = bpy.data.objects.new(f"{name_prefix}_HeadGroup", None)
     bpy.context.collection.objects.link(head_group)
     head_group.location = (x, y, z)
-    if parent:
-        head_group.parent = parent
+    set_parent_keep_transform(head_group, parent)
         
     create_sphere(f"{name_prefix}_Cranium", (0, 0, 0), 0.11, (1.05, 0.92, 1.18), skin_mat, segs=14, rings=10, parent=head_group)
     create_sphere(f"{name_prefix}_Jaw", (0.038, 0, -0.04), 0.07, (1.0, 0.78, 0.85), skin_mat, segs=10, rings=8, parent=head_group)

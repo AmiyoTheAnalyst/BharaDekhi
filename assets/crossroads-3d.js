@@ -40,8 +40,9 @@
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
-  let vehicleOrbitYaw = 0.35;
-  let vehicleOrbitPitch = 0.32;
+  const DEFAULT_VEHICLE_YAW = 2.35;
+  let vehicleOrbitYaw = DEFAULT_VEHICLE_YAW;
+  let vehicleOrbitPitch = 0.28;
   let orbitPointerId = null;
   let lastOrbitPointerX = 0;
   let lastOrbitPointerY = 0;
@@ -204,11 +205,11 @@
   function getVehicleOrbitPose(target) {
     const yaw = vehicleOrbitYaw;
     const pitch = Math.max(0.12, Math.min(0.55, vehicleOrbitPitch));
-    const baseRadius = target.type === 'car' ? 36
-      : target.type === 'bike' ? 22
-        : target.type === 'rickshaw' ? 26
-          : target.type === 'cng' ? 28
-            : 56;
+    const baseRadius = target.type === 'car' ? 44
+      : target.type === 'bike' ? 34
+        : target.type === 'rickshaw' ? 34
+          : target.type === 'cng' ? 36
+            : 64;
     const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const desktopCoverage = Math.tan(THREE.MathUtils.degToRad(38 / 2)) * 1.6;
     const framingScale = horizontalCoverage > 0 ? Math.max(1, desktopCoverage / horizontalCoverage) : 1;
@@ -309,8 +310,8 @@
 
     const targetMode = CAM_MODES[modeName] ? modeName : 'overview';
     activeCamMode = targetMode;
-    vehicleOrbitYaw = 0.35;
-    vehicleOrbitPitch = 0.32;
+    vehicleOrbitYaw = DEFAULT_VEHICLE_YAW;
+    vehicleOrbitPitch = 0.28;
 
     if (targetMode !== 'overview') {
       activeTargetVehicle = acquireTargetVehicle(targetMode);
@@ -4101,6 +4102,7 @@
   }
 
   function replaceRickshawWithModel(vehicle, prototype) {
+    vehicle.scale.set(1, 1, 1);
     const model = prototype.clone(true);
     const bounds = new THREE.Box3().setFromObject(model);
     const dimensions = bounds.getSize(new THREE.Vector3());
@@ -4155,6 +4157,7 @@
   }
 
   function replaceBikeWithModel(vehicle, prototype, bikeColor) {
+    vehicle.scale.set(1, 1, 1);
     const model = prototype.clone(true);
     const bounds = new THREE.Box3().setFromObject(model);
     const dimensions = bounds.getSize(new THREE.Vector3());
@@ -4189,6 +4192,7 @@
   }
 
   function replaceCNGWithModel(vehicle, prototype) {
+    vehicle.scale.set(1, 1, 1);
     const model = prototype.clone(true);
     const bounds = new THREE.Box3().setFromObject(model);
     const dimensions = bounds.getSize(new THREE.Vector3());
@@ -4219,6 +4223,7 @@
   }
 
   function replaceBusWithModel(vehicle, prototype) {
+    vehicle.scale.set(1, 1, 1);
     const model = prototype.clone(true);
     const bounds = new THREE.Box3().setFromObject(model);
     const dimensions = bounds.getSize(new THREE.Vector3());
@@ -4249,6 +4254,7 @@
   }
 
   function replaceCarWithModel(vehicle, prototype) {
+    vehicle.scale.set(1, 1, 1);
     const model = prototype.clone(true);
     const bounds = new THREE.Box3().setFromObject(model);
     const dimensions = bounds.getSize(new THREE.Vector3());
@@ -5165,7 +5171,7 @@
 
       if (e.pointerType === 'mouse' && orbitPointerId === null &&
           isOrbitableVehicleMode(activeCamMode) && activeTargetVehicle) {
-        vehicleOrbitYaw = 0.35 + mouseRelX * Math.PI * 1.5;
+        vehicleOrbitYaw = DEFAULT_VEHICLE_YAW + mouseRelX * Math.PI * 1.5;
         vehicleOrbitPitch = Math.max(0.12, Math.min(0.75, 0.28 - mouseRelY * 0.5));
       }
 
@@ -5513,47 +5519,6 @@
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
     if (isRenderLoopPaused) return;
-
-    if (new URLSearchParams(window.location.search).get('probe') === '1' && !window.__dumpedBike) {
-      window.__dumpedBike = true;
-      setTimeout(() => {
-        const bikeObj = vehicleMeshMap['v_eb_bike'];
-        const bikeMesh = bikeObj ? bikeObj.mesh : null;
-        const targetV = new THREE.Vector3(0, 5.56, 18);
-        const projectedTarget = targetV.clone().project(camera);
-
-        // Raycast from camera to center of screen (NDC 0, 0)
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-        const intersects = raycaster.intersectObjects(scene.children, true);
-        const hits = intersects.slice(0, 5).map(hit => {
-          let root = hit.object;
-          const chain = [];
-          while (root) {
-            chain.push({ name: root.name, type: root.type, pos: { x: root.position.x, y: root.position.y, z: root.position.z } });
-            root = root.parent;
-          }
-          return {
-            name: hit.object.name,
-            chain: chain,
-            distance: hit.distance,
-            point: hit.point,
-            mat: hit.object.material?.name || hit.object.material?.type
-          };
-        });
-
-        const info = {
-          camPos: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
-          camLook: currentCamLook,
-          fov: camera.fov,
-          near: camera.near,
-          far: camera.far,
-          projectedTarget: { x: projectedTarget.x, y: projectedTarget.y, z: projectedTarget.z },
-          hitsAtScreenCenter: hits
-        };
-        fetch('/__log', { method: 'POST', body: JSON.stringify(info, null, 2) });
-      }, 2000);
-    }
 
     // 120Hz Delta-Time Physics (clamped to max 0.05 to avoid frame-skip spikes)
     const delta = clock ? Math.min(clock.getDelta(), 0.05) : (dt || 0.016);
