@@ -5,7 +5,7 @@ Authentic Match to User Reference Photos 2 & 3:
 - User Request 3rd Pic Color Combination: Vibrant Crimson Red Upper / Clean White Lower
 - Front Destination Matrix Sign: Amber LED "VIP - MIRPUR 10"
 - 4 Amber Clearance Marker Lights on Front Roof Visor
-- Curved Panoramic Front Windshield with Center Divider & Twin Wipers
+- Broad Aerodynamic Curved Panoramic Windshield with Center Post & Twin Wipers
 - Recessed Triple-Beam Round Headlights on Left & Right Lower White Fascia
 - Black Front Bumper Splitter with License Plate
 - Right-Side Folding Bi-Fold Passenger Doors with Glass & Yellow Grab Poles
@@ -164,7 +164,7 @@ def create_bus_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat, is
     for toff in tire_offsets:
         bpy.ops.mesh.primitive_cylinder_add(
             radius=radius,
-            depth=tire_w * 0.90,
+            depth=tire_w * 0.88,
             location=(cx, cy + toff, cz),
             rotation=(math.pi / 2, 0, 0),
             vertices=32
@@ -362,7 +362,7 @@ def build():
     # 3. CHASSIS FLOOR & UNDERCARRIAGE (NO CLIPPING THROUGH BOTTOM!)
     # -------------------------------------------------------------
     bus_len = 11.60
-    bus_wid = 2.50
+    bus_wid = 2.48
     floor_z = 0.68
 
     # Solid undercarriage belly pan & interior floor deck
@@ -376,45 +376,38 @@ def build():
     # -------------------------------------------------------------
     # 4. LOWER BODYWORK (CLEAN WHITE - EXACT MATCH TO PHOTO 3!)
     # -------------------------------------------------------------
-    # Lower white side body panels below window beltline (from Z=0.68 to Z=1.62)
-    # Left side (Driver side Y = -1.25)
-    create_box("LowerBodyWhite_L", (0, -bus_wid * 0.5, 1.15), (bus_len - 0.3, 0.06, 0.92), m_bus_white, bevel=0.03)
-    # Right side (Door side Y = +1.25)
-    create_box("LowerBodyWhite_R", (-0.75, bus_wid * 0.5, 1.15), (bus_len - 1.8, 0.06, 0.92), m_bus_white, bevel=0.03)
+    # Main Lower White Body Shell (from floor Z=0.68 to window beltline Z=1.62)
+    # Broad, flat, modern transit bus sides with subtle curved corners
+    create_box("LowerBodyWhite_L", (0, -bus_wid * 0.5, 1.15), (bus_len, 0.08, 0.94), m_bus_white, bevel=0.04)
+    # Right side: from rear up to door frame (X = -5.80 to X = 4.20)
+    create_box("LowerBodyWhite_R", (-0.80, bus_wid * 0.5, 1.15), (bus_len - 1.60, 0.08, 0.94), m_bus_white, bevel=0.04)
+    # Right side: front piece ahead of door (X = 5.30 to X = 5.80)
+    create_box("LowerBodyWhite_R_Front", (5.55, bus_wid * 0.5, 1.15), (0.50, 0.08, 0.94), m_bus_white, bevel=0.04)
 
-    # Front wheel arch moldings (Black rubber surround)
+    # Wheel arch moldings (Semicircular black arch lips)
     for sign in [-1, 1]:
-        wy = sign * (bus_wid * 0.5 + 0.02)
+        wy = sign * (bus_wid * 0.5 + 0.03)
         create_cylinder_between(f"WheelArchFront_{sign}", (front_x - 0.62, wy, wheel_radius), (front_x + 0.62, wy, wheel_radius), 0.035, m_dark_trim)
         create_cylinder_between(f"WheelArchRear_{sign}", (rear_x - 0.65, wy, wheel_radius), (rear_x + 0.65, wy, wheel_radius), 0.035, m_dark_trim)
 
     # -------------------------------------------------------------
-    # 5. FRONT NOSE FASCIA & TRIPLE-BEAM ROUND HEADLIGHTS (PHOTO 2 & 3!)
+    # 5. FRONT NOSE FASCIA & RECESSED TRIPLE ROUND HEADLIGHTS (PHOTO 2 & 3!)
     # -------------------------------------------------------------
-    fx = bus_len * 0.5 - 0.10
+    fx = bus_len * 0.5
 
-    # Aerodynamic sloped front white nose cowl
-    create_wedge_mesh(
-        "FrontNoseCowlWhite",
-        Vector((fx - 0.40, -bus_wid * 0.5, 0.68)),
-        Vector((fx - 0.40, bus_wid * 0.5, 0.68)),
-        Vector((fx - 0.40, 0.0, 1.62)),
-        Vector((fx + 0.18, -bus_wid * 0.5 + 0.08, 0.68)),
-        Vector((fx + 0.18, bus_wid * 0.5 - 0.08, 0.68)),
-        Vector((fx + 0.05, 0.0, 1.62)),
-        m_bus_white
-    )
+    # Broad, flat, modern aerodynamic front white fascia below windshield (Z = 0.68 to 1.62)
+    create_box("FrontNoseFasciaWhite", (fx - 0.04, 0, 1.15), (0.16, bus_wid - 0.04, 0.94), m_bus_white, bevel=0.06)
 
     # Lower Front Heavy-Duty Bumper Splitter
-    create_box("FrontBumper", (fx + 0.14, 0, 0.54), (0.22, bus_wid + 0.06, 0.22), m_dark_trim, bevel=0.04)
+    create_box("FrontBumper", (fx + 0.05, 0, 0.56), (0.22, bus_wid + 0.06, 0.24), m_dark_trim, bevel=0.04)
 
     # Front Center License Plate ("DHAKA METRO-BA 11-4290")
-    create_box("LicensePlateFront", (fx + 0.26, 0, 0.54), (0.02, 0.48, 0.14), m_bus_white, bevel=0.005)
-    create_box("LicensePlateBorder", (fx + 0.255, 0, 0.54), (0.015, 0.50, 0.16), m_dark_trim)
+    create_box("LicensePlateFront", (fx + 0.17, 0, 0.56), (0.02, 0.48, 0.14), m_bus_white, bevel=0.005)
+    create_box("LicensePlateBorder", (fx + 0.165, 0, 0.56), (0.015, 0.50, 0.16), m_dark_trim)
 
     # RECESSED TRIPLE-BEAM ROUND HEADLIGHTS (EXACT GTA V BUS SIGNATURE!)
     # 3 circular round lights on the Left, 3 on the Right!
-    headlight_spacing = [0.60, 0.76, 0.92]
+    headlight_spacing = [0.62, 0.78, 0.94]
     for side, sign in [("L", -1), ("R", 1)]:
         for h_i, hy_off in enumerate(headlight_spacing):
             hy = sign * hy_off
@@ -422,7 +415,7 @@ def build():
             bpy.ops.mesh.primitive_cylinder_add(
                 radius=0.065,
                 depth=0.06,
-                location=(fx + 0.11 - h_i * 0.02, hy, 1.05),
+                location=(fx + 0.03, hy, 1.05),
                 rotation=(0, math.pi / 2, 0),
                 vertices=16
             )
@@ -433,7 +426,7 @@ def build():
             bpy.ops.mesh.primitive_cylinder_add(
                 radius=0.052,
                 depth=0.04,
-                location=(fx + 0.13 - h_i * 0.02, hy, 1.05),
+                location=(fx + 0.05, hy, 1.05),
                 rotation=(0, math.pi / 2, 0),
                 vertices=16
             )
@@ -441,32 +434,23 @@ def build():
             smooth_mesh(h_bulb)
 
         # Front amber indicator blinker strip beneath outer headlight
-        create_box(f"Indicator_{side}", (fx + 0.08, sign * 1.05, 0.88), (0.03, 0.12, 0.06), m_marker_amber, bevel=0.005)
+        create_box(f"Indicator_{side}", (fx + 0.04, sign * 1.06, 0.88), (0.03, 0.14, 0.06), m_marker_amber, bevel=0.005)
 
     # -------------------------------------------------------------
-    # 6. FRONT DESTINATION SIGN BOX & PANORAMIC WINDSHIELD
+    # 6. FRONT DESTINATION SIGN BOX & BROAD PANORAMIC WINDSHIELD
     # -------------------------------------------------------------
-    # Aerodynamic Crimson Red Upper Brow & Destination Box Visor
-    create_wedge_mesh(
-        "DestSignVisorRed",
-        Vector((fx - 0.70, -bus_wid * 0.5, 2.62)),
-        Vector((fx - 0.70, bus_wid * 0.5, 2.62)),
-        Vector((fx - 0.70, 0.0, 3.02)),
-        Vector((fx - 0.10, -bus_wid * 0.5 + 0.06, 2.62)),
-        Vector((fx - 0.10, bus_wid * 0.5 - 0.06, 2.62)),
-        Vector((fx - 0.15, 0.0, 3.02)),
-        m_bus_red
-    )
+    # Aerodynamic Crimson Red Upper Brow & Destination Box Visor (Full width 2.48m)
+    create_box("DestSignVisorRed", (fx - 0.12, 0, 2.76), (0.34, bus_wid - 0.04, 0.36), m_bus_red, bevel=0.04)
 
     # Electronic LED Destination Matrix Display Board ("VIP - MIRPUR 10")
-    create_box("DestSignHousing", (fx - 0.12, 0, 2.80), (0.08, 1.85, 0.30), m_dark_trim, bevel=0.02)
-    create_box("DestSignGlass", (fx - 0.07, 0, 2.80), (0.02, 1.78, 0.24), m_dest_display)
+    create_box("DestSignHousing", (fx + 0.02, 0, 2.76), (0.08, 1.90, 0.28), m_dark_trim, bevel=0.02)
+    create_box("DestSignGlass", (fx + 0.065, 0, 2.76), (0.02, 1.82, 0.22), m_dest_display)
     
     # 3D Embossed Amber LED Destination Text: "VIP 27 · MIRPUR 10"
     create_3d_text(
         "DestSignText",
         "VIP 27 · MIRPUR 10",
-        (fx - 0.055, 0, 2.80),
+        (fx + 0.08, 0, 2.76),
         (math.pi / 2, 0, math.pi / 2),
         0.14,
         0.015,
@@ -474,57 +458,54 @@ def build():
     )
 
     # 4 Amber Roof Clearance Marker Lights across front brow
-    for mx in [-0.75, -0.25, 0.25, 0.75]:
-        create_box(f"MarkerFront_{mx}", (fx - 0.12, mx, 2.98), (0.025, 0.08, 0.035), m_marker_amber, bevel=0.005)
+    for mx in [-0.80, -0.28, 0.28, 0.80]:
+        create_box(f"MarkerFront_{mx}", (fx + 0.03, mx, 2.92), (0.03, 0.08, 0.035), m_marker_amber, bevel=0.005)
 
-    # Panoramic Curved Front Windshield
-    create_wedge_mesh(
-        "WindshieldGlass",
-        Vector((fx - 0.40, -bus_wid * 0.5 + 0.06, 1.62)),
-        Vector((fx - 0.40, bus_wid * 0.5 - 0.06, 1.62)),
-        Vector((fx - 0.40, 0.0, 1.64)),
-        Vector((fx - 0.12, -bus_wid * 0.5 + 0.08, 2.62)),
-        Vector((fx - 0.12, bus_wid * 0.5 - 0.08, 2.62)),
-        Vector((fx - 0.12, 0.0, 2.64)),
-        m_windshield
-    )
-    # Center black vertical wiper/pillar divider
-    create_cylinder_between("WindshieldCenterPost", (fx - 0.40, 0, 1.62), (fx - 0.12, 0, 2.62), 0.025, m_dark_trim)
+    # Broad, flat, slightly raked panoramic curved front windshield (Full width 2.40m)
+    create_box("WindshieldGlass", (fx - 0.06, 0, 2.10), (0.06, bus_wid - 0.12, 0.98), m_windshield, bevel=0.02)
+    # Windshield perimeter black rubber gasket frame
+    create_box("WindshieldFrameTop", (fx - 0.04, 0, 2.58), (0.08, bus_wid - 0.08, 0.05), m_dark_trim)
+    create_box("WindshieldFrameBottom", (fx - 0.04, 0, 1.62), (0.08, bus_wid - 0.08, 0.05), m_dark_trim)
+    create_box("WindshieldFrameL", (fx - 0.04, -bus_wid * 0.5 + 0.04, 2.10), (0.08, 0.06, 0.98), m_dark_trim)
+    create_box("WindshieldFrameR", (fx - 0.04, bus_wid * 0.5 - 0.04, 2.10), (0.08, 0.06, 0.98), m_dark_trim)
+    
+    # Center vertical black wiper post
+    create_cylinder_between("WindshieldCenterPost", (fx - 0.02, 0, 1.62), (fx - 0.02, 0, 2.58), 0.022, m_dark_trim)
     # Twin Windshield Wipers resting horizontally at bottom
-    create_cylinder_between("Wiper_L", (fx - 0.35, -0.65, 1.66), (fx - 0.32, -0.15, 1.68), 0.012, m_dark_trim)
-    create_cylinder_between("Wiper_R", (fx - 0.35, 0.15, 1.66), (fx - 0.32, 0.65, 1.68), 0.012, m_dark_trim)
+    create_cylinder_between("Wiper_L", (fx + 0.01, -0.65, 1.66), (fx + 0.01, -0.15, 1.68), 0.012, m_dark_trim)
+    create_cylinder_between("Wiper_R", (fx + 0.01, 0.15, 1.66), (fx + 0.01, 0.65, 1.68), 0.012, m_dark_trim)
 
     # Aerodynamic Black Side Mirrors
     for side, sign in [("L", -1), ("R", 1)]:
         my = sign * (bus_wid * 0.5 + 0.18)
-        create_cylinder_between(f"MirrorArm1_{side}", (fx - 0.35, sign * (bus_wid * 0.5 - 0.02), 2.55), (fx - 0.20, my, 2.45), 0.018, m_dark_trim)
-        create_cylinder_between(f"MirrorArm2_{side}", (fx - 0.35, sign * (bus_wid * 0.5 - 0.02), 2.10), (fx - 0.20, my, 2.20), 0.018, m_dark_trim)
-        create_box(f"MirrorHead_{side}", (fx - 0.20, my, 2.32), (0.06, 0.08, 0.32), m_dark_trim, bevel=0.01)
+        create_cylinder_between(f"MirrorArm1_{side}", (fx - 0.25, sign * (bus_wid * 0.5 - 0.02), 2.55), (fx - 0.10, my, 2.45), 0.018, m_dark_trim)
+        create_cylinder_between(f"MirrorArm2_{side}", (fx - 0.25, sign * (bus_wid * 0.5 - 0.02), 2.10), (fx - 0.10, my, 2.20), 0.018, m_dark_trim)
+        create_box(f"MirrorHead_{side}", (fx - 0.10, my, 2.32), (0.06, 0.08, 0.32), m_dark_trim, bevel=0.01)
 
     # -------------------------------------------------------------
     # 7. UPPER BODYWORK, ROOF & AC POD (CRIMSON RED + WHITE SWEEP)
     # -------------------------------------------------------------
     # Crimson Red Upper Window Header Band (Running full length on both sides)
-    create_box("UpperHeaderRed_L", (0, -bus_wid * 0.5, 2.74), (bus_len - 0.4, 0.06, 0.28), m_bus_red, bevel=0.02)
-    create_box("UpperHeaderRed_R", (0, bus_wid * 0.5, 2.74), (bus_len - 0.4, 0.06, 0.28), m_bus_red, bevel=0.02)
+    create_box("UpperHeaderRed_L", (0, -bus_wid * 0.5, 2.74), (bus_len, 0.08, 0.28), m_bus_red, bevel=0.02)
+    create_box("UpperHeaderRed_R", (0, bus_wid * 0.5, 2.74), (bus_len, 0.08, 0.28), m_bus_red, bevel=0.02)
 
-    # 3D EMBOSSED "VIP TRANSIT" LETTERING ON RED HEADER (BOTH SIDES!)
-    # Left side (+Y looking outward)
+    # 3D EMBOSSED "VIP TRANSIT" LETTERING ON RED HEADER (PROPERLY ORIENTED LEFT & RIGHT!)
+    # Left side (Driver side): camera looks towards +Y, so rot=(pi/2, 0, 0) reads Left-to-Right!
     create_3d_text(
         "VIP_Text_L",
         "VIP TRANSIT",
-        (0.60, -bus_wid * 0.5 - 0.035, 2.74),
-        (math.pi / 2, 0, -math.pi),
+        (0.60, -bus_wid * 0.5 - 0.045, 2.74),
+        (math.pi / 2, 0, 0),
         0.22,
         0.018,
         m_decal_white
     )
-    # Right side (-Y looking outward)
+    # Right side (Door side): camera looks towards -Y, so rot=(pi/2, 0, pi) reads Left-to-Right!
     create_3d_text(
         "VIP_Text_R",
         "VIP TRANSIT",
-        (0.60, bus_wid * 0.5 + 0.035, 2.74),
-        (math.pi / 2, 0, 0),
+        (0.60, bus_wid * 0.5 + 0.045, 2.74),
+        (math.pi / 2, 0, math.pi),
         0.22,
         0.018,
         m_decal_white
@@ -537,10 +518,10 @@ def build():
             f"RedSweep_{sign}",
             Vector((-3.8, sy, 2.60)),
             Vector((-3.8, sy, 1.60)),
-            Vector((-5.4, sy, 2.60)),
+            Vector((-5.7, sy, 2.60)),
             Vector((-3.8, sy, 2.60)),
             Vector((-3.8, sy, 1.15)),
-            Vector((-5.4, sy, 1.15)),
+            Vector((-5.7, sy, 1.15)),
             m_bus_red
         )
         # 3D bKash sponsor roundel emblem on rear white quarter panel
@@ -549,84 +530,84 @@ def build():
             f"BkashText_{sign}",
             "bKash",
             (-4.4, sy + sign * 0.025, 1.35),
-            (math.pi / 2, 0, 0 if sign > 0 else -math.pi),
+            (math.pi / 2, 0, 0 if sign < 0 else math.pi),
             0.10,
             0.015,
             m_decal_white
         )
 
     # Main Roof Slab (Crimson Red with rounded aerodynamic perimeter)
-    create_box("RoofStructure", (0, 0, 2.90), (bus_len - 0.2, bus_wid - 0.06, 0.14), m_bus_red, bevel=0.06)
+    create_box("RoofStructure", (0, 0, 2.90), (bus_len, bus_wid - 0.02, 0.14), m_bus_red, bevel=0.06)
 
     # Streamlined Rooftop AC / Climate Control Pod (Light silver/white matching Photo 2 & 3!)
-    create_box("ACPodBody", (-0.20, 0, 3.12), (5.20, 1.45, 0.32), m_ac_pod, bevel=0.08)
+    create_box("ACPodBody", (-0.20, 0, 3.12), (5.40, 1.45, 0.32), m_ac_pod, bevel=0.08)
     # Aerodynamic front nose cap on AC pod
     create_wedge_mesh(
         "ACPodFrontCap",
-        Vector((2.40, -0.725, 2.96)),
-        Vector((2.40, 0.725, 2.96)),
-        Vector((2.40, 0.0, 3.28)),
-        Vector((2.80, -0.60, 2.96)),
-        Vector((2.80, 0.60, 2.96)),
-        Vector((2.80, 0.0, 3.16)),
+        Vector((2.50, -0.725, 2.96)),
+        Vector((2.50, 0.725, 2.96)),
+        Vector((2.50, 0.0, 3.28)),
+        Vector((2.90, -0.60, 2.96)),
+        Vector((2.90, 0.60, 2.96)),
+        Vector((2.90, 0.0, 3.16)),
         m_ac_pod
     )
     # AC Side Ventilation Grilles / Louvers
     for side, sign in [("L", -1), ("R", 1)]:
         for gi in range(6):
-            gx = 1.6 - gi * 0.65
+            gx = 1.8 - gi * 0.68
             create_box(f"AC_Louver_{side}_{gi}", (gx, sign * 0.74, 3.14), (0.45, 0.02, 0.16), m_dark_trim)
 
     # Amber Side Clearance Marker Lights along roof rim
     for side, sign in [("L", -1), ("R", 1)]:
-        for mx in [3.6, 1.2, -1.2, -3.6]:
+        for mx in [3.8, 1.4, -1.0, -3.4]:
             create_box(f"RoofMarker_{side}_{mx}", (mx, sign * (bus_wid * 0.5 + 0.01), 2.85), (0.08, 0.02, 0.035), m_marker_amber, bevel=0.005)
 
     # -------------------------------------------------------------
     # 8. PASSENGER BI-FOLD DOORS & 6 PANORAMIC WINDOW BAYS
     # -------------------------------------------------------------
-    # Front Right Passenger Door (Curb side Y = +1.25, between X = 4.10 and X = 5.15)
+    # Front Right Passenger Door (Curb side Y = +1.24, between X = 4.25 and X = 5.35)
     # Bi-fold glass passenger doors with black frames & yellow grab poles inside
-    create_box("DoorFrameOuter", (4.62, bus_wid * 0.5, 1.82), (1.10, 0.05, 1.76), m_dark_trim, bevel=0.02)
+    create_box("DoorFrameOuter", (4.80, bus_wid * 0.5, 1.82), (1.10, 0.06, 1.76), m_dark_trim, bevel=0.02)
     # Left door leaf & right door leaf
-    create_box("DoorLeaf1_Glass", (4.88, bus_wid * 0.5 + 0.005, 1.82), (0.48, 0.02, 1.68), m_glass)
-    create_box("DoorLeaf2_Glass", (4.36, bus_wid * 0.5 + 0.005, 1.82), (0.48, 0.02, 1.68), m_glass)
+    create_box("DoorLeaf1_Glass", (5.08, bus_wid * 0.5 + 0.005, 1.82), (0.48, 0.02, 1.68), m_glass)
+    create_box("DoorLeaf2_Glass", (4.52, bus_wid * 0.5 + 0.005, 1.82), (0.48, 0.02, 1.68), m_glass)
     # Vertical yellow door grab poles
-    create_cylinder_between("DoorPole_1", (4.88, bus_wid * 0.5 - 0.08, 0.70), (4.88, bus_wid * 0.5 - 0.08, 2.55), 0.025, m_stanchion_yellow)
-    create_cylinder_between("DoorPole_2", (4.36, bus_wid * 0.5 - 0.08, 0.70), (4.36, bus_wid * 0.5 - 0.08, 2.55), 0.025, m_stanchion_yellow)
+    create_cylinder_between("DoorPole_1", (5.08, bus_wid * 0.5 - 0.08, 0.70), (5.08, bus_wid * 0.5 - 0.08, 2.55), 0.025, m_stanchion_yellow)
+    create_cylinder_between("DoorPole_2", (4.52, bus_wid * 0.5 - 0.08, 0.70), (4.52, bus_wid * 0.5 - 0.08, 2.55), 0.025, m_stanchion_yellow)
 
     # 6 Panoramic Side Passenger Windows on Left and Right Sides!
-    # Left side bays (from X = +3.6 to X = -4.6)
-    bay_centers = [3.6, 2.0, 0.4, -1.2, -2.8, -4.4]
-    bay_width = 1.45
-    window_hgt = 0.94
-    window_z = 2.12
+    # Left side bays (from X = +4.8 down to X = -4.8)
+    bay_centers = [4.8, 3.2, 1.6, 0.0, -1.6, -3.2, -4.8]
+    bay_width = 1.48
+    window_hgt = 0.96
+    window_z = 2.10
 
+    # Left Side: 7 continuous panoramic window bays (covering driver cab all the way to rear!)
     for bi, bx in enumerate(bay_centers):
-        # Left Window Bay (Driver Side)
-        create_box(f"WindowFrame_L_{bi}", (bx, -bus_wid * 0.5, window_z), (bay_width + 0.08, 0.04, window_hgt + 0.06), m_dark_trim)
+        create_box(f"WindowFrame_L_{bi}", (bx, -bus_wid * 0.5, window_z), (bay_width + 0.06, 0.04, window_hgt + 0.06), m_dark_trim)
         create_box(f"WindowGlass_L_{bi}", (bx, -bus_wid * 0.5, window_z), (bay_width, 0.02, window_hgt), m_glass)
         
-        # Right Window Bay (Door side - bays 2 to 6, since bay 1 has the door)
-        if bi > 0:
-            create_box(f"WindowFrame_R_{bi}", (bx, bus_wid * 0.5, window_z), (bay_width + 0.08, 0.04, window_hgt + 0.06), m_dark_trim)
+        # Right Side: bays behind the door (bx <= 4.0)
+        if bx <= 4.0:
+            create_box(f"WindowFrame_R_{bi}", (bx, bus_wid * 0.5, window_z), (bay_width + 0.06, 0.04, window_hgt + 0.06), m_dark_trim)
             create_box(f"WindowGlass_R_{bi}", (bx, bus_wid * 0.5, window_z), (bay_width, 0.02, window_hgt), m_glass)
 
     # -------------------------------------------------------------
     # 9. REAR FASCIA & VERTICAL TAILLIGHT CLUSTERS
     # -------------------------------------------------------------
-    rx = -bus_len * 0.5 + 0.10
+    rx = -bus_len * 0.5
 
     # Flat rear white tailgate & red upper cap
-    create_box("RearLowerWhite", (rx, 0, 1.15), (0.08, bus_wid - 0.1, 0.92), m_bus_white, bevel=0.03)
-    create_box("RearUpperRed", (rx, 0, 2.68), (0.08, bus_wid - 0.1, 0.42), m_bus_red, bevel=0.03)
+    create_box("RearLowerWhite", (rx + 0.04, 0, 1.15), (0.08, bus_wid - 0.04, 0.94), m_bus_white, bevel=0.04)
+    create_box("RearUpperRed", (rx + 0.04, 0, 2.76), (0.08, bus_wid - 0.04, 0.36), m_bus_red, bevel=0.04)
     # Rear panoramic tinted window
-    create_box("RearWindowGlass", (rx, 0, 2.12), (0.02, bus_wid - 0.35, 0.85), m_glass)
-    create_box("RearWindowFrame", (rx, 0, 2.12), (0.04, bus_wid - 0.28, 0.92), m_dark_trim)
+    create_box("RearWindowGlass", (rx + 0.02, 0, 2.10), (0.02, bus_wid - 0.35, 0.85), m_glass)
+    create_box("RearWindowFrame", (rx + 0.03, 0, 2.10), (0.04, bus_wid - 0.28, 0.92), m_dark_trim)
 
     # Rear Bumper & Step
-    create_box("RearBumper", (rx - 0.12, 0, 0.54), (0.22, bus_wid + 0.06, 0.22), m_dark_trim, bevel=0.04)
-    create_box("LicensePlateRear", (rx - 0.24, 0, 0.54), (0.02, 0.48, 0.14), m_bus_white, bevel=0.005)
+    create_box("RearBumper", (rx - 0.05, 0, 0.56), (0.22, bus_wid + 0.06, 0.24), m_dark_trim, bevel=0.04)
+    create_box("LicensePlateRear", (rx - 0.17, 0, 0.56), (0.02, 0.48, 0.14), m_bus_white, bevel=0.005)
 
     # Vertical Taillight Clusters (Red brake, amber turn, white reverse)
     for side, sign in [("L", -1), ("R", 1)]:
@@ -645,16 +626,16 @@ def build():
     # 10. INTERIOR CABIN: SEATING & YELLOW STANCHION POLES
     # -------------------------------------------------------------
     # Overhead Safety Yellow Grab Rails running full length along aisle
-    create_cylinder_between("OverheadRail_L", (4.4, -0.35, 2.50), (-4.8, -0.35, 2.50), 0.022, m_stanchion_yellow)
-    create_cylinder_between("OverheadRail_R", (4.4, 0.35, 2.50), (-4.8, 0.35, 2.50), 0.022, m_stanchion_yellow)
+    create_cylinder_between("OverheadRail_L", (4.8, -0.35, 2.50), (-4.8, -0.35, 2.50), 0.022, m_stanchion_yellow)
+    create_cylinder_between("OverheadRail_R", (4.8, 0.35, 2.50), (-4.8, 0.35, 2.50), 0.022, m_stanchion_yellow)
 
     # Vertical Stanchion Grab Poles (Floor to ceiling - ZERO CLIPPING!)
-    for px in [3.0, 1.4, -0.2, -1.8, -3.4]:
+    for px in [3.2, 1.6, 0.0, -1.6, -3.2, -4.6]:
         create_cylinder_between(f"VerticalPole_L_{px}", (px, -0.35, floor_z), (px, -0.35, 2.70), 0.022, m_stanchion_yellow)
         create_cylinder_between(f"VerticalPole_R_{px}", (px, 0.35, floor_z), (px, 0.35, 2.70), 0.022, m_stanchion_yellow)
 
     # Commuter Transit Seats (6 Rows of 2x2 seats with blue patterned upholstery!)
-    seat_xs = [3.0, 1.4, -0.2, -1.8, -3.4, -4.8]
+    seat_xs = [3.2, 1.6, 0.0, -1.6, -3.2, -4.6]
     for row_i, sx in enumerate(seat_xs):
         for side, sign in [("L", -1), ("R", 1)]:
             sy = sign * 0.78
@@ -670,7 +651,7 @@ def build():
     # -------------------------------------------------------------
     # 11. FULL-BODIED DRIVER (PROPERLY SEATED IN CABIN!)
     # -------------------------------------------------------------
-    dx, dy, dz = 4.40, -0.72, floor_z
+    dx, dy, dz = 4.60, -0.72, floor_z
 
     # Driver Seat & Console
     create_box("DriverSeatPedestal", (dx, dy, dz + 0.20), (0.45, 0.45, 0.40), m_seat_frame)
@@ -717,12 +698,12 @@ def build():
     # 12. 6 FULL-BODIED PASSENGERS (SEATED COMFORTABLY INSIDE CABIN!)
     # -------------------------------------------------------------
     pass_configs = [
-        (3.0, -0.78, m_shirt_white, m_skin_p1, False),  # Row 1 Left: Man in White Panjabi
-        (1.4, 0.78, m_saree_pink, m_skin_p2, True),     # Row 2 Right: Woman in Pink Saree
-        (-0.2, -0.78, m_shirt_green, m_skin_p1, False), # Row 3 Left: Man in Green Polo
-        (-1.8, 0.78, m_shirt_yellow, m_skin_p2, False), # Row 4 Right: Man in Mustard Shirt
-        (-3.4, -0.78, m_shirt_blue, m_skin_p1, False),  # Row 5 Left: Man in Blue Shirt
-        (-4.8, 0.78, m_saree_pink, m_skin_p2, True),    # Row 6 Right: Woman in Pink Saree
+        (3.2, -0.78, m_shirt_white, m_skin_p1, False),  # Row 1 Left: Man in White Panjabi
+        (1.6, 0.78, m_saree_pink, m_skin_p2, True),     # Row 2 Right: Woman in Pink Saree
+        (0.0, -0.78, m_shirt_green, m_skin_p1, False),  # Row 3 Left: Man in Green Polo
+        (-1.6, 0.78, m_shirt_yellow, m_skin_p2, False), # Row 4 Right: Man in Mustard Shirt
+        (-3.2, -0.78, m_shirt_blue, m_skin_p1, False),  # Row 5 Left: Man in Blue Shirt
+        (-4.6, 0.78, m_saree_pink, m_skin_p2, True),    # Row 6 Right: Woman in Pink Saree
     ]
 
     for pi, (px, py, p_shirt, p_skin, p_fem) in enumerate(pass_configs):

@@ -2250,80 +2250,67 @@
       const width = 22;
       const height = 23;
 
-      // 1. Lower Chassis & Red BRTA / Dhaka City Livery (Matching Picture 5)
-      const bodyGeo = new THREE.BoxGeometry(length, 9.5, width);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex || 0xdc2626, roughness: 0.35, metalness: 0.15 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = 8.5;
-      body.castShadow = true;
-      group.add(body);
+      // 1. Lower White Body Shell (Photo 3 Color Combination)
+      const lowerGeo = new THREE.BoxGeometry(length, 9.2, width);
+      const lowerMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.28, metalness: 0.05 });
+      const lowerBody = new THREE.Mesh(lowerGeo, lowerMat);
+      lowerBody.position.y = 8.6;
+      lowerBody.castShadow = true;
+      group.add(lowerBody);
 
-      // Dhaka Transit Green Speedline & White Accent Band
-      const strWhiteGeo = new THREE.BoxGeometry(length + 0.3, 1.2, width + 0.3);
-      const strWhiteMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
-      const strWhite = new THREE.Mesh(strWhiteGeo, strWhiteMat);
-      strWhite.position.y = 11.8;
-      group.add(strWhite);
+      // Lower Black Protective Rocker Trim Skirt
+      const rockerGeo = new THREE.BoxGeometry(length + 0.2, 1.4, width + 0.2);
+      const rocker = new THREE.Mesh(rockerGeo, vehicleBumperMat);
+      rocker.position.y = 4.7;
+      group.add(rocker);
 
-      const strGreenGeo = new THREE.BoxGeometry(length + 0.35, 1.6, width + 0.35);
-      const strGreenMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
-      const strGreen = new THREE.Mesh(strGreenGeo, strGreenMat);
-      strGreen.position.y = 13.1;
-      group.add(strGreen);
+      // 2. Upper Red Window Header & Roof (Photo 3 Color Combination)
+      const upperHeaderGeo = new THREE.BoxGeometry(length, 2.6, width + 0.1);
+      const redMat = new THREE.MeshStandardMaterial({ color: 0xc8102e, roughness: 0.25, metalness: 0.15 });
+      const upperHeader = new THREE.Mesh(upperHeaderGeo, redMat);
+      upperHeader.position.y = 20.2;
+      group.add(upperHeader);
 
-      // 2. Upper Passenger Cabin with Panoramic Tinted Windows
-      const cabGeo = new THREE.BoxGeometry(length * 0.98, 7.8, width * 0.96);
-      const cabMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2 });
-      const cab = new THREE.Mesh(cabGeo, cabMat);
-      cab.position.y = 17.5;
-      group.add(cab);
-
-      // Curved Red Roof Cap with Water Gutter
-      const roofGeo = new THREE.BoxGeometry(length, 2.2, width);
-      const roofMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38, metalness: 0.15 });
-      const roof = new THREE.Mesh(roofGeo, roofMat);
+      const roofGeo = new THREE.BoxGeometry(length, 1.8, width);
+      const roof = new THREE.Mesh(roofGeo, redMat);
       roof.position.y = 22.0;
       group.add(roof);
 
-      // Rooftop Luggage Carrier Rack & Rear Access Ladder
-      const rackMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
-      const rackGeo = new THREE.BoxGeometry(length * 0.65, 1.8, width * 0.75);
-      const rack = new THREE.Mesh(rackGeo, rackMat);
-      rack.position.set(-4, 23.6, 0);
-      group.add(rack);
+      // Rooftop Streamlined AC Unit Pod in Silver/White (Matching Photos 2 & 3!)
+      const acPodMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.35, metalness: 0.35 });
+      const acPodGeo = new THREE.BoxGeometry(length * 0.55, 2.6, width * 0.65);
+      const acPod = new THREE.Mesh(acPodGeo, acPodMat);
+      acPod.position.set(-2, 23.8, 0);
+      group.add(acPod);
 
-      // Rear ladder
-      [-1, 1].forEach(side => {
-        const ladderRail = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 14, 6), rackMat);
-        ladderRail.position.set(-length / 2 - 0.5, 14, side * 2.5);
-        group.add(ladderRail);
-      });
-      for (let r = 0; r < 5; r++) {
-        const rung = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.25, 5.0), rackMat);
-        rung.position.set(-length / 2 - 0.5, 8.5 + r * 2.5, 0);
-        group.add(rung);
-      }
-
-      // Panoramic Tinted Cabin Glass
+      // 3. Panoramic Tinted Window Glass
       const cabinGlassMat = new THREE.MeshStandardMaterial({
         color: 0x9bdcf5,
         roughness: 0.15,
         metalness: 0.15,
         transparent: true,
-        opacity: 0.38,
+        opacity: 0.35,
         depthWrite: false
       });
 
-      // 3. Interior Layout: Driver with Steering Wheel + 6 Seated Passengers (Matching Picture 5)
-      const seatMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+      // 4. Interior Layout: Driver with Steering Wheel + Commuters with Blue Seats & Yellow Stanchions
+      const seatMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.75 }); // Blue transit seats
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.25, metalness: 0.35 }); // Safety yellow poles
       const passengerPalette = [0xf97316, 0x0284c7, 0x8b5cf6, 0xec4899, 0x22c55e, 0xfacc15];
       const passengerPositions = [-28, -18, -8, 2, 12, 22];
 
       passengerPositions.forEach((px, idx) => {
-        // High-back bus seat
-        const seat = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.4, 14), seatMat);
-        seat.position.set(px, 14.2, 0);
+        // High-back transit seat
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(6.4, 1.4, 14), seatMat);
+        seat.position.set(px, 13.8, 0);
         group.add(seat);
+
+        // Vertical yellow stanchion grab pole
+        [-1, 1].forEach(pside => {
+          const vPole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 12, 6), poleMat);
+          vPole.position.set(px, 15.5, pside * 3.8);
+          group.add(vPole);
+        });
 
         // Seated Passenger Figure
         const pShirt = new THREE.MeshStandardMaterial({ color: passengerPalette[idx % passengerPalette.length], roughness: 0.75 });
@@ -2341,7 +2328,7 @@
       });
 
       // Front Bus Driver with Angled Steering Wheel
-      const driverShirt = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
+      const driverShirt = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.8 });
       const driverSkin = new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.8 });
       const dTorso = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.8, 4.0), driverShirt);
       dTorso.position.set(30, 16.5, -3.2);
@@ -2364,46 +2351,27 @@
       [-1, 1].forEach(side => {
         windowXs.forEach(wx => {
           const winMesh = new THREE.Mesh(new THREE.BoxGeometry(10.2, 5.8, 0.35), cabinGlassMat);
-          winMesh.position.set(wx, 17.5, side * (width / 2 + 0.12));
+          winMesh.position.set(wx, 16.5, side * (width / 2 + 0.12));
           group.add(winMesh);
 
-          // Vertical Black Window Pillar (Mullion)
+          // Vertical Black Window Mullion
           const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.8, 6.2, 0.5), vehicleBumperMat);
-          mullion.position.set(wx + 5.5, 17.5, side * (width / 2 + 0.14));
+          mullion.position.set(wx + 5.5, 16.5, side * (width / 2 + 0.14));
           group.add(mullion);
         });
-
-        // Lower Chrome Window Guard Rail
-        const lowerRail = new THREE.Mesh(new THREE.BoxGeometry(length * 0.94, 0.55, 0.65), rackMat);
-        lowerRail.position.set(0, 14.4, side * (width / 2 + 0.12));
-        group.add(lowerRail);
       });
 
       // Front Windshield
-      const fWin = new THREE.Mesh(new THREE.BoxGeometry(0.35, 7.2, width * 0.9), cabinGlassMat);
-      fWin.position.set(length / 2 + 0.12, 17.2, 0);
+      const fWin = new THREE.Mesh(new THREE.BoxGeometry(0.35, 7.2, width * 0.92), cabinGlassMat);
+      fWin.position.set(length / 2 + 0.12, 16.8, 0);
       group.add(fWin);
 
-      // Front Destination LED Route Board: "মিরপুর ১০ ➔ মতিঝিল"
-      const destTex = createSignboardTexture('মিরপুর ১০ ➔ মতিঝিল', 'MIRPUR 10 · MOTIJHEEL', '#090d16', '#fef08a', '#38bdf8', '#facc15', 256, 64);
-      const destGeo = new THREE.BoxGeometry(1.6, 4.4, 16);
+      // Front Destination LED Route Board: "VIP 27 · MIRPUR 10"
+      const destTex = createSignboardTexture('VIP 27 · MIRPUR 10', 'VIP TRANSIT', '#090d16', '#fbbf24', '#f59e0b', '#fbbf24', 256, 64);
+      const destGeo = new THREE.BoxGeometry(1.6, 4.2, 16);
       const dest = new THREE.Mesh(destGeo, new THREE.MeshBasicMaterial({ map: destTex }));
       dest.position.set(length / 2 + 0.45, 20.8, 0);
       group.add(dest);
-
-      // Heavy Duty Steel Crash Guard / Bull Bar on Front
-      const bullBarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.25 });
-      const bullBarGeo = new THREE.CylinderGeometry(0.7, 0.7, width * 0.92, 10);
-      const bullBar = new THREE.Mesh(bullBarGeo, bullBarMat);
-      bullBar.rotation.x = Math.PI / 2;
-      bullBar.position.set(length / 2 + 2.2, 5.0, 0);
-      group.add(bullBar);
-      [-7, 7].forEach(bz => {
-        const barStalk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 2.6, 8), bullBarMat);
-        barStalk.rotation.z = Math.PI / 2;
-        barStalk.position.set(length / 2 + 1.1, 5.0, bz);
-        group.add(barStalk);
-      });
 
       // Rear Heavy Bumper
       const rBump = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.8, width + 0.8), vehicleBumperMat);
@@ -2427,15 +2395,14 @@
         });
       });
 
-      // Front Dual Round Headlight Clusters
-      [-6.5, 6.5].forEach(hz => {
-        const hl = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 1.2, 12), vehicleHeadlightMat);
-        hl.rotation.z = Math.PI / 2;
-        hl.position.set(length / 2 + 0.7, 6.5, hz);
-        group.add(hl);
-        const ind = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 1.6), vehicleIndicatorMat);
-        ind.position.set(length / 2 + 0.7, 6.5, hz > 0 ? hz + 2.2 : hz - 2.2);
-        group.add(ind);
+      // Front Triple-Beam Round Headlights (Exact Match to Photos 2 & 3!)
+      [-1, 1].forEach(side => {
+        [6.0, 7.6, 9.2].forEach(hz => {
+          const hl = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 1.0, 12), vehicleHeadlightMat);
+          hl.rotation.z = Math.PI / 2;
+          hl.position.set(length / 2 + 0.6, 7.8, side * hz);
+          group.add(hl);
+        });
       });
 
       // Vertical Rear Triple Taillight Clusters
@@ -4086,7 +4053,7 @@
   }
 
   function loadBusModel() {
-    return loadGLBModel('assets/models/dhaka-bus.glb');
+    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-vip');
   }
 
   function loadCarModel() {
@@ -4277,7 +4244,7 @@
     while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
     vehicle.add(model);
     vehicle.userData.wheels = wheels;
-    vehicle.userData.wheelRadius = 5.2;
+    vehicle.userData.wheelRadius = 3.4;
   }
 
   function replaceCarWithModel(vehicle, prototype) {
