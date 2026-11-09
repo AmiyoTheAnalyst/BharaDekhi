@@ -85,27 +85,25 @@ bpy.ops.render.render(write_still=True)
 print(f"SUCCESS: Rendered Bus Hero Showcase to {bus_out}")
 
 # ==============================================================================
-# 2. RENDER ALL 4 CARS LINEUP
+# 2. RENDER ALL 4 CARS LINEUP (Staggered 3/4 Hero View)
 # ==============================================================================
 bpy.ops.wm.read_factory_settings(use_empty=True)
 
 car_files = [
-    ("car-sedan.glb", (0.0, 4.5, 0.0)),
-    ("car-muscle.glb", (0.0, 1.5, 0.0)),
-    ("car-delorean.glb", (0.0, -1.5, 0.0)),
-    ("car-hypercar.glb", (0.0, -4.5, 0.0))
+    ("car-sedan.glb", (1.2, 5.0, 0.0)),
+    ("car-muscle.glb", (0.0, 1.8, 0.0)),
+    ("car-delorean.glb", (-0.8, -1.6, 0.0)),
+    ("car-hypercar.glb", (-1.8, -5.2, 0.0))
 ]
 
 for filename, offset in car_files:
     glb_path = os.path.join(MODELS_DIR, filename)
-    # Import
     bpy.ops.import_scene.gltf(filepath=glb_path)
-    # The imported objects are selected, move them
     for obj in bpy.context.selected_objects:
         if obj.parent is None:
             obj.location = (obj.location[0] + offset[0], obj.location[1] + offset[1], obj.location[2] + offset[2])
 
-setup_camera_and_lights(cam_loc=(7.8, -1.0, 4.2), cam_target=(0.0, 0.0, 0.8), res_x=1280, res_y=720)
+setup_camera_and_lights(cam_loc=(12.0, -2.5, 5.5), cam_target=(0.0, 0.0, 0.8), res_x=1280, res_y=720)
 
 cars_out = os.path.join(SCRATCH_DIR, "render_all_cars.png")
 bpy.context.scene.render.filepath = cars_out
