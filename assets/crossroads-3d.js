@@ -4053,7 +4053,7 @@
   }
 
   function loadBusModel() {
-    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-vip');
+    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-vip3');
   }
 
   function loadCarModel() {
@@ -4191,7 +4191,9 @@
         if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
           node.material = node.material.clone();
           node.material.transparent = true;
-          node.material.opacity = 0.35;
+          node.material.opacity = 0.65;
+          node.material.roughness = 0.08;
+          node.material.metalness = 0.15;
           node.material.depthWrite = false;
         }
       }
@@ -4231,7 +4233,9 @@
         if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
           node.material = node.material.clone();
           node.material.transparent = true;
-          node.material.opacity = 0.35;
+          node.material.opacity = 0.65;
+          node.material.roughness = 0.08;
+          node.material.metalness = 0.15;
           node.material.depthWrite = false;
         }
       }
@@ -4271,7 +4275,9 @@
         if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
           node.material = node.material.clone();
           node.material.transparent = true;
-          node.material.opacity = 0.35;
+          node.material.opacity = 0.65;
+          node.material.roughness = 0.08;
+          node.material.metalness = 0.15;
           node.material.depthWrite = false;
         }
       }
