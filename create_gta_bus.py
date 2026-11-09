@@ -165,10 +165,10 @@ for side in [-1, 1]:
 
     # bKash Sponsor Roundel & Logo on the White Sweep
     add_cyl(f"Rear_bKash_Disc_{side}", 0.22, 0.02, (-5.15, side * 1.295, 2.35), (math.pi / 2, 0, 0), mat_bkash_pink, vertices=32)
-    add_3d_text(f"Rear_bKash_Text_{side}", "bKash", (-5.15, side * 1.308, 2.35), (math.pi / 2, 0, 0 if side > 0 else math.pi), 0.10, 0.015, mat_white)
+    add_3d_text(f"Rear_bKash_Text_{side}", "bKash", (-5.15, side * 1.308, 2.35), (math.pi / 2, 0, math.pi if side > 0 else 0), 0.10, 0.015, mat_white)
 
     # "VIP 27" Route Badge on lower rear skirt
-    add_3d_text(f"Rear_VIP_Route_{side}", "VIP 27", (-4.65, side * 1.295, 1.15), (math.pi / 2, 0, 0 if side > 0 else math.pi), 0.12, 0.015, mat_red)
+    add_3d_text(f"Rear_VIP_Route_{side}", "VIP 27", (-4.65, side * 1.295, 1.15), (math.pi / 2, 0, math.pi if side > 0 else 0), 0.12, 0.015, mat_red)
 
 # ==============================================================================
 # 5. 7 FRAMED SIDE WINDOWS, PILLARS & "VIP TRANSIT" HEADER
@@ -192,7 +192,7 @@ for side in [-1, 1]:
 
     # Side White Banner Backplate & Embossed "VIP TRANSIT" 3D Typography
     add_beveled_box(f"Banner_Backplate_{side}", (4.50, 0.02, 0.18), (0.45, side * 1.29, 2.74), mat_white, bevel_width=0.005)
-    add_3d_text(f"Banner_Text_{side}", "VIP TRANSIT", (0.45, side * 1.305, 2.74), (math.pi / 2, 0, 0 if side > 0 else math.pi), 0.13, 0.015, mat_red)
+    add_3d_text(f"Banner_Text_{side}", "VIP TRANSIT", (0.45, side * 1.305, 2.74), (math.pi / 2, 0, math.pi if side > 0 else 0), 0.13, 0.015, mat_red)
 
 # Front Bi-Fold Passenger Door (Curb Side at Y = -1.28)
 door_side = -1
