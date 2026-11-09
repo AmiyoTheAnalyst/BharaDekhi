@@ -24,6 +24,7 @@ ready.wait(5)
 chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 targets = [
+    ("screenshot_bike_centered.png", f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1"),
     ("screenshot_rickshaw_centered.png", f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=rickshaw&center=1"),
     ("screenshot_cng_centered.png", f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=cng&center=1"),
     ("screenshot_bus_centered.png", f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bus&center=1"),
