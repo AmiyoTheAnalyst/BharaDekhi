@@ -250,25 +250,22 @@ def build():
     # -------------------------------------------------------------
     # 4. FULL-BODIED DRIVER (SEATED WITH STEERING WHEEL & 3D FACE)
     # -------------------------------------------------------------
-    driver_group = bpy.data.objects.new("Car_Driver", None)
-    bpy.context.collection.objects.link(driver_group)
-    driver_group.location = (0.12, -0.42, 0.54)
+    dx, dy, dz = 0.12, -0.44, 0.42
 
     # Steering Wheel on Steering Column
-    create_cylinder_between("SteeringColumn", (0.45, 0, 0.18), (0.32, 0, 0.38), 0.025, m_trim_dark, verts=8, parent=driver_group)
+    create_cylinder_between("SteeringColumn", (dx + 0.42, dy, dz + 0.22), (dx + 0.28, dy, dz + 0.42), 0.024, m_trim_dark, verts=8)
     bpy.ops.mesh.primitive_torus_add(
-        major_radius=0.16,
+        major_radius=0.15,
         minor_radius=0.018,
         major_segments=24,
         minor_segments=8,
-        location=(0.12 + 0.30, -0.42, 0.54 + 0.40),
-        rotation=(math.radians(25), 0, 0)
+        location=(dx + 0.28, dy, dz + 0.42),
+        rotation=(0, math.radians(-65), 0)
     )
     c_wheel = assign_material(bpy.context.object, m_trim_dark)
     c_wheel.name = "CarSteeringWheel"
 
     # Driver Pelvis & Torso (Absolute coordinates around dx = 0.12, dy = -0.44, dz = 0.42)
-    dx, dy, dz = 0.12, -0.44, 0.42
     create_box("Driver_Pelvis", (dx, dy, dz + 0.12), (0.22, 0.28, 0.14), m_pants_dark, bevel=0.02)
     create_box("Driver_Torso", (dx - 0.02, dy, dz + 0.36), (0.24, 0.32, 0.34), m_shirt_white, bevel=0.03)
     create_cylinder_between("Driver_Neck", (dx + 0.01, dy, dz + 0.52), (dx + 0.03, dy, dz + 0.62), 0.046, m_skin_d, verts=10)

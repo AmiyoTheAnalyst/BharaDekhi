@@ -282,28 +282,24 @@ def build():
     # -------------------------------------------------------------
     # 4. FULL-BODIED DRIVER (SEATED WITH STEERING WHEEL & 3D FACE)
     # -------------------------------------------------------------
-    driver_group = bpy.data.objects.new("Bus_Driver", None)
-    bpy.context.collection.objects.link(driver_group)
-    driver_group.location = (3.25, -0.65, 0.70)
+    dx, dy, dz = 3.25, -0.65, 0.70
 
     # Driver seat
-    create_box("DriverSeat", (0, 0, 0.35), (0.48, 0.48, 0.14), m_seat_fabric, bevel=0.02, parent=driver_group)
+    create_box("DriverSeat", (dx, dy, dz + 0.35), (0.48, 0.48, 0.14), m_seat_fabric, bevel=0.02)
     # Large angled bus steering wheel
-    create_cylinder_between("SteeringColumn", (0.55, 0, 0.30), (0.42, 0, 0.78), 0.035, m_bumper_dark, verts=8, parent=driver_group)
+    create_cylinder_between("SteeringColumn", (dx + 0.55, dy, dz + 0.30), (dx + 0.38, dy, dz + 0.80), 0.035, m_bumper_dark, verts=8)
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.22,
         minor_radius=0.022,
         major_segments=24,
         minor_segments=8,
-        location=(3.25 + 0.38, -0.65, 0.70 + 0.82),
-        rotation=(math.radians(35), 0, 0)
+        location=(dx + 0.38, dy, dz + 0.82),
+        rotation=(0, math.radians(-55), 0)
     )
     s_wheel = assign_material(bpy.context.object, m_bumper_dark)
     s_wheel.name = "BusSteeringWheel"
-    s_wheel.parent = driver_group
 
     # Driver Body (Absolute coordinates around dx = 3.25, dy = -0.65, dz = 0.70)
-    dx, dy, dz = 3.25, -0.65, 0.70
     create_box("Driver_Pelvis", (dx, dy, dz + 0.45), (0.24, 0.30, 0.16), m_pants_dark, bevel=0.02)
     create_box("Driver_Torso", (dx + 0.02, dy, dz + 0.74), (0.26, 0.36, 0.38), m_shirt_blue, bevel=0.04)
     create_cylinder_between("Driver_Neck", (dx + 0.05, dy, dz + 0.94), (dx + 0.08, dy, dz + 1.06), 0.052, m_skin_d, verts=10)
