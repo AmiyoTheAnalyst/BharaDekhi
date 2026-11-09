@@ -93,7 +93,6 @@ def create_cylinder_between(name, p1, p2, radius, mat, verts=12, radius2=None):
     return obj
 
 def create_alloy_wheel(name, center, radius, width, tire_mat, rim_mat, disc_mat, hub_mat):
-    """Creates a self-contained wheel mesh whose local origin is at center, so Three.js can rotate it cleanly on its axle."""
     parts = []
     
     # Outer sport tire with grooved tread
@@ -261,140 +260,139 @@ def build():
     # 3. AERODYNAMIC FAIRINGS & BODYWORK
     # -------------------------------------------------------------
     # Front Aggressive Nose Cowl
-    create_box("FrontNoseCowl", (0.75, 0, 0.82), (0.34, 0.38, 0.22), m_body_blue, bevel=0.03)
+    create_box("FrontNoseCowl", (0.75, 0, 0.78), (0.34, 0.36, 0.20), m_body_blue, bevel=0.03)
     # Sharp Angled Dual LED Headlights (glow ice-blue/white)
-    create_box("Headlight_L", (0.88, -0.11, 0.82), (0.08, 0.10, 0.04), m_headlight, bevel=0.005)
-    create_box("Headlight_R", (0.88, 0.11, 0.82), (0.08, 0.10, 0.04), m_headlight, bevel=0.005)
+    create_box("Headlight_L", (0.88, -0.10, 0.78), (0.08, 0.09, 0.035), m_headlight, bevel=0.005)
+    create_box("Headlight_R", (0.88, 0.10, 0.78), (0.08, 0.09, 0.035), m_headlight, bevel=0.005)
     # Clear Smoked Windshield tilted at sports rake
-    create_box("Windshield", (0.66, 0, 0.98), (0.24, 0.26, 0.18), m_windshield, bevel=0.01)
+    create_box("Windshield", (0.66, 0, 0.94), (0.24, 0.24, 0.16), m_windshield, bevel=0.01)
 
     # Aerodynamic Side Mirrors
-    create_cylinder_between("MirrorStem_L", (0.64, -0.14, 0.92), (0.62, -0.26, 0.98), 0.010, m_dark_metal)
-    create_cylinder_between("MirrorStem_R", (0.64, 0.14, 0.92), (0.62, 0.26, 0.98), 0.010, m_dark_metal)
-    create_box("MirrorHousing_L", (0.62, -0.28, 0.99), (0.04, 0.09, 0.05), m_body_blue, bevel=0.005)
-    create_box("MirrorHousing_R", (0.62, 0.28, 0.99), (0.04, 0.09, 0.05), m_body_blue, bevel=0.005)
+    create_cylinder_between("MirrorStem_L", (0.64, -0.12, 0.88), (0.62, -0.24, 0.94), 0.010, m_dark_metal)
+    create_cylinder_between("MirrorStem_R", (0.64, 0.12, 0.88), (0.62, 0.24, 0.94), 0.010, m_dark_metal)
+    create_box("MirrorHousing_L", (0.62, -0.26, 0.95), (0.04, 0.08, 0.04), m_body_blue, bevel=0.005)
+    create_box("MirrorHousing_R", (0.62, 0.26, 0.95), (0.04, 0.08, 0.04), m_body_blue, bevel=0.005)
 
     # Side Fairings with Air Duct Vents
-    create_box("FairingSide_L", (0.42, -0.18, 0.65), (0.52, 0.08, 0.38), m_body_blue, bevel=0.03)
-    create_box("FairingSide_R", (0.42, 0.18, 0.65), (0.52, 0.08, 0.38), m_body_blue, bevel=0.03)
+    create_box("FairingSide_L", (0.42, -0.17, 0.62), (0.50, 0.08, 0.34), m_body_blue, bevel=0.03)
+    create_box("FairingSide_R", (0.42, 0.17, 0.62), (0.50, 0.08, 0.34), m_body_blue, bevel=0.03)
     # Aerodynamic Side Winglets / Canards
-    create_box("Winglet_L", (0.54, -0.23, 0.72), (0.16, 0.06, 0.02), m_dark_metal, bevel=0.005)
-    create_box("Winglet_R", (0.54, 0.23, 0.72), (0.16, 0.06, 0.02), m_dark_metal, bevel=0.005)
+    create_box("Winglet_L", (0.52, -0.22, 0.68), (0.14, 0.06, 0.02), m_dark_metal, bevel=0.005)
+    create_box("Winglet_R", (0.52, 0.22, 0.68), (0.14, 0.06, 0.02), m_dark_metal, bevel=0.005)
 
     # Lower Belly Pan Cowl
-    create_box("BellyPan", (0.22, 0, 0.28), (0.64, 0.26, 0.14), m_body_blue, bevel=0.02)
+    create_box("BellyPan", (0.22, 0, 0.28), (0.60, 0.24, 0.12), m_body_blue, bevel=0.02)
 
     # Sculpted Fuel Tank with Knee Recesses
-    create_box("FuelTank", (0.24, 0, 0.82), (0.46, 0.34, 0.26), m_body_blue, bevel=0.05)
-    create_cylinder_between("FuelFillerCap", (0.32, 0, 0.95), (0.32, 0, 0.97), 0.042, m_chrome)
+    create_box("FuelTank", (0.22, 0, 0.78), (0.44, 0.32, 0.24), m_body_blue, bevel=0.05)
+    create_cylinder_between("FuelFillerCap", (0.30, 0, 0.91), (0.30, 0, 0.93), 0.038, m_chrome)
     # Black rubber knee grip pads on tank
-    create_box("TankPad_L", (0.22, -0.175, 0.80), (0.24, 0.015, 0.14), m_dark_metal)
-    create_box("TankPad_R", (0.22, 0.175, 0.80), (0.24, 0.015, 0.14), m_dark_metal)
+    create_box("TankPad_L", (0.20, -0.165, 0.76), (0.22, 0.015, 0.12), m_dark_metal)
+    create_box("TankPad_R", (0.20, 0.165, 0.76), (0.22, 0.015, 0.12), m_dark_metal)
 
     # Split Rider & Pillion Saddle
-    create_box("RiderSeat", (-0.08, 0, 0.73), (0.32, 0.26, 0.08), m_seat_leather, bevel=0.03)
-    create_box("PillionSeatCowl", (-0.36, 0, 0.82), (0.34, 0.22, 0.12), m_body_blue, bevel=0.04)
+    create_box("RiderSeat", (-0.08, 0, 0.70), (0.30, 0.24, 0.07), m_seat_leather, bevel=0.03)
+    create_box("PillionSeatCowl", (-0.34, 0, 0.78), (0.32, 0.20, 0.11), m_body_blue, bevel=0.04)
 
     # Upswept Rear Tail Cowl & License Plate Hanger
-    create_box("TailCowl", (-0.48, 0, 0.80), (0.38, 0.20, 0.14), m_body_blue, bevel=0.03)
-    create_box("TailLEDLight", (-0.66, 0, 0.84), (0.04, 0.14, 0.04), m_taillight, bevel=0.005)
-    create_box("LicensePlateHanger", (-0.72, 0, 0.68), (0.12, 0.16, 0.08), m_dark_metal)
+    create_box("TailCowl", (-0.46, 0, 0.76), (0.36, 0.18, 0.12), m_body_blue, bevel=0.03)
+    create_box("TailLEDLight", (-0.64, 0, 0.80), (0.04, 0.14, 0.04), m_taillight, bevel=0.005)
+    create_box("LicensePlateHanger", (-0.70, 0, 0.65), (0.12, 0.15, 0.07), m_dark_metal)
 
     # -------------------------------------------------------------
     # 4. FULL-BODIED RIDER IN SPORTS TUCK (EXACT MATCH TO PHOTO 1!)
     # -------------------------------------------------------------
     # Pelvis seated in the rider seat bucket
-    create_box("Rider_Pelvis", (-0.08, 0, 0.77), (0.24, 0.26, 0.16), m_jeans_dark, bevel=0.03)
+    create_box("Rider_Pelvis", (-0.07, 0, 0.74), (0.22, 0.24, 0.14), m_jeans_dark, bevel=0.03)
 
     # Torso leaning forward in aerodynamic sport tuck (~35 deg forward incline)
-    create_box("Rider_Torso", (0.14, 0, 0.94), (0.36, 0.32, 0.28), m_hoodie_orange, bevel=0.05)
+    create_box("Rider_Torso", (0.14, 0, 0.90), (0.34, 0.28, 0.24), m_hoodie_orange, bevel=0.04)
     # Orange Hood draped on upper back / collar
-    create_sphere("Rider_HoodDrape", (0.04, 0, 1.04), 0.11, (1.2, 1.1, 0.8), m_hoodie_orange)
-    create_box("Rider_HoodiePocket", (0.22, 0, 0.88), (0.12, 0.22, 0.10), m_hoodie_orange, bevel=0.02)
+    create_sphere("Rider_HoodDrape", (0.04, 0, 1.00), 0.095, (1.2, 1.1, 0.8), m_hoodie_orange)
+    create_box("Rider_HoodiePocket", (0.21, 0, 0.84), (0.10, 0.20, 0.08), m_hoodie_orange, bevel=0.02)
     
     # Neck connecting torso to helmet
-    create_cylinder_between("Rider_Neck", (0.28, 0, 1.04), (0.38, 0, 1.16), 0.058, m_skin, verts=10)
+    create_cylinder_between("Rider_Neck", (0.26, 0, 1.00), (0.36, 0, 1.12), 0.052, m_skin, verts=10)
 
     # Arms extending forward in low tuck to grip handlebars
     # Left Arm
-    create_cylinder_between("Rider_UpperArm_L", (0.24, -0.18, 1.02), (0.40, -0.24, 0.94), 0.054, m_hoodie_orange, verts=10)
-    create_cylinder_between("Rider_Forearm_L", (0.40, -0.24, 0.94), (0.52, -0.26, 0.87), 0.046, m_hoodie_orange, verts=10)
-    create_sphere("Rider_Glove_L", (0.52, -0.26, 0.86), 0.044, (1.2, 0.9, 0.9), m_dark_metal)
+    create_cylinder_between("Rider_UpperArm_L", (0.22, -0.15, 0.96), (0.36, -0.21, 0.88), 0.048, m_hoodie_orange, verts=10)
+    create_cylinder_between("Rider_Forearm_L", (0.36, -0.21, 0.88), (0.50, -0.21, 0.83), 0.040, m_hoodie_orange, verts=10)
+    create_sphere("Rider_Glove_L", (0.52, -0.21, 0.83), 0.038, (1.2, 0.9, 0.9), m_dark_metal)
 
     # Right Arm
-    create_cylinder_between("Rider_UpperArm_R", (0.24, 0.18, 1.02), (0.40, 0.24, 0.94), 0.054, m_hoodie_orange, verts=10)
-    create_cylinder_between("Rider_Forearm_R", (0.40, 0.24, 0.94), (0.52, 0.26, 0.87), 0.046, m_hoodie_orange, verts=10)
-    create_sphere("Rider_Glove_R", (0.52, 0.26, 0.86), 0.044, (1.2, 0.9, 0.9), m_dark_metal)
+    create_cylinder_between("Rider_UpperArm_R", (0.22, 0.15, 0.96), (0.36, 0.21, 0.88), 0.048, m_hoodie_orange, verts=10)
+    create_cylinder_between("Rider_Forearm_R", (0.36, 0.21, 0.88), (0.50, 0.21, 0.83), 0.040, m_hoodie_orange, verts=10)
+    create_sphere("Rider_Glove_R", (0.52, 0.21, 0.83), 0.038, (1.2, 0.9, 0.9), m_dark_metal)
 
     # Legs hugging fuel tank, knees bent back to rearset footpegs!
     # Left Leg
-    hip_l = (-0.05, -0.12, 0.76)
-    knee_l = (0.18, -0.22, 0.68)
-    ankle_l = (-0.14, -0.24, 0.44)
-    create_cylinder_between("Rider_Thigh_L", hip_l, knee_l, 0.072, m_jeans_dark, verts=12)
-    create_cylinder_between("Rider_Shin_L", knee_l, ankle_l, 0.058, m_jeans_dark, verts=10)
+    hip_l = (-0.05, -0.10, 0.73)
+    knee_l = (0.16, -0.17, 0.62)
+    ankle_l = (-0.10, -0.19, 0.44)
+    create_cylinder_between("Rider_Thigh_L", hip_l, knee_l, 0.065, m_jeans_dark, verts=12)
+    create_cylinder_between("Rider_Shin_L", knee_l, ankle_l, 0.052, m_jeans_dark, verts=10)
     # Skate sneaker with white sole & laces resting on left footpeg (matches photo 1!)
-    create_box("Rider_Sneaker_L", (-0.10, -0.24, 0.44), (0.18, 0.08, 0.07), m_sneaker_gray, bevel=0.015)
-    create_box("Rider_Sole_L", (-0.10, -0.24, 0.405), (0.19, 0.085, 0.02), m_sneaker_white)
+    create_box("Rider_Sneaker_L", (-0.10, -0.19, 0.44), (0.17, 0.08, 0.065), m_sneaker_gray, bevel=0.015)
+    create_box("Rider_Sole_L", (-0.10, -0.19, 0.405), (0.18, 0.085, 0.02), m_sneaker_white)
 
     # Right Leg
-    hip_r = (-0.05, 0.12, 0.76)
-    knee_r = (0.18, 0.22, 0.68)
-    ankle_r = (-0.14, 0.24, 0.44)
-    create_cylinder_between("Rider_Thigh_R", hip_r, knee_r, 0.072, m_jeans_dark, verts=12)
-    create_cylinder_between("Rider_Shin_R", knee_r, ankle_r, 0.058, m_jeans_dark, verts=10)
+    hip_r = (-0.05, 0.10, 0.73)
+    knee_r = (0.16, 0.17, 0.62)
+    ankle_r = (-0.10, 0.19, 0.44)
+    create_cylinder_between("Rider_Thigh_R", hip_r, knee_r, 0.065, m_jeans_dark, verts=12)
+    create_cylinder_between("Rider_Shin_R", knee_r, ankle_r, 0.052, m_jeans_dark, verts=10)
     # Skate sneaker on right footpeg
-    create_box("Rider_Sneaker_R", (-0.10, 0.24, 0.44), (0.18, 0.08, 0.07), m_sneaker_gray, bevel=0.015)
-    create_box("Rider_Sole_R", (-0.10, 0.24, 0.405), (0.19, 0.085, 0.02), m_sneaker_white)
+    create_box("Rider_Sneaker_R", (-0.10, 0.19, 0.44), (0.17, 0.08, 0.065), m_sneaker_gray, bevel=0.015)
+    create_box("Rider_Sole_R", (-0.10, 0.19, 0.405), (0.18, 0.085, 0.02), m_sneaker_white)
 
     # -------------------------------------------------------------
     # 5. AERODYNAMIC FULL-FACE HELMET WITH SLEEK TINTED VISOR & FACE
     # -------------------------------------------------------------
     # Center of helmet resting on neck
-    hx, hy, hz = 0.40, 0.0, 1.24
+    hx, hy, hz = 0.38, 0.0, 1.20
 
     # Internal Head Structure with Face & Sunglasses (visible through tinted visor)
-    create_sphere("Rider_FaceCranium", (hx + 0.01, hy, hz - 0.01), 0.12, (1.0, 0.85, 1.05), m_skin, segs=12, rings=8)
-    create_cylinder_between("Rider_Nose", (hx + 0.10, hy, hz + 0.01), (hx + 0.13, hy, hz - 0.02), 0.012, m_skin, verts=6)
-    create_box("Rider_Mouth", (hx + 0.11, hy, hz - 0.045), (0.015, 0.04, 0.01), m_skin, bevel=0.002)
+    create_sphere("Rider_FaceCranium", (hx + 0.01, hy, hz - 0.01), 0.10, (1.0, 0.85, 1.05), m_skin, segs=12, rings=8)
+    create_cylinder_between("Rider_Nose", (hx + 0.09, hy, hz + 0.01), (hx + 0.12, hy, hz - 0.02), 0.010, m_skin, verts=6)
+    create_box("Rider_Mouth", (hx + 0.10, hy, hz - 0.04), (0.015, 0.035, 0.01), m_skin, bevel=0.002)
     # Cool dark sunglasses inside visor
-    create_box("Rider_GlassesFrame", (hx + 0.105, hy, hz + 0.02), (0.02, 0.11, 0.022), m_sunglasses, bevel=0.003)
-    create_box("Rider_Lens_L", (hx + 0.115, hy - 0.035, hz + 0.02), (0.015, 0.038, 0.02), m_sunglasses, bevel=0.002)
-    create_box("Rider_Lens_R", (hx + 0.115, hy + 0.035, hz + 0.02), (0.015, 0.038, 0.02), m_sunglasses, bevel=0.002)
+    create_box("Rider_GlassesFrame", (hx + 0.095, hy, hz + 0.018), (0.018, 0.10, 0.02), m_sunglasses, bevel=0.003)
+    create_box("Rider_Lens_L", (hx + 0.105, hy - 0.032, hz + 0.018), (0.012, 0.034, 0.018), m_sunglasses, bevel=0.002)
+    create_box("Rider_Lens_R", (hx + 0.105, hy + 0.032, hz + 0.018), (0.012, 0.034, 0.018), m_sunglasses, bevel=0.002)
 
-    # 100% Full-Coverage Aerodynamic Blue Helmet Shell
-    # Main Cranium Shell (covers top, crown, sides, and full back)
-    create_sphere("HelmetShell", (hx, hy, hz + 0.01), 0.165, (1.12, 0.98, 1.10), m_helmet_shell, segs=28, rings=20)
+    # 100% Full-Coverage Aerodynamic Blue Helmet Shell (proportional racing helmet)
+    create_sphere("HelmetShell", (hx, hy, hz + 0.01), 0.135, (1.12, 0.95, 1.05), m_helmet_shell, segs=28, rings=20)
     
     # Back Neck Collar Guard (ensures 100% full coverage at the back so NO skin/hair shows from behind!)
-    create_cylinder_between("HelmetBackCollar", (hx - 0.11, hy, hz + 0.03), (hx - 0.08, hy, hz - 0.11), 0.145, m_helmet_shell, verts=18, radius2=0.155)
+    create_cylinder_between("HelmetBackCollar", (hx - 0.09, hy, hz + 0.02), (hx - 0.07, hy, hz - 0.09), 0.120, m_helmet_shell, verts=18, radius2=0.130)
 
     # Sharp Aerodynamic Chin Bar (covers jaw, mouth, and chin in front)
-    create_box("HelmetChinBar", (hx + 0.11, hy, hz - 0.065), (0.14, 0.19, 0.09), m_helmet_shell, bevel=0.025)
+    create_box("HelmetChinBar", (hx + 0.09, hy, hz - 0.055), (0.12, 0.16, 0.075), m_helmet_shell, bevel=0.02)
     # Front Air Intake Vent Grille on Chin Bar
-    create_box("HelmetChinVent", (hx + 0.185, hy, hz - 0.065), (0.02, 0.08, 0.035), m_dark_metal, bevel=0.005)
+    create_box("HelmetChinVent", (hx + 0.155, hy, hz - 0.055), (0.018, 0.07, 0.03), m_dark_metal, bevel=0.005)
 
     # Aerodynamic Brow Ridge above eye port
-    create_box("HelmetBrowRidge", (hx + 0.11, hy, hz + 0.09), (0.11, 0.18, 0.04), m_helmet_shell, bevel=0.015)
+    create_box("HelmetBrowRidge", (hx + 0.09, hy, hz + 0.075), (0.09, 0.15, 0.035), m_helmet_shell, bevel=0.015)
 
     # Aerodynamic Rear Ducktail Spoiler / Diffuser
-    create_box("HelmetRearSpoiler", (hx - 0.15, hy, hz + 0.04), (0.07, 0.16, 0.035), m_helmet_shell, bevel=0.01)
+    create_box("HelmetRearSpoiler", (hx - 0.12, hy, hz + 0.035), (0.06, 0.14, 0.03), m_helmet_shell, bevel=0.01)
 
     # White Graphic Racing Stripes on Crown (matches user reference image 1!)
-    create_cylinder_between("HelmetStripe_L", (hx - 0.17, hy - 0.05, hz + 0.10), (hx + 0.12, hy - 0.05, hz + 0.13), 0.013, m_helmet_stripe)
-    create_cylinder_between("HelmetStripe_R", (hx - 0.17, hy + 0.05, hz + 0.10), (hx + 0.12, hy + 0.05, hz + 0.13), 0.013, m_helmet_stripe)
-    create_cylinder_between("HelmetStripe_Top", (hx - 0.16, hy, hz + 0.17), (hx + 0.08, hy, hz + 0.175), 0.018, m_helmet_stripe)
+    create_cylinder_between("HelmetStripe_L", (hx - 0.14, hy - 0.045, hz + 0.08), (hx + 0.10, hy - 0.045, hz + 0.105), 0.011, m_helmet_stripe)
+    create_cylinder_between("HelmetStripe_R", (hx - 0.14, hy + 0.045, hz + 0.08), (hx + 0.10, hy + 0.045, hz + 0.105), 0.011, m_helmet_stripe)
+    create_cylinder_between("HelmetStripe_Top", (hx - 0.13, hy, hz + 0.142), (hx + 0.07, hy, hz + 0.145), 0.015, m_helmet_stripe)
 
     # Eye Port Black Rubber Trim / Gasket
-    create_box("HelmetEyeGasketUpper", (hx + 0.13, hy, hz + 0.075), (0.05, 0.20, 0.015), m_helmet_trim, bevel=0.003)
-    create_box("HelmetEyeGasketLower", (hx + 0.14, hy, hz - 0.018), (0.05, 0.20, 0.015), m_helmet_trim, bevel=0.003)
+    create_box("HelmetEyeGasketUpper", (hx + 0.105, hy, hz + 0.06), (0.04, 0.17, 0.012), m_helmet_trim, bevel=0.003)
+    create_box("HelmetEyeGasketLower", (hx + 0.115, hy, hz - 0.015), (0.04, 0.17, 0.012), m_helmet_trim, bevel=0.003)
 
     # PROMINENT SLEEK TINTED VISOR (Projects forward from eye aperture, highly reflective panoramic curve)
-    create_sphere("HelmetVisor", (hx + 0.09, hy, hz + 0.025), 0.145, (0.85, 1.05, 0.65), m_helmet_visor, segs=24, rings=16)
+    create_sphere("HelmetVisor", (hx + 0.075, hy, hz + 0.02), 0.125, (0.85, 1.05, 0.65), m_helmet_visor, segs=24, rings=16)
     
     # Visor Side Pivot Hinge Caps
-    create_sphere("VisorPivot_L", (hx + 0.02, hy - 0.162, hz + 0.025), 0.025, (0.5, 1.0, 1.0), m_dark_metal)
-    create_sphere("VisorPivot_R", (hx + 0.02, hy + 0.162, hz + 0.025), 0.025, (0.5, 1.0, 1.0), m_dark_metal)
+    create_sphere("VisorPivot_L", (hx + 0.015, hy - 0.132, hz + 0.02), 0.022, (0.5, 1.0, 1.0), m_dark_metal)
+    create_sphere("VisorPivot_R", (hx + 0.015, hy + 0.132, hz + 0.02), 0.022, (0.5, 1.0, 1.0), m_dark_metal)
 
     # -------------------------------------------------------------
     # 6. EXPORT TO GLTF/GLB
