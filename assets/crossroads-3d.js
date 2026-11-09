@@ -4059,11 +4059,29 @@
   let busPrototypeModel = null;
 
   function loadBusModel() {
-    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-gtareal2');
+    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-gta3');
   }
 
+  const carModelFiles = [
+    'assets/models/car-sedan.glb?v=20261109-1',
+    'assets/models/car-muscle.glb?v=20261109-1',
+    'assets/models/car-delorean.glb?v=20261109-1',
+    'assets/models/car-hypercar.glb?v=20261109-1'
+  ];
+
   function loadCarModel() {
-    return loadGLBModel('assets/models/private-car.glb');
+    return loadGLBModel('assets/models/private-car.glb?v=20261109-1');
+  }
+
+  function loadAllCarModels() {
+    return Promise.all(
+      carModelFiles.map(file =>
+        loadGLBModel(file).catch(err => {
+          console.warn('Failed loading ' + file + ', using fallback:', err);
+          return loadCarModel();
+        })
+      )
+    );
   }
 
   function loadMetroModel() {
@@ -4291,8 +4309,12 @@
 
     const wheels = [];
     model.traverse(node => {
-      const name = node.name.toLowerCase();
-      if (name.startsWith('wheel_')) wheels.push(node);
+      const name = (node.name || '').toLowerCase();
+      if (name === 'wheel_fl' || name === 'wheel_fr' || name === 'wheel_rl' || name === 'wheel_rr') {
+        wheels.push(node);
+      } else if (name.startsWith('wheel_') && !name.includes('tire') && !name.includes('lip') && !name.includes('spoke') && !name.includes('fin') && !name.includes('blade') && !name.includes('barrel') && !name.includes('hub') && !name.includes('accentring') && !name.includes('brakedisc') && !name.includes('caliper')) {
+        wheels.push(node);
+      }
       if (node.isMesh && node.material) {
         const matName = (node.material.name || '').toLowerCase();
         if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
@@ -5099,10 +5121,13 @@
       });
     }).catch(err => console.warn('Bus GLB fallback:', err));
 
-    loadCarModel().then(prototype => {
+    loadAllCarModels().then(carPrototypes => {
+      let carCounter = 0;
       Object.values(vehicleMeshMap).forEach(vehicle => {
         if (vehicle.data && vehicle.data.type === 'car') {
-          replaceCarWithModel(vehicle.mesh, prototype);
+          const proto = carPrototypes[carCounter % carPrototypes.length];
+          carCounter++;
+          replaceCarWithModel(vehicle.mesh, proto);
         }
       });
     }).catch(err => console.warn('Car GLB fallback:', err));
@@ -5975,11 +6000,7 @@
         const rollAngle = Math.abs(forwardDelta) < 100 ? forwardDelta / wheelRadius : 0;
         const forwardRoll = (Math.abs(roadDelta) < 100 && Math.abs(roadDelta) > 0) ? (Math.abs(roadDelta) / wheelRadius) : 0;
         vm.mesh.userData.wheels.forEach(w => {
-          if (w.name && w.name.startsWith('Wheel_')) {
-            w.rotation.z -= forwardRoll;
-          } else {
-            w.rotation.z += rollAngle;
-          }
+          w.rotation.z -= forwardRoll;
         });
         if (vm.mesh.userData.pedalCrank) {
           vm.mesh.userData.pedalCrank.rotation.z -= Math.abs(rollAngle) * 0.72;

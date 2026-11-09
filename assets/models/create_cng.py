@@ -101,7 +101,9 @@ def create_cylinder_between(name, p1, p2, radius, mat, verts=12, radius2=None):
     return obj
 
 def create_cng_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
-    parts = []
+    pivot = bpy.data.objects.new(name, None)
+    pivot.location = center
+    bpy.context.collection.objects.link(pivot)
     
     # Outer rubber tire
     bpy.ops.mesh.primitive_torus_add(
@@ -109,31 +111,23 @@ def create_cng_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
         minor_radius=0.045,
         major_segments=32,
         minor_segments=8,
-        location=center,
+        location=(0, 0, 0),
         rotation=(math.pi / 2, 0, 0)
     )
     tire = assign_material(bpy.context.object, tire_mat)
     smooth_mesh(tire)
-    parts.append(tire)
+    tire.name = f"{name}_tire"
+    tire.parent = pivot
     
     # Pressed steel rim
-    rim = create_cylinder_between(f"{name}_rim", (center[0], center[1] - width * 0.45, center[2]), (center[0], center[1] + width * 0.45, center[2]), radius * 0.65, rim_mat, verts=16)
-    parts.append(rim)
+    rim = create_cylinder_between(f"{name}_rim", (0, -width * 0.45, 0), (0, width * 0.45, 0), radius * 0.65, rim_mat, verts=16)
+    rim.parent = pivot
     
     # Center chrome axle hub
-    hub = create_cylinder_between(f"{name}_hub", (center[0], center[1] - width * 0.6, center[2]), (center[0], center[1] + width * 0.6, center[2]), 0.05, hub_mat, verts=10)
-    parts.append(hub)
+    hub = create_cylinder_between(f"{name}_hub", (0, -width * 0.6, 0), (0, width * 0.6, 0), 0.05, hub_mat, verts=10)
+    hub.parent = pivot
     
-    bpy.ops.object.select_all(action='DESELECT')
-    for p in parts:
-        p.select_set(True)
-    bpy.context.view_layer.objects.active = tire
-    bpy.ops.object.join()
-    wheel = bpy.context.object
-    wheel.name = name
-    bpy.context.scene.cursor.location = center
-    bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-    return wheel
+    return pivot
 
 def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None):
     x, y, z = center
