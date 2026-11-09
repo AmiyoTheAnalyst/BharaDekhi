@@ -344,12 +344,6 @@ repo_root = os.path.dirname(os.path.abspath(__file__))
 export_target = os.path.join(repo_root, "assets", "models", "dhaka-bus.glb")
 os.makedirs(os.path.dirname(export_target), exist_ok=True)
 
-# Also ensure public/models exists and write there as requested in prompt
-public_models_dir = os.path.join(repo_root, "public", "models")
-os.makedirs(public_models_dir, exist_ok=True)
-public_target = os.path.join(public_models_dir, "dhaka-bus.glb")
-root_target = os.path.join(repo_root, "dhaka-bus.glb")
-
 bpy.ops.export_scene.gltf(
     filepath=export_target,
     export_format='GLB',
@@ -358,8 +352,4 @@ bpy.ops.export_scene.gltf(
     export_apply=True
 )
 
-shutil.copy2(export_target, public_target)
-shutil.copy2(export_target, root_target)
-
 print(f"SUCCESS: Exported GTA V Transit Bus to {export_target}")
-print(f"SUCCESS: Synchronized to {public_target} and {root_target}")
