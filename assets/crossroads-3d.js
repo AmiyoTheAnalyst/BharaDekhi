@@ -2246,6 +2246,10 @@
     }
 
     if (type === 'bus') {
+      if (busPrototypeModel) {
+        replaceBusWithModel(group, busPrototypeModel);
+        return group;
+      }
       const length = 76;
       const width = 22;
       const height = 23;
@@ -4052,8 +4056,10 @@
     return loadGLBModel('assets/models/cng-autorickshaw.glb');
   }
 
+  let busPrototypeModel = null;
+
   function loadBusModel() {
-    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-vip3');
+    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-gta5');
   }
 
   function loadCarModel() {
@@ -4212,13 +4218,26 @@
   function replaceBusWithModel(vehicle, prototype) {
     vehicle.scale.set(1, 1, 1);
     const model = prototype.clone(true);
-    const bounds = new THREE.Box3().setFromObject(model);
+
+    // Auto-orient model along canonical +X heading
+    const initialBounds = new THREE.Box3().setFromObject(model);
+    const initDim = initialBounds.getSize(new THREE.Vector3());
+    if (initDim.z > initDim.x) {
+      // In Blender, front is -Y (which maps to +Z in GLTF export_yup=True) and rear is +Y.
+      // Rotating by Math.PI / 2 around Y turns +Z to +X (canonical forward motion).
+      model.rotation.y = Math.PI / 2;
+    }
+
+    const orienter = new THREE.Group();
+    orienter.add(model);
+
+    const bounds = new THREE.Box3().setFromObject(orienter);
     const dimensions = bounds.getSize(new THREE.Vector3());
     if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) return;
 
     const scale = 76 / dimensions.x;
-    model.scale.setScalar(scale);
-    model.position.set(
+    orienter.scale.setScalar(scale);
+    orienter.position.set(
       -(bounds.min.x + bounds.max.x) * scale / 2,
       -bounds.min.y * scale,
       -(bounds.min.z + bounds.max.z) * scale / 2
@@ -4226,14 +4245,18 @@
 
     const wheels = [];
     model.traverse(node => {
-      const name = node.name.toLowerCase();
-      if (name.startsWith('wheel_')) wheels.push(node);
+      const name = (node.name || '').toLowerCase();
+      if (name === 'wheel_fl' || name === 'wheel_fr' || name === 'wheel_rl' || name === 'wheel_rr') {
+        wheels.push(node);
+      } else if (name.startsWith('wheel_') && !name.includes('tire') && !name.includes('rim') && !name.includes('hub') && !name.includes('vent') && !name.includes('arch')) {
+        wheels.push(node);
+      }
       if (node.isMesh && node.material) {
         const matName = (node.material.name || '').toLowerCase();
         if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
           node.material = node.material.clone();
           node.material.transparent = true;
-          node.material.opacity = 0.65;
+          node.material.opacity = 0.55;
           node.material.roughness = 0.08;
           node.material.metalness = 0.15;
           node.material.depthWrite = false;
@@ -4246,9 +4269,9 @@
     });
 
     while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
-    vehicle.add(model);
+    vehicle.add(orienter);
     vehicle.userData.wheels = wheels;
-    vehicle.userData.wheelRadius = 3.4;
+    vehicle.userData.wheelRadius = 3.3;
   }
 
   function replaceCarWithModel(vehicle, prototype) {
@@ -5068,6 +5091,7 @@
     }).catch(err => console.warn('CNG GLB fallback:', err));
 
     loadBusModel().then(prototype => {
+      busPrototypeModel = prototype;
       Object.values(vehicleMeshMap).forEach(vehicle => {
         if (vehicle.data && vehicle.data.type === 'bus') {
           replaceBusWithModel(vehicle.mesh, prototype);
@@ -5950,7 +5974,11 @@
         const wheelRadius = vm.mesh.userData.wheelRadius || 3;
         const rollAngle = Math.abs(forwardDelta) < 100 ? forwardDelta / wheelRadius : 0;
         vm.mesh.userData.wheels.forEach(w => {
-          w.rotation.z += rollAngle;
+          if (w.name && w.name.startsWith('Wheel_')) {
+            w.rotation.x += rollAngle;
+          } else {
+            w.rotation.z += rollAngle;
+          }
         });
         if (vm.mesh.userData.pedalCrank) {
           vm.mesh.userData.pedalCrank.rotation.z -= Math.abs(rollAngle) * 0.72;
