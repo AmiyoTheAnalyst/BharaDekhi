@@ -266,10 +266,10 @@ def build():
     # -------------------------------------------------------------
     seat_xs = [2.2, 1.1, 0.0, -1.1, -2.2, -3.3]
     for row_i, sx in enumerate(seat_xs):
-        create_box(f"SeatCushion_L_{row_i}", (sx, -0.72, 1.05), (0.48, 0.75, 0.14), m_seat_fabric, bevel=0.02)
-        create_box(f"SeatBack_L_{row_i}", (sx - 0.20, -0.72, 1.42), (0.10, 0.75, 0.58), m_seat_fabric, bevel=0.02)
-        create_box(f"SeatCushion_R_{row_i}", (sx, 0.72, 1.05), (0.48, 0.75, 0.14), m_seat_fabric, bevel=0.02)
-        create_box(f"SeatBack_R_{row_i}", (sx - 0.20, 0.72, 1.42), (0.10, 0.75, 0.58), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatCushion_L_{row_i}", (sx, -0.72, 1.40), (0.48, 0.75, 0.14), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatBack_L_{row_i}", (sx - 0.20, -0.72, 1.75), (0.10, 0.75, 0.56), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatCushion_R_{row_i}", (sx, 0.72, 1.40), (0.48, 0.75, 0.14), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatBack_R_{row_i}", (sx - 0.20, 0.72, 1.75), (0.10, 0.75, 0.56), m_seat_fabric, bevel=0.02)
 
     # Overhead grab rails
     create_cylinder_between("OverheadRail_L", (3.2, -0.35, 2.45), (-3.6, -0.35, 2.45), 0.02, m_chrome)
@@ -278,7 +278,7 @@ def build():
     # -------------------------------------------------------------
     # 4. FULL-BODIED DRIVER (SEATED WITH STEERING WHEEL & 3D FACE)
     # -------------------------------------------------------------
-    dx, dy, dz = 3.25, -0.65, 0.70
+    dx, dy, dz = 3.25, -0.65, 1.05
 
     # Driver seat
     create_box("DriverSeat", (dx, dy, dz + 0.35), (0.48, 0.48, 0.14), m_seat_fabric, bevel=0.02)
@@ -297,25 +297,25 @@ def build():
 
     # Driver Body
     create_box("Driver_Pelvis", (dx, dy, dz + 0.45), (0.24, 0.30, 0.16), m_pants_dark, bevel=0.02)
-    create_box("Driver_Torso", (dx + 0.02, dy, dz + 0.74), (0.26, 0.36, 0.38), m_shirt_blue, bevel=0.04)
-    create_cylinder_between("Driver_Neck", (dx + 0.05, dy, dz + 0.94), (dx + 0.08, dy, dz + 1.06), 0.052, m_skin_d, verts=10)
-    build_head_and_face("BusDriver", (dx + 0.10, dy, dz + 1.18), m_skin_d, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair)
+    create_box("Driver_Torso", (dx + 0.02, dy, dz + 0.72), (0.26, 0.36, 0.36), m_shirt_blue, bevel=0.04)
+    create_cylinder_between("Driver_Neck", (dx + 0.04, dy, dz + 0.90), (dx + 0.06, dy, dz + 1.00), 0.052, m_skin_d, verts=10)
+    build_head_and_face("BusDriver", (dx + 0.08, dy, dz + 1.12), m_skin_d, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair)
 
     # Driver Arms gripping steering wheel
-    create_cylinder_between("Driver_Arm_L", (dx + 0.05, dy - 0.16, dz + 0.88), (dx + 0.28, dy - 0.18, dz + 0.82), 0.05, m_shirt_blue, verts=10)
-    create_cylinder_between("Driver_Forearm_L", (dx + 0.28, dy - 0.18, dz + 0.82), (dx + 0.40, dy - 0.14, dz + 0.84), 0.042, m_skin_d, verts=10)
-    create_sphere("Driver_Hand_L", (dx + 0.41, dy - 0.13, dz + 0.84), 0.044, (1.2, 0.9, 0.9), m_skin_d)
+    create_cylinder_between("Driver_Arm_L", (dx + 0.04, dy - 0.16, dz + 0.85), (dx + 0.26, dy - 0.18, dz + 0.80), 0.05, m_shirt_blue, verts=10)
+    create_cylinder_between("Driver_Forearm_L", (dx + 0.26, dy - 0.18, dz + 0.80), (dx + 0.40, dy - 0.14, dz + 0.82), 0.042, m_skin_d, verts=10)
+    create_sphere("Driver_Hand_L", (dx + 0.41, dy - 0.13, dz + 0.82), 0.044, (1.2, 0.9, 0.9), m_skin_d)
     
-    create_cylinder_between("Driver_Arm_R", (dx + 0.05, dy + 0.16, dz + 0.88), (dx + 0.28, dy + 0.18, dz + 0.82), 0.05, m_shirt_blue, verts=10)
-    create_cylinder_between("Driver_Forearm_R", (dx + 0.28, dy + 0.18, dz + 0.82), (dx + 0.40, dy + 0.14, dz + 0.84), 0.042, m_skin_d, verts=10)
-    create_sphere("Driver_Hand_R", (dx + 0.41, dy + 0.13, dz + 0.84), 0.044, (1.2, 0.9, 0.9), m_skin_d)
+    create_cylinder_between("Driver_Arm_R", (dx + 0.04, dy + 0.16, dz + 0.85), (dx + 0.26, dy + 0.18, dz + 0.80), 0.05, m_shirt_blue, verts=10)
+    create_cylinder_between("Driver_Forearm_R", (dx + 0.26, dy + 0.18, dz + 0.80), (dx + 0.40, dy + 0.14, dz + 0.82), 0.042, m_skin_d, verts=10)
+    create_sphere("Driver_Hand_R", (dx + 0.41, dy + 0.13, dz + 0.82), 0.044, (1.2, 0.9, 0.9), m_skin_d)
 
     # Driver Legs
     for side, sign in [("L", -1), ("R", 1)]:
         ly = dy + sign * 0.11
         create_cylinder_between(f"Driver_Thigh_{side}", (dx + 0.02, ly, dz + 0.45), (dx + 0.34, ly, dz + 0.45), 0.065, m_pants_dark, verts=12)
-        create_cylinder_between(f"Driver_Shin_{side}", (dx + 0.34, ly, dz + 0.45), (dx + 0.34, ly, dz + 0.10), 0.055, m_pants_dark, verts=10)
-        create_box(f"Driver_Foot_{side}", (dx + 0.39, ly, dz + 0.08), (0.16, 0.08, 0.04), m_bumper_dark, bevel=0.01)
+        create_cylinder_between(f"Driver_Shin_{side}", (dx + 0.34, ly, dz + 0.45), (dx + 0.34, ly, dz + 0.05), 0.055, m_pants_dark, verts=10)
+        create_box(f"Driver_Foot_{side}", (dx + 0.39, ly, dz + 0.04), (0.16, 0.08, 0.04), m_bumper_dark, bevel=0.01)
 
     # -------------------------------------------------------------
     # 5. 6 FULL-BODIED PASSENGERS (VISIBLE THROUGH PANORAMIC GLASS!)
@@ -330,8 +330,8 @@ def build():
     ]
 
     for pi, (px, py, p_shirt, p_skin, p_fem) in enumerate(pass_configs):
-        pz = 1.05
-        # Pelvis & Torso
+        pz = 1.40
+        # Pelvis & Torso (Raised above window line so clearly visible!)
         create_box(f"P_Pelvis_{pi}", (px, py, pz + 0.10), (0.24, 0.28, 0.14), m_pants_dark, bevel=0.02)
         create_box(f"P_Torso_{pi}", (px - 0.02, py, pz + 0.36), (0.24, 0.34, 0.36), p_shirt, bevel=0.04)
         create_cylinder_between(f"P_Neck_{pi}", (px, py, pz + 0.54), (px + 0.02, py, pz + 0.65), 0.048, p_skin, verts=10)
@@ -350,8 +350,8 @@ def build():
         for side, sign in [("L", -1), ("R", 1)]:
             ply = py + sign * 0.09
             create_cylinder_between(f"P_Thigh_{pi}_{side}", (px + 0.02, ply, pz + 0.10), (px + 0.30, ply, pz + 0.10), 0.06, m_pants_dark, verts=12)
-            create_cylinder_between(f"P_Shin_{pi}_{side}", (px + 0.30, ply, pz + 0.10), (px + 0.30, ply, pz - 0.35), 0.052, m_pants_dark, verts=10)
-            create_box(f"P_Foot_{pi}_{side}", (px + 0.35, ply, pz - 0.37), (0.15, 0.075, 0.038), m_bumper_dark, bevel=0.01)
+            create_cylinder_between(f"P_Shin_{pi}_{side}", (px + 0.30, ply, pz + 0.10), (px + 0.30, ply, pz - 0.45), 0.052, m_pants_dark, verts=10)
+            create_box(f"P_Foot_{pi}_{side}", (px + 0.35, ply, pz - 0.47), (0.15, 0.075, 0.038), m_bumper_dark, bevel=0.01)
 
     # -------------------------------------------------------------
     # 6. EXPORT TO GLTF/GLB

@@ -274,45 +274,20 @@ def build():
     # -------------------------------------------------------------
     # 3. AERODYNAMIC FAIRINGS & SCULPTED BODYWORK
     # -------------------------------------------------------------
-    # Aerodynamic Front Cowl (Angled Nose wedge)
-    create_wedge_mesh(
-        "FrontNoseWedge",
-        Vector((0.92, 0.0, 0.74)),       # Front sharp nose tip
-        Vector((0.65, -0.19, 0.88)),      # Upper left cowl
-        Vector((0.65, 0.19, 0.88)),       # Upper right cowl
-        Vector((0.85, 0.0, 0.60)),       # Lower front beak
-        Vector((0.65, -0.17, 0.64)),      # Lower left cowl
-        Vector((0.65, 0.17, 0.64)),       # Lower right cowl
-        m_body_blue
-    )
+    # Aerodynamic Front Nose Fairing
+    create_box("FrontNoseCowl", (0.75, 0, 0.74), (0.30, 0.32, 0.18), m_body_blue, bevel=0.04)
     # Slit-eyed aggressive LED headlights
-    create_box("Headlight_L", (0.80, -0.09, 0.76), (0.06, 0.08, 0.028), m_headlight, bevel=0.005)
-    create_box("Headlight_R", (0.80, 0.09, 0.76), (0.06, 0.08, 0.028), m_headlight, bevel=0.005)
+    create_box("Headlight_L", (0.86, -0.09, 0.74), (0.05, 0.08, 0.028), m_headlight, bevel=0.005)
+    create_box("Headlight_R", (0.86, 0.09, 0.74), (0.05, 0.08, 0.028), m_headlight, bevel=0.005)
     
     # Curved Transparent Smoked Windshield
-    create_cylinder_between("WindshieldRake", (0.58, 0, 0.86), (0.76, 0, 0.98), 0.15, m_windshield, verts=14)
+    create_cylinder_between("WindshieldRake", (0.58, 0, 0.82), (0.74, 0, 0.94), 0.14, m_windshield, verts=14)
 
-    # Side Fairings with Air Extractors
-    create_wedge_mesh(
-        "SideFairing_L",
-        Vector((0.65, -0.19, 0.88)),
-        Vector((0.15, -0.22, 0.76)),
-        Vector((0.15, -0.20, 0.46)),
-        Vector((0.65, -0.17, 0.64)),
-        Vector((0.15, -0.22, 0.76)),
-        Vector((0.15, -0.20, 0.46)),
-        m_body_blue
-    )
-    create_wedge_mesh(
-        "SideFairing_R",
-        Vector((0.65, 0.19, 0.88)),
-        Vector((0.15, 0.22, 0.76)),
-        Vector((0.15, 0.20, 0.46)),
-        Vector((0.65, 0.17, 0.64)),
-        Vector((0.15, 0.22, 0.76)),
-        Vector((0.15, 0.20, 0.46)),
-        m_body_blue
-    )
+    # Sleek Side Fairings Hugging Frame & Engine
+    create_box("FairingSide_L", (0.42, -0.155, 0.64), (0.48, 0.05, 0.30), m_body_blue, bevel=0.02)
+    create_box("FairingSide_R", (0.42, 0.155, 0.64), (0.48, 0.05, 0.30), m_body_blue, bevel=0.02)
+    # Lower Belly Pan Cowl
+    create_box("BellyPan", (0.22, 0, 0.30), (0.58, 0.22, 0.12), m_body_blue, bevel=0.02)
 
     # Sculpted Fuel Tank with Knee Recesses
     create_box("FuelTank", (0.22, 0, 0.78), (0.44, 0.32, 0.24), m_body_blue, bevel=0.05)
@@ -344,13 +319,14 @@ def build():
     # Pelvis in seat
     create_box("Rider_Pelvis", (-0.07, 0, 0.74), (0.22, 0.24, 0.14), m_jeans_dark, bevel=0.03)
 
-    # Torso leaning forward in aerodynamic sport tuck (~35 deg forward incline)
+    # Torso leaning forward in aerodynamic sport tuck
     create_box("Rider_Torso", (0.14, 0, 0.90), (0.34, 0.28, 0.24), m_hoodie_orange, bevel=0.04)
     create_sphere("Rider_HoodDrape", (0.04, 0, 1.00), 0.095, (1.2, 1.1, 0.8), m_hoodie_orange)
     create_box("Rider_HoodiePocket", (0.21, 0, 0.84), (0.10, 0.20, 0.08), m_hoodie_orange, bevel=0.02)
     
-    # Neck
-    create_cylinder_between("Rider_Neck", (0.26, 0, 1.00), (0.36, 0, 1.12), 0.052, m_skin, verts=10)
+    # Orange hoodie collar wraps directly around base of neck to helmet
+    create_cylinder_between("HoodieCollar", (0.24, 0, 0.98), (0.32, 0, 1.08), 0.095, m_hoodie_orange, verts=14)
+    create_cylinder_between("Rider_Neck", (0.30, 0, 1.06), (0.34, 0, 1.13), 0.052, m_skin, verts=10)
 
     # Arms extending forward in low tuck to grip handlebars
     create_cylinder_between("Rider_UpperArm_L", (0.22, -0.15, 0.96), (0.36, -0.21, 0.88), 0.048, m_hoodie_orange, verts=10)
@@ -379,41 +355,36 @@ def build():
     create_box("Rider_Sole_R", (-0.10, 0.19, 0.405), (0.18, 0.085, 0.02), m_sneaker_white)
 
     # -------------------------------------------------------------
-    # 5. AERODYNAMIC FULL-FACE HELMET WITH PANORAMIC VISOR & SUNGLASSES
+    # 5. AERODYNAMIC FULL-FACE RACING HELMET (PHOTO 1 AUTHENTICITY!)
     # -------------------------------------------------------------
-    hx, hy, hz = 0.38, 0.0, 1.20
+    hx, hy, hz = 0.35, 0.0, 1.16
 
     # Face inside helmet with stylish dark sunglasses
-    create_sphere("Rider_FaceCranium", (hx + 0.01, hy, hz - 0.01), 0.10, (1.0, 0.85, 1.05), m_skin, segs=12, rings=8)
-    create_box("Rider_GlassesFrame", (hx + 0.095, hy, hz + 0.018), (0.018, 0.10, 0.02), m_sunglasses, bevel=0.003)
-    create_box("Rider_Lens_L", (hx + 0.105, hy - 0.032, hz + 0.018), (0.012, 0.034, 0.018), m_sunglasses, bevel=0.002)
-    create_box("Rider_Lens_R", (hx + 0.105, hy + 0.032, hz + 0.018), (0.012, 0.034, 0.018), m_sunglasses, bevel=0.002)
+    create_sphere("Rider_FaceCranium", (hx + 0.02, hy, hz), 0.09, (1.0, 0.88, 1.0), m_skin, segs=12, rings=8)
+    create_box("Rider_GlassesFrame", (hx + 0.08, hy, hz + 0.018), (0.015, 0.11, 0.022), m_sunglasses, bevel=0.003)
+    create_box("Rider_Lens_L", (hx + 0.085, hy - 0.032, hz + 0.018), (0.01, 0.034, 0.018), m_sunglasses, bevel=0.002)
+    create_box("Rider_Lens_R", (hx + 0.085, hy + 0.032, hz + 0.018), (0.01, 0.034, 0.018), m_sunglasses, bevel=0.002)
 
     # 100% Full-Coverage Aerodynamic Blue Helmet Shell
-    create_sphere("HelmetShell", (hx, hy, hz + 0.01), 0.138, (1.12, 0.95, 1.05), m_helmet_shell, segs=28, rings=20)
+    create_sphere("HelmetShell", (hx, hy, hz + 0.01), 0.138, (1.15, 0.96, 1.04), m_helmet_shell, segs=32, rings=22)
     
-    # Back Neck Collar Guard (100% full coverage at the back so ZERO skin/hair is exposed from behind!)
-    create_cylinder_between("HelmetBackCollar", (hx - 0.09, hy, hz + 0.02), (hx - 0.07, hy, hz - 0.09), 0.120, m_helmet_shell, verts=18, radius2=0.130)
+    # Back Neck Collar Guard (100% coverage at the back so ZERO skin/hair exposed from behind!)
+    create_cylinder_between("HelmetBackCollar", (hx - 0.08, hy, hz + 0.01), (hx - 0.06, hy, hz - 0.08), 0.115, m_helmet_shell, verts=20, radius2=0.125)
 
-    # Aerodynamic Chin Bar (covers jaw, mouth, and chin in front)
-    create_box("HelmetChinBar", (hx + 0.09, hy, hz - 0.055), (0.12, 0.16, 0.075), m_helmet_shell, bevel=0.02)
-    create_box("HelmetChinVent", (hx + 0.155, hy, hz - 0.055), (0.018, 0.07, 0.03), m_dark_metal, bevel=0.005)
+    # Sleek Panoramic Dark Visor (smoothly curved around front eye aperture)
+    create_box("HelmetVisor", (hx + 0.075, hy, hz + 0.018), (0.085, 0.20, 0.075), m_helmet_visor, bevel=0.025)
 
-    # Aerodynamic Brow Ridge above eye port
-    create_box("HelmetBrowRidge", (hx + 0.09, hy, hz + 0.075), (0.09, 0.15, 0.035), m_helmet_shell, bevel=0.015)
+    # Aerodynamic Chin Bar (blends into lower shell)
+    create_box("HelmetChinBar", (hx + 0.068, hy, hz - 0.048), (0.088, 0.18, 0.058), m_helmet_shell, bevel=0.02)
+    create_box("HelmetChinVent", (hx + 0.115, hy, hz - 0.048), (0.015, 0.055, 0.02), m_dark_metal, bevel=0.004)
 
-    # Aerodynamic Rear Ducktail Diffuser
-    create_box("HelmetRearSpoiler", (hx - 0.12, hy, hz + 0.035), (0.06, 0.14, 0.03), m_helmet_shell, bevel=0.01)
+    # Aerodynamic Rear Ducktail Spoiler
+    create_box("HelmetRearSpoiler", (hx - 0.12, hy, hz + 0.025), (0.05, 0.13, 0.025), m_helmet_shell, bevel=0.008)
 
-    # White Racing Stripes on Crown (Matches User Reference Photo 1!)
-    create_cylinder_between("HelmetStripe_L", (hx - 0.14, hy - 0.045, hz + 0.08), (hx + 0.10, hy - 0.045, hz + 0.105), 0.011, m_helmet_stripe)
-    create_cylinder_between("HelmetStripe_R", (hx - 0.14, hy + 0.045, hz + 0.08), (hx + 0.10, hy + 0.045, hz + 0.105), 0.011, m_helmet_stripe)
-    create_cylinder_between("HelmetStripe_Top", (hx - 0.13, hy, hz + 0.142), (hx + 0.07, hy, hz + 0.145), 0.015, m_helmet_stripe)
-
-    # PROMINENT SLEEK TINTED VISOR (Curved panoramic dark visor projecting forward from eye aperture)
-    create_sphere("HelmetVisor", (hx + 0.075, hy, hz + 0.02), 0.125, (0.85, 1.05, 0.65), m_helmet_visor, segs=24, rings=16)
-    create_sphere("VisorPivot_L", (hx + 0.015, hy - 0.132, hz + 0.02), 0.022, (0.5, 1.0, 1.0), m_dark_metal)
-    create_sphere("VisorPivot_R", (hx + 0.015, hy + 0.132, hz + 0.02), 0.022, (0.5, 1.0, 1.0), m_dark_metal)
+    # White Racing Stripes on Crown (Photo 1 Authenticity!)
+    create_cylinder_between("HelmetStripe_L", (hx - 0.13, hy - 0.035, hz + 0.11), (hx + 0.08, hy - 0.035, hz + 0.08), 0.010, m_helmet_stripe)
+    create_cylinder_between("HelmetStripe_R", (hx - 0.13, hy + 0.035, hz + 0.11), (hx + 0.08, hy + 0.035, hz + 0.08), 0.010, m_helmet_stripe)
+    create_cylinder_between("HelmetStripe_Top", (hx - 0.12, hy, hz + 0.144), (hx + 0.06, hy, hz + 0.144), 0.012, m_helmet_stripe)
 
     # -------------------------------------------------------------
     # 6. EXPORT TO GLTF/GLB

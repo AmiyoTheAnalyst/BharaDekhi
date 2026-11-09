@@ -185,7 +185,7 @@
     const right = { x: -forward.z, z: forward.x };
     const horizontalRadius = radius * Math.cos(pitch);
     const targetX = position.x;
-    const targetY = position.y + (target.type === 'bike' ? 4.5 : 6.0);
+    const targetY = position.y + (target.type === 'bike' ? 4.5 : target.type === 'bus' ? 9.5 : target.type === 'car' ? 4.5 : 5.5);
     const targetZ = position.z;
 
     return {
@@ -196,7 +196,7 @@
       },
       look: {
         x: targetX,
-        y: targetY + 1.0,
+        y: targetY + (target.type === 'bus' ? 2.0 : 1.0),
         z: targetZ
       }
     };
@@ -205,11 +205,11 @@
   function getVehicleOrbitPose(target) {
     const yaw = vehicleOrbitYaw;
     const pitch = Math.max(0.12, Math.min(0.55, vehicleOrbitPitch));
-    const baseRadius = target.type === 'car' ? 44
-      : target.type === 'bike' ? 34
-        : target.type === 'rickshaw' ? 34
-          : target.type === 'cng' ? 36
-            : 64;
+    const baseRadius = target.type === 'car' ? 52
+      : target.type === 'bike' ? 36
+        : target.type === 'rickshaw' ? 38
+          : target.type === 'cng' ? 40
+            : 96;
     const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     const desktopCoverage = Math.tan(THREE.MathUtils.degToRad(38 / 2)) * 1.6;
     const framingScale = horizontalCoverage > 0 ? Math.max(1, desktopCoverage / horizontalCoverage) : 1;
@@ -4179,6 +4179,15 @@
         node.material = node.material.clone();
         node.material.color.setHex(bikeColor);
       }
+      if (node.isMesh && node.material) {
+        const matName = (node.material.name || '').toLowerCase();
+        if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield')) {
+          node.material = node.material.clone();
+          node.material.transparent = true;
+          node.material.opacity = 0.35;
+          node.material.depthWrite = false;
+        }
+      }
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
@@ -4210,6 +4219,15 @@
     model.traverse(node => {
       const name = node.name.toLowerCase();
       if (name === 'wheel_front' || name === 'wheel_rear_left' || name === 'wheel_rear_right') wheels.push(node);
+      if (node.isMesh && node.material) {
+        const matName = (node.material.name || '').toLowerCase();
+        if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
+          node.material = node.material.clone();
+          node.material.transparent = true;
+          node.material.opacity = 0.35;
+          node.material.depthWrite = false;
+        }
+      }
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
@@ -4241,6 +4259,15 @@
     model.traverse(node => {
       const name = node.name.toLowerCase();
       if (name.startsWith('wheel_')) wheels.push(node);
+      if (node.isMesh && node.material) {
+        const matName = (node.material.name || '').toLowerCase();
+        if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
+          node.material = node.material.clone();
+          node.material.transparent = true;
+          node.material.opacity = 0.35;
+          node.material.depthWrite = false;
+        }
+      }
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
@@ -4272,6 +4299,15 @@
     model.traverse(node => {
       const name = node.name.toLowerCase();
       if (name.startsWith('wheel_')) wheels.push(node);
+      if (node.isMesh && node.material) {
+        const matName = (node.material.name || '').toLowerCase();
+        if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
+          node.material = node.material.clone();
+          node.material.transparent = true;
+          node.material.opacity = 0.35;
+          node.material.depthWrite = false;
+        }
+      }
       if (node.isMesh) {
         node.castShadow = true;
         node.receiveShadow = true;
