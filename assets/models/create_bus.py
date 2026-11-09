@@ -14,9 +14,9 @@ def clear_scene():
             if datablock.users == 0:
                 datablocks.remove(datablock)
 
-def create_material(name, color, metallic=0.0, roughness=0.5, emission=None, emission_strength=1.0, clearcoat=0.0):
+def create_material(name, color, metallic=0.0, roughness=0.5, emission=None, emission_strength=1.0, clearcoat=0.0, alpha=1.0):
     mat = bpy.data.materials.new(name)
-    mat.diffuse_color = (*color[:3], 1.0)
+    mat.diffuse_color = (*color[:3], alpha)
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
     if bsdf:
@@ -27,6 +27,14 @@ def create_material(name, color, metallic=0.0, roughness=0.5, emission=None, emi
             bsdf.inputs["Coat Weight"].default_value = clearcoat
         elif "Clearcoat" in bsdf.inputs:
             bsdf.inputs["Clearcoat"].default_value = clearcoat
+        if "Alpha" in bsdf.inputs:
+            bsdf.inputs["Alpha"].default_value = alpha
+        if alpha < 0.99:
+            mat.blend_method = 'BLEND'
+            if "Transmission Weight" in bsdf.inputs:
+                bsdf.inputs["Transmission Weight"].default_value = 0.85
+            elif "Transmission" in bsdf.inputs:
+                bsdf.inputs["Transmission"].default_value = 0.85
         if emission and "Emission Color" in bsdf.inputs:
             bsdf.inputs["Emission Color"].default_value = (*emission[:3], 1.0)
             if "Emission Strength" in bsdf.inputs:
@@ -44,13 +52,7 @@ def smooth_mesh(obj):
     for poly in obj.data.polygons:
         poly.use_smooth = True
 
-def set_parent_keep_transform(obj, parent):
-    if parent:
-        mat = obj.matrix_world.copy()
-        obj.parent = parent
-        obj.matrix_world = mat
-
-def create_sphere(name, loc, radius, scale, mat, segs=16, rings=12, parent=None):
+def create_sphere(name, loc, radius, scale, mat, segs=16, rings=12):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=segs, ring_count=rings, radius=radius, location=loc)
     obj = bpy.context.object
     obj.name = name
@@ -58,10 +60,9 @@ def create_sphere(name, loc, radius, scale, mat, segs=16, rings=12, parent=None)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     smooth_mesh(obj)
     assign_material(obj, mat)
-    set_parent_keep_transform(obj, parent)
     return obj
 
-def create_box(name, loc, dimensions, mat, bevel=0.0, parent=None):
+def create_box(name, loc, dimensions, mat, bevel=0.0):
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
     obj = bpy.context.object
     obj.name = name
@@ -74,10 +75,9 @@ def create_box(name, loc, dimensions, mat, bevel=0.0, parent=None):
         bpy.ops.object.modifier_apply(modifier=mod.name)
     smooth_mesh(obj)
     assign_material(obj, mat)
-    set_parent_keep_transform(obj, parent)
     return obj
 
-def create_cylinder_between(name, p1, p2, radius, mat, verts=12, parent=None, radius2=None):
+def create_cylinder_between(name, p1, p2, radius, mat, verts=12, radius2=None):
     p1_v = Vector(p1)
     p2_v = Vector(p2)
     dir_v = p2_v - p1_v
@@ -98,65 +98,57 @@ def create_cylinder_between(name, p1, p2, radius, mat, verts=12, parent=None, ra
     obj.rotation_quaternion = dir_v.to_track_quat("Z", "Y")
     smooth_mesh(obj)
     assign_material(obj, mat)
-    set_parent_keep_transform(obj, parent)
     return obj
 
 def create_bus_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
-    pivot = bpy.data.objects.new(name, None)
-    bpy.context.collection.objects.link(pivot)
-    pivot.location = center
+    parts = []
     
+    # Dual/Single rubber tire
     bpy.ops.mesh.primitive_torus_add(
-        major_radius=radius - 0.08,
-        minor_radius=0.08,
-        major_segments=32,
-        minor_segments=8,
+        major_radius=radius - 0.07,
+        minor_radius=0.07,
+        major_segments=36,
+        minor_segments=10,
         location=center,
         rotation=(math.pi / 2, 0, 0)
     )
     tire = assign_material(bpy.context.object, tire_mat)
-    tire.name = name + "_tire"
-    set_parent_keep_transform(tire, pivot)
     smooth_mesh(tire)
+    parts.append(tire)
     
-    bpy.ops.mesh.primitive_cylinder_add(
-        vertices=16,
-        radius=radius * 0.65,
-        depth=width * 0.88,
-        location=center,
-        rotation=(math.pi / 2, 0, 0)
-    )
-    rim = assign_material(bpy.context.object, rim_mat)
-    rim.name = name + "_rim"
-    set_parent_keep_transform(rim, pivot)
-    smooth_mesh(rim)
+    # Heavy pressed steel rim
+    rim = create_cylinder_between(f"{name}_rim", (center[0], center[1] - width * 0.45, center[2]), (center[0], center[1] + width * 0.45, center[2]), radius * 0.65, rim_mat, verts=18)
+    parts.append(rim)
     
-    create_cylinder_between(f"{name}_hub", (center[0], center[1] - width * 0.5, center[2]), (center[0], center[1] + width * 0.5, center[2]), 0.065, hub_mat, verts=10, parent=pivot)
-    return pivot
+    # Chrome hubcap
+    hub = create_cylinder_between(f"{name}_hub", (center[0], center[1] - width * 0.55, center[2]), (center[0], center[1] + width * 0.55, center[2]), 0.075, hub_mat, verts=12)
+    parts.append(hub)
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    for p in parts:
+        p.select_set(True)
+    bpy.context.view_layer.objects.active = tire
+    bpy.ops.object.join()
+    wheel = bpy.context.object
+    wheel.name = name
+    bpy.context.scene.cursor.location = center
+    bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+    return wheel
 
 def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None, is_female=False):
     x, y, z = center
-        
     create_sphere(f"{name_prefix}_Cranium", (x, y, z), 0.12, (1.05, 0.92, 1.18), skin_mat, segs=14, rings=10)
     create_sphere(f"{name_prefix}_Jaw", (x + 0.04, y, z - 0.045), 0.075, (1.0, 0.78, 0.85), skin_mat, segs=10, rings=8)
     create_sphere(f"{name_prefix}_Hair", (x - 0.015, y, z + 0.04), 0.122, (1.04, 0.96, 1.12), hair_mat, segs=12, rings=8)
     
-    # Left & Right Ears
-    create_sphere(f"{name_prefix}_Ear_L", (x, y - 0.11, z - 0.01), 0.03, (0.6, 0.35, 1.1), skin_mat, segs=8, rings=6)
-    create_sphere(f"{name_prefix}_Ear_R", (x, y + 0.11, z - 0.01), 0.03, (0.6, 0.35, 1.1), skin_mat, segs=8, rings=6)
-    
-    # Eyes & Pupils
     for side, sign in [("L", -1), ("R", 1)]:
         eye_y = y + sign * 0.04
         create_sphere(f"{name_prefix}_EyeWhite_{side}", (x + 0.105, eye_y, z + 0.015), 0.02, (0.6, 1.0, 0.8), eye_white_mat, segs=8, rings=6)
         create_sphere(f"{name_prefix}_Pupil_{side}", (x + 0.115, eye_y, z + 0.015), 0.01, (0.5, 0.9, 0.9), iris_mat, segs=6, rings=4)
         create_box(f"{name_prefix}_Eyebrow_{side}", (x + 0.108, eye_y, z + 0.036), (0.015, 0.038, 0.01), hair_mat, bevel=0.002)
     
-    # Nose
     create_cylinder_between(f"{name_prefix}_NoseBridge", (x + 0.095, y, z + 0.03), (x + 0.13, y, z - 0.012), 0.012, skin_mat, verts=8)
     create_sphere(f"{name_prefix}_NoseTip", (x + 0.132, y, z - 0.015), 0.016, (1.0, 1.0, 0.9), skin_mat, segs=8, rings=6)
-    
-    # Lips
     create_box(f"{name_prefix}_LipUpper", (x + 0.115, y, z - 0.042), (0.015, 0.042, 0.009), lip_mat, bevel=0.002)
     create_box(f"{name_prefix}_LipLower", (x + 0.112, y, z - 0.054), (0.015, 0.038, 0.01), lip_mat, bevel=0.002)
     
@@ -169,7 +161,7 @@ def build():
     clear_scene()
 
     # Materials
-    # Authentic Dhaka Red Bus Paint with Clearcoat
+    # Authentic BRTA Red Bus Body Paint
     m_bus_red = create_material("Bus_RedPaint", (0.85, 0.12, 0.12), metallic=0.2, roughness=0.3, clearcoat=0.9)
     m_bus_green = create_material("Bus_GreenStripe", (0.05, 0.65, 0.35), metallic=0.1, roughness=0.35)
     m_bus_yellow = create_material("Bus_YellowStripe", (0.95, 0.75, 0.10), metallic=0.1, roughness=0.35)
@@ -180,7 +172,10 @@ def build():
     m_chrome = create_material("Bus_ChromeGrille", (0.85, 0.88, 0.90), metallic=0.95, roughness=0.15)
     m_interior = create_material("Bus_InteriorFloor", (0.18, 0.18, 0.20), metallic=0.1, roughness=0.8)
     m_seat_fabric = create_material("Bus_SeatBlue", (0.12, 0.25, 0.65), metallic=0.05, roughness=0.8)
-    m_glass = create_material("Bus_WindowGlass", (0.12, 0.22, 0.28), metallic=0.15, roughness=0.05)
+    # Transparent panoramic window glass
+    m_glass = create_material("Bus_WindowGlass", (0.15, 0.28, 0.38), metallic=0.15, roughness=0.05, alpha=0.35)
+    
+    # Emitters
     m_dest_sign = create_material("Bus_DestSignLED", (0.95, 0.95, 0.85), emission=(0.95, 0.95, 0.85), emission_strength=3.5)
     m_headlight = create_material("Bus_HeadlightLED", (1.0, 1.0, 0.9), emission=(1.0, 1.0, 0.8), emission_strength=4.5)
     m_taillight = create_material("Bus_TaillightLED", (0.9, 0.05, 0.05), emission=(1.0, 0.1, 0.1), emission_strength=4.0)
@@ -194,19 +189,18 @@ def build():
     m_iris = create_material("Eye_Iris", (0.12, 0.08, 0.05), metallic=0.0, roughness=0.2)
     m_lip = create_material("Human_Lips", (0.52, 0.22, 0.18), metallic=0.0, roughness=0.5)
 
-    # Colorful Dhaka attire for passengers
-    m_shirt_blue = create_material("Shirt_SkyBlue", (0.22, 0.58, 0.85), metallic=0.0, roughness=0.8)
-    m_shirt_orange = create_material("Shirt_Orange", (0.92, 0.42, 0.12), metallic=0.0, roughness=0.8)
-    m_shirt_teal = create_material("Shirt_Teal", (0.10, 0.62, 0.55), metallic=0.0, roughness=0.8)
-    m_shirt_purple = create_material("Shirt_Purple", (0.55, 0.20, 0.65), metallic=0.0, roughness=0.8)
-    m_shirt_yellow = create_material("Shirt_Yellow", (0.95, 0.80, 0.15), metallic=0.0, roughness=0.8)
-    m_pants_dark = create_material("Pants_Charcoal", (0.10, 0.12, 0.15), metallic=0.0, roughness=0.85)
+    m_shirt_blue = create_material("Shirt_SkyBlue", (0.25, 0.55, 0.85), metallic=0.0, roughness=0.8)
+    m_shirt_white = create_material("Shirt_White", (0.92, 0.92, 0.90), metallic=0.0, roughness=0.8)
+    m_shirt_green = create_material("Shirt_GreenPolo", (0.12, 0.58, 0.30), metallic=0.0, roughness=0.8)
+    m_shirt_yellow = create_material("Shirt_Mustard", (0.88, 0.70, 0.15), metallic=0.0, roughness=0.8)
+    m_saree_pink = create_material("Saree_MagentaPink", (0.85, 0.18, 0.48), metallic=0.0, roughness=0.75)
+    m_pants_dark = create_material("Pants_DarkNavy", (0.08, 0.10, 0.16), metallic=0.0, roughness=0.85)
 
     # -------------------------------------------------------------
-    # 1. WHEELS (4 Distinct Wheels with Named Pivots)
+    # 1. WHEELS (Single joined meshes named wheel_front_left, etc.)
     # -------------------------------------------------------------
-    wheel_radius = 0.52
-    wheel_width = 0.24
+    wheel_radius = 0.46
+    wheel_width = 0.22
     front_x, rear_x = 2.45, -2.15
     track_y = 1.05
     w_fl = create_bus_wheel("wheel_front_left", (front_x, -track_y, wheel_radius), wheel_radius, wheel_width, m_tire, m_steel_rim, m_chrome)
@@ -215,13 +209,13 @@ def build():
     w_rr = create_bus_wheel("wheel_rear_right", (rear_x, track_y, wheel_radius), wheel_radius, wheel_width * 1.3, m_tire, m_steel_rim, m_chrome)
 
     # -------------------------------------------------------------
-    # 2. BUS BODYWORK & EXTENDED PANELS
+    # 2. BUS BODYWORK & CABIN STRUCTURE
     # -------------------------------------------------------------
     bus_len, bus_wid, bus_hgt = 8.6, 2.42, 2.85
     # Chassis floor pan
     create_box("ChassisFloor", (0, 0, 0.65), (bus_len, bus_wid, 0.12), m_interior)
 
-    # Lower Red Body Shell (below window waistline)
+    # Lower Red Body Shell (below window beltline)
     create_box("LowerBodyRed", (0, 0, 1.15), (bus_len, bus_wid, 0.90), m_bus_red, bevel=0.06)
 
     # Bangladesh Green & Yellow Waist Stripes
@@ -243,16 +237,21 @@ def build():
     create_box("DestSignHousing", (bus_len * 0.5 - 0.15, 0, 2.68), (0.15, 1.85, 0.32), m_bumper_dark, bevel=0.02)
     create_box("DestSignGlass", (bus_len * 0.5 - 0.06, 0, 2.68), (0.02, 1.75, 0.24), m_dest_sign)
 
-    # Panoramic Glass Windows (Left, Right, Front & Rear)
-    # Front Windshield
+    # Front Windshield (transparent)
     create_box("Windshield", (bus_len * 0.5 - 0.10, 0, 2.05), (0.06, bus_wid - 0.15, 0.95), m_glass)
-    # Left & Right Passenger Windows (Continuous Tinted Panoramic Ribbon)
-    create_box("Windows_L", (-0.15, -bus_wid * 0.5, 2.05), (bus_len - 1.2, 0.04, 0.85), m_glass)
-    create_box("Windows_R", (-0.15, bus_wid * 0.5, 2.05), (bus_len - 1.2, 0.04, 0.85), m_glass)
-    # Rear Window
+
+    # Window Pillars (between panoramic glass bays)
+    pillar_xs = [3.4, 2.0, 0.6, -0.8, -2.2, -3.6]
+    for px in pillar_xs:
+        create_box(f"Pillar_L_{px}", (px, -bus_wid * 0.5, 2.05), (0.12, 0.06, 0.88), m_bus_red)
+        create_box(f"Pillar_R_{px}", (px, bus_wid * 0.5, 2.05), (0.12, 0.06, 0.88), m_bus_red)
+
+    # Transparent Left & Right Panoramic Window Panes
+    create_box("Windows_L", (-0.10, -bus_wid * 0.5, 2.05), (bus_len - 1.2, 0.02, 0.84), m_glass)
+    create_box("Windows_R", (-0.10, bus_wid * 0.5, 2.05), (bus_len - 1.2, 0.02, 0.84), m_glass)
     create_box("RearWindow", (-bus_len * 0.5 + 0.05, 0, 2.05), (0.04, bus_wid - 0.30, 0.75), m_glass)
 
-    # White Curved Roof with AC pods & Emergency Hatches
+    # White Curved Roof
     create_box("RoofStructure", (0, 0, 2.72), (bus_len, bus_wid, 0.22), m_roof_white, bevel=0.08)
     create_box("RoofHatch_1", (1.2, 0, 2.85), (0.85, 0.85, 0.08), m_roof_white, bevel=0.02)
     create_box("RoofHatch_2", (-1.8, 0, 2.85), (0.85, 0.85, 0.08), m_roof_white, bevel=0.02)
@@ -265,17 +264,14 @@ def build():
     # -------------------------------------------------------------
     # 3. INTERIOR SEATING & CABIN DETAILS
     # -------------------------------------------------------------
-    # Passenger Seats (Rows of paired blue seats visible through panoramic glass)
     seat_xs = [2.2, 1.1, 0.0, -1.1, -2.2, -3.3]
     for row_i, sx in enumerate(seat_xs):
-        # Left pair
-        create_box(f"Seat_L_{row_i}", (sx, -0.72, 1.05), (0.55, 0.70, 0.12), m_seat_fabric, bevel=0.02)
-        create_box(f"Backrest_L_{row_i}", (sx - 0.24, -0.72, 1.35), (0.08, 0.68, 0.50), m_seat_fabric, bevel=0.02)
-        # Right pair
-        create_box(f"Seat_R_{row_i}", (sx, 0.72, 1.05), (0.55, 0.70, 0.12), m_seat_fabric, bevel=0.02)
-        create_box(f"Backrest_R_{row_i}", (sx - 0.24, 0.72, 1.35), (0.08, 0.68, 0.50), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatCushion_L_{row_i}", (sx, -0.72, 1.05), (0.48, 0.75, 0.14), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatBack_L_{row_i}", (sx - 0.20, -0.72, 1.42), (0.10, 0.75, 0.58), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatCushion_R_{row_i}", (sx, 0.72, 1.05), (0.48, 0.75, 0.14), m_seat_fabric, bevel=0.02)
+        create_box(f"SeatBack_R_{row_i}", (sx - 0.20, 0.72, 1.42), (0.10, 0.75, 0.58), m_seat_fabric, bevel=0.02)
 
-    # Handrails & Stanchion grab poles
+    # Overhead grab rails
     create_cylinder_between("OverheadRail_L", (3.2, -0.35, 2.45), (-3.6, -0.35, 2.45), 0.02, m_chrome)
     create_cylinder_between("OverheadRail_R", (3.2, 0.35, 2.45), (-3.6, 0.35, 2.45), 0.02, m_chrome)
 
@@ -286,7 +282,7 @@ def build():
 
     # Driver seat
     create_box("DriverSeat", (dx, dy, dz + 0.35), (0.48, 0.48, 0.14), m_seat_fabric, bevel=0.02)
-    # Large angled bus steering wheel
+    # Steering column & large bus wheel
     create_cylinder_between("SteeringColumn", (dx + 0.55, dy, dz + 0.30), (dx + 0.38, dy, dz + 0.80), 0.035, m_bumper_dark, verts=8)
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.22,
@@ -299,7 +295,7 @@ def build():
     s_wheel = assign_material(bpy.context.object, m_bumper_dark)
     s_wheel.name = "BusSteeringWheel"
 
-    # Driver Body (Absolute coordinates around dx = 3.25, dy = -0.65, dz = 0.70)
+    # Driver Body
     create_box("Driver_Pelvis", (dx, dy, dz + 0.45), (0.24, 0.30, 0.16), m_pants_dark, bevel=0.02)
     create_box("Driver_Torso", (dx + 0.02, dy, dz + 0.74), (0.26, 0.36, 0.38), m_shirt_blue, bevel=0.04)
     create_cylinder_between("Driver_Neck", (dx + 0.05, dy, dz + 0.94), (dx + 0.08, dy, dz + 1.06), 0.052, m_skin_d, verts=10)
@@ -314,7 +310,7 @@ def build():
     create_cylinder_between("Driver_Forearm_R", (dx + 0.28, dy + 0.18, dz + 0.82), (dx + 0.40, dy + 0.14, dz + 0.84), 0.042, m_skin_d, verts=10)
     create_sphere("Driver_Hand_R", (dx + 0.41, dy + 0.13, dz + 0.84), 0.044, (1.2, 0.9, 0.9), m_skin_d)
 
-    # Driver Legs & Feet
+    # Driver Legs
     for side, sign in [("L", -1), ("R", 1)]:
         ly = dy + sign * 0.11
         create_cylinder_between(f"Driver_Thigh_{side}", (dx + 0.02, ly, dz + 0.45), (dx + 0.34, ly, dz + 0.45), 0.065, m_pants_dark, verts=12)
@@ -322,21 +318,19 @@ def build():
         create_box(f"Driver_Foot_{side}", (dx + 0.39, ly, dz + 0.08), (0.16, 0.08, 0.04), m_bumper_dark, bevel=0.01)
 
     # -------------------------------------------------------------
-    # 5. 6 FULL-BODIED PASSENGERS VISIBLE THROUGH WINDOWS
+    # 5. 6 FULL-BODIED PASSENGERS (VISIBLE THROUGH PANORAMIC GLASS!)
     # -------------------------------------------------------------
     pass_configs = [
-        # x, y, shirt_mat, skin_mat, is_female
-        (1.1, -0.72, m_shirt_orange, m_skin_p1, False),
-        (0.0, -0.72, m_shirt_teal, m_skin_p2, True),
-        (-1.1, -0.72, m_shirt_purple, m_skin_p1, False),
-        (2.2, 0.72, m_shirt_yellow, m_skin_p2, False),
-        (0.0, 0.72, m_shirt_blue, m_skin_p1, False),
-        (-2.2, 0.72, m_shirt_orange, m_skin_p2, True),
+        (2.2, -0.72, m_shirt_white, m_skin_p1, False),  # Row 1 Left: Man in White
+        (1.1, 0.72, m_saree_pink, m_skin_p2, True),     # Row 2 Right: Woman in Pink Saree
+        (0.0, -0.72, m_shirt_green, m_skin_p1, False),  # Row 3 Left: Man in Green
+        (-1.1, 0.72, m_shirt_yellow, m_skin_p2, False), # Row 4 Right: Man in Yellow
+        (-2.2, -0.72, m_shirt_blue, m_skin_p1, False),  # Row 5 Left: Man in Blue
+        (-3.3, 0.72, m_saree_pink, m_skin_p2, True),    # Row 6 Right: Woman in Pink Saree
     ]
 
     for pi, (px, py, p_shirt, p_skin, p_fem) in enumerate(pass_configs):
         pz = 1.05
-
         # Pelvis & Torso
         create_box(f"P_Pelvis_{pi}", (px, py, pz + 0.10), (0.24, 0.28, 0.14), m_pants_dark, bevel=0.02)
         create_box(f"P_Torso_{pi}", (px - 0.02, py, pz + 0.36), (0.24, 0.34, 0.36), p_shirt, bevel=0.04)
@@ -352,7 +346,7 @@ def build():
         create_cylinder_between(f"P_Forearm_R_{pi}", (px + 0.12, py + 0.14, pz + 0.26), (px + 0.22, py + 0.06, pz + 0.22), 0.036, p_skin, verts=10)
         create_sphere(f"P_Hand_R_{pi}", (px + 0.23, py + 0.05, pz + 0.22), 0.038, (1.2, 0.9, 0.9), p_skin)
 
-        # Complete Lower Body: Thighs forward, shins down, feet on floor!
+        # Lower Body
         for side, sign in [("L", -1), ("R", 1)]:
             ply = py + sign * 0.09
             create_cylinder_between(f"P_Thigh_{pi}_{side}", (px + 0.02, ply, pz + 0.10), (px + 0.30, ply, pz + 0.10), 0.06, m_pants_dark, verts=12)
