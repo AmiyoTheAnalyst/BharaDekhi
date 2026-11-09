@@ -137,41 +137,37 @@ def create_cng_wheel(name, center, radius, width, tire_mat, rim_mat, hub_mat):
     create_cylinder_between(f"{name}_hub", (center[0], center[1] - width * 0.5, center[2]), (center[0], center[1] + width * 0.5, center[2]), 0.04, hub_mat, verts=10, parent=pivot)
     return pivot
 
-def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None, parent=None):
+def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None):
     x, y, z = center
-    head_group = bpy.data.objects.new(f"{name_prefix}_HeadGroup", None)
-    bpy.context.collection.objects.link(head_group)
-    head_group.location = (x, y, z)
-    set_parent_keep_transform(head_group, parent)
         
-    head = create_sphere(f"{name_prefix}_Cranium", (0, 0, 0), 0.12, (1.05, 0.92, 1.18), skin_mat, segs=16, rings=12, parent=head_group)
-    create_sphere(f"{name_prefix}_Jaw", (0.04, 0, -0.045), 0.075, (1.0, 0.78, 0.85), skin_mat, segs=12, rings=8, parent=head_group)
-    create_sphere(f"{name_prefix}_Hair", (-0.015, 0, 0.04), 0.122, (1.04, 0.96, 1.12), hair_mat, segs=14, rings=10, parent=head_group)
+    create_sphere(f"{name_prefix}_Cranium", (x, y, z), 0.12, (1.05, 0.92, 1.18), skin_mat, segs=16, rings=12)
+    create_sphere(f"{name_prefix}_Jaw", (x + 0.04, y, z - 0.045), 0.075, (1.0, 0.78, 0.85), skin_mat, segs=12, rings=8)
+    create_sphere(f"{name_prefix}_Hair", (x - 0.015, y, z + 0.04), 0.122, (1.04, 0.96, 1.12), hair_mat, segs=14, rings=10)
     
     # Left & Right Ears
-    create_sphere(f"{name_prefix}_Ear_L", (0.0, -0.11, -0.01), 0.032, (0.6, 0.35, 1.1), skin_mat, segs=8, rings=6, parent=head_group)
-    create_sphere(f"{name_prefix}_Ear_R", (0.0, 0.11, -0.01), 0.032, (0.6, 0.35, 1.1), skin_mat, segs=8, rings=6, parent=head_group)
+    create_sphere(f"{name_prefix}_Ear_L", (x, y - 0.11, z - 0.01), 0.032, (0.6, 0.35, 1.1), skin_mat, segs=8, rings=6)
+    create_sphere(f"{name_prefix}_Ear_R", (x, y + 0.11, z - 0.01), 0.032, (0.6, 0.35, 1.1), skin_mat, segs=8, rings=6)
     
     # Eyes & Pupils (facing forward +X)
     for side, sign in [("L", -1), ("R", 1)]:
-        eye_y = sign * 0.042
-        create_sphere(f"{name_prefix}_EyeWhite_{side}", (0.105, eye_y, 0.015), 0.02, (0.6, 1.0, 0.8), eye_white_mat, segs=8, rings=6, parent=head_group)
-        create_sphere(f"{name_prefix}_Pupil_{side}", (0.116, eye_y, 0.015), 0.01, (0.5, 0.9, 0.9), iris_mat, segs=6, rings=4, parent=head_group)
-        create_box(f"{name_prefix}_Eyebrow_{side}", (0.108, eye_y, 0.038), (0.015, 0.038, 0.01), hair_mat, bevel=0.002, parent=head_group)
+        eye_y = y + sign * 0.042
+        create_sphere(f"{name_prefix}_EyeWhite_{side}", (x + 0.105, eye_y, z + 0.015), 0.02, (0.6, 1.0, 0.8), eye_white_mat, segs=8, rings=6)
+        create_sphere(f"{name_prefix}_Pupil_{side}", (x + 0.116, eye_y, z + 0.015), 0.01, (0.5, 0.9, 0.9), iris_mat, segs=6, rings=4)
+        create_box(f"{name_prefix}_Eyebrow_{side}", (x + 0.108, eye_y, z + 0.038), (0.015, 0.038, 0.01), hair_mat, bevel=0.002)
     
     # Nose & Nostrils
-    create_cylinder_between(f"{name_prefix}_NoseBridge", (0.095, 0, 0.03), (0.13, 0, -0.012), 0.012, skin_mat, verts=8, parent=head_group)
-    create_sphere(f"{name_prefix}_NoseTip", (0.132, 0, -0.015), 0.016, (1.0, 1.0, 0.9), skin_mat, segs=8, rings=6, parent=head_group)
+    create_cylinder_between(f"{name_prefix}_NoseBridge", (x + 0.095, y, z + 0.03), (x + 0.13, y, z - 0.012), 0.012, skin_mat, verts=8)
+    create_sphere(f"{name_prefix}_NoseTip", (x + 0.132, y, z - 0.015), 0.016, (1.0, 1.0, 0.9), skin_mat, segs=8, rings=6)
     
     # Lips / Mouth
-    create_box(f"{name_prefix}_LipUpper", (0.115, 0, -0.042), (0.015, 0.042, 0.009), lip_mat, bevel=0.002, parent=head_group)
-    create_box(f"{name_prefix}_LipLower", (0.112, 0, -0.054), (0.015, 0.038, 0.01), lip_mat, bevel=0.002, parent=head_group)
+    create_box(f"{name_prefix}_LipUpper", (x + 0.115, y, z - 0.042), (0.015, 0.042, 0.009), lip_mat, bevel=0.002)
+    create_box(f"{name_prefix}_LipLower", (x + 0.112, y, z - 0.054), (0.015, 0.038, 0.01), lip_mat, bevel=0.002)
     
     # Mustache
     if mustache_mat:
-        create_sphere(f"{name_prefix}_Mustache_L", (0.122, -0.02, -0.038), 0.015, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6, parent=head_group)
-        create_sphere(f"{name_prefix}_Mustache_R", (0.122, 0.02, -0.038), 0.015, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6, parent=head_group)
-    return head_group
+        create_sphere(f"{name_prefix}_Mustache_L", (x + 0.122, y - 0.02, z - 0.038), 0.015, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6)
+        create_sphere(f"{name_prefix}_Mustache_R", (x + 0.122, y + 0.02, z - 0.038), 0.015, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6)
+    return None
 
 def build():
     clear_scene()
@@ -311,62 +307,59 @@ def build():
     create_box("DriverBench", (0.0, 0, 0.58), (0.34, 0.65, 0.14), m_seat_vinyl, bevel=0.02, parent=driver_group)
     
     # Driver Pelvis
-    create_box("Driver_Pelvis", (0.02, 0, 0.68), (0.22, 0.28, 0.14), m_driver_pants, bevel=0.02, parent=driver_group)
+    create_box("Driver_Pelvis", (0.02, 0, 0.68), (0.22, 0.28, 0.14), m_driver_pants, bevel=0.02)
     # Torso
-    create_box("Driver_Torso", (0.04, 0, 0.92), (0.24, 0.34, 0.34), m_driver_shirt, bevel=0.03, parent=driver_group)
+    create_box("Driver_Torso", (0.04, 0, 0.92), (0.24, 0.34, 0.34), m_driver_shirt, bevel=0.03)
     # Neck
-    create_cylinder_between("Driver_Neck", (0.06, 0, 1.08), (0.08, 0, 1.18), 0.05, m_skin_driver, verts=10, parent=driver_group)
+    create_cylinder_between("Driver_Neck", (0.06, 0, 1.08), (0.08, 0, 1.18), 0.05, m_skin_driver, verts=10)
     # 3D Face with Mustache & Hair
-    build_head_and_face("Driver", (0.10, 0, 1.28), m_skin_driver, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, parent=driver_group)
+    build_head_and_face("Driver", (0.10, 0, 1.28), m_skin_driver, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair)
 
     # Arms reaching forward to handlebar grips
-    create_cylinder_between("Driver_Arm_L", (0.06, -0.16, 1.02), (0.22, -0.22, 0.94), 0.048, m_driver_shirt, verts=10, parent=driver_group)
-    create_cylinder_between("Driver_Forearm_L", (0.22, -0.22, 0.94), (0.36, -0.24, 0.94), 0.040, m_skin_driver, verts=10, parent=driver_group)
-    create_sphere("Driver_Hand_L", (0.37, -0.24, 0.94), 0.042, (1.2, 0.9, 0.9), m_skin_driver, parent=driver_group)
+    create_cylinder_between("Driver_Arm_L", (0.06, -0.16, 1.02), (0.22, -0.22, 0.94), 0.048, m_driver_shirt, verts=10)
+    create_cylinder_between("Driver_Forearm_L", (0.22, -0.22, 0.94), (0.36, -0.24, 0.94), 0.040, m_skin_driver, verts=10)
+    create_sphere("Driver_Hand_L", (0.37, -0.24, 0.94), 0.042, (1.2, 0.9, 0.9), m_skin_driver)
 
-    create_cylinder_between("Driver_Arm_R", (0.06, 0.16, 1.02), (0.22, 0.22, 0.94), 0.048, m_driver_shirt, verts=10, parent=driver_group)
-    create_cylinder_between("Driver_Forearm_R", (0.22, 0.22, 0.94), (0.36, 0.24, 0.94), 0.040, m_skin_driver, verts=10, parent=driver_group)
-    create_sphere("Driver_Hand_R", (0.37, 0.24, 0.94), 0.042, (1.2, 0.9, 0.9), m_skin_driver, parent=driver_group)
+    create_cylinder_between("Driver_Arm_R", (0.06, 0.16, 1.02), (0.22, 0.22, 0.94), 0.048, m_driver_shirt, verts=10)
+    create_cylinder_between("Driver_Forearm_R", (0.22, 0.22, 0.94), (0.36, 0.24, 0.94), 0.040, m_skin_driver, verts=10)
+    create_sphere("Driver_Hand_R", (0.37, 0.24, 0.94), 0.042, (1.2, 0.9, 0.9), m_skin_driver)
 
     # Legs & Feet (Full lower body!)
     for side, sign in [("L", -1), ("R", 1)]:
         dy = sign * 0.10
-        create_cylinder_between(f"Driver_Thigh_{side}", (0.04, dy, 0.68), (0.32, dy, 0.68), 0.062, m_driver_pants, verts=12, parent=driver_group)
-        create_cylinder_between(f"Driver_Shin_{side}", (0.32, dy, 0.68), (0.32, dy, 0.38), 0.052, m_driver_pants, verts=10, parent=driver_group)
-        create_box(f"Driver_Foot_{side}", (0.36, dy, 0.36), (0.15, 0.07, 0.038), m_dark, bevel=0.01, parent=driver_group)
+        create_cylinder_between(f"Driver_Thigh_{side}", (0.04, dy, 0.68), (0.32, dy, 0.68), 0.062, m_driver_pants, verts=12)
+        create_cylinder_between(f"Driver_Shin_{side}", (0.32, dy, 0.68), (0.32, dy, 0.38), 0.052, m_driver_pants, verts=10)
+        create_box(f"Driver_Foot_{side}", (0.36, dy, 0.36), (0.15, 0.07, 0.038), m_dark, bevel=0.01)
 
     # -------------------------------------------------------------
     # 7. FULL-BODIED REAR PASSENGER (SEATED IN CABIN)
     # -------------------------------------------------------------
-    pass_group = bpy.data.objects.new("CNG_Passenger", None)
-    bpy.context.collection.objects.link(pass_group)
-    pass_group.location = (-0.62, 0.18, 0.0)
-
     # Rear Bench Seat
     create_box("RearBench", (-0.68, 0, 0.58), (0.52, 1.18, 0.16), m_seat_vinyl, bevel=0.03)
     create_box("RearBackrest", (-0.94, 0, 0.88), (0.10, 1.16, 0.44), m_seat_vinyl, bevel=0.03)
 
-    # Passenger Pelvis & Torso
-    create_box("Pass_Pelvis", (0, 0, 0.68), (0.24, 0.28, 0.14), m_pass_pants, bevel=0.02, parent=pass_group)
-    create_box("Pass_Torso", (-0.02, 0, 0.94), (0.22, 0.32, 0.36), m_pass_shirt, bevel=0.03, parent=pass_group)
-    create_cylinder_between("Pass_Neck", (0.0, 0, 1.10), (0.02, 0, 1.20), 0.048, m_skin_pass, verts=10, parent=pass_group)
-    build_head_and_face("CNGPass", (0.04, 0, 1.30), m_skin_pass, m_hair, m_eye_white, m_iris, m_lip, parent=pass_group)
+    # Passenger Pelvis & Torso (Absolute coordinates around X = -0.62, Y = 0.18)
+    gx, gy = -0.62, 0.18
+    create_box("Pass_Pelvis", (gx, gy, 0.68), (0.24, 0.28, 0.14), m_pass_pants, bevel=0.02)
+    create_box("Pass_Torso", (gx - 0.02, gy, 0.94), (0.22, 0.32, 0.36), m_pass_shirt, bevel=0.03)
+    create_cylinder_between("Pass_Neck", (gx, gy, 1.10), (gx + 0.02, gy, 1.20), 0.048, m_skin_pass, verts=10)
+    build_head_and_face("CNGPass", (gx + 0.04, gy, 1.30), m_skin_pass, m_hair, m_eye_white, m_iris, m_lip)
 
     # Arms folded in lap
-    create_cylinder_between("Pass_Arm_L", (-0.02, -0.16, 1.04), (0.12, -0.12, 0.82), 0.045, m_pass_shirt, verts=10, parent=pass_group)
-    create_cylinder_between("Pass_Forearm_L", (0.12, -0.12, 0.82), (0.22, -0.04, 0.78), 0.038, m_skin_pass, verts=10, parent=pass_group)
-    create_sphere("Pass_Hand_L", (0.23, -0.03, 0.78), 0.04, (1.2, 0.9, 0.9), m_skin_pass, parent=pass_group)
+    create_cylinder_between("Pass_Arm_L", (gx - 0.02, gy - 0.16, 1.04), (gx + 0.12, gy - 0.12, 0.82), 0.045, m_pass_shirt, verts=10)
+    create_cylinder_between("Pass_Forearm_L", (gx + 0.12, gy - 0.12, 0.82), (gx + 0.22, gy - 0.04, 0.78), 0.038, m_skin_pass, verts=10)
+    create_sphere("Pass_Hand_L", (gx + 0.23, gy - 0.03, 0.78), 0.04, (1.2, 0.9, 0.9), m_skin_pass)
 
-    create_cylinder_between("Pass_Arm_R", (-0.02, 0.16, 1.04), (0.12, 0.12, 0.82), 0.045, m_pass_shirt, verts=10, parent=pass_group)
-    create_cylinder_between("Pass_Forearm_R", (0.12, 0.12, 0.82), (0.22, 0.04, 0.78), 0.038, m_skin_pass, verts=10, parent=pass_group)
-    create_sphere("Pass_Hand_R", (0.23, 0.03, 0.78), 0.04, (1.2, 0.9, 0.9), m_skin_pass, parent=pass_group)
+    create_cylinder_between("Pass_Arm_R", (gx - 0.02, gy + 0.16, 1.04), (gx + 0.12, gy + 0.12, 0.82), 0.045, m_pass_shirt, verts=10)
+    create_cylinder_between("Pass_Forearm_R", (gx + 0.12, gy + 0.12, 0.82), (gx + 0.22, gy + 0.04, 0.78), 0.038, m_skin_pass, verts=10)
+    create_sphere("Pass_Hand_R", (gx + 0.23, gy + 0.03, 0.78), 0.04, (1.2, 0.9, 0.9), m_skin_pass)
 
     # Lower Body: Thighs forward, shins down, feet on floor!
     for side, sign in [("L", -1), ("R", 1)]:
-        py = sign * 0.09
-        create_cylinder_between(f"Pass_Thigh_{side}", (0.02, py, 0.68), (0.30, py, 0.68), 0.06, m_pass_pants, verts=12, parent=pass_group)
-        create_cylinder_between(f"Pass_Shin_{side}", (0.30, py, 0.68), (0.30, py, 0.38), 0.05, m_pass_pants, verts=10, parent=pass_group)
-        create_box(f"Pass_Foot_{side}", (0.34, py, 0.36), (0.15, 0.07, 0.038), m_dark, bevel=0.01, parent=pass_group)
+        py = gy + sign * 0.09
+        create_cylinder_between(f"Pass_Thigh_{side}", (gx + 0.02, py, 0.68), (gx + 0.30, py, 0.68), 0.06, m_pass_pants, verts=12)
+        create_cylinder_between(f"Pass_Shin_{side}", (gx + 0.30, py, 0.68), (gx + 0.30, py, 0.38), 0.05, m_pass_pants, verts=10)
+        create_box(f"Pass_Foot_{side}", (gx + 0.34, py, 0.36), (0.15, 0.07, 0.038), m_dark, bevel=0.01)
 
     # -------------------------------------------------------------
     # 8. EXPORT TO GLTF/GLB

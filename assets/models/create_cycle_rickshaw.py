@@ -161,61 +161,56 @@ def create_spoked_wheel(name, center, radius, width, tire_mat, rim_mat, spoke_ma
         )
     return pivot
 
-def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None, parent=None, is_female=False):
+def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None, is_female=False):
     x, y, z = center
-    head_group = bpy.data.objects.new(f"{name_prefix}_HeadGroup", None)
-    bpy.context.collection.objects.link(head_group)
-    head_group.location = (x, y, z)
-    if parent:
-        set_parent_keep_transform(head_group, parent)
         
     # Cranium / Head base (facing +X)
-    head = create_sphere(f"{name_prefix}_Cranium", (0, 0, 0), 0.13, (1.05, 0.92, 1.18), skin_mat, segs=20, rings=16, parent=head_group)
+    create_sphere(f"{name_prefix}_Cranium", (x, y, z), 0.13, (1.05, 0.92, 1.18), skin_mat, segs=20, rings=16)
     
     # Jaw and Chin
-    create_sphere(f"{name_prefix}_Jaw", (0.045, 0, -0.05), 0.08, (1.0, 0.78, 0.85), skin_mat, segs=14, rings=10, parent=head_group)
+    create_sphere(f"{name_prefix}_Jaw", (x + 0.045, y, z - 0.05), 0.08, (1.0, 0.78, 0.85), skin_mat, segs=14, rings=10)
     
     # Hair
     if is_female:
-        create_sphere(f"{name_prefix}_Hair", (-0.02, 0, 0.04), 0.135, (1.05, 0.98, 1.15), hair_mat, segs=16, rings=12, parent=head_group)
+        create_sphere(f"{name_prefix}_Hair", (x - 0.02, y, z + 0.04), 0.135, (1.05, 0.98, 1.15), hair_mat, segs=16, rings=12)
         # Hair bun on back of head
-        create_sphere(f"{name_prefix}_HairBun", (-0.14, 0, 0.02), 0.065, (0.85, 0.95, 0.95), hair_mat, segs=14, rings=10, parent=head_group)
+        create_sphere(f"{name_prefix}_HairBun", (x - 0.14, y, z + 0.02), 0.065, (0.85, 0.95, 0.95), hair_mat, segs=14, rings=10)
     else:
-        create_sphere(f"{name_prefix}_Hair", (-0.015, 0, 0.045), 0.132, (1.04, 0.96, 1.12), hair_mat, segs=16, rings=12, parent=head_group)
+        create_sphere(f"{name_prefix}_Hair", (x - 0.015, y, z + 0.045), 0.132, (1.04, 0.96, 1.12), hair_mat, segs=16, rings=12)
         # Sideburns
-        create_box(f"{name_prefix}_Sideburn_L", (0.01, -0.11, -0.02), (0.035, 0.015, 0.08), hair_mat, parent=head_group)
-        create_box(f"{name_prefix}_Sideburn_R", (0.01, 0.11, -0.02), (0.035, 0.015, 0.08), hair_mat, parent=head_group)
+        create_box(f"{name_prefix}_Sideburn_L", (x + 0.01, y - 0.11, z - 0.02), (0.035, 0.015, 0.08), hair_mat)
+        create_box(f"{name_prefix}_Sideburn_R", (x + 0.01, y + 0.11, z - 0.02), (0.035, 0.015, 0.08), hair_mat)
     
     # Left & Right Ears
-    create_sphere(f"{name_prefix}_Ear_L", (0.0, -0.12, -0.01), 0.035, (0.6, 0.35, 1.1), skin_mat, segs=10, rings=8, parent=head_group)
-    create_sphere(f"{name_prefix}_Ear_R", (0.0, 0.12, -0.01), 0.035, (0.6, 0.35, 1.1), skin_mat, segs=10, rings=8, parent=head_group)
+    create_sphere(f"{name_prefix}_Ear_L", (x, y - 0.12, z - 0.01), 0.035, (0.6, 0.35, 1.1), skin_mat, segs=10, rings=8)
+    create_sphere(f"{name_prefix}_Ear_R", (x, y + 0.12, z - 0.01), 0.035, (0.6, 0.35, 1.1), skin_mat, segs=10, rings=8)
     
     # Eyeballs & Pupils (facing forward +X)
     for side, sign in [("L", -1), ("R", 1)]:
-        eye_y = sign * 0.046
+        eye_y = y + sign * 0.046
         # Eye white
-        create_sphere(f"{name_prefix}_EyeWhite_{side}", (0.115, eye_y, 0.015), 0.022, (0.6, 1.0, 0.8), eye_white_mat, segs=10, rings=8, parent=head_group)
+        create_sphere(f"{name_prefix}_EyeWhite_{side}", (x + 0.115, eye_y, z + 0.015), 0.022, (0.6, 1.0, 0.8), eye_white_mat, segs=10, rings=8)
         # Dark Iris / Pupil
-        create_sphere(f"{name_prefix}_Pupil_{side}", (0.128, eye_y, 0.015), 0.011, (0.5, 0.9, 0.9), iris_mat, segs=8, rings=6, parent=head_group)
+        create_sphere(f"{name_prefix}_Pupil_{side}", (x + 0.128, eye_y, z + 0.015), 0.011, (0.5, 0.9, 0.9), iris_mat, segs=8, rings=6)
         # Eyebrow arch
-        create_box(f"{name_prefix}_Eyebrow_{side}", (0.118, eye_y, 0.042), (0.015, 0.042, 0.01), hair_mat, bevel=0.003, parent=head_group)
+        create_box(f"{name_prefix}_Eyebrow_{side}", (x + 0.118, eye_y, z + 0.042), (0.015, 0.042, 0.01), hair_mat, bevel=0.003)
     
     # Nose (bridge, tip, and nostrils)
-    create_cylinder_between(f"{name_prefix}_NoseBridge", (0.105, 0, 0.035), (0.142, 0, -0.015), 0.014, skin_mat, verts=8, parent=head_group)
-    create_sphere(f"{name_prefix}_NoseTip", (0.145, 0, -0.018), 0.018, (1.0, 1.0, 0.9), skin_mat, segs=10, rings=8, parent=head_group)
-    create_sphere(f"{name_prefix}_Nostril_L", (0.136, -0.02, -0.022), 0.011, (1.0, 0.9, 0.8), skin_mat, segs=8, rings=6, parent=head_group)
-    create_sphere(f"{name_prefix}_Nostril_R", (0.136, 0.02, -0.022), 0.011, (1.0, 0.9, 0.8), skin_mat, segs=8, rings=6, parent=head_group)
+    create_cylinder_between(f"{name_prefix}_NoseBridge", (x + 0.105, y, z + 0.035), (x + 0.142, y, z - 0.015), 0.014, skin_mat, verts=8)
+    create_sphere(f"{name_prefix}_NoseTip", (x + 0.145, y, z - 0.018), 0.018, (1.0, 1.0, 0.9), skin_mat, segs=10, rings=8)
+    create_sphere(f"{name_prefix}_Nostril_L", (x + 0.136, y - 0.02, z - 0.022), 0.011, (1.0, 0.9, 0.8), skin_mat, segs=8, rings=6)
+    create_sphere(f"{name_prefix}_Nostril_R", (x + 0.136, y + 0.02, z - 0.022), 0.011, (1.0, 0.9, 0.8), skin_mat, segs=8, rings=6)
     
     # Lips / Mouth
-    create_box(f"{name_prefix}_LipUpper", (0.126, 0, -0.048), (0.016, 0.048, 0.01), lip_mat, bevel=0.002, parent=head_group)
-    create_box(f"{name_prefix}_LipLower", (0.122, 0, -0.062), (0.016, 0.042, 0.011), lip_mat, bevel=0.002, parent=head_group)
+    create_box(f"{name_prefix}_LipUpper", (x + 0.126, y, z - 0.048), (0.016, 0.048, 0.01), lip_mat, bevel=0.002)
+    create_box(f"{name_prefix}_LipLower", (x + 0.122, y, z - 0.062), (0.016, 0.042, 0.011), lip_mat, bevel=0.002)
     
     # Authentic Mustache for Male characters
     if mustache_mat and not is_female:
-        create_sphere(f"{name_prefix}_Mustache_L", (0.133, -0.022, -0.042), 0.016, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6, parent=head_group)
-        create_sphere(f"{name_prefix}_Mustache_R", (0.133, 0.022, -0.042), 0.016, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6, parent=head_group)
+        create_sphere(f"{name_prefix}_Mustache_L", (x + 0.133, y - 0.022, z - 0.042), 0.016, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6)
+        create_sphere(f"{name_prefix}_Mustache_R", (x + 0.133, y + 0.022, z - 0.042), 0.016, (0.8, 1.8, 0.5), mustache_mat, segs=8, rings=6)
         
-    return head_group
+    return None
 
 def build():
     clear_scene()
@@ -418,7 +413,7 @@ def build():
     create_cylinder_between("Puller_Neck", (0.22, 0.0, 1.58), (0.26, 0.0, 1.70), 0.055, m_puller_skin, verts=10, parent=puller_group)
 
     # Full Realistic 3D Face
-    build_head_and_face("Puller", (0.28, 0.0, 1.82), m_puller_skin, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, parent=puller_group, is_female=False)
+    build_head_and_face("Puller", (0.28, 0.0, 1.82), m_puller_skin, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, is_female=False)
 
     # Arms reaching forward to grip handlebars
     # Left Arm
@@ -464,7 +459,7 @@ def build():
     # Neck
     create_cylinder_between("PassM_Neck", (-0.02, 0, 1.62), (0.0, 0, 1.72), 0.05, m_pass_m_skin, verts=10, parent=pass_m_group)
     # 3D Face
-    build_head_and_face("PassM", (0.02, 0, 1.84), m_pass_m_skin, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, parent=pass_m_group, is_female=False)
+    build_head_and_face("PassM", (-0.70, -0.32, 1.84), m_pass_m_skin, m_hair, m_eye_white, m_iris, m_lip, mustache_mat=m_hair, is_female=False)
 
     # Arms resting on lap
     create_cylinder_between("PassM_Arm_L", (-0.02, -0.18, 1.56), (0.16, -0.16, 1.30), 0.05, m_pass_m_shirt, verts=10, parent=pass_m_group)
@@ -502,10 +497,10 @@ def build():
     # Neck
     create_cylinder_between("PassF_Neck", (-0.02, 0, 1.60), (0.0, 0, 1.70), 0.045, m_pass_f_skin, verts=10, parent=pass_f_group)
     # 3D Face with earrings & hair bun
-    build_head_and_face("PassF", (0.02, 0, 1.82), m_pass_f_skin, m_hair, m_eye_white, m_iris, m_lip, parent=pass_f_group, is_female=True)
+    build_head_and_face("PassF", (-0.70, 0.32, 1.82), m_pass_f_skin, m_hair, m_eye_white, m_iris, m_lip, is_female=True)
     # Gold Earrings
-    create_sphere("PassF_Earring_L", (0.02, -0.13, 1.79), 0.016, (1.0, 1.0, 1.5), m_yellow, segs=8, rings=6, parent=pass_f_group)
-    create_sphere("PassF_Earring_R", (0.02, 0.13, 1.79), 0.016, (1.0, 1.0, 1.5), m_yellow, segs=8, rings=6, parent=pass_f_group)
+    create_sphere("PassF_Earring_L", (-0.70, 0.19, 1.79), 0.016, (1.0, 1.0, 1.5), m_yellow, segs=8, rings=6)
+    create_sphere("PassF_Earring_R", (-0.70, 0.45, 1.79), 0.016, (1.0, 1.0, 1.5), m_yellow, segs=8, rings=6)
 
     # Arms folded gracefully in lap
     create_cylinder_between("PassF_Arm_L", (-0.02, -0.17, 1.52), (0.14, -0.14, 1.28), 0.045, m_pass_f_saree, verts=10, parent=pass_f_group)
