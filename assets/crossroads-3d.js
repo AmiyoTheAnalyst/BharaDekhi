@@ -4059,7 +4059,7 @@
   let busPrototypeModel = null;
 
   function loadBusModel() {
-    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-gta5');
+    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-gtareal2');
   }
 
   function loadCarModel() {
@@ -5973,9 +5973,10 @@
         const forwardDelta = (v.dir === 'EB' || v.dir === 'SB') ? roadDelta : -roadDelta;
         const wheelRadius = vm.mesh.userData.wheelRadius || 3;
         const rollAngle = Math.abs(forwardDelta) < 100 ? forwardDelta / wheelRadius : 0;
+        const forwardRoll = (Math.abs(roadDelta) < 100 && Math.abs(roadDelta) > 0) ? (Math.abs(roadDelta) / wheelRadius) : 0;
         vm.mesh.userData.wheels.forEach(w => {
           if (w.name && w.name.startsWith('Wheel_')) {
-            w.rotation.x += rollAngle;
+            w.rotation.z -= forwardRoll;
           } else {
             w.rotation.z += rollAngle;
           }
