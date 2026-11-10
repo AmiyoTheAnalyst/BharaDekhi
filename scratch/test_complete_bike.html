@@ -55,8 +55,9 @@
   const urlParams = new URLSearchParams(window.location.search);
   const arch = parseInt(urlParams.get('archetype') || '2', 10);
   const palette = parseInt(urlParams.get('palette') || '1', 10);
+  const outfit = urlParams.get('outfit') !== null ? parseInt(urlParams.get('outfit'), 10) : undefined;
 
-  const vData = { archetype: arch, palette: palette, type: 'bike' };
+  const vData = { archetype: arch, palette: palette, outfit: outfit, type: 'bike' };
   const bike = window.createRealisticGTABike(null, arch, vData);
   scene.add(bike);
 
@@ -80,6 +81,14 @@
     // Direct front head-on view focusing on hands, arms, handlebars & headlights
     camera.position.set(22, 9.0, 1.5);
     camera.lookAt(2, 8.5, 0);
+  } else if (viewMode === 'face') {
+    // Macro close-up on head and face
+    camera.position.set(6.5, 12.0, 3.5);
+    camera.lookAt(2.25, 11.25, 0);
+  } else if (viewMode === 'cruiser_body') {
+    // Close-up on cruiser torso, arms, and neck
+    camera.position.set(8.5, 12.0, 7.5);
+    camera.lookAt(0.5, 11.0, 0);
   } else {
     // General isometric 3/4 view
     camera.position.set(24, 11, 20);

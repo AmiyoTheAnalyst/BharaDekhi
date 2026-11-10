@@ -25,17 +25,20 @@ t.start()
 print(f"Test server running on port {PORT}")
 
 tasks = [
-    {"name": "test_side_profile.png", "arch": 2, "palette": 1, "view": "side"},
-    {"name": "test_rear_number_plate.png", "arch": 2, "palette": 1, "view": "rear"},
-    {"name": "test_front_hands_grip.png", "arch": 2, "palette": 1, "view": "front"},
-    {"name": "test_front_headon.png", "arch": 2, "palette": 1, "view": "headon"},
-    {"name": "test_cruiser_connected.png", "arch": 1, "palette": 3, "view": "side"},
-    {"name": "test_caferacer_connected.png", "arch": 4, "palette": 0, "view": "side"}
+    {"name": "test_side_profile.png", "arch": 2, "palette": 1, "outfit": 1, "view": "side"},
+    {"name": "test_rear_number_plate.png", "arch": 2, "palette": 1, "outfit": 1, "view": "rear"},
+    {"name": "test_front_hands_grip.png", "arch": 2, "palette": 1, "outfit": 1, "view": "front"},
+    {"name": "test_front_headon.png", "arch": 2, "palette": 1, "outfit": 1, "view": "headon"},
+    {"name": "test_cruiser_connected.png", "arch": 1, "palette": 3, "outfit": 0, "view": "side"},
+    {"name": "test_cruiser_body.png", "arch": 1, "palette": 3, "outfit": 0, "view": "cruiser_body"},
+    {"name": "test_face_clean_shaven.png", "arch": 0, "palette": 0, "outfit": 0, "view": "face"},
+    {"name": "test_face_beard.png", "arch": 4, "palette": 0, "outfit": 2, "view": "face"}
 ]
 
 for item in tasks:
     out_path = os.path.abspath(os.path.join("scratch", item["name"]))
-    url = f"http://127.0.0.1:{PORT}/scratch/test_complete_bike.html?archetype={item['arch']}&palette={item['palette']}&view={item['view']}"
+    outfit_param = f"&outfit={item['outfit']}" if 'outfit' in item else ""
+    url = f"http://127.0.0.1:{PORT}/scratch/test_complete_bike.html?archetype={item['arch']}&palette={item['palette']}{outfit_param}&view={item['view']}"
     cmd = [
         chrome_path,
         "--headless=new",
