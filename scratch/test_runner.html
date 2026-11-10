@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { margin: 0; background: #0b0f19; overflow: hidden; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+  </style>
+  <script src="../assets/three.min.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const archetype = parseInt(urlParams.get('archetype') || '0', 10);
+  const paletteIdx = parseInt(urlParams.get('palette') || '0', 10);
+  const outfitIdx = parseInt(urlParams.get('outfit') || '0', 10);
+  const camPreset = urlParams.get('cam') || 'side'; // 'side', 'three_quarter', 'face'
+
+  const canvas = document.getElementById('c');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0f172a);
+
+  // Lighting
+  const hemiLight = new THREE.HemisphereLight(0xe2e8f0, 0x1e293b, 0.75);
+  scene.add(hemiLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  dirLight.position.set(15, 25, 20);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
+
+  const fillLight = new THREE.DirectionalLight(0x94a3b8, 0.6);
+  fillLight.position.set(-15, 15, -15);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.8);
+  rimLight.position.set(10, -5, -20);
+  scene.add(rimLight);
+
+  // Ground plane
+  const groundGeo = new THREE.PlaneGeometry(100, 100);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = 0;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Camera
+  const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 500);
+  if (camPreset === 'face') {
+    // Tight close-up of rider's face & helmet
+    camera.position.set(5.5, 13.8, 4.5);
+    camera.lookAt(1.8, 12.8, 0);
+  } else if (camPreset === 'three_quarter') {
+    // 3/4 Front quarter hero angle
+    camera.position.set(16, 12, 16);
+    camera.lookAt(0, 6.5, 0);
+  } else {
+    // Side profile hero angle
+    camera.position.set(2, 8.5, 22);
+    camera.lookAt(0, 6.5, 0);
+  }
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // Render loop
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+  animate();
+</script>
+</body>
+</html>

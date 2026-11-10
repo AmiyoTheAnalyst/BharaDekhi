@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { margin: 0; background: #0f172a; overflow: hidden; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+  </style>
+  <script src="../assets/three.min.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const canvas = document.getElementById('c');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(1200, 800);
+  renderer.setPixelRatio(1);
+  renderer.shadowMap.enabled = true;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0f172a);
+
+  // Lighting
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x334155, 0.85);
+  scene.add(hemi);
+
+  const keyLight = new THREE.DirectionalLight(0xfffbeb, 1.4);
+  keyLight.position.set(6, 8, 8);
+  keyLight.castShadow = true;
+  scene.add(keyLight);
+
+  const fillLight = new THREE.DirectionalLight(0x94a3b8, 0.7);
+  fillLight.position.set(-6, 4, -4);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.9);
+  rimLight.position.set(6, -2, -6);
+  scene.add(rimLight);
+
+  // Materials
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xd99872, roughness: 0.52 });
+  const darkHairMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
+  const lipMat = new THREE.MeshStandardMaterial({ color: 0xb55a52, roughness: 0.45 });
+  const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const darkIrisMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+  const pupilGlintMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const helmetMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.18, metalness: 0.45 });
+  const linerMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.90 });
+  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.08, metalness: 0.95 });
+  const visorMat = new THREE.MeshStandardMaterial({
+    color: 0x0f172a,
+    roughness: 0.05,
+    metalness: 0.4,
+    transparent: true,
+    opacity: 0.40,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+
+  // Vertical Contour Loft for Human Head
+  function buildAnatomicalHead(stations, radialSegments, material) {
+    const positions = [];
+    const normals = [];
+    const uvs = [];
+    const indices = [];
+
+    const numRings = stations.length;
+    for (let i = 0; i < numRings; i++) {
+      const s = stations[i];
+      const y = s.y;
+      const cx = s.cx || 0;
+      const cz = s.cz || 0;
+      const rx = s.rx;
+      const rz = s.rz || s.rx;
+
+      for (let j = 0; j <= radialSegments; j++) {
+        const phi = (j / radialSegments) * Math.PI * 2; // 0 is +X (front), PI/2 is +Z, PI is -X (back)
+        const cosP = Math.cos(phi);
+        const sinP = Math.sin(phi);
+
+        // Front-biased modulation for nose / chin / lips
+        let rMod = 1.0;
+        if (s.frontMod && cosP > 0) {
+          rMod += s.frontMod * Math.pow(cosP, s.frontPower || 2);
+        }
+
+        const vx = cx + rx * cosP * rMod;
+        const vz = cz + rz * sinP;
+        const vy = y;
+
+        positions.push(vx, vy, vz);
+        normals.push(cosP, 0, sinP);
+        uvs.push(j / radialSegments, i / (numRings - 1));
+      }
+    }
+
+    const ringStride = radialSegments + 1;
+    for (let i = 0; i < numRings - 1; i++) {
+      for (let j = 0; j < radialSegments; j++) {
+        const a = i * ringStride + j;
+        const b = (i + 1) * ringStride + j;
+        const c = (i + 1) * ringStride + (j + 1);
+        const d = i * ringStride + (j + 1);
+        indices.push(a, b, d, b, c, d);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.castShadow = true;
+    return mesh;
+  }
+
+  const headGroup = new THREE.Group();
+
+  // 1. Organic Anatomical Head Surface
+  const headStations = [
+    { y: -0.72, cx: -0.04, rx: 0.38, rz: 0.36 }, // Neck base
+    { y: -0.58, cx: -0.02, rx: 0.42, rz: 0.40 }, // Neck
+    { y: -0.42, cx: 0.08, rx: 0.54, rz: 0.46, frontMod: 0.18, frontPower: 4 }, // Strong chin
+    { y: -0.28, cx: 0.08, rx: 0.60, rz: 0.50, frontMod: 0.12, frontPower: 4 }, // Lower lip
+    { y: -0.16, cx: 0.08, rx: 0.64, rz: 0.52, frontMod: 0.14, frontPower: 4 }, // Upper lip
+    { y: -0.04, cx: 0.10, rx: 0.70, rz: 0.56, frontMod: 0.22, frontPower: 8 }, // Nose tip
+    { y: 0.08, cx: 0.08, rx: 0.64, rz: 0.56, frontMod: 0.14, frontPower: 8 },  // Nose bridge
+    { y: 0.16, cx: 0.04, rx: 0.62, rz: 0.58, frontMod: -0.05, frontPower: 2 }, // Eye socket indent
+    { y: 0.26, cx: 0.04, rx: 0.68, rz: 0.58, frontMod: 0.10, frontPower: 2 },  // Brow ridge
+    { y: 0.45, cx: 0.00, rx: 0.66, rz: 0.56 }, // Forehead
+    { y: 0.65, cx: -0.04, rx: 0.55, rz: 0.48 }, // Upper skull
+    { y: 0.78, cx: -0.06, rx: 0.35, rz: 0.32 }, // Crown
+    { y: 0.84, cx: -0.06, rx: 0.08, rz: 0.08 }  // Top cap
+  ];
+
+  const headMesh = buildAnatomicalHead(headStations, 32, skinMat);
+  headGroup.add(headMesh);
+
+  // 2. Realistic Almond Eyes
+  [-1, 1].forEach(side => {
+    // Sclera
+    const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.10, 16, 12), eyeWhiteMat);
+    eyeWhite.position.set(0.56, 0.15, side * 0.22);
+    headGroup.add(eyeWhite);
+
+    // Dark Iris
+    const iris = new THREE.Mesh(new THREE.SphereGeometry(0.062, 12, 10), darkIrisMat);
+    iris.position.set(0.64, 0.15, side * 0.22);
+    headGroup.add(iris);
+
+    // Specular Glint
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(0.020, 6, 6), pupilGlintMat);
+    glint.position.set(0.69, 0.17, side * 0.20);
+    headGroup.add(glint);
+
+    // Eyebrow
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.20), darkHairMat);
+    brow.position.set(0.66, 0.26, side * 0.22);
+    brow.rotation.z = -0.08;
+    brow.rotation.y = side * 0.08;
+    headGroup.add(brow);
+  });
+
+  // 3. Defined Lip Color Accent
+  const lips = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.24), lipMat);
+  lips.position.set(0.70, -0.22, 0);
+  headGroup.add(lips);
+
+  // 4. BEAUTIFUL CONTOURED MOTORCYCLE HELMET FRAMING THE FACE
+  // Crown Cowl (covers top & sides above brow Y >= 0.30)
+  const crownStations = [
+    { y: 0.32, cx: -0.02, rx: 0.74, rz: 0.65 },
+    { y: 0.52, cx: -0.04, rx: 0.73, rz: 0.64 },
+    { y: 0.72, cx: -0.06, rx: 0.62, rz: 0.54 },
+    { y: 0.86, cx: -0.08, rx: 0.42, rz: 0.38 },
+    { y: 0.92, cx: -0.08, rx: 0.10, rz: 0.10 }
+  ];
+  const crownMesh = buildAnatomicalHead(crownStations, 32, helmetMat);
+  headGroup.add(crownMesh);
+
+  // Back of Skull Wrap (covers back from X <= 0.15 down to neck)
+  const backStations = [
+    { y: -0.45, cx: -0.15, rx: 0.52, rz: 0.48 },
+    { y: -0.20, cx: -0.15, rx: 0.58, rz: 0.54 },
+    { y: 0.05, cx: -0.12, rx: 0.64, rz: 0.60 },
+    { y: 0.32, cx: -0.08, rx: 0.70, rz: 0.64 }
+  ];
+  const backMesh = buildAnatomicalHead(backStations, 32, helmetMat);
+  headGroup.add(backMesh);
+
+  // Padded Interior Leather Liner Rim framing the visor port
+  const browLiner = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.042, 10, 24, Math.PI * 0.65), linerMat);
+  browLiner.rotation.y = Math.PI / 2;
+  browLiner.rotation.z = -Math.PI * 0.325;
+  browLiner.position.set(0.12, 0.28, 0);
+  headGroup.add(browLiner);
+
+  // Raised Translucent Polycarbonate Visor
+  const visorMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.82, 0.82, 0.38, 24, 1, true, -Math.PI * 0.28, Math.PI * 0.56),
+    visorMat
+  );
+  visorMesh.rotation.z = 0.52;
+  visorMesh.position.set(0.18, 0.46, 0);
+  headGroup.add(visorMesh);
+
+  // Chrome Visor Pivot Screws
+  [-0.56, 0.56].forEach(pz => {
+    const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.08, 14), chromeMat);
+    screw.rotation.x = Math.PI / 2;
+    screw.position.set(0.12, 0.22, pz);
+    headGroup.add(screw);
+  });
+
+  scene.add(headGroup);
+
+  // Camera looking at 3/4 front view of face
+  const camera = new THREE.PerspectiveCamera(35, 1200 / 800, 0.1, 100);
+  camera.position.set(2.4, 0.6, 2.2);
+  camera.lookAt(0.35, 0.05, 0);
+
+  renderer.render(scene, camera);
+</script>
+</body>
+</html>

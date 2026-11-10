@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { margin: 0; background: #0f172a; overflow: hidden; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+  </style>
+  <script src="../assets/three.min.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const canvas = document.getElementById('c');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(1200, 800);
+  renderer.setPixelRatio(1);
+  renderer.shadowMap.enabled = true;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0f172a);
+
+  // Studio lighting
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x334155, 0.85);
+  scene.add(hemi);
+
+  const keyLight = new THREE.DirectionalLight(0xfffbeb, 1.4);
+  keyLight.position.set(5, 8, 8);
+  keyLight.castShadow = true;
+  scene.add(keyLight);
+
+  const fillLight = new THREE.DirectionalLight(0x94a3b8, 0.7);
+  fillLight.position.set(-6, 4, -4);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.9);
+  rimLight.position.set(6, -2, -6);
+  scene.add(rimLight);
+
+  // Materials
+  const skinMat = new THREE.MeshStandardMaterial({ color: 0xd99872, roughness: 0.52 });
+  const darkHairMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
+  const lipMat = new THREE.MeshStandardMaterial({ color: 0xb55a52, roughness: 0.45 });
+  const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const darkIrisMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+  const pupilGlintMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const helmetMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.20, metalness: 0.45 });
+  const linerMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.90 });
+  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.08, metalness: 0.95 });
+  const visorMat = new THREE.MeshStandardMaterial({
+    color: 0x0f172a,
+    roughness: 0.05,
+    metalness: 0.4,
+    transparent: true,
+    opacity: 0.40,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+
+  // Build Head Group
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0, 0, 0);
+
+  // 1. Natural Skin Cranium
+  const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.78, 24, 20), skinMat);
+  cranium.scale.set(0.92, 1.05, 0.88);
+  headGroup.add(cranium);
+
+  // 2. Brow Ridge
+  const brow = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.14, 0.58), skinMat);
+  brow.position.set(0.60, 0.22, 0);
+  headGroup.add(brow);
+
+  // 3. Eyebrows
+  [-1, 1].forEach(side => {
+    const eb = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.045, 0.22), darkHairMat);
+    eb.position.set(0.68, 0.26, side * 0.20);
+    eb.rotation.z = -0.08;
+    eb.rotation.y = side * 0.06;
+    headGroup.add(eb);
+  });
+
+  // 4. Eyes (White sclera + dark iris + glint)
+  [-1, 1].forEach(side => {
+    const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.105, 12, 10), eyeWhiteMat);
+    eyeWhite.position.set(0.60, 0.13, side * 0.21);
+    headGroup.add(eyeWhite);
+
+    const iris = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 8), darkIrisMat);
+    iris.position.set(0.68, 0.13, side * 0.21);
+    headGroup.add(iris);
+
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 6), pupilGlintMat);
+    glint.position.set(0.73, 0.15, side * 0.19);
+    headGroup.add(glint);
+
+    // Eyelids
+    const upperLid = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.20), skinMat);
+    upperLid.position.set(0.64, 0.17, side * 0.21);
+    headGroup.add(upperLid);
+  });
+
+  // 5. 3D Sculpted Nose
+  const noseBridge = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.12), skinMat);
+  noseBridge.rotation.z = -0.32;
+  noseBridge.position.set(0.66, 0.08, 0);
+  headGroup.add(noseBridge);
+
+  const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), skinMat);
+  noseTip.position.set(0.81, -0.04, 0);
+  headGroup.add(noseTip);
+
+  [-1, 1].forEach(side => {
+    const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), skinMat);
+    nostril.position.set(0.74, -0.07, side * 0.095);
+    headGroup.add(nostril);
+  });
+
+  // 6. Cheekbones
+  [-1, 1].forEach(side => {
+    const cheek = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.24, 0.14), skinMat);
+    cheek.position.set(0.48, -0.02, side * 0.35);
+    cheek.rotation.y = side * 0.35;
+    cheek.rotation.z = -0.20;
+    headGroup.add(cheek);
+  });
+
+  // 7. Lips
+  const lipUpper = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.055, 0.26), lipMat);
+  lipUpper.position.set(0.68, -0.18, 0);
+  headGroup.add(lipUpper);
+
+  const lipLower = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.065, 0.24), lipMat);
+  lipLower.position.set(0.66, -0.24, 0);
+  headGroup.add(lipLower);
+
+  // 8. Chin & Jaw
+  const chin = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.22, 0.36), skinMat);
+  chin.position.set(0.58, -0.38, 0);
+  headGroup.add(chin);
+
+  [-1, 1].forEach(side => {
+    const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.18, 0.12), skinMat);
+    jaw.position.set(0.20, -0.30, side * 0.36);
+    jaw.rotation.y = side * 0.28;
+    headGroup.add(jaw);
+
+    const ear = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.26, 0.08), skinMat);
+    ear.position.set(-0.04, 0.04, side * 0.42);
+    headGroup.add(ear);
+  });
+
+  // 9. HELMET SHELL FRAMING THE FACE (OPEN APERTURE)
+  // Crown: covers top dome above brow (Y >= 0.28)
+  const crownShape = new THREE.Shape();
+  crownShape.moveTo(-0.70, 0.28);
+  crownShape.quadraticCurveTo(-0.75, 0.95, 0.0, 0.96);
+  crownShape.quadraticCurveTo(0.60, 0.95, 0.52, 0.32);
+  crownShape.lineTo(0.38, 0.30);
+  crownShape.quadraticCurveTo(0.42, 0.85, 0.0, 0.86);
+  crownShape.quadraticCurveTo(-0.62, 0.85, -0.58, 0.28);
+  crownShape.closePath();
+  const crownGeo = new THREE.ExtrudeGeometry(crownShape, { depth: 0.96, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.05, bevelSegments: 3 });
+  crownGeo.translate(0, 0, -0.96 / 2);
+  headGroup.add(new THREE.Mesh(crownGeo, helmetMat));
+
+  // Back of Skull Cowl
+  const backShape = new THREE.Shape();
+  backShape.moveTo(-0.72, 0.32);
+  backShape.quadraticCurveTo(-0.82, -0.20, -0.45, -0.52);
+  backShape.lineTo(-0.35, -0.44);
+  backShape.quadraticCurveTo(-0.68, -0.15, -0.58, 0.32);
+  backShape.closePath();
+  const backGeo = new THREE.ExtrudeGeometry(backShape, { depth: 0.94, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.04, bevelSegments: 3 });
+  backGeo.translate(0, 0, -0.94 / 2);
+  headGroup.add(new THREE.Mesh(backGeo, helmetMat));
+
+  // Padded Leather Liner framing brow
+  const browLiner = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.88, 14), linerMat);
+  browLiner.rotation.x = Math.PI / 2;
+  browLiner.position.set(0.45, 0.30, 0);
+  headGroup.add(browLiner);
+
+  // Raised Translucent Tinted Visor
+  const visorMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.88, 0.88, 0.40, 20, 1, true, -Math.PI * 0.28, Math.PI * 0.56),
+    visorMat
+  );
+  visorMesh.rotation.z = 0.55;
+  visorMesh.position.set(0.18, 0.46, 0);
+  headGroup.add(visorMesh);
+
+  // Visor Pivot Screws
+  [-0.47, 0.47].forEach(pz => {
+    const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 12), chromeMat);
+    screw.rotation.x = Math.PI / 2;
+    screw.position.set(0.12, 0.18, pz);
+    headGroup.add(screw);
+  });
+
+  scene.add(headGroup);
+
+  // Camera looking at 3/4 front view of face
+  const camera = new THREE.PerspectiveCamera(35, 1200 / 800, 0.1, 100);
+  camera.position.set(2.4, 0.6, 2.2);
+  camera.lookAt(0.35, 0.05, 0);
+
+  renderer.render(scene, camera);
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<USER_REQUEST>
+# CRITICAL REJECTION: FIX THE MONSTROUS PROCEDURAL HUMAN RIDER MODEL IN `crossroads-3d.js`
+
+Look at the current render in the screenshot: the biker's head is a plain blue ball with floating white dots, the shoulders are sharp green polygon spikes, and the body looks like a crude, broken robot. 
+
+You must completely rewrite `createRealisticGTABike` / human generation code inside `crossroads-3d.js` to replace this monstrosity with a proper, anatomically proportioned human rider.
+
+---
+
+## MANDATORY ANATOMICAL RECONSTRUCTION RULES FOR THE RIDER
+
+### 1. SCULPTED 3D HUMAN HEAD & REALISTIC FACE INSIDE THE HELMET
+- **Delete the plain blue sphere head and floating white dot eyes immediately!**
+- Model a realistic, scaled human head (`SphereGeometry` or organic vertex mesh with 1:7.5 head-to-body proportion):
+  - **Skin & Facial Features:** Natural skin-toned face with a defined brow ridge, 3D nose bridge and nostrils, cheekbones, jawline, lips, and almond-shaped eyes (white sclera + dark iris/pupil) pointing forward toward the road.
+  - **Open-Face or Visor Helmet:** Frame the head with a proper contoured motorcycle helmet shell (matte black or colored) featuring a padded interior collar around the neck, cheek protection pads, and a **translucent tinted polycarbonate visor flipped up or covering the upper brow**, leaving the realistic human face 100% visible and natural.
+
+### 2. SEAMLESS LOFTED TORSO & SLEEVES (ZERO SPIKES, ZERO GAPS)
+- **Delete the sharp, disjointed green shoulder spikes!**
+- Use continuous, smooth-shaded geometry (`createSeamlessLoftedLimb` or contoured `ExtrudeGeometry`) for the rider's torso and arms:
+  - **Torso:** A smooth, anatomically tapered riding jacket (or leather biker jacket) that conforms naturally to the chest and waist without sharp angular polygon clipping.
+  - **Arms:** Continuous, smooth-contoured upper arms and forearms bending naturally at the elbow, with gloved hands gripping the handlebar grips smoothly.
+
+### 3. NATURAL SPORT-TUCK RIDER POSE
+- The rider's torso must lean forward in an aerodynamic sport-tuck over the fuel tank.
+- Muscular thighs must hug the sides of the fuel tank, knees bent at natural angles, and sneaker soles resting firmly on the footpegs. ----And use these exact bike. These bike is created by you by blender 5.2 ,look at them just copy paste these bikes in 3D animation.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-10T12:29:37+06:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\HP\Desktop\commute-dhaka-web\assets\crossroads-3d.js (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 6615
+Other open documents:
+- c:\Users\HP\Desktop\commute-dhaka-web\index.html (LANGUAGE_UNSPECIFIED)
+- c:\Users\HP\Desktop\commute-dhaka-web\components\ScrollTransitHero.jsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\HP\Desktop\commute-dhaka-web\sw.js (LANGUAGE_UNSPECIFIED)
+
+The user has uploaded 4 image(s):
+- C:/Users/HP/.gemini/antigravity/brain/a2d3aea8-cfe9-491c-9b42-9d7a3c2c4ed8/.user_uploaded/media_1794292175572_ad83496d.jpg
+- C:/Users/HP/.gemini/antigravity/brain/a2d3aea8-cfe9-491c-9b42-9d7a3c2c4ed8/.user_uploaded/media_1794292175582_bd3ac400.jpg
+- C:/Users/HP/.gemini/antigravity/brain/a2d3aea8-cfe9-491c-9b42-9d7a3c2c4ed8/.user_uploaded/media_1794292175586_9ac59447.jpg
+- C:/Users/HP/.gemini/antigravity/brain/a2d3aea8-cfe9-491c-9b42-9d7a3c2c4ed8/.user_uploaded/media_1794292175596_05ac0013.jpg
+You can embed these images in an artifact if you need the USER to review them.
+</ADDITIONAL_METADATA>

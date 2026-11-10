@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GTA Motorcycle & Multi-Outfit Rider Studio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    body { margin: 0; background: #0b0f19; overflow: hidden; font-family: sans-serif; color: #fff; }
+    #hud { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(15,23,42,0.8); padding: 8px 16px; border-radius: 8px; border: 1px solid #334155; }
+  </style>
+</head>
+<body>
+<div id="hud">Archetype: <span id="archName">Loading...</span></div>
+<script src="/assets/crossroads-3d.js"></script>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0f172a);
+
+  // Road Ground Plane with Asphalt Texture & Road Markings
+  const roadGeo = new THREE.PlaneGeometry(80, 80);
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
+  const road = new THREE.Mesh(roadGeo, roadMat);
+  road.rotation.x = -Math.PI / 2;
+  scene.add(road);
+
+  // Yellow Lane Markings
+  const lineGeo = new THREE.PlaneGeometry(40, 0.4);
+  const lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+  const line = new THREE.Mesh(lineGeo, lineMat);
+  line.rotation.x = -Math.PI / 2;
+  line.position.set(0, 0.02, 0);
+  scene.add(line);
+
+  const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(24, 12, 18);
+  camera.lookAt(0, 5, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  document.body.appendChild(renderer.domElement);
+
+  const amb = new THREE.AmbientLight(0xffffff, 0.65);
+  scene.add(amb);
+  const sun = new THREE.DirectionalLight(0xfff5ea, 1.35);
+  sun.position.set(15, 28, 20);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 2048;
+  sun.shadow.mapSize.height = 2048;
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x93c5fd, 0.5);
+  fill.position.set(-15, 10, -15);
+  scene.add(fill);
+
+  // Parse URL archetype param
+  const urlParams = new URLSearchParams(window.location.search);
+  const arch = parseInt(urlParams.get('archetype') || '1', 10);
+  const palette = parseInt(urlParams.get('palette') || '0', 10);
+
+  const vData = { archetype: arch, palette: palette, type: 'bike' };
+  const bike = window.createRealisticGTABike(null, arch, vData);
+  scene.add(bike);
+
+  const names = ['Streetfighter', 'Western Nightblade Cruiser', 'Yamaha R1M Supersport', 'Suzuki Hayabusa Hyperbike', 'Modern Cafe Racer'];
+  document.getElementById('archName').textContent = names[arch % 5] + ` (Arch ${arch})`;
+
+  // Camera views: side-three-quarter
+  // Set camera to frame full bike and rider
+  camera.position.set(28, 11, 24);
+  camera.lookAt(0, 7.2, 0);
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+  setTimeout(render, 400);
+</script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Anatomical Face & Helmet Studio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>body { margin: 0; background: #0f172a; overflow: hidden; }</style>
+</head>
+<body>
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x111827);
+  const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(3.8, 0.8, 2.6);
+  camera.lookAt(0, 0, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  const amb = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xfffaed, 1.3);
+  dir.position.set(5, 7, 4);
+  scene.add(dir);
+  const rimLight = new THREE.DirectionalLight(0x60a5fa, 0.5);
+  rimLight.position.set(-4, 2, -3);
+  scene.add(rimLight);
+
+  // High-Resolution Organic Face Canvas Texture
+  function createDetailedFaceTexture(skinHex, eyeHex) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Natural skin tone base
+    ctx.fillStyle = skinHex || '#c8926d';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Soft shading gradients for organic bone structure
+    const ambientShade = ctx.createRadialGradient(256, 256, 30, 256, 256, 250);
+    ambientShade.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+    ambientShade.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
+    ambientShade.addColorStop(1, 'rgba(0, 0, 0, 0.38)');
+    ctx.fillStyle = ambientShade;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Forehead highlight
+    const foreShade = ctx.createRadialGradient(256, 130, 10, 256, 130, 90);
+    foreShade.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+    foreShade.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = foreShade;
+    ctx.fillRect(170, 60, 172, 120);
+
+    // Natural Arched Eyebrows with Hair Strokes
+    ctx.strokeStyle = '#1a1008';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    // Left eyebrow arch
+    ctx.beginPath();
+    ctx.moveTo(180, 184);
+    ctx.quadraticCurveTo(215, 168, 246, 178);
+    ctx.stroke();
+    // Right eyebrow arch
+    ctx.beginPath();
+    ctx.moveTo(332, 184);
+    ctx.quadraticCurveTo(297, 168, 266, 178);
+    ctx.stroke();
+
+    // Eyes: Natural almond eyes with dark lash lines, sclera, iris, pupil, glints
+    [-1, 1].forEach(side => {
+      const cx = side === -1 ? 218 : 294;
+      const cy = 214;
+
+      // Deep eye socket shadow
+      const sock = ctx.createRadialGradient(cx, cy, 5, cx, cy, 32);
+      sock.addColorStop(0, 'rgba(0, 0, 0, 0.28)');
+      sock.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = sock;
+      ctx.fillRect(cx - 35, cy - 30, 70, 60);
+
+      // Upper eyelid crease
+      ctx.strokeStyle = 'rgba(30, 15, 10, 0.45)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 24, cy - 8);
+      ctx.quadraticCurveTo(cx, cy - 18, cx + 24, cy - 8);
+      ctx.stroke();
+
+      // Almond Eye Sclera (Off-white with subtle tear duct gradient)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(cx - 22, cy);
+      ctx.quadraticCurveTo(cx - 4, cy - 13, cx + 22, cy);
+      ctx.quadraticCurveTo(cx + 4, cy + 11, cx - 22, cy);
+      ctx.closePath();
+      ctx.fill();
+
+      // Tear duct accent
+      ctx.fillStyle = 'rgba(200, 100, 100, 0.5)';
+      ctx.beginPath();
+      ctx.arc(side === -1 ? cx + 20 : cx - 20, cy, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rich Hazel/Brown Iris with radial fibers
+      const iris = ctx.createRadialGradient(cx, cy, 2, cx, cy, 11);
+      iris.addColorStop(0, '#5a351c');
+      iris.addColorStop(0.7, eyeHex || '#2e180c');
+      iris.addColorStop(1, '#150a04');
+      ctx.fillStyle = iris;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 10.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Dark Limbal Ring around iris
+      ctx.strokeStyle = '#090502';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      // Deep Black Pupil
+      ctx.fillStyle = '#050201';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Natural High-Key Catchlights (Studio reflections)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 3.2, cy - 3.2, 2.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.beginPath();
+      ctx.arc(cx + 3.0, cy + 2.5, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Upper Eyelash line (Bold dark contour)
+      ctx.strokeStyle = '#110703';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 24, cy);
+      ctx.quadraticCurveTo(cx, cy - 14, cx + 24, cy);
+      ctx.stroke();
+    });
+
+    // Sculpted Nose Bridge Shading & Nostrils
+    const noseShade = ctx.createLinearGradient(236, 180, 276, 180);
+    noseShade.addColorStop(0, 'rgba(0, 0, 0, 0.22)');
+    noseShade.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+    noseShade.addColorStop(1, 'rgba(0, 0, 0, 0.22)');
+    ctx.fillStyle = noseShade;
+    ctx.beginPath();
+    ctx.moveTo(248, 185);
+    ctx.lineTo(242, 275);
+    ctx.lineTo(270, 275);
+    ctx.lineTo(264, 185);
+    ctx.closePath();
+    ctx.fill();
+
+    // Nose Tip Highlight & Bulb
+    const noseTip = ctx.createRadialGradient(256, 274, 2, 256, 274, 16);
+    noseTip.addColorStop(0, 'rgba(255, 255, 255, 0.32)');
+    noseTip.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = noseTip;
+    ctx.beginPath();
+    ctx.arc(256, 274, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nostrils & Alar Creases
+    ctx.fillStyle = '#1c0c05';
+    ctx.beginPath();
+    ctx.ellipse(240, 284, 6.5, 4.0, 0.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(272, 284, 6.5, 4.0, -0.25, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Philtrum (Indent above lips)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
+    ctx.fillRect(252, 290, 8, 22);
+
+    // Natural Sculpted Lips with Defined Vermilion Border
+    // Upper Lip
+    ctx.fillStyle = '#9e463b';
+    ctx.beginPath();
+    ctx.moveTo(222, 322);
+    ctx.quadraticCurveTo(242, 312, 256, 316);
+    ctx.quadraticCurveTo(270, 312, 290, 322);
+    ctx.quadraticCurveTo(256, 328, 222, 322);
+    ctx.fill();
+    // Lower Lip with fullness highlight
+    ctx.fillStyle = '#83342a';
+    ctx.beginPath();
+    ctx.moveTo(224, 324);
+    ctx.quadraticCurveTo(256, 345, 288, 324);
+    ctx.quadraticCurveTo(256, 326, 224, 324);
+    ctx.fill();
+    // Lower lip shine
+    const lipShine = ctx.createRadialGradient(256, 332, 2, 256, 332, 14);
+    lipShine.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
+    lipShine.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = lipShine;
+    ctx.beginPath();
+    ctx.ellipse(256, 332, 16, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Masculine 5 O'Clock Stubble Shadow along jaw & chin
+    ctx.fillStyle = 'rgba(15, 10, 8, 0.22)';
+    ctx.beginPath();
+    ctx.moveTo(170, 310);
+    ctx.quadraticCurveTo(256, 420, 342, 310);
+    ctx.quadraticCurveTo(360, 360, 256, 435);
+    ctx.quadraticCurveTo(152, 360, 170, 310);
+    ctx.fill();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
+    return tex;
+  }
+
+  // BUILD COMPLETE ANATOMICAL HEAD & HELMET ASSEMBLY
+  function buildAnatomicalHeadAssembly() {
+    const root = new THREE.Group();
+
+    // 1. Organic Head Cranium
+    const faceTex = createDetailedFaceTexture('#c8926d', '#2e180c');
+    const headMat = new THREE.MeshStandardMaterial({
+      map: faceTex,
+      roughness: 0.58,
+      metalness: 0.04
+    });
+    const headGeo = new THREE.SphereGeometry(0.82, 32, 24);
+    const headMesh = new THREE.Mesh(headGeo, headMat);
+    headMesh.scale.set(0.96, 1.14, 0.94);
+    root.add(headMesh);
+
+    // 3D Nose Bridge & Tip (smooth skin-toned organic projection)
+    const noseMat = new THREE.MeshStandardMaterial({ color: 0xc8926d, roughness: 0.58, metalness: 0.04 });
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.34, 12), noseMat);
+    nose.rotation.z = -Math.PI / 2 + 0.12;
+    nose.position.set(0.80, -0.02, 0);
+    root.add(nose);
+
+    // 3D Brow Ridge
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.10, 0.50), noseMat);
+    brow.position.set(0.68, 0.18, 0);
+    root.add(brow);
+
+    // 3D Chin
+    const chin = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.18, 0.32), noseMat);
+    chin.position.set(0.66, -0.36, 0);
+    root.add(chin);
+
+    // 2. Anatomical Open-Face Motorcycle Helmet (Contoured Shell Framing Face)
+    const helmetMat = new THREE.MeshStandardMaterial({
+      color: 0x18181b,
+      roughness: 0.25,
+      metalness: 0.65
+    });
+    const liningMat = new THREE.MeshStandardMaterial({
+      color: 0x09090b,
+      roughness: 0.90
+    });
+
+    // Padded Inner Lining (frames the eye/face port)
+    const innerRim = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.10, 12, 28), liningMat);
+    innerRim.rotation.y = Math.PI / 2;
+    innerRim.position.set(0.42, 0.04, 0);
+    root.add(innerRim);
+
+    // Outer Helmet Crown (top dome)
+    const crown = new THREE.Mesh(
+      new THREE.SphereGeometry(0.92, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.45),
+      helmetMat
+    );
+    crown.position.set(-0.04, 0.08, 0);
+    root.add(crown);
+
+    // Rear Helmet Shell (protecting occiput and back of neck)
+    const rearShell = new THREE.Mesh(
+      new THREE.SphereGeometry(0.92, 32, 16, -Math.PI * 0.65, Math.PI * 1.30, Math.PI * 0.40, Math.PI * 0.50),
+      helmetMat
+    );
+    rearShell.position.set(-0.06, 0.04, 0);
+    root.add(rearShell);
+
+    // Cheek Guards (Left & Right jaw protection)
+    [-1, 1].forEach(side => {
+      const cheek = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.48, 0.14), helmetMat);
+      cheek.position.set(0.36, -0.16, side * 0.72);
+      root.add(cheek);
+    });
+
+    // Padded Chin Strap with Buckle
+    const strapMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.85 });
+    const strap = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.05, 8, 20, Math.PI * 0.7), strapMat);
+    strap.rotation.z = Math.PI / 2 + 0.3;
+    strap.position.set(0.25, -0.32, 0);
+    root.add(strap);
+
+    // 3. Flipped-Up Polycarbonate Visor (Transparent Smoke Shield with Chrome Pivot Rivets)
+    const visorMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.08,
+      metalness: 0.45,
+      transparent: true,
+      opacity: 0.45,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const visor = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.94, 0.94, 0.42, 24, 1, true, -Math.PI * 0.32, Math.PI * 0.64),
+      visorMat
+    );
+    visor.rotation.z = 0.58; // Tilted up above brow
+    visor.position.set(0.18, 0.42, 0);
+    root.add(visor);
+
+    // Chrome Pivot Rivets on Visor Hinge
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.15, metalness: 0.95 });
+    [-1, 1].forEach(side => {
+      const rivet = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.12, 12), chromeMat);
+      rivet.rotation.x = Math.PI / 2;
+      rivet.position.set(0.08, 0.22, side * 0.88);
+      root.add(rivet);
+    });
+
+    return root;
+  }
+
+  const headAssembly = buildAnatomicalHeadAssembly();
+  scene.add(headAssembly);
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+  setTimeout(render, 300);
+</script>
+</body>
+</html>
