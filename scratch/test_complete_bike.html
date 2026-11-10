@@ -76,6 +76,10 @@
     // Front 3/4 view focusing on hands, handlebars & forks
     camera.position.set(18, 9.0, 14);
     camera.lookAt(2, 6.5, 0);
+  } else if (viewMode === 'headon') {
+    // Direct front head-on view focusing on hands, arms, handlebars & headlights
+    camera.position.set(22, 9.0, 1.5);
+    camera.lookAt(2, 8.5, 0);
   } else {
     // General isometric 3/4 view
     camera.position.set(24, 11, 20);

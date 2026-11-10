@@ -28,6 +28,7 @@ tasks = [
     {"name": "test_side_profile.png", "arch": 2, "palette": 1, "view": "side"},
     {"name": "test_rear_number_plate.png", "arch": 2, "palette": 1, "view": "rear"},
     {"name": "test_front_hands_grip.png", "arch": 2, "palette": 1, "view": "front"},
+    {"name": "test_front_headon.png", "arch": 2, "palette": 1, "view": "headon"},
     {"name": "test_cruiser_connected.png", "arch": 1, "palette": 3, "view": "side"},
     {"name": "test_caferacer_connected.png", "arch": 4, "palette": 0, "view": "side"}
 ]
