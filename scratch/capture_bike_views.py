@@ -26,28 +26,33 @@ print(f"Server started on port {PORT}", flush=True)
 
 tasks = [
     {
-        "name": "bike_side_1440.png",
-        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&outfit=0&yaw=1.57&pitch=0.25",
+        "name": "bike_arch0_streetfighter.png",
+        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&archetype=0&palette=1&outfit=0&yaw=2.25&pitch=0.25",
         "size": "1440,900"
     },
     {
-        "name": "bike_front_quarter_1440.png",
-        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&outfit=0&yaw=2.45&pitch=0.28",
+        "name": "bike_arch1_cruiser.png",
+        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&archetype=1&palette=3&outfit=0&yaw=2.25&pitch=0.25",
         "size": "1440,900"
     },
     {
-        "name": "bike_rear_quarter_1440.png",
-        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&outfit=1&yaw=0.85&pitch=0.28",
+        "name": "bike_arch2_supersport.png",
+        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&archetype=2&palette=1&outfit=1&yaw=2.25&pitch=0.25",
         "size": "1440,900"
     },
     {
-        "name": "bike_scrambler_1440.png",
-        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&outfit=2&yaw=1.95&pitch=0.25",
+        "name": "bike_arch3_hyperbike.png",
+        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&archetype=3&palette=2&outfit=1&yaw=2.25&pitch=0.25",
+        "size": "1440,900"
+    },
+    {
+        "name": "bike_arch4_caferacer.png",
+        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&archetype=4&palette=0&outfit=2&yaw=2.25&pitch=0.25",
         "size": "1440,900"
     },
     {
         "name": "bike_mobile_390.png",
-        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&outfit=1&yaw=2.35&pitch=0.28",
+        "url": f"http://127.0.0.1:{PORT}/index.html?view=3d&cam=bike&center=1&archetype=1&palette=3&yaw=2.25&pitch=0.28",
         "size": "390,844"
     }
 ]

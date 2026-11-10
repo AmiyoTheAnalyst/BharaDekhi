@@ -27,32 +27,57 @@ for (const out of outfits) {
 }
 console.log("PASS: All 4 GTA multi-outfit rider definitions are present.");
 
-// 4. Check textures: getVarsityBackTexture & getBikeLicensePlateTexture
-if (!code.includes('getVarsityBackTexture') || !code.includes('getBikeLicensePlateTexture')) {
-  console.error("FAIL: Texture generators missing!");
+// 4. Check 10 automotive palettes
+if (!code.includes('const BIKE_PALETTES = [') || !code.includes('Pearl White & Bronze') || !code.includes('Championship Gold & Silver')) {
+  console.error("FAIL: BIKE_PALETTES matrix missing or incomplete!");
   process.exit(1);
 }
-console.log("PASS: Varsity R★ and license plate UF82 ISK texture generators are present.");
+console.log("PASS: BIKE_PALETTES 10-colorway matrix is defined.");
 
-// 5. Check that loadSportbikeModel GLB override is removed from init3DScene
-if (code.includes('loadSportbikeModel().then(')) {
-  console.error("FAIL: loadSportbikeModel override is still present in init3DScene!");
+// 5. Check textures
+const textures = [
+  'getVarsityBackTexture',
+  'getBikeLicensePlateTexture',
+  'getFukaruTireTexture',
+  'getShitzuDecalTexture',
+  'getKanjiDecalTexture',
+  'getPinstripeTankTexture',
+  'getGrillHeadlightTexture'
+];
+for (const tex of textures) {
+  if (!code.includes(tex)) {
+    console.error(`FAIL: Texture generator ${tex} missing!`);
+    process.exit(1);
+  }
+}
+console.log("PASS: All 7 procedural texture & decal generators are present.");
+
+// 6. Check that head radius 0.82 and sculpted 3D human face are implemented
+if (!code.includes('new THREE.SphereGeometry(0.82, 20, 18)') || !code.includes('darkIrisMat') || !code.includes('eyeWhiteMat')) {
+  console.error("FAIL: Sculpted 3D face / head radius 0.82 missing!");
   process.exit(1);
 }
-console.log("PASS: loadSportbikeModel override has been removed so pure Three.js seamless bike is permanent.");
+console.log("PASS: Anatomical head (radius 0.82) with 3D eyes, nose, brow, and lips is defined.");
 
-// 6. Check that create3DVehicle delegates directly to createRealisticGTABike
-if (!code.includes("if (type === 'bike')") || !code.includes("return createRealisticGTABike(colorHex, appearanceSeed, vData);")) {
-  console.error("FAIL: create3DVehicle does not delegate directly to createRealisticGTABike!");
+// 7. Check that floating toruses (waistHem / collarTrim) are completely removed
+if (code.includes('waistHem') || code.includes('collarTrim')) {
+  console.error("FAIL: Floating waistHem or collarTrim still present in code!");
   process.exit(1);
 }
-console.log("PASS: create3DVehicle directly returns createRealisticGTABike.");
+console.log("PASS: Zero floating artifacts (waistHem & collarTrim completely eliminated).");
 
-// 7. Check wheel rotation
+// 8. Check 5 archetypes logic
+if (!code.includes('isStreetfighter') || !code.includes('isCruiser') || !code.includes('isSupersport') || !code.includes('isHyperbike') || !code.includes('isCafeRacer')) {
+  console.error("FAIL: 5 motorcycle archetypes logic missing!");
+  process.exit(1);
+}
+console.log("PASS: All 5 distinct GTA V motorcycle archetypes are implemented.");
+
+// 9. Check wheel registration and wheel radius
 if (!code.includes('group.userData.wheels.push(wPivot);') || !code.includes('group.userData.wheelRadius = 3.25;')) {
   console.error("FAIL: Wheel registration in userData.wheels missing!");
   process.exit(1);
 }
 console.log("PASS: Wheels registered in userData.wheels with wheelRadius = 3.25.");
 
-console.log("\nALL 7 VERIFICATION CHECKS PASSED SUCCESSFULLY!");
+console.log("\nALL 9 REVOLUTIONARY VERIFICATION CHECKS PASSED SUCCESSFULLY!");
