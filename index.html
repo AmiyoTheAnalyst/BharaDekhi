@@ -106,7 +106,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=blender-gta-v3"></script>
+  <script src="assets/crossroads-3d.js?v=blender-gta-v4"></script>
   <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
@@ -18988,22 +18988,32 @@
       // Check URL search params for 3D view and camera presets (e.g. ?view=3d&cam=bike)
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('view') === '3d') {
-          setCrossroadsViewMode(true);
-        }
         const targetCam = urlParams.get('cam');
         if (targetCam) {
-          if (urlParams.get('center') === '1') {
-            const v = vehicles.find(veh => veh.type === targetCam);
-            if (v) {
+          const v = vehicles.find(veh => veh.type === targetCam);
+          if (v) {
+            if (urlParams.get('center') === '1') {
               v.pos = (v.dir === 'SB' || v.dir === 'NB') ? 420 : 600;
               v.speed = 0;
               v.maxSpeed = 0;
             }
+            if (urlParams.has('outfit')) {
+              v.outfit = parseInt(urlParams.get('outfit'), 10);
+            }
           }
-          if (typeof window.crossroadsFocusMode === 'function') {
-            setTimeout(() => window.crossroadsFocusMode(targetCam), 600);
-          }
+        }
+        if (urlParams.get('view') === '3d') {
+          setCrossroadsViewMode(true);
+        }
+        if (targetCam && typeof window.crossroadsFocusMode === 'function') {
+          setTimeout(() => {
+            window.crossroadsFocusMode(targetCam);
+            if (urlParams.has('yaw') && typeof window.crossroadsSetOrbit === 'function') {
+              const yaw = parseFloat(urlParams.get('yaw'));
+              const pitch = urlParams.has('pitch') ? parseFloat(urlParams.get('pitch')) : undefined;
+              window.crossroadsSetOrbit(yaw, pitch);
+            }
+          }, 600);
         }
       } catch (e) {}
 
@@ -19014,6 +19024,12 @@
           window.initDhakaCrossroads3D('dhakaCrossroads3dCanvas', 'dhakaCrossroadsContainer', vehicles, pedestrians);
           if (typeof window.resizeDhakaCrossroads3D === 'function') {
             window.resizeDhakaCrossroads3D();
+          }
+          if (targetCam && typeof window.crossroadsFocusMode === 'function') {
+            window.crossroadsFocusMode(targetCam);
+            if (urlParams.has('yaw') && typeof window.crossroadsSetOrbit === 'function') {
+              window.crossroadsSetOrbit(parseFloat(urlParams.get('yaw')), urlParams.has('pitch') ? parseFloat(urlParams.get('pitch')) : undefined);
+            }
           }
         }
       }

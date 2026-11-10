@@ -1,39 +1,58 @@
-// Node test simulation for bike wheels & kinematics
 const fs = require('fs');
 
 console.log("Checking assets/crossroads-3d.js...");
 const code = fs.readFileSync('assets/crossroads-3d.js', 'utf8');
 
-// Check that old procedural stickman code is gone
-if (code.includes('makeRoundedLens') || code.includes('chinLowerShape')) {
-  console.error("FAIL: Legacy procedural stickman code still present!");
-  process.exit(1);
-} else {
-  console.log("PASS: Legacy procedural stickman code is completely removed.");
-}
-
-// Check that replaceBikeWithModel matches Wheel_F and Wheel_R
-if (code.includes("name === 'wheel_f'") && code.includes("name === 'wheel_r'")) {
-  console.log("PASS: replaceBikeWithModel matches Wheel_F and Wheel_R pivots.");
-} else {
-  console.error("FAIL: Wheel pivot matching missing in replaceBikeWithModel");
+// 1. Check createSeamlessLoftedLimb
+if (!code.includes('function createSeamlessLoftedLimb')) {
+  console.error("FAIL: createSeamlessLoftedLimb missing!");
   process.exit(1);
 }
+console.log("PASS: createSeamlessLoftedLimb is defined.");
 
-// Check sportbikePrototypeModel caching
-if (code.includes('let sportbikePrototypeModel = null;') && code.includes('sportbikePrototypeModel = prototype;')) {
-  console.log("PASS: sportbikePrototypeModel is properly cached globally.");
-} else {
-  console.error("FAIL: sportbikePrototypeModel caching missing");
+// 2. Check createRealisticGTABike
+if (!code.includes('function createRealisticGTABike(')) {
+  console.error("FAIL: createRealisticGTABike missing!");
   process.exit(1);
 }
+console.log("PASS: createRealisticGTABike is defined.");
 
-// Check forward wheel rolling
-if (code.includes('vm.mesh.userData.wheels.forEach(w => {') && code.includes('w.rotation.z -= forwardRoll;')) {
-  console.log("PASS: Wheels rotate forward strictly around local Z transverse axis.");
-} else {
-  console.error("FAIL: Forward wheel rolling logic missing or incorrect");
+// 3. Check 4 outfits
+const outfits = ['GTA Streetfighter', 'GTA "R★" Varsity Rider', 'GTA Scrambler', 'Dhaka Urban Rider'];
+for (const out of outfits) {
+  if (!code.includes(out)) {
+    console.error(`FAIL: Outfit ${out} missing!`);
+    process.exit(1);
+  }
+}
+console.log("PASS: All 4 GTA multi-outfit rider definitions are present.");
+
+// 4. Check textures: getVarsityBackTexture & getBikeLicensePlateTexture
+if (!code.includes('getVarsityBackTexture') || !code.includes('getBikeLicensePlateTexture')) {
+  console.error("FAIL: Texture generators missing!");
   process.exit(1);
 }
+console.log("PASS: Varsity R★ and license plate UF82 ISK texture generators are present.");
 
-console.log("ALL SIMULATION CHECKS PASSED!");
+// 5. Check that loadSportbikeModel GLB override is removed from init3DScene
+if (code.includes('loadSportbikeModel().then(')) {
+  console.error("FAIL: loadSportbikeModel override is still present in init3DScene!");
+  process.exit(1);
+}
+console.log("PASS: loadSportbikeModel override has been removed so pure Three.js seamless bike is permanent.");
+
+// 6. Check that create3DVehicle delegates directly to createRealisticGTABike
+if (!code.includes("if (type === 'bike')") || !code.includes("return createRealisticGTABike(colorHex, appearanceSeed, vData);")) {
+  console.error("FAIL: create3DVehicle does not delegate directly to createRealisticGTABike!");
+  process.exit(1);
+}
+console.log("PASS: create3DVehicle directly returns createRealisticGTABike.");
+
+// 7. Check wheel rotation
+if (!code.includes('group.userData.wheels.push(wPivot);') || !code.includes('group.userData.wheelRadius = 3.25;')) {
+  console.error("FAIL: Wheel registration in userData.wheels missing!");
+  process.exit(1);
+}
+console.log("PASS: Wheels registered in userData.wheels with wheelRadius = 3.25.");
+
+console.log("\nALL 7 VERIFICATION CHECKS PASSED SUCCESSFULLY!");
