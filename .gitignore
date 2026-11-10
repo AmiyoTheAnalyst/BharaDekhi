@@ -1,0 +1,4 @@
+scratch/chrome_tmp_*
+scratch/chrome_tmp*
+.DS_Store
+Thumbs.db

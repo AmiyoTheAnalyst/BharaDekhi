@@ -24,17 +24,17 @@ t = threading.Thread(target=httpd.serve_forever, daemon=True)
 t.start()
 print(f"Test server running on port {PORT}")
 
-archetypes = [
-    {"name": "test_arch0_streetfighter.png", "arch": 0, "palette": 1},
-    {"name": "test_arch1_cruiser.png", "arch": 1, "palette": 3},
-    {"name": "test_arch2_supersport.png", "arch": 2, "palette": 1},
-    {"name": "test_arch3_hyperbike.png", "arch": 3, "palette": 2},
-    {"name": "test_arch4_caferacer.png", "arch": 4, "palette": 0}
+tasks = [
+    {"name": "test_side_profile.png", "arch": 2, "palette": 1, "view": "side"},
+    {"name": "test_rear_number_plate.png", "arch": 2, "palette": 1, "view": "rear"},
+    {"name": "test_front_hands_grip.png", "arch": 2, "palette": 1, "view": "front"},
+    {"name": "test_cruiser_connected.png", "arch": 1, "palette": 3, "view": "side"},
+    {"name": "test_caferacer_connected.png", "arch": 4, "palette": 0, "view": "side"}
 ]
 
-for item in archetypes:
+for item in tasks:
     out_path = os.path.abspath(os.path.join("scratch", item["name"]))
-    url = f"http://127.0.0.1:{PORT}/scratch/test_complete_bike.html?archetype={item['arch']}&palette={item['palette']}"
+    url = f"http://127.0.0.1:{PORT}/scratch/test_complete_bike.html?archetype={item['arch']}&palette={item['palette']}&view={item['view']}"
     cmd = [
         chrome_path,
         "--headless=new",
