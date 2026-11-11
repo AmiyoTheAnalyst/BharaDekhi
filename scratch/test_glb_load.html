@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Test GLB Loading</title>
+  <script src="../assets/three.min.js"></script>
+  <script src="../assets/GLTFLoader.js"></script>
+</head>
+<body>
+<div id="log"></div>
+<script>
+  const logEl = document.getElementById('log');
+  function log(msg) {
+    console.log(msg);
+    logEl.innerText += msg + '\n';
+  }
+
+  const loader = new THREE.GLTFLoader();
+  const models = [
+    'assets/models/dhaka-bus.glb',
+    'assets/models/cycle-rickshaw.glb',
+    'assets/models/cng-autorickshaw.glb',
+    'assets/models/sportbike-rider.glb',
+    'assets/models/pedestrians.glb'
+  ];
+
+  let completed = 0;
+  models.forEach(m => {
+    loader.load('../' + m, gltf => {
+      log('LOADED: ' + m + ' | Nodes: ' + gltf.scene.children.length);
+      completed++;
+      if (completed === models.length) log('ALL_DONE');
+    }, undefined, err => {
+      log('ERROR: ' + m + ' | ' + err.message);
+      completed++;
+      if (completed === models.length) log('ALL_DONE');
+    });
+  });
+</script>
+</body>
+</html>

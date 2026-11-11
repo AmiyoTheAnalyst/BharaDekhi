@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>3D Inspection Studio</title>
   <script src="../assets/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   <style>
     body { margin: 0; background: #0b0f19; overflow: hidden; font-family: sans-serif; color: #fff; }
     #hud { position: absolute; top: 12px; left: 12px; z-index: 10; background: rgba(15,23,42,0.9); padding: 10px 16px; border-radius: 8px; border: 1px solid #38bdf8; font-size: 14px; }
@@ -17,14 +18,14 @@
   scene.background = new THREE.Color(0x0f172a);
 
   // Ground plane
-  const roadGeo = new THREE.PlaneGeometry(160, 160);
+  const roadGeo = new THREE.PlaneGeometry(260, 260);
   const roadMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
   const road = new THREE.Mesh(roadGeo, roadMat);
   road.rotation.x = -Math.PI / 2;
   scene.add(road);
 
   // Road markings
-  const lineGeo = new THREE.PlaneGeometry(100, 0.4);
+  const lineGeo = new THREE.PlaneGeometry(160, 0.4);
   const lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
   const line = new THREE.Mesh(lineGeo, lineMat);
   line.rotation.x = -Math.PI / 2;
@@ -41,107 +42,109 @@
   renderer.toneMappingExposure = 1.15;
   document.body.appendChild(renderer.domElement);
 
-  const amb = new THREE.AmbientLight(0xffffff, 0.75);
+  const amb = new THREE.AmbientLight(0xffffff, 0.85);
   scene.add(amb);
-  const sun = new THREE.DirectionalLight(0xfffaed, 1.4);
+  const sun = new THREE.DirectionalLight(0xfffaed, 1.5);
   sun.position.set(25, 45, 30);
   sun.castShadow = true;
   scene.add(sun);
-  const fill = new THREE.DirectionalLight(0x93c5fd, 0.6);
+  const fill = new THREE.DirectionalLight(0x93c5fd, 0.7);
   fill.position.set(-25, 20, -25);
   scene.add(fill);
 
   const urlParams = new URLSearchParams(window.location.search);
-  const target = urlParams.get('target') || 'bike';
-  const arch = parseInt(urlParams.get('archetype') || '0', 10);
+  const target = urlParams.get('target') || 'bus';
   const seed = parseInt(urlParams.get('seed') || '0', 10);
-  const view = urlParams.get('view') || 'side';
+  const archetype = parseInt(urlParams.get('archetype') || '0', 10);
+  const viewMode = urlParams.get('view') || 'side';
+  document.getElementById('targetName').textContent = target.toUpperCase();
 
-  document.getElementById('targetName').textContent = target.toUpperCase() + (target === 'bike' ? ` (Arch ${arch}, Seed ${seed})` : '');
+  const loader = new THREE.GLTFLoader();
 
-  let currentMesh = null;
+  function onModelReady(currentMesh) {
+    if (target === 'bike') {
+      if (viewMode === 'head') {
+        camera.position.set(12, 11, 8);
+        camera.lookAt(0, 10.5, 0);
+      } else if (viewMode === 'side') {
+        camera.position.set(0, 8, 22);
+        camera.lookAt(0, 5, 0);
+      } else {
+        camera.position.set(16, 12, 16);
+        camera.lookAt(0, 5, 0);
+      }
+    } else if (target === 'bus') {
+      if (viewMode === 'rear_wheels') {
+        camera.position.set(-18, 6, -18);
+        camera.lookAt(-14, 4, 0);
+      } else if (viewMode === 'banner') {
+        camera.position.set(2, 14, -22);
+        camera.lookAt(2, 12, 0);
+      } else {
+        camera.position.set(0, 10, -52);
+        camera.lookAt(0, 8, 0);
+      }
+    } else if (target === 'cng') {
+      if (viewMode === 'front') {
+        camera.position.set(18, 8, 12);
+        camera.lookAt(0, 6, 0);
+      } else {
+        camera.position.set(0, 8, -26);
+        camera.lookAt(0, 6, 0);
+      }
+    } else if (target === 'rickshaw') {
+      if (viewMode === 'puller') {
+        camera.position.set(10, 10, -14);
+        camera.lookAt(2, 8, 0);
+      } else {
+        camera.position.set(0, 8, -24);
+        camera.lookAt(0, 6, 0);
+      }
+    }
 
-  if (target === 'bike') {
-    const vData = { archetype: arch, palette: seed % 4, outfit: seed % 4, type: 'bike' };
-    currentMesh = window.createRealisticGTABike(null, arch, vData);
-    scene.add(currentMesh);
-    if (view === 'side') {
-      camera.position.set(0, 7.5, 26);
-      camera.lookAt(0, 6.2, 0);
-    } else if (view === 'front') {
-      camera.position.set(18, 9.0, 14);
-      camera.lookAt(2, 6.5, 0);
-    } else if (view === 'head') {
-      camera.position.set(5.5, 12.0, 3.2);
-      camera.lookAt(1.8, 11.2, 0);
-    } else {
-      camera.position.set(22, 10, 18);
-      camera.lookAt(0, 6.5, 0);
+    let frame = 0;
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      frame++;
+      renderer.render(scene, camera);
+      if (frame === 10) {
+        window.__READY__ = true;
+      }
     }
-  } else if (target === 'rickshaw') {
-    currentMesh = window.create3DVehicle('rickshaw', null, 'rickshaw_test', { type: 'rickshaw', dir: 'EB', pos: 600 });
-    scene.add(currentMesh);
-    if (view === 'side') {
-      camera.position.set(0, 10, 32);
-      camera.lookAt(0, 8, 0);
-    } else if (view === 'puller') {
-      camera.position.set(6, 11, 14);
-      camera.lookAt(2, 8, 0);
-    } else {
-      camera.position.set(24, 14, 22);
-      camera.lookAt(0, 8, 0);
-    }
-  } else if (target === 'cng') {
-    currentMesh = window.create3DVehicle('cng', 0x059669, 'cng_test', { type: 'cng', dir: 'EB', pos: 600 });
-    scene.add(currentMesh);
-    if (view === 'side') {
-      camera.position.set(0, 12, 34);
-      camera.lookAt(0, 9, 0);
-    } else {
-      camera.position.set(24, 14, 22);
-      camera.lookAt(0, 8, 0);
-    }
+    renderLoop();
+  }
+
+  if (target === 'cng') {
+    loader.load('../assets/models/cng-autorickshaw.glb', gltf => {
+      const vehicle = new THREE.Group();
+      scene.add(vehicle);
+      window.replaceCNGWithModel(vehicle, gltf.scene);
+      onModelReady(vehicle);
+    });
   } else if (target === 'bus') {
-    currentMesh = window.create3DVehicle('bus', 0xdc2626, 'bus_test', { type: 'bus', dir: 'EB', pos: 600 });
-    scene.add(currentMesh);
-    if (view === 'side') {
-      camera.position.set(0, 18, 65);
-      camera.lookAt(0, 14, 0);
-    } else if (view === 'wheel') {
-      camera.position.set(18, 8, 22);
-      camera.lookAt(18, 6, 0);
-    } else {
-      camera.position.set(45, 26, 45);
-      camera.lookAt(0, 14, 0);
-    }
-  } else if (target === 'pedestrians') {
-    const pedGroup = new THREE.Group();
-    for (let i = 0; i < 8; i++) {
-      const pMesh = window.createArticulatedHuman(i);
-      pMesh.position.set((i - 3.5) * 6, 0, 0);
-      pedGroup.add(pMesh);
-    }
-    scene.add(pedGroup);
-    camera.position.set(0, 10, 38);
-    camera.lookAt(0, 6, 0);
+    loader.load('../assets/models/dhaka-bus.glb', gltf => {
+      const vehicle = new THREE.Group();
+      scene.add(vehicle);
+      window.replaceBusWithModel(vehicle, gltf.scene);
+      onModelReady(vehicle);
+    });
+  } else if (target === 'rickshaw') {
+    loader.load('../assets/models/cycle-rickshaw.glb', gltf => {
+      const vehicle = new THREE.Group();
+      scene.add(vehicle);
+      window.replaceRickshawWithModel(vehicle, gltf.scene);
+      onModelReady(vehicle);
+    });
+  } else if (target === 'bike') {
+    const bike = window.create3DVehicle('bike', 0x2563eb, 'test_bike_' + seed, {
+      type: 'bike',
+      dir: 'EB',
+      archetype: archetype,
+      outfit: seed,
+      palette: seed
+    });
+    onModelReady(bike);
   }
-
-  // Animate a bit and render
-  let angle = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    angle += 0.05;
-    if (currentMesh && currentMesh.userData && currentMesh.userData.wheels) {
-      currentMesh.userData.wheels.forEach(w => {
-        w.rotation.z -= 0.05;
-      });
-    }
-    if (currentMesh && currentMesh.userData && currentMesh.userData.updatePedaling) {
-      currentMesh.userData.updatePedaling(angle);
-    }
-    renderer.render(scene, camera);
-  }
-  animate();
 </script>
 </body>
 </html>
