@@ -3902,7 +3902,8 @@
         { shell: 0x6366f1, decal: 0xf8fafc }, // Deep Royal Purple
         { shell: 0xeab308, decal: 0x18181b }  // Solar Track Yellow
       ];
-      const hPreset = HELMET_PRESETS[Math.abs(seed) % HELMET_PRESETS.length];
+      const hSeed = (typeof appearanceSeed !== 'undefined') ? appearanceSeed : 0;
+      const hPreset = HELMET_PRESETS[Math.abs(hSeed) % HELMET_PRESETS.length];
       const tex = getAerodynamicHelmetTexture(hPreset.shell, hPreset.decal);
 
       const helmetMat = new THREE.MeshStandardMaterial({
@@ -5843,19 +5844,19 @@
     scene.fog = new THREE.FogExp2(0x2e1538, 0.008);
 
     // 2. Camera: Isometric Drone Aerial 3/4 Perspective
-    let width = canvasEl.clientWidth;
-    let height = canvasEl.clientHeight;
-    if (!width || !height || width <= 0 || height <= 0) {
-      if (containerEl && containerEl.clientWidth > 0 && containerEl.clientHeight > 0) {
-        width = containerEl.clientWidth;
-        height = containerEl.clientHeight;
-      } else if (window.innerWidth > 0 && window.innerHeight > 0) {
-        width = window.innerWidth;
-        height = window.innerHeight;
-      } else {
-        width = 1200;
-        height = 700;
-      }
+    let width = 0, height = 0;
+    if (containerEl && containerEl.clientWidth > 0 && containerEl.clientHeight > 0) {
+      width = containerEl.clientWidth;
+      height = containerEl.clientHeight;
+    } else if (canvasEl && canvasEl.clientWidth > 0 && canvasEl.clientHeight > 0) {
+      width = canvasEl.clientWidth;
+      height = canvasEl.clientHeight;
+    } else if (typeof window !== 'undefined' && window.innerWidth > 0 && window.innerHeight > 0) {
+      width = window.innerWidth;
+      height = window.innerHeight;
+    } else {
+      width = 1200;
+      height = 700;
     }
     const aspect = (width > 0 && height > 0) ? (width / height) : (1200 / 700);
 
@@ -6765,17 +6766,17 @@
   }
 
   function onResize() {
-    if (!renderer || !camera || !canvasEl) return;
-    let width = canvasEl.clientWidth;
-    let height = canvasEl.clientHeight;
-    if (!width || !height || width <= 0 || height <= 0) {
-      if (containerEl && containerEl.clientWidth > 0 && containerEl.clientHeight > 0) {
-        width = containerEl.clientWidth;
-        height = containerEl.clientHeight;
-      } else if (window.innerWidth > 0 && window.innerHeight > 0) {
-        width = window.innerWidth;
-        height = window.innerHeight;
-      }
+    if (!renderer || !camera) return;
+    let width = 0, height = 0;
+    if (containerEl && containerEl.clientWidth > 0 && containerEl.clientHeight > 0) {
+      width = containerEl.clientWidth;
+      height = containerEl.clientHeight;
+    } else if (canvasEl && canvasEl.clientWidth > 0 && canvasEl.clientHeight > 0) {
+      width = canvasEl.clientWidth;
+      height = canvasEl.clientHeight;
+    } else if (typeof window !== 'undefined' && window.innerWidth > 0 && window.innerHeight > 0) {
+      width = window.innerWidth;
+      height = window.innerHeight;
     }
     if (width > 0 && height > 0) {
       const aspect = width / height;
@@ -6808,6 +6809,7 @@
   };
 
   window.resizeDhakaCrossroads3D = function() {
+    isRenderLoopPaused = false;
     onResize();
   };
 
