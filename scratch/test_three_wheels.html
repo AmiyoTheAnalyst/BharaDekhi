@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="../assets/three.min.js"></script>
+<script src="../assets/GLTFLoader.js"></script>
+</head>
+<body>
+<pre id="out">Starting...</pre>
+<script>
+const out = document.getElementById('out');
+function log(msg) {
+  out.textContent += msg + '\n';
+}
+
+const loader = new THREE.GLTFLoader();
+const models = [
+  '../assets/models/dhaka-bus.glb',
+  '../assets/models/cng-autorickshaw.glb',
+  '../assets/models/cycle-rickshaw.glb',
+  '../assets/models/sportbike-rider.glb'
+];
+
+async function check() {
+  for (const m of models) {
+    try {
+      const gltf = await new Promise((res, rej) => loader.load(m, res, undefined, rej));
+      log('MODEL: ' + m);
+      gltf.scene.traverse(node => {
+        const name = (node.name || '').toLowerCase();
+        if (name === 'wheel_fl' || name === 'wheel_front' || name === 'wheel_f' || name === 'wheel_rear_left' || name === 'wheel_r') {
+          log(`  NODE ${node.name}: pos=(${node.position.x.toFixed(2)}, ${node.position.y.toFixed(2)}, ${node.position.z.toFixed(2)}) rot=(${node.rotation.x.toFixed(2)}, ${node.rotation.y.toFixed(2)}, ${node.rotation.z.toFixed(2)})`);
+          const initBox = new THREE.Box3().setFromObject(node);
+          const size = initBox.getSize(new THREE.Vector3());
+          log(`    size=(${size.x.toFixed(3)}, ${size.y.toFixed(3)}, ${size.z.toFixed(3)})`);
+          
+          // Test rotate Z
+          node.rotation.z += 0.5;
+          node.updateMatrixWorld(true);
+          const boxZ = new THREE.Box3().setFromObject(node);
+          const sizeZ = boxZ.getSize(new THREE.Vector3());
+          log(`    rotZ size=(${sizeZ.x.toFixed(3)}, ${sizeZ.y.toFixed(3)}, ${sizeZ.z.toFixed(3)})`);
+          node.rotation.z -= 0.5;
+
+          // Test rotate X
+          node.rotation.x += 0.5;
+          node.updateMatrixWorld(true);
+          const boxX = new THREE.Box3().setFromObject(node);
+          const sizeX = boxX.getSize(new THREE.Vector3());
+          log(`    rotX size=(${sizeX.x.toFixed(3)}, ${sizeX.y.toFixed(3)}, ${sizeX.z.toFixed(3)})`);
+          node.rotation.x -= 0.5;
+        }
+      });
+    } catch (e) {
+      log('ERR: ' + e);
+    }
+  }
+  log('DONE');
+}
+check();
+</script>
+</body>
+</html>
