@@ -172,6 +172,7 @@ def create_spoked_wheel(name, center, radius, width, tire_mat, rim_mat, spoke_ma
     wheel.name = name
     bpy.context.scene.cursor.location = center
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
     return wheel
 
 def build_head_and_face(name_prefix, center, skin_mat, hair_mat, eye_white_mat, iris_mat, lip_mat, mustache_mat=None, is_female=False):
@@ -228,11 +229,11 @@ def build():
     m_dark = create_material("Metal_DarkTrim", (0.06, 0.06, 0.07), metallic=0.4, roughness=0.6)
     m_sandal = create_material("Sandal_Leather", (0.12, 0.08, 0.05), metallic=0.0, roughness=0.8)
 
-    # Characters Materials
-    m_puller_skin = create_material("Puller_Skin", (0.44, 0.26, 0.15), metallic=0.0, roughness=0.78)
-    m_puller_shirt = create_material("Puller_BlueShirt", (0.18, 0.42, 0.82), metallic=0.0, roughness=0.8)
-    m_puller_lungi = create_material("Puller_LungiPlaid", (0.85, 0.32, 0.18), metallic=0.0, roughness=0.85)
-    m_gamcha = create_material("Puller_GamchaRed", (0.92, 0.22, 0.25), metallic=0.0, roughness=0.85)
+    # Characters Materials (Authentic Bangladeshi Rickshaw Puller & Commuters matching Picture 3)
+    m_puller_skin = create_material("Puller_Skin", (0.48, 0.30, 0.18), metallic=0.0, roughness=0.75)
+    m_puller_shirt = create_material("Puller_VioletShirt", (0.38, 0.16, 0.60), metallic=0.0, roughness=0.8) # Violet/Purple shirt as in Picture 3
+    m_puller_lungi = create_material("Puller_BlueLungi", (0.16, 0.26, 0.68), metallic=0.0, roughness=0.85)   # Authentic Blue folded lungi as in Picture 3
+    m_gamcha = create_material("Puller_GamchaRed", (0.88, 0.18, 0.22), metallic=0.0, roughness=0.85)
 
     m_pass_m_skin = create_material("PassMale_Skin", (0.50, 0.30, 0.18), metallic=0.0, roughness=0.75)
     m_pass_m_shirt = create_material("PassMale_Panjabi", (0.92, 0.90, 0.85), metallic=0.0, roughness=0.8)
@@ -276,8 +277,21 @@ def build():
     m_lens = create_material("HeadlampLens", (1.0, 0.95, 0.8), metallic=0.2, roughness=0.1, emission=(1.0, 0.9, 0.6), emission_strength=2.0)
     create_sphere("HeadlampGlass", (1.20, 0, 1.44), 0.065, (0.4, 1.0, 1.0), m_lens)
 
-    # Front mudguard
-    create_cylinder_between("MudguardFront", (1.15, 0, 0.88), (1.62, 0, 0.82), 0.08, m_red, verts=8)
+    # Curved Front mudguard hugging the front tire (authentic green rickshaw art)
+    bpy.ops.mesh.primitive_torus_add(
+        major_radius=wheel_radius + 0.03,
+        minor_radius=0.018,
+        major_segments=36,
+        minor_segments=8,
+        location=(1.38, 0, wheel_radius),
+        rotation=(math.pi / 2, 0, 0)
+    )
+    m_guard = assign_material(bpy.context.object, m_teal)
+    m_guard.name = "FrontMudguardArch"
+    smooth_mesh(m_guard)
+    # Mudguard chrome support stays
+    create_cylinder_between("MudguardStay_L", (1.38, -0.055, wheel_radius), (1.68, -0.04, wheel_radius + 0.40), 0.009, m_chrome)
+    create_cylinder_between("MudguardStay_R", (1.38, 0.055, wheel_radius), (1.68, 0.04, wheel_radius + 0.40), 0.009, m_chrome)
 
     # Diamond cycle frame
     create_cylinder_between("TopTube", (0.95, 0, 1.55), (0.0, 0, 1.15), 0.028, m_frame)
@@ -327,6 +341,7 @@ def build():
     crank_obj.name = "pedal_crank"
     bpy.context.scene.cursor.location = crank_center
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
     # -------------------------------------------------------------
     # 4. CARRIAGE, PASSENGER CABIN & FOLK ART
@@ -396,20 +411,33 @@ def build():
     create_cylinder_between("Puller_Forearm_R", (0.54, 0.26, 1.50), (0.95, 0.34, 1.66), 0.042, m_puller_skin, verts=10)
     create_sphere("Puller_Hand_R", (0.96, 0.35, 1.67), 0.048, (1.2, 0.9, 0.9), m_puller_skin, segs=10, rings=8)
 
-    # Articulated Pedaling Legs (Bone origins at hip joint for Three.js pedaling kinetics!)
+    # Articulated Pedaling Legs (Parented hierarchy: Hip -> Thigh -> Knee/Shin -> Ankle/Foot!)
     hip_l = (0.05, -0.12, 1.18)
     knee_l = (0.26, -0.16, 0.98)
     ankle_l = (0.28, -0.17, 0.78)
-    create_bone_cylinder("Puller_Thigh_L", hip_l, knee_l, 0.068, m_puller_lungi, verts=12)
-    create_bone_cylinder("Puller_Shin_L", knee_l, ankle_l, 0.052, m_puller_skin, verts=10)
-    create_box("Puller_Foot_L", (ankle_l[0] + 0.04, ankle_l[1], ankle_l[2] - 0.02), (0.16, 0.075, 0.04), m_sandal, bevel=0.01)
+    thigh_l = create_bone_cylinder("Puller_Thigh_L", hip_l, knee_l, 0.068, m_puller_lungi, verts=12)
+    shin_l = create_bone_cylinder("Puller_Shin_L", knee_l, ankle_l, 0.052, m_puller_skin, verts=10)
+    foot_l = create_box("Puller_Foot_L", (ankle_l[0] + 0.04, ankle_l[1], ankle_l[2] - 0.02), (0.16, 0.075, 0.04), m_sandal, bevel=0.01)
+    
+    # Hierarchy: Knee parented to Thigh, Foot parented to Knee
+    bpy.context.view_layer.update()
+    shin_l.parent = thigh_l
+    shin_l.matrix_parent_inverse = thigh_l.matrix_world.inverted()
+    foot_l.parent = shin_l
+    foot_l.matrix_parent_inverse = shin_l.matrix_world.inverted()
 
     hip_r = (0.05, 0.12, 1.18)
     knee_r = (0.02, 0.16, 0.94)
     ankle_r = (-0.05, 0.17, 0.78)
-    create_bone_cylinder("Puller_Thigh_R", hip_r, knee_r, 0.068, m_puller_lungi, verts=12)
-    create_bone_cylinder("Puller_Shin_R", knee_r, ankle_r, 0.052, m_puller_skin, verts=10)
-    create_box("Puller_Foot_R", (ankle_r[0] + 0.04, ankle_r[1], ankle_r[2] - 0.02), (0.16, 0.075, 0.04), m_sandal, bevel=0.01)
+    thigh_r = create_bone_cylinder("Puller_Thigh_R", hip_r, knee_r, 0.068, m_puller_lungi, verts=12)
+    shin_r = create_bone_cylinder("Puller_Shin_R", knee_r, ankle_r, 0.052, m_puller_skin, verts=10)
+    foot_r = create_box("Puller_Foot_R", (ankle_r[0] + 0.04, ankle_r[1], ankle_r[2] - 0.02), (0.16, 0.075, 0.04), m_sandal, bevel=0.01)
+
+    bpy.context.view_layer.update()
+    shin_r.parent = thigh_r
+    shin_r.matrix_parent_inverse = thigh_r.matrix_world.inverted()
+    foot_r.parent = shin_r
+    foot_r.matrix_parent_inverse = shin_r.matrix_world.inverted()
 
     # -------------------------------------------------------------
     # 6. PASSENGER LEFT: MALE IN PANJABI (100% COMPLETE ANATOMY & SEATED ON CUSHION)

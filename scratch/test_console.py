@@ -4,33 +4,57 @@ import threading
 import time
 import subprocess
 import os
+import socket
+import json
 
-PORT = 8769
+def find_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('127.0.0.1', 0))
+        return s.getsockname()[1]
+
+PORT = find_free_port()
+
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args): pass
 
-def main():
-    t = threading.Thread(target=lambda: socketserver.TCPServer(('127.0.0.1', PORT), QuietHandler).serve_forever(), daemon=True)
-    t.start()
-    time.sleep(1)
+def run_server(server_ready_event):
+    socketserver.TCPServer.allow_reuse_address = True
+    try:
+        with socketserver.TCPServer(("127.0.0.1", PORT), QuietHandler) as httpd:
+            server_ready_event.set()
+            httpd.serve_forever()
+    except Exception as e:
+        print(f"Server error: {e}", flush=True)
 
-    chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-    cmd = [
-        chrome_path,
-        '--headless=new',
-        '--no-sandbox',
-        '--enable-webgl',
-        '--use-gl=angle',
-        '--enable-logging=stderr',
-        '--v=1',
-        '--virtual-time-budget=6000',
-        '--screenshot=scratch_test.png',
-        f'http://127.0.0.1:{PORT}/index.html?view=3d'
-    ]
-    res = subprocess.run(cmd, capture_output=True, text=True)
-    with open('console_output.txt', 'w', encoding='utf-8') as f:
-        f.write(res.stdout + '\n--- STDERR ---\n' + res.stderr)
-    print("Logged to console_output.txt")
+ready = threading.Event()
+t = threading.Thread(target=run_server, args=(ready,), daemon=True)
+t.start()
+ready.wait(timeout=5)
+print(f"Server on {PORT}")
 
-if __name__ == '__main__':
-    main()
+# Let's run chrome with remote debugging to fetch console errors
+chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+import urllib.request
+
+debug_port = find_free_port()
+cmd = [
+    chrome_path,
+    "--headless=new",
+    "--no-sandbox",
+    f"--remote-debugging-port={debug_port}",
+    "--enable-webgl",
+    "--use-gl=angle",
+    f"http://127.0.0.1:{PORT}/index.html?view=3d"
+]
+
+proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+time.sleep(3)
+
+try:
+    with urllib.request.urlopen(f"http://127.0.0.1:{debug_port}/json") as resp:
+        tabs = json.loads(resp.read().decode())
+        print("Tabs:", tabs)
+except Exception as e:
+    print("Debug error:", e)
+
+proc.terminate()

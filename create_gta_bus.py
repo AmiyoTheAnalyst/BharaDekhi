@@ -190,9 +190,9 @@ for side in [-1, 1]:
         add_beveled_box(f"WinTransom_{side}_{idx}", (w_len, 0.055, 0.032), (wx, y_pos, 2.27), mat_black_trim, bevel_width=0.005)
         add_beveled_box(f"WinGlass_{side}_{idx}", (w_len, 0.02, 0.94), (wx, side * 1.265, 2.02), mat_glass, bevel_width=0.0)
 
-    # Side White Banner Backplate & Embossed "VIP TRANSIT" 3D Typography
-    add_beveled_box(f"Banner_Backplate_{side}", (4.50, 0.02, 0.18), (0.45, side * 1.29, 2.74), mat_white, bevel_width=0.005)
-    add_3d_text(f"Banner_Text_{side}", "VIP TRANSIT", (0.45, side * 1.305, 2.74), (math.pi / 2, 0, math.pi if side > 0 else 0), 0.13, 0.015, mat_red)
+    # Side White Banner Backplate & Embossed "BRTC · MIRPUR 10 ⇄ MOTIJHEEL" 3D Typography
+    add_beveled_box(f"Banner_Backplate_{side}", (5.0, 0.02, 0.24), (0.45, side * 1.29, 2.74), mat_white, bevel_width=0.005)
+    add_3d_text(f"Banner_Text_{side}", "BRTC · MIRPUR 10 ⇄ MOTIJHEEL", (0.45, side * 1.305, 2.74), (math.pi / 2, 0, math.pi if side > 0 else 0), 0.16, 0.025, mat_red)
 
 # Front Bi-Fold Passenger Door (Curb Side at Y = -1.28)
 door_side = -1
@@ -261,10 +261,10 @@ for wy_off in [-0.42, 0.42]:
     add_cyl(f"Wiper_Pivot_{wy_off}", 0.03, 0.06, (5.78, wy_off, 1.38), (0, math.pi / 2, 0), mat_chrome)
     add_beveled_box(f"Wiper_Arm_{wy_off}", (0.03, 0.025, 0.72), (5.79, wy_off, 1.74), mat_black_trim, bevel_width=0.004)
 
-# Upper Destination Sign Box with "VIP 27 · MIRPUR 10" Glowing LED
+# Upper Destination Sign Box with "BRTC 12 · MIRPUR 10" Glowing LED
 add_beveled_box("Dest_Sign_Housing", (0.22, 2.05, 0.28), (5.78, 0, 2.82), mat_black_trim, bevel_width=0.03)
 add_beveled_box("Dest_LED_Board", (0.04, 1.95, 0.22), (5.90, 0, 2.82), mat_black_trim, bevel_width=0.005)
-add_3d_text("Dest_LED_Text", "VIP 27 · MIRPUR 10", (5.93, 0, 2.82), (math.pi / 2, 0, math.pi / 2), 0.10, 0.01, mat_led_board)
+add_3d_text("Dest_LED_Text", "BRTC 12 · MIRPUR 10", (5.93, 0, 2.82), (math.pi / 2, 0, math.pi / 2), 0.10, 0.015, mat_led_board)
 
 for side in [-1, 1]:
     add_beveled_box(f"Dest_Amber_Marker_{side}", (0.04, 0.09, 0.07), (5.90, side * 0.95, 2.82), mat_amber, bevel_width=0.005)
@@ -384,22 +384,26 @@ for w_name, w_x, side_sign in [("Wheel_RL", -3.35, 1), ("Wheel_RR", -3.35, -1)]:
     link_to_bus(w_pivot, bus_root)
 
     # Dual Tires: Outer Tire + Inner Tire
-    add_cyl(f"{w_name}_Tire_Outer", 0.52, 0.24, (0, side_sign * 0.14, 0), (math.pi / 2, 0, 0), mat_tire, vertices=36, parent=w_pivot)
-    add_cyl(f"{w_name}_Tire_Inner", 0.52, 0.24, (0, side_sign * -0.14, 0), (math.pi / 2, 0, 0), mat_tire, vertices=36, parent=w_pivot)
+    add_cyl(f"{w_name}_Tire_Outer", 0.52, 0.22, (0, side_sign * 0.13, 0), (math.pi / 2, 0, 0), mat_tire, vertices=36, parent=w_pivot)
+    add_cyl(f"{w_name}_Tire_Inner", 0.52, 0.22, (0, side_sign * -0.13, 0), (math.pi / 2, 0, 0), mat_tire, vertices=36, parent=w_pivot)
 
-    # Deep Inset Steel Rim Lip (Recessed 16cm inward into the wheel barrel!)
-    rim_y = side_sign * 0.04
-    add_cyl(f"{w_name}_Rim_Lip", 0.38, 0.06, (0, rim_y, 0), (math.pi / 2, 0, 0), mat_rim, vertices=32, parent=w_pivot)
-    # Concave deep dish recess
-    add_cyl(f"{w_name}_Deep_Dish", 0.32, 0.12, (0, rim_y - side_sign * 0.05, 0), (math.pi / 2, 0, 0), mat_rim_dark, vertices=28, parent=w_pivot)
-    # Heavy cylindrical axle hub drum
-    add_cyl(f"{w_name}_Axle_Drum", 0.16, 0.16, (0, rim_y - side_sign * 0.02, 0), (math.pi / 2, 0, 0), mat_chrome, vertices=20, parent=w_pivot)
-    # 10 Ventilation cutouts in the deep dish
+    # Fully Visible Commercial Transit Dual-Wheel Rim Lip & Deep Concave Dish
+    # Placed on outer face (side_sign * 0.22) so rim lip, chrome axle drum, and lug nuts are 100% visible!
+    rim_y = side_sign * 0.22
+    add_cyl(f"{w_name}_Rim_Lip", 0.38, 0.05, (0, rim_y, 0), (math.pi / 2, 0, 0), mat_rim, vertices=32, parent=w_pivot)
+    # Concave deep dish recess extending inward into the barrel
+    add_cyl(f"{w_name}_Deep_Dish", 0.33, 0.09, (0, rim_y - side_sign * 0.04, 0), (math.pi / 2, 0, 0), mat_rim_dark, vertices=28, parent=w_pivot)
+    # Heavy cylindrical chrome axle hub drum protruding outward
+    add_cyl(f"{w_name}_Axle_Drum", 0.16, 0.12, (0, rim_y - side_sign * 0.01, 0), (math.pi / 2, 0, 0), mat_chrome, vertices=20, parent=w_pivot)
+    # 10 Ventilation cutouts in the deep dish & 10 Heavy-Duty Lug Nuts
     for b_i in range(10):
         ang = b_i * (2 * math.pi / 10)
-        vx = 0.24 * math.cos(ang)
-        vz = 0.24 * math.sin(ang)
-        add_cyl(f"{w_name}_Vent_{b_i}", 0.030, 0.10, (vx, rim_y - side_sign * 0.03, vz), (math.pi / 2, 0, 0), mat_black_trim, vertices=12, parent=w_pivot)
+        vx = 0.23 * math.cos(ang)
+        vz = 0.23 * math.sin(ang)
+        add_cyl(f"{w_name}_Vent_{b_i}", 0.028, 0.08, (vx, rim_y - side_sign * 0.03, vz), (math.pi / 2, 0, 0), mat_black_trim, vertices=12, parent=w_pivot)
+        lx = 0.12 * math.cos(ang + math.pi / 10)
+        lz = 0.12 * math.sin(ang + math.pi / 10)
+        add_cyl(f"{w_name}_Lug_{b_i}", 0.016, 0.04, (lx, rim_y + side_sign * 0.01, lz), (math.pi / 2, 0, 0), mat_chrome, vertices=8, parent=w_pivot)
 
 # ==============================================================================
 # 11. EXPORT PRODUCTION GLB FOR BHARADEKHI

@@ -870,14 +870,14 @@
     const skinMat = new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.7 });
 
     const outfits = [
-      { top: 0xeab308, bottom: 0x1d4ed8, hair: 0x1e293b },
-      { top: 0xf43f5e, bottom: 0x18181b, hair: 0x1c1917 },
-      { top: 0xf8fafc, bottom: 0x78716c, hair: 0x292524 },
-      { top: 0x2563eb, bottom: 0x334155, hair: 0x0f172a },
-      { top: 0x15803d, bottom: 0xe7d7b1, hair: 0x292016, longTop: true },
-      { top: 0xb45309, bottom: 0x374151, hair: 0x211c1a, longTop: true },
-      { top: 0xdb2777, bottom: 0x7c3aed, hair: 0x211c1a, scarf: true },
-      { top: 0x0f766e, bottom: 0x78350f, hair: 0x292016 }
+      { top: 0xf8fafc, bottom: 0xe2e8f0, hair: 0x1e293b, panjabi: true, shoe: 0x18181b },
+      { top: 0x1e3a8a, bottom: 0xf1f5f9, hair: 0x0f172a, panjabi: true, shoe: 0x27272a },
+      { top: 0xdc2626, bottom: 0xb91c1c, hair: 0x18181b, saree: true, gold: 0xfacc15, shoe: 0x451a03 },
+      { top: 0x059669, bottom: 0x047857, hair: 0x1e293b, salwar: true, scarf: true, shoe: 0x334155 },
+      { top: 0x0284c7, bottom: 0x1e293b, hair: 0x18181b, polo: true, shoe: 0xf8fafc },
+      { top: 0x374151, bottom: 0x1f2937, hair: 0x090d16, hoodie: true, shoe: 0xe11d48 },
+      { top: 0xdb2777, bottom: 0xf8fafc, hair: 0x18181b, kurti: true, scarf: true, shoe: 0xd97706 },
+      { top: 0x38bdf8, bottom: 0x334155, hair: 0x1c1917, executive: true, shoe: 0x18181b }
     ];
     const outfit = outfits[styleIdx];
     const topColor = outfit.top;
@@ -886,7 +886,8 @@
 
     const topMat = new THREE.MeshStandardMaterial({ color: topColor, roughness: 0.6 });
     const bottomMat = new THREE.MeshStandardMaterial({ color: bottomColor, roughness: 0.7 });
-    const shoeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 }); // White sneakers
+    const shoeMat = new THREE.MeshStandardMaterial({ color: outfit.shoe || 0xf8fafc, roughness: 0.4 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: outfit.gold || 0xfacc15, roughness: 0.35, metalness: 0.5 });
     const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
 
     // 1. Hips / Pelvis
@@ -894,14 +895,58 @@
     pelvis.position.y = 5.2;
     group.add(pelvis);
 
-    // 2. Sculpted Torso / Chest
+    // 2. Sculpted Torso & Authentic Dhaka Clothing
     const torso = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.6, 1.3), topMat);
     torso.position.y = 7.0;
     group.add(torso);
-    if (outfit.longTop) {
-      const tunic = new THREE.Mesh(new THREE.BoxGeometry(2.45, 3.5, 1.42), topMat);
-      tunic.position.y = 6.35;
+
+    if (outfit.panjabi) {
+      // Long knee-length Panjabi tunic with side slits and mandarin collar
+      const tunic = new THREE.Mesh(new THREE.BoxGeometry(2.45, 3.8, 1.42), topMat);
+      tunic.position.y = 5.5;
       group.add(tunic);
+      const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.58, 0.45, 12), topMat);
+      collar.position.y = 8.5;
+      group.add(collar);
+      const placket = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.2, 0.15), goldMat);
+      placket.position.set(0, 7.2, 0.72);
+      group.add(placket);
+    } else if (outfit.saree) {
+      // Graceful Bengali Saree with draped pallu over shoulder & golden hem
+      const sareeDrape = new THREE.Mesh(new THREE.BoxGeometry(2.65, 3.2, 1.45), topMat);
+      sareeDrape.position.y = 6.2;
+      group.add(sareeDrape);
+      const pallu = new THREE.Mesh(new THREE.BoxGeometry(0.85, 3.5, 0.32), goldMat);
+      pallu.position.set(0.35, 6.8, 0.72);
+      pallu.rotation.z = -0.22;
+      group.add(pallu);
+      const sareeBorder = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.35, 1.48), goldMat);
+      sareeBorder.position.y = 4.4;
+      group.add(sareeBorder);
+    } else if (outfit.salwar || outfit.kurti) {
+      // Salwar Kameez / Kurti with draped dupatta scarf
+      const tunic = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.4, 1.38), topMat);
+      tunic.position.y = 5.8;
+      group.add(tunic);
+      const dupatta = new THREE.Mesh(new THREE.BoxGeometry(2.55, 1.2, 0.35), goldMat);
+      dupatta.position.set(0, 7.4, 0.72);
+      group.add(dupatta);
+    } else if (outfit.hoodie) {
+      // Modern Streetwear Hoodie with front kangaroo pocket
+      const pocket = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 0.35), bottomMat);
+      pocket.position.set(0, 6.3, 0.72);
+      group.add(pocket);
+      const hood = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 8), topMat);
+      hood.position.set(0, 8.2, -0.65);
+      group.add(hood);
+    } else if (outfit.executive || outfit.polo) {
+      // Collared Shirt / Polo with button placket
+      const collar = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.35, 1.35), topMat);
+      collar.position.y = 8.35;
+      group.add(collar);
+      const placket = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.12), new THREE.MeshBasicMaterial({ color: 0x1e293b }));
+      placket.position.set(0, 7.3, 0.70);
+      group.add(placket);
     }
 
     // 3. Two Articulated Continuous Lofted Legs terminating in White Sneakers
@@ -1084,7 +1129,9 @@
       rightArm.rotation.z = -0.08 - Math.random() * 0.12;
     }
 
-    scene.add(group);
+    if (typeof scene !== 'undefined' && scene && scene.add) {
+      scene.add(group);
+    }
     return group;
   }
   window.createArticulatedHuman = createArticulatedHuman;
@@ -2104,7 +2151,9 @@
     }
 
     freezeStatic(group);
-    scene.add(group);
+    if (typeof scene !== 'undefined' && scene && scene.add) {
+      scene.add(group);
+    }
     return group;
   }
 
@@ -2375,6 +2424,59 @@
 
     const tex = new THREE.CanvasTexture(canvas);
     bikeTextureCache.discRotor = tex;
+    return tex;
+  }
+
+  // Photo 1 Aerodynamic Helmet Painted Swoop & Spine Texture Generator
+  function getAerodynamicHelmetTexture(shellHex, decalHex) {
+    const key = `helmet_${shellHex}_${decalHex}`;
+    if (bikeTextureCache[key]) return bikeTextureCache[key];
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Glossy vibrant shell
+    ctx.fillStyle = '#' + new THREE.Color(shellHex).getHexString();
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    // 2. Black aerodynamic center spine stripe (over the top crown)
+    ctx.fillStyle = '#090d16';
+    ctx.beginPath();
+    ctx.moveTo(225, 1024);
+    ctx.lineTo(287, 1024);
+    ctx.lineTo(295, 450);
+    ctx.lineTo(217, 450);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Signature White/Silver Aerodynamic Curved Swoop Graphic Decal (Photo 1)
+    ctx.strokeStyle = '#' + new THREE.Color(decalHex).getHexString();
+    ctx.lineWidth = 42;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Right side swoop: curves from above visor up over crown down to rear
+    ctx.beginPath();
+    ctx.moveTo(330, 620);
+    ctx.bezierCurveTo(420, 880, 520, 840, 620, 640);
+    ctx.stroke();
+
+    // Left side swoop
+    ctx.beginPath();
+    ctx.moveTo(182, 620);
+    ctx.bezierCurveTo(92, 880, 0, 840, 0, 750);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(1024, 750);
+    ctx.bezierCurveTo(1000, 840, 932, 880, 842, 620);
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
+    bikeTextureCache[key] = tex;
     return tex;
   }
 
@@ -3658,134 +3760,115 @@
     }
 
     // B. ANATOMICAL HEAD & DIVERSE 3D FACIAL STRUCTURES
-    // 4 Distinct Styles: 0: Clean-Shaven, 1: Designer Stubble, 2: Full Biker Beard, 3: Sculpted Goatee
     const headGroup = new THREE.Group();
     headGroup.position.set(headPosition[0], headPosition[1], headPosition[2]);
 
     const beardStyleIdx = outfitIdx % 4;
 
-    // Anatomical Head Sphere (radius 0.82)
-    const headMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.82, 20, 18),
-      new THREE.MeshStandardMaterial({
-        map: getRealisticFaceTexture(paletteIdx, palette.accent, beardStyleIdx),
-        roughness: 0.58,
-        metalness: 0.05
-      })
-    );
-    headMesh.rotation.y = -Math.PI / 2;
-    headGroup.add(headMesh);
-
-    // Realistic Almond-Shaped 3D Eyes (White Sclera + Dark Iris Pupil)
-    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const darkIrisMat = new THREE.MeshBasicMaterial({ color: 0x1e1510 });
-    [-0.22, 0.22].forEach(ez => {
-      const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), eyeWhiteMat);
-      eyeWhite.position.set(0.68, 0.12, ez);
-      headGroup.add(eyeWhite);
-      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.068, 10, 8), darkIrisMat);
-      pupil.position.set(0.76, 0.12, ez);
-      headGroup.add(pupil);
-
-      // Upper Eyelid Crease
-      const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.22, 8), hairMat);
-      lid.rotation.x = Math.PI / 2;
-      lid.position.set(0.71, 0.22, ez);
-      headGroup.add(lid);
-    });
-
-    // 3D Contoured Eyebrows
-    [-0.22, 0.22].forEach(ez => {
-      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.22), hairMat);
-      brow.position.set(0.67, 0.26, ez);
-      brow.rotation.y = (ez < 0 ? -0.15 : 0.15);
-      headGroup.add(brow);
-    });
-
-    // 3D Sculpted Nose (Bridge, Tip, Nostrils)
-    const noseBridge = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.32, 12), skinMat);
-    noseBridge.rotation.z = -Math.PI / 2 + 0.14;
-    noseBridge.position.set(0.79, -0.02, 0);
-    headGroup.add(noseBridge);
-
-    const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), skinMat);
-    noseTip.position.set(0.83, -0.05, 0);
-    headGroup.add(noseTip);
-
-    // Natural Sculpted Lips
-    const upperLip = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), lipMat);
-    upperLip.rotation.x = Math.PI / 2;
-    upperLip.position.set(0.78, -0.22, 0);
-    headGroup.add(upperLip);
-
-    const lowerLip = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.20, 10), lipMat);
-    lowerLip.rotation.x = Math.PI / 2;
-    lowerLip.position.set(0.76, -0.27, 0);
-    headGroup.add(lowerLip);
-
-    // Sculpted Chin & Jaw
-    const chin = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), skinMat);
-    chin.position.set(0.68, -0.36, 0);
-    headGroup.add(chin);
-
-    // 3D Contoured Ears on both sides
-    [-1, 1].forEach(side => {
-      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), skinMat);
-      ear.scale.set(0.8, 1.3, 0.4);
-      ear.position.set(0.06, 0.02, side * 0.78);
-      headGroup.add(ear);
-    });
-
-    // DIVERSE 3D FACIAL HAIR ARCHETYPES
-    if (beardStyleIdx === 0) {
-      // Style 0: 100% Clean-Shaven (Smooth chiseled jaw, zero beard/mustache)
-      // Chin cleft highlight
-      const cleft = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.02), skinMat);
-      cleft.position.set(0.78, -0.36, 0);
-      headGroup.add(cleft);
-
-    } else if (beardStyleIdx === 1) {
-      // Style 1: Designer 5 O'Clock Stubble (Subtle dark stubble chin & jaw accent)
-      const stubbleMat = new THREE.MeshStandardMaterial({ color: 0x1a120c, roughness: 0.90, transparent: true, opacity: 0.45 });
-      const stubbleChin = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), stubbleMat);
-      stubbleChin.position.set(0.69, -0.36, 0);
-      headGroup.add(stubbleChin);
-
-    } else if (beardStyleIdx === 2) {
-      // Style 2: Full Groomed Biker Beard & Connected Mustache
-      const beardMat = new THREE.MeshStandardMaterial({ color: 0x140a04, roughness: 0.85 });
-      
-      // Full Chin Beard
-      const chinBeard = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), beardMat);
-      chinBeard.scale.set(1.15, 1.25, 1.45);
-      chinBeard.position.set(0.68, -0.38, 0);
-      headGroup.add(chinBeard);
-
-      // Connected Mustache arching over upper lip
-      const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.28, 12), beardMat);
-      stache.rotation.x = Math.PI / 2;
-      stache.position.set(0.80, -0.19, 0);
-      headGroup.add(stache);
-
-// Jawline beard blends naturally from chin to ears
-
-    } else {
-      // Style 3: Sculpted Goatee & Stylized Mustache (Clean Cheeks)
-      const goateeMat = new THREE.MeshStandardMaterial({ color: 0x180d05, roughness: 0.85 });
-      
-      const goatee = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), goateeMat);
-      goatee.scale.set(1.1, 1.2, 0.9);
-      goatee.position.set(0.72, -0.36, 0);
-      headGroup.add(goatee);
-
-      const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.24, 12), goateeMat);
-      stache.rotation.x = Math.PI / 2;
-      stache.position.set(0.79, -0.19, 0);
-      headGroup.add(stache);
-    }
-
-    // CLEAN HELMET FRAMING (NO BLACK BAR ACROSS MOUTH, NO CHINBAR CUTTING NOSE!)
     if (isCruiser) {
+      // Anatomical Head Sphere (radius 0.82)
+      const headMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.82, 20, 18),
+        new THREE.MeshStandardMaterial({
+          map: getRealisticFaceTexture(paletteIdx, palette.accent, beardStyleIdx),
+          roughness: 0.58,
+          metalness: 0.05
+        })
+      );
+      headMesh.rotation.y = -Math.PI / 2;
+      headGroup.add(headMesh);
+
+      // Realistic Almond-Shaped 3D Eyes (White Sclera + Dark Iris Pupil)
+      const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const darkIrisMat = new THREE.MeshBasicMaterial({ color: 0x1e1510 });
+      [-0.22, 0.22].forEach(ez => {
+        const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), eyeWhiteMat);
+        eyeWhite.position.set(0.68, 0.12, ez);
+        headGroup.add(eyeWhite);
+        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.068, 10, 8), darkIrisMat);
+        pupil.position.set(0.76, 0.12, ez);
+        headGroup.add(pupil);
+
+        // Upper Eyelid Crease
+        const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.22, 8), hairMat);
+        lid.rotation.x = Math.PI / 2;
+        lid.position.set(0.71, 0.22, ez);
+        headGroup.add(lid);
+      });
+      // 3D Contoured Eyebrows
+      [-0.22, 0.22].forEach(ez => {
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.22), hairMat);
+        brow.position.set(0.67, 0.26, ez);
+        brow.rotation.y = (ez < 0 ? -0.15 : 0.15);
+        headGroup.add(brow);
+      });
+
+      // 3D Sculpted Nose (Bridge, Tip, Nostrils)
+      const noseBridge = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.32, 12), skinMat);
+      noseBridge.rotation.z = -Math.PI / 2 + 0.14;
+      noseBridge.position.set(0.79, -0.02, 0);
+      headGroup.add(noseBridge);
+
+      const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 8), skinMat);
+      noseTip.position.set(0.83, -0.05, 0);
+      headGroup.add(noseTip);
+
+      // Natural Sculpted Lips
+      const upperLip = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), lipMat);
+      upperLip.rotation.x = Math.PI / 2;
+      upperLip.position.set(0.78, -0.22, 0);
+      headGroup.add(upperLip);
+
+      const lowerLip = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.20, 10), lipMat);
+      lowerLip.rotation.x = Math.PI / 2;
+      lowerLip.position.set(0.76, -0.27, 0);
+      headGroup.add(lowerLip);
+
+      // Sculpted Chin & Jaw
+      const chin = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), skinMat);
+      chin.position.set(0.68, -0.36, 0);
+      headGroup.add(chin);
+
+      // 3D Contoured Ears on both sides
+      [-1, 1].forEach(side => {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), skinMat);
+        ear.scale.set(0.8, 1.3, 0.4);
+        ear.position.set(0.06, 0.02, side * 0.78);
+        headGroup.add(ear);
+      });
+
+      // DIVERSE 3D FACIAL HAIR ARCHETYPES (Cruiser Biker Culture)
+      if (beardStyleIdx === 0) {
+        const cleft = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.02), skinMat);
+        cleft.position.set(0.78, -0.36, 0);
+        headGroup.add(cleft);
+      } else if (beardStyleIdx === 1) {
+        const stubbleMat = new THREE.MeshStandardMaterial({ color: 0x1a120c, roughness: 0.90, transparent: true, opacity: 0.45 });
+        const stubbleChin = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), stubbleMat);
+        stubbleChin.position.set(0.69, -0.36, 0);
+        headGroup.add(stubbleChin);
+      } else if (beardStyleIdx === 2) {
+        const beardMat = new THREE.MeshStandardMaterial({ color: 0x140a04, roughness: 0.85 });
+        const chinBeard = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), beardMat);
+        chinBeard.scale.set(1.15, 1.25, 1.45);
+        chinBeard.position.set(0.68, -0.38, 0);
+        headGroup.add(chinBeard);
+        const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.28, 12), beardMat);
+        stache.rotation.x = Math.PI / 2;
+        stache.position.set(0.80, -0.19, 0);
+        headGroup.add(stache);
+      } else {
+        const goateeMat = new THREE.MeshStandardMaterial({ color: 0x180d05, roughness: 0.85 });
+        const goatee = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), goateeMat);
+        goatee.scale.set(1.1, 1.2, 0.9);
+        goatee.position.set(0.72, -0.36, 0);
+        headGroup.add(goatee);
+        const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.24, 12), goateeMat);
+        stache.rotation.x = Math.PI / 2;
+        stache.position.set(0.79, -0.19, 0);
+        headGroup.add(stache);
+      }
+
       // Cruiser Sleek Half-Shell Skull-Cap & Raised Aviator Goggles
       const skullCap = new THREE.Mesh(
         new THREE.SphereGeometry(0.86, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.44),
@@ -3808,75 +3891,115 @@
       });
 
     } else {
-      // Motorcycle Helmet with Raised Polycarbonate Visor
-      const helmetColor = isCafeRacer ? 0x090d16 : (isSupersport ? palette.fairing : (outfitCfg.streetfighter ? 0x111827 : outfitCfg.helmetHex));
+      // Aerodynamic Full-Face Sports Motorcycle Helmet (Photo 1 Matching Aerodynamic Shell)
+      const HELMET_PRESETS = [
+        { shell: 0x2563eb, decal: 0xf8fafc }, // Photo 1 Electric Cobalt Blue!
+        { shell: 0xea580c, decal: 0xf8fafc }, // Photo 1 Neon Flame Orange hoodie match!
+        { shell: 0xdc2626, decal: 0xf8fafc }, // Candy Sport Red
+        { shell: 0xf8fafc, decal: 0x18181b }, // Pearl Arctic White
+        { shell: 0x18181b, decal: 0x22c55e }, // Stealth Black & Lime
+        { shell: 0x059669, decal: 0xf8fafc }, // Kawasaki Emerald Green
+        { shell: 0x6366f1, decal: 0xf8fafc }, // Deep Royal Purple
+        { shell: 0xeab308, decal: 0x18181b }  // Solar Track Yellow
+      ];
+      const hPreset = HELMET_PRESETS[Math.abs(seed) % HELMET_PRESETS.length];
+      const tex = getAerodynamicHelmetTexture(hPreset.shell, hPreset.decal);
+
       const helmetMat = new THREE.MeshStandardMaterial({
-        color: helmetColor,
-        roughness: 0.20,
-        metalness: isCafeRacer ? 0.35 : 0.60
+        map: tex,
+        roughness: 0.12,
+        metalness: 0.45
+      });
+      const visorMat = new THREE.MeshStandardMaterial({
+        color: 0x090d16,
+        roughness: 0.03,
+        metalness: 0.94,
+        transparent: true,
+        opacity: 0.94,
+        side: THREE.DoubleSide
+      });
+      const darkVentMat = new THREE.MeshStandardMaterial({
+        color: 0x090d16,
+        roughness: 0.35,
+        metalness: 0.60
+      });
+      const chromeMat = new THREE.MeshStandardMaterial({
+        color: 0xd9e4ff,
+        roughness: 0.15,
+        metalness: 0.88
       });
 
-      // Helmet Dome (Crown)
-      const crown = new THREE.Mesh(
-        new THREE.SphereGeometry(0.88, 28, 16, 0, Math.PI * 2, 0, Math.PI * 0.44),
+      // 1. Aerodynamic Contoured Shell (Elongated oval sportbike helmet profile)
+      const shell = new THREE.Mesh(
+        new THREE.SphereGeometry(0.88, 36, 28),
         helmetMat
       );
-      crown.position.set(-0.04, 0.06, 0);
-      headGroup.add(crown);
+      shell.scale.set(1.22, 1.05, 0.90);
+      shell.position.set(-0.04, 0.04, 0);
+      headGroup.add(shell);
 
-      // Rear Skull Shell
-      const rearShell = new THREE.Mesh(
-        new THREE.SphereGeometry(0.88, 28, 16, -Math.PI * 0.65, Math.PI * 1.30, Math.PI * 0.40, Math.PI * 0.50),
+      // 2. Aerodynamic Rear Ducktail Spoiler Lip (Photo 1)
+      const spoiler = new THREE.Mesh(
+        new THREE.BoxGeometry(0.38, 0.10, 1.05),
         helmetMat
       );
-      rearShell.position.set(-0.06, 0.04, 0);
-      headGroup.add(rearShell);
+      spoiler.position.set(-0.84, 0.18, 0);
+      spoiler.rotation.z = -0.32;
+      headGroup.add(spoiler);
 
-      if (isCafeRacer) {
-        // Transparent Yellow Bubble Shield
-        const bubbleMat = new THREE.MeshStandardMaterial({
-          color: 0xfacc15,
-          roughness: 0.06,
-          metalness: 0.25,
-          transparent: true,
-          opacity: 0.38,
-          side: THREE.DoubleSide,
-          depthWrite: false
-        });
-        const bubbleShield = new THREE.Mesh(
-          new THREE.SphereGeometry(0.92, 24, 18, -Math.PI * 0.26, Math.PI * 0.52, Math.PI * 0.15, Math.PI * 0.65),
-          bubbleMat
-        );
-        bubbleShield.position.set(0.12, 0.02, 0);
-        headGroup.add(bubbleShield);
+      // 3. Molded Chin Guard Bar (Flush with shell)
+      const chinBar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.86, 0.80, 0.42, 28, 1, false, -Math.PI * 0.35, Math.PI * 0.70),
+        helmetMat
+      );
+      chinBar.scale.set(1.18, 1.0, 0.88);
+      chinBar.position.set(0.18, -0.26, 0);
+      chinBar.rotation.z = 0.08;
+      headGroup.add(chinBar);
 
-      } else {
-        // Raised Polycarbonate Visor flipped up cleanly above brow
-        const raisedVisorMat = new THREE.MeshStandardMaterial({
-          color: 0x090d16,
-          roughness: 0.05,
-          metalness: 0.40,
-          transparent: true,
-          opacity: 0.42,
-          side: THREE.DoubleSide,
-          depthWrite: false
-        });
-        const raisedVisor = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.88, 0.88, 0.38, 20, 1, true, -Math.PI * 0.26, Math.PI * 0.52),
-          raisedVisorMat
-        );
-        raisedVisor.rotation.z = 0.55;
-        raisedVisor.position.set(0.18, 0.44, 0);
-        headGroup.add(raisedVisor);
+      // Chin Air Intake Grille
+      const chinVent = new THREE.Mesh(
+        new THREE.BoxGeometry(0.10, 0.14, 0.36),
+        darkVentMat
+      );
+      chinVent.position.set(1.08, -0.25, 0);
+      headGroup.add(chinVent);
 
-        // Chrome Visor Pivot Screws on sides
-        [-1, 1].forEach(side => {
-          const pivotScrew = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12), chromeMat);
-          pivotScrew.rotation.x = Math.PI / 2;
-          pivotScrew.position.set(0.08, 0.22, side * 0.89);
-          headGroup.add(pivotScrew);
-        });
-      }
+      // Top Ram-Air Intake Scoop
+      const topVent = new THREE.Mesh(
+        new THREE.BoxGeometry(0.44, 0.08, 0.26),
+        darkVentMat
+      );
+      topVent.position.set(0.14, 0.96, 0);
+      topVent.rotation.z = -0.12;
+      headGroup.add(topVent);
+
+      // 4. Dark Smoke / Iridescent Tinted Curved Visor (Photo 1)
+      const visor = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.91, 0.88, 0.46, 28, 1, true, -Math.PI * 0.35, Math.PI * 0.70),
+        visorMat
+      );
+      visor.scale.set(1.18, 1.0, 0.88);
+      visor.position.set(0.19, 0.10, 0);
+      headGroup.add(visor);
+
+      // Visor Hinge Pivot Discs
+      [-1, 1].forEach(side => {
+        const pivot = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.04, 16), chromeMat);
+        pivot.rotation.x = Math.PI / 2;
+        pivot.position.set(0.06, 0.12, side * 0.82);
+        headGroup.add(pivot);
+      });
+
+      // Bottom Neck Padded Collar
+      const neckSeal = new THREE.Mesh(
+        new THREE.TorusGeometry(0.68, 0.10, 10, 24),
+        darkVentMat
+      );
+      neckSeal.rotation.x = Math.PI / 2;
+      neckSeal.scale.set(1.18, 0.88, 1.0);
+      neckSeal.position.set(-0.05, -0.44, 0);
+      headGroup.add(neckSeal);
     }
     group.add(headGroup);
 
@@ -4362,6 +4485,10 @@
       });
 
     } else if (type === 'cng') {
+      if (cngPrototypeModel) {
+        replaceCNGWithModel(group, cngPrototypeModel);
+        return group;
+      }
       const length = 31;
       const width = 16.5;
 
@@ -4545,6 +4672,10 @@
       group.add(tl);
 
     } else if (type === 'rickshaw') {
+      if (rickshawPrototypeModel) {
+        replaceRickshawWithModel(group, rickshawPrototypeModel);
+        return group;
+      }
       const frameMat = new THREE.MeshStandardMaterial({ color: 0x202431, metalness: 0.72, roughness: 0.32 });
       const chromeMat = new THREE.MeshStandardMaterial({ color: 0xd9e4ff, metalness: 0.78, roughness: 0.24 });
       const blackRubber = new THREE.MeshStandardMaterial({ color: 0x11131b, roughness: 0.88 });
@@ -4645,17 +4776,20 @@
           }
 
           for (const side of [-1, 1]) {
-            const knee = side < 0 ? [2.3, 0.75, -0.88] : [1.0, 0.8, 0.85];
-            const pedal = side < 0 ? [1.81, 1.7, -1.12] : [1.81, 4.9, 1.12];
-            addBlockLimb(person, [-0.2, 1.55, side * 0.58], knee, 1.2, 1.1, pants);
-            const shin = addBlockLimb(person, knee, pedal, 0.95, 0.9, pants);
-            const shoeMesh = box([1.18, 0.56, 0.76], [pedal[0] + 0.52, pedal[1] - 0.02, pedal[2]], shoe);
+            const hip = [-0.10, 1.85, side * 0.58];
+            const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.48, 2.7, 10), pants); // Folded blue lungi
+            const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.36, 2.7, 10), skin);   // Bare calf
+            const shoeMesh = box([1.18, 0.42, 0.65], [0, 0, 0], shoe);                            // Sandal
+            person.add(thigh);
+            person.add(shin);
             pedalLegs.push({
-              knee,
+              hip,
               side,
+              thigh,
               shin,
               shoe: shoeMesh,
-              initialLength: shin.geometry.parameters.height
+              lenThigh: 2.7,
+              lenShin: 2.7
             });
           }
           person.userData.pedalLegs = pedalLegs;
@@ -4683,16 +4817,34 @@
         const pivot = new THREE.Vector3(1.35, 3.3, 0);
         const axis = new THREE.Vector3(0, 0, 1);
         person.userData.pedalLegs.forEach(leg => {
-          const pedalTarget = new THREE.Vector3(0.46, leg.side * 1.6, leg.side * 1.12)
-            .applyAxisAngle(axis, phase)
+          const legPhase = phase + (leg.side > 0 ? 0 : Math.PI);
+          const pedalTarget = new THREE.Vector3(1.45 * Math.cos(legPhase), 1.45 * Math.sin(legPhase), leg.side * 1.12)
             .add(pivot)
             .sub(person.position);
-          const knee = new THREE.Vector3(leg.knee[0], leg.knee[1], leg.knee[2]);
-          const direction = pedalTarget.clone().sub(knee);
-          leg.shin.position.copy(knee).add(pedalTarget).multiplyScalar(0.5);
-          leg.shin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
-          leg.shin.scale.y = direction.length() / leg.initialLength;
-          leg.shoe.position.set(pedalTarget.x + 0.52, pedalTarget.y - 0.02, pedalTarget.z);
+
+          const H = new THREE.Vector3(leg.hip[0], leg.hip[1], leg.hip[2]);
+          const P = pedalTarget;
+          const diff = P.clone().sub(H);
+          const D = Math.max(0.6, Math.min(diff.length(), leg.lenThigh + leg.lenShin - 0.05));
+
+          const cosAlpha = Math.max(-1, Math.min(1, (leg.lenThigh * leg.lenThigh + D * D - leg.lenShin * leg.lenShin) / (2 * leg.lenThigh * D)));
+          const alpha = Math.acos(cosAlpha);
+
+          const dir = diff.clone().normalize();
+          let norm = new THREE.Vector3(-dir.y, dir.x, 0).normalize();
+          if (norm.x < 0) norm.negate();
+
+          const K = H.clone().addScaledVector(dir, leg.lenThigh * Math.cos(alpha)).addScaledVector(norm, leg.lenThigh * Math.sin(alpha));
+
+          const thighDir = K.clone().sub(H);
+          leg.thigh.position.copy(H).add(K).multiplyScalar(0.5);
+          leg.thigh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), thighDir.normalize());
+
+          const shinDir = P.clone().sub(K);
+          leg.shin.position.copy(K).add(P).multiplyScalar(0.5);
+          leg.shin.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), shinDir.normalize());
+
+          leg.shoe.position.set(P.x + 0.15, P.y, P.z);
         });
       }
 
@@ -4892,9 +5044,9 @@
       group.add(headlight);
 
       const driver = createRickshawPerson('driver', {
-        shirt: 0x7625a9,
-        pants: 0x4549df,
-        skin: 0xe9a17c,
+        shirt: 0x6b21a8,
+        pants: 0x1d4ed8,
+        skin: 0xb87958,
         gender: 'male',
         mustache: true
       }, [0.15, 5.25, 0], { handleTargets: handleTargets.map(point => [point[0] - 0.15, point[1] - 5.25, point[2]]) });
@@ -5038,9 +5190,12 @@
       return bike;
     }
 
-    scene.add(group);
+    if (typeof scene !== 'undefined' && scene && scene.add) {
+      scene.add(group);
+    }
     return group;
   }
+  window.create3DVehicle = create3DVehicle;
 
   function loadGLBModel(path) {
     if (!gltfModelPromises[path]) {
@@ -5065,6 +5220,8 @@
   }
 
   let sportbikePrototypeModel = null;
+  let cngPrototypeModel = null;
+  let rickshawPrototypeModel = null;
 
   function loadSportbikeModel() {
     return loadGLBModel('assets/models/sportbike-rider.glb?v=20261110-gta1');
@@ -5154,14 +5311,31 @@
     const thighR = model.getObjectByName('Puller_Thigh_R');
     const shinR = model.getObjectByName('Puller_Shin_R');
 
+    [thighL, shinL, thighR, shinR].forEach(bone => {
+      if (bone) bone.userData.initQuat = bone.quaternion.clone();
+    });
+
     vehicle.userData.updatePedaling = function(phase) {
       if (pedalCrank) pedalCrank.rotation.z = phase;
       const sinL = Math.sin(phase);
       const cosL = Math.cos(phase);
-      if (thighL) thighL.rotation.z = sinL * 0.38;
-      if (shinL) shinL.rotation.z = cosL * 0.45;
-      if (thighR) thighR.rotation.z = -sinL * 0.38;
-      if (shinR) shinR.rotation.z = -cosL * 0.45;
+      const qZ = new THREE.Quaternion();
+      if (thighL && thighL.userData.initQuat) {
+        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), sinL * 0.38);
+        thighL.quaternion.copy(thighL.userData.initQuat).multiply(qZ);
+      }
+      if (shinL && shinL.userData.initQuat) {
+        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), cosL * 0.45);
+        shinL.quaternion.copy(shinL.userData.initQuat).multiply(qZ);
+      }
+      if (thighR && thighR.userData.initQuat) {
+        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -sinL * 0.38);
+        thighR.quaternion.copy(thighR.userData.initQuat).multiply(qZ);
+      }
+      if (shinR && shinR.userData.initQuat) {
+        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -cosL * 0.45);
+        shinR.quaternion.copy(shinR.userData.initQuat).multiply(qZ);
+      }
     };
   }
 
@@ -5305,8 +5479,6 @@
       const name = (node.name || '').toLowerCase();
       if (name === 'wheel_fl' || name === 'wheel_fr' || name === 'wheel_rl' || name === 'wheel_rr') {
         wheels.push(node);
-      } else if (name.startsWith('wheel_') && !name.includes('tire') && !name.includes('rim') && !name.includes('hub') && !name.includes('vent') && !name.includes('arch')) {
-        wheels.push(node);
       }
       if (node.isMesh && node.material) {
         const matName = (node.material.name || '').toLowerCase();
@@ -5350,8 +5522,6 @@
     model.traverse(node => {
       const name = (node.name || '').toLowerCase();
       if (name === 'wheel_fl' || name === 'wheel_fr' || name === 'wheel_rl' || name === 'wheel_rr') {
-        wheels.push(node);
-      } else if (name.startsWith('wheel_') && !name.includes('tire') && !name.includes('lip') && !name.includes('spoke') && !name.includes('fin') && !name.includes('blade') && !name.includes('barrel') && !name.includes('hub') && !name.includes('accentring') && !name.includes('brakedisc') && !name.includes('caliper')) {
         wheels.push(node);
       }
       if (node.isMesh && node.material) {
@@ -5414,12 +5584,30 @@
       if (dims.y > 0) {
         const scale = 16 / dims.y;
         clone.scale.setScalar(scale);
+        clone.rotation.y = -Math.PI / 2; // Aligns GLTF model forward (+X) to canonical forward (+Z)
         clone.position.set(0, -bounds.min.y * scale, 0);
       }
       clone.traverse(n => {
         if (n.isMesh) {
           n.castShadow = true;
           n.receiveShadow = true;
+          if (n.material) {
+            const matName = (n.material.name || '').toLowerCase();
+            const outfitColors = [
+              { panjabi: 0xf8fafc, pajama: 0xe2e8f0, saree: 0xdc2626, gold: 0xfacc15 },
+              { panjabi: 0x1e3a8a, pajama: 0xf1f5f9, saree: 0x059669, gold: 0xfde047 },
+              { panjabi: 0x065f46, pajama: 0xfef08a, saree: 0x7c3aed, gold: 0xfacc15 },
+              { panjabi: 0x7c2d12, pajama: 0xe2e8f0, saree: 0xdb2777, gold: 0xfde047 },
+              { panjabi: 0x312e81, pajama: 0xf1f5f9, saree: 0xe11d48, gold: 0xfacc15 },
+              { panjabi: 0x475569, pajama: 0x1e293b, saree: 0x0d9488, gold: 0xfde047 }
+            ];
+            const pal = outfitColors[idx % outfitColors.length];
+            n.material = n.material.clone();
+            if (matName.includes('panjabi')) n.material.color.setHex(pal.panjabi);
+            if (matName.includes('pajama')) n.material.color.setHex(pal.pajama);
+            if (matName.includes('saree') && !matName.includes('gold')) n.material.color.setHex(pal.saree);
+            if (matName.includes('gold')) n.material.color.setHex(pal.gold);
+          }
         }
       });
       while (pedEntry.mesh.children.length) pedEntry.mesh.remove(pedEntry.mesh.children[0]);
@@ -6127,6 +6315,7 @@
     }
     // Asynchronously load and integrate Blender 5.2 GTA V-Grade 3D models with fallback
     loadCycleRickshawModel().then(prototype => {
+      rickshawPrototypeModel = prototype;
       Object.values(vehicleMeshMap).forEach(vehicle => {
         if (vehicle.data && vehicle.data.type === 'rickshaw') {
           replaceRickshawWithModel(vehicle.mesh, prototype);
@@ -6135,6 +6324,7 @@
     }).catch(err => console.warn('Cycle Rickshaw GLB fallback:', err));
 
     loadCNGModel().then(prototype => {
+      cngPrototypeModel = prototype;
       Object.values(vehicleMeshMap).forEach(vehicle => {
         if (vehicle.data && vehicle.data.type === 'cng') {
           replaceCNGWithModel(vehicle.mesh, prototype);
@@ -7080,7 +7270,7 @@
 
       let coord = 0;
       let isMoving = true;
-      let rotY = 0;
+      let targetRotY = 0;
       let posX = 0, posZ = 0;
 
       if (p.isSidewalk) {
@@ -7089,11 +7279,11 @@
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
-          rotY = (p.dirForward !== false) ? Math.PI / 2 : -Math.PI / 2;
+          targetRotY = (p.dirForward !== false) ? Math.PI / 2 : -Math.PI / 2;
         } else {
           posX = p.x - 600;
           posZ = coord - 420;
-          rotY = (p.dirForward !== false) ? 0 : Math.PI;
+          targetRotY = (p.dirForward !== false) ? 0 : Math.PI;
         }
       } else {
         // Crosswalk pedestrian
@@ -7102,37 +7292,45 @@
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
-          rotY = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
+          targetRotY = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
         } else {
           posX = p.x - 600;
           posZ = coord - 420;
-          rotY = (p.end > p.start) ? 0 : Math.PI;
+          targetRotY = (p.end > p.start) ? 0 : Math.PI;
         }
       }
 
-      
-        const walkPhase = coord * 0.22;
-        const legAngle = isMoving ? Math.sin(walkPhase) * 0.45 : 0;
-        const armAngle = isMoving ? Math.sin(walkPhase) * 0.4 : 0;
-        const bob = isMoving ? Math.abs(Math.sin(walkPhase * 2)) * 0.4 : 0;
+      const walkPhase = coord * 0.22;
+      const legAngle = isMoving ? Math.sin(walkPhase) * 0.45 : 0;
+      const armAngle = isMoving ? Math.sin(walkPhase) * 0.4 : 0;
+      const bob = isMoving ? Math.abs(Math.sin(walkPhase * 2)) * 0.4 : 0;
 
-        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = legAngle;
-        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -legAngle;
-        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armAngle;
+      if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = legAngle;
+      if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -legAngle;
+      if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armAngle;
 
-        if (pm.mesh.userData.rightArm) {
-          if (isRain) {
-            // Hand raised holding umbrella shaft upright
-            pm.mesh.userData.rightArm.rotation.x = -0.55;
-            pm.mesh.userData.rightArm.rotation.z = 0.2;
-          } else {
-            pm.mesh.userData.rightArm.rotation.x = armAngle;
-            pm.mesh.userData.rightArm.rotation.z = 0;
-          }
+      if (pm.mesh.userData.rightArm) {
+        if (isRain) {
+          // Hand raised holding umbrella shaft upright
+          pm.mesh.userData.rightArm.rotation.x = -0.55;
+          pm.mesh.userData.rightArm.rotation.z = 0.2;
+        } else {
+          pm.mesh.userData.rightArm.rotation.x = armAngle;
+          pm.mesh.userData.rightArm.rotation.z = 0;
         }
+      }
 
-        pm.mesh.position.set(posX, 1 + bob, posZ);
-        pm.mesh.rotation.y = rotY;
+      // Smooth 180° turnaround heading interpolation so pedestrians turn around naturally
+      if (typeof pm.mesh.userData.currentRotY === 'undefined') {
+        pm.mesh.userData.currentRotY = targetRotY;
+      }
+      let rotDiff = targetRotY - pm.mesh.userData.currentRotY;
+      while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
+      while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
+      pm.mesh.userData.currentRotY += rotDiff * Math.min(1.0, delta * 12);
+
+      pm.mesh.position.set(posX, 1 + bob, posZ);
+      pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
       
     }
 
