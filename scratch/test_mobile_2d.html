@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0; padding:0; overflow:hidden;">
+<iframe id="appFrame" src="file:///C:/Users/HP/Desktop/commute-dhaka-web/index.html" style="width: 390px; height: 844px; border: none;"></iframe>
+<script>
+  window.onload = () => {
+    const frame = document.getElementById('appFrame');
+    setTimeout(() => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      
+      console.log('[mobile_2d] Setting view mode 3D=False...');
+      if (false) {
+        win.setCrossroadsViewMode(true);
+      }
+      
+      setTimeout(() => {
+        const canvas = doc.getElementById('dhakaCrossroads3dCanvas');
+        const stageWrapper = doc.getElementById('dhakaCrossroadsStageWrapper');
+        const container = doc.getElementById('dhakaCrossroadsContainer');
+        console.log('[mobile_2d] Done waiting. canvas display: ' + (canvas ? canvas.style.display : 'none'));
+        console.log('[mobile_2d] stageWrapper display: ' + (stageWrapper ? stageWrapper.style.display : 'none'));
+        console.log('[mobile_2d] 3D ready: ' + (win.isDhakaCrossroads3DReady ? win.isDhakaCrossroads3DReady() : 'fn missing'));
+        if (win.getDhakaCrossroads3DMetrics) {
+          console.log('[mobile_2d] metrics: ' + JSON.stringify(win.getDhakaCrossroads3DMetrics()));
+        }
+      }, 3000);
+    }, 1500);
+  };
+</script>
+</body>
+</html>

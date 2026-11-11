@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0; padding:0; overflow:hidden;">
+<iframe id="appFrame" src="file:///C:/Users/HP/Desktop/commute-dhaka-web/index.html" style="width: 1920px; height: 1080px; border: none;"></iframe>
+<script>
+  window.onload = () => {
+    const frame = document.getElementById('appFrame');
+    setTimeout(() => {
+      const win = frame.contentWindow;
+      console.log('[VERIFY] Setting 3D mode...');
+      if (win.setCrossroadsViewMode) win.setCrossroadsViewMode(true);
+      setTimeout(() => {
+        console.log('[VERIFY] 3D Ready: ' + (win.isDhakaCrossroads3DReady ? win.isDhakaCrossroads3DReady() : 'no fn'));
+      }, 3000);
+    }, 2000);
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { background: #111; color: #fff; font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
+    canvas { border: 2px solid #444; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body>
+  <div>
+    <h3>Bangladeshi Rickshaw Art (512x512)</h3>
+    <canvas id="rickshaw" width="512" height="512"></canvas>
+  </div>
+  <div>
+    <h3>Dhaka CNG Alpona Art (512x512)</h3>
+    <canvas id="cng" width="512" height="512"></canvas>
+  </div>
+
+  <script>
+    // 1. Rickshaw Art Canvas
+    const rCanvas = document.getElementById('rickshaw');
+    const rCtx = rCanvas.getContext('2d');
+
+    const rGrad = rCtx.createRadialGradient(256, 256, 50, 256, 256, 280);
+    rGrad.addColorStop(0, '#0284c7');
+    rGrad.addColorStop(0.45, '#1e1b4b');
+    rGrad.addColorStop(0.85, '#831843');
+    rGrad.addColorStop(1, '#db2777');
+    rCtx.fillStyle = rGrad;
+    rCtx.fillRect(0, 0, 512, 512);
+
+    function drawScallopedBorder(ctx, inset, radius, color1, color2) {
+      const step = radius * 1.8;
+      ctx.fillStyle = color1;
+      ctx.strokeStyle = color2;
+      ctx.lineWidth = 2;
+      for (let x = inset; x <= 512 - inset; x += step) {
+        ctx.beginPath(); ctx.arc(x, inset, radius, 0, Math.PI); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x, 512 - inset, radius, Math.PI, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      for (let y = inset; y <= 512 - inset; y += step) {
+        ctx.beginPath(); ctx.arc(inset, y, radius, -Math.PI / 2, Math.PI / 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(512 - inset, y, radius, Math.PI / 2, Math.PI * 1.5); ctx.fill(); ctx.stroke();
+      }
+    }
+    drawScallopedBorder(rCtx, 16, 12, '#facc15', '#dc2626');
+    drawScallopedBorder(rCtx, 32, 8, '#38bdf8', '#ffffff');
+
+    rCtx.strokeStyle = '#f59e0b';
+    rCtx.lineWidth = 4;
+    rCtx.strokeRect(44, 44, 424, 424);
+
+    function drawCornerLotus(ctx, cx, cy, rot) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      const petalColors = ['#ec4899', '#f43f5e', '#fbbf24', '#34d399'];
+      for (let i = 0; i < 4; i++) {
+        ctx.save();
+        ctx.rotate((i * Math.PI) / 6);
+        ctx.fillStyle = petalColors[i];
+        ctx.beginPath();
+        ctx.ellipse(22, 0, 20, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+    drawCornerLotus(rCtx, 54, 54, 0);
+    drawCornerLotus(rCtx, 458, 54, Math.PI / 2);
+    drawCornerLotus(rCtx, 458, 458, Math.PI);
+    drawCornerLotus(rCtx, 54, 458, -Math.PI / 2);
+
+    rCtx.save();
+    rCtx.translate(256, 230);
+
+    const numFeathers = 18;
+    for (let f = 0; f < numFeathers; f++) {
+      const angle = Math.PI + (f * Math.PI) / (numFeathers - 1);
+      const fx = Math.cos(angle) * 110;
+      const fy = Math.sin(angle) * 95;
+      rCtx.save();
+      rCtx.translate(fx, fy);
+      rCtx.rotate(angle + Math.PI / 2);
+      rCtx.fillStyle = f % 2 === 0 ? '#10b981' : '#06b6d4';
+      rCtx.beginPath();
+      rCtx.ellipse(0, 0, 16, 32, 0, 0, Math.PI * 2);
+      rCtx.fill();
+      rCtx.fillStyle = '#facc15';
+      rCtx.beginPath();
+      rCtx.arc(0, -8, 7, 0, Math.PI * 2);
+      rCtx.fill();
+      rCtx.fillStyle = '#1e1b4b';
+      rCtx.beginPath();
+      rCtx.arc(0, -8, 3.5, 0, Math.PI * 2);
+      rCtx.fill();
+      rCtx.restore();
+    }
+
+    rCtx.fillStyle = '#0284c7';
+    rCtx.beginPath();
+    rCtx.ellipse(0, 30, 36, 44, 0, 0, Math.PI * 2);
+    rCtx.fill();
+
+    rCtx.fillStyle = '#0369a1';
+    rCtx.beginPath();
+    rCtx.moveTo(-10, 20);
+    rCtx.quadraticCurveTo(-24, -20, -12, -45);
+    rCtx.quadraticCurveTo(-6, -60, 6, -55);
+    rCtx.quadraticCurveTo(8, -35, 12, 20);
+    rCtx.fill();
+
+    rCtx.fillStyle = '#f59e0b';
+    rCtx.beginPath();
+    rCtx.moveTo(-12, -50);
+    rCtx.lineTo(-24, -48);
+    rCtx.lineTo(-10, -42);
+    rCtx.fill();
+
+    rCtx.fillStyle = '#ffffff';
+    rCtx.beginPath();
+    rCtx.arc(-4, -48, 4, 0, Math.PI * 2);
+    rCtx.fill();
+    rCtx.fillStyle = '#000000';
+    rCtx.beginPath();
+    rCtx.arc(-4, -48, 2, 0, Math.PI * 2);
+    rCtx.fill();
+
+    for (let c = -1; c <= 1; c++) {
+      rCtx.strokeStyle = '#facc15';
+      rCtx.lineWidth = 2;
+      rCtx.beginPath();
+      rCtx.moveTo(0, -56);
+      rCtx.lineTo(c * 12, -72);
+      rCtx.stroke();
+      rCtx.fillStyle = '#ec4899';
+      rCtx.beginPath();
+      rCtx.arc(c * 12, -74, 4, 0, Math.PI * 2);
+      rCtx.fill();
+    }
+
+    const lotusColors = ['#f43f5e', '#fb7185', '#fda4af', '#facc15'];
+    for (let layer = 0; layer < 3; layer++) {
+      const petals = 7;
+      rCtx.fillStyle = lotusColors[layer];
+      for (let p = 0; p < petals; p++) {
+        const pAng = (p - (petals - 1) / 2) * 0.28;
+        rCtx.save();
+        rCtx.translate(0, 70 + layer * 6);
+        rCtx.rotate(pAng);
+        rCtx.beginPath();
+        rCtx.ellipse(0, 25 - layer * 5, 14 - layer * 2, 32 - layer * 4, 0, 0, Math.PI * 2);
+        rCtx.fill();
+        rCtx.restore();
+      }
+    }
+    rCtx.restore();
+
+    rCtx.fillStyle = '#fef08a';
+    rCtx.fillRect(70, 420, 372, 54);
+    rCtx.strokeStyle = '#b45309';
+    rCtx.lineWidth = 3;
+    rCtx.strokeRect(70, 420, 372, 54);
+
+    rCtx.fillStyle = '#78350f';
+    rCtx.font = 'bold 30px sans-serif';
+    rCtx.textAlign = 'center';
+    rCtx.textBaseline = 'middle';
+    rCtx.fillText('★ DHAKA RICKSHAW ART ★', 256, 447);
+
+    // 2. CNG Alpona Canvas
+    const cCanvas = document.getElementById('cng');
+    const cCtx = cCanvas.getContext('2d');
+
+    const cGrad = cCtx.createLinearGradient(0, 0, 512, 512);
+    cGrad.addColorStop(0, '#064e3b');
+    cGrad.addColorStop(0.5, '#047857');
+    cGrad.addColorStop(1, '#065f46');
+    cCtx.fillStyle = cGrad;
+    cCtx.fillRect(0, 0, 512, 512);
+
+    function drawAlponaVine(ctx, y, color) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let x = 0; x <= 512; x += 32) {
+        ctx.quadraticCurveTo(x + 16, y - 18, x + 32, y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#fef08a';
+      for (let x = 16; x < 512; x += 32) {
+        ctx.beginPath();
+        ctx.arc(x, y - 14, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(x - 8, y - 6, 7, 3, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(x + 8, y - 6, 7, 3, -Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    drawAlponaVine(cCtx, 40, '#f8fafc');
+    drawAlponaVine(cCtx, 470, '#f8fafc');
+
+    cCtx.save();
+    cCtx.translate(256, 210);
+
+    cCtx.strokeStyle = '#fef08a';
+    cCtx.lineWidth = 3;
+    cCtx.beginPath(); cCtx.arc(0, 0, 110, 0, Math.PI * 2); cCtx.stroke();
+    cCtx.strokeStyle = '#ffffff';
+    cCtx.lineWidth = 1.5;
+    cCtx.beginPath(); cCtx.arc(0, 0, 96, 0, Math.PI * 2); cCtx.stroke();
+
+    const numAlponaPetals = 16;
+    for (let p = 0; p < numAlponaPetals; p++) {
+      const angle = (p * Math.PI * 2) / numAlponaPetals;
+      cCtx.save();
+      cCtx.rotate(angle);
+      cCtx.fillStyle = p % 2 === 0 ? '#fef08a' : '#ffffff';
+      cCtx.beginPath();
+      cCtx.ellipse(65, 0, 30, 10, 0, 0, Math.PI * 2);
+      cCtx.fill();
+      cCtx.restore();
+    }
+
+    for (let p = 0; p < 8; p++) {
+      const angle = (p * Math.PI * 2) / 8 + Math.PI / 8;
+      cCtx.save();
+      cCtx.rotate(angle);
+      cCtx.fillStyle = '#dc2626';
+      cCtx.beginPath();
+      cCtx.ellipse(32, 0, 14, 6, 0, 0, Math.PI * 2);
+      cCtx.fill();
+      cCtx.restore();
+    }
+
+    cCtx.fillStyle = '#f59e0b';
+    cCtx.beginPath();
+    cCtx.arc(0, 0, 18, 0, Math.PI * 2);
+    cCtx.fill();
+    cCtx.fillStyle = '#ffffff';
+    cCtx.beginPath();
+    cCtx.arc(0, 0, 7, 0, Math.PI * 2);
+    cCtx.fill();
+    cCtx.restore();
+
+    cCtx.fillStyle = '#ffffff';
+    cCtx.fillRect(106, 360, 300, 72);
+    cCtx.strokeStyle = '#18181b';
+    cCtx.lineWidth = 4;
+    cCtx.strokeRect(106, 360, 300, 72);
+
+    cCtx.fillStyle = '#047857';
+    cCtx.beginPath();
+    cCtx.arc(136, 396, 16, 0, Math.PI * 2);
+    cCtx.fill();
+    cCtx.fillStyle = '#dc2626';
+    cCtx.beginPath();
+    cCtx.arc(136, 396, 9, 0, Math.PI * 2);
+    cCtx.fill();
+
+    cCtx.fillStyle = '#0f172a';
+    cCtx.font = 'bold 22px sans-serif';
+    cCtx.textAlign = 'center';
+    cCtx.textBaseline = 'middle';
+    cCtx.fillText('DHAKA METRO - THA', 280, 380);
+    cCtx.font = 'bold 24px sans-serif';
+    cCtx.fillText('11-2468', 280, 412);
+  </script>
+</body>
+</html>

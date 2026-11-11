@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<iframe id="appFrame" src="file:///C:/Users/HP/Desktop/commute-dhaka-web/index.html" style="width: 1920px; height: 1080px; border: none;"></iframe>
+<script>
+  window.onload = () => {
+    const frame = document.getElementById('appFrame');
+    setTimeout(() => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      
+      console.log('CALLING_INIT: start');
+      try {
+        // Check window.crossroadsVehiclesData
+        console.log('VehiclesData: ' + (win.crossroadsVehiclesData ? win.crossroadsVehiclesData.length : 'undefined'));
+        console.log('PedestriansData: ' + (win.crossroadsPedestriansData ? win.crossroadsPedestriansData.length : 'undefined'));
+        
+        win.initDhakaCrossroads3D('dhakaCrossroads3dCanvas', 'dhakaCrossroadsContainer', win.crossroadsVehiclesData, win.crossroadsPedestriansData);
+        console.log('CALLING_INIT: finished without exception');
+        console.log('isReady: ' + win.isDhakaCrossroads3DReady());
+      } catch (e) {
+        console.log('CALLING_INIT_ERROR: ' + e.message + '\n' + e.stack);
+      }
+    }, 2000);
+  };
+</script>
+</body>
+</html>

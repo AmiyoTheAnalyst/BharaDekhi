@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<iframe id="appFrame" src="file:///C:/Users/HP/Desktop/commute-dhaka-web/index.html" style="width: 1920px; height: 1080px; border: none;"></iframe>
+<script>
+  window.onload = () => {
+    const frame = document.getElementById('appFrame');
+    setTimeout(() => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      
+      console.log('DIAG: 1. Checking initial state:');
+      console.log('DIAG: Crossroads running: ' + win.dhakaCrossroadsRunning);
+      console.log('DIAG: 3D mode: ' + win.crossroads3DMode);
+      
+      // Toggle to 3D mode
+      console.log('DIAG: 2. Switching to 3D mode...');
+      win.setCrossroadsViewMode(true);
+      
+      setTimeout(() => {
+        console.log('DIAG: 3. After 2s in 3D mode:');
+        console.log('DIAG: 3D ready: ' + (win.isDhakaCrossroads3DReady ? win.isDhakaCrossroads3DReady() : 'fn missing'));
+        if (win.getDhakaCrossroads3DMetrics) {
+          console.log('DIAG: metrics: ' + JSON.stringify(win.getDhakaCrossroads3DMetrics()));
+        }
+        const canvas = doc.getElementById('dhakaCrossroads3dCanvas');
+        if (canvas) {
+          console.log('DIAG: canvas client: ' + canvas.clientWidth + 'x' + canvas.clientHeight);
+          console.log('DIAG: canvas buffer: ' + canvas.width + 'x' + canvas.height);
+          console.log('DIAG: canvas style display: ' + canvas.style.display);
+          console.log('DIAG: canvas computed opacity: ' + getComputedStyle(canvas).opacity);
+          console.log('DIAG: canvas computed zIndex: ' + getComputedStyle(canvas).zIndex);
+          const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+          console.log('DIAG: webgl context: ' + (gl ? 'obtained' : 'FAILED'));
+          if (gl) {
+            console.log('DIAG: gl error: ' + gl.getError());
+          }
+        } else {
+          console.log('DIAG: NO CANVAS ELEMENT FOUND!');
+        }
+        
+        const stageWrapper = doc.getElementById('dhakaCrossroadsStageWrapper');
+        if (stageWrapper) {
+          console.log('DIAG: stageWrapper style display: ' + stageWrapper.style.display);
+          console.log('DIAG: stageWrapper computed display: ' + getComputedStyle(stageWrapper).display);
+          console.log('DIAG: stageWrapper computed opacity: ' + getComputedStyle(stageWrapper).opacity);
+        }
+      }, 2500);
+    }, 1500);
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<USER_REQUEST>
+### ⚠️ STRICT ZERO-REGRESSION & REALISTIC 3D RICKSHAW / CNG UPGRADE MANDATE
+Everything across the Bhara dekhi application—including the 3D Bus, Bike, Car, Metro Rail, 2D Flat mode, traffic formation/movement paths, 60/90/120 FPS optimizations, fare logic, surge toggles, geolocation, and auth gating—is 100% finalized and working.
+- **ABSOLUTE CODE FREEZE:** **DO NOT TOUCH, EDIT, OR ALTER THE BUS, BIKE, CAR, METRO, 2D FLAT MODE, VEHICLE MOVEMENT PATHS, FARE LOGIC, OR UI COMPONENTS.**
+- **SCOPED TARGET ONLY:** Using **Three.js (`THREE.Group`, `MeshStandardMaterial`, `MeshPhysicalMaterial`, and high-resolution procedural `THREE.CanvasTexture`)**, upgrade ONLY the **3D Rickshaw** and **3D CNG Auto-Rickshaw** models so they look realistic, culturally authentic to Dhaka, and richly detailed while keeping their exact current scale, position, and movement formation on the road.
+
+---
+
+### Task 1: Realistic 3D Dhaka Cycle Rickshaw (Hood Art, Puller & Passengers)
+
+Keep the existing rickshaw movement/formation logic intact, but replace its mesh construction with a detailed, realistic Three.js model:
+
+1. **Authentic Dhaka Rickshaw Hood & Backplate Art (`THREE.CanvasTexture`):**
+   - Generate a cached high-resolution `THREE.CanvasTexture` (512x512) for the curved folding hood (canopy) and rear backplate.
+   - Paint vibrant, authentic **Bangladeshi Rickshaw Art** onto the canvas: rich royal blue/magenta/gold base with intricate floral lotus patterns, peacock/bird motifs, scalloped multi-color decorative borders, and golden fringe tassels along the front rim of the hood.
+   - Apply `MeshStandardMaterial({ map: rickshawArtTexture, roughness: 0.45, metalness: 0.1 })` so the hood catches city and street lighting realistically.
+
+2. **Realistic Chassis, Chrome & Spoked Wheels:**
+   - **Wheels (x3):** Use thin-profile `TorusGeometry` dark rubber tires with metallic chrome rims, visible radial wire spokes, and rear curved fenders/mudguards painted with yellow/red pinstripes.
+   - **Frame & Seat:** Metallic silver tubular frame, curved chrome handlebars with rubber grips, a slanted footboard, and a plush cushioned passenger bench seat with side armrests.
+
+3. **Realistic Animated Rickshaw Puller & Seated Passengers:**
+   - **Rickshaw Puller:** Replace any blocky/cartoonish figure with an articulated human hierarchy:
+     - Head with hair and realistic skin tone, torso wearing a traditional tunic/shirt, a patterned *lungi* around the lower body, and a red/white checkered *gamcha* draped over one shoulder.
+     - Articulated upper and lower arms gripping the handlebars.
+     - Articulated thighs, knees, and calves connected to the pedals—animate the legs and torso in a smooth sine/cosine **pedaling motion** synced with the rickshaw's forward speed.
+   - **Passengers:** Place two realistic seated passengers on the cushioned bench under the hood (e.g., one in a vibrant saree/salwar kameez and one in a panjabi/casual shirt) with natural seated posture, heads, shoulders, and arms resting naturally.
+
+---
+
+### Task 2: Realistic 3D Dhaka CNG Auto-Rickshaw with Bengali Cultural Art
+
+Remove the cartoonish appearance of the CNG and rebuild its mesh to look like an authentic, realistic Dhaka CNG auto-rickshaw:
+
+1. **Realistic Proportions, Windshield & Dhaka Grill Cage:**
+   - **Body Shell:** Sculpt a realistic tapered front nose apron, curved front mudguard over the single front wheel, rounded rear passenger cabin cowling, and a matte charcoal/black canvas soft-top roof (`roughness: 0.85`) with subtle rib seams.
+   - **Windshield & Headlight:** Add a curved, slightly tilted front glass windshield using `MeshPhysicalMaterial` (semi-transparent tinted glass with a thin black rubber frame and central wiper blade), flanked by two side rearview mirrors and a central round chrome-ringed glass headlight emitting a warm beam.
+   - **Signature Dhaka Metal Cage Doors:** Add the iconic silver metallic protective grill doors on both sides of the passenger cabin using thin vertical and horizontal chrome bars (`metalness: 0.85, roughness: 0.2`).
+
+2. **PBR Green Enamel & Traditional Bengali Cultural Art (`THREE.CanvasTexture`):**
+   - Create a cached high-resolution `THREE.CanvasTexture` combining Dhaka's signature deep metallic emerald green enamel base with **traditional Bengali folk & Alpona art**:
+     - Paint intricate yellow, gold, red, and white Bengali *Alpona* floral vines, lotus medallions, and traditional geometric border stripes along the front apron, side panels, and rear engine hood.
+     - Include a realistic white/black Bangla registration plate and subtle metallic wear/highlights (`metalness: 0.4, roughness: 0.3`).
+   - **Interior Occupants:** Include a visible CNG driver sitting behind the front handlebars and 1–2 silhouetted/detailed passengers seated inside the rear caged cabin.
+
+---
+
+### Task 3: Strict 60/90/120 FPS Performance Preservation
+- **CRITICAL:** Generate all `THREE.CanvasTexture` paintings, geometries, and `THREE.Material` instances **ONCE** inside a `useMemo` or module-level singleton cache and share/clone them across instances.
+- **NEVER** create new canvas textures or materials inside the `requestAnimationFrame` loop.
+- Keep polygon counts optimized so both mobile and Windows PC maintain locked 60/90/120 FPS with zero flickering.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-12T01:13:56+06:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\HP\Desktop\commute-dhaka-web\assets\crossroads-3d.js (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 7609
+Other open documents:
+- c:\Users\HP\Desktop\commute-dhaka-web\index.html (LANGUAGE_UNSPECIFIED)
+- c:\Users\HP\Desktop\commute-dhaka-web\components\ScrollTransitHero.jsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\HP\Desktop\commute-dhaka-web\sw.js (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>

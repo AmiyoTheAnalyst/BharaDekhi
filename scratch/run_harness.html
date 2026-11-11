@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<iframe id="appFrame" src="file:///C:/Users/HP/Desktop/commute-dhaka-web/index.html" style="width: 1920px; height: 1080px; border: none;"></iframe>
+<script>
+  window.onload = () => {
+    const frame = document.getElementById('appFrame');
+    setTimeout(() => {
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      
+      console.log('TEST_LOG: 1. Calling win.setCrossroadsViewMode(true)...');
+      try {
+        win.setCrossroadsViewMode(true);
+      } catch (e) {
+        console.log('TEST_LOG: Error calling setCrossroadsViewMode: ' + e.message);
+      }
+
+      setTimeout(() => {
+        try {
+          const canvas = doc.getElementById('dhakaCrossroads3dCanvas');
+          const container = doc.getElementById('dhakaCrossroadsContainer');
+          const stageWrapper = doc.getElementById('dhakaCrossroadsStageWrapper');
+          
+          console.log('TEST_LOG: canvas display: ' + (canvas ? canvas.style.display : 'no canvas'));
+          console.log('TEST_LOG: canvas opacity: ' + (canvas ? getComputedStyle(canvas).opacity : 'no canvas'));
+          console.log('TEST_LOG: canvas rect: ' + (canvas ? JSON.stringify(canvas.getBoundingClientRect()) : ''));
+          console.log('TEST_LOG: canvas width/height attr: ' + (canvas ? canvas.width + 'x' + canvas.height : ''));
+          console.log('TEST_LOG: container classes: ' + (container ? container.className : ''));
+          console.log('TEST_LOG: stageWrapper display: ' + (stageWrapper ? stageWrapper.style.display : ''));
+          console.log('TEST_LOG: isDhakaCrossroads3DReady: ' + (win.isDhakaCrossroads3DReady ? win.isDhakaCrossroads3DReady() : 'fn not found'));
+          console.log('TEST_LOG: metrics: ' + (win.getDhakaCrossroads3DMetrics ? JSON.stringify(win.getDhakaCrossroads3DMetrics()) : 'no metrics'));
+        } catch(err) {
+          console.log('TEST_LOG: Inspection error: ' + err.message);
+        }
+      }, 2500);
+    }, 2000);
+  };
+</script>
+</body>
+</html>
