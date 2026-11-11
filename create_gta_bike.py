@@ -127,6 +127,56 @@ def add_annular_disc(name, r_outer, r_inner, depth, loc, rot, mat, segs=32, pare
     obj.data.materials.append(mat)
     return link_obj(obj, parent)
 
+def create_lofted_tube(name, points, radii, mat, segs=14, parent=None):
+    bm = bmesh.new()
+    rings = []
+    for i, (pt, r) in enumerate(zip(points, radii)):
+        if i < len(points) - 1:
+            tang = [points[i+1][j] - pt[j] for j in range(3)]
+        else:
+            tang = [pt[j] - points[i-1][j] for j in range(3)]
+        L = math.sqrt(sum(c*c for c in tang))
+        tang = [c/L for c in tang] if L > 0 else [1, 0, 0]
+
+        up = [0, 0, 1] if abs(tang[2]) < 0.9 else [0, 1, 0]
+        v1 = [tang[1]*up[2] - tang[2]*up[1], tang[2]*up[0] - tang[0]*up[2], tang[0]*up[1] - tang[1]*up[0]]
+        L1 = math.sqrt(sum(c*c for c in v1))
+        v1 = [c/L1 for c in v1]
+        v2 = [v1[1]*tang[2] - v1[2]*tang[1], v1[2]*tang[0] - v1[0]*tang[2], v1[0]*tang[1] - v1[1]*tang[0]]
+
+        ring = []
+        for s in range(segs):
+            ang = 2 * math.pi * s / segs
+            cx = math.cos(ang) * r
+            cy = math.sin(ang) * r
+            vx = pt[0] + cx * v1[0] + cy * v2[0]
+            vy = pt[1] + cx * v1[1] + cy * v2[1]
+            vz = pt[2] + cx * v1[2] + cy * v2[2]
+            ring.append(bm.verts.new((vx, vy, vz)))
+        rings.append(ring)
+
+    for i in range(len(rings) - 1):
+        r1 = rings[i]
+        r2 = rings[i+1]
+        for s in range(segs):
+            s_next = (s + 1) % segs
+            bm.faces.new([r1[s], r2[s], r2[s_next], r1[s_next]])
+
+    bm.faces.new(rings[0])
+    bm.faces.new(list(reversed(rings[-1])))
+
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh)
+    bm.free()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    bpy.ops.object.select_all(action='DESELECT')
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.shade_smooth()
+    obj.data.materials.append(mat)
+    return link_obj(obj, parent)
+
 def build_sportbike_and_rider():
     reset_scene()
     bike_root = bpy.data.objects.new("GTA_Sportbike_Root", None)
@@ -158,9 +208,9 @@ def build_sportbike_and_rider():
     mat_sneaker_black = make_mat("Rider_SneakerBlack", (0.04, 0.04, 0.045, 1.0), roughness=0.70)
     mat_sneaker_white = make_mat("Rider_SneakerWhite", (0.96, 0.96, 0.95, 1.0), roughness=0.35)
     mat_skin = make_mat("Rider_NaturalSkin", (0.58, 0.38, 0.26, 1.0), roughness=0.65)
-    mat_helmet_shell = make_mat("Helmet_GlossBlack", (0.02, 0.022, 0.026, 1.0), metallic=0.55, roughness=0.10, coat=1.0)
-    mat_helmet_visor = make_mat("Helmet_SmokedVisor", (0.015, 0.018, 0.025, 1.0), metallic=0.95, roughness=0.03, coat=1.0)
-    mat_helmet_decal = make_mat("Helmet_CyanStripe", (0.0, 0.85, 1.0, 1.0), roughness=0.2, emission=(0.0, 0.85, 1.0, 1.0), emission_strength=2.0)
+    mat_helmet_shell = make_mat("Helmet_Shell", (0.015, 0.28, 0.92, 1.0), metallic=0.75, roughness=0.15, coat=1.0)
+    mat_helmet_visor = make_mat("Helmet_Visor", (0.015, 0.018, 0.025, 1.0), metallic=0.95, roughness=0.03, coat=1.0)
+    mat_helmet_decal = make_mat("Helmet_Decal", (0.96, 0.96, 0.98, 1.0), roughness=0.2, emission=(0.96, 0.96, 0.98, 1.0), emission_strength=1.5)
 
     # ==========================================================================
     # 1. HOLLOW 5-SPOKE ALLOY WHEELS (Front & Rear)
@@ -413,92 +463,103 @@ def build_sportbike_and_rider():
     link_obj(rider_root, bike_root)
 
     # Pelvis seated squarely on saddle
-    add_box("Rider_Pelvis", (0.22, 0.20, 0.13), (-0.06, 0.0, 0.77), mat_dark_jeans, bevel=0.028, parent=rider_root)
+    add_box("Rider_Pelvis", (0.24, 0.22, 0.14), (-0.06, 0.0, 0.77), mat_dark_jeans, bevel=0.03, parent=rider_root)
 
-    # Torso angled forward naturally in 35° sport tuck (NO giant box behind back!)
+    # Torso angled forward naturally in 35° sport tuck (Continuous cloth jacket)
     add_box(
         "Rider_Torso_Jacket",
-        (0.24, 0.26, 0.28),
-        (0.10, 0.0, 0.93),
+        (0.26, 0.28, 0.32),
+        (0.10, 0.0, 0.94),
         mat_leather_jacket,
-        bevel=0.035,
-        segs=3,
+        bevel=0.045,
+        segs=4,
         parent=rider_root,
         rot=(0, 0.45, 0)
     )
     # Open collar showing white crew-neck t-shirt
     add_box(
         "Rider_Inner_TShirt",
-        (0.10, 0.11, 0.14),
-        (0.18, 0.0, 0.98),
+        (0.12, 0.13, 0.15),
+        (0.19, 0.0, 0.99),
         mat_white_tshirt,
-        bevel=0.012,
+        bevel=0.015,
         parent=rider_root,
         rot=(0, 0.45, 0)
     )
-    # Natural skin neck
-    add_cyl("Rider_Neck_Skin", 0.052, 0.11, (0.23, 0.0, 1.06), (0, -0.35, 0), mat_skin, verts=16, parent=rider_root)
+    # Draped hoodie collar ring around neck
+    add_torus("Rider_Hoodie_Collar", 0.082, 0.038, (0.21, 0.0, 1.05), (0, 0.45, 0), mat_leather_jacket, 24, 10, rider_root)
 
-    # Organic Arms & Riding Gloves Gripping Handlebars
+    # Natural skin neck
+    add_cyl("Rider_Neck_Skin", 0.052, 0.11, (0.24, 0.0, 1.08), (0, -0.35, 0), mat_skin, verts=16, parent=rider_root)
+
+    # Seamless Lofted Sleeves & Riding Gloves Gripping Handlebars (Zero gaps!)
     for side in [-1, 1]:
-        sy = side * 0.14
-        end_y = side * 0.21
-        # Shoulder
-        add_box(f"Rider_Shoulder_{side}", (0.11, 0.08, 0.11), (0.14, sy, 0.99), mat_leather_jacket, bevel=0.02, parent=rider_root)
-        # Upper Arm
-        add_cyl(f"Rider_UpperArm_{side}", 0.044, 0.22, (0.25, (sy + end_y) / 2, 0.95), (0.16 * side, 0.65, 0), mat_leather_jacket, verts=14, parent=rider_root)
-        # Forearm extending to handlebar
-        add_cyl(f"Rider_Forearm_{side}", 0.038, 0.22, (0.40, end_y, 0.90), (0, 0.95, 0), mat_leather_jacket, verts=14, parent=rider_root)
+        sy = side * 0.145
+        end_y = side * 0.22
+        arm_pts = [
+            (0.14, sy, 0.99),
+            (0.26, (sy + end_y) * 0.52, 0.93),
+            (0.38, end_y, 0.89),
+            (0.46, end_y, 0.87)
+        ]
+        arm_rad = [0.065, 0.052, 0.044, 0.038]
+        create_lofted_tube(f"Rider_Sleeve_{side}", arm_pts, arm_rad, mat_leather_jacket, segs=14, parent=rider_root)
+
         # Black leather riding glove with white knuckle protector
         add_box(f"Rider_Glove_{side}", (0.075, 0.055, 0.045), (0.50, end_y, 0.87), mat_dark_frame, bevel=0.008, parent=rider_root)
         add_box(f"Rider_KnuckleProtector_{side}", (0.035, 0.04, 0.012), (0.50, end_y, 0.895), mat_white_tshirt, bevel=0.003, parent=rider_root)
 
-    # Anatomical Legs & Athletic Sneakers on Footpegs
+    # Seamless Lofted Legs & Athletic Sneakers on Footpegs (Zero gaps!)
     for side in [-1, 1]:
-        sy = side * 0.13
-        # Thigh hugging fuel tank
-        add_cyl(f"Rider_Thigh_{side}", 0.058, 0.26, (0.06, sy + side * 0.025, 0.67), (0.14 * side, 0.85, 0), mat_dark_jeans, verts=14, parent=rider_root)
-        # Knee
-        add_box(f"Rider_Knee_{side}", (0.09, 0.08, 0.09), (0.17, sy + side * 0.025, 0.55), mat_dark_jeans, bevel=0.018, parent=rider_root)
-        # Shin angling back to footpeg
-        add_cyl(f"Rider_Shin_{side}", 0.046, 0.28, (0.02, sy + side * 0.02, 0.45), (0, -0.65, 0), mat_dark_jeans, verts=14, parent=rider_root)
+        sy = side * 0.125
+        leg_pts = [
+            (-0.04, sy, 0.77),
+            (0.08, sy + side * 0.025, 0.68),
+            (0.18, sy + side * 0.03, 0.55),
+            (0.06, sy + side * 0.02, 0.44),
+            (-0.10, sy + side * 0.02, 0.39)
+        ]
+        leg_rad = [0.075, 0.068, 0.058, 0.048, 0.042]
+        create_lofted_tube(f"Rider_Pants_{side}", leg_pts, leg_rad, mat_dark_jeans, segs=14, parent=rider_root)
+
         # Sneaker resting squarely on footpeg
         add_box(f"Rider_Sneaker_Upper_{side}", (0.14, 0.07, 0.055), (-0.14, sy + side * 0.02, 0.40), mat_sneaker_black, bevel=0.01, parent=rider_root)
         add_box(f"Rider_Sneaker_Sole_{side}", (0.15, 0.075, 0.018), (-0.14, sy + side * 0.02, 0.372), mat_sneaker_white, bevel=0.003, parent=rider_root)
 
-    # Aerodynamic Full-Face Racing Helmet (Smooth contoured shell + curved visor)
+    # Aerodynamic Full-Face Racing Helmet (Picture 8 Style: Cobalt Blue with White Swoop Curve)
     hx, hy, hz = 0.31, 0.0, 1.18
 
-    # Oval aerodynamic shell
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=20, radius=0.12, location=(hx, hy, hz))
+    # Smooth sculpted aerodynamic shell
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=36, ring_count=22, radius=0.125, location=(hx, hy, hz))
     h_shell = bpy.context.active_object
     h_shell.name = "Helmet_Shell"
-    h_shell.scale = (1.08, 0.92, 1.02)
+    h_shell.scale = (1.12, 0.94, 1.04)
     bpy.ops.object.transform_apply(scale=True)
     apply_crisp_edges(h_shell, 35)
     h_shell.data.materials.append(mat_helmet_shell)
     link_obj(h_shell, rider_root)
 
     # Sleek chin bar
-    add_box("Helmet_Chin_Bar", (0.10, 0.14, 0.07), (hx + 0.07, hy, hz - 0.045), mat_helmet_shell, bevel=0.018, parent=rider_root)
+    add_box("Helmet_Chin_Bar", (0.11, 0.15, 0.075), (hx + 0.07, hy, hz - 0.05), mat_helmet_shell, bevel=0.02, parent=rider_root)
 
-    # Flush Wrap-Around Dark Visor
+    # Wide aerodynamic dark gloss visor covering front eye port
     add_box(
         "Helmet_Visor",
-        (0.08, 0.16, 0.06),
-        (hx + 0.08, hy, hz + 0.01),
+        (0.09, 0.18, 0.075),
+        (hx + 0.075, hy, hz + 0.008),
         mat_helmet_visor,
-        bevel=0.012,
+        bevel=0.015,
         parent=rider_root,
-        rot=(0, -0.12, 0)
+        rot=(0, -0.10, 0)
     )
 
     # Rear aerodynamic spoiler ridge
-    add_box("Helmet_Rear_Spoiler", (0.05, 0.10, 0.03), (hx - 0.10, hy, hz + 0.04), mat_helmet_shell, bevel=0.008, parent=rider_root)
+    add_box("Helmet_Rear_Spoiler", (0.06, 0.11, 0.035), (hx - 0.10, hy, hz + 0.035), mat_helmet_shell, bevel=0.01, parent=rider_root)
 
-    # Cyan racing graphic decal
+    # Distinctive Picture 8 white swooping racing curves along helmet sides
     for side in [-1, 1]:
-        add_box(f"Helmet_Decal_{side}", (0.12, 0.004, 0.018), (hx - 0.01, side * 0.112, hz + 0.02), mat_helmet_decal, parent=rider_root)
+        add_box(f"Helmet_Decal_Side_{side}", (0.14, 0.004, 0.026), (hx - 0.01, side * 0.118, hz + 0.02), mat_helmet_decal, parent=rider_root, rot=(0, -0.15, 0.12 * side))
+        add_box(f"Helmet_Decal_Top_{side}", (0.09, 0.012, 0.004), (hx + 0.02, side * 0.065, hz + 0.128), mat_helmet_decal, parent=rider_root)
 
     # ==========================================================================
     # 6. EXPORT PRODUCTION GLB

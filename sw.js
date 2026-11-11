@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v19';
+const CACHE_NAME = 'bharadekhi-pwa-v21';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   '/icon-192.png',
   '/icon-512.png',
   '/assets/bharadekhi-mark.svg',
+  '/assets/GLTFLoader.js',
   '/assets/dhaka-bus-routes.json'
 ];
 
@@ -64,6 +65,22 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() => caches.match('/index.html') || caches.match('/'))
+    );
+    return;
+  }
+
+  // Network-first for versioned query assets (?v=...) to prevent stale caching
+  if (url.search) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }

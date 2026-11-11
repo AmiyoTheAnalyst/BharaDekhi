@@ -4228,11 +4228,35 @@
     }
     if (type === 'bike') {
       const appearanceSeed = getAppearanceSeed(appearanceId || (vData && vData.id) || type);
+      if (sportbikePrototypeModel) {
+        const bikeGroup = new THREE.Group();
+        replaceBikeWithModel(bikeGroup, sportbikePrototypeModel, colorHex, appearanceSeed);
+        if (typeof scene !== 'undefined' && scene && scene.add) scene.add(bikeGroup);
+        return bikeGroup;
+      }
       const bike = createRealisticGTABike(colorHex, appearanceSeed, vData);
       if (typeof scene !== 'undefined' && scene && scene.add) {
         scene.add(bike);
       }
       return bike;
+    }
+    if (type === 'cng' && cngPrototypeModel) {
+      const cngGroup = new THREE.Group();
+      replaceCNGWithModel(cngGroup, cngPrototypeModel);
+      if (typeof scene !== 'undefined' && scene && scene.add) scene.add(cngGroup);
+      return cngGroup;
+    }
+    if (type === 'rickshaw' && rickshawPrototypeModel) {
+      const rickGroup = new THREE.Group();
+      replaceRickshawWithModel(rickGroup, rickshawPrototypeModel);
+      if (typeof scene !== 'undefined' && scene && scene.add) scene.add(rickGroup);
+      return rickGroup;
+    }
+    if (type === 'bus' && busPrototypeModel) {
+      const busGroup = new THREE.Group();
+      replaceBusWithModel(busGroup, busPrototypeModel);
+      if (typeof scene !== 'undefined' && scene && scene.add) scene.add(busGroup);
+      return busGroup;
     }
     const appearanceSeed = getAppearanceSeed(appearanceId || type);
     if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
@@ -5216,7 +5240,7 @@
   }
 
   function loadCycleRickshawModel() {
-    return loadGLBModel('assets/models/cycle-rickshaw.glb');
+    return loadGLBModel('assets/models/cycle-rickshaw.glb?v=20261111-pic3');
   }
 
   let sportbikePrototypeModel = null;
@@ -5224,17 +5248,17 @@
   let rickshawPrototypeModel = null;
 
   function loadSportbikeModel() {
-    return loadGLBModel('assets/models/sportbike-rider.glb?v=20261110-gta1');
+    return loadGLBModel('assets/models/sportbike-rider.glb?v=20261111-pic8');
   }
 
   function loadCNGModel() {
-    return loadGLBModel('assets/models/cng-autorickshaw.glb');
+    return loadGLBModel('assets/models/cng-autorickshaw.glb?v=20261111-pic4');
   }
 
   let busPrototypeModel = null;
 
   function loadBusModel() {
-    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261109-gta3');
+    return loadGLBModel('assets/models/dhaka-bus.glb?v=20261111-brtc');
   }
 
   const carModelFiles = [
@@ -5364,6 +5388,18 @@
     ];
     const outfit = outfitPacks[outfitIndex];
 
+    const helmetColors = [
+      0x0066f5, // Picture 8 Electric Cobalt Blue
+      0xf97316, // Sunset Orange
+      0xdc2626, // Crimson Red
+      0x18181b, // Matte Black
+      0x059669, // Emerald Green
+      0x7c3aed, // Royal Purple
+      0xf8fafc, // Pearl White
+      0xeab308  // Track Yellow
+    ];
+    const riderHelmetColor = helmetColors[Math.abs((seed || 0) % helmetColors.length)];
+
     model.traverse(node => {
       const name = (node.name || '').toLowerCase();
       if (name === 'wheel_f' || name === 'wheel_r' || name === 'wheel_front' || name === 'wheel_rear') {
@@ -5371,9 +5407,17 @@
       }
       if (node.isMesh && node.material) {
         const matName = node.material.name || '';
-        if (bikeColor && (matName.includes('Fairing_YamahaBlue') || matName.includes('Fairing_Blue') || matName.includes('Rim_') || matName.includes('Helmet_CyanStripe') || matName.includes('Helmet_BlueGloss'))) {
+        if (bikeColor && (matName.includes('Fairing_YamahaBlue') || matName.includes('Fairing_Blue') || matName.includes('Rim_'))) {
           node.material = node.material.clone();
           node.material.color.setHex(bikeColor);
+        }
+        if (matName.includes('Helmet_BlueGloss') || matName.includes('Helmet_Shell') || matName.includes('Helmet_Paint')) {
+          node.material = node.material.clone();
+          node.material.color.setHex(riderHelmetColor);
+        }
+        if (matName.includes('Helmet_CyanStripe') || matName.includes('Helmet_Decal')) {
+          node.material = node.material.clone();
+          node.material.color.setHex(0xf8fafc); // Crisp Picture 8 contrasting swoop stripe
         }
         if (matName.includes('Rider_LeatherJacket') || matName.includes('Rider_BlackLeather')) {
           node.material = node.material.clone();
@@ -5421,8 +5465,8 @@
 
     const wheels = [];
     model.traverse(node => {
-      const name = node.name.toLowerCase();
-      if (name === 'wheel_front' || name === 'wheel_rear_left' || name === 'wheel_rear_right') wheels.push(node);
+      const name = (node.name || '').toLowerCase();
+      if (name === 'wheel_front' || name === 'wheel_rear_left' || name === 'wheel_rear_right' || name === 'wheel_rear_l' || name === 'wheel_rear_r') wheels.push(node);
       if (node.isMesh && node.material) {
         const matName = (node.material.name || '').toLowerCase();
         if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
@@ -6341,6 +6385,17 @@
       });
     }).catch(err => console.warn('Bus GLB fallback:', err));
 
+    loadSportbikeModel().then(prototype => {
+      sportbikePrototypeModel = prototype;
+      Object.values(vehicleMeshMap).forEach(vehicle => {
+        if (vehicle.data && vehicle.data.type === 'bike') {
+          const colorHex = (vehicle.data.color || vehicle.data.bikeColor) ? parseInt((vehicle.data.bikeColor || vehicle.data.color).replace('#', '0x'), 16) : null;
+          const appearanceSeed = getAppearanceSeed(vehicle.data.id || vehicle.data.type);
+          replaceBikeWithModel(vehicle.mesh, prototype, colorHex, appearanceSeed);
+        }
+      });
+    }).catch(err => console.warn('Sportbike GLB fallback:', err));
+
     loadAllCarModels().then(carPrototypes => {
       let carCounter = 0;
       Object.values(vehicleMeshMap).forEach(vehicle => {
@@ -6355,10 +6410,6 @@
     loadMetroModel().then(prototype => {
       replaceMetroTrainWithModel(prototype);
     }).catch(err => console.warn('Metro GLB fallback:', err));
-
-    loadPedestriansModel().then(prototype => {
-      replacePedestriansWithModel(prototype);
-    }).catch(err => console.warn('Pedestrians GLB fallback:', err));
 
     // 11. Instantiate 3D Emergency Ambulance (EB -> Heading 0)
     ambulanceGroup = create3DAmbulance();
@@ -7196,18 +7247,22 @@
       if (v.dir === 'EB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? 18 : 48);
         vm.mesh.position.set(v.pos - 600, bounce, laneZ);
+        vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.z = -tiltZ;
       } else if (v.dir === 'WB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? -15 : -52);
         vm.mesh.position.set(v.pos - 600, bounce, laneZ);
+        vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.z = tiltZ;
       } else if (v.dir === 'SB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? -20 : -58);
         vm.mesh.position.set(laneX, bounce, v.pos - 420);
+        vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.x = tiltZ;
       } else if (v.dir === 'NB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? 18 : 56);
         vm.mesh.position.set(laneX, bounce, v.pos - 420);
+        vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.x = -tiltZ;
       }
       // Roll wheels by the distance the vehicle actually travelled this frame.
@@ -7270,7 +7325,6 @@
 
       let coord = 0;
       let isMoving = true;
-      let targetRotY = 0;
       let posX = 0, posZ = 0;
 
       if (p.isSidewalk) {
@@ -7279,11 +7333,9 @@
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
-          targetRotY = (p.dirForward !== false) ? Math.PI / 2 : -Math.PI / 2;
         } else {
           posX = p.x - 600;
           posZ = coord - 420;
-          targetRotY = (p.dirForward !== false) ? 0 : Math.PI;
         }
       } else {
         // Crosswalk pedestrian
@@ -7292,12 +7344,32 @@
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
-          targetRotY = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
         } else {
           posX = p.x - 600;
           posZ = coord - 420;
+        }
+      }
+
+      // Dynamic forward orientation vector from frame displacement:
+      const lastX = pm.mesh.userData.lastX !== undefined ? pm.mesh.userData.lastX : posX;
+      const lastZ = pm.mesh.userData.lastZ !== undefined ? pm.mesh.userData.lastZ : posZ;
+      const dX = posX - lastX;
+      const dZ = posZ - lastZ;
+      pm.mesh.userData.lastX = posX;
+      pm.mesh.userData.lastZ = posZ;
+
+      const dispDist = Math.hypot(dX, dZ);
+      let targetRotY = (typeof pm.mesh.userData.targetRotY !== 'undefined') ? pm.mesh.userData.targetRotY : 0;
+      if (dispDist > 0.001) {
+        targetRotY = Math.atan2(dX, dZ);
+        pm.mesh.userData.targetRotY = targetRotY;
+      } else if (typeof pm.mesh.userData.targetRotY === 'undefined') {
+        if (p.axis === 'H') {
+          targetRotY = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
+        } else {
           targetRotY = (p.end > p.start) ? 0 : Math.PI;
         }
+        pm.mesh.userData.targetRotY = targetRotY;
       }
 
       const walkPhase = coord * 0.22;
@@ -7525,5 +7597,10 @@
       perfLastSampleTime = nowTime;
     }
   };
+
+  window.replaceCNGWithModel = replaceCNGWithModel;
+  window.replaceBusWithModel = replaceBusWithModel;
+  window.replaceRickshawWithModel = replaceRickshawWithModel;
+  window.replaceBikeWithModel = replaceBikeWithModel;
 
 })();
