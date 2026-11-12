@@ -4659,8 +4659,35 @@ let sharedRickshawArtTexture = null;
     return headGroup;
   }
 
-    function createRealisticDhakaRickshaw(colorHex, appearanceSeed, vData) {
+  function createRealisticDhakaRickshaw(colorHex, appearanceSeed, vData) {
     const group = new THREE.Group();
+    group.userData.wheels = [];
+    group.userData.wheelRadius = 4.1;
+
+    function createBone(pA, pB, rA, rB, material) {
+      const vA = (pA && pA.isVector3) ? pA.clone() : new THREE.Vector3(pA[0], pA[1], pA[2]);
+      const vB = (pB && pB.isVector3) ? pB.clone() : new THREE.Vector3(pB[0], pB[1], pB[2]);
+      const dist = vA.distanceTo(vB);
+      if (dist < 0.001) return new THREE.Group();
+
+      const segGroup = new THREE.Group();
+      const cylGeo = new THREE.CylinderGeometry(rB, rA, dist, 12, 1, false);
+      cylGeo.translate(0, dist / 2, 0);
+      const mesh = new THREE.Mesh(cylGeo, material);
+      mesh.castShadow = true;
+
+      const jointGeo = new THREE.SphereGeometry(rA, 10, 8);
+      const jointMesh = new THREE.Mesh(jointGeo, material);
+      jointMesh.castShadow = true;
+      segGroup.add(jointMesh);
+
+      const dir = new THREE.Vector3().subVectors(vB, vA).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      segGroup.position.copy(vA);
+      segGroup.quaternion.copy(quat);
+      segGroup.add(mesh);
+      return segGroup;
+    }
 
     // Standard materials
     const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.25, metalness: 0.85 });
