@@ -1,91 +1,51 @@
-import subprocess
 import os
-import shutil
+import subprocess
+import re
 
-chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-
-with open('scratch/test_perfect.html', 'r', encoding='utf-8') as f:
+with open('scratch/test_perfect_dhaka_rickshaw.html', 'r', encoding='utf-8') as f:
     base_html = f.read()
 
-# 1. Rickshaw Side Profile (Full length, Puller pedaling & Seated Passengers)
-html_rick1 = base_html.replace('camera.position.set(0, 10, 48);', 'camera.position.set(0, 11, 14);')
-html_rick1 = html_rick1.replace('camera.lookAt(0, 8, 0);', 'camera.lookAt(0, 9, -20);')
-with open('scratch/view_perfect_rick_side.html', 'w', encoding='utf-8') as f:
-    f.write(html_rick1)
-
-out_rick1 = os.path.abspath('scratch/perfect_rickshaw_side.png')
-url_rick1 = os.path.abspath('scratch/view_perfect_rick_side.html').replace('\\', '/')
-cmd_rick1 = [
-    chrome_path, '--headless=new', '--no-sandbox', '--allow-file-access-from-files',
-    '--enable-webgl', '--use-gl=angle', '--window-size=1280,720', '--virtual-time-budget=3000',
-    f'--screenshot={out_rick1}', f'file:///{url_rick1}'
+views = [
+    ('scratch/perfect_side_lady.png', (1.5, 8.5, 36), (1.5, 8.5, 0)),
+    ('scratch/perfect_side_man.png', (1.5, 8.5, -36), (1.5, 8.5, 0)),
+    ('scratch/perfect_close_lady.png', (-7.5, 12.0, 13), (-7.5, 11.5, 3.4)),
+    ('scratch/perfect_close_man.png', (-7.5, 12.0, -13), (-7.5, 11.5, -3.4)),
+    ('scratch/perfect_close_puller.png', (3.5, 11.0, 11), (3.2, 10.5, 0))
 ]
-subprocess.run(cmd_rick1, timeout=15)
 
-# 2. Rickshaw 3/4 Front View (Hood art, spoked wheels, handlebars, passengers)
-html_rick2 = base_html.replace('camera.position.set(0, 10, 48);', 'camera.position.set(28, 14, -8);')
-html_rick2 = html_rick2.replace('camera.lookAt(0, 8, 0);', 'camera.lookAt(-2, 8.5, -20);')
-with open('scratch/view_perfect_rick_front.html', 'w', encoding='utf-8') as f:
-    f.write(html_rick2)
+chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
+user_data = os.path.abspath('scratch/chrome_tmp_perfect_rick')
+os.makedirs(user_data, exist_ok=True)
 
-out_rick2 = os.path.abspath('scratch/perfect_rickshaw_front.png')
-url_rick2 = os.path.abspath('scratch/view_perfect_rick_front.html').replace('\\', '/')
-cmd_rick2 = [
-    chrome_path, '--headless=new', '--no-sandbox', '--allow-file-access-from-files',
-    '--enable-webgl', '--use-gl=angle', '--window-size=1280,720', '--virtual-time-budget=3000',
-    f'--screenshot={out_rick2}', f'file:///{url_rick2}'
-]
-subprocess.run(cmd_rick2, timeout=15)
+cam_regex = r'camera\.position\.set\([^)]+\);\s*camera\.lookAt\([^)]+\);'
 
-# 3. CNG Side Profile (Picture 4 Match: Full length, Doors, Livery, Wheels)
-html_cng1 = base_html.replace('camera.position.set(0, 10, 48);', 'camera.position.set(0, 11, 56);')
-html_cng1 = html_cng1.replace('camera.lookAt(0, 8, 0);', 'camera.lookAt(0, 9, 20);')
-with open('scratch/view_perfect_cng_side.html', 'w', encoding='utf-8') as f:
-    f.write(html_cng1)
+for out_name, cam_pos, look_at in views:
+    cam_setup = f'camera.position.set({cam_pos[0]}, {cam_pos[1]}, {cam_pos[2]});\n  camera.lookAt({look_at[0]}, {look_at[1]}, {look_at[2]});'
+    content = re.sub(cam_regex, cam_setup, base_html)
 
-out_cng1 = os.path.abspath('scratch/perfect_cng_side.png')
-url_cng1 = os.path.abspath('scratch/view_perfect_cng_side.html').replace('\\', '/')
-cmd_cng1 = [
-    chrome_path, '--headless=new', '--no-sandbox', '--allow-file-access-from-files',
-    '--enable-webgl', '--use-gl=angle', '--window-size=1280,720', '--virtual-time-budget=3000',
-    f'--screenshot={out_cng1}', f'file:///{url_cng1}'
-]
-subprocess.run(cmd_cng1, timeout=15)
+    temp_html_path = os.path.abspath(f'scratch/temp_{os.path.basename(out_name)}.html')
+    with open(temp_html_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    out_png = os.path.abspath(out_name)
+    if os.path.exists(out_png):
+        try: os.remove(out_png)
+        except: pass
 
-# 4. CNG 3/4 Front View (Nose, Windshield, Headlight, Grill cage)
-html_cng2 = base_html.replace('camera.position.set(0, 10, 48);', 'camera.position.set(30, 14, 44);')
-html_cng2 = html_cng2.replace('camera.lookAt(0, 8, 0);', 'camera.lookAt(0, 8.5, 20);')
-with open('scratch/view_perfect_cng_front.html', 'w', encoding='utf-8') as f:
-    f.write(html_cng2)
-
-out_cng2 = os.path.abspath('scratch/perfect_cng_front.png')
-url_cng2 = os.path.abspath('scratch/view_perfect_cng_front.html').replace('\\', '/')
-cmd_cng2 = [
-    chrome_path, '--headless=new', '--no-sandbox', '--allow-file-access-from-files',
-    '--enable-webgl', '--use-gl=angle', '--window-size=1280,720', '--virtual-time-budget=3000',
-    f'--screenshot={out_cng2}', f'file:///{url_cng2}'
-]
-subprocess.run(cmd_cng2, timeout=15)
-
-# 5. CNG Rear View (Alpona + License plate)
-html_cng3 = base_html.replace('camera.position.set(0, 10, 48);', 'camera.position.set(-36, 12, 20);')
-html_cng3 = html_cng3.replace('camera.lookAt(0, 8, 0);', 'camera.lookAt(-4, 9, 20);')
-with open('scratch/view_perfect_cng_rear.html', 'w', encoding='utf-8') as f:
-    f.write(html_cng3)
-
-out_cng3 = os.path.abspath('scratch/perfect_cng_rear.png')
-url_cng3 = os.path.abspath('scratch/view_perfect_cng_rear.html').replace('\\', '/')
-cmd_cng3 = [
-    chrome_path, '--headless=new', '--no-sandbox', '--allow-file-access-from-files',
-    '--enable-webgl', '--use-gl=angle', '--window-size=1280,720', '--virtual-time-budget=3000',
-    f'--screenshot={out_cng3}', f'file:///{url_cng3}'
-]
-subprocess.run(cmd_cng3, timeout=15)
-
-dest_dir = r'C:\Users\HP\.gemini\antigravity\brain\a2d3aea8-cfe9-491c-9b42-9d7a3c2c4ed8'
-for f in ['perfect_rickshaw_side.png', 'perfect_rickshaw_front.png', 'perfect_cng_side.png', 'perfect_cng_front.png', 'perfect_cng_rear.png']:
-    src = os.path.join('scratch', f)
-    if os.path.exists(src):
-        shutil.copy(src, os.path.join(dest_dir, f))
-
-print('Captured all updated views!')
+    cmd = [
+        chrome_path,
+        '--headless=new',
+        '--no-sandbox',
+        '--allow-file-access-from-files',
+        '--enable-webgl',
+        '--use-gl=angle',
+        '--window-size=1280,720',
+        f'--user-data-dir={user_data}',
+        f'--screenshot={out_png}',
+        f'file:///{temp_html_path.replace(os.sep, "/")}'
+    ]
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
+        print(f'{out_name}: exists={os.path.exists(out_png)}, size={os.path.getsize(out_png) if os.path.exists(out_png) else 0}')
+    except Exception as e:
+        print(f'Error for {out_name}: {e}')
