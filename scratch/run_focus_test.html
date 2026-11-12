@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<iframe id="appFrame" src="file:///C:/Users/HP/Desktop/commute-dhaka-web/index.html" style="width: 1920px; height: 1080px; border: none;"></iframe>
+<script>
+  window.onload = () => {
+    const frame = document.getElementById('appFrame');
+    setTimeout(() => {
+      const win = frame.contentWindow;
+      console.log('FOCUS: Switching to 3D mode...');
+      win.setCrossroadsViewMode(true);
+      
+      setTimeout(() => {
+        console.log('FOCUS: Focusing on rickshaw...');
+        if (win.crossroadsFocusMode) {
+          win.crossroadsFocusMode('rickshaw');
+        }
+      }, 3000);
+    }, 2000);
+  };
+</script>
+</body>
+</html>

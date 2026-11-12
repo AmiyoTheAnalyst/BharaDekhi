@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="../assets/three.min.js"></script>
+  <script src="../assets/crossroads-3d.js"></script>
+</head>
+<body>
+<div id="output">Running test...</div>
+<script>
+  try {
+    console.log('Testing window.create3DVehicle("rickshaw")...');
+    const rick = window.create3DVehicle('rickshaw', '#f59e0b', 1, {});
+    console.log('SUCCESS! Rickshaw created:', rick);
+    document.getElementById('output').innerText = 'SUCCESS! Children count: ' + rick.children.length;
+    
+    // Test pedaling update
+    if (rick.userData.updatePedaling) {
+      rick.userData.updatePedaling(1.5);
+      console.log('SUCCESS! updatePedaling executed without error');
+    }
+  } catch(e) {
+    console.error('TEST ERROR:', e.stack || e);
+    document.getElementById('output').innerText = 'ERROR: ' + e.message;
+  }
+</script>
+</body>
+</html>
