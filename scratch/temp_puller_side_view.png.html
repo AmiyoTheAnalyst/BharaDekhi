@@ -26,7 +26,7 @@
   renderer.toneMappingExposure = 1.15;
   container.appendChild(renderer.domElement);
 
-  // Lighting - Identical to Crossroads 3D Daylight
+  // Lighting
   const hemiLight = new THREE.HemisphereLight(0xffedd5, 0x1e293b, 1.05);
   scene.add(hemiLight);
 
@@ -55,8 +55,7 @@
   // Textures
   function getRickshawArtTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 512; canvas.height = 512;
     const ctx = canvas.getContext('2d');
     const grad = ctx.createLinearGradient(0, 0, 512, 512);
     grad.addColorStop(0, '#0284c7');
@@ -68,15 +67,13 @@
     ctx.lineWidth = 14;
     ctx.strokeRect(10, 10, 492, 492);
     const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
     return tex;
   }
 
   function getLungiTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = 256; canvas.height = 256;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#1e3a8a';
     ctx.fillRect(0, 0, 256, 256);
@@ -102,18 +99,16 @@
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 256); ctx.stroke();
     }
     const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(4, 4);
     return tex;
   }
 
   function getGamchaTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 128; canvas.height = 128;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#991b1b';
+    ctx.fillStyle = '#b91c1c';
     ctx.fillRect(0, 0, 128, 128);
     ctx.strokeStyle = '#fee2e2';
     ctx.lineWidth = 6;
@@ -129,9 +124,59 @@
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 128); ctx.stroke();
     }
     const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(3, 3);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 4);
+    return tex;
+  }
+
+  // Realistic Face Texture with Soft Ambient Shading
+  function getPullerFaceTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Rich South Asian Bronze Skin Base
+    ctx.fillStyle = '#7a452d';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Soft Ambient Facial Shading around temples, cheeks, and jawline
+    const ambGrad = ctx.createRadialGradient(256, 256, 80, 256, 256, 250);
+    ambGrad.addColorStop(0, 'rgba(255, 230, 210, 0.14)');
+    ambGrad.addColorStop(0.55, 'rgba(0, 0, 0, 0.0)');
+    ambGrad.addColorStop(1, 'rgba(0, 0, 0, 0.32)');
+    ctx.fillStyle = ambGrad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Forehead Soft Light Center
+    const foreGrad = ctx.createRadialGradient(256, 120, 15, 256, 120, 110);
+    foreGrad.addColorStop(0, 'rgba(255, 230, 210, 0.18)');
+    foreGrad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+    ctx.fillStyle = foreGrad;
+    ctx.fillRect(150, 40, 212, 140);
+
+    // Warm Cheek Shading
+    [-1, 1].forEach(side => {
+      const bx = side === -1 ? 190 : 322;
+      const blushGrad = ctx.createRadialGradient(bx, 280, 4, bx, 280, 50);
+      blushGrad.addColorStop(0, 'rgba(160, 60, 45, 0.18)');
+      blushGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = blushGrad;
+      ctx.beginPath();
+      ctx.arc(bx, 280, 50, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Jawline Contour Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+    ctx.beginPath();
+    ctx.moveTo(160, 320);
+    ctx.quadraticCurveTo(256, 440, 352, 320);
+    ctx.quadraticCurveTo(365, 380, 256, 460);
+    ctx.quadraticCurveTo(145, 380, 160, 320);
+    ctx.fill();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
     return tex;
   }
 
@@ -149,33 +194,33 @@
     const tealTrimMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35 });
     const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
-    const lipMat = new THREE.MeshStandardMaterial({ color: 0x7a3a30, roughness: 0.55 });
+    const lipMat = new THREE.MeshStandardMaterial({ color: 0x6e352b, roughness: 0.55 });
     const femaleLipMat = new THREE.MeshStandardMaterial({ color: 0xb83848, roughness: 0.40 });
     const bindiMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.3 });
 
     // CALIBRATED AUTHENTIC PULLER MATERIALS
-    // Deep South Asian Sun-Tanned Bronze
     const pullerSkinMat = new THREE.MeshStandardMaterial({
-      color: 0x7a432b,
-      roughness: 0.68,
+      color: 0x7a452d,
+      roughness: 0.65,
       metalness: 0.04
     });
-    // Deep Traditional Violet-Indigo Cotton Tunic
+    const pullerFaceMat = new THREE.MeshStandardMaterial({
+      map: getPullerFaceTexture(),
+      roughness: 0.62,
+      metalness: 0.04
+    });
     const plumShirtMat = new THREE.MeshStandardMaterial({
-      color: 0x361a3e,
+      color: 0x2d1736,
       roughness: 0.82
     });
-    // Traditional Dark Brown Leather Strap Sandal Material
     const brownSandalMat = new THREE.MeshStandardMaterial({
-      color: 0x24140b,
+      color: 0x22130a,
       roughness: 0.85
     });
-    // Soft Natural Black Hair
     const hairMat = new THREE.MeshStandardMaterial({
-      color: 0x0d0d10,
-      roughness: 0.88
+      color: 0x0c0c0e,
+      roughness: 0.90
     });
-    // Authentic Draped Lungi & Gamcha
     const lungiMat = new THREE.MeshStandardMaterial({
       map: getLungiTexture(),
       roughness: 0.78
@@ -219,12 +264,11 @@
     const wheelRadius = 4.1;
     const wheelWidth = 0.55;
 
-    // 1. Front Wheel
+    // Wheels
     const frontWheel = buildSpokedWheel(wheelRadius, wheelWidth);
     frontWheel.position.set(13.6, 4.1, 0);
     group.add(frontWheel);
 
-    // 2. Rear Wheels
     const rearWheelL = buildSpokedWheel(wheelRadius, wheelWidth);
     rearWheelL.position.set(-10.0, 4.1, -7.5);
     group.add(rearWheelL);
@@ -245,7 +289,7 @@
       group.add(fenderMesh);
     });
 
-    // Helper: Bone connector
+    // Bone connector
     function createBone(pA, pB, rA, rB, material) {
       const vA = (pA && pA.isVector3) ? pA.clone() : new THREE.Vector3(pA[0], pA[1], pA[2]);
       const vB = (pB && pB.isVector3) ? pB.clone() : new THREE.Vector3(pB[0], pB[1], pB[2]);
@@ -346,7 +390,6 @@
       sideRail.position.set(-8.0, 9.0, side * 7.3);
       group.add(sideRail);
 
-      // Curved Chrome Armrest Rail
       const armPts = [
         new THREE.Vector3(-12.4, 9.2, side * 7.3),
         new THREE.Vector3(-8.2, 10.8, side * 7.3),
@@ -562,6 +605,22 @@
       return mesh;
     }
 
+    // Direct Directional Limb Segment (Base at 0, 0, 0, extends along +Y to length)
+    function createDirectionalLimbMesh(radiusBottom, radiusTop, length, material) {
+      const g = new THREE.Group();
+      const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 16, 1, false);
+      cylGeo.translate(0, length / 2, 0);
+      const mesh = new THREE.Mesh(cylGeo, material);
+      mesh.castShadow = true;
+      g.add(mesh);
+
+      const joint = new THREE.Mesh(new THREE.SphereGeometry(radiusBottom, 12, 10), material);
+      joint.castShadow = true;
+      g.add(joint);
+      return g;
+    }
+
+    // Static Connected Bone Segment (between pA and pB)
     function createSmoothBoneSegment(pA, pB, rA, rB, material) {
       const vA = (pA && pA.isVector3) ? pA.clone() : new THREE.Vector3(pA[0], pA[1], pA[2]);
       const vB = (pB && pB.isVector3) ? pB.clone() : new THREE.Vector3(pB[0], pB[1], pB[2]);
@@ -619,7 +678,6 @@
       thumb.rotation.x = side > 0 ? 0.45 : -0.45;
       thumb.rotation.z = -0.25;
       hGroup.add(thumb);
-
       return hGroup;
     }
 
@@ -650,43 +708,49 @@
     }
 
     // =========================================================================
-    // PERFECT SCULPTED HEAD & DIGNIFIED BANGLADESHI FACE
+    // DIGNIFIED ANATOMICAL BANGLADESHI PULLER HEAD
     // =========================================================================
     function buildPerfectPullerHead() {
       const headGroup = new THREE.Group();
-      const r = 0.84; // Realistic adult human head radius (~20-22cm scale)
+      const r = 0.85;
 
-      // 1. Natural Cranium (Center at 0, 0, 0)
-      const craniumGeo = new THREE.SphereGeometry(r, 22, 18);
-      craniumGeo.scale(0.88, 1.05, 0.86);
-      const cranium = new THREE.Mesh(craniumGeo, pullerSkinMat);
+      // 1. Natural Cranium with Realistic Facial Texture Mapping
+      const craniumGeo = new THREE.SphereGeometry(r, 24, 20);
+      craniumGeo.scale(0.88, 1.06, 0.86);
+      const cranium = new THREE.Mesh(craniumGeo, pullerFaceMat);
+      cranium.rotation.y = -Math.PI / 2;
       cranium.castShadow = true;
       headGroup.add(cranium);
 
-      // 2. Natural Jawline & Chin (Subtle contour, seamlessly integrated)
-      const chin = new THREE.Mesh(new THREE.SphereGeometry(r * 0.22, 12, 10), pullerSkinMat);
-      chin.scale.set(1.0, 0.8, 1.1);
-      chin.position.set(r * 0.70, -r * 0.38, 0);
+      // 2. Anatomical Jawline & Sculpted Chin
+      const chin = new THREE.Mesh(new THREE.SphereGeometry(r * 0.20, 14, 12), pullerSkinMat);
+      chin.scale.set(1.0, 0.85, 1.15);
+      chin.position.set(r * 0.70, -r * 0.36, 0);
       headGroup.add(chin);
 
-      // 3. FULL NATURAL BLACK HAIR WITH SIDE-PART (NO SKI-MASK, NO BALD SPOT!)
-      // Hair cap covers upper and back crown (thetaLength = Math.PI * 0.45 leaves forehead clear!)
-      const hairCrownGeo = new THREE.SphereGeometry(r * 1.025, 22, 16, 0, Math.PI * 2, 0, Math.PI * 0.44);
-      hairCrownGeo.scale(0.90, 1.04, 0.90);
-      const hairCrown = new THREE.Mesh(hairCrownGeo, hairMat);
-      hairCrown.position.set(-0.04, 0.06, 0);
+      // 3. FULL NATURAL BLACK HAIR WITH PROPER HAIRCUT (NO BALD TONSURE!)
+      // Upper crown hair (covers top of skull down to upper forehead, thetaLength: Math.PI * 0.42)
+      const hairCrown = new THREE.Mesh(
+        new THREE.SphereGeometry(r * 1.025, 22, 16, 0, Math.PI * 2, 0, Math.PI * 0.42),
+        hairMat
+      );
+      hairCrown.position.set(-0.02, 0.06, 0);
       hairCrown.castShadow = true;
       headGroup.add(hairCrown);
 
-      // Nape Hair (covers back of skull down to neck)
-      const napeHair = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r * 0.65, 0.65, 14, 1, false, Math.PI * 0.5, Math.PI), hairMat);
-      napeHair.position.set(-0.15, -0.15, 0);
+      // Back of head & nape hair (covers back hemisphere down to neck)
+      const napeHair = new THREE.Mesh(
+        new THREE.SphereGeometry(r * 1.02, 20, 16, Math.PI * 0.5, Math.PI, 0, Math.PI * 0.75),
+        hairMat
+      );
+      napeHair.rotation.y = Math.PI / 2;
+      napeHair.position.set(-0.06, 0.02, 0);
       headGroup.add(napeHair);
 
-      // Sideburns in front of ears
+      // Natural Sideburns in front of ears
       [-r * 0.74, r * 0.74].forEach(sz => {
-        const sburn = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.38, 0.10), hairMat);
-        sburn.position.set(0.10, -0.06, sz);
+        const sburn = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.36, 0.08), hairMat);
+        sburn.position.set(0.10, -0.05, sz);
         headGroup.add(sburn);
       });
 
@@ -876,9 +940,7 @@
     lungiKnot.position.set(1.35, 6.95, 0);
     pullerGroup.add(lungiKnot);
 
-    // Pedaling Legs:
-    // Thighs are WRAPPED IN LUNGI FABRIC down to the knee!
-    // Calves are BARE BRONZE MUSCLE from knee down to traditional leather sandals!
+    // Dynamic Pedaling Legs
     const lenThigh = 2.8;
     const lenShin = 2.6;
     const pullerLegs = [];
@@ -887,20 +949,16 @@
       const hipPt = new THREE.Vector3(0.65, 6.8, side * 0.95);
       const legGroup = new THREE.Group();
 
-      // THIGH: Wrapped in Lungi Fabric (NO BARE DOLL THIGH!)
-      const thighGroup = new THREE.Group();
-      const thighMesh = createSmoothBoneSegment([0, 0, 0], [0, -lenThigh, 0], 0.58, 0.48, lungiMat);
-      thighGroup.add(thighMesh);
+      // Thigh Limb Group (Base at 0, 0, 0 extends along +Y to lenThigh)
+      const thighGroup = createDirectionalLimbMesh(0.58, 0.48, lenThigh, lungiMat);
 
       // Fabric Knee Cuff / Hem
-      const kneeHem = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.20, 16), lungiMat);
-      kneeHem.position.set(0, -lenThigh, 0);
+      const kneeHem = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.22, 16), lungiMat);
+      kneeHem.position.set(0, lenThigh, 0);
       thighGroup.add(kneeHem);
 
-      // CALF: Bare Muscular Bronze Leg (Knee to Ankle) with Gastrocnemius Taper
-      const calfGroup = new THREE.Group();
-      const calfMesh = createSmoothBoneSegment([0, 0, 0], [0, -lenShin, 0], 0.44, 0.30, pullerSkinMat);
-      calfGroup.add(calfMesh);
+      // Calf Limb Group (Base at 0, 0, 0 extends along +Y to lenShin)
+      const calfGroup = createDirectionalLimbMesh(0.44, 0.30, lenShin, pullerSkinMat);
 
       // Traditional Bengali Brown Leather Strap Sandal (Chappal)
       const footGroup = new THREE.Group();
@@ -956,15 +1014,15 @@
         const ky = leg.hip.y + Math.sin(thighAngle) * lenThigh;
         const kz = leg.hip.z;
 
-        // Orient Thigh from Hip to Knee
+        // Thigh: extends from leg.hip towards knee (kx, ky, kz)
         const thighDir = new THREE.Vector3(kx - leg.hip.x, ky - leg.hip.y, 0).normalize();
-        const qThigh = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), thighDir);
+        const qThigh = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), thighDir);
         leg.thighGroup.position.copy(leg.hip);
         leg.thighGroup.quaternion.copy(qThigh);
 
-        // Orient Calf from Knee to Pedal
+        // Calf: extends from knee (kx, ky, kz) towards pedal (pedalLocalX, pedalLocalY, pedalLocalZ)
         const shinDir = new THREE.Vector3(pedalLocalX - kx, pedalLocalY - ky, pedalLocalZ - kz).normalize();
-        const qShin = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), shinDir);
+        const qShin = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), shinDir);
         leg.calfGroup.position.set(kx, ky, kz);
         leg.calfGroup.quaternion.copy(qShin);
 
