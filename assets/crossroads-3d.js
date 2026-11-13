@@ -4836,6 +4836,8 @@ let sharedRickshawArtTexture = null;
 
   function createRealisticDhakaRickshaw(colorHex, appearanceSeed, vData) {
     const group = new THREE.Group();
+    // Scaled realistically so rickshaw occupies lane naturally relative to Dhaka buses/cars
+    group.scale.set(0.82, 0.82, 0.82);
 
     // Standard materials
     const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.25, metalness: 0.85 });
@@ -4846,11 +4848,24 @@ let sharedRickshawArtTexture = null;
     const woodFloorMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.75 });
     const yellowWallMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.35, metalness: 0.15 });
     const tealTrimMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35 });
-    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
-    const lipMat = new THREE.MeshStandardMaterial({ color: 0xa84242, roughness: 0.45 });
-    const femaleLipMat = new THREE.MeshStandardMaterial({ color: 0xb83848, roughness: 0.40 });
-    const bindiMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.3 });
+
+    const pullerSkinMat = new THREE.MeshStandardMaterial({ color: 0x93593e, roughness: 0.58, metalness: 0.05 });
+    const maleSkinMat = new THREE.MeshStandardMaterial({ color: 0x9e644b, roughness: 0.58 });
+    const femaleSkinMat = new THREE.MeshStandardMaterial({ color: 0xa86e55, roughness: 0.55 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x141416, roughness: 0.85 });
+
+    const plumShirtMat = new THREE.MeshStandardMaterial({ color: 0x4a2157, roughness: 0.75 });
+    const brownSandalMat = new THREE.MeshStandardMaterial({ color: 0x45220c, roughness: 0.85 });
+    const maleShirtMat = new THREE.MeshStandardMaterial({ color: 0x684d94, roughness: 0.65 });
+    const malePantMat = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.72 });
+    const maleSandalsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.85 });
+
+    const femaleBlouseMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65, side: THREE.DoubleSide });
+    const femaleSareeSkirtMat = new THREE.MeshStandardMaterial({ color: 0x4ba3db, roughness: 0.62, side: THREE.DoubleSide });
+    const pinkSandalMat = new THREE.MeshStandardMaterial({ color: 0xdb2777, roughness: 0.75 });
+    const lipMat = new THREE.MeshStandardMaterial({ color: 0x9f513b, roughness: 0.6 });
+    const femaleLipMat = new THREE.MeshStandardMaterial({ color: 0xbe3246, roughness: 0.40 });
+    const bindiMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 });
 
     const hoodArtMat = new THREE.MeshStandardMaterial({
       map: getRickshawArtTexture(),
@@ -4861,127 +4876,121 @@ let sharedRickshawArtTexture = null;
 
     const lungiMat = new THREE.MeshStandardMaterial({
       map: getLungiTexture(),
-      roughness: 0.75
-    });
-
-    const gamchaMat = new THREE.MeshStandardMaterial({
-      map: getGamchaTexture(),
-      roughness: 0.75
-    });
-
-    const pullerHeadMat = new THREE.MeshStandardMaterial({
-      map: getPullerFaceTexture(),
-      roughness: 0.55,
-      metalness: 0.05
+      roughness: 0.75,
+      side: THREE.DoubleSide
     });
 
     function buildSpokedWheel(radius, width) {
-      const wheelGroup = new THREE.Group();
-      const tireGeo = new THREE.TorusGeometry(radius, width * 0.45, 14, 36);
-      const tireMesh = new THREE.Mesh(tireGeo, rubberMat);
-      tireMesh.castShadow = true;
-      wheelGroup.add(tireMesh);
+      const wheel = new THREE.Group();
+      const tire = new THREE.Mesh(new THREE.TorusGeometry(radius, width, 14, 36), rubberMat);
+      tire.castShadow = true;
+      wheel.add(tire);
 
-      const rimGeo = new THREE.TorusGeometry(radius * 0.92, width * 0.22, 10, 36);
-      wheelGroup.add(new THREE.Mesh(rimGeo, chromeMat));
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(radius - width * 0.45, width * 0.45, 10, 36), chromeMat);
+      wheel.add(rim);
 
-      const hubGeo = new THREE.CylinderGeometry(0.55, 0.55, width * 1.8, 14);
-      hubGeo.rotateX(Math.PI / 2);
-      wheelGroup.add(new THREE.Mesh(hubGeo, chromeMat));
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.8, 16), chromeMat);
+      hub.rotation.z = Math.PI / 2;
+      hub.castShadow = true;
+      wheel.add(hub);
 
-      const spokeCount = 18;
+      const spokeCount = 20;
+      const spokeGeo = new THREE.CylinderGeometry(0.04, 0.04, radius * 1.95, 6);
       for (let i = 0; i < spokeCount; i++) {
-        const ang = (i * Math.PI * 2) / spokeCount;
-        const spokeGeo = new THREE.CylinderGeometry(0.04, 0.04, radius * 1.84, 4);
-        spokeGeo.rotateZ(ang);
-        wheelGroup.add(new THREE.Mesh(spokeGeo, chromeMat));
+        const spoke = new THREE.Mesh(spokeGeo, chromeMat);
+        const ang = (i * Math.PI) / (spokeCount / 2);
+        spoke.rotation.z = ang;
+        wheel.add(spoke);
       }
-      return wheelGroup;
+      return wheel;
     }
 
-    const wheelRadius = 4.1;
-    const wheelWidth = 0.55;
+    function createBone(pA, pB, rA, rB, mat) {
+      const vA = new THREE.Vector3(pA[0], pA[1], pA[2]);
+      const vB = new THREE.Vector3(pB[0], pB[1], pB[2]);
+      const dist = vA.distanceTo(vB);
+      if (dist < 0.001) return new THREE.Group();
+      const g = new THREE.Group();
+      const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rB, rA, dist, 12), mat);
+      cyl.position.set(0, dist / 2, 0);
+      cyl.castShadow = true;
+      g.add(cyl);
+      const dir = new THREE.Vector3().subVectors(vB, vA).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      g.position.copy(vA);
+      g.quaternion.copy(quat);
+      return g;
+    }
 
-    // 1. Front Wheel
-    const frontWheel = buildSpokedWheel(wheelRadius, wheelWidth);
-    frontWheel.position.set(13.6, 4.1, 0);
+    // 1. Narrowed Chassis & Wheels (Real Dhaka proportions: rear track = 9.3)
+    const wheelZ = 4.65;
+    const wheelRadius = 4.1;
+
+    const frontWheel = buildSpokedWheel(wheelRadius, 0.40);
+    frontWheel.position.set(13.6, wheelRadius, 0);
     group.add(frontWheel);
 
-    // 2. Rear Wheels
-    const rearWheelL = buildSpokedWheel(wheelRadius, wheelWidth);
-    rearWheelL.position.set(-10.0, 4.1, -7.5);
+    const rearWheelL = buildSpokedWheel(wheelRadius, 0.40);
+    rearWheelL.position.set(-10.0, wheelRadius, -wheelZ);
     group.add(rearWheelL);
 
-    const rearWheelR = buildSpokedWheel(wheelRadius, wheelWidth);
-    rearWheelR.position.set(-10.0, 4.1, 7.5);
+    const rearWheelR = buildSpokedWheel(wheelRadius, 0.40);
+    rearWheelR.position.set(-10.0, wheelRadius, wheelZ);
     group.add(rearWheelR);
 
     group.userData.wheels = [frontWheel, rearWheelL, rearWheelR];
-    group.userData.wheelRadius = 4.1;
+    group.userData.wheelRadius = wheelRadius;
 
-    // Rear Fenders
-    [-7.5, 7.5].forEach(z => {
-      const fenderGeo = new THREE.TorusGeometry(wheelRadius * 1.08, 0.45, 10, 24, Math.PI * 0.72);
-      const fenderMesh = new THREE.Mesh(fenderGeo, yellowWallMat);
-      fenderMesh.position.set(-10.0, 4.1, z);
-      fenderMesh.rotation.z = Math.PI * 0.64;
-      group.add(fenderMesh);
+    // Mudguards
+    const fFenderGeo = new THREE.TorusGeometry(4.4, 0.35, 8, 24, Math.PI * 0.65);
+    const fFender = new THREE.Mesh(fFenderGeo, frameMat);
+    fFender.rotation.z = Math.PI * 0.65;
+    fFender.position.set(13.6, wheelRadius, 0);
+    group.add(fFender);
+
+    [-wheelZ, wheelZ].forEach(z => {
+      const rFenderGeo = new THREE.TorusGeometry(4.4, 0.35, 8, 24, Math.PI * 0.70);
+      const rFender = new THREE.Mesh(rFenderGeo, goldTrimMat);
+      rFender.rotation.z = Math.PI * 0.60;
+      rFender.position.set(-10.0, wheelRadius, z);
+      group.add(rFender);
     });
 
-    // Helper: Bone connector
-    function createBone(pA, pB, rA, rB, material) {
-      const vA = (pA && pA.isVector3) ? pA.clone() : new THREE.Vector3(pA[0], pA[1], pA[2]);
-      const vB = (pB && pB.isVector3) ? pB.clone() : new THREE.Vector3(pB[0], pB[1], pB[2]);
-      const dist = vA.distanceTo(vB);
-      if (dist < 0.001) return new THREE.Group();
-
-      const segGroup = new THREE.Group();
-      const cylGeo = new THREE.CylinderGeometry(rB, rA, dist, 12, 1, false);
-      cylGeo.translate(0, dist / 2, 0);
-      const mesh = new THREE.Mesh(cylGeo, material);
-      mesh.castShadow = true;
-
-      const jointGeo = new THREE.SphereGeometry(rA, 10, 8);
-      const jointMesh = new THREE.Mesh(jointGeo, material);
-      jointMesh.castShadow = true;
-      segGroup.add(jointMesh);
-
-      const dir = new THREE.Vector3().subVectors(vB, vA).normalize();
-      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-      segGroup.position.copy(vA);
-      segGroup.quaternion.copy(quat);
-      segGroup.add(mesh);
-      return segGroup;
-    }
-
     // Frame tubes
+    const frameTubes = [
+      [[1.6, 3.6, 0], [0.6, 7.2, 0], 0.32, 0.30],
+      [[0.6, 7.2, 0], [8.8, 10.4, 0], 0.28, 0.28],
+      [[1.6, 3.6, 0], [8.8, 10.4, 0], 0.32, 0.28],
+      [[1.6, 3.6, 0], [-10.0, 4.1, 0], 0.34, 0.32],
+      [[0.6, 7.2, 0], [-10.0, 4.1, 0], 0.28, 0.28]
+    ];
+    frameTubes.forEach(t => group.add(createBone(t[0], t[1], t[2], t[3], frameMat)));
+
     const forkPts = [
-      [-10.0, 4.1, 0], [1.6, 3.6, 0], [1.6, 3.6, 0], [0.6, 7.2, 0],
-      [0.6, 7.2, 0], [8.8, 10.4, 0], [1.6, 3.6, 0], [8.8, 10.4, 0],
       [13.6, 4.1, 0], [8.8, 10.4, 0]
     ];
     for (let i = 0; i < forkPts.length; i += 2) {
       group.add(createBone(forkPts[i], forkPts[i+1], 0.28, 0.28, frameMat));
     }
 
-    [-6.8, 6.8].forEach(z => {
+    [-4.2, 4.2].forEach(z => {
       group.add(createBone([1.6, 3.6, 0], [-10.0, 4.1, z], 0.24, 0.24, frameMat));
       group.add(createBone([0.6, 7.2, 0], [-10.0, 4.1, z], 0.22, 0.22, frameMat));
     });
-    group.add(createBone([-10.0, 4.1, -7.5], [-10.0, 4.1, 7.5], 0.35, 0.35, frameMat));
+    group.add(createBone([-10.0, 4.1, -wheelZ], [-10.0, 4.1, wheelZ], 0.35, 0.35, frameMat));
 
-    // Handlebars
+    // Handlebars: narrowed to Z=±1.8 to match human shoulder span
     const hbarPts = [
-      new THREE.Vector3(6.2, 9.8, -2.6),
-      new THREE.Vector3(7.4, 10.2, -1.6),
+      new THREE.Vector3(6.2, 9.8, -1.8),
+      new THREE.Vector3(7.4, 10.2, -1.1),
       new THREE.Vector3(8.8, 10.4, 0),
-      new THREE.Vector3(7.4, 10.2, 1.6),
-      new THREE.Vector3(6.2, 9.8, 2.6)
+      new THREE.Vector3(7.4, 10.2, 1.1),
+      new THREE.Vector3(6.2, 9.8, 1.8)
     ];
     const hbarCurve = new THREE.CatmullRomCurve3(hbarPts);
     group.add(new THREE.Mesh(new THREE.TubeGeometry(hbarCurve, 20, 0.16, 8, false), chromeMat));
 
-    [-2.6, 2.6].forEach(gz => {
+    [-1.8, 1.8].forEach(gz => {
       const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 1.0, 10), rubberMat);
       grip.rotation.x = Math.PI / 2;
       grip.position.set(6.2, 9.8, gz);
@@ -4994,17 +5003,18 @@ let sharedRickshawArtTexture = null;
     group.add(headlamp);
 
     const bell = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), goldTrimMat);
-    bell.position.set(7.6, 10.6, 1.2);
+    bell.position.set(7.6, 10.6, 1.1);
     group.add(bell);
 
-    // Saddle - Raised to y = 7.75 so frame tubes do NOT clip through hips
+    // Saddle
     const saddle = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1.8), rubberMat);
     saddle.position.set(0.6, 7.75, 0);
     group.add(saddle);
 
-    // -------------------------------------------------------------------------
-    // CARRIAGE TUB WITH ELEVATED ADULT BENCH & DEEP FOOTWELL
-    // -------------------------------------------------------------------------
+    // 2. Narrowed Carriage Body (Width 8.8, walls at Z=±4.55)
+    const carriageWallZ = 4.55;
+    const carriageWidth = 8.8;
+
     [-1, 1].forEach(side => {
       const sideShape = new THREE.Shape();
       sideShape.moveTo(-12.8, 5.4);
@@ -5015,89 +5025,89 @@ let sharedRickshawArtTexture = null;
       sideShape.closePath();
 
       const sideGeo = new THREE.ExtrudeGeometry(sideShape, {
-        depth: 0.5,
+        depth: 0.4,
         bevelEnabled: true,
         bevelSegments: 2,
         steps: 1,
-        bevelSize: 0.15,
-        bevelThickness: 0.15
+        bevelSize: 0.12,
+        bevelThickness: 0.12
       });
-      sideGeo.translate(0, 0, side === 1 ? 6.9 : -7.4);
+      sideGeo.translate(0, 0, side === 1 ? (carriageWallZ - 0.2) : -(carriageWallZ + 0.2));
       const sideWall = new THREE.Mesh(sideGeo, yellowWallMat);
       sideWall.castShadow = true;
       group.add(sideWall);
 
-      const sideRail = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.35, 0.45), goldTrimMat);
-      sideRail.position.set(-8.0, 9.0, side * 7.3);
+      const sideRail = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.35, 0.40), goldTrimMat);
+      sideRail.position.set(-8.0, 9.0, side * carriageWallZ);
       group.add(sideRail);
 
       // Curved Chrome Armrest Rail
       const armPts = [
-        new THREE.Vector3(-12.4, 9.2, side * 7.3),
-        new THREE.Vector3(-8.2, 10.8, side * 7.3),
-        new THREE.Vector3(-3.6, 8.8, side * 7.3)
+        new THREE.Vector3(-12.4, 9.2, side * carriageWallZ),
+        new THREE.Vector3(-8.2, 10.8, side * carriageWallZ),
+        new THREE.Vector3(-3.6, 8.8, side * carriageWallZ)
       ];
       const armCurve = new THREE.CatmullRomCurve3(armPts);
-      group.add(new THREE.Mesh(new THREE.TubeGeometry(armCurve, 16, 0.22, 8, false), chromeMat));
+      group.add(new THREE.Mesh(new THREE.TubeGeometry(armCurve, 16, 0.20, 8, false), chromeMat));
     });
 
-    const rearWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4.2, 14.2), yellowWallMat);
+    const rearWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 4.2, carriageWidth), yellowWallMat);
     rearWall.position.set(-12.6, 7.5, 0);
     rearWall.castShadow = true;
     group.add(rearWall);
 
-    const carriageFloor = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.4, 14.0), yellowWallMat);
+    const carriageFloor = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.4, carriageWidth - 0.2), yellowWallMat);
     carriageFloor.position.set(-8.8, 5.2, 0);
     group.add(carriageFloor);
 
-    const footboard = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.45, 14.0), woodFloorMat);
+    // Footboard
+    const footboard = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.45, carriageWidth - 0.2), woodFloorMat);
     footboard.position.set(-3.2, 5.2, 0);
     footboard.castShadow = true;
     group.add(footboard);
 
-    // LOWERED SEAT CUSHION (Top surface at y = 7.00)
-    const seatRiser = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 13.8), yellowWallMat);
+    // Seat cushion & riser
+    const seatRiser = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, carriageWidth - 0.3), yellowWallMat);
     seatRiser.position.set(-6.2, 6.0, 0);
     seatRiser.castShadow = true;
     group.add(seatRiser);
 
-    const benchPad = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.60, 13.8), tealTrimMat);
+    const benchPad = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.60, carriageWidth - 0.3), tealTrimMat);
     benchPad.position.set(-8.8, 6.70, 0);
     benchPad.castShadow = true;
     group.add(benchPad);
 
-    const backrest = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4.5, 13.8), seatRedMat);
+    // Red Backrest (Top surface at Y = 11.8)
+    const backrest = new THREE.Mesh(new THREE.BoxGeometry(1.2, 5.2, carriageWidth - 0.3), seatRedMat);
     backrest.position.set(-11.8, 9.2, 0);
     backrest.castShadow = true;
     group.add(backrest);
 
-    const backboard = new THREE.Mesh(new THREE.BoxGeometry(0.35, 7.5, 14.8), hoodArtMat);
+    const backboard = new THREE.Mesh(new THREE.BoxGeometry(0.35, 7.5, carriageWidth + 0.4), hoodArtMat);
     backboard.position.set(-12.6, 8.4, 0);
     backboard.castShadow = true;
     group.add(backboard);
 
-    // -------------------------------------------------------------------------
-    // CANOPY HOOD WITH AMPLE HEADROOM & DELICATE DECORATIVE SCALLOPED FRINGES
-    // -------------------------------------------------------------------------
+    // 3. Canopy Hood Attached Flush to Backrest With Visible Support Struts
     const canopyCenterX = -7.5;
-    const canopyBaseY = 13.2;
-    const canopyRx = 6.2;
-    const canopyRy = 6.8;
-    const canopyWidth = 8.2;
+    const canopyBaseY = 11.8;
+    const canopyRx = 4.8;
+    const canopyRy = 4.8;
+    const canopyHalfW = 5.0;
 
     const segs = 18;
     const posArr = [];
     const uvArr = [];
     const idxArr = [];
-    const startAng = Math.PI * 0.16;
+    const startAng = Math.PI * 0.14;
     const endAng = Math.PI * 0.95;
     for (let s = 0; s <= segs; s++) {
       const u = s / segs;
       const ang = startAng + (endAng - startAng) * u;
       const x = canopyCenterX + Math.cos(ang) * canopyRx;
       const y = canopyBaseY + Math.sin(ang) * canopyRy;
-      posArr.push(x, y, -canopyWidth);
-      posArr.push(x, y, canopyWidth);
+      posArr.push(x, y, -canopyHalfW);
+      posArr.push(x, y, canopyHalfW);
       uvArr.push(u, 0);
       uvArr.push(u, 1);
       if (s < segs) {
@@ -5116,31 +5126,39 @@ let sharedRickshawArtTexture = null;
     canopyMesh.castShadow = true;
     group.add(canopyMesh);
 
+    // Canopy Ribs
     for (let r = 0; r <= 5; r++) {
       const ru = r / 5;
       const rang = startAng + (endAng - startAng) * ru;
       const rx = canopyCenterX + Math.cos(rang) * canopyRx;
       const ry = canopyBaseY + Math.sin(rang) * canopyRy;
-      const ribPts = [new THREE.Vector3(rx, ry, -canopyWidth), new THREE.Vector3(rx, ry, canopyWidth)];
-      group.add(createBone(ribPts[0].toArray(), ribPts[1].toArray(), 0.16, 0.16, chromeMat));
+      group.add(createBone([rx, ry, -canopyHalfW], [rx, ry, canopyHalfW], 0.14, 0.14, chromeMat));
     }
 
-    // Front Rim & Delicate Golden Fringe Tassels (height = 0.35, high up at y = 16.2!)
+    // Chrome scissor support struts
+    [-1, 1].forEach(side => {
+      const strutZ = side * (canopyHalfW - 0.1);
+      const wallPt = [-11.6, 9.2, side * carriageWallZ];
+      const apexPt = [-7.5, canopyBaseY + canopyRy, strutZ];
+      const frontRimPt = [canopyCenterX + Math.cos(startAng) * canopyRx, canopyBaseY + Math.sin(startAng) * canopyRy, strutZ];
+      const midWallPt = [-6.2, 9.0, side * carriageWallZ];
+
+      group.add(createBone(wallPt, apexPt, 0.12, 0.12, chromeMat));
+      group.add(createBone(midWallPt, apexPt, 0.12, 0.12, chromeMat));
+      group.add(createBone(apexPt, frontRimPt, 0.10, 0.10, chromeMat));
+    });
+
+    // Front Rim & Golden Scallop Tassels
     const frontRimX = canopyCenterX + Math.cos(startAng) * canopyRx;
     const frontRimY = canopyBaseY + Math.sin(startAng) * canopyRy;
-    const rimRod = createBone(
-      [frontRimX, frontRimY, -canopyWidth],
-      [frontRimX, frontRimY, canopyWidth],
-      0.18, 0.18, goldTrimMat
-    );
-    group.add(rimRod);
+    group.add(createBone([frontRimX, frontRimY, -canopyHalfW], [frontRimX, frontRimY, canopyHalfW], 0.16, 0.16, goldTrimMat));
 
-    const tasselCount = 19;
+    const tasselCount = 13;
     for (let t = 0; t < tasselCount; t++) {
-      const tz = -canopyWidth + 0.4 + (t * (canopyWidth * 2 - 0.8) / (tasselCount - 1));
-      const tassel = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.35, 8), goldTrimMat);
+      const tz = -canopyHalfW + 0.35 + (t * (canopyHalfW * 2 - 0.7) / (tasselCount - 1));
+      const tassel = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.28, 8), goldTrimMat);
       tassel.rotation.z = Math.PI;
-      tassel.position.set(frontRimX, frontRimY - 0.20, tz);
+      tassel.position.set(frontRimX, frontRimY - 0.15, tz);
       group.add(tassel);
     }
 
@@ -5150,33 +5168,33 @@ let sharedRickshawArtTexture = null;
     const crankGroup = new THREE.Group();
     crankGroup.position.set(bottomBracket[0], bottomBracket[1], bottomBracket[2]);
 
-    const crankAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 3.2, 10), chromeMat);
+    const crankAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 2.4, 10), chromeMat);
     crankAxle.rotation.x = Math.PI / 2;
     crankGroup.add(crankAxle);
 
     const chainring = new THREE.Mesh(new THREE.CylinderGeometry(1.10, 1.10, 0.12, 18), chromeMat);
     chainring.rotation.x = Math.PI / 2;
-    chainring.position.z = 1.45;
+    chainring.position.z = 1.15;
     crankGroup.add(chainring);
 
-    const crankArmL = new THREE.Mesh(new THREE.BoxGeometry(0.32, crankR, 0.18), chromeMat);
-    crankArmL.position.set(0, crankR / 2, -1.55);
+    const crankArmL = new THREE.Mesh(new THREE.BoxGeometry(0.28, crankR, 0.16), chromeMat);
+    crankArmL.position.set(0, crankR / 2, -1.1);
     crankGroup.add(crankArmL);
 
     const pedalLGroup = new THREE.Group();
-    pedalLGroup.position.set(0, crankR, -1.55);
-    const pedalLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.24, 0.65), rubberMat);
+    pedalLGroup.position.set(0, crankR, -1.1);
+    const pedalLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.22, 0.55), rubberMat);
     pedalLMesh.castShadow = true;
     pedalLGroup.add(pedalLMesh);
     crankGroup.add(pedalLGroup);
 
-    const crankArmR = new THREE.Mesh(new THREE.BoxGeometry(0.32, crankR, 0.18), chromeMat);
-    crankArmR.position.set(0, -crankR / 2, 1.55);
+    const crankArmR = new THREE.Mesh(new THREE.BoxGeometry(0.28, crankR, 0.16), chromeMat);
+    crankArmR.position.set(0, -crankR / 2, 1.1);
     crankGroup.add(crankArmR);
 
     const pedalRGroup = new THREE.Group();
-    pedalRGroup.position.set(0, -crankR, 1.55);
-    const pedalRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.24, 0.65), rubberMat);
+    pedalRGroup.position.set(0, -crankR, 1.1);
+    const pedalRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.22, 0.55), rubberMat);
     pedalRMesh.castShadow = true;
     pedalRGroup.add(pedalRMesh);
     crankGroup.add(pedalRGroup);
@@ -5184,362 +5202,208 @@ let sharedRickshawArtTexture = null;
     group.add(crankGroup);
     group.userData.pedalCrank = crankGroup;
 
-    // Parallel-Transport Smooth Lofting for Limbs
-    function createSeamlessLoftedLimb(crossSections, radialSegs, pathSegs, material) {
-      radialSegs = radialSegs || 16;
-      pathSegs = pathSegs || 20;
-
-      const points = crossSections.map(c => new THREE.Vector3(c.p[0], c.p[1], c.p[2]));
-      const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
-
-      function getInterpolatedRadius(u) {
-        const n = crossSections.length - 1;
-        const idx = Math.min(Math.floor(u * n), n - 1);
-        const t = (u * n) - idx;
-        const cA = crossSections[idx];
-        const cB = crossSections[idx + 1];
-        return {
-          rx: THREE.MathUtils.lerp(cA.rx, cB.rx, t),
-          ry: THREE.MathUtils.lerp(cA.ry, cB.ry, t)
-        };
-      }
-
-      const frames = curve.computeFrenetFrames(pathSegs, false);
-      const vertices = [];
-      const uvs = [];
-      const indices = [];
-
-      for (let i = 0; i <= pathSegs; i++) {
-        const u = i / pathSegs;
-        const P = curve.getPointAt(u);
-        const rad = getInterpolatedRadius(u);
-        const N = frames.normals[i];
-        const B = frames.binormals[i];
-
-        for (let j = 0; j <= radialSegs; j++) {
-          const v = j / radialSegs;
-          const theta = v * Math.PI * 2;
-          const cos = Math.cos(theta);
-          const sin = Math.sin(theta);
-
-          const vx = P.x + (N.x * cos * rad.rx) + (B.x * sin * rad.ry);
-          const vy = P.y + (N.y * cos * rad.rx) + (B.y * sin * rad.ry);
-          const vz = P.z + (N.z * cos * rad.rx) + (B.z * sin * rad.ry);
-
-          vertices.push(vx, vy, vz);
-          uvs.push(u, v);
-        }
-      }
-
-      for (let i = 0; i < pathSegs; i++) {
-        for (let j = 0; j < radialSegs; j++) {
-          const a = i * (radialSegs + 1) + j;
-          const b = (i + 1) * (radialSegs + 1) + j;
-          const c = (i + 1) * (radialSegs + 1) + (j + 1);
-          const d = i * (radialSegs + 1) + (j + 1);
-          indices.push(a, b, d);
-          indices.push(b, c, d);
-        }
-      }
-
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-      geo.setIndex(indices);
-      geo.computeVertexNormals();
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.castShadow = true;
-      return mesh;
-    }
-
-    function createBoneSegment(pA, pB, rA, rB, material) {
-      const vA = (pA && pA.isVector3) ? pA.clone() : new THREE.Vector3(pA[0], pA[1], pA[2]);
-      const vB = (pB && pB.isVector3) ? pB.clone() : new THREE.Vector3(pB[0], pB[1], pB[2]);
-      const dist = vA.distanceTo(vB);
-      if (dist < 0.001) return new THREE.Group();
-
-      const segGroup = new THREE.Group();
-      const cylGeo = new THREE.CylinderGeometry(rB, rA, dist, 16, 1, false);
-      cylGeo.translate(0, dist / 2, 0);
-      const mesh = new THREE.Mesh(cylGeo, material);
-      mesh.castShadow = true;
-
-      const dir = new THREE.Vector3().subVectors(vB, vA).normalize();
-      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-      segGroup.position.copy(vA);
-      segGroup.quaternion.copy(quat);
-      segGroup.add(mesh);
-      return segGroup;
-    }
-
-    // Realistic Anatomical Hand Gripping Handlebars
-    function buildGrippingHand(skinMat, side) {
-      const hGroup = new THREE.Group();
-      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.28, 0.52), skinMat);
-      palm.castShadow = true;
-      hGroup.add(palm);
-
-      for (let f = 0; f < 4; f++) {
-        const fz = -0.18 + f * 0.12;
-        const proximal = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.22, 8), skinMat);
-        proximal.rotation.z = Math.PI * 0.55;
-        proximal.position.set(0.12, -0.06, fz);
-        hGroup.add(proximal);
-
-        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), skinMat);
-        tip.position.set(0.16 - Math.sin(Math.PI * 0.55) * 0.18, -0.12 - Math.cos(Math.PI * 0.55) * 0.18, fz);
-        hGroup.add(tip);
-      }
-
-      const thumb = new THREE.Mesh(new THREE.CylinderGeometry(0.070, 0.060, 0.30, 8), skinMat);
-      thumb.position.set(-0.06, -0.06, side > 0 ? -0.20 : 0.20);
-      thumb.rotation.x = side > 0 ? 0.40 : -0.40;
-      thumb.rotation.z = 0.25;
-      hGroup.add(thumb);
-      return hGroup;
-    }
-
-    function buildRestingHand(skinMat, isFemale) {
-      const hGroup = new THREE.Group();
-      const s = isFemale ? 0.85 : 0.95;
-      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.50 * s, 0.20 * s, 0.46 * s), skinMat);
-      palm.castShadow = true;
-      hGroup.add(palm);
-
-      for (let f = 0; f < 4; f++) {
-        const fz = (-0.15 + f * 0.10) * s;
-        const fLen = (f === 1 || f === 2 ? 0.42 : 0.36) * s;
-        const fGeo = new THREE.CylinderGeometry(0.055 * s, 0.046 * s, fLen, 8);
-        fGeo.translate(0, -fLen / 2, 0);
-        const finger = new THREE.Mesh(fGeo, skinMat);
-        finger.position.set(0.22 * s, 0.02 * s, fz);
-        finger.rotation.z = -0.35;
-        hGroup.add(finger);
-      }
-
-      const thumb = new THREE.Mesh(new THREE.CylinderGeometry(0.068 * s, 0.055 * s, 0.30 * s, 8), skinMat);
-      thumb.position.set(0.08 * s, 0.05 * s, -0.20 * s);
-      thumb.rotation.z = -0.22;
-      thumb.rotation.y = 0.28;
-      hGroup.add(thumb);
-      return hGroup;
-    }
-
-    // Puller Head with Natural Hair Cap, Defined Nose, Eyes, and Bangladeshi Mustache
-    function buildPerfectPullerHead() {
+    // 4. Clean Stylized Human Anatomy & Faces
+    function buildCleanFace(skinMat, hairMat, isFemale, mustache) {
       const headGroup = new THREE.Group();
 
-      // Cranial skull
-      const skullGeo = new THREE.SphereGeometry(0.80, 24, 20);
-      skullGeo.scale(0.85, 1.05, 0.85);
-      const skullMesh = new THREE.Mesh(skullGeo, pullerSkinMat);
-      skullMesh.castShadow = true;
-      headGroup.add(skullMesh);
+      const skullGeo = new THREE.SphereGeometry(0.74, 24, 20);
+      skullGeo.scale(0.85, 1.05, 0.86);
+      const skull = new THREE.Mesh(skullGeo, skinMat);
+      skull.castShadow = true;
+      headGroup.add(skull);
 
-      // Full styled dark hair cap covering crown, sides, and nape
-      const hairGeo = new THREE.SphereGeometry(0.835, 24, 20);
-      hairGeo.scale(0.86, 1.06, 0.86);
-      const hairMesh = new THREE.Mesh(hairGeo, hairMat);
-      hairMesh.position.set(-0.06, 0.04, 0);
-      hairMesh.castShadow = true;
-      headGroup.add(hairMesh);
+      const hairGeo = new THREE.SphereGeometry(0.77, 24, 20);
+      hairGeo.scale(0.86, 1.06, 0.88);
+      const hair = new THREE.Mesh(hairGeo, hairMat);
+      hair.position.set(-0.06, 0.04, 0);
+      headGroup.add(hair);
 
-      // Sideburns & Nape
-      [-0.65, 0.65].forEach(sz => {
-        const sburn = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.50, 0.12), hairMat);
-        sburn.position.set(0.10, -0.15, sz);
-        headGroup.add(sburn);
+      [-0.64, 0.64].forEach(ez => {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 8), skinMat);
+        ear.scale.set(0.4, 0.8, 0.5);
+        ear.position.set(0.0, -0.05, ez);
+        headGroup.add(ear);
       });
-      const nape = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.55, 1.0), hairMat);
-      nape.position.set(-0.55, -0.30, 0);
-      headGroup.add(nape);
 
-      // Recessed Eyes with realistic lids
-      [-0.28, 0.28].forEach(ez => {
-        const eyeWhite = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.09, 0.18), eyeWhiteMat);
-        eyeWhite.position.set(0.64, 0.10, ez);
-        headGroup.add(eyeWhite);
+      const noseBridge = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.24, 8), skinMat);
+      noseBridge.rotation.z = -Math.PI / 2 + 0.15;
+      noseBridge.position.set(0.63, 0.0, 0);
+      headGroup.add(noseBridge);
 
-        const pupil = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.08, 0.10), eyePupilMat);
-        pupil.position.set(0.66, 0.10, ez);
-        headGroup.add(pupil);
+      const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), skinMat);
+      noseTip.position.set(0.67, -0.06, 0);
+      headGroup.add(noseTip);
 
-        const brow = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.28), hairMat);
-        brow.position.set(0.64, 0.24, ez);
+      [-0.22, 0.22].forEach(ez => {
+        const eyeLine = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.16), hairMat);
+        eyeLine.position.set(0.63, 0.08, ez);
+        headGroup.add(eyeLine);
+
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.20), hairMat);
+        brow.position.set(0.61, 0.19, ez);
         brow.rotation.z = -0.15;
         headGroup.add(brow);
       });
 
-      // Sculpted 3D Nose
-      const noseBridge = createBoneSegment([0.64, 0.08, 0], [0.72, -0.05, 0], 0.04, 0.05, pullerSkinMat);
-      headGroup.add(noseBridge);
-      const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.052, 10, 8), pullerSkinMat);
-      noseTip.position.set(0.72, -0.05, 0);
-      headGroup.add(noseTip);
+      const lips = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.20), isFemale ? femaleLipMat : lipMat);
+      lips.position.set(0.63, -0.22, 0);
+      headGroup.add(lips);
 
-      // Neat Bangladeshi Mustache & Lips
-      const stache = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.13, 0.55), hairMat);
-      stache.position.set(0.70, -0.15, 0);
-      headGroup.add(stache);
+      if (mustache) {
+        const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.40, 8), hairMat);
+        stache.rotation.x = Math.PI / 2;
+        stache.position.set(0.65, -0.14, 0);
+        headGroup.add(stache);
+      }
 
-      const pullerLips = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.06, 0.26), lipMat);
-      pullerLips.position.set(0.65, -0.24, 0);
-      headGroup.add(pullerLips);
+      if (isFemale) {
+        const bindi = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.02, 12), bindiMat);
+        bindi.rotation.z = Math.PI / 2;
+        bindi.position.set(0.65, 0.17, 0);
+        headGroup.add(bindi);
 
-      // Ears
-      [-0.70, 0.70].forEach(ez => {
-        const earHelix = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.028, 8, 14, Math.PI * 1.3), pullerSkinMat);
-        earHelix.scale.set(0.65, 1.10, 0.5);
-        earHelix.position.set(-0.02, -0.02, ez);
-        earHelix.rotation.y = ez > 0 ? 0.35 : -0.35;
-        headGroup.add(earHelix);
-      });
+        const khopa = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), hairMat);
+        khopa.scale.set(0.8, 1.0, 1.1);
+        khopa.position.set(-0.64, -0.12, 0);
+        headGroup.add(khopa);
+      }
 
       return headGroup;
     }
 
-    // -------------------------------------------------------------------------
-    // 1. RICKSHAW PULLER (~22° FORWARD LEAN, PLUM SHIRT, DRAPED LUNGI, EXACT HANDS)
-    // -------------------------------------------------------------------------
+    // 5. Rickshaw Puller (Leaning Forward, Hands Gripping Handlebars, Planar Pedaling Legs)
     const pullerGroup = new THREE.Group();
-    const pullerSkinMat = new THREE.MeshStandardMaterial({ color: 0x8a523a, roughness: 0.55, metalness: 0.05 });
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x141416, roughness: 0.85 });
-    const plumShirtMat = new THREE.MeshStandardMaterial({ color: 0x361642, roughness: 0.85 });
-    const brownSandalMat = new THREE.MeshStandardMaterial({ color: 0x45220c, roughness: 0.85 });
 
-    // Raised Pelvis on saddle at [0.65, 8.10, 0], leaning ~22° forward
-    const pullerTorso = createSeamlessLoftedLimb([
-      { p: [0.65,  8.10, 0], rx: 1.15, ry: 1.25 }, // Pelvis/waist above frame
-      { p: [1.05,  8.95, 0], rx: 1.12, ry: 1.20 }, // Lower back
-      { p: [1.50,  9.85, 0], rx: 1.22, ry: 1.35 }, // Mid back/chest
-      { p: [1.80, 10.70, 0], rx: 1.18, ry: 1.45 }, // Broad shoulders
-      { p: [2.00, 11.10, 0], rx: 0.65, ry: 0.80 }, // Base of neck
-      { p: [2.15, 11.45, 0], rx: 0.38, ry: 0.42 }  // Neck seam
-    ], 16, 20, plumShirtMat);
-    pullerGroup.add(pullerTorso);
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.set(0.65, 7.80, 0);
+    pullerGroup.add(torsoGroup);
 
-    const pullerShoulderPos = { x: 1.80, y: 10.70, z: 1.35 };
+    // Plum/purple shirt: overlapping waist by 0.7 units (ZERO BARE SKIN GAP)
+    const shirtCyl = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.15, 1.25, 3.4, 16),
+      plumShirtMat
+    );
+    shirtCyl.position.set(0.65, 1.45, 0);
+    shirtCyl.rotation.z = -0.42;
+    torsoGroup.add(shirtCyl);
 
-    // Collared Shirt details (#361642)
-    const collarBand = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.48, 0.20, 18), plumShirtMat);
-    collarBand.position.set(2.05, 11.15, 0);
-    collarBand.rotation.z = -0.38;
-    pullerGroup.add(collarBand);
+    const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.48, 0.24, 16), plumShirtMat);
+    collar.position.set(1.42, 2.92, 0);
+    collar.rotation.z = -0.42;
+    torsoGroup.add(collar);
 
-    const placket = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.55, 0.05), plumShirtMat);
-    placket.position.set(2.15, 10.85, 0);
-    placket.rotation.z = -0.38;
-    pullerGroup.add(placket);
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.55, 12), pullerSkinMat);
+    neck.position.set(1.55, 3.25, 0);
+    neck.rotation.z = -0.38;
+    torsoGroup.add(neck);
 
-    const pullerNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.65, 14), pullerSkinMat);
-    pullerNeck.position.set(2.20, 11.55, 0);
-    pullerNeck.rotation.z = -0.34;
-    pullerGroup.add(pullerNeck);
+    const pullerHead = buildCleanFace(pullerSkinMat, hairMat, false, true);
+    pullerHead.position.set(1.80, 3.98, 0);
+    torsoGroup.add(pullerHead);
 
-    // Red-and-White Checkered Gamcha draped neatly over Left Shoulder
-    const gamchaDrape = createSeamlessLoftedLimb([
-      { p: [1.40,  9.90, 0.70], rx: 0.12, ry: 0.36 },
-      { p: [1.80, 10.55, 0.82], rx: 0.12, ry: 0.38 },
-      { p: [2.05, 10.95, 0.85], rx: 0.12, ry: 0.36 },
-      { p: [1.75, 10.80, 0.80], rx: 0.12, ry: 0.36 },
-      { p: [1.20, 10.00, 0.68], rx: 0.12, ry: 0.36 }
-    ], 12, 16, gamchaMat);
-    pullerGroup.add(gamchaDrape);
+    // Authentic Blue Lungi: Wraps around hips/thighs, overlapping shirt
+    const lungiGeo = new THREE.CylinderGeometry(1.22, 1.34, 2.8, 16, 1, true);
+    lungiGeo.translate(0, -1.3, 0);
+    const lungiMesh = new THREE.Mesh(lungiGeo, lungiMat);
+    lungiMesh.position.set(0.45, 0.15, 0);
+    lungiMesh.rotation.z = -0.22;
+    torsoGroup.add(lungiMesh);
 
-    // Sculpted Head
-    const pullerHead = buildPerfectPullerHead();
-    pullerHead.position.set(2.45, 12.15, 0);
-    pullerHead.rotation.z = -0.06;
-    pullerGroup.add(pullerHead);
-
-    // ARMS: Lock Hands DIRECTLY onto Handlebar Grips at [6.20, 9.80, ±2.60]
+    // Arms: Natural bent cyclist posture gripping handlebars seamlessly
     [-1, 1].forEach(side => {
-      const shX = pullerShoulderPos.x;
-      const shY = pullerShoulderPos.y;
-      const shZ = side * pullerShoulderPos.z;
-      const gripTarget = [6.20, 9.80, side * 2.60];
-      const elbowPos = [3.85, 9.15, side * 2.15];
+      const shoulderPt = [1.85, 10.4, side * 1.35];
+      const elbowPt = [3.60, 9.15, side * 2.05];
+      const gripCenter = [6.20, 9.80, side * 1.80];
 
-      // Flared Shirt Sleeve covering upper arm
-      pullerGroup.add(createBoneSegment([shX, shY, shZ], elbowPos, 0.52, 0.44, plumShirtMat));
+      const sleeveEnd = [2.70, 9.85, side * 1.62];
+      const sleeve = createBone(shoulderPt, sleeveEnd, 0.46, 0.50, plumShirtMat);
+      pullerGroup.add(sleeve);
 
-      const cuffHem = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.44, 0.22, 16), plumShirtMat);
-      cuffHem.position.set(elbowPos[0], elbowPos[1], elbowPos[2]);
-      pullerGroup.add(cuffHem);
+      const upperArm = createBone([2.60, 9.90, side * 1.60], elbowPt, 0.34, 0.38, pullerSkinMat);
+      pullerGroup.add(upperArm);
 
-      // Bare Forearm (Elbow -> Wrist)
-      const wristPos = [gripTarget[0] - 0.22, gripTarget[1] - 0.05, gripTarget[2]];
-      pullerGroup.add(createBoneSegment(elbowPos, wristPos, 0.35, 0.26, pullerSkinMat));
+      const elbowJoint = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 10), pullerSkinMat);
+      elbowJoint.position.set(elbowPt[0], elbowPt[1], elbowPt[2]);
+      pullerGroup.add(elbowJoint);
 
-      // Closed Hand gripping Handlebar Grip
-      const hand = buildGrippingHand(pullerSkinMat, side);
-      hand.position.set(gripTarget[0], gripTarget[1], gripTarget[2]);
-      hand.rotation.order = 'YXZ';
-      hand.rotation.y = side > 0 ? 0.25 : -0.25;
-      hand.rotation.z = -0.12;
-      pullerGroup.add(hand);
+      const wristPt = [5.90, 9.75, side * 1.82];
+      const forearm = createBone(elbowPt, wristPt, 0.28, 0.34, pullerSkinMat);
+      pullerGroup.add(forearm);
+
+      const handGroup = new THREE.Group();
+      handGroup.position.set(gripCenter[0], gripCenter[1], gripCenter[2]);
+
+      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.38, 0.44), pullerSkinMat);
+      palm.position.set(-0.08, 0.06, 0);
+      palm.rotation.z = -0.15;
+      handGroup.add(palm);
+
+      const fingers = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.32, 0.32, 0.42, 12, 1, false, -Math.PI * 0.25, Math.PI * 1.35),
+        pullerSkinMat
+      );
+      fingers.rotation.x = Math.PI / 2;
+      handGroup.add(fingers);
+
+      const knuckles = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.40, 8), pullerSkinMat);
+      knuckles.rotation.x = Math.PI / 2;
+      knuckles.position.set(0.04, 0.18, 0);
+      handGroup.add(knuckles);
+
+      pullerGroup.add(handGroup);
     });
 
-    // TRUE MID-CALF DRAPED LUNGI (Single continuous wrap around BOTH thighs down to mid-calf)
-    const lungiMesh = createSeamlessLoftedLimb([
-      { p: [0.65, 8.10, 0], rx: 1.25, ry: 1.45 }, // Waist
-      { p: [0.85, 7.35, 0], rx: 1.35, ry: 1.60 }, // Upper thigh
-      { p: [1.10, 6.45, 0], rx: 1.45, ry: 1.70 }, // Mid thigh
-      { p: [1.35, 5.55, 0], rx: 1.48, ry: 1.72 }, // Over knees
-      { p: [1.45, 4.80, 0], rx: 1.38, ry: 1.58 }  // Mid-calf hem
-    ], 18, 20, lungiMat);
-    pullerGroup.add(lungiMesh);
-
-    // Lungi Waist Knot (Gira)
-    const lungiKnot = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), lungiMat);
-    lungiKnot.scale.set(0.9, 0.7, 1.2);
-    lungiKnot.position.set(1.42, 7.95, 0);
-    pullerGroup.add(lungiKnot);
-
-    // Pedaling Legs emerging below mid-calf lungi
-    const lenShin = 2.6;
+    // Strict Planar Nested Pedaling Legs (Z = ±1.1 strictly constant)
+    const lenThigh = 2.45;
+    const lenShin = 2.55;
     const pullerLegs = [];
 
-    function createPedalLimb(radiusBottom, radiusTop, length, material) {
-      const g = new THREE.Group();
-      const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 16, 1, false);
-      cylGeo.translate(0, length / 2, 0);
-      const mesh = new THREE.Mesh(cylGeo, material);
-      mesh.castShadow = true;
-      g.add(mesh);
-      return g;
-    }
-
     [-1, 1].forEach(side => {
-      const kneePt = new THREE.Vector3(1.35, 5.30, side * 0.95);
-      const legGroup = new THREE.Group();
+      const hipX = 0.65;
+      const hipY = 7.45;
+      const legZ = side * 1.1;
 
-      // Lower bare calf/ankle emerging below mid-calf lungi
-      const calfGroup = createPedalLimb(0.42, 0.28, lenShin, pullerSkinMat);
+      const hipPivot = new THREE.Group();
+      hipPivot.position.set(hipX, hipY, legZ);
+      pullerGroup.add(hipPivot);
 
-      // Brown Strap Sandal (Chappal) locked flat on pedal
-      const footGroup = new THREE.Group();
-      const sandalSole = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.22, 0.78), brownSandalMat);
-      sandalSole.castShadow = true;
-      footGroup.add(sandalSole);
+      const thighMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.38, 0.46, lenThigh, 14),
+        pullerSkinMat
+      );
+      thighMesh.position.set(0, -lenThigh / 2, 0);
+      hipPivot.add(thighMesh);
 
-      const strapCross = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.16, 0.82), brownSandalMat);
-      strapCross.position.set(0.20, 0.14, 0);
-      footGroup.add(strapCross);
+      const kneePivot = new THREE.Group();
+      kneePivot.position.set(0, -lenThigh, 0);
+      hipPivot.add(kneePivot);
 
-      const strapToe = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.22, 8), brownSandalMat);
-      strapToe.position.set(0.52, 0.12, 0);
-      footGroup.add(strapToe);
+      const shinMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.26, 0.36, lenShin, 14),
+        pullerSkinMat
+      );
+      shinMesh.position.set(0, -lenShin / 2, 0);
+      kneePivot.add(shinMesh);
 
-      legGroup.add(calfGroup);
-      legGroup.add(footGroup);
-      pullerGroup.add(legGroup);
+      const footPivot = new THREE.Group();
+      footPivot.position.set(0, -lenShin, 0);
+      kneePivot.add(footPivot);
+
+      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.60, 0.22, 0.60), brownSandalMat);
+      sandal.position.set(0.35, -0.11, 0);
+      footPivot.add(sandal);
+
+      const strap = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.16, 0.64), brownSandalMat);
+      strap.position.set(0.20, 0.05, 0);
+      footPivot.add(strap);
 
       pullerLegs.push({
         side: side,
-        knee: kneePt,
-        calfGroup: calfGroup,
-        footGroup: footGroup
+        hipX: hipX,
+        hipY: hipY,
+        hipPivot: hipPivot,
+        kneePivot: kneePivot,
+        footPivot: footPivot
       });
     });
 
@@ -5552,23 +5416,25 @@ let sharedRickshawArtTexture = null;
 
       pullerLegs.forEach(leg => {
         const legAngle = leg.side === -1 ? phase : phase + Math.PI;
-        const pedalLocalX = bottomBracket[0] - Math.sin(legAngle) * crankR;
-        const pedalLocalY = bottomBracket[1] + Math.cos(legAngle) * crankR;
-        const pedalLocalZ = leg.side * 1.55;
+        const pedalX = bottomBracket[0] - Math.sin(legAngle) * crankR;
+        const pedalY = bottomBracket[1] + Math.cos(legAngle) * crankR;
 
-        // Dynamic knee position shifting slightly with stroke
-        const kx = leg.knee.x + Math.sin(legAngle) * 0.35;
-        const ky = leg.knee.y + Math.cos(legAngle) * 0.25;
-        const kz = leg.knee.z;
+        const dx = pedalX - leg.hipX;
+        const dy = pedalY - leg.hipY;
+        const dist = Math.min(lenThigh + lenShin - 0.02, Math.max(0.6, Math.sqrt(dx * dx + dy * dy)));
 
-        const shinDir = new THREE.Vector3(pedalLocalX - kx, pedalLocalY - ky, pedalLocalZ - kz).normalize();
-        const qShin = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), shinDir);
-        leg.calfGroup.position.set(kx, ky, kz);
-        leg.calfGroup.quaternion.copy(qShin);
+        const baseAngle = Math.atan2(dy, dx);
+        const cosAlpha = (lenThigh * lenThigh + dist * dist - lenShin * lenShin) / (2 * lenThigh * dist);
+        const alpha = Math.acos(Math.max(-1, Math.min(1, cosAlpha)));
 
-        // Lock Sandal onto Pedal
-        leg.footGroup.position.set(pedalLocalX, pedalLocalY, pedalLocalZ);
-        leg.footGroup.quaternion.identity();
+        const thighAngle = baseAngle + alpha;
+        const kneeX = leg.hipX + lenThigh * Math.cos(thighAngle);
+        const kneeY = leg.hipY + lenThigh * Math.sin(thighAngle);
+        const shinAngle = Math.atan2(pedalY - kneeY, pedalX - kneeX);
+
+        leg.hipPivot.rotation.set(0, 0, thighAngle - (-Math.PI / 2));
+        leg.kneePivot.rotation.set(0, 0, shinAngle - thighAngle);
+        leg.footPivot.rotation.set(0, 0, -(shinAngle - (-Math.PI / 2)));
       });
     }
 
@@ -5576,217 +5442,99 @@ let sharedRickshawArtTexture = null;
     group.userData.updatePedaling = updatePullerPedaling;
     updatePullerPedaling(0);
 
-    // -------------------------------------------------------------------------
-    // 2. PASSENGERS (LOWERED SEAT, FULL HEADROOM, MATCHING REFERENCE ILLUSTRATION)
-    // -------------------------------------------------------------------------
-    // Swapped Sides: Female in Foreground (fZ = +3.2), Male in Background (mZ = -3.2)
-    const mHipX = -8.8, mHipY = 7.00, mZ = -3.2;
-    const fHipX = -8.8, fHipY = 7.00, fZ = 3.2;
+    // 6. Seated Passengers (Resting Against Backrest, Shoulder-to-Shoulder)
+    const fZ = 1.65;
+    const mZ = -1.65;
+    const passHipX = -9.80;
+    const passHipY = 7.10;
 
-    // -------------------------------------------------------------------------
-    // 2.1 MALE PASSENGER (INNER / BACKGROUND SIDE: mZ = -3.2)
-    // -------------------------------------------------------------------------
+    // 6.1 Male Passenger (Z = -1.65)
     const maleGroup = new THREE.Group();
-    const maleShirtMat = new THREE.MeshStandardMaterial({ color: 0x684d94, roughness: 0.65 });
-    const malePantMat = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.72 });
-    const maleSkinMat = new THREE.MeshStandardMaterial({ color: 0x9e644b, roughness: 0.58 });
-    const maleSandalsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.85 });
+    maleGroup.position.set(passHipX, passHipY, mZ);
 
-    // Compacted Torso (lowered to hipY = 7.00)
-    const maleTorso = createSeamlessLoftedLimb([
-      { p: [mHipX,        mHipY,        mZ], rx: 1.10, ry: 1.25 },
-      { p: [mHipX + 0.10, mHipY + 0.95, mZ], rx: 1.05, ry: 1.20 },
-      { p: [mHipX + 0.18, mHipY + 1.95, mZ], rx: 1.25, ry: 1.55 },
-      { p: [mHipX + 0.18, mHipY + 2.85, mZ], rx: 1.20, ry: 1.70 }, // Shoulders
-      { p: [mHipX + 0.18, mHipY + 3.30, mZ], rx: 0.75, ry: 0.95 },
-      { p: [mHipX + 0.18, mHipY + 3.65, mZ], rx: 0.42, ry: 0.46 }
-    ], 16, 20, maleShirtMat);
-    maleGroup.add(maleTorso);
+    const mTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.10, 2.8, 16), maleShirtMat);
+    mTorso.position.set(0.05, 1.40, 0);
+    mTorso.rotation.z = 0.08;
+    maleGroup.add(mTorso);
 
-    const mCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.58, 0.30, 14), maleShirtMat);
-    mCollar.position.set(mHipX + 0.18, mHipY + 3.40, mZ);
+    const mCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.52, 0.25, 14), maleShirtMat);
+    mCollar.position.set(0.02, 2.85, 0);
     maleGroup.add(mCollar);
 
-    const mNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.70, 12), maleSkinMat);
-    mNeck.position.set(mHipX + 0.18, mHipY + 3.75, mZ);
+    const mNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.60, 12), maleSkinMat);
+    mNeck.position.set(0.02, 3.20, 0);
     maleGroup.add(mNeck);
 
-    // Male Head - sitting at y = 11.45, top of head at 12.30
-    const maleHead = new THREE.Group();
-    const mSkullGeo = new THREE.SphereGeometry(0.85, 24, 20);
-    mSkullGeo.scale(0.85, 1.04, 0.85);
-    const mSkullMesh = new THREE.Mesh(mSkullGeo, maleSkinMat);
-    mSkullMesh.castShadow = true;
-    maleHead.add(mSkullMesh);
+    const mHead = buildCleanFace(maleSkinMat, hairMat, false, true);
+    mHead.position.set(0.05, 3.90, 0);
+    maleGroup.add(mHead);
 
-    const mHair = new THREE.Mesh(new THREE.SphereGeometry(0.865, 20, 16), hairMat);
-    mHair.scale.set(0.86, 1.05, 0.86);
-    mHair.position.set(-0.08, 0.04, 0);
-    maleHead.add(mHair);
+    [-0.92, 0.92].forEach(az => {
+      const armGroup = new THREE.Group();
+      armGroup.position.set(0.05, 2.50, az);
+      maleGroup.add(armGroup);
 
-    // Eyes
-    [-0.28, 0.28].forEach(ez => {
-      const eyeWhite = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.09, 0.18), eyeWhiteMat);
-      eyeWhite.position.set(0.68, 0.10, ez);
-      maleHead.add(eyeWhite);
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.40, 1.8, 12), maleShirtMat);
+      upperArm.position.set(0.65, -0.70, 0);
+      upperArm.rotation.z = -0.75;
+      armGroup.add(upperArm);
 
-      const pupil = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.08, 0.10), eyePupilMat);
-      pupil.position.set(0.70, 0.10, ez);
-      maleHead.add(pupil);
+      const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.32, 1.6, 12), maleSkinMat);
+      forearm.position.set(1.80, -1.30, 0);
+      forearm.rotation.z = -1.15;
+      armGroup.add(forearm);
 
-      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.26), hairMat);
-      brow.position.set(0.68, 0.24, ez);
-      brow.rotation.z = -0.15;
-      maleHead.add(brow);
+      const hand = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.18, 0.36), maleSkinMat);
+      hand.position.set(2.50, -1.65, 0);
+      armGroup.add(hand);
     });
 
-    const mNose = createBoneSegment([0.68, 0.06, 0], [0.75, -0.05, 0], 0.04, 0.05, maleSkinMat);
-    maleHead.add(mNose);
-    const mNoseTip = new THREE.Mesh(new THREE.SphereGeometry(0.048, 10, 8), maleSkinMat);
-    mNoseTip.position.set(0.75, -0.05, 0);
-    maleHead.add(mNoseTip);
+    [-0.58, 0.58].forEach(tz => {
+      const legGroup = new THREE.Group();
+      legGroup.position.set(0, 0, tz);
+      maleGroup.add(legGroup);
 
-    const mMustache = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.55), hairMat);
-    mMustache.position.set(0.73, -0.16, 0);
-    maleHead.add(mMustache);
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.56, 3.5, 14), malePantMat);
+      thigh.rotation.z = Math.PI / 2;
+      thigh.position.set(1.75, 0, 0);
+      legGroup.add(thigh);
 
-    const mLips = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.06, 0.28), lipMat);
-    mLips.position.set(0.68, -0.24, 0);
-    maleHead.add(mLips);
+      const kneeGroup = new THREE.Group();
+      kneeGroup.position.set(3.5, 0, 0);
+      legGroup.add(kneeGroup);
 
-    maleHead.position.set(mHipX + 0.22, mHipY + 4.45, mZ);
-    maleGroup.add(maleHead);
+      const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.46, 1.85, 14), malePantMat);
+      shin.position.set(0, -0.92, 0);
+      kneeGroup.add(shin);
 
-    // Male Arms: Smooth shoulders, palms resting naturally on knees
-    [-1.25, 1.25].forEach(az => {
-      const shPt = [mHipX + 0.18, mHipY + 2.85, mZ + az * 1.05];
-      const kneeTarget = [-5.5, mHipY + 0.25, mZ + az * 0.7];
-      const elbowPt = [-7.3, mHipY + 1.3, mZ + az * 1.15];
-
-      // Purple shirt sleeve
-      maleGroup.add(createBoneSegment(shPt, elbowPt, 0.48, 0.40, maleShirtMat));
-
-      const mSleeveCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.40, 0.15, 14), maleShirtMat);
-      mSleeveCuff.position.set(elbowPt[0], elbowPt[1], elbowPt[2]);
-      maleGroup.add(mSleeveCuff);
-
-      maleGroup.add(createBoneSegment(elbowPt, kneeTarget, 0.38, 0.30, maleSkinMat));
-
-      // Palms resting on knees
-      const mHand = buildRestingHand(maleSkinMat, false);
-      mHand.position.set(kneeTarget[0], kneeTarget[1] + 0.10, kneeTarget[2]);
-      mHand.rotation.y = az > 0 ? 0.30 : -0.30;
-      maleGroup.add(mHand);
-    });
-
-    // Bright Blue Trousers (#1e40af) & Blue Strap Sandals on footboard (y = 5.54)
-    [-0.85, 0.85].forEach(tz => {
-      const legZ = mZ + tz;
-      const hipPt = [mHipX, mHipY, legZ];
-      const kneePt = [-5.5, mHipY, legZ];
-      const anklePt = [-5.3, 5.55, legZ];
-
-      maleGroup.add(createBoneSegment(hipPt, kneePt, 0.62, 0.52, malePantMat));
-      maleGroup.add(createBoneSegment(kneePt, anklePt, 0.52, 0.44, malePantMat));
-
-      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.22, 0.75), maleSandalsMat);
-      sandal.position.set(anklePt[0] + 0.35, 5.54, legZ);
-      maleGroup.add(sandal);
-
-      const strap = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.16, 0.78), maleSandalsMat);
-      strap.position.set(anklePt[0] + 0.55, 5.68, legZ);
-      maleGroup.add(strap);
+      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.60, 0.22, 0.65), maleSandalsMat);
+      sandal.position.set(0.30, -1.80, 0);
+      kneeGroup.add(sandal);
     });
 
     group.add(maleGroup);
 
-    // -------------------------------------------------------------------------
-    // 2.2 FEMALE PASSENGER (FOREGROUND SIDE: fZ = +3.2)
-    // -------------------------------------------------------------------------
+    // 6.2 Female Passenger (Z = +1.65)
     const femaleGroup = new THREE.Group();
-    const femaleBlouseMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65, side: THREE.DoubleSide });
-    const femaleSareeSkirtMat = new THREE.MeshStandardMaterial({ color: 0x4ba3db, roughness: 0.62, side: THREE.DoubleSide });
-    const femaleSkinMat = new THREE.MeshStandardMaterial({ color: 0xa86e55, roughness: 0.55 });
-    const pinkSandalMat = new THREE.MeshStandardMaterial({ color: 0xdb2777, roughness: 0.75 });
+    femaleGroup.position.set(passHipX, passHipY, fZ);
 
-    // Feminine silhouette in ochre/mustard-gold blouse (#d97706)
-    const femaleTorso = createSeamlessLoftedLimb([
-      { p: [fHipX,        fHipY,        fZ], rx: 1.05, ry: 1.20 },
-      { p: [fHipX + 0.10, fHipY + 0.90, fZ], rx: 0.88, ry: 1.05 },
-      { p: [fHipX + 0.18, fHipY + 1.85, fZ], rx: 1.15, ry: 1.30 },
-      { p: [fHipX + 0.18, fHipY + 2.75, fZ], rx: 1.05, ry: 1.40 }, // Shoulders
-      { p: [fHipX + 0.18, fHipY + 3.20, fZ], rx: 0.60, ry: 0.78 },
-      { p: [fHipX + 0.18, fHipY + 3.55, fZ], rx: 0.36, ry: 0.40 }
-    ], 16, 20, femaleBlouseMat);
-    femaleGroup.add(femaleTorso);
+    const fTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.90, 1.05, 2.7, 16), femaleBlouseMat);
+    fTorso.position.set(0.05, 1.35, 0);
+    fTorso.rotation.z = 0.08;
+    femaleGroup.add(fTorso);
 
-    const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.70, 12), femaleSkinMat);
-    fNeck.position.set(fHipX + 0.18, fHipY + 3.65, fZ);
+    const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.60, 12), femaleSkinMat);
+    fNeck.position.set(0.02, 3.15, 0);
     femaleGroup.add(fNeck);
 
-    // Female Head - sitting at y = 11.35, top of head at 12.15
-    const femaleHead = new THREE.Group();
-    const fSkullGeo = new THREE.SphereGeometry(0.80, 24, 20);
-    fSkullGeo.scale(0.84, 1.02, 0.84);
-    const fSkullMesh = new THREE.Mesh(fSkullGeo, femaleSkinMat);
-    fSkullMesh.castShadow = true;
-    femaleHead.add(fSkullMesh);
+    const fHead = buildCleanFace(femaleSkinMat, hairMat, true, false);
+    fHead.position.set(0.05, 3.85, 0);
+    femaleGroup.add(fHead);
 
-    // Sleek black hair covering front, crown and sides
-    const fHair = new THREE.Mesh(new THREE.SphereGeometry(0.82, 20, 16), hairMat);
-    fHair.scale.set(0.85, 1.03, 0.85);
-    fHair.position.set(-0.06, 0.04, 0);
-    femaleHead.add(fHair);
-
-    // Low hair bun (Khopa) at back of head under veil
-    const fKhopa = new THREE.Mesh(new THREE.SphereGeometry(0.38, 14, 12), hairMat);
-    fKhopa.scale.set(0.85, 1.0, 1.2);
-    fKhopa.position.set(-0.65, -0.15, 0);
-    femaleHead.add(fKhopa);
-
-    // Delicate feminine eyes & eyebrows
-    [-0.26, 0.26].forEach(ez => {
-      const eyeWhite = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.08, 0.16), eyeWhiteMat);
-      eyeWhite.position.set(0.64, 0.08, ez);
-      femaleHead.add(eyeWhite);
-
-      const pupil = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.07, 0.09), eyePupilMat);
-      pupil.position.set(0.66, 0.08, ez);
-      femaleHead.add(pupil);
-
-      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.04, 0.24), hairMat);
-      brow.position.set(0.64, 0.20, ez);
-      brow.rotation.z = -0.15;
-      femaleHead.add(brow);
-    });
-
-    // Sculpted Delicate Nose
-    const fNose = createBoneSegment([0.64, 0.06, 0], [0.72, -0.04, 0], 0.032, 0.042, femaleSkinMat);
-    femaleHead.add(fNose);
-    const fNoseTip = new THREE.Mesh(new THREE.SphereGeometry(0.042, 10, 8), femaleSkinMat);
-    fNoseTip.position.set(0.72, -0.04, 0);
-    femaleHead.add(fNoseTip);
-
-    // Traditional Velvet Bindi (Teep) & Rose Lips
-    const fBindi = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.03, 12), bindiMat);
-    fBindi.rotation.z = Math.PI / 2;
-    fBindi.position.set(0.68, 0.20, 0);
-    femaleHead.add(fBindi);
-
-    const fLips = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.05, 0.24), femaleLipMat);
-    fLips.position.set(0.65, -0.18, 0);
-    femaleHead.add(fLips);
-
-    femaleHead.position.set(fHipX + 0.22, fHipY + 4.35, fZ);
-    femaleGroup.add(femaleHead);
-
-    // AUTHENTIC FLOWING SAREE ANCHOL (GHOMTA):
-    // Framing the crown and ears from behind, falling gracefully down the back & shoulders,
-    // leaving the front black hair, bindi, eyes, and entire facial profile 100% visible!
     const ghomtaRimPts = [
-      new THREE.Vector3(fHipX - 0.15, fHipY + 4.10, fZ - 0.75),
-      new THREE.Vector3(fHipX - 0.08, fHipY + 5.10, fZ),
-      new THREE.Vector3(fHipX - 0.15, fHipY + 4.10, fZ + 0.75)
+      new THREE.Vector3(-0.25, 3.65, -0.72),
+      new THREE.Vector3(-0.15, 4.65, 0),
+      new THREE.Vector3(-0.25, 3.65, 0.72)
     ];
     const ghomtaRim = new THREE.Mesh(
       new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ghomtaRimPts), 16, 0.12, 8, false),
@@ -5794,76 +5542,73 @@ let sharedRickshawArtTexture = null;
     );
     femaleGroup.add(ghomtaRim);
 
-    const veilBackDrape = createSeamlessLoftedLimb([
-      { p: [fHipX - 0.25, fHipY + 4.70, fZ], rx: 0.32, ry: 1.05 },
-      { p: [fHipX - 0.55, fHipY + 3.80, fZ], rx: 0.38, ry: 1.20 },
-      { p: [fHipX - 0.65, fHipY + 2.70, fZ], rx: 0.36, ry: 1.25 },
-      { p: [fHipX - 0.70, fHipY + 1.60, fZ], rx: 0.32, ry: 1.30 }
-    ], 16, 16, femaleBlouseMat);
-    femaleGroup.add(veilBackDrape);
+    const ghomtaDrape = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.92, 1.15, 2.4, 14, 1, true, Math.PI * 0.45, Math.PI * 1.1),
+      femaleBlouseMat
+    );
+    ghomtaDrape.position.set(-0.35, 2.60, 0);
+    femaleGroup.add(ghomtaDrape);
 
-    // Female Arms: Bent elbows, forearms resting on lap
-    [-1.05, 1.05].forEach(az => {
-      const shPt = [fHipX + 0.18, fHipY + 2.75, fZ + az * 0.95];
-      const elbowPt = [-7.4, fHipY + 1.1, fZ + az * 1.05];
-      const lapTarget = [-5.8, fHipY + 0.25, fZ + az * 0.30];
+    [-0.82, 0.82].forEach(az => {
+      const armGroup = new THREE.Group();
+      armGroup.position.set(0.05, 2.40, az);
+      femaleGroup.add(armGroup);
 
-      femaleGroup.add(createBoneSegment(shPt, elbowPt, 0.44, 0.36, femaleBlouseMat));
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 1.6, 12), femaleBlouseMat);
+      upperArm.position.set(0.60, -0.65, 0);
+      upperArm.rotation.z = -0.75;
+      armGroup.add(upperArm);
 
-      const fSleeveCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.36, 0.15, 14), femaleBlouseMat);
-      fSleeveCuff.position.set(elbowPt[0], elbowPt[1], elbowPt[2]);
-      femaleGroup.add(fSleeveCuff);
+      const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 1.5, 12), femaleSkinMat);
+      forearm.position.set(1.65, -1.20, -az * 0.25);
+      forearm.rotation.z = -1.15;
+      armGroup.add(forearm);
 
-      femaleGroup.add(createBoneSegment(elbowPt, lapTarget, 0.34, 0.26, femaleSkinMat));
-
-      // Traditional Bangles (Churi)
-      [0xf59e0b, 0xdc2626, 0x16a34a].forEach((bColor, bIdx) => {
-        const bMat = new THREE.MeshStandardMaterial({ color: bColor, roughness: 0.25, metalness: 0.6 });
-        const bangle = new THREE.Mesh(new THREE.TorusGeometry(0.20, 0.038, 8, 16), bMat);
-        bangle.position.set(lapTarget[0] - 0.24 + bIdx * 0.08, lapTarget[1] + 0.06, lapTarget[2]);
+      [0xdc2626, 0xf59e0b, 0x16a34a].forEach((bColor, bIdx) => {
+        const bangle = new THREE.Mesh(
+          new THREE.TorusGeometry(0.18, 0.035, 6, 16),
+          new THREE.MeshStandardMaterial({ color: bColor, roughness: 0.25, metalness: 0.6 })
+        );
+        bangle.position.set(2.0 + bIdx * 0.08, -1.40, -az * 0.25);
         bangle.rotation.y = Math.PI / 2;
-        femaleGroup.add(bangle);
+        armGroup.add(bangle);
       });
 
-      const fHand = buildRestingHand(femaleSkinMat, true);
-      fHand.position.set(lapTarget[0], lapTarget[1], lapTarget[2]);
-      fHand.rotation.y = az > 0 ? 0.25 : -0.25;
-      femaleGroup.add(fHand);
+      const hand = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.16, 0.34), femaleSkinMat);
+      hand.position.set(2.35, -1.50, -az * 0.30);
+      armGroup.add(hand);
     });
 
-    // FLOWING SKY-BLUE SAREE SKIRT (#4ba3db) - SEATED WITH KNEES TOGETHER
-    [-0.60, 0.60].forEach(tz => {
-      const legZ = fZ + tz;
-      const hipPt = [fHipX, fHipY, legZ];
-      const kneePt = [-5.5, fHipY, legZ];
-      const anklePt = [-5.3, 5.55, legZ];
+    [-0.50, 0.50].forEach(tz => {
+      const legGroup = new THREE.Group();
+      legGroup.position.set(0, 0, tz);
+      femaleGroup.add(legGroup);
 
-      femaleGroup.add(createBoneSegment(hipPt, kneePt, 0.60, 0.52, femaleSareeSkirtMat));
-      femaleGroup.add(createBoneSegment(kneePt, anklePt, 0.52, 0.46, femaleSareeSkirtMat));
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.54, 3.5, 14), femaleSareeSkirtMat);
+      thigh.rotation.z = Math.PI / 2;
+      thigh.position.set(1.75, 0, 0);
+      legGroup.add(thigh);
+
+      const kneeGroup = new THREE.Group();
+      kneeGroup.position.set(3.5, 0, 0);
+      legGroup.add(kneeGroup);
+
+      const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.44, 1.85, 14), femaleSareeSkirtMat);
+      shin.position.set(0, -0.92, 0);
+      kneeGroup.add(shin);
+
+      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.50, 0.20, 0.58), pinkSandalMat);
+      sandal.position.set(0.30, -1.80, 0);
+      kneeGroup.add(sandal);
     });
 
-    // Pleated Fabric Center Drape connecting both knees and shins
-    const kuchiDrape = new THREE.Mesh(
-      new THREE.BoxGeometry(0.40, 1.45, 1.30),
-      femaleSareeSkirtMat
-    );
-    kuchiDrape.position.set(-5.35, 6.25, fZ);
-    femaleGroup.add(kuchiDrape);
+    const kuchi = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.85, 1.10), femaleSareeSkirtMat);
+    kuchi.position.set(3.60, -0.92, 0);
+    femaleGroup.add(kuchi);
 
-    const fGoldBorder = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.20, 2.50), goldTrimMat);
-    fGoldBorder.position.set(-5.35, 5.56, fZ);
-    femaleGroup.add(fGoldBorder);
-
-    // Pink Strap Sandals on top of footboard (y = 5.54)
-    [-0.60, 0.60].forEach(tz => {
-      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.20, 0.68), pinkSandalMat);
-      sandal.position.set(-5.0, 5.54, fZ + tz);
-      femaleGroup.add(sandal);
-
-      const strap = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.15, 0.72), pinkSandalMat);
-      strap.position.set(-4.8, 5.67, fZ + tz);
-      femaleGroup.add(strap);
-    });
+    const fGoldHem = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.18, 2.10), goldTrimMat);
+    fGoldHem.position.set(3.60, -1.75, 0);
+    femaleGroup.add(fGoldHem);
 
     group.add(femaleGroup);
 
