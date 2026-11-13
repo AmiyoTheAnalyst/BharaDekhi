@@ -1560,6 +1560,183 @@
     return sharedLungiTexture;
   }
 
+  let sharedGamchaTexture = null;
+  function getGamchaTexture() {
+    if (sharedGamchaTexture) return sharedGamchaTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.strokeStyle = '#fee2e2';
+    ctx.lineWidth = 6;
+    for (let x = 0; x < 128; x += 24) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 128); ctx.stroke();
+    }
+    for (let y = 0; y < 128; y += 24) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(128, y); ctx.stroke();
+    }
+    ctx.strokeStyle = '#18181b';
+    ctx.lineWidth = 2;
+    for (let x = 12; x < 128; x += 24) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 128); ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 4);
+    sharedGamchaTexture = tex;
+    return sharedGamchaTexture;
+  }
+
+  let sharedPullerFaceTexture = null;
+  function getPullerFaceTexture() {
+    if (sharedPullerFaceTexture) return sharedPullerFaceTexture;
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // 1. Base Warm Authentic Bengali Bronze Skin Tone
+    const skinGrad = ctx.createLinearGradient(0, 0, 0, 512);
+    skinGrad.addColorStop(0, '#75402c');
+    skinGrad.addColorStop(0.3, '#8e523b');
+    skinGrad.addColorStop(0.7, '#854b35');
+    skinGrad.addColorStop(1, '#663724');
+    ctx.fillStyle = skinGrad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // 2. Culturally Authentic Haircut (natural hairline, neat sideburns, clean neck)
+    ctx.fillStyle = '#141416';
+    // Crown and top of head (y: 0-180)
+    ctx.fillRect(0, 0, 512, 180);
+    // Back of head down to nape of neck (y: 180-350)
+    ctx.fillRect(0, 180, 148, 170);
+    ctx.fillRect(364, 180, 148, 170);
+
+    // Natural curved hairline & sideburns (ends cleanly at mid-ear level y = 255)
+    ctx.beginPath();
+    ctx.moveTo(148, 350);
+    ctx.lineTo(150, 255); // Right sideburn
+    ctx.bezierCurveTo(175, 192, 215, 182, 256, 186); // Right forehead arch
+    ctx.bezierCurveTo(297, 182, 337, 192, 362, 255); // Left forehead arch
+    ctx.lineTo(364, 350); // Left sideburn
+    ctx.lineTo(512, 350);
+    ctx.lineTo(512, 0);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(0, 350);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Eyebrows (masculine, defined, slightly angled)
+    ctx.strokeStyle = '#141416';
+    ctx.lineWidth = 5.5;
+    ctx.lineCap = 'round';
+
+    // Left eyebrow (viewer right)
+    ctx.beginPath();
+    ctx.moveTo(270, 226);
+    ctx.quadraticCurveTo(292, 215, 318, 223);
+    ctx.stroke();
+
+    // Right eyebrow (viewer left)
+    ctx.beginPath();
+    ctx.moveTo(242, 226);
+    ctx.quadraticCurveTo(220, 215, 194, 223);
+    ctx.stroke();
+
+    // 4. Realistic Almond Eyes with warm brown iris and specular catchlight
+    [-38, 38].forEach(ox => {
+      const ex = 256 + ox;
+      const ey = 246;
+
+      // Soft Eye Socket Shadow
+      ctx.fillStyle = 'rgba(40, 20, 12, 0.40)';
+      ctx.beginPath();
+      ctx.ellipse(ex, ey - 2, 20, 13, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sclera (soft natural off-white)
+      ctx.fillStyle = '#f3f4f6';
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 16, 8.0, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Warm Brown Iris
+      ctx.fillStyle = '#3a2014';
+      ctx.beginPath();
+      ctx.arc(ex, ey, 7.0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pupil
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath();
+      ctx.arc(ex, ey, 3.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Specular Catchlight
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(ex + 1.8, ey - 1.8, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Upper Eyelid crease
+      ctx.strokeStyle = '#18181b';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 16.5, 8.0, 0, Math.PI * 0.95, Math.PI * 2.05);
+      ctx.stroke();
+    });
+
+    // 5. Soft Nose Bridge & Nostril Shading (subtle highlight and contour)
+    ctx.strokeStyle = 'rgba(70, 35, 20, 0.28)';
+    ctx.lineWidth = 3.0;
+    ctx.beginPath();
+    ctx.moveTo(253, 230);
+    ctx.lineTo(252, 282);
+    ctx.stroke();
+
+    // Nostril shadow dots
+    ctx.fillStyle = '#381a10';
+    ctx.beginPath();
+    ctx.ellipse(246, 288, 4.0, 2.2, -0.2, 0, Math.PI * 2);
+    ctx.ellipse(266, 288, 4.0, 2.2, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 6. Authentic Bengali Rickshaw Puller Mustache (full, curved, elegant, matching Image 2)
+    ctx.fillStyle = '#141416';
+    ctx.beginPath();
+    ctx.moveTo(206, 316);
+    ctx.quadraticCurveTo(232, 296, 256, 301);
+    ctx.quadraticCurveTo(280, 296, 306, 316);
+    ctx.quadraticCurveTo(282, 311, 256, 313);
+    ctx.quadraticCurveTo(230, 311, 206, 316);
+    ctx.closePath();
+    ctx.fill();
+
+    // 7. Lips
+    ctx.fillStyle = '#7a3c30';
+    ctx.beginPath();
+    ctx.ellipse(256, 319, 15, 3.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8f4a3d';
+    ctx.beginPath();
+    ctx.ellipse(256, 327, 13, 4.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Soft diffused chin crease
+    ctx.strokeStyle = 'rgba(60, 30, 18, 0.25)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(256, 336, 12, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    sharedPullerFaceTexture = tex;
+    return sharedPullerFaceTexture;
+  }
+
 let sharedRickshawArtTexture = null;
   function getRickshawArtTexture() {
     if (sharedRickshawArtTexture) return sharedRickshawArtTexture;
@@ -4689,6 +4866,17 @@ let sharedRickshawArtTexture = null;
       roughness: 0.75
     });
 
+    const gamchaMat = new THREE.MeshStandardMaterial({
+      map: getGamchaTexture(),
+      roughness: 0.75
+    });
+
+    const pullerHeadMat = new THREE.MeshStandardMaterial({
+      map: getPullerFaceTexture(),
+      roughness: 0.55,
+      metalness: 0.05
+    });
+
     function buildSpokedWheel(radius, width) {
       const wheelGroup = new THREE.Group();
       const tireGeo = new THREE.TorusGeometry(radius, width * 0.45, 14, 36);
@@ -5118,36 +5306,35 @@ let sharedRickshawArtTexture = null;
     // =========================================================================
     function buildGrippingHand(skinMat, side) {
       const hGroup = new THREE.Group();
-      // Palm
-      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.32, 0.50), skinMat);
+      // Back of hand / palm resting naturally over handlebar grip
+      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.24, 0.52), skinMat);
       palm.castShadow = true;
       hGroup.add(palm);
 
-      // Knuckle Bar
-      const knuckle = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.48), skinMat);
-      knuckle.position.set(0.18, 0.12, 0);
+      // Knuckle ridge
+      const knuckle = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.14, 0.48), skinMat);
+      knuckle.position.set(0.18, 0.04, 0);
       hGroup.add(knuckle);
 
-      // 4 Curled Fingers wrapped snugly around handlebar grip
+      // 4 Fingers curling under the rubber grip
       for (let f = 0; f < 4; f++) {
         const fz = -0.16 + f * 0.11;
-        const fingerCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.45, 8), skinMat);
-        fingerCyl.rotation.z = Math.PI * 0.65;
-        fingerCyl.position.set(0.18, -0.06, fz);
+        const fingerCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.058, 0.38, 8), skinMat);
+        fingerCyl.rotation.z = Math.PI * 0.55;
+        fingerCyl.position.set(0.18, -0.14, fz);
         hGroup.add(fingerCyl);
 
-        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), skinMat);
-        tip.position.set(0.18 - Math.sin(Math.PI * 0.65) * 0.22, -0.06 + Math.cos(Math.PI * 0.65) * 0.22, fz);
+        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.058, 8, 8), skinMat);
+        tip.position.set(0.18 - Math.sin(Math.PI * 0.55) * 0.19, -0.14 - Math.cos(Math.PI * 0.55) * 0.19, fz);
         hGroup.add(tip);
       }
 
-      // Opposable Thumb
-      const thumb = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.38, 8), skinMat);
-      thumb.position.set(0.05, 0.16, side > 0 ? -0.24 : 0.24);
-      thumb.rotation.x = side > 0 ? 0.45 : -0.45;
-      thumb.rotation.z = -0.25;
+      // Thumb wrapping from top/side
+      const thumb = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.32, 8), skinMat);
+      thumb.position.set(-0.06, -0.06, side > 0 ? -0.22 : 0.22);
+      thumb.rotation.x = side > 0 ? 0.40 : -0.40;
+      thumb.rotation.z = 0.25;
       hGroup.add(thumb);
-
       return hGroup;
     }
 
@@ -5360,151 +5547,203 @@ let sharedRickshawArtTexture = null;
       return headGroup;
     }
 
+    function buildPerfectPullerHead() {
+      const headGroup = new THREE.Group();
+
+      // 1. Natural Athletic Head Mesh with Painted Lifelike Bangladeshi Features
+      const skullGeo = new THREE.SphereGeometry(0.82, 32, 28);
+      skullGeo.scale(0.85, 1.04, 0.85);
+      const skullMesh = new THREE.Mesh(skullGeo, pullerHeadMat);
+      skullMesh.castShadow = true;
+      headGroup.add(skullMesh);
+
+      // 2. Smooth Volumetric Hair (recessed back so forehead & hairline stay pristine)
+      const hairGeo = new THREE.SphereGeometry(0.835, 24, 20);
+      hairGeo.scale(0.86, 1.05, 0.86);
+      const hairMesh = new THREE.Mesh(hairGeo, hairMat);
+      hairMesh.position.set(-0.10, 0.04, 0);
+      hairMesh.castShadow = true;
+      headGroup.add(hairMesh);
+
+      // 3. Anatomical Nose Bridge (flush along midline of face between eyes down to tip)
+      const noseBridge = createBoneSegment([0.695, 0.05, 0], [0.730, -0.05, 0], 0.035, 0.045, pullerSkinMat);
+      headGroup.add(noseBridge);
+
+      const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.042, 12, 10), pullerSkinMat);
+      noseTip.position.set(0.730, -0.05, 0);
+      headGroup.add(noseTip);
+
+      // 4. Symmetrical 3D Ears with realistic helix and soft lobe
+      [-0.72, 0.72].forEach(ez => {
+        const earHelix = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.028, 8, 14, Math.PI * 1.3), pullerSkinMat);
+        earHelix.scale.set(0.65, 1.10, 0.5);
+        earHelix.position.set(-0.02, -0.02, ez);
+        earHelix.rotation.y = ez > 0 ? 0.35 : -0.35;
+        headGroup.add(earHelix);
+
+        const earLobe = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), pullerSkinMat);
+        earLobe.position.set(-0.04, -0.13, ez);
+        headGroup.add(earLobe);
+      });
+
+      return headGroup;
+    }
+
     // -------------------------------------------------------------------------
-    // 1. RICKSHAW PULLER (FULL ADULT MAN - HIGH-FIDELITY ORGANIC ANATOMY)
+    // 1. RICKSHAW PULLER (FULL ADULT MAN - NATURAL RIDING POSTURE MATCHING IMAGE 2)
     // -------------------------------------------------------------------------
     const pullerGroup = new THREE.Group();
-    // Warm Authentic Bangladeshi Bronze Skin Tone
-    const pullerSkinMat = new THREE.MeshStandardMaterial({ color: 0x945b46, roughness: 0.65 });
+    const pullerSkinMat = new THREE.MeshStandardMaterial({ color: 0x8e523b, roughness: 0.65 });
     const hairMat = new THREE.MeshStandardMaterial({ color: 0x151518, roughness: 0.85 });
-    // Deep Authentic Violet / Plum Tunic Shirt matching Image 2
-    const plumShirtMat = new THREE.MeshStandardMaterial({ color: 0x3d1746, roughness: 0.72 });
+    const plumShirtMat = new THREE.MeshStandardMaterial({ color: 0x4a1d5a, roughness: 0.72 });
     const brownSandalMat = new THREE.MeshStandardMaterial({ color: 0x45220c, roughness: 0.85 });
-    const gamchaRedMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.78 });
 
-    // Smooth Lofted Athletic Male Torso (Forward lean ~24° toward grips)
+    // Natural athletic riding posture leaning forward ~32° towards handlebars
     const pullerTorso = createSeamlessLoftedLimb([
-      { p: [0.60, 7.20, 0], rx: 1.15, ry: 1.25 },
-      { p: [1.10, 8.20, 0], rx: 1.10, ry: 1.20 },
-      { p: [1.80, 9.60, 0], rx: 1.35, ry: 1.65 },
-      { p: [2.50, 11.00, 0], rx: 1.30, ry: 1.80 },
-      { p: [2.80, 11.40, 0], rx: 0.85, ry: 1.05 },
-      { p: [3.05, 11.85, 0], rx: 0.48, ry: 0.52 }
+      { p: [0.65,  7.10, 0], rx: 1.15, ry: 1.25 }, // Pelvis/waist on saddle
+      { p: [1.35,  8.05, 0], rx: 1.12, ry: 1.20 }, // Lower back
+      { p: [2.15,  9.25, 0], rx: 1.22, ry: 1.35 }, // Mid back/chest
+      { p: [3.10, 10.45, 0], rx: 1.18, ry: 1.45 }, // Broad shoulders
+      { p: [3.45, 10.90, 0], rx: 0.65, ry: 0.80 }, // Base of neck
+      { p: [3.68, 11.30, 0], rx: 0.38, ry: 0.42 }  // Neck seam
     ], 16, 20, plumShirtMat);
     pullerGroup.add(pullerTorso);
 
-    const pullerShoulderPos = { x: 2.50, y: 11.00, z: 1.65 };
+    const pullerShoulderPos = { x: 3.10, y: 10.45, z: 1.35 };
 
-    // Folded Shirt Collar & Placket
-    const pullerCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 0.40, 14), plumShirtMat);
-    pullerCollar.position.set(2.80, 11.45, 0);
-    pullerCollar.rotation.z = -0.42;
-    pullerGroup.add(pullerCollar);
+    // Clean Shirt Collar (Zero vampire fins, flat round polo collar)
+    const collarBand = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.48, 0.20, 18), plumShirtMat);
+    collarBand.position.set(3.50, 10.95, 0);
+    collarBand.rotation.z = -0.38;
+    pullerGroup.add(collarBand);
 
-    const pullerNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.44, 0.85, 12), pullerSkinMat);
-    pullerNeck.position.set(2.95, 11.85, 0);
-    pullerNeck.rotation.z = -0.32;
+    // Front Placket lying flat on chest
+    const placket = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.55, 0.05), plumShirtMat);
+    placket.position.set(3.60, 10.65, 0);
+    placket.rotation.z = -0.38;
+    pullerGroup.add(placket);
+
+    // Neck
+    const pullerNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.65, 14), pullerSkinMat);
+    pullerNeck.position.set(3.70, 11.35, 0);
+    pullerNeck.rotation.z = -0.34;
     pullerGroup.add(pullerNeck);
 
-    // Traditional Bengali Red Gamcha Draped around neck & shoulder
-    const gamchaNeck = createSeamlessLoftedLimb([
-      { p: [2.80, 10.60, 0.75], rx: 0.16, ry: 0.42 },
-      { p: [2.95, 11.40, 0.55], rx: 0.18, ry: 0.45 },
-      { p: [2.85, 11.70, 0], rx: 0.20, ry: 0.48 },
-      { p: [2.70, 11.40, -0.55], rx: 0.18, ry: 0.45 },
-      { p: [2.55, 10.60, -0.75], rx: 0.16, ry: 0.42 }
-    ], 10, 14, gamchaRedMat);
-    pullerGroup.add(gamchaNeck);
+    // AUTHENTIC DHAKA GAMCHA (Draped naturally over Left Shoulder!)
+    const gamchaDrape = createSeamlessLoftedLimb([
+      { p: [2.70,  9.65, 0.70], rx: 0.12, ry: 0.36 },
+      { p: [3.10, 10.30, 0.82], rx: 0.12, ry: 0.38 },
+      { p: [3.35, 10.70, 0.85], rx: 0.12, ry: 0.36 },
+      { p: [3.05, 10.55, 0.80], rx: 0.12, ry: 0.36 },
+      { p: [2.50,  9.75, 0.68], rx: 0.12, ry: 0.36 }
+    ], 12, 16, gamchaMat);
+    pullerGroup.add(gamchaDrape);
 
-    // Realistic Sculpted Head
-    const pullerHead = buildRealisticSculptedHead({
-      skinMat: pullerSkinMat,
-      hairMat: hairMat,
-      radius: 0.98,
-      mustache: true,
-      isFemale: false
-    });
-    pullerHead.position.set(3.40, 12.35, 0);
+    // Perfect Sculpted Head
+    const pullerHead = buildPerfectPullerHead();
+    pullerHead.position.set(4.05, 11.95, 0);
+    pullerHead.rotation.z = -0.06;
     pullerGroup.add(pullerHead);
 
-    // Muscular Athletic Arms & Realistic Gripping Hands locked squarely onto grips
+    // Proportional Athletic Arms with natural ~110° elbow bend matching Image 2
     [-1, 1].forEach(side => {
       const shX = pullerShoulderPos.x;
       const shY = pullerShoulderPos.y;
       const shZ = side * pullerShoulderPos.z;
-      const gripTarget = [6.2, 9.8, side * 2.6];
-      const elbowPos = [4.20, 10.15, side * 2.35];
+      const gripTarget = [9.20, 10.55, side * 2.95];
+      // Balanced Elbow Drop (upper arm ~3.4, forearm ~4.0)
+      const elbowPos = [5.70, 8.50, side * 2.25];
 
-      // Dropped Shoulder Sleeve Cap
-      const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.70, 14, 12), plumShirtMat);
-      shoulderCap.scale.set(1.10, 0.95, 1.05);
-      shoulderCap.position.set(shX, shY, shZ);
-      pullerGroup.add(shoulderCap);
+      // Upper arm in shirt sleeve (Shoulder -> Elbow)
+      pullerGroup.add(createBoneSegment([shX, shY, shZ], elbowPos, 0.48, 0.40, plumShirtMat));
 
-      // Upper Arm Fabric Sleeve with Cuff
-      pullerGroup.add(createBoneSegment([shX, shY, shZ], elbowPos, 0.62, 0.50, plumShirtMat));
-
-      const cuffHem = new THREE.Mesh(new THREE.TorusGeometry(0.51, 0.05, 8, 16), plumShirtMat);
+      // Rolled Sleeve Cuff at Elbow
+      const cuffHem = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.42, 0.22, 16), plumShirtMat);
       cuffHem.position.set(elbowPos[0], elbowPos[1], elbowPos[2]);
       pullerGroup.add(cuffHem);
 
-      // Muscular Bare Forearm (Elbow -> Wrist)
-      const wristPos = [gripTarget[0] - 0.20, gripTarget[1] - 0.05, gripTarget[2]];
-      pullerGroup.add(createBoneSegment(elbowPos, wristPos, 0.44, 0.34, pullerSkinMat));
+      // Muscular Bare Forearm extending upward & forward to wrist
+      const wristPos = [gripTarget[0] - 0.25, gripTarget[1] - 0.02, gripTarget[2]];
+      pullerGroup.add(createBoneSegment(elbowPos, wristPos, 0.35, 0.26, pullerSkinMat));
 
       // Realistic Gripping Hand wrapping directly around Handlebar Grip
       const hand = buildGrippingHand(pullerSkinMat, side);
       hand.position.set(gripTarget[0], gripTarget[1], gripTarget[2]);
       hand.rotation.order = 'YXZ';
-      hand.rotation.y = side > 0 ? 0.35 : -0.35;
-      hand.rotation.z = -0.22;
+      hand.rotation.y = side > 0 ? 0.30 : -0.30;
+      hand.rotation.z = -0.15;
       pullerGroup.add(hand);
     });
 
-    // Traditional Draped Lungi (Sarong) - Smooth Organic Lofts Wrapping Hips & Thighs
-    const lungiLoft = createSeamlessLoftedLimb([
-      { p: [0.65, 7.20, 0], rx: 1.30, ry: 1.45 },
-      { p: [0.85, 6.60, 0], rx: 1.40, ry: 1.55 },
-      { p: [1.10, 5.80, 0], rx: 1.50, ry: 1.65 },
-      { p: [1.35, 5.10, 0], rx: 1.58, ry: 1.70 }
+    // Main Draped Waist & Pelvis Lungi Wrap
+    const lungiWaist = createSeamlessLoftedLimb([
+      { p: [0.65, 7.10, 0], rx: 1.15, ry: 1.30 },
+      { p: [0.75, 6.50, 0], rx: 1.28, ry: 1.45 },
+      { p: [0.90, 5.80, 0], rx: 1.35, ry: 1.50 }
     ], 16, 16, lungiMat);
-    pullerGroup.add(lungiLoft);
+    pullerGroup.add(lungiWaist);
 
-    // Front Waist Knot (Lungi Gira)
-    const lungiKnot = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 10), lungiMat);
+    // Front Waist Knot / Fold (Lungi Gira)
+    const lungiKnot = new THREE.Mesh(new THREE.SphereGeometry(0.30, 12, 10), lungiMat);
     lungiKnot.scale.set(0.9, 0.7, 1.2);
-    lungiKnot.position.set(1.45, 6.95, 0);
+    lungiKnot.position.set(1.40, 6.85, 0);
     pullerGroup.add(lungiKnot);
 
-    // Bare Muscular Thighs, Calves & Leather Strap Sandals on Pedals
+    // Helper: Dynamic bone segment where mesh vertices start at (0, 0, 0) and extend along +Y
+    function createPedalLimb(radiusBottom, radiusTop, length, material) {
+      const g = new THREE.Group();
+      const cylGeo = new THREE.CylinderGeometry(radiusTop, radiusBottom, length, 16, 1, false);
+      cylGeo.translate(0, length / 2, 0);
+      const mesh = new THREE.Mesh(cylGeo, material);
+      mesh.castShadow = true;
+      g.add(mesh);
+      return g;
+    }
+
+    // Dynamic Pedaling Legs
     const lenThigh = 2.8;
     const lenShin = 2.6;
     const pullerLegs = [];
 
     [-1, 1].forEach(side => {
-      const hipPt = new THREE.Vector3(0.6, 6.8, side * 1.15);
+      const hipPt = new THREE.Vector3(0.65, 6.8, side * 0.95);
       const legGroup = new THREE.Group();
 
-      // Bare Thigh (Hip to Knee, emerges from lungi)
-      const thighSeg = createArticulatedSegment(lenThigh, 0.54, 0.46, pullerSkinMat);
+      // Thigh Limb (wrapped in authentic lungi fabric down to knee!)
+      const thighGroup = createPedalLimb(0.56, 0.48, lenThigh, lungiMat);
 
-      // Bare Muscular Calf with Gastrocnemius Bulge (Knee to Pedal)
-      const calfSeg = createArticulatedSegment(lenShin, 0.46, 0.34, pullerSkinMat);
+      // Fabric Knee Hem / Cuff
+      const kneeHem = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.22, 16), lungiMat);
+      kneeHem.position.set(0, lenThigh, 0);
+      thighGroup.add(kneeHem);
 
-      // Traditional Brown Leather Strap Sandal (Chappal)
+      // Calf Limb (bare bronze muscle from knee to ankle)
+      const calfGroup = createPedalLimb(0.44, 0.30, lenShin, pullerSkinMat);
+
+      // Traditional Bengali Brown Leather Strap Sandal (Chappal)
       const footGroup = new THREE.Group();
       const sandalSole = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.22, 0.78), brownSandalMat);
       sandalSole.castShadow = true;
       footGroup.add(sandalSole);
 
-      const strapMain = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.16, 0.82), brownSandalMat);
-      strapMain.position.set(0.20, 0.14, 0);
-      footGroup.add(strapMain);
+      const strapCross = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.16, 0.82), brownSandalMat);
+      strapCross.position.set(0.20, 0.14, 0);
+      footGroup.add(strapCross);
 
-      const toeStrap = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.22, 8), brownSandalMat);
-      toeStrap.position.set(0.52, 0.12, 0);
-      footGroup.add(toeStrap);
+      const strapToe = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.22, 8), brownSandalMat);
+      strapToe.position.set(0.52, 0.12, 0);
+      footGroup.add(strapToe);
 
-      legGroup.add(thighSeg);
-      legGroup.add(calfSeg);
+      legGroup.add(thighGroup);
+      legGroup.add(calfGroup);
       legGroup.add(footGroup);
       pullerGroup.add(legGroup);
 
       pullerLegs.push({
         side: side,
         hip: hipPt,
-        thighSeg: thighSeg,
-        calfSeg: calfSeg,
+        thighGroup: thighGroup,
+        calfGroup: calfGroup,
         footGroup: footGroup
       });
     });
@@ -5535,17 +5774,17 @@ let sharedRickshawArtTexture = null;
         const ky = leg.hip.y + Math.sin(thighAngle) * lenThigh;
         const kz = leg.hip.z;
 
-        // Orient Thigh from Hip to Knee
+        // Thigh: extends from leg.hip towards knee (kx, ky, kz)
         const thighDir = new THREE.Vector3(kx - leg.hip.x, ky - leg.hip.y, 0).normalize();
-        const qThigh = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), thighDir);
-        leg.thighSeg.position.copy(leg.hip);
-        leg.thighSeg.quaternion.copy(qThigh);
+        const qThigh = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), thighDir);
+        leg.thighGroup.position.copy(leg.hip);
+        leg.thighGroup.quaternion.copy(qThigh);
 
-        // Orient Calf from Knee to Pedal
+        // Calf: extends from knee (kx, ky, kz) towards pedal (pedalLocalX, pedalLocalY, pedalLocalZ)
         const shinDir = new THREE.Vector3(pedalLocalX - kx, pedalLocalY - ky, pedalLocalZ - kz).normalize();
-        const qShin = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), shinDir);
-        leg.calfSeg.position.set(kx, ky, kz);
-        leg.calfSeg.quaternion.copy(qShin);
+        const qShin = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), shinDir);
+        leg.calfGroup.position.set(kx, ky, kz);
+        leg.calfGroup.quaternion.copy(qShin);
 
         // Lock Sandal onto Pedal
         leg.footGroup.position.set(pedalLocalX, pedalLocalY, pedalLocalZ);
