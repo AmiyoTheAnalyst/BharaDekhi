@@ -5192,11 +5192,6 @@ let sharedRickshawArtTexture = null;
       cranium.castShadow = true;
       headGroup.add(cranium);
 
-      const jaw = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.20, 0.42, 12), skinMat);
-      jaw.position.set(0.12, -0.36, 0);
-      jaw.rotation.z = 0.25;
-      headGroup.add(jaw);
-
       const hairGeo = new THREE.SphereGeometry(0.58, 24, 20);
       hairGeo.scale(0.87, 1.10, 0.92);
       const hair = new THREE.Mesh(hairGeo, hairMat);
@@ -5328,17 +5323,32 @@ let sharedRickshawArtTexture = null;
     ];
     pullerGroup.add(createLoftedOrganMesh(pullerTorsoStations, 20, plumShirtMat));
 
-    // Collar ring seated flush against the top of the shirt (smooth chest, no protruding lump)
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.09, 10, 18), plumShirtMat);
-    collar.position.set(0.65, 8.72, 0);
-    collar.rotation.z = -0.32;
-    pullerGroup.add(collar);
+    // Solid smooth upper-chest / clavicle bridge spanning across shoulders (Z: -1.15 to +1.15)
+    const clavicleBridge = new THREE.Mesh(
+      new THREE.SphereGeometry(0.72, 20, 16),
+      plumShirtMat
+    );
+    clavicleBridge.scale.set(0.66, 0.46, 1.62);
+    clavicleBridge.position.set(0.48, 8.62, 0);
+    clavicleBridge.rotation.z = -0.32;
+    pullerGroup.add(clavicleBridge);
 
-    // Neck cylinder sunk into torso to eliminate any gaps
-    const pullerNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.65, 12), pullerSkinMat);
-    pullerNeck.position.set(0.72, 8.85, 0);
-    pullerNeck.rotation.z = -0.28;
+    // Single centered continuous neck column (Z = 0 strictly on symmetry plane)
+    const neckAngle = 0.44; // ~25° forward lean
+    const pullerNeck = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.28, 0.32, 1.05, 16),
+      pullerSkinMat
+    );
+    pullerNeck.position.set(0.70, 9.05, 0);
+    pullerNeck.rotation.z = -neckAngle;
     pullerGroup.add(pullerNeck);
+
+    // Horizontal collar wrapping around the base of the centered neck cylinder
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.08, 10, 24), plumShirtMat);
+    collar.position.set(0.56, 8.76, 0);
+    const neckDir = new THREE.Vector3(Math.sin(neckAngle), Math.cos(neckAngle), 0).normalize();
+    collar.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), neckDir);
+    pullerGroup.add(collar);
 
     const pullerHead = buildRealisticAdultHead(pullerSkinMat, false, true);
     pullerHead.position.set(0.95, 9.60, 0);
