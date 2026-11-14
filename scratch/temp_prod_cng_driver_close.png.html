@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Production CNG Render</title>
+  <style>
+    body { margin: 0; background: #070b14; overflow: hidden; }
+    #canvas-container { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id='canvas-container'></div>
+  <script src='../assets/three.min.js'></script>
+  <script src='../assets/crossroads-3d.js'></script>
+  <script>
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c1220);
+    const camera = new THREE.PerspectiveCamera(36, 1280 / 720, 0.1, 1000);
+    camera.position.set(3.5, 7.5, 14.0);
+    camera.lookAt(2.0, 6.5, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+    renderer.setSize(1280, 720);
+    renderer.setPixelRatio(1.5);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x334155, 1.15);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xfff7ed, 1.45);
+    dir.position.set(16, 26, 20);
+    dir.castShadow = true;
+    scene.add(dir);
+    const fill = new THREE.DirectionalLight(0x93c5fd, 0.75);
+    fill.position.set(-18, 14, -14);
+    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffedd5, 0.65);
+    rim.position.set(-10, 16, 22);
+    scene.add(rim);
+
+    // Ground plane
+    const groundGeo = new THREE.PlaneGeometry(140, 140);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const cng = window.create3DVehicle('cng', 0x00a65a, 202, { id: 'cng_prod_test' });
+    if (cng) {
+      scene.add(cng);
+    }
+
+    renderer.render(scene, camera);
+    window.__RENDER_DONE__ = true;
+  </script>
+</body>
+</html>
