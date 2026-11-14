@@ -1,0 +1,91 @@
+import os
+import subprocess
+import re
+
+html_template = """<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Prod Rickshaw Render</title>
+  <style>
+    body { margin: 0; background: #070b14; overflow: hidden; }
+    #canvas-container { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id='canvas-container'></div>
+  <script src='../assets/three.min.js'></script>
+  <script src='../assets/crossroads-3d.js'></script>
+  <script>
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0e17);
+    const camera = new THREE.PerspectiveCamera(38, 1280 / 720, 0.1, 1000);
+    // CAMERA_SETUP_PLACEHOLDER
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+    renderer.setSize(1280, 720);
+    renderer.setPixelRatio(1.5);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x334155, 1.1);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xfff7ed, 1.4);
+    dir.position.set(12, 22, 15);
+    scene.add(dir);
+    const fill = new THREE.DirectionalLight(0x93c5fd, 0.7);
+    fill.position.set(-15, 10, -10);
+    scene.add(fill);
+
+    const rick = window.create3DVehicle('rickshaw', 0x0284c7, 101, { id: 'test' });
+    if (rick) {
+      scene.add(rick);
+    }
+
+    renderer.render(scene, camera);
+  </script>
+</body>
+</html>"""
+
+views = [
+    ('scratch/sealed_prod_side_profile.png', (0.5, 6.2, 17.5), (0.5, 5.8, 0)),
+    ('scratch/sealed_prod_puller_close.png', (1.8, 7.8, 8.0), (1.0, 7.5, 0)),
+    ('scratch/sealed_prod_passengers_close.png', (-4.8, 6.8, 8.8), (-4.8, 6.5, 0)),
+    ('scratch/sealed_prod_isometric.png', (7.5, 10.5, 11.5), (0.5, 6.0, 0))
+]
+
+chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
+user_data = os.path.abspath('scratch/chrome_tmp_sealed')
+os.makedirs(user_data, exist_ok=True)
+
+for out_name, cam_pos, look_at in views:
+    cam_setup = f'camera.position.set({cam_pos[0]}, {cam_pos[1]}, {cam_pos[2]});\n    camera.lookAt({look_at[0]}, {look_at[1]}, {look_at[2]});'
+    content = html_template.replace('// CAMERA_SETUP_PLACEHOLDER', cam_setup)
+
+    temp_html_path = os.path.abspath(f'scratch/temp_{os.path.basename(out_name)}.html')
+    with open(temp_html_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    out_png = os.path.abspath(out_name)
+    if os.path.exists(out_png):
+        try: os.remove(out_png)
+        except: pass
+
+    cmd = [
+        chrome_path,
+        '--headless=new',
+        '--no-sandbox',
+        '--allow-file-access-from-files',
+        '--enable-webgl',
+        '--use-gl=angle',
+        '--window-size=1280,720',
+        f'--user-data-dir={user_data}',
+        f'--screenshot={out_png}',
+        f'file:///{temp_html_path.replace(os.sep, "/")}'
+    ]
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20)
+        print(f'{out_name}: exists={os.path.exists(out_png)}, size={os.path.getsize(out_png) if os.path.exists(out_png) else 0}')
+    except Exception as e:
+        print(f'Error for {out_name}: {e}')
