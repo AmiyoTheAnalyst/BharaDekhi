@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dhaka Rickshaw Masterpiece Verification</title>
+  <style>
+    body { margin: 0; background: #070b14; overflow: hidden; }
+    #canvas-container { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<script src="../assets/three.min.js"></script>
+<script>
+  const container = document.getElementById('canvas-container');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b1120);
+
+  const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.5, 500);
+  camera.position.set(0.5, 6.2, 17.5);
+  camera.lookAt(0.5, 5.8, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.20;
+  container.appendChild(renderer.domElement);
+
+  // Soft cinematic studio lighting
+  const hemiLight = new THREE.HemisphereLight(0xffedd5, 0x1e293b, 1.15);
+  scene.add(hemiLight);
+
+  const sunLight = new THREE.DirectionalLight(0xfff5ea, 1.45);
+  sunLight.position.set(16, 26, 22);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
+  sunLight.shadow.bias = -0.0005;
+  scene.add(sunLight);
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 0.70);
+  keyLight.position.set(12, 14, 26);
+  scene.add(keyLight);
+
+  const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.60);
+  fillLight.position.set(-20, 16, -18);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
+  rimLight.position.set(0, 14, -24);
+  scene.add(rimLight);
+
+  // Ground plane
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), roadMat);
+  road.rotation.x = -Math.PI / 2;
+  road.receiveShadow = true;
+  scene.add(road);
+
+  // Road markings
+  const lineMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+  for (let i = -5; i <= 5; i++) {
+    const dash = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 0.3), lineMat);
+    dash.rotation.x = -Math.PI / 2;
+    dash.position.set(i * 7.0, 0.02, 6.0);
+    scene.add(dash);
+  }
+
+  // Authentic Procedural Rickshaw Art Texture
+  function getRickshawArtTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Royal blue & peacock turquoise base
+    const grad = ctx.createLinearGradient(0, 0, 512, 512);
+    grad.addColorStop(0, '#1d4ed8');
+    grad.addColorStop(0.35, '#0284c7');
+    grad.addColorStop(0.7, '#0d9488');
+    grad.addColorStop(1, '#1e3a8a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Decorative borders
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 14;
+    ctx.strokeRect(10, 10, 492, 492);
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(20, 20, 472, 472);
+
+    // Golden corner scallops
+    const corners = [[30, 30], [482, 30], [30, 482], [482, 482]];
+    corners.forEach(([cx, cy]) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fill();
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    });
+
+    // Central Bangladeshi Rickshaw Lotus Motif
+    const mx = 256, my = 256;
+    const petalColors = ['#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6'];
+    for (let r = 85; r >= 25; r -= 20) {
+      const petals = 8;
+      for (let i = 0; i < petals; i++) {
+        const ang = (i * Math.PI * 2) / petals + (r * 0.02);
+        const px = mx + Math.cos(ang) * r;
+        const py = my + Math.sin(ang) * r;
+        ctx.beginPath();
+        ctx.arc(px, py, r * 0.45, 0, Math.PI * 2);
+        ctx.fillStyle = petalColors[(i + r / 20) % petalColors.length];
+        ctx.globalAlpha = 0.88;
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1.0;
+
+    // Golden Lotus core
+    ctx.beginPath();
+    ctx.arc(mx, my, 26, 0, Math.PI * 2);
+    ctx.fillStyle = '#fbbf24';
+    ctx.fill();
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  // Authentic Bangladeshi Woven Lungi Pattern Texture
+  function getLungiTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+
+    // Traditional rich indigo-blue base
+    ctx.fillStyle = '#263e6e';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Deep blue weave bands
+    ctx.fillStyle = '#1c2e54';
+    for (let y = 0; y < 256; y += 16) {
+      ctx.fillRect(0, y, 256, 4);
+    }
+    for (let x = 0; x < 256; x += 16) {
+      ctx.fillRect(x, 0, 4, 256);
+    }
+
+    // White & sky-blue pinstripe checks
+    ctx.fillStyle = '#93c5fd';
+    for (let y = 8; y < 256; y += 32) {
+      ctx.fillRect(0, y, 256, 1.5);
+    }
+    for (let x = 8; x < 256; x += 32) {
+      ctx.fillRect(x, 0, 1.5, 256);
+    }
+
+    // Red accent stripes
+    ctx.fillStyle = '#ef4444';
+    for (let y = 0; y < 256; y += 64) {
+      ctx.fillRect(0, y, 256, 1.5);
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 4);
+    return tex;
+  }
+
+  // =========================================================================
+  // MASTER BUILDER: AUTHENTIC DHAKA CYCLE RICKSHAW
+  // =========================================================================
+  function createRealisticDhakaRickshaw() {
+    const group = new THREE.Group();
+
+    // High quality standard materials
+    const frameMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.35, metalness: 0.85 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.18, metalness: 0.95 });
+    const rubberMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.88 });
+    const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.25, metalness: 0.7 });
+    const woodFloorMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.75 });
+    const tealCarriageMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.38, metalness: 0.15 });
+    const seatRedMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.50 });
+    const leatherSeatMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.45 });
+
+    // Authentic South Asian Skin Tones (Warm Complexions)
+    const pullerSkinMat = new THREE.MeshStandardMaterial({ color: 0x9e5c3e, roughness: 0.62, metalness: 0.04 });
+    const maleSkinMat = new THREE.MeshStandardMaterial({ color: 0xa8664a, roughness: 0.62, metalness: 0.04 });
+    const femaleSkinMat = new THREE.MeshStandardMaterial({ color: 0xb07054, roughness: 0.58, metalness: 0.04 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.85 });
+
+    // Authentic Clothing Fabrics
+    const plumShirtMat = new THREE.MeshStandardMaterial({ color: 0x4a2157, roughness: 0.75 }); // Puller plum shirt
+    const maleShirtMat = new THREE.MeshStandardMaterial({ color: 0x674786, roughness: 0.70 }); // Passenger violet shirt
+    const malePantMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.72 });  // Passenger blue pants
+    const femaleBlouseMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.65 });
+    const femaleSareeSkirtMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.60 });
+    const femaleAncholMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65, side: THREE.DoubleSide }); // Golden mustard anchol
+    const brownSandalMat = new THREE.MeshStandardMaterial({ color: 0x45220c, roughness: 0.85 });
+    const pinkSandalMat = new THREE.MeshStandardMaterial({ color: 0xdb2777, roughness: 0.75 });
+    const bindiMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 });
+    const femaleLipMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.4 });
+
+    const hoodArtMat = new THREE.MeshStandardMaterial({
+      map: getRickshawArtTexture(),
+      roughness: 0.42,
+      metalness: 0.08,
+      side: THREE.DoubleSide
+    });
+
+    const lungiMat = new THREE.MeshStandardMaterial({
+      map: getLungiTexture(),
+      roughness: 0.75,
+      side: THREE.DoubleSide
+    });
+
+    // Helper: Spline Tube
+    function createSplineTube(pts, r, mat, segs = 16, radSegs = 8) {
+      const vPts = pts.map(p => Array.isArray(p) ? new THREE.Vector3(p[0], p[1], p[2]) : p);
+      const curve = new THREE.CatmullRomCurve3(vPts);
+      const geo = new THREE.TubeGeometry(curve, segs, r, radSegs, false);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      return mesh;
+    }
+
+    // Helper: Direct bone/tube connecting two 3D coordinates
+    function createBone(pA, pB, rA, rB, mat) {
+      const vA = new THREE.Vector3(pA[0], pA[1], pA[2]);
+      const vB = new THREE.Vector3(pB[0], pB[1], pB[2]);
+      const dist = vA.distanceTo(vB);
+      if (dist < 0.001) return new THREE.Group();
+      const g = new THREE.Group();
+      const cyl = new THREE.Mesh(new THREE.CylinderGeometry(rB, rA, dist, 12), mat);
+      cyl.position.set(0, dist / 2, 0);
+      cyl.castShadow = true;
+      g.add(cyl);
+      const dir = new THREE.Vector3().subVectors(vB, vA).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      g.position.copy(vA);
+      g.quaternion.copy(quat);
+      return g;
+    }
+
+    // -------------------------------------------------------------------------
+    // 1. CHASSIS & WHEELS (COMPACT AUTHENTIC PROPORTIONS MATCHING REFERENCE ART)
+    // -------------------------------------------------------------------------
+    const wheelRadius = 2.80;
+    const tireTubeR = 0.16;
+    const wheelZ = 3.25; // Track width = 6.50
+
+    function buildThinBicycleWheel(radius) {
+      const wheel = new THREE.Group();
+      const tire = new THREE.Mesh(new THREE.TorusGeometry(radius, tireTubeR, 12, 36), rubberMat);
+      tire.castShadow = true;
+      wheel.add(tire);
+
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(radius - tireTubeR * 0.75, tireTubeR * 0.70, 8, 36), chromeMat);
+      wheel.add(rim);
+
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.9, 14), chromeMat);
+      hub.rotation.z = Math.PI / 2;
+      hub.castShadow = true;
+      wheel.add(hub);
+
+      const spokeCount = 28;
+      const spokeGeo = new THREE.CylinderGeometry(0.022, 0.022, radius * 1.95, 4);
+      for (let i = 0; i < spokeCount; i++) {
+        const spoke = new THREE.Mesh(spokeGeo, chromeMat);
+        const ang = (i * Math.PI) / (spokeCount / 2);
+        spoke.rotation.z = ang;
+        wheel.add(spoke);
+      }
+      return wheel;
+    }
+
+    // Front axle at X = +6.40, rear axles at X = -5.50 (wheelbase = 11.90)
+    const frontAxleX = 6.40;
+    const rearAxleX = -5.50;
+
+    const frontWheel = buildThinBicycleWheel(wheelRadius);
+    frontWheel.position.set(frontAxleX, wheelRadius, 0);
+    group.add(frontWheel);
+
+    const rearWheelL = buildThinBicycleWheel(wheelRadius);
+    rearWheelL.position.set(rearAxleX, wheelRadius, -wheelZ);
+    group.add(rearWheelL);
+
+    const rearWheelR = buildThinBicycleWheel(wheelRadius);
+    rearWheelR.position.set(rearAxleX, wheelRadius, wheelZ);
+    group.add(rearWheelR);
+
+    // Realistic curved fenders
+    const fFenderGeo = new THREE.TorusGeometry(wheelRadius + 0.22, 0.22, 8, 28, Math.PI * 0.65);
+    const fFender = new THREE.Mesh(fFenderGeo, frameMat);
+    fFender.rotation.z = Math.PI * 0.66;
+    fFender.position.set(frontAxleX, wheelRadius, 0);
+    group.add(fFender);
+
+    [-wheelZ, wheelZ].forEach(z => {
+      const rFenderGeo = new THREE.TorusGeometry(wheelRadius + 0.22, 0.22, 8, 28, Math.PI * 0.70);
+      const rFender = new THREE.Mesh(rFenderGeo, goldTrimMat);
+      rFender.rotation.z = Math.PI * 0.60;
+      rFender.position.set(rearAxleX, wheelRadius, z);
+      group.add(rFender);
+    });
+
+    // -------------------------------------------------------------------------
+    // 2. AUTHENTIC BICYCLE FRAME (PASSES STRICTLY BELOW CROTCH!)
+    // -------------------------------------------------------------------------
+    const bb = [0.60, 2.45, 0];       // Bottom Bracket (Crank Center)
+    const seatPost = [-0.50, 5.20, 0]; // Seat cluster (low, below crotch!)
+    const headTubeBottom = [4.10, 5.80, 0];
+    const headTubeTop = [3.90, 6.65, 0];
+
+    // Frame tubes: Diamond bicycle triangle (passes at Y = 5.20-5.80, below saddle!)
+    group.add(createBone(bb, seatPost, 0.22, 0.20, frameMat));                // Seat tube
+    group.add(createBone(seatPost, headTubeTop, 0.20, 0.20, frameMat));       // Top tube (PASSES UNDER CROTCH!)
+    group.add(createBone(bb, headTubeBottom, 0.22, 0.20, frameMat));          // Down tube
+    group.add(createBone(headTubeBottom, headTubeTop, 0.25, 0.25, frameMat)); // Head tube
+
+    // Front fork
+    group.add(createBone([frontAxleX, wheelRadius, 0], headTubeBottom, 0.22, 0.20, frameMat));
+
+    // Handlebar Stem & Curved Handlebars (Grips sweep back towards chest!)
+    group.add(createBone(headTubeTop, [3.70, 7.15, 0], 0.18, 0.18, chromeMat));
+
+    const hbarPts = [
+      new THREE.Vector3(2.95, 6.95, -1.45), // Left grip
+      new THREE.Vector3(3.40, 7.10, -1.05),
+      new THREE.Vector3(3.70, 7.15, 0),     // Center stem clamp
+      new THREE.Vector3(3.40, 7.10, 1.05),
+      new THREE.Vector3(2.95, 6.95, 1.45)   // Right grip
+    ];
+    group.add(createSplineTube(hbarPts, 0.12, chromeMat, 20, 8));
+
+    // Rubber handlebar grips
+    [-1.45, 1.45].forEach(gz => {
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.85, 10), rubberMat);
+      grip.rotation.x = Math.PI / 2;
+      grip.position.set(2.95, 6.95, gz);
+      group.add(grip);
+    });
+
+    // Golden brass bell
+    const bell = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 8), goldTrimMat);
+    bell.position.set(3.45, 7.35, 0.85);
+    group.add(bell);
+
+    // Rear chassis frame connecting bike to rear axle
+    [-2.8, 2.8].forEach(z => {
+      group.add(createBone(bb, [rearAxleX, wheelRadius, z], 0.18, 0.18, frameMat));
+      group.add(createBone(seatPost, [rearAxleX, wheelRadius, z], 0.16, 0.16, frameMat));
+    });
+    group.add(createBone([rearAxleX, wheelRadius, -wheelZ], [rearAxleX, wheelRadius, wheelZ], 0.26, 0.26, frameMat));
+
+    // Saddle: Mounted ON TOP of seat post at (-0.50, 5.80, 0)
+    const saddle = new THREE.Mesh(new THREE.BoxGeometry(1.60, 0.35, 1.30), rubberMat);
+    saddle.position.set(-0.50, 5.80, 0);
+    group.add(saddle);
+
+    // -------------------------------------------------------------------------
+    // 3. ELEGANT CARRIAGE TUB & FOLDING HOOD
+    // -------------------------------------------------------------------------
+    const carriageWidth = 6.00;
+    const carriageWallZ = 3.00;
+
+    // Curved Teal Carriage Tub
+    [-1, 1].forEach(side => {
+      const sideShape = new THREE.Shape();
+      sideShape.moveTo(-7.40, 3.60);
+      sideShape.lineTo(-1.60, 3.60);
+      sideShape.lineTo(-1.60, 5.10);
+      sideShape.lineTo(-3.60, 6.10);
+      sideShape.lineTo(-7.40, 6.10);
+      sideShape.closePath();
+
+      const sideGeo = new THREE.ExtrudeGeometry(sideShape, {
+        depth: 0.26,
+        bevelEnabled: true,
+        bevelSegments: 2,
+        steps: 1,
+        bevelSize: 0.08,
+        bevelThickness: 0.08
+      });
+      sideGeo.translate(0, 0, side === 1 ? (carriageWallZ - 0.13) : -(carriageWallZ + 0.13));
+      const sideWall = new THREE.Mesh(sideGeo, tealCarriageMat);
+      sideWall.castShadow = true;
+      group.add(sideWall);
+
+      // Curved wooden armrest rail
+      const armPts = [
+        new THREE.Vector3(-7.30, 6.25, side * carriageWallZ),
+        new THREE.Vector3(-4.80, 7.00, side * carriageWallZ),
+        new THREE.Vector3(-2.00, 5.50, side * carriageWallZ)
+      ];
+      group.add(createSplineTube(armPts, 0.14, woodFloorMat, 16, 8));
+    });
+
+    // Wooden Footboard
+    const footboard = new THREE.Mesh(new THREE.BoxGeometry(3.20, 0.32, carriageWidth - 0.2), woodFloorMat);
+    footboard.position.set(-2.60, 3.65, 0);
+    footboard.castShadow = true;
+    group.add(footboard);
+
+    // Bench Cushion (Y = 4.80)
+    const benchPad = new THREE.Mesh(new THREE.BoxGeometry(3.20, 0.55, carriageWidth - 0.2), leatherSeatMat);
+    benchPad.position.set(-5.60, 4.80, 0);
+    benchPad.castShadow = true;
+    group.add(benchPad);
+
+    // Red Backrest (Top at Y = 8.15)
+    const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.75, 3.40, carriageWidth - 0.2), seatRedMat);
+    backrest.position.set(-6.90, 6.50, 0);
+    backrest.castShadow = true;
+    group.add(backrest);
+
+    // Rear Rickshaw Art Backplate
+    const backArtPlate = new THREE.Mesh(new THREE.BoxGeometry(0.22, 4.20, carriageWidth + 0.1), hoodArtMat);
+    backArtPlate.position.set(-7.40, 6.10, 0);
+    backArtPlate.castShadow = true;
+    group.add(backArtPlate);
+
+    // Authentic Folding Canopy Hood (Snug 1.1 Headroom, NO stilt poles!)
+    const canopyCenterX = -5.00;
+    const canopyBaseY = 8.00;
+    const canopyRx = 3.20;
+    const canopyRy = 3.20;
+    const canopyHalfW = 3.15;
+
+    const segs = 20;
+    const posArr = [];
+    const uvArr = [];
+    const idxArr = [];
+    const startAng = Math.PI * 0.12;
+    const endAng = Math.PI * 0.94;
+    for (let s = 0; s <= segs; s++) {
+      const u = s / segs;
+      const ang = startAng + (endAng - startAng) * u;
+      const x = canopyCenterX + Math.cos(ang) * canopyRx;
+      const y = canopyBaseY + Math.sin(ang) * canopyRy;
+      posArr.push(x, y, -canopyHalfW);
+      posArr.push(x, y, canopyHalfW);
+      uvArr.push(u, 0);
+      uvArr.push(u, 1);
+      if (s < segs) {
+        const v = s * 2;
+        idxArr.push(v, v + 1, v + 2);
+        idxArr.push(v + 1, v + 3, v + 2);
+      }
+    }
+    const canopyGeo = new THREE.BufferGeometry();
+    canopyGeo.setAttribute('position', new THREE.Float32BufferAttribute(posArr, 3));
+    canopyGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvArr, 2));
+    canopyGeo.setIndex(idxArr);
+    canopyGeo.computeVertexNormals();
+
+    const canopyMesh = new THREE.Mesh(canopyGeo, hoodArtMat);
+    canopyMesh.castShadow = true;
+    group.add(canopyMesh);
+
+    // Scissor Struts at rear corner
+    [-1, 1].forEach(side => {
+      const sz = side * (canopyHalfW - 0.08);
+      const hingePt = [-6.80, 6.40, side * carriageWallZ];
+      const rib1 = [-6.50, canopyBaseY + canopyRy * 0.65, sz];
+      const rib2 = [canopyCenterX, canopyBaseY + canopyRy, sz];
+      const rib3 = [canopyCenterX + Math.cos(startAng) * canopyRx, canopyBaseY + Math.sin(startAng) * canopyRy, sz];
+
+      const hingeBracket = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.32, 10), chromeMat);
+      hingeBracket.rotation.x = Math.PI / 2;
+      hingeBracket.position.set(hingePt[0], hingePt[1], hingePt[2]);
+      group.add(hingeBracket);
+
+      group.add(createSplineTube([hingePt, rib1], 0.07, chromeMat, 8, 6));
+      group.add(createSplineTube([hingePt, rib2], 0.07, chromeMat, 8, 6));
+      group.add(createSplineTube([hingePt, rib3], 0.07, chromeMat, 8, 6));
+    });
+
+    // Front Rim gold trim & tassels
+    const frontRimX = canopyCenterX + Math.cos(startAng) * canopyRx;
+    const frontRimY = canopyBaseY + Math.sin(startAng) * canopyRy;
+    group.add(createBone([frontRimX, frontRimY, -canopyHalfW], [frontRimX, frontRimY, canopyHalfW], 0.10, 0.10, goldTrimMat));
+
+    const tasselCount = 13;
+    for (let t = 0; t < tasselCount; t++) {
+      const tz = -canopyHalfW + 0.25 + (t * (canopyHalfW * 2 - 0.50) / (tasselCount - 1));
+      const tassel = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.20, 8), goldTrimMat);
+      tassel.rotation.z = Math.PI;
+      tassel.position.set(frontRimX, frontRimY - 0.10, tz);
+      group.add(tassel);
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. REALISTIC ADULT HUMAN HEAD BUILDER (MATCHING REFERENCE PROFILE!)
+    // -------------------------------------------------------------------------
+    function buildRealisticAdultHead(skinMat, isFemale, mustache) {
+      const headGroup = new THREE.Group();
+
+      // Cranium / Face structure
+      const craniumGeo = new THREE.SphereGeometry(0.60, 24, 20);
+      craniumGeo.scale(0.86, 1.08, 0.92);
+      const cranium = new THREE.Mesh(craniumGeo, skinMat);
+      cranium.castShadow = true;
+      headGroup.add(cranium);
+
+      // Sculpted Jaw and Chin
+      const jaw = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.25, 0.45, 12), skinMat);
+      jaw.position.set(0.12, -0.38, 0);
+      jaw.rotation.z = 0.25;
+      headGroup.add(jaw);
+
+      const chin = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), skinMat);
+      chin.position.set(0.26, -0.52, 0);
+      headGroup.add(chin);
+
+      // Natural contoured hairline & hair cap
+      const hairGeo = new THREE.SphereGeometry(0.62, 24, 20);
+      hairGeo.scale(0.88, 1.10, 0.94);
+      const hair = new THREE.Mesh(hairGeo, hairMat);
+      hair.position.set(-0.06, 0.06, 0);
+      headGroup.add(hair);
+
+      // Defined ears
+      [-0.52, 0.52].forEach(ez => {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), skinMat);
+        ear.scale.set(0.35, 0.75, 0.45);
+        ear.position.set(-0.02, -0.04, ez);
+        headGroup.add(ear);
+      });
+
+      // Sculpted 3D nose profile (Side profile match!)
+      const noseBridge = new THREE.Mesh(new THREE.ConeGeometry(0.048, 0.26, 8), skinMat);
+      noseBridge.rotation.z = -Math.PI / 2 + 0.18;
+      noseBridge.position.set(0.52, 0.02, 0);
+      headGroup.add(noseBridge);
+
+      const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.052, 8, 8), skinMat);
+      noseTip.position.set(0.58, -0.04, 0);
+      headGroup.add(noseTip);
+
+      [-0.08, 0.08].forEach(nz => {
+        const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.032, 6, 6), skinMat);
+        nostril.position.set(0.54, -0.06, nz);
+        headGroup.add(nostril);
+      });
+
+      // Almond eyes & defined brows (Visible on both sides!)
+      [-0.22, 0.22].forEach(ez => {
+        const eyeLine = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.035, 0.16), hairMat);
+        eyeLine.position.set(0.50, 0.08, ez);
+        headGroup.add(eyeLine);
+
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.038, 0.18), hairMat);
+        brow.position.set(0.48, 0.18, ez);
+        brow.rotation.z = -0.15;
+        headGroup.add(brow);
+      });
+
+      // Natural lips
+      const lipMat = isFemale ? femaleLipMat : new THREE.MeshStandardMaterial({ color: 0x8a4734, roughness: 0.6 });
+      const lips = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.048, 0.18), lipMat);
+      lips.position.set(0.52, -0.18, 0);
+      headGroup.add(lips);
+
+      // Traditional Bangladeshi mustache for adult males
+      if (mustache) {
+        const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.42, 8), hairMat);
+        stache.rotation.x = Math.PI / 2;
+        stache.position.set(0.55, -0.11, 0);
+        headGroup.add(stache);
+      }
+
+      // Traditional Bindi & Hair Bun (Khopa) for female passenger
+      if (isFemale) {
+        const bindi = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.02, 12), bindiMat);
+        bindi.rotation.z = Math.PI / 2;
+        bindi.position.set(0.55, 0.15, 0);
+        headGroup.add(bindi);
+
+        const khopa = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 12), hairMat);
+        khopa.scale.set(0.8, 1.0, 1.1);
+        khopa.position.set(-0.52, -0.12, 0);
+        headGroup.add(khopa);
+      }
+
+      return headGroup;
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. RICKSHAW PULLER (LEAN ATHLETIC BUILD, BENT ELBOWS, NATURAL POSTURE)
+    // -------------------------------------------------------------------------
+    const pullerGroup = new THREE.Group();
+
+    // Rotating Pedal Crank
+    const crankR = 1.05;
+    const crankGroup = new THREE.Group();
+    crankGroup.position.set(bb[0], bb[1], bb[2]);
+
+    const crankAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 2.0, 10), chromeMat);
+    crankAxle.rotation.x = Math.PI / 2;
+    crankGroup.add(crankAxle);
+
+    const chainring = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.08, 18), chromeMat);
+    chainring.rotation.x = Math.PI / 2;
+    chainring.position.z = 0.95;
+    crankGroup.add(chainring);
+
+    const crankArmL = new THREE.Mesh(new THREE.BoxGeometry(0.22, crankR, 0.12), chromeMat);
+    crankArmL.position.set(0, crankR / 2, -0.85);
+    crankGroup.add(crankArmL);
+
+    const pedalLGroup = new THREE.Group();
+    pedalLGroup.position.set(0, crankR, -0.85);
+    const pedalLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.18, 0.45), rubberMat);
+    pedalLMesh.castShadow = true;
+    pedalLGroup.add(pedalLMesh);
+    crankGroup.add(pedalLGroup);
+
+    const crankArmR = new THREE.Mesh(new THREE.BoxGeometry(0.22, crankR, 0.12), chromeMat);
+    crankArmR.position.set(0, -crankR / 2, 0.85);
+    crankGroup.add(crankArmR);
+
+    const pedalRGroup = new THREE.Group();
+    pedalRGroup.position.set(0, -crankR, 0.85);
+    const pedalRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.18, 0.45), rubberMat);
+    pedalRMesh.castShadow = true;
+    pedalRGroup.add(pedalRMesh);
+    crankGroup.add(pedalRGroup);
+
+    group.add(crankGroup);
+
+    // Torso: Athletic collared plum shirt (#4a2157)
+    // Seated on saddle at (-0.50, 5.80), chest leaning forward naturally ~22°
+    const torsoMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.85, 0.98, 2.7, 16),
+      plumShirtMat
+    );
+    torsoMesh.position.set(-0.05, 7.35, 0);
+    torsoMesh.rotation.z = -0.38;
+    torsoMesh.castShadow = true;
+    pullerGroup.add(torsoMesh);
+
+    // Shirt collar
+    const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.44, 0.22, 14), plumShirtMat);
+    collar.position.set(0.52, 8.65, 0);
+    collar.rotation.z = -0.38;
+    pullerGroup.add(collar);
+
+    // Clean neck
+    const pullerNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.50, 12), pullerSkinMat);
+    pullerNeck.position.set(0.62, 8.85, 0);
+    pullerNeck.rotation.z = -0.30;
+    pullerGroup.add(pullerNeck);
+
+    // Head
+    const pullerHead = buildRealisticAdultHead(pullerSkinMat, false, true);
+    pullerHead.position.set(0.80, 9.45, 0);
+    pullerGroup.add(pullerHead);
+
+    // Puller Arms: Continuous spline TubeGeometry with RELAXED BENT ELBOWS!
+    // Reaching from shoulders to handlebar grips at (2.95, 6.95, ±1.45)
+    [-1, 1].forEach(side => {
+      const shoulderPt = [0.25, 8.35, side * 1.05];
+      const sleeveEnd = [0.75, 7.85, side * 1.25];
+      const elbowPt = [1.55, 7.15, side * 1.55];  // Natural bent elbow!
+      const wristPt = [2.70, 6.98, side * 1.48];
+      const gripPt = [2.95, 6.95, side * 1.45];
+
+      // Flared short sleeve
+      pullerGroup.add(createSplineTube([shoulderPt, sleeveEnd], 0.35, plumShirtMat, 8, 8));
+
+      // Continuous muscular bare arm
+      pullerGroup.add(createSplineTube([sleeveEnd, elbowPt, wristPt, gripPt], 0.22, pullerSkinMat, 18, 8));
+
+      // Hand grasping handlebar
+      const hand = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.26, 0.32), pullerSkinMat);
+      hand.position.set(2.95, 6.95, side * 1.45);
+      hand.rotation.z = -0.15;
+      pullerGroup.add(hand);
+    });
+
+    // Authentic Bangladeshi Lungi Wrap & Draped Pleats
+    const lenThigh = 2.30;
+    const lenShin = 2.35;
+    const pullerLegs = [];
+
+    // Pelvis wraps around the saddle at (-0.50, 6.15, 0)
+    const lungiPelvisWrap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.98, 1.15, 1.25, 16),
+      lungiMat
+    );
+    lungiPelvisWrap.position.set(-0.35, 6.15, 0);
+    lungiPelvisWrap.rotation.z = -0.22;
+    pullerGroup.add(lungiPelvisWrap);
+
+    // Dynamic Pedaling Legs
+    [-1, 1].forEach(side => {
+      const hipX = -0.40;
+      const hipY = 5.95;
+      const legZ = side * 0.85;
+
+      const hipPivot = new THREE.Group();
+      hipPivot.position.set(hipX, hipY, legZ);
+      pullerGroup.add(hipPivot);
+
+      // Thigh modeled directly AS the clothed folded lungi!
+      const lungiThigh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.30, 0.38, lenThigh, 14),
+        lungiMat
+      );
+      lungiThigh.position.set(0, -lenThigh / 2, 0);
+      lungiThigh.castShadow = true;
+      hipPivot.add(lungiThigh);
+
+      // Folded Lungi Hem at knee
+      const lungiHem = new THREE.Mesh(
+        new THREE.TorusGeometry(0.32, 0.05, 6, 14),
+        lungiMat
+      );
+      lungiHem.rotation.x = Math.PI / 2;
+      lungiHem.position.set(0, -lenThigh, 0);
+      hipPivot.add(lungiHem);
+
+      const kneePivot = new THREE.Group();
+      kneePivot.position.set(0, -lenThigh, 0);
+      hipPivot.add(kneePivot);
+
+      // Muscular bare calf
+      const calfMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.18, 0.26, lenShin, 12),
+        pullerSkinMat
+      );
+      calfMesh.position.set(0, -lenShin / 2, 0);
+      calfMesh.castShadow = true;
+      kneePivot.add(calfMesh);
+
+      const footPivot = new THREE.Group();
+      footPivot.position.set(0, -lenShin, 0);
+      kneePivot.add(footPivot);
+
+      // Leather sandal (Chappal)
+      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.20, 0.16, 0.48), brownSandalMat);
+      sandal.position.set(0.25, -0.08, 0);
+      footPivot.add(sandal);
+
+      const strap = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.52), brownSandalMat);
+      strap.position.set(0.15, 0.04, 0);
+      footPivot.add(strap);
+
+      pullerLegs.push({
+        side: side,
+        hipX: hipX,
+        hipY: hipY,
+        hipPivot: hipPivot,
+        kneePivot: kneePivot,
+        footPivot: footPivot
+      });
+    });
+
+    function updatePullerPedaling(phase) {
+      if (crankGroup) {
+        crankGroup.rotation.z = phase;
+        pedalLGroup.rotation.z = -phase;
+        pedalRGroup.rotation.z = -phase;
+      }
+
+      pullerLegs.forEach(leg => {
+        const legAngle = leg.side === -1 ? phase : phase + Math.PI;
+        const pedalX = bb[0] - Math.sin(legAngle) * crankR;
+        const pedalY = bb[1] + Math.cos(legAngle) * crankR;
+
+        const dx = pedalX - leg.hipX;
+        const dy = pedalY - leg.hipY;
+        const dist = Math.min(lenThigh + lenShin - 0.02, Math.max(0.5, Math.sqrt(dx * dx + dy * dy)));
+
+        const baseAngle = Math.atan2(dy, dx);
+        const cosAlpha = (lenThigh * lenThigh + dist * dist - lenShin * lenShin) / (2 * lenThigh * dist);
+        const alpha = Math.acos(Math.max(-1, Math.min(1, cosAlpha)));
+
+        const thighAngle = baseAngle + alpha;
+        const kneeX = leg.hipX + lenThigh * Math.cos(thighAngle);
+        const kneeY = leg.hipY + lenThigh * Math.sin(thighAngle);
+        const shinAngle = Math.atan2(pedalY - kneeY, pedalX - kneeX);
+
+        leg.hipPivot.rotation.set(0, 0, thighAngle - (-Math.PI / 2));
+        leg.kneePivot.rotation.set(0, 0, shinAngle - thighAngle);
+        leg.footPivot.rotation.set(0, 0, -(shinAngle - (-Math.PI / 2)));
+      });
+    }
+
+    group.add(pullerGroup);
+    group.userData.updatePedaling = updatePullerPedaling;
+    updatePullerPedaling(0);
+
+    // -------------------------------------------------------------------------
+    // 6. SEATED PASSENGERS (ADULT PROPORTIONS, ELEGANT POSTURE, ZERO GAPS)
+    // -------------------------------------------------------------------------
+    const passHipX = -5.80;
+    const passHipY = 5.25;
+    const mZ = -1.30;
+    const fZ = 1.30;
+
+    // --- 6.1 MALE PASSENGER (Z = -1.30, Left side) ---
+    const maleGroup = new THREE.Group();
+    maleGroup.position.set(passHipX, passHipY, mZ);
+
+    const mTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.98, 2.7, 16), maleShirtMat);
+    mTorso.position.set(0.05, 1.35, 0);
+    mTorso.rotation.z = 0.06;
+    maleGroup.add(mTorso);
+
+    const mCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.44, 0.22, 14), maleShirtMat);
+    mCollar.position.set(0.02, 2.75, 0);
+    maleGroup.add(mCollar);
+
+    const mNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.30, 0.48, 12), maleSkinMat);
+    mNeck.position.set(0.02, 3.05, 0);
+    maleGroup.add(mNeck);
+
+    const mHead = buildRealisticAdultHead(maleSkinMat, false, true);
+    mHead.position.set(0.05, 3.65, 0);
+    maleGroup.add(mHead);
+
+    // Male Trouser Legs: Continuous curved spline tube from hip -> knee -> shin -> foot
+    [-0.52, 0.52].forEach(tz => {
+      const legPts = [
+        [-0.10, 0.0, tz],
+        [1.20, 0.05, tz],
+        [2.50, 0.0, tz],
+        [2.65, -0.75, tz],
+        [2.70, -1.55, tz]
+      ];
+      maleGroup.add(createSplineTube(legPts, 0.30, malePantMat, 20, 8));
+
+      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.16, 0.50), brownSandalMat);
+      sandal.position.set(2.85, -1.58, tz);
+      maleGroup.add(sandal);
+    });
+
+    // Male Arms: Resting naturally with hands flat on top of knees!
+    [-0.80, 0.80].forEach(az => {
+      const armPts = [
+        [0.05, 2.35, az],
+        [0.85, 1.25, az * 0.95],
+        [1.85, 0.50, az * 0.68],
+        [2.45, 0.22, az * 0.65]
+      ];
+      maleGroup.add(createSplineTube(armPts, 0.19, maleSkinMat, 18, 8));
+
+      const sleevePts = [[0.05, 2.35, az], [0.55, 1.80, az * 0.98]];
+      maleGroup.add(createSplineTube(sleevePts, 0.28, maleShirtMat, 8, 8));
+
+      const hand = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.10, 0.30), maleSkinMat);
+      hand.position.set(2.45, 0.26, az * 0.65);
+      maleGroup.add(hand);
+    });
+
+    group.add(maleGroup);
+
+    // --- 6.2 FEMALE PASSENGER (Z = +1.30, Right side) ---
+    const femaleGroup = new THREE.Group();
+    femaleGroup.position.set(passHipX, passHipY, fZ);
+
+    const fTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.80, 0.92, 2.6, 16), femaleBlouseMat);
+    fTorso.position.set(0.05, 1.30, 0);
+    fTorso.rotation.z = 0.06;
+    femaleGroup.add(fTorso);
+
+    const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.48, 12), femaleSkinMat);
+    fNeck.position.set(0.02, 3.00, 0);
+    femaleGroup.add(fNeck);
+
+    const fHead = buildRealisticAdultHead(femaleSkinMat, true, false);
+    fHead.position.set(0.05, 3.60, 0);
+    femaleGroup.add(fHead);
+
+    // Authentically draped Saree Anchol / Ghomta (Golden-Ochre #d97706)
+    // Veils the crown, temples, and back of neck, framing her BLACK HAIR and FACE OPENLY!
+    const ghomtaCrownPts = [
+      new THREE.Vector3(-0.35, 3.25, -0.60),
+      new THREE.Vector3(-0.15, 4.25, -0.42),
+      new THREE.Vector3(0.08, 4.35, 0),       // Apex above forehead
+      new THREE.Vector3(-0.15, 4.25, 0.42),
+      new THREE.Vector3(-0.35, 3.25, 0.60)
+    ];
+    femaleGroup.add(new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ghomtaCrownPts), 20, 0.11, 8, false),
+      femaleAncholMat
+    ));
+
+    // Draped cowl behind head & shoulders (open at front face)
+    const ghomtaBackGeo = new THREE.SphereGeometry(0.66, 20, 16, Math.PI * 0.40, Math.PI * 1.20, 0, Math.PI * 0.70);
+    const ghomtaBack = new THREE.Mesh(ghomtaBackGeo, femaleAncholMat);
+    ghomtaBack.position.set(-0.12, 3.65, 0);
+    ghomtaBack.scale.set(0.95, 1.08, 1.00);
+    femaleGroup.add(ghomtaBack);
+
+    // Soft drape falling down the back of neck onto shoulders
+    const ghomtaDrapeGeo = new THREE.CylinderGeometry(0.78, 1.02, 1.5, 16, 1, true, Math.PI * 0.45, Math.PI * 1.10);
+    const ghomtaDrape = new THREE.Mesh(ghomtaDrapeGeo, femaleAncholMat);
+    ghomtaDrape.position.set(-0.24, 2.50, 0);
+    femaleGroup.add(ghomtaDrape);
+
+    // Diagonal Saree Anchol across chest (from right waist over left shoulder)
+    const ancholChestPts = [
+      new THREE.Vector3(0.55, 0.80, 0.60),
+      new THREE.Vector3(0.65, 1.50, 0.18),
+      new THREE.Vector3(0.32, 2.35, -0.42),
+      new THREE.Vector3(-0.25, 2.25, -0.60)
+    ];
+    femaleGroup.add(new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ancholChestPts), 16, 0.20, 8, false),
+      femaleAncholMat
+    ));
+
+    // Unified Sky-Blue Saree Skirt with smooth curved drape over knees
+    const sareeCurvePts = [
+      [-0.10, 0.0, 0],
+      [1.20, 0.05, 0],
+      [2.50, 0.0, 0],
+      [2.65, -0.75, 0],
+      [2.70, -1.55, 0]
+    ];
+    const sareeSkirtTube = createSplineTube(sareeCurvePts, 0.84, femaleSareeSkirtMat, 20, 14);
+    sareeSkirtTube.scale.set(1.0, 0.70, 1.05);
+    femaleGroup.add(sareeSkirtTube);
+
+    // Golden hem border at bottom of saree
+    const hemBorder = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.15, 1.75), goldTrimMat);
+    hemBorder.position.set(2.60, -1.50, 0);
+    femaleGroup.add(hemBorder);
+
+    // Traditional pink slippers
+    [-0.42, 0.42].forEach(tz => {
+      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.20, 0.15, 0.45), pinkSandalMat);
+      sandal.position.set(2.75, -1.58, tz);
+      femaleGroup.add(sandal);
+    });
+
+    // Female Arms: Resting softly in lap with colorful glass bangles
+    [-0.75, 0.75].forEach(az => {
+      const armPts = [
+        [0.05, 2.30, az],
+        [0.80, 1.20, az * 0.85],
+        [1.65, 0.50, az * 0.38],
+        [2.20, 0.35, 0]
+      ];
+      femaleGroup.add(createSplineTube(armPts, 0.17, femaleSkinMat, 18, 8));
+
+      femaleGroup.add(createSplineTube([[0.05, 2.30, az], [0.50, 1.75, az * 0.90]], 0.26, femaleBlouseMat, 8, 8));
+
+      // Colorful glass bangles
+      [0xdc2626, 0xf59e0b, 0x16a34a].forEach((bColor, bIdx) => {
+        const bangle = new THREE.Mesh(
+          new THREE.TorusGeometry(0.14, 0.028, 6, 14),
+          new THREE.MeshStandardMaterial({ color: bColor, roughness: 0.25, metalness: 0.6 })
+        );
+        bangle.position.set(1.80 + bIdx * 0.07, 0.44, az * 0.24);
+        bangle.rotation.y = Math.PI / 2;
+        femaleGroup.add(bangle);
+      });
+    });
+
+    // Folded hands in lap
+    const fHands = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.14, 0.42), femaleSkinMat);
+    fHands.position.set(2.25, 0.36, 0);
+    femaleGroup.add(fHands);
+
+    group.add(femaleGroup);
+
+    return group;
+  }
+
+  const rickshaw = createRealisticDhakaRickshaw();
+  scene.add(rickshaw);
+
+  renderer.render(scene, camera);
+</script>
+</body>
+</html>
