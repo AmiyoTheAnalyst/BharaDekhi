@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset='utf-8'>
-  <title>Compact Bangladeshi CNG Test</title>
+  <title>Compact Bangladeshi CNG Interior Perfection Test</title>
   <style>
     body { margin: 0; background: #070b14; overflow: hidden; }
     #canvas-container { width: 100vw; height: 100vh; }
@@ -32,25 +32,21 @@
       ctx.fillStyle = '#00a65a';
       ctx.fillRect(0, 0, 1024, 512);
 
-      // Yellow dashed border stitching
       ctx.strokeStyle = '#facc15';
       ctx.lineWidth = 8;
       ctx.setLineDash([16, 12]);
       ctx.strokeRect(20, 20, 984, 472);
 
-      // Wheel arch cutout guideline
       const archCenterX = isLeft ? 680 : 344;
       ctx.beginPath();
       ctx.arc(archCenterX, 512, 220, Math.PI, 0, false);
       ctx.stroke();
 
-      // Slanted banners
       ctx.save();
       const slantAngle = isLeft ? -0.05 : 0.05;
       ctx.translate(isLeft ? 480 : 544, 115);
       ctx.rotate(slantAngle);
 
-      // Upper Banner: White strip with ★ FOR HIRE ★
       const bW = 680;
       const bH = 74;
       ctx.fillStyle = '#ffffff';
@@ -66,7 +62,6 @@
       ctx.textBaseline = 'middle';
       ctx.fillText('★ FOR HIRE ★', 0, 2);
 
-      // Lower Banner: Bright Neon-Yellow strip with ONE PARIBAHAN
       ctx.translate(0, 84);
       const b2W = 660;
       const b2H = 70;
@@ -107,7 +102,6 @@
       ctx.setLineDash([16, 12]);
       ctx.strokeRect(18, 18, 476, 476);
 
-      // Tricolor accent band
       const bandY = 220;
       const bandH = 36;
 
@@ -182,8 +176,47 @@
     }
 
     // =========================================================================
-    // HELPER BUILDERS: Splines & Anatomy
+    // HELPER BUILDERS: Splines & Distinct Anatomy
     // =========================================================================
+    
+    function createLoftedOrganMesh(stations, radSegs = 20, mat) {
+      const numStations = stations.length;
+      const pos = [];
+      const uvs = [];
+      const indices = [];
+
+      for (let s = 0; s < numStations; s++) {
+        const st = stations[s];
+        const u = s / (numStations - 1);
+        for (let j = 0; j <= radSegs; j++) {
+          const theta = (j / radSegs) * Math.PI * 2;
+          const x = st.center[0] + Math.cos(theta) * st.rx;
+          const y = st.center[1];
+          const z = st.center[2] + Math.sin(theta) * st.rz;
+          pos.push(x, y, z);
+          uvs.push(j / radSegs, u);
+        }
+      }
+
+      for (let s = 0; s < numStations - 1; s++) {
+        for (let j = 0; j < radSegs; j++) {
+          const a = s * (radSegs + 1) + j;
+          const b = (s + 1) * (radSegs + 1) + j;
+          const c = (s + 1) * (radSegs + 1) + j + 1;
+          const d = s * (radSegs + 1) + j + 1;
+          indices.push(a, b, d);
+          indices.push(b, c, d);
+        }
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+      return new THREE.Mesh(geo, mat);
+    }
+
     function createContinuousSplineLimb(pts, radii, material, tubSteps = 16, radSteps = 10) {
       const curvePts = pts.map(p => new THREE.Vector3(p[0], p[1], p[2]));
       const curve = new THREE.CatmullRomCurve3(curvePts);
@@ -246,7 +279,7 @@
       return mesh;
     }
 
-    function buildRealisticAdultHead(skinMat, hairMat, isFemale, mustache) {
+    function buildRealisticAdultHead(skinMat, hairMat, isFemale, mustache, options = {}) {
       const headGroup = new THREE.Group();
 
       const craniumGeo = new THREE.SphereGeometry(0.56, 20, 18);
@@ -255,8 +288,13 @@
       cranium.castShadow = true;
       headGroup.add(cranium);
 
+      // Varied hairstyle for passenger vs driver
       const hairGeo = new THREE.SphereGeometry(0.58, 20, 18);
-      hairGeo.scale(0.87, 1.10, 0.92);
+      if (options.isYounger) {
+        hairGeo.scale(0.88, 1.12, 0.92);
+      } else {
+        hairGeo.scale(0.87, 1.10, 0.92);
+      }
       const hair = new THREE.Mesh(hairGeo, hairMat);
       hair.position.set(-0.06, 0.06, 0);
       headGroup.add(hair);
@@ -293,9 +331,10 @@
         eyeLine.position.set(0.50, 0.08, ez);
         headGroup.add(eyeLine);
 
+        const browAngle = options.isYounger ? -0.05 : -0.15;
         const brow = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.038, 0.17), hairMat);
         brow.position.set(0.46, 0.18, ez);
-        brow.rotation.z = -0.15;
+        brow.rotation.z = browAngle;
         headGroup.add(brow);
       });
 
@@ -304,6 +343,7 @@
       lips.position.set(0.50, -0.18, 0);
       headGroup.add(lips);
 
+      // Mustache ONLY added when explicitly true (Driver has it; Male Passenger DOES NOT)
       if (mustache) {
         const stache = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.40, 8), hairMat);
         stache.rotation.x = Math.PI / 2;
@@ -334,7 +374,7 @@
       const cngGroup = new THREE.Group();
       cngGroup.userData.wheels = [];
 
-      // Authentic Dhaka Materials
+      // Authentic Materials
       const cngGreenMat = new THREE.MeshStandardMaterial({
         color: 0x00a65a, // Dhaka Emerald Green
         roughness: 0.30,
@@ -495,7 +535,6 @@
       floorPan.position.set(-1.7, 1.45, 0);
       cngGroup.add(floorPan);
 
-      // Tapered driver floorboard
       const frontFloorShape = new THREE.Shape();
       frontFloorShape.moveTo(3.4, -3.8);
       frontFloorShape.lineTo(5.2, -1.8);
@@ -508,7 +547,6 @@
       frontFloorMesh.position.set(0, 1.61, 0);
       cngGroup.add(frontFloorMesh);
 
-      // Side step sills with yellow stitched edge
       [-3.95, 3.95].forEach(sz => {
         const sill = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.28, 0.16), cngGreenMat);
         sill.position.set(-0.5, 1.55, sz);
@@ -519,12 +557,10 @@
         cngGroup.add(sillStitch);
       });
 
-      // Rear bumper
       const rearBumper = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.65, 8.2), chassisMat);
       rearBumper.position.set(-7.45, 1.55, 0);
       cngGroup.add(rearBumper);
 
-      // Mudflaps
       [-rearTrackHalfW, rearTrackHalfW].forEach(mz => {
         const rMudflap = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.1, 1.3), chassisMat);
         rMudflap.position.set(-5.6, 1.25, mz);
@@ -543,7 +579,6 @@
       const panelMidY = 3.80;
       const panelZ = 3.96;
 
-      // Left Quarter Panel
       const leftPanel = new THREE.Mesh(new THREE.PlaneGeometry(panelLen, panelH), leftLiveryMat);
       leftPanel.position.set(panelMidX, panelMidY, -panelZ);
       leftPanel.rotation.y = Math.PI;
@@ -553,7 +588,6 @@
       leftInner.position.set(panelMidX, panelMidY, -panelZ + 0.02);
       cngGroup.add(leftInner);
 
-      // Right Quarter Panel
       const rightPanel = new THREE.Mesh(new THREE.PlaneGeometry(panelLen, panelH), rightLiveryMat);
       rightPanel.position.set(panelMidX, panelMidY, panelZ);
       cngGroup.add(rightPanel);
@@ -563,7 +597,6 @@
       rightInner.rotation.y = Math.PI;
       cngGroup.add(rightInner);
 
-      // Fuel cap
       [-panelZ, panelZ].forEach(sz => {
         const fuelCap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.10, 16), chassisMat);
         fuelCap.rotation.x = Math.PI / 2;
@@ -571,12 +604,10 @@
         cngGroup.add(fuelCap);
       });
 
-      // Solid Rear Wall
       const rearWall = new THREE.Mesh(new THREE.BoxGeometry(0.32, 4.40, 7.90), cngGreenMat);
       rearWall.position.set(-7.25, 3.80, 0);
       cngGroup.add(rearWall);
 
-      // Rear tail lamps (red + amber)
       [-3.1, 3.1].forEach(tz => {
         const rLight = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.32, 0.75), new THREE.MeshStandardMaterial({
           color: 0xdc2626,
@@ -595,7 +626,6 @@
         cngGroup.add(aLight);
       });
 
-      // Bengali Number Plate: Dhaka Metro
       const plate = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.85, 2.4), new THREE.MeshStandardMaterial({ color: 0x047857 }));
       plate.position.set(-7.42, 2.65, 0);
       cngGroup.add(plate);
@@ -603,12 +633,10 @@
       // -----------------------------------------------------------------------
       // 4. CABIN ENTRYWAYS & DRIVER PARTITION (NO YELLOW PILLAR)
       // -----------------------------------------------------------------------
-      // Half-height green divider wall behind driver seat
       const dividerWall = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.80, 7.80), cngGreenMat);
       dividerWall.position.set(-0.65, 3.00, 0);
       cngGroup.add(dividerWall);
 
-      // Driver backrest pad mounted on front of divider
       const driverBackrest = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.40, 2.20), new THREE.MeshStandardMaterial({
         color: 0x27272a,
         roughness: 0.70
@@ -616,7 +644,6 @@
       driverBackrest.position.set(-0.46, 3.80, 0);
       cngGroup.add(driverBackrest);
 
-      // Thin black tubular arch supporting center roof
       const roofArchCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(-0.65, 4.40, -3.90),
         new THREE.Vector3(-0.65, 7.80, -3.90),
@@ -628,7 +655,6 @@
       const roofArchMesh = new THREE.Mesh(roofArchGeo, chassisMat);
       cngGroup.add(roofArchMesh);
 
-      // Festive Bunting Flags along upper passenger doorway
       [-3.95, 3.95].forEach(sz => {
         const flagColors = [0xef4444, 0xfacc15, 0x22c55e, 0x3b82f6, 0xf97316];
         const numFlags = 7;
@@ -655,21 +681,16 @@
       });
 
       // -----------------------------------------------------------------------
-      // 5. SEAMLESS CURVED FRONT COWL, DARK MASK, DUAL HEADLIGHTS & WINDSHIELD
+      // 5. SEAMLESS FRONT COWL, DARK MASK, DUAL HEADLIGHTS & WINDSHIELD
       // -----------------------------------------------------------------------
-      // Natural Bajaj front side fairing (sloping down from windshield to doorway sill)
       [-1, 1].forEach(side => {
         const sz = side * 3.90;
         const cheekGeo = new THREE.BufferGeometry();
-        // Vertices forming natural sloping fairing
         const cVerts = new Float32Array([
-          // Lower vertical door pillar / threshold
           2.20, 1.60, sz,       3.40, 1.60, sz * 0.95,  3.40, 3.80, sz * 0.95,
           2.20, 1.60, sz,       3.40, 3.80, sz * 0.95,  2.20, 3.40, sz,
-          // Sloping forward cheek towards nose
           3.40, 1.60, sz * 0.95,5.20, 1.80, sz * 0.65,  5.20, 3.40, sz * 0.65,
           3.40, 1.60, sz * 0.95,5.20, 3.40, sz * 0.65,  3.40, 3.80, sz * 0.95,
-          // Upper cowl cheek to windshield corner
           3.40, 3.80, sz * 0.95,5.20, 3.40, sz * 0.65,  5.38, 5.25, sz * 0.63,
           3.40, 3.80, sz * 0.95,5.38, 5.25, sz * 0.63,  4.80, 5.75, sz * 0.82
         ]);
@@ -678,7 +699,6 @@
         cngGroup.add(new THREE.Mesh(cheekGeo, cngGreenMat));
       });
 
-      // Lower Front Nose Apron (Between wheels and headlights)
       const apronGeo = new THREE.BufferGeometry();
       const aVerts = new Float32Array([
         5.20, 3.40, -2.55,    5.38, 3.80, -2.50,    5.38, 3.80, 2.50,
@@ -690,7 +710,6 @@
       apronGeo.computeVertexNormals();
       cngGroup.add(new THREE.Mesh(apronGeo, cngGreenMat));
 
-      // Curved Front Mudguard directly over front wheel
       const fFenderCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(3.30, 2.05, 0),
         new THREE.Vector3(3.80, 3.45, 0),
@@ -702,14 +721,12 @@
       fFender.scale.set(1.0, 1.0, 2.2);
       cngGroup.add(fFender);
 
-      // SIGNATURE CONTOURED DARK CHARCOAL HEADLIGHT MASK (#22252a)
       const maskW = 4.90;
       const maskH = 1.45;
       const maskMesh = new THREE.Mesh(new THREE.BoxGeometry(0.28, maskH, maskW), darkMaskMat);
       maskMesh.position.set(5.38, 4.52, 0);
       cngGroup.add(maskMesh);
 
-      // Dual Round Headlights (Left & Right)
       [-1.55, 1.55].forEach(hz => {
         const hHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.24, 18), chromeMat);
         hHousing.rotation.z = Math.PI / 2;
@@ -722,14 +739,12 @@
         cngGroup.add(hLens);
       });
 
-      // 3 Stacked Center Horizontal Grille Slots between headlights
       [4.80, 4.52, 4.24].forEach(gy => {
         const slot = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.30), chromeMat);
         slot.position.set(5.54, gy, 0);
         cngGroup.add(slot);
       });
 
-      // Upper Front Cowl (sloping back from dark mask Y=5.25 up to windshield frame base Y=5.75)
       const cowlUpperGeo = new THREE.BufferGeometry();
       const cuVerts = new Float32Array([
         5.38, 5.25, -2.45,    4.80, 5.75, -3.20,    4.80, 5.75, 3.20,
@@ -744,14 +759,12 @@
       cowlUpperGeo.computeVertexNormals();
       cngGroup.add(new THREE.Mesh(cowlUpperGeo, frontNoseMat));
 
-      // Two Red-Orange Turn Indicators under windshield corners
       [-2.65, 2.65].forEach(iz => {
         const ind = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.70), indicatorMat);
         ind.position.set(4.88, 5.65, iz);
         cngGroup.add(ind);
       });
 
-      // Solid Windshield Surround Frame (steep slope ~18° from vertical)
       const wsPillarL = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 3.32, 8), cngGreenMat);
       wsPillarL.position.set((4.80 + 3.40) / 2, (5.75 + 8.75) / 2, -3.20);
       wsPillarL.rotation.z = Math.atan2(4.80 - 3.40, 8.75 - 5.75);
@@ -771,7 +784,6 @@
       wsBottomBar.position.set(4.80, 5.75, 0);
       cngGroup.add(wsBottomBar);
 
-      // Tinted Glass Windshield
       const glassLen = Math.hypot(4.80 - 3.40, 8.75 - 5.75);
       const glassAngle = Math.atan2(4.80 - 3.40, 8.75 - 5.75);
       const wsGlass = new THREE.Mesh(new THREE.PlaneGeometry(6.20, glassLen - 0.18), glassMat);
@@ -780,14 +792,12 @@
       wsGlass.rotation.x = -glassAngle;
       cngGroup.add(wsGlass);
 
-      // Single angled black wiper blade
       const wiperCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(4.82, 5.90, 0),
         new THREE.Vector3(4.15, 7.30, 0.85)
       ]);
       cngGroup.add(new THREE.Mesh(new THREE.TubeGeometry(wiperCurve, 10, 0.04, 6, false), chassisMat));
 
-      // Side Rearview Mirrors on Upper Windshield Pillars
       [-3.25, 3.25].forEach(mz => {
         const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 6), chassisMat);
         stalk.rotation.z = Math.PI / 2;
@@ -809,13 +819,13 @@
       // 6. FITTED DARK SLATE-BLUE CANVAS SOFT-TOP HOOD & SCALLOPED GARLANDS
       // -----------------------------------------------------------------------
       const roofStations = [
-        { center: [3.42, 8.80, 0], rx: 0.20, rz: 3.25 }, // wraps cleanly over top of windshield
+        { center: [3.42, 8.80, 0], rx: 0.20, rz: 3.25 },
         { center: [1.60, 9.10, 0], rx: 0.20, rz: 3.85 },
         { center: [-0.65, 9.15, 0], rx: 0.20, rz: 4.00 },
         { center: [-3.20, 9.05, 0], rx: 0.20, rz: 4.00 },
         { center: [-5.80, 8.85, 0], rx: 0.20, rz: 3.95 },
         { center: [-6.85, 8.40, 0], rx: 0.20, rz: 3.90 },
-        { center: [-7.35, 6.00, 0], rx: 0.20, rz: 3.90 } // curves down back to meet rear wall
+        { center: [-7.35, 6.00, 0], rx: 0.20, rz: 3.90 }
       ];
 
       const roofGeo = new THREE.BufferGeometry();
@@ -857,7 +867,6 @@
       const roofMesh = new THREE.Mesh(roofGeo, canvasSoftTopMat);
       cngGroup.add(roofMesh);
 
-      // Scalloped Garlands along roof seams
       [-3.95, 3.95].forEach(sz => {
         const garlandCurve = new THREE.CatmullRomCurve3([
           new THREE.Vector3(3.35, 8.75, sz * 0.85),
@@ -872,9 +881,8 @@
       });
 
       // -----------------------------------------------------------------------
-      // 7. INTERIOR COCKPIT & BENCH SEATS
+      // 7. INTERIOR COCKPIT & CONNECTED T-BAR STEERING COLUMN
       // -----------------------------------------------------------------------
-      // Driver seat pedestal & cushion
       const driverPedestal = new THREE.Mesh(new THREE.BoxGeometry(1.60, 1.25, 2.20), chassisMat);
       driverPedestal.position.set(0.90, 2.20, 0);
       cngGroup.add(driverPedestal);
@@ -886,19 +894,53 @@
       driverCushion.position.set(0.90, 2.90, 0);
       cngGroup.add(driverCushion);
 
-      // Scooter Handlebars & Meter Console
-      const stemBar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.85, 8), chassisMat);
-      stemBar.position.set(2.80, 3.45, 0);
-      stemBar.rotation.z = -0.32;
+      // --- FULLY CONNECTED T-BAR STEERING COLUMN ---
+      // 1. Continuous angled steering shaft rising from floor/apron (4.85, 1.35) to handlebar (2.45, 4.35)
+      const steerTop = new THREE.Vector3(2.45, 4.35, 0);
+      const steerBase = new THREE.Vector3(4.85, 1.35, 0);
+      const steerDist = steerTop.distanceTo(steerBase) + 0.25;
+      const steerMid = new THREE.Vector3().addVectors(steerTop, steerBase).multiplyScalar(0.5);
+      const steerDir = new THREE.Vector3().subVectors(steerBase, steerTop).normalize();
+
+      const stemBar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.10, 0.12, steerDist, 14),
+        chassisMat
+      );
+      stemBar.position.copy(steerMid);
+      stemBar.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), steerDir);
       cngGroup.add(stemBar);
 
-      const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.40, 8), chassisMat);
+      // Floor mounting collar locking into floorboard
+      const steerBaseCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.24, 0.40, 14), chassisMat);
+      steerBaseCollar.position.set(4.80, 1.45, 0);
+      cngGroup.add(steerBaseCollar);
+
+      // 2. Central steering yoke / speedometer console housing locking shaft to handlebar
+      const yokeConsole = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.36, 0.72),
+        chassisMat
+      );
+      yokeConsole.position.set(2.45, 4.35, 0);
+      yokeConsole.rotation.z = 0.24;
+      cngGroup.add(yokeConsole);
+
+      const speedoDial = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.15, 0.15, 0.04, 16),
+        new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.25 })
+      );
+      speedoDial.position.set(2.48, 4.54, 0);
+      speedoDial.rotation.z = 0.24;
+      cngGroup.add(speedoDial);
+
+      // 3. Horizontal handlebar (Z = ±1.20)
+      const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 2.40, 12), chassisMat);
       handleBar.rotation.x = Math.PI / 2;
       handleBar.position.set(2.45, 4.35, 0);
       cngGroup.add(handleBar);
 
+      // Ergonomic rubber grips on handlebar ends
       [-1.15, 1.15].forEach(gz => {
-        const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.45, 8), rubberTireMat);
+        const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 0.45, 12), rubberTireMat);
         grip.rotation.x = Math.PI / 2;
         grip.position.set(2.45, 4.35, gz);
         cngGroup.add(grip);
@@ -924,154 +966,271 @@
       cngGroup.add(passBackrest);
 
       // -----------------------------------------------------------------------
-      // 8. FULL-SIZED HUMAN CHARACTERS (DRIVER & 2 REAR PASSENGERS)
+      // 8. DISTINCT HUMAN CHARACTERS: DRIVER (WORK SHIRT) & PASSENGERS (HOODIE & SAREE)
       // -----------------------------------------------------------------------
       const driverSkinMat = new THREE.MeshStandardMaterial({ color: 0x9a5c40, roughness: 0.62 });
       const maleSkinMat = new THREE.MeshStandardMaterial({ color: 0xa4684d, roughness: 0.62 });
       const femaleSkinMat = new THREE.MeshStandardMaterial({ color: 0xad7258, roughness: 0.58 });
       const hairMat = new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.85 });
 
-      const driverShirtMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.70 });
-      const driverPantsMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.75 });
-      const maleShirtMat = new THREE.MeshStandardMaterial({ color: 0x7c3aed, roughness: 0.70 });
-      const malePantsMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.75 });
+      // DISTINCT DRESS COLORS:
+      // Driver: Deep Navy-Slate Work Shirt (#2c3e50)
+      const driverShirtMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.75 });
+      const driverPantsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.75 });
+
+      // Male Passenger: Rich Burgundy/Crimson Hoodie (#991b1b)
+      const maleHoodieMat = new THREE.MeshStandardMaterial({ color: 0x781726, roughness: 0.82 });
+      const malePantsMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.75 }); // Royal Blue Jeans
+
+      // Female Passenger: Ochre Saree (#d97706) with Anchol
       const sareeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65, side: THREE.DoubleSide });
       const sareeAncholMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.60, side: THREE.DoubleSide });
 
-      // --- DRIVER ---
+      // =======================================================================
+      // A. CNG DRIVER (MUSTACHE + NAVY WORK SHIRT + ROLLED SLEEVES + GRIPPING FISTS)
+      // =======================================================================
       const driverGroup = new THREE.Group();
       driverGroup.position.set(0.90, 3.10, 0);
 
-      // Torso & Pelvis
-      const dTorsoPts = [
-        [0.0, 0.20, 0],
-        [0.25, 1.10, 0],
-        [0.45, 2.10, 0],
-        [0.60, 2.65, 0]
+      // 1. Torso: Smooth lofted organ mesh with horizontal rings
+      const driverTorsoStations = [
+        { center: [0.00, 0.25, 0], rx: 0.65, rz: 0.75 },
+        { center: [0.18, 1.05, 0], rx: 0.66, rz: 0.74 },
+        { center: [0.38, 1.85, 0], rx: 0.70, rz: 0.78 },
+        { center: [0.52, 2.45, 0], rx: 0.54, rz: 0.82 }
       ];
-      driverGroup.add(createContinuousSplineLimb(dTorsoPts, [0.65, 0.68, 0.75, 0.62], driverShirtMat, 12, 10));
+      driverGroup.add(createLoftedOrganMesh(driverTorsoStations, 20, driverShirtMat));
 
-      // Neck & Head
-      const dNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.60, 10), driverSkinMat);
-      dNeck.position.set(0.70, 2.95, 0);
-      dNeck.rotation.z = -0.22;
+      // 2. Solid Upper-Chest / Clavicle Dome (SEALS upper torso and neck seam seamlessly)
+      const driverClavicle = new THREE.Mesh(
+        new THREE.SphereGeometry(0.72, 20, 16),
+        driverShirtMat
+      );
+      driverClavicle.scale.set(0.78, 0.46, 1.55);
+      driverClavicle.position.set(0.50, 2.46, 0);
+      driverClavicle.rotation.z = -0.22; // Aligned with torso forward lean
+      driverGroup.add(driverClavicle);
+
+      // 3. Centered Neck Column (Deeply embedded into torso dome and head)
+      const neckAngle = 0.22;
+      const dNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.28, 1.10, 16), driverSkinMat);
+      dNeck.position.set(0.58, 2.85, 0);
+      dNeck.rotation.z = -neckAngle;
       driverGroup.add(dNeck);
 
-      const dHead = buildRealisticAdultHead(driverSkinMat, hairMat, false, true);
-      dHead.position.set(0.82, 3.48, 0);
+      // Fitted work shirt collar flush around base of neck
+      const driverCollar = new THREE.Mesh(
+        new THREE.TorusGeometry(0.32, 0.08, 10, 24),
+        driverShirtMat
+      );
+      driverCollar.position.set(0.54, 2.60, 0);
+      const dNeckDir = new THREE.Vector3(Math.sin(neckAngle), Math.cos(neckAngle), 0).normalize();
+      driverCollar.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dNeckDir);
+      driverGroup.add(driverCollar);
+
+      // 4. Head with neat black mustache
+      const dHead = buildRealisticAdultHead(driverSkinMat, hairMat, false, true, { isYounger: false });
+      dHead.position.set(0.68, 3.42, 0);
       driverGroup.add(dHead);
 
-      // Arms gripping handlebars
+      // 5. Curved Arms with Rolled-up Sleeves & Sculpted Gripping Hands
       [-1, 1].forEach(side => {
-        const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), driverShirtMat);
-        shoulderCap.position.set(0.50, 2.50, side * 0.85);
+        // Deltoid shoulder cap
+        const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 10), driverShirtMat);
+        shoulderCap.position.set(0.48, 2.42, side * 0.85);
         driverGroup.add(shoulderCap);
 
-        const dArmPts = [
-          [0.50, 2.50, side * 0.85],
-          [0.95, 1.95, side * 1.10],
-          [1.55, 1.25, side * 1.15]
+        // Upper arm in work shirt fabric down to elbow
+        const dUpperArmPts = [
+          [0.48, 2.42, side * 0.85],
+          [0.85, 1.95, side * 1.02],
+          [1.08, 1.62, side * 1.10]
         ];
-        driverGroup.add(createContinuousSplineLimb(dArmPts, [0.26, 0.22, 0.18], driverShirtMat, 10, 8));
+        driverGroup.add(createContinuousSplineLimb(dUpperArmPts, [0.28, 0.24, 0.22], driverShirtMat, 10, 8));
 
-        const dHand = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), driverSkinMat);
-        dHand.position.set(1.55, 1.25, side * 1.15);
-        driverGroup.add(dHand);
+        // Rolled-up sleeve cuff
+        const cuff = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.05, 8, 16), driverShirtMat);
+        cuff.position.set(1.08, 1.62, side * 1.10);
+        cuff.rotation.y = Math.PI / 2;
+        driverGroup.add(cuff);
+
+        // Exposed skin forearm tapering to wrist with ~20° natural elbow bend
+        const dForearmPts = [
+          [1.08, 1.62, side * 1.10],
+          [1.32, 1.40, side * 1.13],
+          [1.48, 1.28, side * 1.15]
+        ];
+        driverGroup.add(createContinuousSplineLimb(dForearmPts, [0.19, 0.17, 0.15], driverSkinMat, 10, 8));
+
+        // Sculpted gripping hand/fist wrapped directly around the handlebar grip
+        const hand = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 8), driverSkinMat);
+        hand.scale.set(1.10, 0.75, 1.25);
+        hand.position.set(1.55, 1.25, side * 1.15);
+        hand.rotation.z = -0.15;
+        driverGroup.add(hand);
       });
 
-      // Legs
-      [-0.45, 0.45].forEach(lz => {
+      // 6. Driver seated legs
+      [-0.40, 0.40].forEach(lz => {
         const dLegPts = [
           [0.10, 0.20, lz],
-          [1.20, 0.20, lz],
-          [1.40, -0.65, lz],
-          [1.40, -1.45, lz]
+          [1.15, 0.20, lz],
+          [1.25, -0.70, lz],
+          [1.25, -1.45, lz]
         ];
-        driverGroup.add(createContinuousSplineLimb(dLegPts, [0.35, 0.32, 0.28, 0.26], driverPantsMat, 14, 10));
+        driverGroup.add(createContinuousSplineLimb(dLegPts, [0.29, 0.25, 0.23, 0.20], driverPantsMat, 12, 8));
 
-        const dShoe = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.22, 0.36), chassisMat);
-        dShoe.position.set(1.55, -1.50, lz);
-        driverGroup.add(dShoe);
+        // Shoes resting flat on floorboard
+        const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.22, 0.38), new THREE.MeshStandardMaterial({
+          color: 0x0f172a,
+          roughness: 0.6
+        }));
+        shoe.position.set(1.48, -1.50, lz);
+        driverGroup.add(shoe);
       });
 
       cngGroup.add(driverGroup);
 
-      // --- MALE REAR PASSENGER (Sitting on Left side: Z = -1.80) ---
+      // =======================================================================
+      // B. MALE REAR PASSENGER (CLEAN-SHAVEN + BURGUNDY HOODIE + HANDS ON KNEES)
+      // =======================================================================
       const maleGroup = new THREE.Group();
       maleGroup.position.set(-4.50, 3.15, -1.80);
 
-      const mTorsoPts = [
-        [0.0, 0.20, 0],
-        [0.05, 1.15, 0],
-        [0.10, 2.15, 0],
-        [0.12, 2.65, 0]
+      // 1. Torso: Smooth lofted organ mesh in Burgundy Hoodie (#991b1b)
+      const maleTorsoStations = [
+        { center: [0.00, 0.25, 0], rx: 0.65, rz: 0.75 },
+        { center: [0.03, 1.05, 0], rx: 0.66, rz: 0.74 },
+        { center: [0.06, 1.85, 0], rx: 0.68, rz: 0.78 },
+        { center: [0.08, 2.42, 0], rx: 0.54, rz: 0.80 }
       ];
-      maleGroup.add(createContinuousSplineLimb(mTorsoPts, [0.65, 0.68, 0.76, 0.62], maleShirtMat, 12, 10));
+      maleGroup.add(createLoftedOrganMesh(maleTorsoStations, 20, maleHoodieMat));
 
-      const mNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.60, 10), maleSkinMat);
-      mNeck.position.set(0.12, 2.95, 0);
+      // 2. Kangaroo pocket detail on front of hoodie
+      const kPocket = new THREE.Mesh(
+        new THREE.BoxGeometry(0.20, 0.55, 0.92),
+        new THREE.MeshStandardMaterial({ color: 0x5c1020, roughness: 0.82 })
+      );
+      kPocket.position.set(0.46, 1.15, 0);
+      maleGroup.add(kPocket);
+
+      // 3. Solid Upper-Chest / Clavicle Dome
+      const maleClavicle = new THREE.Mesh(
+        new THREE.SphereGeometry(0.68, 20, 16),
+        maleHoodieMat
+      );
+      maleClavicle.scale.set(0.78, 0.46, 1.50);
+      maleClavicle.position.set(0.08, 2.42, 0);
+      maleGroup.add(maleClavicle);
+
+      // 4. SCULPTED 3D HOODIE COLLAR & BACK DRAPE (SEALS neck-to-torso completely)
+      const hoodCollar = new THREE.Mesh(
+        new THREE.TorusGeometry(0.38, 0.15, 10, 24),
+        maleHoodieMat
+      );
+      hoodCollar.position.set(0.06, 2.58, 0);
+      hoodCollar.rotation.x = Math.PI / 2;
+      hoodCollar.scale.set(1.10, 0.85, 1.20);
+      maleGroup.add(hoodCollar);
+
+      const hoodDrape = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 14, 12),
+        maleHoodieMat
+      );
+      hoodDrape.scale.set(0.55, 0.78, 0.95);
+      hoodDrape.position.set(-0.25, 2.38, 0);
+      maleGroup.add(hoodDrape);
+
+      // 5. Deeply Sunk Neck Column
+      const mNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.26, 1.10, 14), maleSkinMat);
+      mNeck.position.set(0.08, 2.80, 0);
       maleGroup.add(mNeck);
 
-      const mHead = buildRealisticAdultHead(maleSkinMat, hairMat, false, true);
-      mHead.position.set(0.14, 3.48, 0);
+      // 6. Clean-shaven younger face (MUSTACHE = FALSE)
+      const mHead = buildRealisticAdultHead(maleSkinMat, hairMat, false, false, { isYounger: true });
+      mHead.position.set(0.10, 3.42, 0);
       maleGroup.add(mHead);
 
-      // Male arms resting on knees
-      [-0.75, 0.75].forEach(az => {
-        const mShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), maleShirtMat);
-        mShoulder.position.set(0.10, 2.45, az);
+      // 7. Hoodie arms with ribbed cuffs and sculpted flat hands resting on knees
+      [-0.65, 0.65].forEach(az => {
+        const mShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), maleHoodieMat);
+        mShoulder.position.set(0.08, 2.42, az);
         maleGroup.add(mShoulder);
 
         const mArmPts = [
-          [0.10, 2.45, az],
-          [0.75, 1.45, az * 0.85],
-          [1.40, 0.55, az * 0.55]
+          [0.08, 2.42, az],
+          [0.72, 1.48, az * 0.85],
+          [1.35, 0.64, az * 0.55]
         ];
-        maleGroup.add(createContinuousSplineLimb(mArmPts, [0.24, 0.20, 0.17], maleShirtMat, 10, 8));
+        maleGroup.add(createContinuousSplineLimb(mArmPts, [0.26, 0.22, 0.19], maleHoodieMat, 10, 8));
 
-        const mHand = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), maleSkinMat);
-        mHand.position.set(1.40, 0.55, az * 0.55);
+        // Ribbed cuff at wrist
+        const hCuff = new THREE.Mesh(new THREE.TorusGeometry(0.19, 0.045, 8, 16), new THREE.MeshStandardMaterial({ color: 0x5c1020, roughness: 0.82 }));
+        hCuff.position.set(1.35, 0.64, az * 0.55);
+        hCuff.rotation.y = Math.PI / 2;
+        maleGroup.add(hCuff);
+
+        // Sculpted palm resting flat on top of knee
+        const mHand = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.18), maleSkinMat);
+        mHand.position.set(1.48, 0.54, az * 0.55);
         maleGroup.add(mHand);
       });
 
-      // Male legs
+      // 8. Male legs in royal blue jeans
       [-0.45, 0.45].forEach(lz => {
         const mLegPts = [
           [0.10, 0.20, lz],
-          [1.35, 0.20, lz],
-          [1.45, -0.65, lz],
-          [1.45, -1.50, lz]
+          [1.25, 0.20, lz],
+          [1.35, -0.65, lz],
+          [1.35, -1.45, lz]
         ];
-        maleGroup.add(createContinuousSplineLimb(mLegPts, [0.35, 0.32, 0.28, 0.26], malePantsMat, 14, 10));
+        maleGroup.add(createContinuousSplineLimb(mLegPts, [0.29, 0.25, 0.23, 0.20], malePantsMat, 12, 8));
 
-        const mShoe = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.22, 0.36), chassisMat);
-        mShoe.position.set(1.60, -1.55, lz);
+        const mShoe = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.22, 0.38), new THREE.MeshStandardMaterial({
+          color: 0x334155,
+          roughness: 0.6
+        }));
+        mShoe.position.set(1.58, -1.50, lz);
         maleGroup.add(mShoe);
       });
 
       cngGroup.add(maleGroup);
 
-      // --- FEMALE REAR PASSENGER (Sitting on Right side: Z = +1.80) ---
+      // =======================================================================
+      // C. FEMALE REAR PASSENGER (OCHRE SAREE + ANCHOL/GHOMTA + BINDI + BANGLES)
+      // =======================================================================
       const femaleGroup = new THREE.Group();
       femaleGroup.position.set(-4.50, 3.15, 1.80);
 
-      const fTorsoPts = [
-        [0.0, 0.20, 0],
-        [0.05, 1.10, 0],
-        [0.08, 2.10, 0],
-        [0.10, 2.60, 0]
+      // 1. Torso: Smooth lofted organ mesh in Saree
+      const femaleTorsoStations = [
+        { center: [0.00, 0.25, 0], rx: 0.60, rz: 0.70 },
+        { center: [0.03, 1.05, 0], rx: 0.62, rz: 0.68 },
+        { center: [0.06, 1.85, 0], rx: 0.65, rz: 0.72 },
+        { center: [0.08, 2.42, 0], rx: 0.52, rz: 0.75 }
       ];
-      femaleGroup.add(createContinuousSplineLimb(fTorsoPts, [0.60, 0.62, 0.70, 0.58], sareeMat, 12, 10));
+      femaleGroup.add(createLoftedOrganMesh(femaleTorsoStations, 20, sareeMat));
 
-      const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.58, 10), femaleSkinMat);
-      fNeck.position.set(0.10, 2.90, 0);
+      // 2. Solid Upper-Chest / Clavicle Dome
+      const femaleClavicle = new THREE.Mesh(
+        new THREE.SphereGeometry(0.65, 20, 16),
+        sareeMat
+      );
+      femaleClavicle.scale.set(0.74, 0.44, 1.45);
+      femaleClavicle.position.set(0.08, 2.42, 0);
+      femaleGroup.add(femaleClavicle);
+
+      // 3. Deeply Sunk Neck Column
+      const fNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 1.05, 14), femaleSkinMat);
+      fNeck.position.set(0.10, 2.80, 0);
       femaleGroup.add(fNeck);
 
+      // 4. Head with Bindi, Khopa bun and Red Lips
       const fHead = buildRealisticAdultHead(femaleSkinMat, hairMat, true, false);
       fHead.position.set(0.12, 3.42, 0);
       femaleGroup.add(fHead);
 
-      // Saree Cowl / Ghomta draped over back of head
+      // 5. Saree Cowl / Ghomta draped over back and crown of head
       const ghomtaCurve = [
         [-0.40, 3.75, -0.60],
         [-0.55, 3.40, 0],
@@ -1081,7 +1240,7 @@
       ];
       femaleGroup.add(createContinuousSplineLimb(ghomtaCurve, 0.22, sareeAncholMat, 12, 8));
 
-      // Saree skirt covering seated thighs and shins
+      // 6. Saree skirt covering seated thighs and shins
       const skirtPts = [
         [0.05, 0.25, 0],
         [1.35, 0.25, 0],
@@ -1090,7 +1249,7 @@
       ];
       femaleGroup.add(createContinuousSplineLimb(skirtPts, [0.72, 0.75, 0.68, 0.62], sareeMat, 14, 10));
 
-      // Female arms resting softly on lap
+      // 7. Female arms resting softly on lap with bangles
       [-0.65, 0.65].forEach(az => {
         const fShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 8), sareeMat);
         fShoulder.position.set(0.10, 2.40, az);
@@ -1103,7 +1262,6 @@
         ];
         femaleGroup.add(createContinuousSplineLimb(fArmPts, [0.22, 0.18, 0.15], femaleSkinMat, 10, 8));
 
-        // Bangles on wrists
         [0xdc2626, 0xfacc15].forEach((bColor, bIdx) => {
           const bangle = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.03, 6, 12), new THREE.MeshStandardMaterial({
             color: bColor,
