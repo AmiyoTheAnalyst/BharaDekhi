@@ -63,10 +63,10 @@ html_template = """<!DOCTYPE html>
 </html>"""
 
 views = [
-    ('scratch/prod_cng_side_profile.png', (0.5, 7.5, 34.0), (0.5, 6.5, 0)),
-    ('scratch/prod_cng_driver_close.png', (3.5, 7.5, 14.0), (2.0, 6.5, 0)),
-    ('scratch/prod_cng_passengers_close.png', (-1.0, 7.2, 14.0), (-6.5, 6.5, 0)),
-    ('scratch/prod_cng_isometric.png', (18.0, 16.0, 24.0), (0, 7.0, 0))
+    ('scratch/prod_cng_side_profile.png', (0.0, 5.0, 18.0), (0.0, 4.6, 0)),
+    ('scratch/prod_cng_driver_close.png', (2.8, 5.2, 8.0), (1.4, 4.8, 0)),
+    ('scratch/prod_cng_passengers_close.png', (-1.5, 5.2, 7.8), (-4.2, 4.6, 0)),
+    ('scratch/prod_cng_isometric.png', (11.0, 9.8, 12.5), (0.0, 4.5, 0))
 ]
 
 chrome_path = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
