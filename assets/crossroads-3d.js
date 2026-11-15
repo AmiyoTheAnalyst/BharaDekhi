@@ -4020,7 +4020,7 @@ let sharedRickshawArtTexture = null;
     root.userData.wheels = [];
 
     // Inner child wrapper holding the entire combined Motorcycle + Seated Rider
-    // Scaled down uniformly to 0.35x (calibrated against 3D CNG & Cycle Rickshaw world scale)
+    // Scaled uniformly to 0.60x (sweet-spot scale matching BRTA bus, CNG & lane width)
     const bikePackage = new THREE.Group();
     bikePackage.userData.wheels = [];
     const group = bikePackage; // Seamless alias for all internal mesh additions
@@ -4669,11 +4669,12 @@ let sharedRickshawArtTexture = null;
     }
 
     // =========================================================================
-    // TASK 2: UNIFORMLY SCALE DOWN ENTIRE BIKE + RIDER PACKAGE TO 0.35x
-    // Inner child wrapper ensures the 0.35x world scale is permanent & cannot be overwritten.
+    // TASK 1: UNIFORMLY SCALE BIKE + RIDER PACKAGE TO 0.60x (SWEET SPOT)
+    // Multiplied by 1.70x to hit the exact sweet-spot scale in traffic.
+    // Inner child wrapper ensures the 0.60x world scale is permanent & cannot be overwritten.
     // Both front & rear tire treads rest 100% flush on the road surface (y = 0.0, zero sink/float).
     // =========================================================================
-    const BIKE_WORLD_SCALE = 0.35;
+    const BIKE_WORLD_SCALE = 0.60;
     bikePackage.scale.setScalar(BIKE_WORLD_SCALE);
     bikePackage.position.set(0, 0, 0);
     root.add(bikePackage);
