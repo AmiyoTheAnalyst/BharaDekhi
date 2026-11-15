@@ -6095,9 +6095,10 @@ let sharedRickshawArtTexture = null;
     root.userData.wheels = [];
 
     // Inner child wrapper holding the complete 3D CNG + Occupants Package
-    // Scaled up uniformly by 1.06x (6% increase) to match human and traffic proportions
-    const cngGroup = new THREE.Group();
-    cngGroup.userData.wheels = [];
+    // Scaled up by 1.14x (cumulative +14% increase) to match human and traffic proportions
+    const cngPackage = new THREE.Group();
+    cngPackage.userData.wheels = [];
+    const cngGroup = cngPackage;
 
       // Authentic Materials
       const cngGreenMat = new THREE.MeshStandardMaterial({
@@ -7005,16 +7006,16 @@ let sharedRickshawArtTexture = null;
       cngGroup.add(femaleGroup);
 
       // =========================================================================
-      // TASK 1: UNIFORMLY SCALE UP 3D CNG PACKAGE BY 6% (1.06x)
-      // Inner child wrapper ensures 1.06x scale is permanent & cannot be overwritten.
+      // TASK 1: UNIFORMLY SCALE UP 3D CNG PACKAGE BY ADDITIONAL 1.07x (LOCKED AT 1.14x)
+      // Inner child wrapper ensures 1.14x scale is permanent & cannot be overwritten.
       // All 3 wheels rest 100% flush on the asphalt road surface (y = 0.0, zero float/sink).
       // =========================================================================
-      const CNG_WORLD_SCALE = 1.06;
-      cngGroup.scale.setScalar(CNG_WORLD_SCALE);
-      cngGroup.position.set(0, 0, 0);
-      root.add(cngGroup);
+      const CNG_WORLD_SCALE = 1.14;
+      cngPackage.scale.setScalar(CNG_WORLD_SCALE);
+      cngPackage.position.set(0, 0, 0);
+      root.add(cngPackage);
 
-      root.userData.wheels = cngGroup.userData.wheels;
+      root.userData.wheels = cngPackage.userData.wheels;
       root.userData.wheelRadius = 1.85 * CNG_WORLD_SCALE;
 
       return root;
