@@ -3264,12 +3264,12 @@ let sharedRickshawArtTexture = null;
       gunmetalEngineMat: new THREE.MeshStandardMaterial({ color: 0x22252a, roughness: 0.38, metalness: 0.65 }),
       bronzeCoverMat: new THREE.MeshStandardMaterial({ color: 0x78563a, roughness: 0.30, metalness: 0.60 }),
       goldAnodizedMat: new THREE.MeshStandardMaterial({ color: 0xd4a024, roughness: 0.22, metalness: 0.82 }),
-      darkLeatherMat: new THREE.MeshStandardMaterial({ color: 0x181a1d, roughness: 0.75, metalness: 0.05 }),
+      darkLeatherMat: new THREE.MeshStandardMaterial({ color: 0x141619, roughness: 0.80, metalness: 0.05 }),
       discRotorMat: new THREE.MeshStandardMaterial({ map: getDiscRotorTexture(), roughness: 0.25, metalness: 0.85, transparent: true }),
-      pearlWhiteMat: new THREE.MeshStandardMaterial({ color: 0xf5f6fa, roughness: 0.18, metalness: 0.15 }),
+      pearlWhiteMat: new THREE.MeshStandardMaterial({ color: 0xf5f6fa, roughness: 0.18, metalness: 0.15, side: THREE.DoubleSide }),
       matteBlackKneeMat: new THREE.MeshStandardMaterial({ color: 0x1e2124, roughness: 0.85 }),
       smokedVisorMat: new THREE.MeshStandardMaterial({ color: 0x0a0f1d, roughness: 0.10, metalness: 0.20, transparent: true, opacity: 0.80 }),
-      glossyBlackMat: new THREE.MeshStandardMaterial({ color: 0x0f1115, roughness: 0.15, metalness: 0.30 }),
+      glossyBlackMat: new THREE.MeshStandardMaterial({ color: 0x0c0e12, roughness: 0.15, metalness: 0.30, side: THREE.DoubleSide }),
       crimsonPinstripeMat: new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.35, metalness: 0.20 }),
       redRimStripeMat: new THREE.MeshStandardMaterial({ color: 0xd63031, roughness: 0.30, metalness: 0.10 }),
       skinMat: new THREE.MeshStandardMaterial({ color: 0xc8926d, roughness: 0.60, metalness: 0.04 }),
@@ -3374,6 +3374,374 @@ let sharedRickshawArtTexture = null;
     { name: 'Championship Gold & Silver', fairing: 0xd97706, accent: 0x090d16, rim: 0xcfd8dc, rimLip: null, seat: 0x090d16, frame: 0x18181b, chrome: 0xe2e8f0, caliper: 0xd97706 }
   ];
 
+  // Explicit Upper-Arch Mudguard Generator with Smooth Normals (y = cy + sin(angle) * r, y > axleY)
+  function createUpperArchFender(cx, cy, r, width, startDeg, endDeg, segs, mat, crownDrop) {
+    segs = segs || 24;
+    crownDrop = crownDrop !== undefined ? crownDrop : 0.08;
+    const geo = new THREE.BufferGeometry();
+    const pos = [];
+    const uvs = [];
+    const indices = [];
+    const halfW = width / 2;
+
+    for (let i = 0; i <= segs; i++) {
+      const t = i / segs;
+      const deg = startDeg + t * (endDeg - startDeg);
+      const rad = deg * Math.PI / 180;
+      const cosR = Math.cos(rad);
+      const sinR = Math.sin(rad);
+
+      const xC = cx + cosR * r;
+      const yC = cy + sinR * r;
+      const xE = cx + cosR * (r - crownDrop);
+      const yE = cy + sinR * (r - crownDrop);
+
+      pos.push(xE, yE, -halfW); // 0
+      uvs.push(0, t);
+      pos.push(xC, yC, 0);      // 1
+      uvs.push(0.5, t);
+      pos.push(xE, yE, halfW);  // 2
+      uvs.push(1, t);
+    }
+
+    for (let i = 0; i < segs; i++) {
+      const r0 = i * 3;
+      const r1 = (i + 1) * 3;
+      indices.push(r0, r1, r0 + 1);
+      indices.push(r0 + 1, r1, r1 + 1);
+      indices.push(r0 + 1, r1 + 1, r0 + 2);
+      indices.push(r0 + 2, r1 + 1, r1 + 2);
+    }
+
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    return mesh;
+  }
+
+  // Anatomical V-Tapered Torso Lofting Function (Lofts smoothly along Y axis from waist to shoulders)
+  function createAnatomicalTorso(stations, radSegs, mat) {
+    radSegs = radSegs || 24;
+    const numStations = stations.length;
+    const pos = [];
+    const uvs = [];
+    const indices = [];
+
+    for (let s = 0; s < numStations; s++) {
+      const st = stations[s];
+      const v = s / (numStations - 1);
+      for (let j = 0; j <= radSegs; j++) {
+        const theta = (j / radSegs) * Math.PI * 2;
+        const cos = Math.cos(theta); // Depth X
+        const sin = Math.sin(theta); // Width Z
+        const x = cos * st.rx;
+        const y = st.y;
+        const z = sin * st.rz;
+
+        pos.push(x, y, z);
+        uvs.push(j / radSegs, v);
+      }
+    }
+
+    for (let s = 0; s < numStations - 1; s++) {
+      for (let j = 0; j < radSegs; j++) {
+        const a = s * (radSegs + 1) + j;
+        const b = (s + 1) * (radSegs + 1) + j;
+        const c = (s + 1) * (radSegs + 1) + j + 1;
+        const d = s * (radSegs + 1) + j + 1;
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  // =========================================================================
+  // TASK 2: REBUILD REALISTIC FURNISHED 3D BIKER (BROAD UPPER BACK & SEAMLESS LIMBS)
+  // =========================================================================
+  function buildRealisticBiker(isCruiser, saddlePos, gripLeft, gripRight, pegLeft, pegRight, mats, appearanceSeed) {
+    const biker = new THREE.Group();
+
+    const OUTFIT_PRESETS = [
+      { jacket: 0x1c2026, vest: 0x13161b, pantsC: 0x1e242b, pantsS: 0x283c5a, boot: 0x111317, helmetC: 0x121417, helmetS: 0x181c24 },
+      { jacket: 0x242a33, vest: 0x181d24, pantsC: 0x1b2028, pantsS: 0x1f2e45, boot: 0x111317, helmetC: 0x14161a, helmetS: 0x232730 },
+      { jacket: 0x181a1f, vest: 0x101216, pantsC: 0x232830, pantsS: 0x33445c, boot: 0x111317, helmetC: 0x101214, helmetS: 0x1a1e28 }
+    ];
+    const outfit = OUTFIT_PRESETS[Math.abs(appearanceSeed || 0) % OUTFIT_PRESETS.length];
+
+    const jacketColor = outfit.jacket;
+    const vestColor = outfit.vest;
+    const pantsColor = isCruiser ? outfit.pantsC : outfit.pantsS;
+    const bootColor = outfit.boot;
+    const gloveColor = 0x14161a;
+    const helmetColor = isCruiser ? outfit.helmetC : outfit.helmetS;
+    const visorColor = 0x050811;
+
+    const jacketMat = new THREE.MeshStandardMaterial({ color: jacketColor, roughness: 0.65, metalness: 0.08 });
+    const vestMat = new THREE.MeshStandardMaterial({ color: vestColor, roughness: 0.75, metalness: 0.05 });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.82, metalness: 0.04 });
+    const bootMat = new THREE.MeshStandardMaterial({ color: bootColor, roughness: 0.55, metalness: 0.12 });
+    const soleMat = new THREE.MeshStandardMaterial({ color: 0x0a0b0e, roughness: 0.92 });
+    const gloveMat = new THREE.MeshStandardMaterial({ color: gloveColor, roughness: 0.60, metalness: 0.15 });
+    const collarMat = new THREE.MeshStandardMaterial({ color: 0x16181d, roughness: 0.88 });
+    const helmetMat = new THREE.MeshStandardMaterial({ color: helmetColor, roughness: isCruiser ? 0.82 : 0.22, metalness: 0.30 });
+    const visorMat = new THREE.MeshStandardMaterial({ color: visorColor, roughness: 0.04, metalness: 0.96 });
+
+    const leanAngle = isCruiser ? -0.22 : -0.46; // Radians
+
+    // 1. CONNECTED PELVIS & GLUTES SEATED SQUARELY ON SADDLE (ZERO GAP BEHIND RIDER)
+    const pelvisGroup = new THREE.Group();
+    // Position glutes center so bottom of glutes embeds firmly into the saddle bucket
+    const glutesY = isCruiser ? saddlePos[1] - 0.15 : saddlePos[1] + 0.10;
+    pelvisGroup.position.set(saddlePos[0] - 0.05, glutesY, saddlePos[2]);
+
+    // Broad anatomical glutes & pelvis hip block (widthZ = 2.10, filling saddle completely)
+    const glutesMesh = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 18), pantsMat);
+    glutesMesh.scale.set(1.30, 0.75, 1.05); // Radius Z = 1.05 -> Width = 2.10
+    pelvisGroup.add(glutesMesh);
+
+    // Lumbar rise & waist bridge filling seat backrest seam
+    const lumbarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.05, 0.95, 20), pantsMat);
+    lumbarMesh.position.set(-0.25, 0.38, 0);
+    lumbarMesh.rotation.z = isCruiser ? -0.12 : -0.28;
+    pelvisGroup.add(lumbarMesh);
+
+    // Wide dark tactical belt at jacket seam
+    const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 0.28, 20), new THREE.MeshStandardMaterial({ color: 0x0d0e12, roughness: 0.6 }));
+    belt.position.set(-0.15, 0.70, 0);
+    belt.rotation.z = leanAngle;
+    pelvisGroup.add(belt);
+
+    biker.add(pelvisGroup);
+
+    // 2. BROAD ANATOMICAL UPPER BACK, CHEST & INTEGRATED SHOULDERS (NO BOWLING PIN!)
+    // Continuous V-tapered lofted jacket torso (waist width 1.56 expanding to shoulder width 2.20)
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.set(saddlePos[0] - 0.05, glutesY + 0.60, saddlePos[2]);
+    torsoGroup.rotation.z = leanAngle;
+
+    const jacketStations = [
+      { y: 0.0, rx: 0.50, rz: 0.78 }, // Waist: depth 1.00, width 1.56
+      { y: 0.7, rx: 0.55, rz: 0.90 }, // Mid-torso: depth 1.10, width 1.80
+      { y: 1.4, rx: 0.60, rz: 1.04 }, // Upper chest: depth 1.20, width 2.08
+      { y: 2.0, rx: 0.58, rz: 1.10 }, // Broad shoulder yoke: depth 1.16, width 2.20
+      { y: 2.3, rx: 0.50, rz: 0.95 }, // Clavicle slope: depth 1.00, width 1.90
+      { y: 2.5, rx: 0.44, rz: 0.65 }  // Neck base: depth 0.88, width 1.30
+    ];
+    torsoGroup.add(createAnatomicalTorso(jacketStations, 24, jacketMat));
+
+    // Tactical front chest / spine vest detail
+    const vestPanel = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.7, 1.45), vestMat);
+    vestPanel.position.set(0.55, 1.05, 0);
+    torsoGroup.add(vestPanel);
+
+    const spinePanel = new THREE.Mesh(new THREE.BoxGeometry(0.30, 1.8, 1.25), vestMat);
+    spinePanel.position.set(-0.52, 1.0, 0);
+    torsoGroup.add(spinePanel);
+
+    // Thick Folded Hoodie Collar & Neck Seal (ZERO gap under helmet)
+    const hoodieCollar = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.26, 16, 28), collarMat);
+    hoodieCollar.rotation.x = Math.PI / 2;
+    hoodieCollar.position.set(0, 2.38, 0);
+    torsoGroup.add(hoodieCollar);
+
+    const neckSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.52, 0.55, 20), collarMat);
+    neckSeal.position.set(0, 2.55, 0);
+    torsoGroup.add(neckSeal);
+
+    biker.add(torsoGroup);
+
+    // 3. SEAMLESS TAPERED ARMS EMBEDDED INSIDE SHOULDER YOKE (NO FLOATING CYLINDERS, NO BALL JOINTS)
+    // Shoulder origins: local (0, 2.0, ±0.95) strictly INSIDE the wide shoulder yoke (radiusZ = 1.10)
+    const shLocalL = new THREE.Vector3(0.0, 2.0, -0.95);
+    const shLocalR = new THREE.Vector3(0.0, 2.0, 0.95);
+    shLocalL.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
+    shLocalR.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
+
+    [[-1, shLocalL, gripLeft], [1, shLocalR, gripRight]].forEach(([side, shPos, gripPos]) => {
+      const sx = shPos.x;
+      const sy = shPos.y;
+      const sz = shPos.z;
+      const gx = gripPos[0];
+      const gy = gripPos[1];
+      const gz = gripPos[2];
+
+      // Natural relaxed motorcycle elbow bend (dropped down and flared out naturally)
+      const elbowX = sx + (gx - sx) * 0.44 - 0.20;
+      const elbowY = sy - 0.85;
+      const elbowZ = sz + (gz - sz) * 0.45 + side * 0.25;
+
+      const bicepX = sx + (elbowX - sx) * 0.50;
+      const bicepY = sy - 0.42;
+      const bicepZ = sz + (elbowZ - sz) * 0.40;
+
+      const wristX = gx - 0.18;
+      const wristY = gy - 0.08;
+      const wristZ = gz;
+
+      const foreX = elbowX + (wristX - elbowX) * 0.50;
+      const foreY = elbowY + (wristY - elbowY) * 0.55;
+      const foreZ = elbowZ + (wristZ - elbowZ) * 0.50;
+
+      // Continuous smooth curved spline arm (shoulder -> bicep -> elbow bend -> forearm -> wrist)
+      const armCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(sx, sy, sz),
+        new THREE.Vector3(bicepX, bicepY, bicepZ),
+        new THREE.Vector3(elbowX, elbowY, elbowZ),
+        new THREE.Vector3(foreX, foreY, foreZ),
+        new THREE.Vector3(wristX, wristY, wristZ)
+      ]);
+
+      // Seamless tapered arm mesh (radius: 0.35 shoulder to 0.28 elbow to 0.21 wrist)
+      const armTube = new THREE.Mesh(new THREE.TubeGeometry(armCurve, 20, 0.29, 14, false), jacketMat);
+      biker.add(armTube);
+
+      // Dark Motorcycle Riding Glove gripping handlebar
+      const handGroup = new THREE.Group();
+      handGroup.position.set(gx, gy, gz);
+
+      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.36, 0.42), gloveMat);
+      handGroup.add(palm);
+
+      const fingers = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.40, 14), gloveMat);
+      fingers.rotation.x = Math.PI / 2;
+      fingers.position.set(0.15, -0.06, 0);
+      handGroup.add(fingers);
+
+      const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.90, 8), mats.chromeMat);
+      lever.rotation.x = Math.PI / 2 + (side * 0.12);
+      lever.position.set(0.32, 0.04, -side * 0.22);
+      handGroup.add(lever);
+
+      biker.add(handGroup);
+    });
+
+    // 4. CONNECTED TROUSERS, KNEES, CALVES & LACED COMBAT BOOTS
+    [[-1, pegLeft], [1, pegRight]].forEach(([side, pegPos]) => {
+      const hipX = saddlePos[0] + 0.25;
+      const hipY = glutesY + 0.10;
+      const hipZ = side * 0.85;
+
+      const px = pegPos[0];
+      const py = pegPos[1];
+      const pz = pegPos[2];
+
+      // Knee hugging fuel tank tightly
+      let kneeX, kneeY, kneeZ;
+      if (isCruiser) {
+        kneeX = hipX + 1.85;
+        kneeY = hipY - 0.20;
+        kneeZ = side * 1.15;
+      } else {
+        kneeX = hipX + 1.65;
+        kneeY = hipY - 0.38;
+        kneeZ = side * 1.15;
+      }
+
+      const ankleX = px;
+      const ankleY = py + 0.45;
+      const ankleZ = pz;
+
+      // Continuous smooth curved leg spline (hip -> thigh -> knee -> calf -> ankle)
+      const legCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(hipX, hipY, hipZ),
+        new THREE.Vector3(hipX + (kneeX - hipX) * 0.5, hipY + (kneeY - hipY) * 0.5, hipZ + (kneeZ - hipZ) * 0.5),
+        new THREE.Vector3(kneeX, kneeY, kneeZ),
+        new THREE.Vector3(kneeX + (ankleX - kneeX) * 0.5, kneeY + (ankleY - kneeY) * 0.5, kneeZ + (ankleZ - kneeZ) * 0.5),
+        new THREE.Vector3(ankleX, ankleY, ankleZ)
+      ]);
+      const legTube = new THREE.Mesh(new THREE.TubeGeometry(legCurve, 20, 0.38, 14, false), pantsMat);
+      biker.add(legTube);
+
+      // Dark molded knee armor contour
+      const kneePad = new THREE.Mesh(new THREE.SphereGeometry(0.35, 14, 10), gloveMat);
+      kneePad.scale.set(0.48, 0.88, 0.78);
+      kneePad.position.set(kneeX + 0.20, kneeY, kneeZ);
+      biker.add(kneePad);
+
+      // Laced Black Leather Combat/Riding Boot on Footpeg
+      const bootGroup = new THREE.Group();
+      bootGroup.position.set(px, py, pz);
+      if (isCruiser) bootGroup.rotation.z = 0.25;
+
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.26, 0.65, 14), bootMat);
+      shaft.position.set(0, 0.32, 0);
+      bootGroup.add(shaft);
+
+      const sole = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.18, 0.68), soleMat);
+      sole.position.set(0.30, 0.09, 0);
+      bootGroup.add(sole);
+
+      const upper = new THREE.Mesh(new THREE.BoxGeometry(1.10, 0.42, 0.64), bootMat);
+      upper.position.set(0.12, 0.32, 0);
+      bootGroup.add(upper);
+
+      const toe = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.32, 0.62), bootMat);
+      toe.position.set(0.68, 0.25, 0);
+      bootGroup.add(toe);
+
+      biker.add(bootGroup);
+    });
+
+    // 5. REALISTIC PROPORTIONATE HEAD / HELMET (1.3X SCALE, FLUSH FIT IN HOODIE COLLAR)
+    const headPosLocal = new THREE.Vector3(0, 2.75, 0);
+    headPosLocal.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
+
+    const helmetGroup = new THREE.Group();
+    helmetGroup.position.copy(headPosLocal);
+    helmetGroup.rotation.z = isCruiser ? -0.06 : -0.16;
+
+    // 1.3x Scale Helmet Shell (Proportionate ~ 1/2.4 of shoulder width, seated flush into collar)
+    const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(1.02, 32, 24), helmetMat);
+    helmetShell.scale.set(1.18, 1.12, 1.02);
+    helmetGroup.add(helmetShell);
+
+    if (isCruiser) {
+      // Black Cruiser: Matte-black biker helmet with recessed visor
+      const chinBar = new THREE.Mesh(new THREE.CylinderGeometry(0.98, 0.92, 0.48, 24, 1, false, -Math.PI * 0.34, Math.PI * 0.68), helmetMat);
+      chinBar.scale.set(1.15, 1.0, 1.0);
+      chinBar.position.set(0.18, -0.28, 0);
+      helmetGroup.add(chinBar);
+
+      const visor = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 0.98, 0.50, 24, 1, true, -Math.PI * 0.34, Math.PI * 0.68), visorMat);
+      visor.scale.set(1.16, 1.0, 1.0);
+      visor.position.set(0.20, 0.10, 0);
+      helmetGroup.add(visor);
+    } else {
+      // White Streetfighter: Sleek aerodynamic full-face sport helmet with dark tinted visor
+      const chinBar = new THREE.Mesh(new THREE.CylinderGeometry(1.00, 0.94, 0.50, 24, 1, false, -Math.PI * 0.36, Math.PI * 0.72), helmetMat);
+      chinBar.scale.set(1.16, 1.0, 1.0);
+      chinBar.position.set(0.20, -0.30, 0);
+      helmetGroup.add(chinBar);
+
+      const visor = new THREE.Mesh(new THREE.CylinderGeometry(1.04, 1.00, 0.52, 24, 1, true, -Math.PI * 0.36, Math.PI * 0.72), visorMat);
+      visor.scale.set(1.17, 1.0, 1.0);
+      visor.position.set(0.22, 0.12, 0);
+      helmetGroup.add(visor);
+
+      const spoiler = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.10, 1.10), helmetMat);
+      spoiler.position.set(-1.05, 0.20, 0);
+      spoiler.rotation.z = -0.30;
+      helmetGroup.add(spoiler);
+    }
+
+    biker.add(helmetGroup);
+
+    return biker;
+  }
+
   // Master Canonical Dual 3D Motorcycle Factory (Pure Three.js - Zero Blender!)
   // Alternates between Model A (White Streetfighter/Cafe Racer) and Model B (Black/Gold/Red Muscle Cruiser)
   function createRealisticGTABike(colorHex, appearanceSeed, vData) {
@@ -3454,7 +3822,8 @@ let sharedRickshawArtTexture = null;
       group.add(rWheel);
       group.userData.wheels.push(rWheel);
 
-      const fCaliper = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.25, 0.45), mats.bronzeCoverMat);
+      // Caliper: dark metallic (ZERO stray tan block)
+      const fCaliper = new THREE.Mesh(new THREE.BoxGeometry(0.75, 1.15, 0.42), mats.darkFrameMat);
       fCaliper.position.set(frontX - 1.25, wheelY + 1.25, 0.65);
       group.add(fCaliper);
 
@@ -3483,15 +3852,31 @@ let sharedRickshawArtTexture = null;
         shroud.rotation.z = rakeAngle;
         group.add(shroud);
 
-        const axleClamp = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.05, 0.55), mats.darkFrameMat);
-        axleClamp.position.set(frontX, wheelY, fz);
-        group.add(axleClamp);
+        // CLEAN AXLE SPINDLE (NO protruding square block)
+        const smallAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.45, 12), mats.darkFrameMat);
+        smallAxle.rotation.x = Math.PI / 2;
+        smallAxle.position.set(frontX, wheelY, fz);
+        group.add(smallAxle);
       });
 
-      const fenderMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.65, 3.65, 1.60, 24, 1, true, Math.PI * 0.16, Math.PI * 0.68), mats.pearlWhiteMat);
-      fenderMesh.rotation.x = Math.PI / 2;
-      fenderMesh.position.set(frontX, wheelY, 0);
-      group.add(fenderMesh);
+      // 1. MODEL A FRONT MUDGUARD: Sculpted pearl-white fender over top crown (angle = 65° to 135°)
+      // Bridging cleanly between two white fork shrouds, with triangular side extensions covering upper fork stanchions
+      const frontMudguard = createUpperArchFender(frontX, wheelY, 3.25 + 0.10, 1.65, 65, 135, 24, mats.pearlWhiteMat, 0.10);
+      group.add(frontMudguard);
+
+      // Triangular side extensions covering fork stanchions
+      [-0.85, 0.85].forEach(sz => {
+        const sideFlangeGeo = new THREE.BufferGeometry();
+        const pts = [
+          new THREE.Vector3(frontX - 0.2, wheelY + 3.15, sz),
+          new THREE.Vector3(frontX - 1.2, wheelY + 2.30, sz),
+          new THREE.Vector3(frontX - 0.1, wheelY + 2.05, sz)
+        ];
+        sideFlangeGeo.setFromPoints(pts);
+        sideFlangeGeo.computeVertexNormals();
+        const flange = new THREE.Mesh(sideFlangeGeo, mats.pearlWhiteMat);
+        group.add(flange);
+      });
 
       // Slatted Headlight with 4 Prominent Vertical Black Grill Slats & Smoked Flyscreen
       const headlightGroup = new THREE.Group();
@@ -3590,24 +3975,21 @@ let sharedRickshawArtTexture = null;
         group.add(cMesh);
       });
 
+      // Tightly Contoured Pearl-White Belly Pan
       const bellyShape = new THREE.Shape();
-      bellyShape.moveTo(3.6, 4.4);
-      bellyShape.lineTo(4.6, 3.2);
-      bellyShape.lineTo(3.4, 2.1);
-      bellyShape.lineTo(-0.6, 2.1);
-      bellyShape.lineTo(-1.0, 3.2);
-      bellyShape.lineTo(0.5, 3.8);
+      bellyShape.moveTo(3.2, 3.6);
+      bellyShape.lineTo(3.4, 2.8);
+      bellyShape.lineTo(2.0, 2.3);
+      bellyShape.lineTo(0.4, 2.3);
+      bellyShape.lineTo(0.2, 3.0);
+      bellyShape.lineTo(1.2, 3.6);
       bellyShape.closePath();
-      const bellyGeo = new THREE.ExtrudeGeometry(bellyShape, { depth: 2.35, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.12 });
-      bellyGeo.translate(0, 0, -2.35 / 2);
+      const bellyGeo = new THREE.ExtrudeGeometry(bellyShape, { depth: 1.55, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06 });
+      bellyGeo.translate(0, 0, -1.55 / 2);
       const bellyPan = new THREE.Mesh(bellyGeo, mats.pearlWhiteMat);
       group.add(bellyPan);
 
-      const skidPlate = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.15, 2.2), mats.darkFrameMat);
-      skidPlate.position.set(1.4, 2.05, 0);
-      group.add(skidPlate);
-
-      // Sculpted Muscular Pearl-White Humpback Fuel Tank with Knee Cutouts
+      // Sculpted Muscular Pearl-White Humpback Fuel Tank
       const tankStations = [
         { center: [5.4, 7.6, 0],  ryTop: 0.55, ryBot: 0.65, rz: 0.65 },
         { center: [4.4, 8.2, 0],  ryTop: 1.25, ryBot: 1.35, rz: 1.35 },
@@ -3631,11 +4013,12 @@ let sharedRickshawArtTexture = null;
         group.add(padMesh);
       });
 
+      // Contoured Saddle (Tailored directly under rider glutes)
       const saddleStations = [
-        { center: [-1.0, 6.9, 0], ryTop: 0.42, ryBot: 0.45, rz: 0.75 },
-        { center: [-2.2, 6.5, 0], ryTop: 0.38, ryBot: 0.42, rz: 0.85 },
-        { center: [-3.4, 6.8, 0], ryTop: 0.40, ryBot: 0.40, rz: 0.80 },
-        { center: [-4.4, 7.4, 0], ryTop: 0.45, ryBot: 0.38, rz: 0.75 }
+        { center: [-1.0, 6.9, 0], ryTop: 0.42, ryBot: 0.45, rz: 0.85 },
+        { center: [-2.2, 6.5, 0], ryTop: 0.38, ryBot: 0.42, rz: 1.05 }, // Wide saddle bucket
+        { center: [-3.4, 6.8, 0], ryTop: 0.40, ryBot: 0.40, rz: 0.95 },
+        { center: [-4.4, 7.4, 0], ryTop: 0.45, ryBot: 0.38, rz: 0.80 }
       ];
       group.add(createLoftedBodyMesh(saddleStations, 20, mats.darkLeatherMat));
 
@@ -3651,10 +4034,17 @@ let sharedRickshawArtTexture = null;
       tailLight.position.set(-8.25, 8.1, 0);
       group.add(tailLight);
 
-      const huggerMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.60, 3.60, 1.95, 20, 1, true, Math.PI * 0.40, Math.PI * 0.55), mats.pearlWhiteMat);
-      huggerMesh.rotation.x = Math.PI / 2;
-      huggerMesh.position.set(rearX, wheelY, 0);
-      group.add(huggerMesh);
+      // 2. MODEL A REAR TIRE HUGGER: Forward-facing sport tire hugger mounted to swingarm
+      // Covers ONLY upper-front quadrant (angle = 35° to 88° facing engine/exhaust under seat), stopping right at 12 o'clock top crest!
+      // Leaves rear half (88° to 180°) and lower half 100% open and exposed!
+      const rearHugger = createUpperArchFender(rearX, wheelY, 3.25 + 0.10, 1.85, 35, 88, 20, mats.pearlWhiteMat, 0.08);
+      group.add(rearHugger);
+
+      // Swingarm mounting bracket for rear hugger
+      const huggerBracket = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.16, 0.35), mats.darkFrameMat);
+      huggerBracket.position.set(rearX + 1.8, wheelY + 1.6, 1.0);
+      huggerBracket.rotation.z = -0.55;
+      group.add(huggerBracket);
 
       const headerPts = [
         new THREE.Vector3(3.4, 4.6, 0.3),
@@ -3686,9 +4076,21 @@ let sharedRickshawArtTexture = null;
         group.add(swingArm);
       });
 
-      saddleAnchor = [-1.8, 6.7, 0];
-      pegPosL = [0.4, 4.1, -1.45];
-      pegPosR = [0.4, 4.1, 1.45];
+      saddleAnchor = [-2.2, 6.5, 0];
+      pegPosL = [0.4, 4.0, -1.45];
+      pegPosR = [0.4, 4.0, 1.45];
+
+      // Footpegs
+      [-1, 1].forEach(side => {
+        const peg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.85, 12), mats.darkFrameMat);
+        peg.rotation.x = Math.PI / 2;
+        peg.position.set(0.4, 3.8, side * 1.45);
+        group.add(peg);
+      });
+
+      // ATTACH REBUILT FURNISHED BIKER (Sport Tuck - Hips seated firmly on saddle)
+      const biker = buildRealisticBiker(false, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed);
+      group.add(biker);
 
     } else {
       // =======================================================================
@@ -3737,90 +4139,115 @@ let sharedRickshawArtTexture = null;
         goldTube.rotation.z = rakeAngle;
         group.add(goldTube);
 
-        const axleClamp = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.05, 0.55), mats.darkFrameMat);
-        axleClamp.position.set(frontX, wheelY, fz);
-        group.add(axleClamp);
+        // CLEAN AXLE SPINDLE (NO blocky cube sticking out)
+        const smallAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.45, 14), mats.darkFrameMat);
+        smallAxle.rotation.x = Math.PI / 2;
+        smallAxle.position.set(frontX, wheelY, fz);
+        group.add(smallAxle);
       });
 
-      const fFender = new THREE.Mesh(new THREE.CylinderGeometry(3.60, 3.60, 1.55, 24, 1, true, Math.PI * 0.18, Math.PI * 0.65), mats.glossyBlackMat);
-      fFender.rotation.x = Math.PI / 2;
-      fFender.position.set(frontX, wheelY, 0);
-      group.add(fFender);
+      // 1. MODEL B FRONT MUDGUARD: Single unified group centered at top crest (angle = 60° to 130°, hugging 0.08 above tread)
+      const frontFenderGroup = new THREE.Group();
+      const fFenderR = 3.25 + 0.08;
+      const fFender = createUpperArchFender(frontX, wheelY, fFenderR, 1.60, 60, 130, 24, mats.glossyBlackMat, 0.08);
+      frontFenderGroup.add(fFender);
 
-      const fFenderStripe = new THREE.Mesh(new THREE.TorusGeometry(3.64, 0.045, 6, 24, Math.PI * 0.65), mats.crimsonPinstripeMat);
-      fFenderStripe.position.set(frontX, wheelY, 0);
-      fFenderStripe.rotation.z = Math.PI * 0.18;
-      group.add(fFenderStripe);
+      // Crimson-red pinstripe hugging tightly right on the front fender arch
+      const fStripeCurve = new THREE.CatmullRomCurve3();
+      for (let d = 60; d <= 130; d += 10) {
+        const rad = d * Math.PI / 180;
+        fStripeCurve.points.push(new THREE.Vector3(frontX + Math.cos(rad) * (fFenderR + 0.05), wheelY + Math.sin(rad) * (fFenderR + 0.05), 0));
+      }
+      const fFenderStripe = new THREE.Mesh(new THREE.TubeGeometry(fStripeCurve, 18, 0.045, 8, false), mats.crimsonPinstripeMat);
+      frontFenderGroup.add(fFenderStripe);
+      group.add(frontFenderGroup);
 
+      // Single Round Chrome Headlight
       const hlGroup = new THREE.Group();
-      hlGroup.position.set(tripleTreeX + 1.2, tripleTreeY - 0.35, 0);
+      hlGroup.position.set(tripleTreeX + 1.25, tripleTreeY - 0.45, 0);
 
-      const hlShell = new THREE.Mesh(new THREE.SphereGeometry(0.90, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), mats.darkFrameMat);
-      hlShell.rotation.z = Math.PI / 2;
-      hlGroup.add(hlShell);
+      const hlBucket = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 18), mats.darkFrameMat);
+      hlBucket.scale.set(0.75, 0.95, 0.95);
+      hlGroup.add(hlBucket);
 
-      const hlRim = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.09, 10, 24), mats.chromeMat);
-      hlRim.rotation.y = Math.PI / 2;
-      hlRim.position.set(0.42, 0, 0);
-      hlGroup.add(hlRim);
+      const hlBezel = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.09, 10, 24), mats.chromeMat);
+      hlBezel.rotation.y = Math.PI / 2;
+      hlBezel.position.set(0.25, 0, 0);
+      hlGroup.add(hlBezel);
 
-      const hlGlass = new THREE.Mesh(new THREE.CircleGeometry(0.84, 24), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffedd5, emissiveIntensity: 0.85, roughness: 0.1 }));
-      hlGlass.rotation.y = Math.PI / 2;
-      hlGlass.position.set(0.45, 0, 0);
-      hlGroup.add(hlGlass);
+      const hlLens = new THREE.Mesh(new THREE.CircleGeometry(0.92, 24), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfffbeb, emissiveIntensity: 0.95, roughness: 0.08 }));
+      hlLens.rotation.y = Math.PI / 2;
+      hlLens.position.set(0.26, 0, 0);
+      hlGroup.add(hlLens);
 
-      const cowlShape = new THREE.Shape();
-      cowlShape.moveTo(-0.2, 0);
-      cowlShape.quadraticCurveTo(0.6, 1.2, 0.2, 1.9);
-      cowlShape.quadraticCurveTo(-0.8, 1.6, -0.6, 0);
-      cowlShape.closePath();
-      const cowlGeo = new THREE.ExtrudeGeometry(cowlShape, { depth: 1.85, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08 });
-      cowlGeo.translate(0, 0, -1.85 / 2);
-      const miniCowl = new THREE.Mesh(cowlGeo, mats.glossyBlackMat);
-      miniCowl.position.set(0.1, 0.45, 0);
-      miniCowl.rotation.z = -0.32;
-      hlGroup.add(miniCowl);
+      const flyscreenShape = new THREE.Shape();
+      flyscreenShape.moveTo(0, 0);
+      flyscreenShape.quadraticCurveTo(0.4, 1.8, 0.1, 2.8);
+      flyscreenShape.quadraticCurveTo(-0.6, 2.2, -0.5, 0);
+      flyscreenShape.closePath();
+      const flyscreen = new THREE.Mesh(new THREE.ExtrudeGeometry(flyscreenShape, { depth: 1.4, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05 }).translate(0, 0, -0.7), mats.smokedVisorMat);
+      flyscreen.position.set(-0.25, 0.7, 0);
+      flyscreen.rotation.z = -0.45;
+      hlGroup.add(flyscreen);
       group.add(hlGroup);
 
-      const cBar = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 4.6, 14), mats.darkFrameMat);
-      cBar.rotation.x = Math.PI / 2;
-      cBar.position.set(tripleTreeX - 0.25, tripleTreeY + 0.65, 0);
-      group.add(cBar);
+      // Wide Flat Chrome T-Bars
+      const tBar = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 5.2, 14), mats.chromeMat);
+      tBar.rotation.x = Math.PI / 2;
+      tBar.position.set(tripleTreeX + 0.10, tripleTreeY + 0.65, 0);
+      group.add(tBar);
 
-      leftGripPos = [tripleTreeX - 0.25, tripleTreeY + 0.65, -1.95];
-      rightGripPos = [tripleTreeX - 0.25, tripleTreeY + 0.65, 1.95];
+      leftGripPos = [tripleTreeX + 0.10, tripleTreeY + 0.65, -2.25];
+      rightGripPos = [tripleTreeX + 0.10, tripleTreeY + 0.65, 2.25];
 
-      [-2.1, 2.1].forEach(mz => {
+      [-2.45, 2.45].forEach(mz => {
         const mStem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 8), mats.chromeMat);
-        mStem.position.set(tripleTreeX - 0.25, tripleTreeY + 1.05, mz);
+        mStem.position.set(tripleTreeX + 0.10, tripleTreeY + 1.05, mz);
         group.add(mStem);
-        const mHead = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.06, 16), mats.chromeMat);
-        mHead.position.set(tripleTreeX - 0.25, tripleTreeY + 1.45, mz);
-        mHead.rotation.x = Math.PI / 2;
+        const mHead = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.40, 0.08, 16), mats.chromeMat);
+        mHead.rotation.z = Math.PI / 2;
+        mHead.position.set(tripleTreeX + 0.10, tripleTreeY + 1.45, mz);
         group.add(mHead);
       });
 
-      // Exposed V-Twin Engine in Frame Cradle
+      // Double-Cradle Black Steel Frame
+      const cradleTubes = [
+        [[tripleTreeX - 0.4, tripleTreeY - 0.6, 1.0], [3.8, 4.2, 1.3], [1.8, 2.3, 1.3], [-2.0, 2.3, 1.3], [-4.2, 3.8, 1.1]],
+        [[tripleTreeX - 0.4, tripleTreeY - 0.6, -1.0], [3.8, 4.2, -1.3], [1.8, 2.3, -1.3], [-2.0, 2.3, -1.3], [-4.2, 3.8, -1.1]]
+      ];
+      cradleTubes.forEach(pts => {
+        const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], p[2])));
+        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 16, 0.20, 8, false), mats.darkFrameMat);
+        group.add(tube);
+      });
+
+      // Exposed Chrome V-Twin Engine
       const vTwinGroup = new THREE.Group();
-      vTwinGroup.position.set(0.8, 3.8, 0);
-      vTwinGroup.add(new THREE.Mesh(new THREE.BoxGeometry(4.0, 2.2, 2.4), mats.gunmetalEngineMat));
+      vTwinGroup.position.set(1.2, 4.5, 0);
 
-      [-0.42, 0.42].forEach(va => {
-        const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.90, 1.8, 16), mats.darkFrameMat);
-        cyl.rotation.z = va;
-        cyl.position.set(Math.sin(va) * 1.35, Math.cos(va) * 1.35, 0);
-        vTwinGroup.add(cyl);
+      const crankCase = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.4, 2.2), mats.gunmetalEngineMat);
+      vTwinGroup.add(crankCase);
 
-        for (let f = -0.7; f <= 0.7; f += 0.28) {
-          const cFin = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.05, 16), mats.darkFrameMat);
-          cFin.rotation.z = va;
-          cFin.position.set(Math.sin(va) * (1.35 + f), Math.cos(va) * (1.35 + f), 0);
-          vTwinGroup.add(cFin);
+      const vAngles = [-0.40, 0.40];
+      vAngles.forEach(va => {
+        const cylGroup = new THREE.Group();
+        cylGroup.rotation.z = va;
+        cylGroup.position.set(Math.sin(va) * 0.9, Math.cos(va) * 0.9, 0);
+
+        for (let fy = 0; fy <= 1.8; fy += 0.28) {
+          const cFin = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.07, 18), mats.darkFrameMat);
+          cFin.position.y = fy;
+          cylGroup.add(cFin);
+          const iFin = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.22, 16), mats.gunmetalEngineMat);
+          iFin.position.y = fy + 0.14;
+          cylGroup.add(iFin);
         }
 
-        const rockerHead = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.55, 1.95), mats.chromeMat);
+        vTwinGroup.add(cylGroup);
+
+        const rockerHead = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.55, 1.6), mats.chromeMat);
         rockerHead.rotation.z = va;
-        rockerHead.position.set(Math.sin(va) * 2.35, Math.cos(va) * 2.35, 0);
+        rockerHead.position.set(Math.sin(va) * 2.8, Math.cos(va) * 2.8, 0);
         vTwinGroup.add(rockerHead);
 
         [-0.55, 0.55].forEach(pz => {
@@ -3842,24 +4269,27 @@ let sharedRickshawArtTexture = null;
       vTwinGroup.add(primaryCover);
       group.add(vTwinGroup);
 
+      // Dual Staggered Chrome Exhaust Pipes
       [0.95, 1.30].forEach((pz, idx) => {
         const pipeY = 2.7 + idx * 0.45;
         const pipePts = [
           new THREE.Vector3(2.4, 4.4 - idx * 0.4, 0.6),
           new THREE.Vector3(3.0, 3.4, pz),
-          new THREE.Vector3(1.2, pipeY, pz),
-          new THREE.Vector3(-7.4, pipeY, pz)
+          new THREE.Vector3(1.8, pipeY, pz),
+          new THREE.Vector3(-4.0, pipeY, pz),
+          new THREE.Vector3(-8.8 - idx * 0.4, pipeY, pz)
         ];
         const pipeCurve = new THREE.CatmullRomCurve3(pipePts);
         const exPipe = new THREE.Mesh(new THREE.TubeGeometry(pipeCurve, 20, 0.22, 10, false), mats.chromeMat);
         group.add(exPipe);
 
-        const slashTip = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.8, 12), mats.chromeMat);
-        slashTip.rotation.z = Math.PI / 2 + 0.35;
-        slashTip.position.set(-7.7, pipeY, pz);
+        const slashTip = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.65, 14), mats.chromeMat);
+        slashTip.rotation.z = Math.PI / 2 - 0.35;
+        slashTip.position.set(-8.8 - idx * 0.4, pipeY, pz);
         group.add(slashTip);
       });
 
+      // Teardrop Glossy Black Fuel Tank with Crimson Pinstripes
       const cruiserTankStations = [
         { center: [5.4, 7.5, 0],  ryTop: 0.50, ryBot: 0.65, rz: 0.65 },
         { center: [4.0, 8.4, 0],  ryTop: 1.20, ryBot: 1.45, rz: 1.40 },
@@ -3869,14 +4299,10 @@ let sharedRickshawArtTexture = null;
       ];
       group.add(createLoftedBodyMesh(cruiserTankStations, 24, mats.glossyBlackMat));
 
-      const tankConsole = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.12, 0.55), mats.chromeMat);
-      tankConsole.position.set(2.4, 8.95, 0);
-      tankConsole.rotation.z = -0.32;
-      group.add(tankConsole);
-
-      const gasCap = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.14, 16), mats.chromeMat);
-      gasCap.position.set(3.4, 9.45, 0);
-      gasCap.rotation.z = -0.32;
+      // Flush billet gas cap (ZERO vertical grey bar)
+      const gasCap = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.10, 18), mats.chromeMat);
+      gasCap.position.set(3.2, 8.85, 0);
+      gasCap.rotation.z = -0.25;
       group.add(gasCap);
 
       [-1.38, 1.38].forEach(tz => {
@@ -3891,40 +4317,24 @@ let sharedRickshawArtTexture = null;
         group.add(stripeTube);
       });
 
-      const chinShape = new THREE.Shape();
-      chinShape.moveTo(3.6, 4.0);
-      chinShape.lineTo(4.6, 2.8);
-      chinShape.lineTo(3.2, 1.9);
-      chinShape.lineTo(0.8, 1.9);
-      chinShape.lineTo(1.8, 3.4);
-      chinShape.closePath();
-      const chinGeo = new THREE.ExtrudeGeometry(chinShape, { depth: 1.85, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08 });
-      chinGeo.translate(0, 0, -1.85 / 2);
-      const chinMesh = new THREE.Mesh(chinGeo, mats.glossyBlackMat);
-      group.add(chinMesh);
-
-      const chinStripe = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.09, 1.95), mats.crimsonPinstripeMat);
-      chinStripe.position.set(2.4, 2.2, 0);
-      chinStripe.rotation.z = -0.35;
-      group.add(chinStripe);
-
-      // 6. Low Scooped Black Leather Rider Seat & Sweeping Rear Fender (ZERO GAP!)
+      // Ultra-Low Scooped Leather Saddle & Sweeping Rear Fender (SEAMLESS CONTINUOUS BODYWORK)
       const seatStations = [
         { center: [-1.4, 6.4, 0], ryTop: 0.38, ryBot: 0.35, rz: 0.72 },
-        { center: [-2.6, 5.8, 0], ryTop: 0.35, ryBot: 0.35, rz: 0.88 }, // Deepest pocket
-        { center: [-3.8, 6.3, 0], ryTop: 0.40, ryBot: 0.32, rz: 0.80 }, // Lumbar rise behind rider
-        { center: [-4.4, 6.1, 0], ryTop: 0.25, ryBot: 0.22, rz: 0.75 }  // Seamless junction to fender
+        { center: [-2.6, 5.8, 0], ryTop: 0.35, ryBot: 0.35, rz: 0.95 }, // Deepest pocket directly under rider
+        { center: [-3.8, 6.3, 0], ryTop: 0.40, ryBot: 0.32, rz: 0.88 }, // Lumbar rise supporting rider's back
+        { center: [-4.4, 6.1, 0], ryTop: 0.25, ryBot: 0.22, rz: 0.80 }  // Seamless junction into rear fender
       ];
       group.add(createLoftedBodyMesh(seatStations, 20, mats.darkLeatherMat));
 
-      // Sweeping Glossy Black Rear Fender from back of seat to bobbed tail
+      // 2. MODEL B REAR MUDGUARD: Sweeping Glossy Black Rear Fender from back of seat to bobbed tail
+      // Hugging the top arch of the rear tire, flowing seamlessly into the saddle!
       const fenderStations = [
-        { center: [-4.3, 6.08, 0], ryTop: 0.16, ryBot: 0.14, rz: 1.12 },
-        { center: [-5.6, 6.35, 0], ryTop: 0.18, ryBot: 0.16, rz: 1.22 },
-        { center: [-7.2, 6.55, 0], ryTop: 0.20, ryBot: 0.18, rz: 1.25 },
-        { center: [-8.8, 6.50, 0], ryTop: 0.20, ryBot: 0.18, rz: 1.22 },
-        { center: [-10.4, 5.75, 0], ryTop: 0.18, ryBot: 0.16, rz: 1.18 },
-        { center: [-11.5, 4.40, 0], ryTop: 0.16, ryBot: 0.14, rz: 1.10 }
+        { center: [-4.3, 6.08, 0], ryTop: 0.18, ryBot: 0.14, rz: 1.15 },
+        { center: [-5.6, 6.35, 0], ryTop: 0.20, ryBot: 0.16, rz: 1.25 },
+        { center: [-7.2, 6.55, 0], ryTop: 0.22, ryBot: 0.18, rz: 1.28 },
+        { center: [-8.8, 6.50, 0], ryTop: 0.22, ryBot: 0.18, rz: 1.25 },
+        { center: [-10.4, 5.75, 0], ryTop: 0.20, ryBot: 0.16, rz: 1.20 },
+        { center: [-11.5, 4.40, 0], ryTop: 0.18, ryBot: 0.14, rz: 1.12 }
       ];
       group.add(createLoftedBodyMesh(fenderStations, 24, mats.glossyBlackMat));
 
@@ -3962,187 +4372,22 @@ let sharedRickshawArtTexture = null;
         group.add(cArm);
       });
 
-      saddleAnchor = [-2.4, 6.2, 0];
+      saddleAnchor = [-2.6, 5.8, 0];
       pegPosL = [2.8, 3.8, -1.55];
       pegPosR = [2.8, 3.8, 1.55];
+
+      // Forward Footpegs
+      [-1, 1].forEach(side => {
+        const peg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.85, 12), mats.darkFrameMat);
+        peg.rotation.x = Math.PI / 2;
+        peg.position.set(2.8, 3.6, side * 1.55);
+        group.add(peg);
+      });
+
+      // ATTACH REBUILT FURNISHED BIKER (Cruiser Posture - Deeply nested in saddle)
+      const biker = buildRealisticBiker(true, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed);
+      group.add(biker);
     }
-
-    // -------------------------------------------------------------------------
-    // CONTINUOUS WATERTIGHT HUMAN RIDER (STEP 1: CLEAN SADDLE & GRIP LOCK)
-    // -------------------------------------------------------------------------
-    const OUTFIT_PRESETS = [
-      { hoodieHex: 0x18181b, legHex: 0x27272a, shoeHex: 0x18181b, glovesHex: 0x18181b, helmetHex: 0x111827 },
-      { hoodieHex: 0x475569, legHex: 0x1e293b, shoeHex: 0x580b18, glovesHex: 0x1e293b, helmetHex: 0x1e293b },
-      { hoodieHex: 0x334138, legHex: 0x374151, shoeHex: 0xd97706, glovesHex: 0x451a03, helmetHex: 0x090d16 },
-      { hoodieHex: 0x4c0519, legHex: 0x18181b, shoeHex: 0x991b1b, glovesHex: 0x18181b, helmetHex: 0x1d4ed8 }
-    ];
-    const outfit = OUTFIT_PRESETS[Math.abs(appearanceSeed || 0) % OUTFIT_PRESETS.length];
-
-    const riderHoodieMat = new THREE.MeshStandardMaterial({ color: outfit.hoodieHex, roughness: 0.85, metalness: 0.02 });
-    const riderRibbedMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(outfit.hoodieHex).multiplyScalar(0.72), roughness: 0.90 });
-    const riderPantsMat = new THREE.MeshStandardMaterial({ color: outfit.legHex, roughness: 0.82 });
-    const riderShoeMat = new THREE.MeshStandardMaterial({ color: outfit.shoeHex, roughness: 0.45 });
-    const riderGlovesMat = new THREE.MeshStandardMaterial({ color: outfit.glovesHex, roughness: 0.55 });
-    const riderHelmetMat = new THREE.MeshStandardMaterial({ color: outfit.helmetHex, roughness: 0.15, metalness: 0.45 });
-    const riderVisorMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.05, metalness: 0.95 });
-
-    let headPos, shoulderPos, torsoCrossSections;
-    let kneePosL, kneePosR;
-
-    if (isCruiser) {
-      headPos = [0.45, 12.20, 0];
-      shoulderPos = { x: -0.15, y: 10.85, z: 1.80 };
-      kneePosL = [1.2, 5.8, -1.65];
-      kneePosR = [1.2, 5.8, 1.65];
-
-      torsoCrossSections = [
-        { p: [-2.4, 6.2, 0], rx: 1.15, ry: 1.45 },
-        { p: [-1.8, 7.6, 0], rx: 1.25, ry: 1.65 },
-        { p: [-1.0, 9.2, 0], rx: 1.35, ry: 1.95 },
-        { p: [-0.15, 10.85, 0], rx: 1.30, ry: 2.10 },
-        { p: [0.15, 11.45, 0], rx: 1.05, ry: 1.55 },
-        { p: [0.35, 11.85, 0], rx: 0.75, ry: 0.95 },
-        { p: [0.45, 12.20, 0], rx: 0.65, ry: 0.75 }
-      ];
-    } else {
-      headPos = [2.25, 11.25, 0];
-      shoulderPos = { x: 1.35, y: 10.25, z: 1.80 };
-      kneePosL = [1.1, 6.15, -1.60];
-      kneePosR = [1.1, 6.15, 1.60];
-
-      torsoCrossSections = [
-        { p: [-1.8, 6.7, 0], rx: 1.10, ry: 1.40 },
-        { p: [-0.9, 7.9, 0], rx: 1.20, ry: 1.65 },
-        { p: [0.25, 9.2, 0], rx: 1.30, ry: 1.95 },
-        { p: [1.35, 10.25, 0], rx: 1.25, ry: 2.10 },
-        { p: [1.80, 10.65, 0], rx: 1.00, ry: 1.50 },
-        { p: [2.05, 10.95, 0], rx: 0.72, ry: 0.90 },
-        { p: [2.25, 11.25, 0], rx: 0.65, ry: 0.75 }
-      ];
-    }
-
-    group.add(createSeamlessLoftedLimb(torsoCrossSections, 16, 24, riderHoodieMat));
-
-    const solidNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 0.55, 16), mats.skinMat);
-    solidNeck.position.set(headPos[0] - 0.12, headPos[1] - 0.45, 0);
-    solidNeck.rotation.z = isCruiser ? -0.15 : -0.28;
-    group.add(solidNeck);
-
-    const collarRim = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.72, 0.30, 18), riderRibbedMat);
-    collarRim.position.set(headPos[0] - 0.18, headPos[1] - 0.58, 0);
-    collarRim.rotation.z = isCruiser ? -0.15 : -0.28;
-    group.add(collarRim);
-
-    // Head / Aerodynamic Helmet
-    const headGroup = new THREE.Group();
-    headGroup.position.set(headPos[0], headPos[1], 0);
-
-    const shell = new THREE.Mesh(new THREE.SphereGeometry(0.88, 36, 28), riderHelmetMat);
-    shell.scale.set(1.22, 1.05, 0.90);
-    shell.position.set(-0.04, 0.04, 0);
-    headGroup.add(shell);
-
-    const chinBar = new THREE.Mesh(new THREE.CylinderGeometry(0.86, 0.80, 0.42, 28, 1, false, -Math.PI * 0.35, Math.PI * 0.70), riderHelmetMat);
-    chinBar.scale.set(1.18, 1.0, 0.88);
-    chinBar.position.set(0.18, -0.26, 0);
-    headGroup.add(chinBar);
-
-    const visor = new THREE.Mesh(new THREE.CylinderGeometry(0.91, 0.88, 0.46, 28, 1, true, -Math.PI * 0.35, Math.PI * 0.70), riderVisorMat);
-    visor.scale.set(1.18, 1.0, 0.88);
-    visor.position.set(0.19, 0.10, 0);
-    headGroup.add(visor);
-
-    group.add(headGroup);
-
-    // Arms & Hands (Firm Handlebar Grip)
-    [-1, 1].forEach(side => {
-      const grip = side === -1 ? leftGripPos : rightGripPos;
-      const shX = shoulderPos.x;
-      const shY = shoulderPos.y;
-      const shZ = side * shoulderPos.z;
-
-      const elbow = isCruiser
-        ? [shX + (grip[0] - shX) * 0.44, shY - 1.10, side * 2.35]
-        : [shX + (grip[0] - shX) * 0.46, shY - 1.25, side * 2.35];
-
-      const wrist = [grip[0] - 0.22, grip[1] - 0.08, grip[2] - side * 0.08];
-
-      const shCap = new THREE.Mesh(new THREE.SphereGeometry(0.76, 16, 14), riderHoodieMat);
-      shCap.position.set(shX, shY, shZ);
-      group.add(shCap);
-
-      group.add(createBoneSegment([shX, shY, shZ], elbow, 0.74, 0.62, riderHoodieMat));
-
-      const elFold = new THREE.Mesh(new THREE.SphereGeometry(0.63, 16, 14), riderHoodieMat);
-      elFold.position.set(elbow[0], elbow[1], elbow[2]);
-      group.add(elFold);
-
-      group.add(createBoneSegment(elbow, wrist, 0.62, 0.48, riderHoodieMat));
-
-      const handGroup = new THREE.Group();
-      handGroup.position.set(grip[0], grip[1], grip[2]);
-      handGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.42, 0.50), riderGlovesMat));
-
-      const knuckle = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.46), mats.whiteMat);
-      knuckle.position.set(-0.02, 0.19, 0);
-      handGroup.add(knuckle);
-
-      const fingers = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.46, 14), riderGlovesMat);
-      fingers.rotation.x = Math.PI / 2;
-      fingers.position.set(0.18, -0.08, 0);
-      handGroup.add(fingers);
-
-      const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.95, 8), mats.chromeMat);
-      lever.rotation.x = Math.PI / 2 + (side * 0.12);
-      lever.position.set(0.35, 0.05, -side * 0.25);
-      handGroup.add(lever);
-
-      group.add(handGroup);
-    });
-
-    // Legs & Sneakers (Footpeg Contact)
-    [-1, 1].forEach(side => {
-      const peg = side === -1 ? pegPosL : pegPosR;
-      const knee = side === -1 ? kneePosL : kneePosR;
-      const hipX = isCruiser ? -1.8 : -1.2;
-      const hipY = isCruiser ? 6.2 : 6.6;
-      const hipZ = side * 1.05;
-
-      group.add(createBoneSegment([hipX, hipY, hipZ], knee, 0.85, 0.72, riderPantsMat));
-
-      const kneeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 14), riderPantsMat);
-      kneeMesh.position.set(knee[0], knee[1], knee[2]);
-      group.add(kneeMesh);
-
-      group.add(createBoneSegment(knee, [peg[0], peg[1] + 0.35, peg[2]], 0.70, 0.52, riderPantsMat));
-
-      const pegMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.85, 10), mats.darkFrameMat);
-      pegMesh.rotation.x = Math.PI / 2;
-      pegMesh.position.set(peg[0], peg[1] - 0.22, peg[2]);
-      group.add(pegMesh);
-
-      const shoe = new THREE.Group();
-      shoe.position.set(peg[0], peg[1], peg[2]);
-      if (isCruiser) shoe.rotation.z = 0.28;
-
-      const collarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.38, 0.75, 14), riderShoeMat);
-      collarMesh.position.set(0, 0.36, 0);
-      shoe.add(collarMesh);
-
-      const sole = new THREE.Mesh(new THREE.BoxGeometry(1.86, 0.26, 0.88), mats.soleMat);
-      sole.position.set(0.38, -0.25, 0);
-      shoe.add(sole);
-
-      const quarter = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.58, 0.84), riderShoeMat);
-      quarter.position.set(0.08, 0.05, 0);
-      shoe.add(quarter);
-
-      const toe = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.42, 0.80), riderShoeMat);
-      toe.position.set(0.74, -0.02, 0);
-      shoe.add(toe);
-
-      group.add(shoe);
-    });
 
     // Zero-Lag Additive Headlight Ground Light Pool
     const headGlowMat = new THREE.MeshBasicMaterial({
