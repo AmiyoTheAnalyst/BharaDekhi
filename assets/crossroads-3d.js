@@ -3716,40 +3716,66 @@ let sharedRickshawArtTexture = null;
   // TASK: REBUILD 3D BIKER (ANATOMICAL WAIST, FLUSH SADDLE PENETRATION,
   // CLEAN VISIBLE NECK, SYMMETRICAL FULL-FACE HELMET & DISTINCT COLOR PALETTES)
   // =========================================================================
-  function buildRealisticBiker(isCruiser, saddlePos, gripLeft, gripRight, pegLeft, pegRight, mats, appearanceSeed) {
+  function buildRealisticBiker(isCruiser, saddlePos, gripLeft, gripRight, pegLeft, pegRight, mats, appearanceSeed, bikeSync) {
     const biker = new THREE.Group();
 
     // -------------------------------------------------------------------------
-    // Task 3: Distinct Outfit & Helmet Colors (Zero Clones)
+    // Task 3: 1:1 Helmet-to-Bike Color Synchronization (Zero Color Mismatch!)
+    // Helmet shell matches the motorcycle's exact primary livery color.
+    // Outfits vary in curated modern streetwear tones (charcoal, slate, midnight, titanium) with crisp sneakers.
     // -------------------------------------------------------------------------
-    let hoodieColor, collarColor, pantsColor, helmShellColor, helmCheekColor, shoeBodyColor, shoeStripeColor;
-    if (!isCruiser) {
-      // Model A (White Streetfighter):
-      // Helmet: Glossy Cobalt Royal-Blue (#1d4ed8) with darker navy (#1e3a8a) cheek trim,
-      // reflective silver-smoke visor, dark grey side pivot hinges, black chin vent
-      // Top: Deep Crimson/Burgundy (#991b1b) fitted sweatshirt with visible neck
-      // Pants & Shoes: Dark Charcoal cargo pants (#1e293b) with crisp Bright-White sneakers (#ffffff)
-      hoodieColor = 0x991b1b;    // Deep Crimson/Burgundy fitted sweatshirt
-      collarColor = 0x7f1d1d;    // Darker Burgundy collar & cuffs
-      pantsColor = 0x1e293b;     // Dark Charcoal cargo pants
-      helmShellColor = 0x1d4ed8; // Glossy Cobalt Royal-Blue
-      helmCheekColor = 0x1e3a8a; // Darker Navy lower cheek trim
-      shoeBodyColor = 0xffffff;  // Crisp Bright-White sneakers
-      shoeStripeColor = 0x0f172a;// Charcoal trim
-    } else {
-      // Model B (Black Cruiser):
-      // Helmet: Glossy Crimson-Red (#b91c1c) with deeper ruby-red (#881337) cheek trim,
-      // reflective silver-smoke visor, dark grey side pivot hinges, black chin vent
-      // Top: Charcoal-Black fitted riding sweatshirt (#1e293b) with visible neck
-      // Pants & Shoes: Jet-Black tapered pants (#0f172a) with Red & White high-top sneakers (#dc2626 / #ffffff)
-      hoodieColor = 0x1e293b;    // Charcoal-Black fitted riding sweatshirt
-      collarColor = 0x0f172a;    // Jet-Black collar & cuffs
-      pantsColor = 0x0f172a;     // Jet-Black tapered pants
-      helmShellColor = 0xb91c1c; // Glossy Crimson-Red
-      helmCheekColor = 0x881337; // Deeper Ruby-Red cheek trim
-      shoeBodyColor = 0xdc2626;  // Red high-top sneaker body
-      shoeStripeColor = 0xffffff;// Crisp White high-top side trim
-    }
+    const helmShellColor = (bikeSync && bikeSync.helmColor !== undefined)
+      ? bikeSync.helmColor
+      : (isCruiser ? 0x111317 : 0xf5f6fa);
+
+    const helmCheekColor = (bikeSync && bikeSync.contrastColor !== undefined)
+      ? bikeSync.contrastColor
+      : 0x181a1d;
+
+    const streetwearPalettes = [
+      {
+        hoodie: 0x1e293b, // Charcoal slate sweatshirt
+        collar: 0x0f172a,
+        pants: 0x0f172a,  // Jet-black pants
+        shoe: 0xffffff,   // Crisp white sneakers
+        stripe: 0x0f172a
+      },
+      {
+        hoodie: 0x27272a, // Dark titanium grey sweatshirt
+        collar: 0x18181b,
+        pants: 0x1e293b,  // Dark slate cargo pants
+        shoe: 0xffffff,   // Crisp white sneakers
+        stripe: 0x2563eb
+      },
+      {
+        hoodie: 0x0f172a, // Deep midnight black hoodie
+        collar: 0x020617,
+        pants: 0x1e293b,  // Charcoal cargo pants
+        shoe: 0xf8fafc,   // White sneakers with red accent
+        stripe: 0xdc2626
+      },
+      {
+        hoodie: 0x334155, // Slate blue/grey sweatshirt
+        collar: 0x1e293b,
+        pants: 0x090a0d,  // Black denim
+        shoe: 0xffffff,   // Crisp white sneakers
+        stripe: 0x475569
+      },
+      {
+        hoodie: 0x3f3f46, // Heather charcoal sweatshirt
+        collar: 0x27272a,
+        pants: 0x18181b,  // Dark charcoal cargo pants
+        shoe: 0xffffff,   // Crisp white sneakers
+        stripe: 0x18181b
+      }
+    ];
+
+    const outfit = streetwearPalettes[Math.abs(appearanceSeed || 0) % streetwearPalettes.length];
+    const hoodieColor = outfit.hoodie;
+    const collarColor = outfit.collar;
+    const pantsColor = outfit.pants;
+    const shoeBodyColor = outfit.shoe;
+    const shoeStripeColor = outfit.stripe;
 
     const hoodieMat = new THREE.MeshStandardMaterial({ color: hoodieColor, roughness: 0.75, metalness: 0.04 });
     const hoodCollarMat = new THREE.MeshStandardMaterial({ color: collarColor, roughness: 0.82, metalness: 0.02 });
@@ -4013,8 +4039,363 @@ let sharedRickshawArtTexture = null;
     return biker;
   }
 
+  // =========================================================================
+  // TASK 1: REALISTIC MOTORCYCLE WHEEL & FLOATING WAVE-BRAKE ROTOR FACTORY
+  // - Dark charcoal rubber sport tire (#1c1e21, roughness: 0.82) with angled sipes (bump map)
+  // - Zero white text, zero red rim stripes
+  // - Stepped matte gunmetal alloy rim barrel (#26292e, metalness: 0.60, roughness: 0.35)
+  // - 10 slim directionally swept spokes (#22252a)
+  // - Floating wave rotor: brushed silver petal ring (#d4d8dd) with drilled holes +
+  //   champagne-gold carrier (#b59449) with 9 triangular cutouts & 9 silver bobbins
+  // =========================================================================
+  function getWaveRotorTexture() {
+    if (bikeTextureCache.waveRotor) return bikeTextureCache.waveRotor;
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 512, 512);
+
+    const cX = 256;
+    const cY = 256;
+    // Concentric brushed metal track
+    for (let r = 155; r <= 232; r += 2) {
+      const alpha = 0.14 + Math.sin(r * 1.5) * 0.08;
+      ctx.strokeStyle = `rgba(220, 226, 235, ${alpha})`;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(cX, cY, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Drilled ventilation holes: 18 staggered hole pairs around track
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1.0;
+    const numPairs = 18;
+    for (let i = 0; i < numPairs; i++) {
+      const angle = (i / numPairs) * Math.PI * 2;
+      const angle2 = angle + 0.045;
+      // Hole 1 at outer friction track (r = 212)
+      const x1 = cX + Math.cos(angle) * 212;
+      const y1 = cY + Math.sin(angle) * 212;
+      ctx.beginPath();
+      ctx.arc(x1, y1, 4.0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Hole 2 at inner friction track (r = 175)
+      const x2 = cX + Math.cos(angle2) * 175;
+      const y2 = cY + Math.sin(angle2) * 175;
+      ctx.beginPath();
+      ctx.arc(x2, y2, 4.0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
+    bikeTextureCache.waveRotor = tex;
+    return tex;
+  }
+
+  function getTreadBumpTexture() {
+    if (bikeTextureCache.treadBump) return bikeTextureCache.treadBump;
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#808080';
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#202020';
+    ctx.lineWidth = 4;
+    for (let x = 0; x < 512; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 10);
+      ctx.lineTo(x + 16, 45);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x + 16, 118);
+      ctx.lineTo(x, 83);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x + 8, 60);
+      ctx.lineTo(x + 24, 68);
+      ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(6, 1);
+    bikeTextureCache.treadBump = tex;
+    return tex;
+  }
+
+  let _cachedWaveRotorGeo = null;
+  let _cachedCarrierRotorGeo = null;
+
+  function createWaveRotorMesh() {
+    const rotorGroup = new THREE.Group();
+
+    if (!_cachedWaveRotorGeo) {
+      const outerR = 1.72;
+      const innerR = 1.15;
+      const numWaves = 12;
+      const waveShape = new THREE.Shape();
+      for (let i = 0; i <= numWaves * 8; i++) {
+        const theta = (i / (numWaves * 8)) * Math.PI * 2;
+        const waveVal = Math.sin(theta * numWaves);
+        const r = outerR + waveVal * 0.10;
+        const x = Math.cos(theta) * r;
+        const y = Math.sin(theta) * r;
+        if (i === 0) waveShape.moveTo(x, y);
+        else waveShape.lineTo(x, y);
+      }
+      const holePath = new THREE.Path();
+      holePath.absarc(0, 0, innerR, 0, Math.PI * 2, true);
+      waveShape.holes.push(holePath);
+
+      _cachedWaveRotorGeo = new THREE.ShapeGeometry(waveShape, 24);
+      const maxR = 1.90;
+      const pos = _cachedWaveRotorGeo.attributes.position;
+      const uvs = _cachedWaveRotorGeo.attributes.uv;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        uvs.setXY(i, (x / (2 * maxR)) + 0.5, (y / (2 * maxR)) + 0.5);
+      }
+      _cachedWaveRotorGeo.computeVertexNormals();
+    }
+
+    if (!_cachedCarrierRotorGeo) {
+      const carrierOuterR = 1.18;
+      const carrierInnerR = 0.58;
+      const carrierShape = new THREE.Shape();
+      carrierShape.absarc(0, 0, carrierOuterR, 0, Math.PI * 2, false);
+      const centerHole = new THREE.Path();
+      centerHole.absarc(0, 0, carrierInnerR, 0, Math.PI * 2, true);
+      carrierShape.holes.push(centerHole);
+
+      const numCutouts = 9;
+      for (let c = 0; c < numCutouts; c++) {
+        const baseAngle = (c / numCutouts) * Math.PI * 2;
+        const dAngle = (Math.PI * 2 / numCutouts) * 0.32;
+        const cutout = new THREE.Path();
+        const r1 = carrierInnerR + 0.10;
+        const r2 = carrierOuterR - 0.10;
+        cutout.moveTo(Math.cos(baseAngle - dAngle) * r1, Math.sin(baseAngle - dAngle) * r1);
+        cutout.lineTo(Math.cos(baseAngle + dAngle) * r1, Math.sin(baseAngle + dAngle) * r1);
+        cutout.lineTo(Math.cos(baseAngle) * r2, Math.sin(baseAngle) * r2);
+        cutout.closePath();
+        carrierShape.holes.push(cutout);
+      }
+      _cachedCarrierRotorGeo = new THREE.ShapeGeometry(carrierShape, 16);
+      _cachedCarrierRotorGeo.computeVertexNormals();
+    }
+
+    // Outer wave ring mesh (brushed silver, 12 wave crests, drilled ventilation holes)
+    const waveMat = new THREE.MeshStandardMaterial({
+      color: 0xd4d8dd,
+      metalness: 0.85,
+      roughness: 0.20,
+      map: getWaveRotorTexture(),
+      side: THREE.DoubleSide
+    });
+    const waveMesh = new THREE.Mesh(_cachedWaveRotorGeo, waveMat);
+    rotorGroup.add(waveMesh);
+
+    // Inner champagne-gold carrier mesh (9 open triangular cutouts)
+    const carrierMat = new THREE.MeshStandardMaterial({
+      color: 0xb59449,
+      metalness: 0.75,
+      roughness: 0.28,
+      side: THREE.DoubleSide
+    });
+    const carrierMesh = new THREE.Mesh(_cachedCarrierRotorGeo, carrierMat);
+    carrierMesh.position.z = 0.01;
+    rotorGroup.add(carrierMesh);
+
+    // 9 Floating Bobbin Rivets connecting carrier to wave ring at radius 1.16
+    const bobbinMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.90,
+      roughness: 0.18
+    });
+    const bobbinCenterMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.50,
+      roughness: 0.50
+    });
+    for (let b = 0; b < 9; b++) {
+      const bAngle = (b / 9) * Math.PI * 2;
+      const bx = Math.cos(bAngle) * 1.16;
+      const by = Math.sin(bAngle) * 1.16;
+
+      const bobbin = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.07, 12), bobbinMat);
+      bobbin.rotation.x = Math.PI / 2;
+      bobbin.position.set(bx, by, 0.02);
+      rotorGroup.add(bobbin);
+
+      const bobbinHole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.08, 10), bobbinCenterMat);
+      bobbinHole.rotation.x = Math.PI / 2;
+      bobbinHole.position.set(bx, by, 0.025);
+      rotorGroup.add(bobbinHole);
+    }
+
+    return rotorGroup;
+  }
+
+  function createRealisticMotoWheel(radius, width, isRear, isCruiser) {
+    const wheel = new THREE.Group();
+    const rimRadius = radius * 0.70;
+
+    // 1. Charcoal-Black Sport Tire (roughness: 0.82, subtle directional shoulder sipes, NO text, NO red stripes)
+    const tireMat = new THREE.MeshStandardMaterial({
+      color: 0x1c1e21,
+      roughness: 0.82,
+      metalness: 0.05,
+      bumpMap: getTreadBumpTexture(),
+      bumpScale: 0.04
+    });
+    const tire = new THREE.Mesh(
+      new THREE.TorusGeometry(radius - width * 0.44, width * 0.44, 20, 36),
+      tireMat
+    );
+    wheel.add(tire);
+
+    // 2. Stepped Matte Gunmetal-Black Alloy Rim Barrel
+    const rimMat = new THREE.MeshStandardMaterial({
+      color: 0x26292e,
+      metalness: 0.60,
+      roughness: 0.35
+    });
+
+    const rimBarrel = new THREE.Mesh(
+      new THREE.CylinderGeometry(rimRadius, rimRadius, width * 0.80, 32, 1, true),
+      rimMat
+    );
+    rimBarrel.rotation.x = Math.PI / 2;
+    wheel.add(rimBarrel);
+
+    [-1, 1].forEach(side => {
+      const rimLip = new THREE.Mesh(
+        new THREE.TorusGeometry(rimRadius, 0.075, 10, 32),
+        rimMat
+      );
+      rimLip.position.z = side * (width * 0.40);
+      wheel.add(rimLip);
+
+      const stepDrop = new THREE.Mesh(
+        new THREE.TorusGeometry(rimRadius * 0.92, 0.06, 8, 32),
+        rimMat
+      );
+      stepDrop.position.z = side * (width * 0.32);
+      wheel.add(stepDrop);
+    });
+
+    // 3. Center Hub & Axle Bore
+    const hubMat = new THREE.MeshStandardMaterial({
+      color: 0x22252a,
+      metalness: 0.65,
+      roughness: 0.35
+    });
+    const hub = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.58, 0.58, width * 0.84, 20),
+      hubMat
+    );
+    hub.rotation.x = Math.PI / 2;
+    wheel.add(hub);
+
+    const axleBoreMat = new THREE.MeshStandardMaterial({
+      color: 0x9ca3af,
+      metalness: 0.85,
+      roughness: 0.20
+    });
+    [-1, 1].forEach(side => {
+      const axleCap = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.30, 0.30, 0.08, 16),
+        axleBoreMat
+      );
+      axleCap.rotation.x = Math.PI / 2;
+      axleCap.position.z = side * (width * 0.43);
+      wheel.add(axleCap);
+
+      const centerHole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.14, 0.14, 0.09, 12),
+        new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.70 })
+      );
+      centerHole.rotation.x = Math.PI / 2;
+      centerHole.position.z = side * (width * 0.435);
+      wheel.add(centerHole);
+    });
+
+    // 4. 10 Slim Directionally Swept Alloy Spokes
+    const spokeMat = new THREE.MeshStandardMaterial({
+      color: 0x22252a,
+      metalness: 0.58,
+      roughness: 0.36
+    });
+    const numSpokes = 10;
+    const spokeLen = rimRadius * 0.94 - 0.58;
+    for (let i = 0; i < numSpokes; i++) {
+      const baseAngle = (i / numSpokes) * Math.PI * 2;
+      const sweepAngle = baseAngle + 0.14;
+      const midR = 0.58 + spokeLen * 0.50;
+
+      const spoke = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, spokeLen, width * 0.22),
+        spokeMat
+      );
+      spoke.position.set(
+        Math.cos(sweepAngle) * midR,
+        Math.sin(sweepAngle) * midR,
+        0
+      );
+      spoke.rotation.z = sweepAngle - Math.PI / 2;
+      wheel.add(spoke);
+    }
+
+    // 5. Precision Floating Wave-Brake Rotor Assembly
+    const rotorScale = radius / 3.25;
+    if (!isRear) {
+      [-1, 1].forEach(side => {
+        const rotor = createWaveRotorMesh();
+        rotor.scale.set(rotorScale, rotorScale, 1);
+        rotor.position.z = side * (width * 0.43);
+        if (side === -1) rotor.rotation.y = Math.PI;
+        wheel.add(rotor);
+      });
+    } else {
+      const rearRotor = createWaveRotorMesh();
+      rearRotor.scale.set(rotorScale, rotorScale, 1);
+      rearRotor.position.z = width * 0.43;
+      wheel.add(rearRotor);
+
+      const sprocketMat = new THREE.MeshStandardMaterial({
+        color: 0x27272a,
+        metalness: 0.70,
+        roughness: 0.30
+      });
+      const sprocket = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius * 0.50, radius * 0.50, 0.12, 32),
+        sprocketMat
+      );
+      sprocket.rotation.x = Math.PI / 2;
+      sprocket.position.z = -width * 0.41;
+      wheel.add(sprocket);
+    }
+
+    return wheel;
+  }
+
   // Master Canonical Dual 3D Motorcycle Factory (Pure Three.js - Zero Blender!)
-  // Alternates between Model A (White Streetfighter/Cafe Racer) and Model B (Black/Gold/Red Muscle Cruiser)
+  // Alternates between Model A (Streetfighter) and Model B (Cruiser) with Multi-Color Liveries & 1:1 Helmet Lock
   function createRealisticGTABike(colorHex, appearanceSeed, vData) {
     const root = new THREE.Group();
     root.userData.wheels = [];
@@ -4034,48 +4415,123 @@ let sharedRickshawArtTexture = null;
     const mats = getBikeSharedMaterials();
 
     // -------------------------------------------------------------------------
-    // Helper: Wheel Builder (Diablo Rosso Sidewalls on A, Red Rim Stripes on B)
+    // Task 2: Multi-Color Livery Combinations (Model A Streetfighter & Model B Cruiser)
     // -------------------------------------------------------------------------
-    function createSportWheel(radius, width, isRear, isModelA) {
-      const wheel = new THREE.Group();
-      const rimRadius = radius * 0.70;
-
-      const tire = new THREE.Mesh(new THREE.TorusGeometry(radius - width * 0.42, width * 0.42, 18, 36), mats.rubberMat);
-      wheel.add(tire);
-
-      if (isModelA) {
-        [-1, 1].forEach(side => {
-          const sidewallGeo = new THREE.RingGeometry(rimRadius * 0.98, radius * 0.98, 32);
-          const sidewallMat = new THREE.MeshBasicMaterial({ map: getSportTireSidewallTexture(), transparent: true, side: THREE.DoubleSide });
-          const sidewall = new THREE.Mesh(sidewallGeo, sidewallMat);
-          sidewall.position.z = side * (width * 0.43);
-          wheel.add(sidewall);
-        });
-      } else {
-        [-1, 1].forEach(side => {
-          const rimStripe = new THREE.Mesh(new THREE.TorusGeometry(rimRadius + 0.08, 0.07, 8, 36), mats.redRimStripeMat);
-          rimStripe.position.z = side * (width * 0.38);
-          wheel.add(rimStripe);
-        });
+    const modelA_Liveries = [
+      {
+        name: 'Pearl-White',
+        primaryColor: 0xf5f6fa,
+        contrastColor: 0x1e293b,
+        pinstripeColor: 0x3b82f6,
+        roughness: 0.18,
+        metalness: 0.15
+      },
+      {
+        name: 'Racing Crimson-Red',
+        primaryColor: 0xdc2626,
+        contrastColor: 0x7f1d1d,
+        pinstripeColor: 0x18181b,
+        roughness: 0.20,
+        metalness: 0.22
+      },
+      {
+        name: 'Metallic Ash-Grey',
+        primaryColor: 0x71717a,
+        contrastColor: 0x27272a,
+        pinstripeColor: 0x06b6d4,
+        roughness: 0.25,
+        metalness: 0.45
       }
+    ];
 
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.25, radius * 0.25, width * 0.85, 18), mats.darkFrameMat);
-      hub.rotation.x = Math.PI / 2;
-      wheel.add(hub);
-
-      for (let i = 0; i < 5; i++) {
-        const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.32, rimRadius * 0.92, width * 0.32), isModelA ? mats.bronzeCoverMat : mats.darkFrameMat);
-        spoke.rotation.z = (i / 5) * Math.PI * 2;
-        spoke.position.set(Math.sin((i / 5) * Math.PI * 2) * (rimRadius * 0.46), Math.cos((i / 5) * Math.PI * 2) * (rimRadius * 0.46), 0);
-        wheel.add(spoke);
+    const modelB_Liveries = [
+      {
+        name: 'Classic Gloss Black',
+        primaryColor: 0x111317,
+        contrastColor: 0x27272a,
+        pinstripeColor: 0xb91c1c,
+        roughness: 0.15,
+        metalness: 0.30
+      },
+      {
+        name: 'Matte Navy-Blue',
+        primaryColor: 0x1b2a4a,
+        contrastColor: 0x0f172a,
+        pinstripeColor: 0xd4a024,
+        roughness: 0.35,
+        metalness: 0.25
+      },
+      {
+        name: 'Matte Ash Slate',
+        primaryColor: 0x475569,
+        contrastColor: 0x1e293b,
+        pinstripeColor: 0x0f172a,
+        roughness: 0.38,
+        metalness: 0.20
+      },
+      {
+        name: 'Dark Titanium / Ash-Black',
+        primaryColor: 0x27272a,
+        contrastColor: 0x18181b,
+        pinstripeColor: 0xef4444,
+        roughness: 0.28,
+        metalness: 0.40
       }
+    ];
 
-      const disc = new THREE.Mesh(new THREE.RingGeometry(radius * 0.24, radius * 0.62, 32), mats.discRotorMat);
-      disc.position.z = isRear ? -width * 0.36 : width * 0.36;
-      wheel.add(disc);
-
-      return wheel;
+    let selectedLivery;
+    if (!isCruiser) {
+      selectedLivery = modelA_Liveries[Math.abs(appearanceSeed || 0) % modelA_Liveries.length];
+      if (colorHex !== null && colorHex !== undefined) {
+        const hexStr = '#' + colorHex.toString(16).padStart(6, '0').toLowerCase();
+        if (hexStr === '#f8fafc' || hexStr === '#ffffff' || hexStr === '#f5f6fa') {
+          selectedLivery = modelA_Liveries[0];
+        } else if (hexStr === '#dc2626' || hexStr === '#ea580c' || hexStr === '#f97316' || hexStr === '#b91c1c') {
+          selectedLivery = modelA_Liveries[1];
+        } else if (hexStr === '#71717a' || hexStr === '#64748b' || hexStr === '#475569') {
+          selectedLivery = modelA_Liveries[2];
+        } else {
+          selectedLivery = {
+            name: 'Custom',
+            primaryColor: colorHex,
+            contrastColor: 0x141619,
+            pinstripeColor: 0x3b82f6,
+            roughness: 0.20,
+            metalness: 0.25
+          };
+        }
+      }
+    } else {
+      selectedLivery = modelB_Liveries[Math.abs(appearanceSeed || 0) % modelB_Liveries.length];
+      if (colorHex !== null && colorHex !== undefined) {
+        const hexStr = '#' + colorHex.toString(16).padStart(6, '0').toLowerCase();
+        if (hexStr === '#111827' || hexStr === '#090d12' || hexStr === '#000000' || hexStr === '#111317') {
+          selectedLivery = modelB_Liveries[0];
+        } else if (hexStr === '#172554' || hexStr === '#1b2a4a' || hexStr === '#0066f5' || hexStr === '#1e3a8a') {
+          selectedLivery = modelB_Liveries[1];
+        } else if (hexStr === '#475569' || hexStr === '#64748b') {
+          selectedLivery = modelB_Liveries[2];
+        } else if (hexStr === '#27272a' || hexStr === '#2b3036') {
+          selectedLivery = modelB_Liveries[3];
+        } else {
+          selectedLivery = {
+            name: 'Custom',
+            primaryColor: colorHex,
+            contrastColor: 0x181a1b,
+            pinstripeColor: 0xb91c1c,
+            roughness: 0.25,
+            metalness: 0.30
+          };
+        }
+      }
     }
+
+    const bikeBodyMat = new THREE.MeshStandardMaterial({
+      color: selectedLivery.primaryColor,
+      roughness: selectedLivery.roughness,
+      metalness: selectedLivery.metalness,
+      side: THREE.DoubleSide
+    });
 
     let leftGripPos, rightGripPos;
     let saddleAnchor = [-1.8, 6.7, 0];
@@ -4089,12 +4545,12 @@ let sharedRickshawArtTexture = null;
       const rearX = -8.2;
       const wheelY = 3.25;
 
-      const fWheel = createSportWheel(3.25, 1.45, false, true);
+      const fWheel = createRealisticMotoWheel(3.25, 1.45, false, false);
       fWheel.position.set(frontX, wheelY, 0);
       group.add(fWheel);
       group.userData.wheels.push(fWheel);
 
-      const rWheel = createSportWheel(3.25, 1.80, true, true);
+      const rWheel = createRealisticMotoWheel(3.25, 1.80, true, false);
       rWheel.position.set(rearX, wheelY, 0);
       group.add(rWheel);
       group.userData.wheels.push(rWheel);
@@ -4124,7 +4580,7 @@ let sharedRickshawArtTexture = null;
         slider.rotation.z = rakeAngle;
         group.add(slider);
 
-        const shroud = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.40, 4.2, 16), mats.pearlWhiteMat);
+        const shroud = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.40, 4.2, 16), bikeBodyMat);
         shroud.position.set(tripleTreeX + Math.sin(rakeAngle) * 0.5, tripleTreeY - Math.cos(rakeAngle) * 0.5, fz);
         shroud.rotation.z = rakeAngle;
         group.add(shroud);
@@ -4136,9 +4592,9 @@ let sharedRickshawArtTexture = null;
         group.add(smallAxle);
       });
 
-      // 1. MODEL A FRONT MUDGUARD: Sculpted pearl-white fender over top crown (angle = 65° to 135°)
-      // Bridging cleanly between two white fork shrouds, with triangular side extensions covering upper fork stanchions
-      const frontMudguard = createUpperArchFender(frontX, wheelY, 3.25 + 0.10, 1.65, 65, 135, 24, mats.pearlWhiteMat, 0.10);
+      // 1. MODEL A FRONT MUDGUARD: Sculpted fender over top crown (angle = 65° to 135°)
+      // Bridging cleanly between two fork shrouds, with triangular side extensions covering upper fork stanchions
+      const frontMudguard = createUpperArchFender(frontX, wheelY, 3.25 + 0.10, 1.65, 65, 135, 24, bikeBodyMat, 0.10);
       group.add(frontMudguard);
 
       // Triangular side extensions covering fork stanchions
@@ -4151,7 +4607,7 @@ let sharedRickshawArtTexture = null;
         ];
         sideFlangeGeo.setFromPoints(pts);
         sideFlangeGeo.computeVertexNormals();
-        const flange = new THREE.Mesh(sideFlangeGeo, mats.pearlWhiteMat);
+        const flange = new THREE.Mesh(sideFlangeGeo, bikeBodyMat);
         group.add(flange);
       });
 
@@ -4252,7 +4708,7 @@ let sharedRickshawArtTexture = null;
         group.add(cMesh);
       });
 
-      // Tightly Contoured Pearl-White Belly Pan
+      // Tightly Contoured Belly Pan (matching primary livery)
       const bellyShape = new THREE.Shape();
       bellyShape.moveTo(3.2, 3.6);
       bellyShape.lineTo(3.4, 2.8);
@@ -4263,10 +4719,10 @@ let sharedRickshawArtTexture = null;
       bellyShape.closePath();
       const bellyGeo = new THREE.ExtrudeGeometry(bellyShape, { depth: 1.55, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06 });
       bellyGeo.translate(0, 0, -1.55 / 2);
-      const bellyPan = new THREE.Mesh(bellyGeo, mats.pearlWhiteMat);
+      const bellyPan = new THREE.Mesh(bellyGeo, bikeBodyMat);
       group.add(bellyPan);
 
-      // Sculpted Muscular Pearl-White Humpback Fuel Tank
+      // Sculpted Muscular Humpback Fuel Tank (matching primary livery)
       const tankStations = [
         { center: [5.4, 7.6, 0],  ryTop: 0.55, ryBot: 0.65, rz: 0.65 },
         { center: [4.4, 8.2, 0],  ryTop: 1.25, ryBot: 1.35, rz: 1.35 },
@@ -4275,7 +4731,7 @@ let sharedRickshawArtTexture = null;
         { center: [0.4, 7.5, 0],  ryTop: 1.00, ryBot: 1.15, rz: 1.05 },
         { center: [-1.0, 6.9, 0], ryTop: 0.55, ryBot: 0.65, rz: 0.75 }
       ];
-      group.add(createLoftedBodyMesh(tankStations, 24, mats.pearlWhiteMat));
+      group.add(createLoftedBodyMesh(tankStations, 24, bikeBodyMat));
 
       const gasCap = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.12, 18), mats.chromeMat);
       gasCap.position.set(2.8, 10.25, 0);
@@ -4306,7 +4762,7 @@ let sharedRickshawArtTexture = null;
         { center: [-7.0, 8.3, 0], ryTop: 0.35, ryBot: 0.25, rz: 0.50 },
         { center: [-8.2, 8.1, 0], ryTop: 0.18, ryBot: 0.15, rz: 0.25 }
       ];
-      group.add(createLoftedBodyMesh(tailStations, 20, mats.pearlWhiteMat));
+      group.add(createLoftedBodyMesh(tailStations, 20, bikeBodyMat));
 
       const tailLight = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.16, 0.65), new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xdc2626, emissiveIntensity: 1.0 }));
       tailLight.position.set(-8.25, 8.1, 0);
@@ -4315,7 +4771,7 @@ let sharedRickshawArtTexture = null;
       // 2. MODEL A REAR TIRE HUGGER: Forward-facing sport tire hugger mounted to swingarm
       // Covers ONLY upper-front quadrant (angle = 35° to 88° facing engine/exhaust under seat), stopping right at 12 o'clock top crest!
       // Leaves rear half (88° to 180°) and lower half 100% open and exposed!
-      const rearHugger = createUpperArchFender(rearX, wheelY, 3.25 + 0.10, 1.85, 35, 88, 20, mats.pearlWhiteMat, 0.08);
+      const rearHugger = createUpperArchFender(rearX, wheelY, 3.25 + 0.10, 1.85, 35, 88, 20, bikeBodyMat, 0.08);
       group.add(rearHugger);
 
       // Swingarm mounting bracket for rear hugger
@@ -4367,26 +4823,37 @@ let sharedRickshawArtTexture = null;
       });
 
       // ATTACH REBUILT FURNISHED BIKER (Sport Tuck - Hips seated firmly on saddle)
-      const biker = buildRealisticBiker(false, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed);
+      // 1:1 Helmet-to-Bike Color Synchronization
+      const bikeSyncA = {
+        helmColor: selectedLivery.primaryColor,
+        contrastColor: selectedLivery.contrastColor
+      };
+      const biker = buildRealisticBiker(false, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed, bikeSyncA);
       group.add(biker);
 
     } else {
       // =======================================================================
-      // MODEL B: BLACK, GOLD & RED-PINSTRIPE MUSCLE CRUISER
+      // MODEL B: MUSCLE CRUISER (MULTI-COLOR LIVERIES WITH 1:1 HELMET LOCK)
       // =======================================================================
       const frontX = 8.8;
       const rearX = -8.6;
       const wheelY = 3.25;
 
-      const fWheel = createSportWheel(3.25, 1.45, false, false);
+      const fWheel = createRealisticMotoWheel(3.25, 1.45, false, true);
       fWheel.position.set(frontX, wheelY, 0);
       group.add(fWheel);
       group.userData.wheels.push(fWheel);
 
-      const rWheel = createSportWheel(3.10, 2.20, true, false);
+      const rWheel = createRealisticMotoWheel(3.10, 2.20, true, true);
       rWheel.position.set(rearX, 3.10, 0);
       group.add(rWheel);
       group.userData.wheels.push(rWheel);
+
+      const pinstripeMat = new THREE.MeshStandardMaterial({
+        color: selectedLivery.pinstripeColor,
+        roughness: 0.35,
+        metalness: 0.20
+      });
 
       const fCaliper = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.25, 0.45), mats.darkFrameMat);
       fCaliper.position.set(frontX - 1.25, wheelY + 1.20, 0.75);
@@ -4427,16 +4894,16 @@ let sharedRickshawArtTexture = null;
       // 1. MODEL B FRONT MUDGUARD: Single unified group centered at top crest (angle = 60° to 130°, hugging 0.08 above tread)
       const frontFenderGroup = new THREE.Group();
       const fFenderR = 3.25 + 0.08;
-      const fFender = createUpperArchFender(frontX, wheelY, fFenderR, 1.60, 60, 130, 24, mats.glossyBlackMat, 0.08);
+      const fFender = createUpperArchFender(frontX, wheelY, fFenderR, 1.60, 60, 130, 24, bikeBodyMat, 0.08);
       frontFenderGroup.add(fFender);
 
-      // Crimson-red pinstripe hugging tightly right on the front fender arch
+      // Coordinated pinstripe hugging tightly right on the front fender arch
       const fStripeCurve = new THREE.CatmullRomCurve3();
       for (let d = 60; d <= 130; d += 10) {
         const rad = d * Math.PI / 180;
         fStripeCurve.points.push(new THREE.Vector3(frontX + Math.cos(rad) * (fFenderR + 0.05), wheelY + Math.sin(rad) * (fFenderR + 0.05), 0));
       }
-      const fFenderStripe = new THREE.Mesh(new THREE.TubeGeometry(fStripeCurve, 18, 0.045, 8, false), mats.crimsonPinstripeMat);
+      const fFenderStripe = new THREE.Mesh(new THREE.TubeGeometry(fStripeCurve, 18, 0.045, 8, false), pinstripeMat);
       frontFenderGroup.add(fFenderStripe);
       group.add(frontFenderGroup);
 
@@ -4567,7 +5034,7 @@ let sharedRickshawArtTexture = null;
         group.add(slashTip);
       });
 
-      // Teardrop Glossy Black Fuel Tank with Crimson Pinstripes
+      // Teardrop Fuel Tank with Coordinated Pinstripes
       const cruiserTankStations = [
         { center: [5.4, 7.5, 0],  ryTop: 0.50, ryBot: 0.65, rz: 0.65 },
         { center: [4.0, 8.4, 0],  ryTop: 1.20, ryBot: 1.45, rz: 1.40 },
@@ -4575,7 +5042,7 @@ let sharedRickshawArtTexture = null;
         { center: [0.2, 7.3, 0],  ryTop: 0.90, ryBot: 1.10, rz: 1.05 },
         { center: [-1.4, 6.4, 0], ryTop: 0.50, ryBot: 0.65, rz: 0.72 }
       ];
-      group.add(createLoftedBodyMesh(cruiserTankStations, 24, mats.glossyBlackMat));
+      group.add(createLoftedBodyMesh(cruiserTankStations, 24, bikeBodyMat));
 
       // Flush billet gas cap (ZERO vertical grey bar)
       const gasCap = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.10, 18), mats.chromeMat);
@@ -4591,7 +5058,7 @@ let sharedRickshawArtTexture = null;
           new THREE.Vector3(4.0, 8.7, tz * 1.05),
           new THREE.Vector3(5.2, 7.7, tz * 0.6)
         ]);
-        const stripeTube = new THREE.Mesh(new THREE.TubeGeometry(pinstripeCurve, 20, 0.05, 8, false), mats.crimsonPinstripeMat);
+        const stripeTube = new THREE.Mesh(new THREE.TubeGeometry(pinstripeCurve, 20, 0.05, 8, false), pinstripeMat);
         group.add(stripeTube);
       });
 
@@ -4605,7 +5072,7 @@ let sharedRickshawArtTexture = null;
       ];
       group.add(createLoftedBodyMesh(seatStations, 22, cruiserSaddleMat));
 
-      // 2. MODEL B REAR MUDGUARD: Sweeping Glossy Black Rear Fender from back of seat to bobbed tail
+      // 2. MODEL B REAR MUDGUARD: Sweeping Rear Fender from back of seat to bobbed tail
       // Hugging the top arch of the rear tire, flowing seamlessly into the saddle!
       const fenderStations = [
         { center: [-4.3, 6.08, 0], ryTop: 0.18, ryBot: 0.14, rz: 1.15 },
@@ -4615,9 +5082,9 @@ let sharedRickshawArtTexture = null;
         { center: [-10.4, 5.75, 0], ryTop: 0.20, ryBot: 0.16, rz: 1.20 },
         { center: [-11.5, 4.40, 0], ryTop: 0.18, ryBot: 0.14, rz: 1.12 }
       ];
-      group.add(createLoftedBodyMesh(fenderStations, 24, mats.glossyBlackMat));
+      group.add(createLoftedBodyMesh(fenderStations, 24, bikeBodyMat));
 
-      // Crimson Pinstripes along rear fender flanks
+      // Coordinated Pinstripes along rear fender flanks
       [-1.18, 1.18].forEach(rz => {
         const rStripeCurve = new THREE.CatmullRomCurve3([
           new THREE.Vector3(-4.4, 6.12, rz * 0.75),
@@ -4626,7 +5093,7 @@ let sharedRickshawArtTexture = null;
           new THREE.Vector3(-10.4, 5.82, rz * 0.95),
           new THREE.Vector3(-11.5, 4.45, rz * 0.80)
         ]);
-        const rStripe = new THREE.Mesh(new THREE.TubeGeometry(rStripeCurve, 20, 0.05, 8, false), mats.crimsonPinstripeMat);
+        const rStripe = new THREE.Mesh(new THREE.TubeGeometry(rStripeCurve, 20, 0.05, 8, false), pinstripeMat);
         group.add(rStripe);
       });
 
@@ -4664,7 +5131,12 @@ let sharedRickshawArtTexture = null;
       });
 
       // ATTACH REBUILT FURNISHED BIKER (Cruiser Posture - Deeply nested in saddle)
-      const biker = buildRealisticBiker(true, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed);
+      // 1:1 Helmet-to-Bike Color Synchronization
+      const bikeSyncB = {
+        helmColor: selectedLivery.primaryColor,
+        contrastColor: selectedLivery.contrastColor
+      };
+      const biker = buildRealisticBiker(true, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed, bikeSyncB);
       group.add(biker);
     }
 
