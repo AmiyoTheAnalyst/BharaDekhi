@@ -167,7 +167,7 @@
       return mesh;
     }
 
-    // Explicit Upper-Arch Mudguard Generator with Proper Smooth Normals (y = cy + sin(angle) * r, y > axleY)
+    // Explicit Upper-Arch Mudguard Generator with Smooth Normals (y = cy + sin(angle) * r, y > axleY)
     function createUpperArchFender(cx, cy, r, width, startDeg, endDeg, segs, mat, crownDrop) {
       segs = segs || 24;
       crownDrop = crownDrop !== undefined ? crownDrop : 0.08;
@@ -214,76 +214,6 @@
       geo.computeVertexNormals();
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
-      return mesh;
-    }
-
-    // Parallel-Transport Continuous Lofted Limb / Torso Helper
-    function createSeamlessLoftedLimb(crossSections, radialSegs, pathSegs, material) {
-      radialSegs = radialSegs || 16;
-      pathSegs = pathSegs || 20;
-
-      const points = crossSections.map(c => new THREE.Vector3(c.p[0], c.p[1], c.p[2]));
-      const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
-
-      function getInterpolatedRadius(u) {
-        const n = crossSections.length - 1;
-        const idx = Math.min(Math.floor(u * n), n - 1);
-        const t = (u * n) - idx;
-        const cA = crossSections[idx];
-        const cB = crossSections[idx + 1];
-        return {
-          rx: THREE.MathUtils.lerp(cA.rx, cB.rx, t),
-          ry: THREE.MathUtils.lerp(cA.ry || cA.rx, cB.ry || cB.rx, t)
-        };
-      }
-
-      const frames = curve.computeFrenetFrames(pathSegs, false);
-      const vertices = [];
-      const uvs = [];
-      const indices = [];
-
-      for (let i = 0; i <= pathSegs; i++) {
-        const u = i / pathSegs;
-        const P = curve.getPointAt(u);
-        const rad = getInterpolatedRadius(u);
-        const N = frames.normals[i];
-        const B = frames.binormals[i];
-
-        for (let j = 0; j <= radialSegs; j++) {
-          const v = j / radialSegs;
-          const theta = v * Math.PI * 2;
-          const cos = Math.cos(theta);
-          const sin = Math.sin(theta);
-
-          const vx = P.x + (N.x * cos * rad.rx) + (B.x * sin * rad.ry);
-          const vy = P.y + (N.y * cos * rad.rx) + (B.y * sin * rad.ry);
-          const vz = P.z + (N.z * cos * rad.rx) + (B.z * sin * rad.ry);
-
-          vertices.push(vx, vy, vz);
-          uvs.push(u, v);
-        }
-      }
-
-      for (let i = 0; i < pathSegs; i++) {
-        for (let j = 0; j < radialSegs; j++) {
-          const a = i * (radialSegs + 1) + j;
-          const b = (i + 1) * (radialSegs + 1) + j;
-          const c = (i + 1) * (radialSegs + 1) + (j + 1);
-          const d = i * (radialSegs + 1) + (j + 1);
-          indices.push(a, b, d);
-          indices.push(b, c, d);
-        }
-      }
-
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-      geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-      geo.setIndex(indices);
-      geo.computeVertexNormals();
-
-      const mesh = new THREE.Mesh(geo, material);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
       return mesh;
     }
 
@@ -335,8 +265,8 @@
     function buildRealisticBiker(isCruiser, saddlePos, gripLeft, gripRight, pegLeft, pegRight) {
       const biker = new THREE.Group();
 
-      const jacketColor = 0x1c2026; // Textured dark biker jacket
-      const vestColor = 0x13161b;   // Tactical vest panel
+      const jacketColor = 0x1c2026; // Textured dark biker jacket (#1c2026)
+      const vestColor = 0x13161b;   // Dark tactical vest panel
       const pantsColor = isCruiser ? 0x1e242b : 0x283c5a; // Tactical cargo / Dark denim
       const bootColor = 0x111317;   // Laced black combat/riding boots
       const gloveColor = 0x14161a;
@@ -353,78 +283,77 @@
       const helmetMat = new THREE.MeshStandardMaterial({ color: helmetColor, roughness: isCruiser ? 0.82 : 0.22, metalness: 0.30 });
       const visorMat = new THREE.MeshStandardMaterial({ color: visorColor, roughness: 0.04, metalness: 0.96 });
 
-      // Torso lean angle toward handlebars (~28° streetfighter, ~14° cruiser)
-      const leanAngle = isCruiser ? -0.24 : -0.48; // Radians
+      const leanAngle = isCruiser ? -0.22 : -0.46; // Radians
 
       // 1. CONNECTED PELVIS & GLUTES SEATED SQUARELY ON SADDLE (ZERO GAP BEHIND RIDER)
-      // Glutes sit deeply inside saddle pocket
-      const glutesCenter = [saddlePos[0] - 0.20, saddlePos[1] + 0.15, saddlePos[2]];
+      // Glutes sit directly inside saddle pocket, filling seat width completely
       const pelvisGroup = new THREE.Group();
-      pelvisGroup.position.set(glutesCenter[0], glutesCenter[1], glutesCenter[2]);
+      const glutesY = saddlePos[1] + 0.15;
+      pelvisGroup.position.set(saddlePos[0], glutesY, saddlePos[2]);
 
-      // Broad glutes & pelvis hip block (widthZ = 2.10, filling saddle width completely)
+      // Broad anatomical glutes & pelvis hip block (widthZ = 2.15, filling saddle completely)
       const glutesMesh = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 18), pantsMat);
-      glutesMesh.scale.set(1.35, 0.78, 1.05);
+      glutesMesh.scale.set(1.30, 0.75, 1.05); // Radius Z = 1.05 -> Width = 2.10
       pelvisGroup.add(glutesMesh);
 
       // Lumbar rise & waist bridge filling seat backrest seam
       const lumbarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.05, 0.95, 20), pantsMat);
       lumbarMesh.position.set(-0.25, 0.40, 0);
-      lumbarMesh.rotation.z = isCruiser ? -0.12 : -0.30;
+      lumbarMesh.rotation.z = isCruiser ? -0.12 : -0.28;
       pelvisGroup.add(lumbarMesh);
 
       // Wide dark tactical belt at jacket seam
-      const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 0.30, 20), new THREE.MeshStandardMaterial({ color: 0x0d0e12, roughness: 0.6 }));
-      belt.position.set(-0.15, 0.75, 0);
+      const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.92, 0.92, 0.28, 20), new THREE.MeshStandardMaterial({ color: 0x0d0e12, roughness: 0.6 }));
+      belt.position.set(-0.15, 0.72, 0);
       belt.rotation.z = leanAngle;
       pelvisGroup.add(belt);
 
       biker.add(pelvisGroup);
 
       // 2. BROAD ANATOMICAL UPPER BACK, CHEST & INTEGRATED SHOULDERS (NO BOWLING PIN!)
-      // Spine path from waist up to neck: WIDEST at shoulders (Z axis = 2.2) and tapering downward to waist
-      const spineOrigin = new THREE.Vector3(glutesCenter[0] + 0.05, glutesCenter[1] + 0.65, glutesCenter[2]);
-
-      // Torso group angled forward along spine
+      // Built out of 3 overlapping anatomical sections:
       const torsoGroup = new THREE.Group();
-      torsoGroup.position.copy(spineOrigin);
+      torsoGroup.position.set(saddlePos[0] + 0.05, glutesY + 0.60, saddlePos[2]);
       torsoGroup.rotation.z = leanAngle;
 
-      // Section 1: Contoured Mid-Torso / Ribcage (tapering from widthZ = 2.0 under arms down to 1.55 at waist)
-      const torsoCrossSections = [
-        { p: [0.0, 0.0, 0],   rx: 0.55, ry: 0.78 }, // Waist: depth 1.10, width 1.56
-        { p: [0.0, 1.1, 0],   rx: 0.62, ry: 0.98 }, // Ribs: depth 1.24, width 1.96
-        { p: [0.0, 2.3, 0],   rx: 0.60, ry: 1.10 }, // Scapula/Upper Chest: depth 1.20, width 2.20
-        { p: [0.0, 2.7, 0],   rx: 0.58, ry: 1.10 }, // Broad Shoulder Yoke: depth 1.16, width 2.20
-        { p: [0.0, 3.0, 0],   rx: 0.48, ry: 0.75 }  // Base of Neck: depth 0.96, width 1.50
-      ];
-      torsoGroup.add(createSeamlessLoftedLimb(torsoCrossSections, 18, 20, jacketMat));
+      // Section 1: Contoured Mid-Torso / Ribcage (tapering naturally from widthZ = 2.0 under arms down to 1.55 at waist)
+      const ribcage = new THREE.Mesh(new THREE.CylinderGeometry(0.98, 0.78, 1.9, 24), jacketMat);
+      ribcage.scale.set(0.92, 1.0, 1.0); // Depth X = 0.90, Width Z tapers from 1.96 down to 1.56
+      ribcage.position.set(0, 0.95, 0);
+      torsoGroup.add(ribcage);
 
-      // Tactical front chest / spine protector vest detail
-      const vestPanel = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.9, 1.45), vestMat);
-      vestPanel.position.set(0.55, 1.25, 0);
+      // Front tactical vest panel & rear spine protector
+      const vestPanel = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.7, 1.45), vestMat);
+      vestPanel.position.set(0.55, 1.05, 0);
       torsoGroup.add(vestPanel);
 
-      const spinePanel = new THREE.Mesh(new THREE.BoxGeometry(0.30, 2.0, 1.25), vestMat);
-      spinePanel.position.set(-0.55, 1.20, 0);
+      const spinePanel = new THREE.Mesh(new THREE.BoxGeometry(0.30, 1.8, 1.25), vestMat);
+      spinePanel.position.set(-0.52, 1.0, 0);
       torsoGroup.add(spinePanel);
 
-      // Section 2: Thick Folded Hoodie Collar & Neck Seal (ZERO gap under helmet)
-      const hoodieCollar = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.28, 16, 28), collarMat);
+      // Section 2: Broad Upper Chest & Scapula/Shoulder Yoke
+      // Wide muscular horizontal ellipsoid across upper back and chest: widthZ = 2.2, heightY = 1.1, depthX = 1.15
+      const shoulderYoke = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 24), jacketMat);
+      shoulderYoke.scale.set(1.15 / 2, 1.10 / 2, 2.20 / 2); // Radius: X = 0.575, Y = 0.55, Z = 1.10 (widthZ = 2.20)
+      shoulderYoke.position.set(0, 1.95, 0);
+      torsoGroup.add(shoulderYoke);
+
+      // Section 3: Thick Folded Hoodie Collar & Neck Seal (ZERO gap under helmet)
+      const hoodieCollar = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.26, 16, 28), collarMat);
       hoodieCollar.rotation.x = Math.PI / 2;
-      hoodieCollar.position.set(0, 2.85, 0);
+      hoodieCollar.position.set(0, 2.35, 0);
       torsoGroup.add(hoodieCollar);
 
-      const neckSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.54, 0.55, 20), collarMat);
-      neckSeal.position.set(0, 3.10, 0);
+      const neckSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.54, 0.60, 20), collarMat);
+      neckSeal.position.set(0, 2.55, 0);
       torsoGroup.add(neckSeal);
 
       biker.add(torsoGroup);
 
-      // 3. SEAMLESS TAPERED ARMS EMBEDDED INSIDE SHOULDER YOKE (NO FLOATING CYLINDERS)
-      // Shoulder origin: local (0, 2.60, ±0.95) inside the wide shoulder yoke
-      const shLocalL = new THREE.Vector3(0.0, 2.60, -0.95);
-      const shLocalR = new THREE.Vector3(0.0, 2.60, 0.95);
+      // 3. SEAMLESS TAPERED ARMS EMBEDDED INSIDE SHOULDER YOKE (NO FLOATING CYLINDERS, NO BALL JOINTS)
+      // Shoulder origins: local (0, 1.95, ±0.95) strictly INSIDE the wide shoulder yoke (radiusZ = 1.10)
+      const shLocalL = new THREE.Vector3(0.0, 1.95, -0.95);
+      const shLocalR = new THREE.Vector3(0.0, 1.95, 0.95);
       shLocalL.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
       shLocalR.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
 
@@ -436,34 +365,27 @@
         const gy = gripPos[1];
         const gz = gripPos[2];
 
-        // Natural elbow point: forward and slightly lower, keeping arm tightly aligned with shoulder & grip
-        const elbowX = sx + (gx - sx) * 0.46;
-        const elbowY = sy + (gy - sy) * 0.42 - 0.35;
-        const elbowZ = sz + (gz - sz) * 0.42;
+        // Natural elbow point with realistic bend, dropped slightly toward tank
+        const elbowX = sx + (gx - sx) * 0.42 - 0.25;
+        const elbowY = sy + (gy - sy) * 0.45 - 0.55;
+        const elbowZ = sz + (gz - sz) * 0.38 + side * 0.15;
 
-        const wristX = gx - 0.20;
+        const wristX = gx - 0.18;
         const wristY = gy - 0.08;
         const wristZ = gz;
 
-        // Bicep midpoint
-        const bicepX = sx + (elbowX - sx) * 0.5;
-        const bicepY = sy + (elbowY - sy) * 0.5;
-        const bicepZ = sz + (elbowZ - sz) * 0.5;
+        // Continuous smooth curved spline arm (shoulder -> bicep -> elbow bend -> forearm -> wrist)
+        const armCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(sx, sy, sz),
+          new THREE.Vector3(sx + (elbowX - sx) * 0.5, sy + (elbowY - sy) * 0.5, sz + (elbowZ - sz) * 0.5),
+          new THREE.Vector3(elbowX, elbowY, elbowZ),
+          new THREE.Vector3(elbowX + (wristX - elbowX) * 0.5, elbowY + (wristY - elbowY) * 0.5, elbowZ + (wristZ - elbowZ) * 0.5),
+          new THREE.Vector3(wristX, wristY, wristZ)
+        ]);
 
-        // Forearm midpoint
-        const foreX = elbowX + (wristX - elbowX) * 0.5;
-        const foreY = elbowY + (wristY - elbowY) * 0.5;
-        const foreZ = elbowZ + (wristZ - elbowZ) * 0.5;
-
-        // Continuous lofted arm (Shoulder: r=0.36 -> Bicep: r=0.32 -> Elbow: r=0.28 -> Forearm: r=0.24 -> Wrist: r=0.20)
-        const armSections = [
-          { p: [sx, sy, sz], rx: 0.36, ry: 0.36 },
-          { p: [bicepX, bicepY, bicepZ], rx: 0.32, ry: 0.32 },
-          { p: [elbowX, elbowY, elbowZ], rx: 0.28, ry: 0.28 },
-          { p: [foreX, foreY, foreZ], rx: 0.24, ry: 0.24 },
-          { p: [wristX, wristY, wristZ], rx: 0.20, ry: 0.20 }
-        ];
-        biker.add(createSeamlessLoftedLimb(armSections, 14, 16, jacketMat));
+        // Seamless tapered arm mesh (radius: 0.36 shoulder to 0.26 forearm to 0.20 wrist)
+        const armTube = new THREE.Mesh(new THREE.TubeGeometry(armCurve, 20, 0.30, 14, false), jacketMat);
+        biker.add(armTube);
 
         // Dark Motorcycle Riding Glove gripping handlebar
         const handGroup = new THREE.Group();
@@ -487,8 +409,8 @@
 
       // 4. CONNECTED TROUSERS, KNEES, CALVES & LACED COMBAT BOOTS
       [[-1, pegLeft], [1, pegRight]].forEach(([side, pegPos]) => {
-        const hipX = glutesCenter[0] + 0.35;
-        const hipY = glutesCenter[1] + 0.10;
+        const hipX = saddlePos[0] + 0.30;
+        const hipY = glutesY + 0.10;
         const hipZ = side * 0.85;
 
         const px = pegPos[0];
@@ -511,26 +433,19 @@
         const ankleY = py + 0.45;
         const ankleZ = pz;
 
-        const midThighX = hipX + (kneeX - hipX) * 0.50;
-        const midThighY = hipY + (kneeY - hipY) * 0.50;
-        const midThighZ = hipZ + (kneeZ - hipZ) * 0.50;
-
-        const midCalfX = kneeX + (ankleX - kneeX) * 0.50;
-        const midCalfY = kneeY + (ankleY - kneeY) * 0.50;
-        const midCalfZ = kneeZ + (ankleZ - kneeZ) * 0.50;
-
-        // Continuous smooth leg splines (Hip -> Mid-Thigh -> Knee -> Mid-Calf -> Ankle)
-        const legSections = [
-          { p: [hipX, hipY, hipZ], rx: 0.48, ry: 0.48 },
-          { p: [midThighX, midThighY, midThighZ], rx: 0.43, ry: 0.43 },
-          { p: [kneeX, kneeY, kneeZ], rx: 0.38, ry: 0.38 },
-          { p: [midCalfX, midCalfY, midCalfZ], rx: 0.34, ry: 0.32 },
-          { p: [ankleX, ankleY, ankleZ], rx: 0.26, ry: 0.26 }
-        ];
-        biker.add(createSeamlessLoftedLimb(legSections, 14, 18, pantsMat));
+        // Continuous smooth curved leg spline (hip -> thigh -> knee -> calf -> ankle)
+        const legCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(hipX, hipY, hipZ),
+          new THREE.Vector3(hipX + (kneeX - hipX) * 0.5, hipY + (kneeY - hipY) * 0.5, hipZ + (kneeZ - hipZ) * 0.5),
+          new THREE.Vector3(kneeX, kneeY, kneeZ),
+          new THREE.Vector3(kneeX + (ankleX - kneeX) * 0.5, kneeY + (ankleY - kneeY) * 0.5, kneeZ + (ankleZ - kneeZ) * 0.5),
+          new THREE.Vector3(ankleX, ankleY, ankleZ)
+        ]);
+        const legTube = new THREE.Mesh(new THREE.TubeGeometry(legCurve, 20, 0.38, 14, false), pantsMat);
+        biker.add(legTube);
 
         // Dark molded knee armor contour
-        const kneePad = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 10), gloveMat);
+        const kneePad = new THREE.Mesh(new THREE.SphereGeometry(0.35, 14, 10), gloveMat);
         kneePad.scale.set(0.48, 0.88, 0.78);
         kneePad.position.set(kneeX + 0.20, kneeY, kneeZ);
         biker.add(kneePad);
@@ -560,14 +475,14 @@
       });
 
       // 5. REALISTIC PROPORTIONATE HEAD / HELMET (1.3X SCALE, FLUSH FIT IN HOODIE COLLAR)
-      const headPosLocal = new THREE.Vector3(0, 3.25, 0);
+      const headPosLocal = new THREE.Vector3(0, 2.75, 0);
       headPosLocal.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
 
       const helmetGroup = new THREE.Group();
       helmetGroup.position.copy(headPosLocal);
       helmetGroup.rotation.z = isCruiser ? -0.06 : -0.16;
 
-      // 1.3x Scale Helmet Shell (Proportionate ~ 1/2.4 of shoulder width)
+      // 1.3x Scale Helmet Shell (Proportionate ~ 1/2.4 of shoulder width, seated flush into collar)
       const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(1.02, 32, 24), helmetMat);
       helmetShell.scale.set(1.18, 1.12, 1.02);
       helmetGroup.add(helmetShell);
