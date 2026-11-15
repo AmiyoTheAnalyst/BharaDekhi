@@ -3469,102 +3469,130 @@ let sharedRickshawArtTexture = null;
   }
 
   // =========================================================================
-  // TASK: REBUILD 3D BIKER (RAISED SADDLE ANCHOR, GLUTES 100% ON TOP OF SEAT,
-  // 2.0X MUSCULAR ADULT TORSO TOWERING ABOVE FUEL TANK, SHORT ARMS & WHITE SNEAKERS)
+  // TASK: REBUILD 3D BIKER (ANATOMICAL WAIST, FLUSH SADDLE PENETRATION,
+  // STREAMLINED 0.82X HELMET & DISTINCT MODEL A / MODEL B COLOR PALETTES)
   // =========================================================================
   function buildRealisticBiker(isCruiser, saddlePos, gripLeft, gripRight, pegLeft, pegRight, mats, appearanceSeed) {
     const biker = new THREE.Group();
 
-    // Mandate Materials & Palette:
-    // Matte-Black Hoodie: #121418, roughness: 0.75
-    const hoodieMat = new THREE.MeshStandardMaterial({ color: 0x121418, roughness: 0.75, metalness: 0.04 });
-    const hoodCollarMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.85, metalness: 0.02 });
+    // -------------------------------------------------------------------------
+    // Task 4: Distinct Outfit & Helmet Colors (Zero Clones)
+    // -------------------------------------------------------------------------
+    let hoodieColor, collarColor, pantsColor, helmShellColor, helmStripeColor, shoeBodyColor, shoeStripeColor;
+    if (!isCruiser) {
+      // Model A (White Streetfighter): Deep Navy Hoodie, Charcoal Pants, White Sneakers, Pearl-White/Blue Helmet
+      hoodieColor = 0x1e3a8a;    // Deep Navy-Blue / Indigo streetwear hoodie
+      collarColor = 0x172554;    // Midnight Navy collar & cuffs
+      pantsColor = 0x334155;     // Charcoal-Slate tapered cargo pants
+      helmShellColor = 0xf1f5f9; // Glossy Pearl-White
+      helmStripeColor = 0x2563eb;// Royal-Blue racing stripe
+      shoeBodyColor = 0xffffff;  // Crisp Bright-White sneakers
+      shoeStripeColor = 0x111317;// Black side stripe
+    } else {
+      // Model B (Black Cruiser): Rich Crimson-Burgundy Hoodie, Jet-Black Denim, Red/Black High-Tops, Carbon/Gold Helmet
+      hoodieColor = 0x7f1d1d;    // Rich Crimson-Burgundy heavy hoodie
+      collarColor = 0x450a0a;    // Dark Burgundy collar & cuffs
+      pantsColor = 0x111317;     // Jet-Black biker denim/joggers
+      helmShellColor = 0x141619; // Matte Carbon-Black
+      helmStripeColor = 0xd4a024;// Metallic-Gold accent trim
+      shoeBodyColor = 0xdc2626;  // Red high-top sneaker body
+      shoeStripeColor = 0x111317;// Jet-black trim
+    }
 
-    // Black Pants / Joggers: #161920, roughness: 0.75
-    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x161920, roughness: 0.75, metalness: 0.04 });
+    const hoodieMat = new THREE.MeshStandardMaterial({ color: hoodieColor, roughness: 0.75, metalness: 0.04 });
+    const hoodCollarMat = new THREE.MeshStandardMaterial({ color: collarColor, roughness: 0.82, metalness: 0.02 });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.70, metalness: 0.04 });
 
-    // Crisp Bright White Sneakers: #ffffff, flat white sole, subtle dark accent stripe
-    const sneakerWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.02 });
-    const sneakerSoleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45, metalness: 0.02 });
-    const sneakerStripeMat = new THREE.MeshStandardMaterial({ color: 0x161920, roughness: 0.60 });
+    const shoeBodyMat = new THREE.MeshStandardMaterial({ color: shoeBodyColor, roughness: 0.38, metalness: 0.04 });
+    const shoeSoleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45, metalness: 0.02 });
+    const shoeStripeMat = new THREE.MeshStandardMaterial({ color: shoeStripeColor, roughness: 0.60 });
 
-    // Dark Riding Gloves & Proportionate Full-Face Helmet:
-    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x121418, roughness: 0.60, metalness: 0.15 });
-    const helmetMat = new THREE.MeshStandardMaterial({ color: 0x121418, roughness: 0.25, metalness: 0.30 });
-    const visorMat = new THREE.MeshStandardMaterial({ color: 0x050811, roughness: 0.04, metalness: 0.96 });
+    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.60, metalness: 0.15 });
+    const helmetShellMat = new THREE.MeshStandardMaterial({ color: helmShellColor, roughness: !isCruiser ? 0.20 : 0.65, metalness: !isCruiser ? 0.25 : 0.40 });
+    const helmetStripeMat = new THREE.MeshStandardMaterial({ color: helmStripeColor, roughness: 0.30, metalness: isCruiser ? 0.75 : 0.10 });
+    const visorMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.10, metalness: 0.80 });
 
-    // Task 1: Place 100% of the Rider's Bum/Glutes ABOVE seatTopY (NEVER Under the Seat)
-    // hipY = seatTopY + hipRadius so the bottom of the glutes rests on top of the seat cushion!
+    // -------------------------------------------------------------------------
+    // Task 2: Lock Bum 100% Flush ON Seat Cushion (Zero Floating Gap)
+    // Lower hip anchor so bottom of bum penetrates 0.12 units inside the seat cushion
+    // -------------------------------------------------------------------------
     const seatTopY = saddlePos[1];
-    const hipRadius = 1.45;
-    const hipY = seatTopY + hipRadius;
-    const hipX = saddlePos[0] + 0.25;
+    const glutesRadiusY = 1.05;
+    // hipY is placed so bum bottom = hipY - glutesRadiusY === seatTopY - 0.12 (penetrates 0.12 into seat)
+    const hipY = seatTopY + glutesRadiusY - 0.12;
+    const hipX = saddlePos[0] + 0.18;
     const hipZ = saddlePos[2];
 
-    // Pelvis & Glutes Group Resting 100% ON TOP of the black seat cushion
     const pelvisGroup = new THREE.Group();
     pelvisGroup.position.set(hipX, hipY, hipZ);
 
-    // Anatomically proportioned adult glutes/pelvis in matte black (#161920)
-    const glutesMesh = new THREE.Mesh(new THREE.SphereGeometry(hipRadius, 24, 18), pantsMat);
-    glutesMesh.scale.set(1.42, 0.90, 1.25); // Broad adult pelvic block resting flush on seat
+    // -------------------------------------------------------------------------
+    // Task 1: Eliminate Oval Bulge & Lower-Back Spike (Flat Gut & Rear-Only Glutes)
+    // Front-to-back (X) radius reduced by 42% (0.82 vs 1.42). Shifted back so
+    // glutes round out ONLY at the rear contour behind spine. Zero gut bulge!
+    // -------------------------------------------------------------------------
+    const glutesMesh = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 18), pantsMat);
+    glutesMesh.position.set(-0.35, 0.0, 0); // shifted rearward behind spine
+    glutesMesh.scale.set(0.82, 1.0, 1.22);  // 42% narrower in X: rounds out ONLY at rear!
     pelvisGroup.add(glutesMesh);
 
-    // Lumbar rise & waist bridge filling connection into torso
-    const lumbarMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.30, 1.50, 1.40, 20), pantsMat);
-    lumbarMesh.position.set(-0.25, 0.55, 0);
-    lumbarMesh.rotation.z = -0.35;
-    pelvisGroup.add(lumbarMesh);
+    // Flat anterior groin/pelvis blending smoothly into the upper thighs
+    const groinMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.00, 0.80, 20), pantsMat);
+    groinMesh.position.set(0.05, 0.15, 0);
+    groinMesh.rotation.z = -0.15;
+    pelvisGroup.add(groinMesh);
 
     biker.add(pelvisGroup);
 
-    // Task 2: Make the Human Body 2x Bigger (Torso Must Tower ABOVE the Fuel Tank)
-    // Lean torso forward (~35° pitch toward front wheel) over middle of fuel tank
+    // -------------------------------------------------------------------------
+    // Task 1 & 2: Flat-Bellied Muscular Torso (~35° Forward Lean, Over Fuel Tank)
+    // 0.97x overall trim applied to station dimensions
+    // DELETE kangaroo pocket box and spine spikes!
+    // -------------------------------------------------------------------------
     const leanAngle = -0.61; // ~35° forward pitch
     const torsoGroup = new THREE.Group();
-    torsoGroup.position.set(hipX - 0.08, hipY + 0.70, hipZ);
+    torsoGroup.position.set(hipX - 0.06, hipY + 0.55, hipZ);
     torsoGroup.rotation.z = leanAngle;
 
-    // Muscular Adult Torso Stations (2.2x Taller, 2.0x Thicker, Shoulders towering above tank & windshield)
+    // Waistband hem overlapping top of hips cleanly (flat natural stomach line)
+    const waistband = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 1.22, 0.35, 24), hoodCollarMat);
+    waistband.position.set(0, -0.05, 0);
+    torsoGroup.add(waistband);
+
+    // Muscular flat-bellied torso stations (Trimmed 0.97x, shoulders high above tank)
     const hoodieStations = [
-      { y: 0.0, rx: 1.15, rz: 1.65 }, // Waist: depth 2.30, width 3.30
-      { y: 1.3, rx: 1.28, rz: 1.95 }, // Abdomen / kangaroo pocket: depth 2.56, width 3.90
-      { y: 2.7, rx: 1.42, rz: 2.25 }, // Muscular chest: depth 2.84, width 4.50
-      { y: 4.1, rx: 1.35, rz: 2.45 }, // Broad shoulder yoke: depth 2.70, width 4.90 (high above tank peak!)
-      { y: 4.8, rx: 1.18, rz: 2.05 }, // Clavicle slope: depth 2.36, width 4.10
-      { y: 5.3, rx: 0.95, rz: 1.45 }  // Neck base: depth 1.90, width 2.90
+      { y: 0.0, rx: 1.02, rz: 1.50 }, // Flat waist hem: depth 2.04, width 3.00
+      { y: 1.2, rx: 1.12, rz: 1.80 }, // Flat abdomen (ZERO blocky gut box): depth 2.24, width 3.60
+      { y: 2.5, rx: 1.30, rz: 2.12 }, // Muscular chest: depth 2.60, width 4.24
+      { y: 3.9, rx: 1.26, rz: 2.32 }, // Broad shoulder yoke: depth 2.52, width 4.64
+      { y: 4.6, rx: 1.08, rz: 1.88 }, // Clavicle slope: depth 2.16, width 3.76
+      { y: 5.1, rx: 0.86, rz: 1.35 }  // Neck base: depth 1.72, width 2.70
     ];
     torsoGroup.add(createAnatomicalTorso(hoodieStations, 24, hoodieMat));
 
-    // Subtle Front Kangaroo Pocket on lower abdomen
-    const kangarooPocket = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.35, 2.30), hoodieMat);
-    kangarooPocket.position.set(1.15, 1.45, 0);
-    torsoGroup.add(kangarooPocket);
-
-    const pocketTrim = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.10, 2.25), hoodCollarMat);
-    pocketTrim.position.set(1.18, 2.10, 0);
-    torsoGroup.add(pocketTrim);
-
-    // Folded Hoodie Neck Collar & Seal Resting Around Helmet Base (ZERO neck gap)
-    const hoodCollar = new THREE.Mesh(new THREE.TorusGeometry(1.25, 0.45, 16, 28), hoodCollarMat);
+    // Folded Hoodie Neck Collar & Inner Seal (Zero neck gap)
+    const hoodCollar = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.38, 16, 28), hoodCollarMat);
     hoodCollar.rotation.x = Math.PI / 2;
-    hoodCollar.position.set(0, 5.05, 0);
+    hoodCollar.position.set(0, 4.85, 0);
     torsoGroup.add(hoodCollar);
 
-    const hoodFoldBack = new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 12), hoodCollarMat);
-    hoodFoldBack.scale.set(0.70, 0.85, 1.30);
-    hoodFoldBack.position.set(-0.75, 4.85, 0);
+    const hoodFoldBack = new THREE.Mesh(new THREE.SphereGeometry(0.95, 16, 12), hoodCollarMat);
+    hoodFoldBack.scale.set(0.68, 0.82, 1.25);
+    hoodFoldBack.position.set(-0.70, 4.65, 0);
     torsoGroup.add(hoodFoldBack);
 
-    const neckSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.95, 1.05, 20), hoodCollarMat);
-    neckSeal.position.set(0, 5.25, 0);
+    const neckSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.88, 0.95, 20), hoodCollarMat);
+    neckSeal.position.set(0, 5.05, 0);
     torsoGroup.add(neckSeal);
 
     biker.add(torsoGroup);
 
-    // Task 2 Part 2: Proportional Downward-Reaching Arms (Shorter Than Torso Height, ~35° Elbow Bend)
-    const shLocalL = new THREE.Vector3(0.0, 4.10, -2.25);
-    const shLocalR = new THREE.Vector3(0.0, 4.10, 2.25);
+    // -------------------------------------------------------------------------
+    // Task 2 Part 2: Proportional Downward-Reaching Arms (Shorter Than Torso)
+    // Hands locked 100% on handlebar grips!
+    // -------------------------------------------------------------------------
+    const shLocalL = new THREE.Vector3(0.0, 3.90, -2.15);
+    const shLocalR = new THREE.Vector3(0.0, 3.90, 2.15);
     shLocalL.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
     shLocalR.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
 
@@ -3576,17 +3604,15 @@ let sharedRickshawArtTexture = null;
       const gy = gripPos[1];
       const gz = gripPos[2];
 
-      // Downward and forward reach:
-      // Since sy (~12.7-13.1) > gy (~8.5-8.8), arms reach DOWNWARD and forward with natural ~35° elbow bend
-      const elbowX = sx + (gx - sx) * 0.48 - 0.15;
-      const elbowY = sy + (gy - sy) * 0.42 - 0.65;
-      const elbowZ = sz + (gz - sz) * 0.45 + side * 0.45;
+      const elbowX = sx + (gx - sx) * 0.48 - 0.12;
+      const elbowY = sy + (gy - sy) * 0.42 - 0.60;
+      const elbowZ = sz + (gz - sz) * 0.45 + side * 0.42;
 
       const bicepX = sx + (elbowX - sx) * 0.50;
       const bicepY = sy + (elbowY - sy) * 0.50;
       const bicepZ = sz + (elbowZ - sz) * 0.45;
 
-      const wristX = gx - 0.28;
+      const wristX = gx - 0.26;
       const wristY = gy + 0.05;
       const wristZ = gz;
 
@@ -3594,7 +3620,6 @@ let sharedRickshawArtTexture = null;
       const foreY = elbowY + (wristY - elbowY) * 0.50;
       const foreZ = elbowZ + (wristZ - elbowZ) * 0.50;
 
-      // Smooth anatomical arm spline (total arm length is strictly shorter than torso height)
       const armCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(sx, sy, sz),
         new THREE.Vector3(bicepX, bicepY, bicepZ),
@@ -3603,61 +3628,58 @@ let sharedRickshawArtTexture = null;
         new THREE.Vector3(wristX, wristY, wristZ)
       ]);
 
-      // Thick muscular hoodie sleeves
-      const armTube = new THREE.Mesh(new THREE.TubeGeometry(armCurve, 20, 0.46, 14, false), hoodieMat);
+      const armTube = new THREE.Mesh(new THREE.TubeGeometry(armCurve, 20, 0.42, 14, false), hoodieMat);
       biker.add(armTube);
 
-      // Ribbed wrist cuff on hoodie sleeve
-      const wristCuff = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.09, 12, 18), hoodCollarMat);
+      const wristCuff = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 12, 18), hoodCollarMat);
       wristCuff.position.set(wristX, wristY, wristZ);
       wristCuff.rotation.y = Math.PI / 2;
       biker.add(wristCuff);
 
-      // Dark Motorcycle Riding Glove gripping handlebar
       const handGroup = new THREE.Group();
       handGroup.position.set(gx, gy, gz);
 
-      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.44, 0.50), gloveMat);
+      const palm = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.40, 0.46), gloveMat);
       handGroup.add(palm);
 
-      const fingers = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.48, 14), gloveMat);
+      const fingers = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.44, 14), gloveMat);
       fingers.rotation.x = Math.PI / 2;
-      fingers.position.set(0.20, -0.06, 0);
+      fingers.position.set(0.18, -0.06, 0);
       handGroup.add(fingers);
 
-      const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.05, 8), mats.chromeMat);
+      const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.98, 8), mats.chromeMat);
       lever.rotation.x = Math.PI / 2 + (side * 0.12);
-      lever.position.set(0.38, 0.05, -side * 0.26);
+      lever.position.set(0.35, 0.05, -side * 0.24);
       handGroup.add(lever);
 
       biker.add(handGroup);
     });
 
-    // Task 3: Proportional Long Legs, Black Pants (#161920) & Crisp White Sneakers (#ffffff)
+    // -------------------------------------------------------------------------
+    // Task 3: Proportional Legs & Sneakers Locked Flat on Footpegs
+    // -------------------------------------------------------------------------
     [[-1, pegLeft], [1, pegRight]].forEach(([side, pegPos]) => {
-      const hipLegX = hipX + 0.25;
-      const hipLegY = hipY + 0.15;
-      const hipLegZ = side * 1.25;
+      const hipLegX = hipX + 0.15;
+      const hipLegY = hipY + 0.05;
+      const hipLegZ = side * 1.15;
 
       const px = pegPos[0];
       const py = pegPos[1];
       const pz = pegPos[2];
 
-      // Thigh angles downward and forward (~40° downward slope) hugging fuel tank
-      // Calf angles downward and backward (Model A) or forward (Model B) to footpegs
       let kneeX, kneeY, kneeZ;
       if (isCruiser) {
-        kneeX = hipLegX + 3.10;
-        kneeY = hipLegY - 2.00;
-        kneeZ = side * 1.60;
-      } else {
-        kneeX = hipLegX + 3.35;
-        kneeY = hipLegY - 2.15;
+        kneeX = hipLegX + 2.95;
+        kneeY = hipLegY - 1.85;
         kneeZ = side * 1.55;
+      } else {
+        kneeX = hipLegX + 3.20;
+        kneeY = hipLegY - 2.05;
+        kneeZ = side * 1.48;
       }
 
       const ankleX = px;
-      const ankleY = py + 0.65;
+      const ankleY = py + 0.60;
       const ankleZ = pz;
 
       const midThighX = hipLegX + (kneeX - hipLegX) * 0.50;
@@ -3675,51 +3697,44 @@ let sharedRickshawArtTexture = null;
         new THREE.Vector3(midCalfX, midCalfY, midCalfZ),
         new THREE.Vector3(ankleX, ankleY, ankleZ)
       ]);
-      const legTube = new THREE.Mesh(new THREE.TubeGeometry(legCurve, 24, 0.44, 14, false), pantsMat);
+      const legTube = new THREE.Mesh(new THREE.TubeGeometry(legCurve, 24, 0.42, 14, false), pantsMat);
       biker.add(legTube);
 
-      // Distinct Knee Joint Beside Engine
-      const kneeJoint = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 12), pantsMat);
-      kneeJoint.scale.set(0.70, 0.95, 0.85);
-      kneeJoint.position.set(kneeX + 0.15, kneeY, kneeZ);
+      const kneeJoint = new THREE.Mesh(new THREE.SphereGeometry(0.50, 16, 12), pantsMat);
+      kneeJoint.scale.set(0.68, 0.92, 0.82);
+      kneeJoint.position.set(kneeX + 0.12, kneeY, kneeZ);
       biker.add(kneeJoint);
 
-      // Ribbed Pant Jogger Cuff at Ankle
-      const pantCuff = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.09, 12, 18), pantsMat);
+      const pantCuff = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.08, 12, 18), pantsMat);
       pantCuff.position.set(ankleX, ankleY, ankleZ);
       pantCuff.rotation.x = Math.PI / 2;
       biker.add(pantCuff);
 
-      // Crisp White Sneakers (#ffffff) on Footpegs
+      // Sneaker locked flat on footpeg
       const sneakerGroup = new THREE.Group();
       sneakerGroup.position.set(px, py, pz);
-      if (isCruiser) sneakerGroup.rotation.z = 0.22;
+      if (isCruiser) sneakerGroup.rotation.z = 0.20;
 
-      // Flat white sole resting squarely on the footpeg
-      const sole = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.26, 0.82), sneakerSoleMat);
-      sole.position.set(0.35, 0.13, 0);
+      const sole = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.24, 0.78), shoeSoleMat);
+      sole.position.set(0.32, 0.12, 0);
       sneakerGroup.add(sole);
 
-      // Rounded toe box
-      const toeBox = new THREE.Mesh(new THREE.SphereGeometry(0.38, 16, 12), sneakerWhiteMat);
+      const toeBox = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 12), shoeBodyMat);
       toeBox.scale.set(1.15, 0.68, 0.96);
-      toeBox.position.set(0.92, 0.25, 0);
+      toeBox.position.set(0.88, 0.24, 0);
       sneakerGroup.add(toeBox);
 
-      // Main sneaker leather upper (#ffffff)
-      const sneakerUpper = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.55, 0.78), sneakerWhiteMat);
-      sneakerUpper.position.set(0.15, 0.38, 0);
+      const sneakerUpper = new THREE.Mesh(new THREE.BoxGeometry(1.38, 0.52, 0.74), shoeBodyMat);
+      sneakerUpper.position.set(0.14, 0.36, 0);
       sneakerGroup.add(sneakerUpper);
 
-      // Padded ankle collar & tongue
-      const sneakerCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.40, 0.45, 16), sneakerWhiteMat);
-      sneakerCollar.position.set(-0.12, 0.62, 0);
+      const sneakerCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.42, 16), shoeBodyMat);
+      sneakerCollar.position.set(-0.10, 0.58, 0);
       sneakerGroup.add(sneakerCollar);
 
-      // Subtle black side accent stripe (#161920) on sneaker flanks
-      [-0.42, 0.42].forEach(sz => {
-        const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.10, 0.04), sneakerStripeMat);
-        stripe.position.set(0.22, 0.35, sz);
+      [-0.39, 0.39].forEach(sz => {
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.09, 0.04), shoeStripeMat);
+        stripe.position.set(0.20, 0.34, sz);
         stripe.rotation.z = 0.12;
         sneakerGroup.add(stripe);
       });
@@ -3727,46 +3742,55 @@ let sharedRickshawArtTexture = null;
       biker.add(sneakerGroup);
     });
 
-    // Proportionate 1.45x Full-Face Black Helmet & Dark Visor (Sitting High Above Bike)
-    const headPosLocal = new THREE.Vector3(0, 5.75, 0);
+    // -------------------------------------------------------------------------
+    // Task 3: Streamlined Full-Face Helmet (0.82x Scale, Sleek Oval, No Boxy Blocks)
+    // -------------------------------------------------------------------------
+    const headPosLocal = new THREE.Vector3(0, 5.50, 0);
     headPosLocal.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
 
     const helmetGroup = new THREE.Group();
     helmetGroup.position.copy(headPosLocal);
     helmetGroup.rotation.z = isCruiser ? -0.06 : -0.16;
 
-    // Proportionate 1.45x Helmet Shell (seated flush into elevated collar high above bike)
-    const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(1.45, 32, 24), helmetMat);
-    helmetShell.scale.set(1.18, 1.12, 1.04);
+    // Sleek Oval Helmet Shell (SphereGeometry scaled 0.92, 1.0, 1.12 with radius 1.18)
+    const helmR = 1.18;
+    const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(helmR, 32, 24), helmetShellMat);
+    helmetShell.scale.set(0.92, 1.00, 1.12);
     helmetGroup.add(helmetShell);
 
-    if (isCruiser) {
-      // Cruiser: Full-face matte-black helmet with recessed visor
-      const chinBar = new THREE.Mesh(new THREE.CylinderGeometry(1.38, 1.30, 0.68, 24, 1, false, -Math.PI * 0.34, Math.PI * 0.68), helmetMat);
-      chinBar.scale.set(1.15, 1.0, 1.0);
-      chinBar.position.set(0.25, -0.36, 0);
-      helmetGroup.add(chinBar);
+    // Smooth, flush-mounted dark glossy curved visor band (#090a0d, roughness: 0.1, metalness: 0.8)
+    const visorMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(helmR * 0.96, helmR * 0.92, 0.44, 24, 1, true, -Math.PI * 0.36, Math.PI * 0.72),
+      visorMat
+    );
+    visorMesh.position.set(0.22, 0.06, 0);
+    visorMesh.scale.set(0.95, 1.0, 1.10);
+    helmetGroup.add(visorMesh);
 
-      const visor = new THREE.Mesh(new THREE.CylinderGeometry(1.42, 1.36, 0.70, 24, 1, true, -Math.PI * 0.34, Math.PI * 0.68), visorMat);
-      visor.scale.set(1.16, 1.0, 1.0);
-      visor.position.set(0.28, 0.14, 0);
-      helmetGroup.add(visor);
+    // Smooth chin bar beneath the visor
+    const chinBar = new THREE.Mesh(
+      new THREE.CylinderGeometry(helmR * 0.94, helmR * 0.88, 0.38, 24, 1, false, -Math.PI * 0.34, Math.PI * 0.68),
+      helmetShellMat
+    );
+    chinBar.position.set(0.20, -0.28, 0);
+    chinBar.scale.set(0.94, 1.0, 1.08);
+    helmetGroup.add(chinBar);
+
+    if (!isCruiser) {
+      // Model A: Royal-Blue racing stripe along top crest
+      const stripeCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-helmR * 0.85, 0.40, 0),
+        new THREE.Vector3(0, helmR * 1.02, 0),
+        new THREE.Vector3(helmR * 0.85, 0.20, 0)
+      ]);
+      const stripeMesh = new THREE.Mesh(new THREE.TubeGeometry(stripeCurve, 16, 0.08, 8, false), helmetStripeMat);
+      helmetGroup.add(stripeMesh);
     } else {
-      // Streetfighter: Sleek aerodynamic sport helmet with dark visor & spoiler
-      const chinBar = new THREE.Mesh(new THREE.CylinderGeometry(1.40, 1.34, 0.70, 24, 1, false, -Math.PI * 0.36, Math.PI * 0.72), helmetMat);
-      chinBar.scale.set(1.16, 1.0, 1.0);
-      chinBar.position.set(0.28, -0.38, 0);
-      helmetGroup.add(chinBar);
-
-      const visor = new THREE.Mesh(new THREE.CylinderGeometry(1.44, 1.38, 0.72, 24, 1, true, -Math.PI * 0.36, Math.PI * 0.72), visorMat);
-      visor.scale.set(1.17, 1.0, 1.0);
-      visor.position.set(0.30, 0.16, 0);
-      helmetGroup.add(visor);
-
-      const spoiler = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.14, 1.50), helmetMat);
-      spoiler.position.set(-1.45, 0.28, 0);
-      spoiler.rotation.z = -0.30;
-      helmetGroup.add(spoiler);
+      // Model B: Metallic-Gold accent trim ring along helmet base
+      const goldTrim = new THREE.Mesh(new THREE.TorusGeometry(helmR * 0.94, 0.045, 10, 28), helmetStripeMat);
+      goldTrim.rotation.x = Math.PI / 2;
+      goldTrim.position.set(0, -0.42, 0);
+      helmetGroup.add(goldTrim);
     }
 
     biker.add(helmetGroup);
@@ -4045,13 +4069,13 @@ let sharedRickshawArtTexture = null;
         group.add(padMesh);
       });
 
-      // Thick Raised Matte-Black Saddle Cushion (#181a1f) - Top surface at seatTopY = 7.60
+      // Thick Raised Matte-Black Saddle Cushion (#181a1f) - Top surface at seatTopY = 7.70
       const raisedSaddleMat = new THREE.MeshStandardMaterial({ color: 0x181a1f, roughness: 0.85 });
       const saddleStations = [
-        { center: [-1.0, 7.10, 0], ryTop: 0.50, ryBot: 0.65, rz: 0.95 },
-        { center: [-2.2, 7.00, 0], ryTop: 0.60, ryBot: 0.65, rz: 1.25 },
-        { center: [-3.4, 7.20, 0], ryTop: 0.50, ryBot: 0.55, rz: 1.15 },
-        { center: [-4.4, 7.45, 0], ryTop: 0.45, ryBot: 0.45, rz: 0.95 }
+        { center: [-1.0, 7.15, 0], ryTop: 0.52, ryBot: 0.65, rz: 0.98 },
+        { center: [-2.2, 7.10, 0], ryTop: 0.65, ryBot: 0.65, rz: 1.28 },
+        { center: [-3.4, 7.25, 0], ryTop: 0.55, ryBot: 0.55, rz: 1.18 },
+        { center: [-4.4, 7.50, 0], ryTop: 0.45, ryBot: 0.45, rz: 0.95 }
       ];
       group.add(createLoftedBodyMesh(saddleStations, 22, raisedSaddleMat));
 
@@ -4109,7 +4133,7 @@ let sharedRickshawArtTexture = null;
         group.add(swingArm);
       });
 
-      saddleAnchor = [-2.2, 7.60, 0];
+      saddleAnchor = [-2.2, 7.70, 0];
       pegPosL = [0.4, 4.0, -1.45];
       pegPosR = [0.4, 4.0, 1.45];
 
@@ -4350,13 +4374,13 @@ let sharedRickshawArtTexture = null;
         group.add(stripeTube);
       });
 
-      // Thick Raised Matte-Black Saddle Cushion (#181a1f) - Top surface at seatTopY = 7.20
+      // Thick Raised Matte-Black Saddle Cushion (#181a1f) - Top surface at seatTopY = 7.30
       const cruiserSaddleMat = new THREE.MeshStandardMaterial({ color: 0x181a1f, roughness: 0.85 });
       const seatStations = [
-        { center: [-1.4, 6.70, 0], ryTop: 0.50, ryBot: 0.65, rz: 0.90 }, // meeting tank rear (top Y = 7.20)
-        { center: [-2.6, 6.60, 0], ryTop: 0.60, ryBot: 0.65, rz: 1.20 }, // main thick raised saddle cushion (top Y = 7.20)
-        { center: [-3.8, 6.75, 0], ryTop: 0.50, ryBot: 0.55, rz: 1.10 }, // gentle lumbar rise (top Y = 7.25)
-        { center: [-4.4, 6.60, 0], ryTop: 0.40, ryBot: 0.45, rz: 0.95 }  // meeting rear fender (top Y = 7.00)
+        { center: [-1.4, 6.75, 0], ryTop: 0.52, ryBot: 0.65, rz: 0.92 }, // meeting tank rear (top Y = 7.27)
+        { center: [-2.6, 6.70, 0], ryTop: 0.65, ryBot: 0.65, rz: 1.25 }, // main thick raised cushion directly under glutes (top Y = 7.35)
+        { center: [-3.8, 6.80, 0], ryTop: 0.55, ryBot: 0.55, rz: 1.15 }, // gentle lumbar rise (top Y = 7.35)
+        { center: [-4.4, 6.65, 0], ryTop: 0.42, ryBot: 0.45, rz: 0.95 }  // meeting rear fender (top Y = 7.07)
       ];
       group.add(createLoftedBodyMesh(seatStations, 22, cruiserSaddleMat));
 
@@ -4406,7 +4430,7 @@ let sharedRickshawArtTexture = null;
         group.add(cArm);
       });
 
-      saddleAnchor = [-2.6, 7.20, 0];
+      saddleAnchor = [-2.6, 7.30, 0];
       pegPosL = [2.8, 3.8, -1.55];
       pegPosR = [2.8, 3.8, 1.55];
 
