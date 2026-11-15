@@ -3469,34 +3469,286 @@ let sharedRickshawArtTexture = null;
   }
 
   // =========================================================================
+  // TASK: FULL-FACE HELMET WITH REFLECTIVE SHEEN & 100% SYMMETRICAL 160° VISOR
+  // =========================================================================
+  let _cachedVisorReflectionTexture = null;
+  function getVisorReflectionTexture() {
+    if (_cachedVisorReflectionTexture) return _cachedVisorReflectionTexture;
+    if (typeof document === 'undefined') return null;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      // Base silver-grey tint
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(0, 0, 256, 128);
+
+      // Gradient shadow depth
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, 128);
+      bgGrad.addColorStop(0, 'rgba(15, 23, 42, 0.45)');
+      bgGrad.addColorStop(0.5, 'rgba(100, 116, 139, 0.15)');
+      bgGrad.addColorStop(1, 'rgba(15, 23, 42, 0.65)');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 256, 128);
+
+      // Two crisp diagonal reflection gleam streaks
+      ctx.save();
+      ctx.rotate(-0.32);
+
+      // Primary gleam band
+      const grad1 = ctx.createLinearGradient(-40, 35, 140, 35);
+      grad1.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      grad1.addColorStop(0.5, 'rgba(255, 255, 255, 0.82)');
+      grad1.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = grad1;
+      ctx.fillRect(-40, 20, 240, 24);
+
+      // Secondary thinner gleam band
+      const grad2 = ctx.createLinearGradient(20, 65, 180, 65);
+      grad2.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      grad2.addColorStop(0.5, 'rgba(255, 255, 255, 0.50)');
+      grad2.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = grad2;
+      ctx.fillRect(20, 56, 220, 12);
+
+      ctx.restore();
+
+      _cachedVisorReflectionTexture = new THREE.CanvasTexture(canvas);
+      _cachedVisorReflectionTexture.wrapS = THREE.ClampToEdgeWrapping;
+      _cachedVisorReflectionTexture.wrapT = THREE.ClampToEdgeWrapping;
+      return _cachedVisorReflectionTexture;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Helper for generating smooth curved aerodynamic bands (visor & chin bar)
+  // Perfectly bilaterally symmetrical across forward +X axis (phi = 0)
+  function createCurvedHelmetBand(yTop, yBot, rTopX, rTopZ, rBotX, rBotZ, angleSpanRad, segsH, segsV, material) {
+    const pos = [];
+    const uvs = [];
+    const indices = [];
+    const halfSpan = angleSpanRad / 2;
+
+    for (let v = 0; v <= segsV; v++) {
+      const tv = v / segsV;
+      const y = yTop + (yBot - yTop) * tv;
+      const rx = rTopX + (rBotX - rTopX) * tv;
+      const rz = rTopZ + (rBotZ - rTopZ) * tv;
+      for (let h = 0; h <= segsH; h++) {
+        const th = h / segsH;
+        const phi = -halfSpan + angleSpanRad * th;
+        // phi = 0 points STRAIGHT FORWARD along +X (nose axis)
+        // phi < 0 points to left (-Z), phi > 0 points to right (+Z)
+        const x = rx * Math.cos(phi);
+        const z = rz * Math.sin(phi);
+        pos.push(x, y, z);
+        uvs.push(th, 1 - tv);
+      }
+    }
+
+    for (let v = 0; v < segsV; v++) {
+      for (let h = 0; h < segsH; h++) {
+        const a = v * (segsH + 1) + h;
+        const b = (v + 1) * (segsH + 1) + h;
+        const c = (v + 1) * (segsH + 1) + h + 1;
+        const d = v * (segsH + 1) + h + 1;
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  }
+
+  function createFullFaceHelmet(shellColorHex, cheekTrimColorHex, isCruiser) {
+    const helmetGroup = new THREE.Group();
+
+    // Premium realistic helmet materials
+    const shellMat = new THREE.MeshStandardMaterial({
+      color: shellColorHex,
+      roughness: 0.18,
+      metalness: 0.35
+    });
+    const cheekTrimMat = new THREE.MeshStandardMaterial({
+      color: cheekTrimColorHex,
+      roughness: 0.25,
+      metalness: 0.28
+    });
+    const visorTex = getVisorReflectionTexture();
+    const visorMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b, // reflective silver-grey tinted glass
+      metalness: 0.85,
+      roughness: 0.12,
+      map: visorTex || null,
+      side: THREE.DoubleSide
+    });
+    const hingePlateMat = new THREE.MeshStandardMaterial({
+      color: 0x26292e, // dark charcoal side hinge plate
+      roughness: 0.45,
+      metalness: 0.50
+    });
+    const pivotScrewMat = new THREE.MeshStandardMaterial({
+      color: 0x090a0d, // circular black pivot screw button
+      roughness: 0.35,
+      metalness: 0.75
+    });
+    const ventMat = new THREE.MeshStandardMaterial({
+      color: 0x111317, // black intake vent
+      roughness: 0.55,
+      metalness: 0.20
+    });
+    const rubberRimMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c10, // black rubber bottom rim
+      roughness: 0.90,
+      metalness: 0.05
+    });
+
+    const helmR = 1.15;
+
+    // 1. Contoured Helmet Shell Dome with flat bottom opening (thetaLength = Math.PI * 0.78)
+    const domeGeo = new THREE.SphereGeometry(helmR, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.78);
+    const domeMesh = new THREE.Mesh(domeGeo, shellMat);
+    domeMesh.scale.set(1.08, 1.02, 1.00);
+    helmetGroup.add(domeMesh);
+
+    // 2. Sculpted Forward-Jutting Chin Guard Bar with flat bottom rim
+    // Spans 160° (Math.PI * 0.888) horizontally, from y = -0.16 down to y = -0.72
+    const chinBar = createCurvedHelmetBand(
+      -0.16, -0.72,
+      helmR * 1.10, helmR * 1.01,
+      helmR * 1.05, helmR * 0.95,
+      Math.PI * 0.888, 24, 6,
+      shellMat
+    );
+    helmetGroup.add(chinBar);
+
+    // 3. Symmetrical 160° Wrap-Around Curved Visor Shield
+    // Centered at 0° along +X (straight forward nose axis), wrapping -80° to +80° symmetrically
+    const visorMesh = createCurvedHelmetBand(
+      0.20, -0.16,
+      helmR * 1.10, helmR * 1.025,
+      helmR * 1.12, helmR * 1.025,
+      Math.PI * 0.888, 28, 6,
+      visorMat
+    );
+    helmetGroup.add(visorMesh);
+
+    // 4. Front Chin Air Vent: black trapezoidal chin intake vent (#111317) directly below visor
+    const ventGroup = new THREE.Group();
+    ventGroup.position.set(helmR * 1.09, -0.36, 0);
+    ventGroup.rotation.z = -0.16;
+
+    const ventHousing = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.22, 0.28), ventMat);
+    ventGroup.add(ventHousing);
+
+    // Matte black intake scoop recess & center divider
+    const ventRecess = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.20), pivotScrewMat);
+    ventRecess.position.set(0.04, 0.02, 0);
+    ventGroup.add(ventRecess);
+
+    const ventDivider = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.16, 0.035), ventMat);
+    ventDivider.position.set(0.04, 0.01, 0);
+    ventGroup.add(ventDivider);
+
+    helmetGroup.add(ventGroup);
+
+    // 5. Lower Cheek / Jaw Trim Panels (darker contoured lower cheek panels)
+    [-1, 1].forEach(side => {
+      const cheekPanel = new THREE.Mesh(new THREE.BoxGeometry(0.96, 0.24, 0.06), cheekTrimMat);
+      cheekPanel.position.set(0.06, -0.52, side * (helmR * 0.985));
+      cheekPanel.rotation.y = side * 0.08;
+      cheekPanel.rotation.z = -0.12;
+      helmetGroup.add(cheekPanel);
+    });
+
+    // 6. Black Rubber Bottom Base Rim enclosing the bottom neck aperture
+    const bottomRim = new THREE.Mesh(new THREE.TorusGeometry(helmR * 0.94, 0.05, 12, 32), rubberRimMat);
+    bottomRim.rotation.x = Math.PI / 2;
+    bottomRim.scale.set(1.05, 0.96, 1.0);
+    bottomRim.position.set(0.02, -0.73, 0);
+    helmetGroup.add(bottomRim);
+
+    // 7. Left & Right Side Visor Pivot Hinges with black screw button (#090a0d)
+    const hingeAngle = Math.PI * 0.444; // ~80 degrees
+    const hingeX = helmR * 1.03 * Math.cos(hingeAngle); // ~0.20
+    const hingeZ = helmR * 1.025 * Math.sin(hingeAngle) + 0.02; // ~1.17
+
+    [-1, 1].forEach(side => {
+      const hingeGroup = new THREE.Group();
+      hingeGroup.position.set(hingeX, 0.02, side * hingeZ);
+
+      // Dark charcoal side hinge plate (#26292e)
+      const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.05, 16), hingePlateMat);
+      plate.rotation.x = Math.PI / 2;
+      hingeGroup.add(plate);
+
+      // Circular black pivot screw button (#090a0d)
+      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.07, 14), pivotScrewMat);
+      screw.rotation.x = Math.PI / 2;
+      screw.position.set(0, 0, side * 0.012);
+      hingeGroup.add(screw);
+
+      helmetGroup.add(hingeGroup);
+    });
+
+    // 8. Aerodynamic Top Crest Fin
+    const aeroFin = new THREE.Mesh(new THREE.BoxGeometry(1.22, 0.045, 0.06), shellMat);
+    aeroFin.position.set(0.06, helmR * 1.02, 0);
+    aeroFin.rotation.z = -0.09;
+    helmetGroup.add(aeroFin);
+
+    return helmetGroup;
+  }
+
+  // =========================================================================
   // TASK: REBUILD 3D BIKER (ANATOMICAL WAIST, FLUSH SADDLE PENETRATION,
-  // STREAMLINED 0.82X HELMET & DISTINCT MODEL A / MODEL B COLOR PALETTES)
+  // CLEAN VISIBLE NECK, SYMMETRICAL FULL-FACE HELMET & DISTINCT COLOR PALETTES)
   // =========================================================================
   function buildRealisticBiker(isCruiser, saddlePos, gripLeft, gripRight, pegLeft, pegRight, mats, appearanceSeed) {
     const biker = new THREE.Group();
 
     // -------------------------------------------------------------------------
-    // Task 4: Distinct Outfit & Helmet Colors (Zero Clones)
+    // Task 3: Distinct Outfit & Helmet Colors (Zero Clones)
     // -------------------------------------------------------------------------
-    let hoodieColor, collarColor, pantsColor, helmShellColor, helmStripeColor, shoeBodyColor, shoeStripeColor;
+    let hoodieColor, collarColor, pantsColor, helmShellColor, helmCheekColor, shoeBodyColor, shoeStripeColor;
     if (!isCruiser) {
-      // Model A (White Streetfighter): Deep Navy Hoodie, Charcoal Pants, White Sneakers, Pearl-White/Blue Helmet
-      hoodieColor = 0x1e3a8a;    // Deep Navy-Blue / Indigo streetwear hoodie
-      collarColor = 0x172554;    // Midnight Navy collar & cuffs
-      pantsColor = 0x334155;     // Charcoal-Slate tapered cargo pants
-      helmShellColor = 0xf1f5f9; // Glossy Pearl-White
-      helmStripeColor = 0x2563eb;// Royal-Blue racing stripe
+      // Model A (White Streetfighter):
+      // Helmet: Glossy Cobalt Royal-Blue (#1d4ed8) with darker navy (#1e3a8a) cheek trim,
+      // reflective silver-smoke visor, dark grey side pivot hinges, black chin vent
+      // Top: Deep Crimson/Burgundy (#991b1b) fitted sweatshirt with visible neck
+      // Pants & Shoes: Dark Charcoal cargo pants (#1e293b) with crisp Bright-White sneakers (#ffffff)
+      hoodieColor = 0x991b1b;    // Deep Crimson/Burgundy fitted sweatshirt
+      collarColor = 0x7f1d1d;    // Darker Burgundy collar & cuffs
+      pantsColor = 0x1e293b;     // Dark Charcoal cargo pants
+      helmShellColor = 0x1d4ed8; // Glossy Cobalt Royal-Blue
+      helmCheekColor = 0x1e3a8a; // Darker Navy lower cheek trim
       shoeBodyColor = 0xffffff;  // Crisp Bright-White sneakers
-      shoeStripeColor = 0x111317;// Black side stripe
+      shoeStripeColor = 0x0f172a;// Charcoal trim
     } else {
-      // Model B (Black Cruiser): Rich Crimson-Burgundy Hoodie, Jet-Black Denim, Red/Black High-Tops, Carbon/Gold Helmet
-      hoodieColor = 0x7f1d1d;    // Rich Crimson-Burgundy heavy hoodie
-      collarColor = 0x450a0a;    // Dark Burgundy collar & cuffs
-      pantsColor = 0x111317;     // Jet-Black biker denim/joggers
-      helmShellColor = 0x141619; // Matte Carbon-Black
-      helmStripeColor = 0xd4a024;// Metallic-Gold accent trim
+      // Model B (Black Cruiser):
+      // Helmet: Glossy Crimson-Red (#b91c1c) with deeper ruby-red (#881337) cheek trim,
+      // reflective silver-smoke visor, dark grey side pivot hinges, black chin vent
+      // Top: Charcoal-Black fitted riding sweatshirt (#1e293b) with visible neck
+      // Pants & Shoes: Jet-Black tapered pants (#0f172a) with Red & White high-top sneakers (#dc2626 / #ffffff)
+      hoodieColor = 0x1e293b;    // Charcoal-Black fitted riding sweatshirt
+      collarColor = 0x0f172a;    // Jet-Black collar & cuffs
+      pantsColor = 0x0f172a;     // Jet-Black tapered pants
+      helmShellColor = 0xb91c1c; // Glossy Crimson-Red
+      helmCheekColor = 0x881337; // Deeper Ruby-Red cheek trim
       shoeBodyColor = 0xdc2626;  // Red high-top sneaker body
-      shoeStripeColor = 0x111317;// Jet-black trim
+      shoeStripeColor = 0xffffff;// Crisp White high-top side trim
     }
 
     const hoodieMat = new THREE.MeshStandardMaterial({ color: hoodieColor, roughness: 0.75, metalness: 0.04 });
@@ -3508,9 +3760,6 @@ let sharedRickshawArtTexture = null;
     const shoeStripeMat = new THREE.MeshStandardMaterial({ color: shoeStripeColor, roughness: 0.60 });
 
     const gloveMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.60, metalness: 0.15 });
-    const helmetShellMat = new THREE.MeshStandardMaterial({ color: helmShellColor, roughness: !isCruiser ? 0.20 : 0.65, metalness: !isCruiser ? 0.25 : 0.40 });
-    const helmetStripeMat = new THREE.MeshStandardMaterial({ color: helmStripeColor, roughness: 0.30, metalness: isCruiser ? 0.75 : 0.10 });
-    const visorMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.10, metalness: 0.80 });
 
     // -------------------------------------------------------------------------
     // Task 2: Lock Bum 100% Flush ON Seat Cushion (Zero Floating Gap)
@@ -3559,31 +3808,39 @@ let sharedRickshawArtTexture = null;
     waistband.position.set(0, -0.05, 0);
     torsoGroup.add(waistband);
 
-    // Muscular flat-bellied torso stations (Trimmed 0.97x, shoulders high above tank)
+    // Muscular flat-bellied torso stations:
+    // Flat-sloping athletic shoulder & clavicle line (tapering cleanly to neck base)
     const hoodieStations = [
-      { y: 0.0, rx: 1.02, rz: 1.50 }, // Flat waist hem: depth 2.04, width 3.00
-      { y: 1.2, rx: 1.12, rz: 1.80 }, // Flat abdomen (ZERO blocky gut box): depth 2.24, width 3.60
-      { y: 2.5, rx: 1.30, rz: 2.12 }, // Muscular chest: depth 2.60, width 4.24
-      { y: 3.9, rx: 1.26, rz: 2.32 }, // Broad shoulder yoke: depth 2.52, width 4.64
-      { y: 4.6, rx: 1.08, rz: 1.88 }, // Clavicle slope: depth 2.16, width 3.76
-      { y: 5.1, rx: 0.86, rz: 1.35 }  // Neck base: depth 1.72, width 2.70
+      { y: 0.0, rx: 0.98, rz: 1.48 }, // Flat waist hem: depth 1.96, width 2.96
+      { y: 1.2, rx: 1.06, rz: 1.76 }, // Flat abdomen / lower ribs: depth 2.12, width 3.52
+      { y: 2.5, rx: 1.22, rz: 2.10 }, // Muscular chest: depth 2.44, width 4.20
+      { y: 3.8, rx: 1.18, rz: 2.30 }, // Broad athletic shoulders: depth 2.36, width 4.60
+      { y: 4.35, rx: 0.86, rz: 1.40 }, // Flat-sloping clavicle/collarbone line (NOT rounded ball)
+      { y: 4.55, rx: 0.62, rz: 0.82 }  // Crew-neck collar opening
     ];
     torsoGroup.add(createAnatomicalTorso(hoodieStations, 24, hoodieMat));
 
-    // Folded Hoodie Neck Collar & Inner Seal (Zero neck gap)
-    const hoodCollar = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.38, 16, 28), hoodCollarMat);
-    hoodCollar.rotation.x = Math.PI / 2;
-    hoodCollar.position.set(0, 4.85, 0);
-    torsoGroup.add(hoodCollar);
+    // Low-profile crew-neck collar ring (tubeRadius = 0.06 only, flush with chest top)
+    const crewCollar = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.06, 12, 24), hoodCollarMat);
+    crewCollar.rotation.x = Math.PI / 2;
+    crewCollar.position.set(0, 4.55, 0);
+    torsoGroup.add(crewCollar);
 
-    const hoodFoldBack = new THREE.Mesh(new THREE.SphereGeometry(0.95, 16, 12), hoodCollarMat);
-    hoodFoldBack.scale.set(0.68, 0.82, 1.25);
-    hoodFoldBack.position.set(-0.70, 4.65, 0);
-    torsoGroup.add(hoodFoldBack);
+    // Clean, visible cylindrical human neck rising 0.35-0.45 units above collar
+    const skinPalette = [0xc58f68, 0xb47b56, 0xd4a373, 0x99613d];
+    const skinColor = skinPalette[(appearanceSeed || 0) % skinPalette.length];
+    const skinMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.72, metalness: 0.04 });
 
-    const neckSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.88, 0.95, 20), hoodCollarMat);
-    neckSeal.position.set(0, 5.05, 0);
-    torsoGroup.add(neckSeal);
+    const neckCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.48, 0.85, 20), skinMat);
+    neckCylinder.position.set(0, 4.90, 0);
+    torsoGroup.add(neckCylinder);
+
+    // Slim deltoid transitions (radius = 0.30) connecting arms cleanly to shoulder corners
+    [-2.15, 2.15].forEach(zSide => {
+      const deltoid = new THREE.Mesh(new THREE.SphereGeometry(0.30, 16, 12), hoodieMat);
+      deltoid.position.set(0.0, 3.85, zSide);
+      torsoGroup.add(deltoid);
+    });
 
     biker.add(torsoGroup);
 
@@ -3591,8 +3848,8 @@ let sharedRickshawArtTexture = null;
     // Task 2 Part 2: Proportional Downward-Reaching Arms (Shorter Than Torso)
     // Hands locked 100% on handlebar grips!
     // -------------------------------------------------------------------------
-    const shLocalL = new THREE.Vector3(0.0, 3.90, -2.15);
-    const shLocalR = new THREE.Vector3(0.0, 3.90, 2.15);
+    const shLocalL = new THREE.Vector3(0.0, 3.85, -2.15);
+    const shLocalR = new THREE.Vector3(0.0, 3.85, 2.15);
     shLocalL.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
     shLocalR.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
 
@@ -3743,56 +4000,14 @@ let sharedRickshawArtTexture = null;
     });
 
     // -------------------------------------------------------------------------
-    // Task 3: Streamlined Full-Face Helmet (0.82x Scale, Sleek Oval, No Boxy Blocks)
+    // Task 2: Rebuilt 3D Full-Face Helmet (100% Symmetrical Left & Right, Visor Sheen)
     // -------------------------------------------------------------------------
     const headPosLocal = new THREE.Vector3(0, 5.50, 0);
     headPosLocal.applyEuler(new THREE.Euler(0, 0, leanAngle)).add(torsoGroup.position);
 
-    const helmetGroup = new THREE.Group();
+    const helmetGroup = createFullFaceHelmet(helmShellColor, helmCheekColor, isCruiser);
     helmetGroup.position.copy(headPosLocal);
     helmetGroup.rotation.z = isCruiser ? -0.06 : -0.16;
-
-    // Sleek Oval Helmet Shell (SphereGeometry scaled 0.92, 1.0, 1.12 with radius 1.18)
-    const helmR = 1.18;
-    const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(helmR, 32, 24), helmetShellMat);
-    helmetShell.scale.set(0.92, 1.00, 1.12);
-    helmetGroup.add(helmetShell);
-
-    // Smooth, flush-mounted dark glossy curved visor band (#090a0d, roughness: 0.1, metalness: 0.8)
-    const visorMesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(helmR * 0.96, helmR * 0.92, 0.44, 24, 1, true, -Math.PI * 0.36, Math.PI * 0.72),
-      visorMat
-    );
-    visorMesh.position.set(0.22, 0.06, 0);
-    visorMesh.scale.set(0.95, 1.0, 1.10);
-    helmetGroup.add(visorMesh);
-
-    // Smooth chin bar beneath the visor
-    const chinBar = new THREE.Mesh(
-      new THREE.CylinderGeometry(helmR * 0.94, helmR * 0.88, 0.38, 24, 1, false, -Math.PI * 0.34, Math.PI * 0.68),
-      helmetShellMat
-    );
-    chinBar.position.set(0.20, -0.28, 0);
-    chinBar.scale.set(0.94, 1.0, 1.08);
-    helmetGroup.add(chinBar);
-
-    if (!isCruiser) {
-      // Model A: Royal-Blue racing stripe along top crest
-      const stripeCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-helmR * 0.85, 0.40, 0),
-        new THREE.Vector3(0, helmR * 1.02, 0),
-        new THREE.Vector3(helmR * 0.85, 0.20, 0)
-      ]);
-      const stripeMesh = new THREE.Mesh(new THREE.TubeGeometry(stripeCurve, 16, 0.08, 8, false), helmetStripeMat);
-      helmetGroup.add(stripeMesh);
-    } else {
-      // Model B: Metallic-Gold accent trim ring along helmet base
-      const goldTrim = new THREE.Mesh(new THREE.TorusGeometry(helmR * 0.94, 0.045, 10, 28), helmetStripeMat);
-      goldTrim.rotation.x = Math.PI / 2;
-      goldTrim.position.set(0, -0.42, 0);
-      helmetGroup.add(goldTrim);
-    }
-
     biker.add(helmetGroup);
 
     return biker;
