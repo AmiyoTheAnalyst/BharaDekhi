@@ -4019,10 +4019,11 @@ let sharedRickshawArtTexture = null;
     const root = new THREE.Group();
     root.userData.wheels = [];
 
-    // Inner wrapper holding the entire bike chassis, wheels, and rider
-    // Scaled down uniformly by 28% (0.72x) to match Dhaka Cycle Rickshaw & CNG human scale
-    const group = new THREE.Group();
-    group.userData.wheels = [];
+    // Inner child wrapper holding the entire combined Motorcycle + Seated Rider
+    // Scaled down uniformly to 0.35x (calibrated against 3D CNG & Cycle Rickshaw world scale)
+    const bikePackage = new THREE.Group();
+    bikePackage.userData.wheels = [];
+    const group = bikePackage; // Seamless alias for all internal mesh additions
 
     const isCruiser = (vData && vData.modelType === 'cruiser')
       ? true
@@ -4668,16 +4669,17 @@ let sharedRickshawArtTexture = null;
     }
 
     // =========================================================================
-    // TASK 1: UNIFORMLY SCALE DOWN ENTIRE BIKE + RIDER PACKAGE BY 28% (0.72x)
-    // Inner wrapper ensures the 0.72x scale is permanent & cannot be overwritten.
-    // Tire tread rests 100% flush on the road surface (y = 0.0, zero sink/float).
+    // TASK 2: UNIFORMLY SCALE DOWN ENTIRE BIKE + RIDER PACKAGE TO 0.35x
+    // Inner child wrapper ensures the 0.35x world scale is permanent & cannot be overwritten.
+    // Both front & rear tire treads rest 100% flush on the road surface (y = 0.0, zero sink/float).
     // =========================================================================
-    group.scale.setScalar(0.72);
-    group.position.set(0, 0, 0);
-    root.add(group);
+    const BIKE_WORLD_SCALE = 0.35;
+    bikePackage.scale.setScalar(BIKE_WORLD_SCALE);
+    bikePackage.position.set(0, 0, 0);
+    root.add(bikePackage);
 
-    root.userData.wheels = group.userData.wheels;
-    root.userData.wheelRadius = 3.25 * 0.72;
+    root.userData.wheels = bikePackage.userData.wheels;
+    root.userData.wheelRadius = 3.25 * BIKE_WORLD_SCALE;
 
     // Zero-Lag Additive Headlight Ground Light Pool (scaled with vehicle)
     const headGlowMat = new THREE.MeshBasicMaterial({
@@ -4687,9 +4689,9 @@ let sharedRickshawArtTexture = null;
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
-    const headPool = new THREE.Mesh(new THREE.PlaneGeometry(36 * 0.72, 18 * 0.72), headGlowMat);
+    const headPool = new THREE.Mesh(new THREE.PlaneGeometry(36 * BIKE_WORLD_SCALE, 18 * BIKE_WORLD_SCALE), headGlowMat);
     headPool.rotation.x = -Math.PI / 2;
-    headPool.position.set(((isCruiser ? 8.8 : 8.2) + 18) * 0.72, 0.08, 0);
+    headPool.position.set(((isCruiser ? 8.8 : 8.2) + 18) * BIKE_WORLD_SCALE, 0.08, 0);
     root.add(headPool);
 
     if (typeof scene !== 'undefined' && scene && scene.add) {
