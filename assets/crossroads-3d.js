@@ -6963,38 +6963,99 @@ let sharedRickshawArtTexture = null;
         cngGroup.add(ind);
       });
 
-      const wsPillarL = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 3.32, 8), cngGreenMat);
-      wsPillarL.position.set((4.80 + 3.40) / 2, (5.75 + 8.75) / 2, -3.20);
-      wsPillarL.rotation.z = Math.atan2(4.80 - 3.40, 8.75 - 5.75);
+      // -------------------------------------------------------------------------
+      // TASK: 3D CNG FRONT WINDSHIELD FRAME, FLUSH GLASS & OUTER WIPER ASSEMBLY
+      // Frame Bounds: Bottom (4.80, 5.75, 0), Top (3.40, 8.75, 0), Width: 6.40 (-3.20 to +3.20)
+      // Slant Height = hypot(4.80 - 3.40, 8.75 - 5.75) = 3.3106
+      // Exact Frame Pitch Angle = atan2(4.80 - 3.40, 8.75 - 5.75) = 0.4366 rad (ZERO roll/yaw skew)
+      // -------------------------------------------------------------------------
+      const xBot = 4.80, yBot = 5.75;
+      const xTop = 3.40, yTop = 8.75;
+      const frameWidth = 6.40;
+      const slantHeight = Math.hypot(xBot - xTop, yTop - yBot);
+      const tiltAngle = Math.atan2(xBot - xTop, yTop - yBot);
+      const wsMidX = (xBot + xTop) * 0.5;
+      const wsMidY = (yBot + yTop) * 0.5;
+
+      const wsPillarL = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, slantHeight, 8), cngGreenMat);
+      wsPillarL.position.set(wsMidX, wsMidY, -3.20);
+      wsPillarL.rotation.z = tiltAngle;
       cngGroup.add(wsPillarL);
 
       const wsPillarR = wsPillarL.clone();
       wsPillarR.position.z = 3.20;
       cngGroup.add(wsPillarR);
 
-      const wsTopBar = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 6.40, 8), cngGreenMat);
+      const wsTopBar = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, frameWidth, 8), cngGreenMat);
       wsTopBar.rotation.x = Math.PI / 2;
-      wsTopBar.position.set(3.40, 8.75, 0);
+      wsTopBar.position.set(xTop, yTop, 0);
       cngGroup.add(wsTopBar);
 
-      const wsBottomBar = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 6.40, 8), cngGreenMat);
+      const wsBottomBar = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, frameWidth, 8), cngGreenMat);
       wsBottomBar.rotation.x = Math.PI / 2;
-      wsBottomBar.position.set(4.80, 5.75, 0);
+      wsBottomBar.position.set(xBot, yBot, 0);
       cngGroup.add(wsBottomBar);
 
-      const glassLen = Math.hypot(4.80 - 3.40, 8.75 - 5.75);
-      const glassAngle = Math.atan2(4.80 - 3.40, 8.75 - 5.75);
-      const wsGlass = new THREE.Mesh(new THREE.PlaneGeometry(6.20, glassLen - 0.18), glassMat);
-      wsGlass.position.set((4.80 + 3.40) / 2, (5.75 + 8.75) / 2, 0);
-      wsGlass.rotation.y = Math.PI / 2;
-      wsGlass.rotation.x = -glassAngle;
-      cngGroup.add(wsGlass);
+      // Windshield Assembly Group (Centered & tilted strictly in pitch plane, Z = 0, ZERO roll/yaw)
+      const wsGroup = new THREE.Group();
+      wsGroup.position.set(wsMidX, wsMidY, 0);
+      wsGroup.rotation.set(0, 0, tiltAngle);
 
-      const wiperCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(4.82, 5.90, 0),
-        new THREE.Vector3(4.15, 7.30, 0.85)
-      ]);
-      cngGroup.add(new THREE.Mesh(new THREE.TubeGeometry(wiperCurve, 10, 0.04, 6, false), chassisMat));
+      // 1. Semi-Transparent Windshield Glass Pane (Symmetrically flush inside 4 green frame tubes)
+      const glassH = slantHeight - 0.08;
+      const glassW = frameWidth - 0.08;
+      const wsGlass = new THREE.Mesh(new THREE.BoxGeometry(0.03, glassH, glassW), glassMat);
+      wsGroup.add(wsGlass);
+
+      // 2. Dark Rubber Gasket Border (#141619) around inner frame perimeter
+      const gasketMat = new THREE.MeshStandardMaterial({ color: 0x141619, roughness: 0.90 });
+      const gasketThick = 0.038;
+      const gasketBorder = 0.06;
+
+      const topGasket = new THREE.Mesh(new THREE.BoxGeometry(gasketThick, gasketBorder, glassW), gasketMat);
+      topGasket.position.set(0, glassH * 0.5 - gasketBorder * 0.5, 0);
+      wsGroup.add(topGasket);
+
+      const botGasket = new THREE.Mesh(new THREE.BoxGeometry(gasketThick, gasketBorder, glassW), gasketMat);
+      botGasket.position.set(0, -glassH * 0.5 + gasketBorder * 0.5, 0);
+      wsGroup.add(botGasket);
+
+      const leftGasket = new THREE.Mesh(new THREE.BoxGeometry(gasketThick, glassH, gasketBorder), gasketMat);
+      leftGasket.position.set(0, 0, -glassW * 0.5 + gasketBorder * 0.5);
+      wsGroup.add(leftGasket);
+
+      const rightGasket = new THREE.Mesh(new THREE.BoxGeometry(gasketThick, glassH, gasketBorder), gasketMat);
+      rightGasket.position.set(0, 0, glassW * 0.5 - gasketBorder * 0.5);
+      wsGroup.add(rightGasket);
+
+      // 3. Black Windshield Wiper (Mounted flush against outer glass face, swept across driver view)
+      const wiperGroup = new THREE.Group();
+      // Positioned at bottom-center of the outer glass surface (local X = +0.026, outer face)
+      wiperGroup.position.set(0.026, -glassH * 0.5 + 0.16, 0.0);
+
+      // Black wiper motor pivot cap
+      const wiperPivot = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.04, 12), chassisMat);
+      wiperPivot.rotation.z = Math.PI / 2;
+      wiperGroup.add(wiperPivot);
+
+      // Swept wiper arm + squeegee blade lying flat against the glass surface (rotation around local X keeps it in YZ plane)
+      const wiperArmGroup = new THREE.Group();
+      wiperArmGroup.rotation.x = -0.32; // ~18° natural parked sweep across windshield
+
+      const wiperArmLen = 1.75;
+      const wiperArm = new THREE.Mesh(new THREE.BoxGeometry(0.024, wiperArmLen, 0.032), chassisMat);
+      wiperArm.position.set(0.005, wiperArmLen * 0.5, 0);
+      wiperArmGroup.add(wiperArm);
+
+      const bladeLen = 1.40;
+      const wiperBlade = new THREE.Mesh(new THREE.BoxGeometry(0.018, bladeLen, 0.028), chassisMat);
+      wiperBlade.position.set(-0.006, wiperArmLen * 0.55, 0);
+      wiperArmGroup.add(wiperBlade);
+
+      wiperGroup.add(wiperArmGroup);
+      wsGroup.add(wiperGroup);
+
+      cngGroup.add(wsGroup);
 
       [-3.25, 3.25].forEach(mz => {
         const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 6), chassisMat);
