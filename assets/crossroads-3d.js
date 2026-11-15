@@ -6091,8 +6091,13 @@ let sharedRickshawArtTexture = null;
       return headGroup;
     }
 
+    const root = new THREE.Group();
+    root.userData.wheels = [];
+
+    // Inner child wrapper holding the complete 3D CNG + Occupants Package
+    // Scaled up uniformly by 1.06x (6% increase) to match human and traffic proportions
     const cngGroup = new THREE.Group();
-      cngGroup.userData.wheels = [];
+    cngGroup.userData.wheels = [];
 
       // Authentic Materials
       const cngGreenMat = new THREE.MeshStandardMaterial({
@@ -6999,7 +7004,20 @@ let sharedRickshawArtTexture = null;
 
       cngGroup.add(femaleGroup);
 
-      return cngGroup;
+      // =========================================================================
+      // TASK 1: UNIFORMLY SCALE UP 3D CNG PACKAGE BY 6% (1.06x)
+      // Inner child wrapper ensures 1.06x scale is permanent & cannot be overwritten.
+      // All 3 wheels rest 100% flush on the asphalt road surface (y = 0.0, zero float/sink).
+      // =========================================================================
+      const CNG_WORLD_SCALE = 1.06;
+      cngGroup.scale.setScalar(CNG_WORLD_SCALE);
+      cngGroup.position.set(0, 0, 0);
+      root.add(cngGroup);
+
+      root.userData.wheels = cngGroup.userData.wheels;
+      root.userData.wheelRadius = 1.85 * CNG_WORLD_SCALE;
+
+      return root;
   }
 
   function create3DVehicle(type, colorHex, appearanceId, vData) {
