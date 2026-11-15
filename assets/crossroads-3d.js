@@ -4016,6 +4016,11 @@ let sharedRickshawArtTexture = null;
   // Master Canonical Dual 3D Motorcycle Factory (Pure Three.js - Zero Blender!)
   // Alternates between Model A (White Streetfighter/Cafe Racer) and Model B (Black/Gold/Red Muscle Cruiser)
   function createRealisticGTABike(colorHex, appearanceSeed, vData) {
+    const root = new THREE.Group();
+    root.userData.wheels = [];
+
+    // Inner wrapper holding the entire bike chassis, wheels, and rider
+    // Scaled down uniformly by 28% (0.72x) to match Dhaka Cycle Rickshaw & CNG human scale
     const group = new THREE.Group();
     group.userData.wheels = [];
 
@@ -4662,7 +4667,19 @@ let sharedRickshawArtTexture = null;
       group.add(biker);
     }
 
-    // Zero-Lag Additive Headlight Ground Light Pool
+    // =========================================================================
+    // TASK 1: UNIFORMLY SCALE DOWN ENTIRE BIKE + RIDER PACKAGE BY 28% (0.72x)
+    // Inner wrapper ensures the 0.72x scale is permanent & cannot be overwritten.
+    // Tire tread rests 100% flush on the road surface (y = 0.0, zero sink/float).
+    // =========================================================================
+    group.scale.setScalar(0.72);
+    group.position.set(0, 0, 0);
+    root.add(group);
+
+    root.userData.wheels = group.userData.wheels;
+    root.userData.wheelRadius = 3.25 * 0.72;
+
+    // Zero-Lag Additive Headlight Ground Light Pool (scaled with vehicle)
     const headGlowMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
@@ -4670,15 +4687,15 @@ let sharedRickshawArtTexture = null;
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
-    const headPool = new THREE.Mesh(new THREE.PlaneGeometry(36, 18), headGlowMat);
+    const headPool = new THREE.Mesh(new THREE.PlaneGeometry(36 * 0.72, 18 * 0.72), headGlowMat);
     headPool.rotation.x = -Math.PI / 2;
-    headPool.position.set((isCruiser ? 8.8 : 8.2) + 18, 0.08, 0);
-    group.add(headPool);
+    headPool.position.set(((isCruiser ? 8.8 : 8.2) + 18) * 0.72, 0.08, 0);
+    root.add(headPool);
 
     if (typeof scene !== 'undefined' && scene && scene.add) {
-      scene.add(group);
+      scene.add(root);
     }
-    return group;
+    return root;
   }
 
   window.createRealisticGTABike = createRealisticGTABike;
