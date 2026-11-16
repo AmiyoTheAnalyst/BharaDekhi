@@ -1036,6 +1036,170 @@
   ];
 
   // -------------------------------------------------------------
+  // Seated Human Driver Builder for Mercedes-AMG GT Coupe (LHD)
+  // Visible through 0.65 opacity tinted windshield & side glass
+  // -------------------------------------------------------------
+  function buildMercedesDriver() {
+    const driverGroup = new THREE.Group();
+
+    // Dedicated materials
+    const skinMat = new THREE.MeshStandardMaterial({
+      color: 0xc68662, // Warm natural South Asian skin tone
+      roughness: 0.72,
+      metalness: 0.05
+    });
+    const jacketMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b, // Dark charcoal-navy professional jacket
+      roughness: 0.70,
+      metalness: 0.15
+    });
+    const hairMat = new THREE.MeshStandardMaterial({
+      color: 0x111317, // Dark natural hair
+      roughness: 0.90,
+      metalness: 0.10
+    });
+    const seatMat = new THREE.MeshStandardMaterial({
+      color: 0x18181b, // Dark leather sports bucket seat
+      roughness: 0.65,
+      metalness: 0.20
+    });
+    const steeringMat = new THREE.MeshStandardMaterial({
+      color: 0x090a0f, // AMG leather-wrapped sports steering wheel
+      roughness: 0.60,
+      metalness: 0.25
+    });
+    const silverTrimMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.90,
+      roughness: 0.20
+    });
+
+    const DRIVER_Z = 0.30; // Left-Hand Drive (LHD) seating line
+
+    // 1. Interior Bucket Seats (Driver & Passenger)
+    [DRIVER_Z, -DRIVER_Z].forEach(sz => {
+      // Cushion
+      const cushion = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.08, 0.34), seatMat);
+      cushion.position.set(-0.15, 0.54, sz);
+      driverGroup.add(cushion);
+
+      // Backrest tilted ~10° backward
+      const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.44, 0.32), seatMat);
+      backrest.rotation.z = -0.15;
+      backrest.position.set(-0.32, 0.76, sz);
+      driverGroup.add(backrest);
+
+      // Headrest
+      const headrest = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.18), seatMat);
+      headrest.position.set(-0.35, 1.02, sz);
+      driverGroup.add(headrest);
+    });
+
+    // Center Console & Armrest
+    const consoleBox = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.18, 0.16), seatMat);
+    consoleBox.position.set(-0.05, 0.59, 0);
+    driverGroup.add(consoleBox);
+
+    // 2. Dashboard Console & Instrument Binnacle
+    const dash = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 1.08), seatMat);
+    dash.position.set(0.32, 0.74, 0);
+    driverGroup.add(dash);
+
+    const binnacle = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.26), seatMat);
+    binnacle.position.set(0.26, 0.83, DRIVER_Z);
+    driverGroup.add(binnacle);
+
+    // Angled Steering Column
+    const column = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.15, 8), seatMat);
+    column.rotation.z = -0.60;
+    column.position.set(0.18, 0.79, DRIVER_Z);
+    driverGroup.add(column);
+
+    // AMG Sports Steering Wheel (Tilted ~22° back towards driver)
+    const steeringWheel = new THREE.Mesh(
+      new THREE.TorusGeometry(0.095, 0.014, 8, 20),
+      steeringMat
+    );
+    steeringWheel.position.set(0.12, 0.84, DRIVER_Z);
+    steeringWheel.rotation.y = Math.PI / 2;
+    steeringWheel.rotation.x = 0.38;
+    driverGroup.add(steeringWheel);
+
+    const horn = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.012, 12), silverTrimMat);
+    horn.rotation.z = Math.PI / 2;
+    horn.rotation.y = 0.38;
+    horn.position.set(0.12, 0.84, DRIVER_Z);
+    driverGroup.add(horn);
+
+    // 3. Seated Human Driver
+    // Torso (Dark professional jacket)
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.34, 0.28), jacketMat);
+    torso.position.set(-0.10, 0.78, DRIVER_Z);
+    driverGroup.add(torso);
+
+    // Jacket Collar
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.018, 6, 12), jacketMat);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.set(-0.08, 0.95, DRIVER_Z);
+    driverGroup.add(collar);
+
+    // Neck
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.048, 0.08, 10), skinMat);
+    neck.position.set(-0.07, 0.97, DRIVER_Z);
+    driverGroup.add(neck);
+
+    // Rounded Head
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.090, 14, 12), skinMat);
+    head.position.set(-0.06, 1.05, DRIVER_Z);
+    driverGroup.add(head);
+
+    // Dark Stylized Hair
+    const hair = new THREE.Mesh(
+      new THREE.SphereGeometry(0.096, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.62),
+      hairMat
+    );
+    hair.position.set(-0.065, 1.06, DRIVER_Z);
+    driverGroup.add(hair);
+
+    // 4. Arms & Hands Gripping Steering Wheel (10 and 2 o'clock positions)
+    // Left Arm (Outer side, reaching to 10 o'clock on wheel)
+    const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.18, 8), jacketMat);
+    lUpperArm.position.set(-0.04, 0.85, DRIVER_Z + 0.15);
+    lUpperArm.rotation.x = 0.35;
+    lUpperArm.rotation.z = -0.55;
+    driverGroup.add(lUpperArm);
+
+    const lForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.17, 8), jacketMat);
+    lForeArm.position.set(0.05, 0.85, DRIVER_Z + 0.11);
+    lForeArm.rotation.x = -0.30;
+    lForeArm.rotation.z = -1.10;
+    driverGroup.add(lForeArm);
+
+    const lHand = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), skinMat);
+    lHand.position.set(0.12, 0.90, DRIVER_Z + 0.07);
+    driverGroup.add(lHand);
+
+    // Right Arm (Inner side, reaching to 2 o'clock on wheel)
+    const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.18, 8), jacketMat);
+    rUpperArm.position.set(-0.04, 0.85, DRIVER_Z - 0.15);
+    rUpperArm.rotation.x = -0.35;
+    rUpperArm.rotation.z = -0.55;
+    driverGroup.add(rUpperArm);
+
+    const rForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.17, 8), jacketMat);
+    rForeArm.position.set(0.05, 0.85, DRIVER_Z - 0.11);
+    rForeArm.rotation.x = 0.30;
+    rForeArm.rotation.z = -1.10;
+    driverGroup.add(rForeArm);
+
+    const rHand = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), skinMat);
+    rHand.position.set(0.12, 0.90, DRIVER_Z - 0.07);
+    driverGroup.add(rHand);
+
+    return driverGroup;
+  }
+
+  // -------------------------------------------------------------
   // Model 1: Mercedes-AMG GT Coupe Builder (Sleek Sports Coupe & 3D Panamericana Grille)
   // -------------------------------------------------------------
   function buildCarMercedesAMGGT(config) {
@@ -1057,7 +1221,7 @@
       roughness: 0.10,
       metalness: 0.90,
       transparent: true,
-      opacity: 0.75
+      opacity: 0.65 // Transparent enough to cleanly see seated driver inside
     });
     const glassMat = darkGlassMat;
     const mirrorFaceMat = new THREE.MeshStandardMaterial({
@@ -1099,16 +1263,6 @@
     bodyLowerMesh.receiveShadow = true;
     group.add(bodyLowerMesh);
 
-    // Muscular Rear Fender Haunches (Subtle side swell over rear wheels, Width ~1.92)
-    [-0.88, 0.88].forEach(hz => {
-      const haunchGeo = new THREE.CylinderGeometry(0.42, 0.45, 0.12, 16, 1, false, 0, Math.PI);
-      const haunch = new THREE.Mesh(haunchGeo, bodyMat);
-      haunch.rotation.x = Math.PI / 2;
-      haunch.rotation.z = Math.PI;
-      haunch.position.set(-1.35, 0.44, hz);
-      group.add(haunch);
-    });
-
     // Twin Hood Power Domes (Longitudinal muscular hood creases)
     [-0.26, 0.26].forEach(pz => {
       const dome = new THREE.Mesh(
@@ -1142,6 +1296,10 @@
     cabinGeo.translate(0, 0, -1.34 / 2);
     const cabinMesh = new THREE.Mesh(cabinGeo, darkGlassMat);
     group.add(cabinMesh);
+
+    // Seated 3D Human Driver & Sports Interior (Visible through glass)
+    const driverGroup = buildMercedesDriver();
+    group.add(driverGroup);
 
     // Slim Roof Band (Body-colored center roof spine)
     const roofSpine = new THREE.Mesh(
@@ -1421,17 +1579,17 @@
     });
 
     // -----------------------------------------------------------------
-    // 8. 4 AMG Sport 10-Spoke Alloy Wheels
+    // 8. 4 AMG Sport 10-Spoke Alloy Wheels (Charcoal-Black Rubber Tires #1c1e21)
     // -----------------------------------------------------------------
     [-0.86, 0.86].forEach(wz => {
-      const fWheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true);
+      const fWheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true, 0x1c1e21);
       fWheel.position.set(1.35, 0.34, wz);
       group.add(fWheel);
       group.userData.wheels.push(fWheel);
     });
 
     [-0.88, 0.88].forEach(wz => {
-      const rWheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true);
+      const rWheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true, 0x1c1e21);
       rWheel.position.set(-1.35, 0.34, wz);
       group.add(rWheel);
       group.userData.wheels.push(rWheel);
@@ -4177,18 +4335,25 @@ let sharedRickshawArtTexture = null;
   // ---------------------------------------------------------------------------
   // 10-Spoke Metallic Alloy Wheel Builder (Zero BoxGeometry)
   // ---------------------------------------------------------------------------
-  function create10SpokeAlloyWheel(radius, width, rimColorHex, darkCenter) {
+  function create10SpokeAlloyWheel(radius, width, rimColorHex, darkCenter, tireColorHex) {
     const wheelGroup = new THREE.Group();
 
-    // 1. Rubber tire with subtle sidewall bead detail.
+    // 1. Rubber tire with subtle sidewall bead detail (Dedicated Charcoal-Black #1c1e21)
     const tireGeo = new THREE.CylinderGeometry(radius, radius, width, 24);
-    if (!sharedWheelMat) sharedWheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.85 });
-    const tireMat = sharedWheelMat;
+    const tireMat = new THREE.MeshStandardMaterial({
+      color: tireColorHex || 0x1c1e21,
+      roughness: 0.85,
+      metalness: 0.15
+    });
     const tire = new THREE.Mesh(tireGeo, tireMat);
     tire.rotation.x = Math.PI / 2;
     wheelGroup.add(tire);
 
-    if (!tireSidewallMat) tireSidewallMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.7 });
+    const tireSidewallMat = new THREE.MeshStandardMaterial({
+      color: tireColorHex || 0x1c1e21,
+      roughness: 0.85,
+      metalness: 0.15
+    });
     [-1, 1].forEach(side => {
       const bead = new THREE.Mesh(
         new THREE.TorusGeometry(radius * 0.80, radius * 0.025, 5, 24),
