@@ -296,8 +296,9 @@
           if (sub) sub.textContent = 'Motorized three-wheeler for comfortable local trips.';
         } else if (modeName === 'car') {
           if (icon) icon.textContent = '🚗';
-          if (title) title.textContent = 'Ride-share Car';
-          if (sub) sub.textContent = 'Private car trips with a comfortable ride.';
+          const carTitle = (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) ? activeTargetVehicle.mesh.userData.modelTitle : 'Private Car Fleet';
+          if (title) title.textContent = carTitle;
+          if (sub) sub.textContent = 'Executive Sedan & Luxury SUV Fleet (Base ৳50 · ৳20/km)';
         } else if (modeName === 'walking') {
           if (icon) icon.textContent = '🚶';
           if (title) title.textContent = 'Zebra Crossings & Pedestrian Walkway';
@@ -333,6 +334,33 @@
             icon.textContent = '🏍️';
             title.textContent = `${(activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
             sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
+          }
+          const pose = getVehicleOrbitPose(activeTargetVehicle);
+          focusCamera(pose.position, pose.look, 0.8);
+          return;
+        }
+      }
+      if (modeName === 'car') {
+        // Repeated clicks on Car cycle across the 4 car models & 16 colorways
+        activeTargetVehicle = acquireTargetVehicle('car');
+        if (activeTargetVehicle && activeTargetVehicle.data) {
+          if (activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isCar) {
+            swapCarVariant(activeTargetVehicle.mesh);
+          }
+          updateLegendHUD('car');
+          const modePill = document.getElementById('crossroadsModePill');
+          const icon = document.getElementById('crossroadsModePillIcon');
+          const title = document.getElementById('crossroadsModePillTitle');
+          const sub = document.getElementById('crossroadsModePillSub');
+          if (modePill && icon && title && sub) {
+            modePill.classList.remove('hidden');
+            const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
+                             activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
+                             activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
+            const speedKmh = Math.round(activeTargetVehicle.data.speed || 55);
+            icon.textContent = '🚗';
+            title.textContent = `${(activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) || 'Private Car'} · ${dirLabel}`;
+            sub.textContent = `Speed: ${speedKmh} km/h · Executive Fleet · Base ৳50 + ৳20/km`;
           }
           const pose = getVehicleOrbitPose(activeTargetVehicle);
           focusCamera(pose.position, pose.look, 0.8);
@@ -575,237 +603,1127 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 1. Aerodynamic Extruded Sports & Street Car Factory — ZERO BoxGeometry
-  // 4 Specific Archetypes: Lime-Green i8, Silver DeLorean, White Hypercar, Night Muscle
+  // 1. Procedural 3D Car Fleet Factory — Pure Three.js (ZERO Blender / ZERO GLB)
+  // 4 Iconic Models: Mercedes-AMG GT, Honda Civic/Accord Sedan, Range Rover, Land Cruiser LC300
+  // 16 Specified Colorways with Authentic Branded Grilles, Lights & Geometry
   // ---------------------------------------------------------------------------
-  function createAerodynamicCar(archetypeIdx) {
-    const typeIdx = (archetypeIdx !== undefined ? archetypeIdx : (carArchetypeCounter++)) % 4;
+  const carTextureCache = {};
+
+  function getCarGrilleTexture(carType) {
+    if (carTextureCache[carType]) return carTextureCache[carType];
+    if (typeof document === 'undefined') return null;
+    const cv = document.createElement('canvas');
+    cv.width = 512;
+    cv.height = 256;
+    const ctx = cv.getContext('2d');
+
+    if (carType === 'mercedes_amg') {
+      // Panamericana Grille: deep black background, vertical chrome slats, center Mercedes star
+      ctx.fillStyle = '#0f1115';
+      ctx.fillRect(0, 0, 512, 256);
+
+      // Outer chrome rim
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.roundRect(8, 8, 496, 240, 36);
+      ctx.stroke();
+
+      // Vertical Panamericana chrome slats
+      ctx.fillStyle = '#e2e8f0';
+      for (let x = 40; x <= 472; x += 32) {
+        if (x > 210 && x < 300) continue; // center gap for star
+        ctx.fillRect(x, 16, 8, 224);
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(x + 6, 16, 2, 224);
+        ctx.fillStyle = '#e2e8f0';
+      }
+
+      // Center 3D-effect Mercedes star emblem
+      const cx = 256, cy = 128, r = 62;
+      ctx.fillStyle = '#0f1115';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8fafc';
+      for (let a = 0; a < 3; a++) {
+        const ang = -Math.PI / 2 + a * (Math.PI * 2 / 3);
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(ang + 0.18) * (r * 0.3), cy + Math.sin(ang + 0.18) * (r * 0.3));
+        ctx.lineTo(cx + Math.cos(ang) * (r * 0.95), cy + Math.sin(ang) * (r * 0.95));
+        ctx.lineTo(cx + Math.cos(ang - 0.18) * (r * 0.3), cy + Math.sin(ang - 0.18) * (r * 0.3));
+        ctx.closePath();
+        ctx.fill();
+      }
+    } else if (carType === 'honda_sedan') {
+      // Honda Fastback Grille: horizontal glossy black bars with upper chrome bar and Honda 'H'
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 512, 256);
+
+      // Upper chrome brow bar
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(0, 0, 512, 38);
+
+      // Horizontal black slatted grille bars
+      for (let y = 56; y < 240; y += 32) {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(20, y, 472, 14);
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(20, y, 472, 3);
+      }
+
+      // Center Chrome Honda 'H' Logo
+      const cx = 256, cy = 128;
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.roundRect(cx - 52, cy - 48, 104, 96, 16);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(cx - 36, cy + 34); ctx.lineTo(cx - 42, cy - 34); ctx.lineTo(cx - 28, cy - 34); ctx.lineTo(cx - 24, cy + 34); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx + 24, cy + 34); ctx.lineTo(cx + 28, cy - 34); ctx.lineTo(cx + 42, cy - 34); ctx.lineTo(cx + 36, cy + 34); ctx.closePath(); ctx.fill();
+      ctx.fillRect(cx - 30, cy - 6, 60, 12);
+    } else if (carType === 'range_rover') {
+      // Range Rover Grille: Minimalist rectangular grille with horizontal micro-mesh pattern
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(0, 0, 512, 256);
+
+      ctx.strokeStyle = '#b49a75';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(8, 8, 496, 240);
+
+      // Micro-mesh pattern
+      ctx.fillStyle = '#71717a';
+      for (let x = 24; x < 488; x += 28) {
+        for (let y = 24; y < 232; y += 24) {
+          ctx.beginPath();
+          ctx.roundRect(x, y, 20, 14, 4);
+          ctx.fill();
+        }
+      }
+
+      // Small Land Rover oval badge in upper right corner
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath();
+      ctx.ellipse(430, 60, 36, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    } else if (carType === 'land_cruiser') {
+      // Toyota Land Cruiser LC300 Grille: Massive 4-bar horizontal chrome grille + Toyota triple-oval
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, 512, 256);
+
+      // 4 heavy horizontal chrome bars
+      const barYs = [28, 80, 136, 192];
+      barYs.forEach(by => {
+        const barGrad = ctx.createLinearGradient(0, by, 0, by + 34);
+        barGrad.addColorStop(0, '#f8fafc');
+        barGrad.addColorStop(0.3, '#cbd5e1');
+        barGrad.addColorStop(0.7, '#94a3b8');
+        barGrad.addColorStop(1, '#475569');
+        ctx.fillStyle = barGrad;
+        ctx.beginPath();
+        ctx.roundRect(16, by, 480, 34, 6);
+        ctx.fill();
+      });
+
+      // Center Toyota Triple-Oval Emblem
+      const cx = 256, cy = 108;
+      ctx.fillStyle = '#090d16';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 64, 44, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 58, 38, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - 8, 36, 22, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 18, 32, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(cv);
+    tex.anisotropy = 4;
+    carTextureCache[carType] = tex;
+    return tex;
+  }
+
+  // -------------------------------------------------------------
+  // MASTER CAR VARIANT DECK (16 Configurations across 4 Models)
+  // -------------------------------------------------------------
+  const CAR_VARIANT_DECK = [
+    // Model 1: Mercedes-AMG GT Coupe (4 variants)
+    {
+      id: 'AMG_1',
+      modelKey: 'AMG_GT',
+      modelTitle: 'Mercedes-AMG GT Coupe (Metallic Silver)',
+      carType: 'mercedes_amg',
+      bodyColor: 0xe2e8f0,
+      metalness: 0.85,
+      roughness: 0.18,
+      roofColor: 0xe2e8f0,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.4,
+      width: 1.9,
+      height: 1.25,
+      wheelRadius: 0.34
+    },
+    {
+      id: 'AMG_2',
+      modelKey: 'AMG_GT',
+      modelTitle: 'Mercedes-AMG GT Coupe (Glossy Jet Black)',
+      carType: 'mercedes_amg',
+      bodyColor: 0x111317,
+      metalness: 0.80,
+      roughness: 0.15,
+      roofColor: 0x111317,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.4,
+      width: 1.9,
+      height: 1.25,
+      wheelRadius: 0.34
+    },
+    {
+      id: 'AMG_3',
+      modelKey: 'AMG_GT',
+      modelTitle: 'Mercedes-AMG GT Coupe (Deep Dark Blue)',
+      carType: 'mercedes_amg',
+      bodyColor: 0x1e3a8a,
+      metalness: 0.75,
+      roughness: 0.20,
+      roofColor: 0x1e3a8a,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.4,
+      width: 1.9,
+      height: 1.25,
+      wheelRadius: 0.34
+    },
+    {
+      id: 'AMG_4',
+      modelKey: 'AMG_GT',
+      modelTitle: 'Mercedes-AMG GT Coupe (Pearl White)',
+      carType: 'mercedes_amg',
+      bodyColor: 0xf8fafc,
+      metalness: 0.60,
+      roughness: 0.25,
+      roofColor: 0xf8fafc,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.4,
+      width: 1.9,
+      height: 1.25,
+      wheelRadius: 0.34
+    },
+
+    // Model 2: Honda Civic / Accord Fastback Sedan (4 variants)
+    {
+      id: 'HONDA_1',
+      modelKey: 'HONDA_SEDAN',
+      modelTitle: 'Honda Accord Sedan (Urban Gray)',
+      carType: 'honda_sedan',
+      bodyColor: 0x64748b,
+      metalness: 0.50,
+      roughness: 0.35,
+      roofColor: 0x64748b,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.6,
+      width: 1.85,
+      height: 1.4,
+      wheelRadius: 0.35
+    },
+    {
+      id: 'HONDA_2',
+      modelKey: 'HONDA_SEDAN',
+      modelTitle: 'Honda Accord Sedan (Glossy Black)',
+      carType: 'honda_sedan',
+      bodyColor: 0x111317,
+      metalness: 0.70,
+      roughness: 0.15,
+      roofColor: 0x111317,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.6,
+      width: 1.85,
+      height: 1.4,
+      wheelRadius: 0.35
+    },
+    {
+      id: 'HONDA_3',
+      modelKey: 'HONDA_SEDAN',
+      modelTitle: 'Honda Accord Sedan (Deep Dark Blue)',
+      carType: 'honda_sedan',
+      bodyColor: 0x1e3a8a,
+      metalness: 0.65,
+      roughness: 0.20,
+      roofColor: 0x1e3a8a,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.6,
+      width: 1.85,
+      height: 1.4,
+      wheelRadius: 0.35
+    },
+    {
+      id: 'HONDA_4',
+      modelKey: 'HONDA_SEDAN',
+      modelTitle: 'Honda Accord Sedan (Pearl White)',
+      carType: 'honda_sedan',
+      bodyColor: 0xf8fafc,
+      metalness: 0.55,
+      roughness: 0.25,
+      roofColor: 0xf8fafc,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.6,
+      width: 1.85,
+      height: 1.4,
+      wheelRadius: 0.35
+    },
+
+    // Model 3: Range Rover Luxury SUV (4 variants)
+    {
+      id: 'RR_1',
+      modelKey: 'RANGE_ROVER',
+      modelTitle: 'Range Rover SUV (Satin Champagne)',
+      carType: 'range_rover',
+      bodyColor: 0xb49a75,
+      metalness: 0.45,
+      roughness: 0.30,
+      roofColor: 0xb49a75,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 5.0,
+      width: 2.0,
+      height: 1.8,
+      wheelRadius: 0.42
+    },
+    {
+      id: 'RR_2',
+      modelKey: 'RANGE_ROVER',
+      modelTitle: 'Range Rover SUV (Black & White Contrast)',
+      carType: 'range_rover',
+      bodyColor: 0x111317,
+      metalness: 0.70,
+      roughness: 0.15,
+      roofColor: 0xf8fafc,
+      contrastRoof: true,
+      headlightColor: 0xffffff,
+      length: 5.0,
+      width: 2.0,
+      height: 1.8,
+      wheelRadius: 0.42
+    },
+    {
+      id: 'RR_3',
+      modelKey: 'RANGE_ROVER',
+      modelTitle: 'Range Rover SUV (Black & Navy Blue Contrast)',
+      carType: 'range_rover',
+      bodyColor: 0x111317,
+      metalness: 0.70,
+      roughness: 0.15,
+      roofColor: 0x172554,
+      contrastRoof: true,
+      headlightColor: 0xffffff,
+      length: 5.0,
+      width: 2.0,
+      height: 1.8,
+      wheelRadius: 0.42
+    },
+    {
+      id: 'RR_4',
+      modelKey: 'RANGE_ROVER',
+      modelTitle: 'Range Rover SUV (Black & Dark Ash Contrast)',
+      carType: 'range_rover',
+      bodyColor: 0x111317,
+      metalness: 0.70,
+      roughness: 0.15,
+      roofColor: 0x334155,
+      contrastRoof: true,
+      headlightColor: 0xffffff,
+      length: 5.0,
+      width: 2.0,
+      height: 1.8,
+      wheelRadius: 0.42
+    },
+
+    // Model 4: Toyota Land Cruiser Prado / LC300 SUV (4 variants)
+    {
+      id: 'LC_1',
+      modelKey: 'LAND_CRUISER',
+      modelTitle: 'Toyota Land Cruiser LC300 (Pearl White)',
+      carType: 'land_cruiser',
+      bodyColor: 0xf1f5f9,
+      metalness: 0.55,
+      roughness: 0.25,
+      roofColor: 0xf1f5f9,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.9,
+      width: 1.98,
+      height: 1.9,
+      wheelRadius: 0.43
+    },
+    {
+      id: 'LC_2',
+      modelKey: 'LAND_CRUISER',
+      modelTitle: 'Toyota Land Cruiser LC300 (Glossy Black)',
+      carType: 'land_cruiser',
+      bodyColor: 0x111317,
+      metalness: 0.70,
+      roughness: 0.15,
+      roofColor: 0x111317,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.9,
+      width: 1.98,
+      height: 1.9,
+      wheelRadius: 0.43
+    },
+    {
+      id: 'LC_3',
+      modelKey: 'LAND_CRUISER',
+      modelTitle: 'Toyota Land Cruiser LC300 (Deep Dark Blue)',
+      carType: 'land_cruiser',
+      bodyColor: 0x1e3a8a,
+      metalness: 0.65,
+      roughness: 0.20,
+      roofColor: 0x1e3a8a,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.9,
+      width: 1.98,
+      height: 1.9,
+      wheelRadius: 0.43
+    },
+    {
+      id: 'LC_4',
+      modelKey: 'LAND_CRUISER',
+      modelTitle: 'Toyota Land Cruiser LC300 (Dark Ash Charcoal)',
+      carType: 'land_cruiser',
+      bodyColor: 0x334155,
+      metalness: 0.50,
+      roughness: 0.30,
+      roofColor: 0x334155,
+      contrastRoof: false,
+      headlightColor: 0xffffff,
+      length: 4.9,
+      width: 1.98,
+      height: 1.9,
+      wheelRadius: 0.43
+    }
+  ];
+
+  // -------------------------------------------------------------
+  // Model 1: Mercedes-AMG GT Coupe Builder
+  // -------------------------------------------------------------
+  function buildCarMercedesAMGGT(config) {
     const group = new THREE.Group();
     group.userData.wheels = [];
 
-    // Smooth aerodynamic 2D side profile extruded along Z (Facing canonical +X)
-    const shape = new THREE.Shape();
-    // Front splitter & nose
-    shape.moveTo(2.1, 0.18);
-    shape.lineTo(2.0, 0.52);
-    // Sloped aerodynamic hood
-    shape.quadraticCurveTo(1.1, 0.68, 0.7, 0.72);
-    // Raked windshield
-    shape.lineTo(0.1, 1.18);
-    // Swept curved aerodynamic roofline
-    shape.quadraticCurveTo(-0.6, 1.22, -1.1, 1.12);
-    // Fastback rear glass
-    shape.lineTo(-1.95, 0.78);
-    // Integrated decklid spoiler
-    shape.lineTo(-2.1, 0.85);
-    // Rear diffuser
-    shape.lineTo(-2.1, 0.22);
-    // Recessed rear wheel arch
-    shape.bezierCurveTo(-1.7, 0.55, -0.9, 0.55, -0.85, 0.18);
-    shape.lineTo(0.85, 0.18);
-    // Recessed front wheel arch
-    shape.bezierCurveTo(0.9, 0.55, 1.7, 0.55, 1.75, 0.18);
-    shape.lineTo(2.1, 0.18);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: config.bodyColor,
+      metalness: config.metalness !== undefined ? config.metalness : 0.80,
+      roughness: config.roughness !== undefined ? config.roughness : 0.18
+    });
+    const darkChassisMat = new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.70 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.15 });
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16,
+      roughness: 0.08,
+      metalness: 0.90,
+      transparent: true,
+      opacity: 0.85
+    });
 
-    const extrudeSettings = {
-      depth: 1.55,
+    // Extruded Body Silhouette (Length 4.4, Width 1.9, Height 1.25)
+    const shape = new THREE.Shape();
+    shape.moveTo(2.20, 0.16);
+    shape.lineTo(2.10, 0.46);
+    shape.quadraticCurveTo(1.20, 0.65, 0.65, 0.68);
+    shape.lineTo(0.05, 1.15);
+    shape.quadraticCurveTo(-0.35, 1.22, -0.70, 1.18);
+    shape.quadraticCurveTo(-1.35, 1.05, -1.90, 0.72);
+    shape.lineTo(-2.15, 0.76);
+    shape.lineTo(-2.20, 0.20);
+    shape.bezierCurveTo(-1.80, 0.52, -0.90, 0.52, -0.85, 0.16);
+    shape.lineTo(0.85, 0.16);
+    shape.bezierCurveTo(0.90, 0.52, 1.80, 0.52, 1.85, 0.16);
+    shape.lineTo(2.20, 0.16);
+
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, {
+      depth: 1.78,
       bevelEnabled: true,
-      bevelThickness: 0.14,
-      bevelSize: 0.12,
+      bevelThickness: 0.06,
+      bevelSize: 0.06,
       bevelSegments: 4,
       curveSegments: 16
-    };
-    const bodyGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    bodyGeo.translate(0, 0, -1.55 / 2);
-
-    let bodyColorHex = 0x84cc16;
-    let roughness = 0.25;
-    let metalness = 0.65;
-    let headlightColor = 0xffffff;
-
-    if (typeIdx === 0) {
-      // 1. Lime-Green Neon i8 Coupe: Toxic lime-green (#84cc16), black hood scoop, #facc15 daytime LED strips
-      bodyColorHex = 0x84cc16;
-      roughness = 0.25;
-      metalness = 0.65;
-      headlightColor = 0xfacc15;
-    } else if (typeIdx === 1) {
-      // 2. Silver Retro DeLorean Wedge Coupe: Brushed stainless silver (#cbd5e1), sharp wedge cabin, quad headlights
-      bodyColorHex = 0xcbd5e1;
-      roughness = 0.35;
-      metalness = 0.80;
-      headlightColor = 0xe0f2fe;
-    } else if (typeIdx === 2) {
-      // 3. White & Carbon Hypercar: High-gloss pearl white (#f8fafc), carbon splitter, #60a5fa ice-blue LED headlights
-      bodyColorHex = 0xf8fafc;
-      roughness = 0.15;
-      metalness = 0.20;
-      headlightColor = 0x60a5fa;
-    } else {
-      // 4. Night Muscle Sedan: Deep midnight black/navy (#0f172a), 4 ice-blue circular xenon headlights (#38bdf8), 3 red blower lights
-      bodyColorHex = 0x0f172a;
-      roughness = 0.30;
-      metalness = 0.70;
-      headlightColor = 0x38bdf8;
-    }
-
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: bodyColorHex,
-      roughness: roughness,
-      metalness: metalness
     });
+    bodyGeo.translate(0, 0, -1.78 / 2);
     const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.castShadow = true;
     group.add(bodyMesh);
 
-    // Dark Smoked Glass Windshield & Cabin Canopy (Extruded Contour)
+    // Front Panamericana Grille
+    const grilleTex = getCarGrilleTexture('mercedes_amg');
+    if (grilleTex) {
+      const gPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.50, 1.05),
+        new THREE.MeshBasicMaterial({ map: grilleTex, transparent: true })
+      );
+      gPlane.rotation.y = Math.PI / 2;
+      gPlane.position.set(2.18, 0.44, 0);
+      group.add(gPlane);
+    }
+
+    // Front Lower Splitter
+    const splitter = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 1.84), darkChassisMat);
+    splitter.position.set(2.15, 0.16, 0);
+    group.add(splitter);
+
+    // Front LED Headlights
+    [-0.68, 0.68].forEach(hz => {
+      const hlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.32), darkChassisMat);
+      hlHousing.position.set(2.05, 0.50, hz);
+      group.add(hlHousing);
+
+      const hlLens = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.20, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      hlLens.rotation.x = Math.PI / 2;
+      hlLens.position.set(2.14, 0.50, hz);
+      group.add(hlLens);
+
+      const drlStrip = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.03, 0.30), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      drlStrip.position.set(2.08, 0.57, hz);
+      group.add(drlStrip);
+    });
+
+    // Dark Tinted Glass Windshield & Fastback Cabin Canopy
     const glassShape = new THREE.Shape();
-    glassShape.moveTo(0.12, 1.15);
-    glassShape.quadraticCurveTo(-0.55, 1.18, -1.05, 1.09);
-    glassShape.lineTo(-1.85, 0.78);
-    glassShape.lineTo(-1.3, 0.75);
-    glassShape.quadraticCurveTo(0.2, 0.72, 0.65, 0.72);
+    glassShape.moveTo(0.08, 1.13);
+    glassShape.quadraticCurveTo(-0.35, 1.19, -0.68, 1.15);
+    glassShape.lineTo(-1.80, 0.73);
+    glassShape.lineTo(-1.10, 0.70);
+    glassShape.quadraticCurveTo(0.10, 0.68, 0.60, 0.68);
     glassShape.closePath();
     const glassGeo = new THREE.ExtrudeGeometry(glassShape, {
-      depth: 1.48,
+      depth: 1.70,
       bevelEnabled: true,
       bevelThickness: 0.04,
-      bevelSize: 0.03,
+      bevelSize: 0.04,
       bevelSegments: 2
     });
-    glassGeo.translate(0, 0, -1.48 / 2);
-    const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      roughness: 0.1,
-      metalness: 0.9
-    });
+    glassGeo.translate(0, 0, -1.70 / 2);
     const glassMesh = new THREE.Mesh(glassGeo, glassMat);
     group.add(glassMesh);
 
-    const sideGlassMat = new THREE.MeshStandardMaterial({
-      color: 0x7dd3fc,
-      roughness: 0.18,
-      metalness: 0.35,
-      transparent: true,
-      opacity: 0.78,
-      side: THREE.DoubleSide
-    });
-    const sideWindowShapes = [
-      [[0.02, 1.05], [-0.18, 0.79], [-0.72, 0.78], [-0.72, 1.08]],
-      [[-0.28, 1.08], [-0.79, 1.07], [-1.03, 1.01], [-1.72, 0.80], [-0.87, 0.78]]
-    ];
-    [-0.79, 0.79].forEach(side => {
-      sideWindowShapes.forEach(points => {
-        const windowShape = new THREE.Shape();
-        windowShape.moveTo(points[0][0], points[0][1]);
-        points.slice(1).forEach(point => windowShape.lineTo(point[0], point[1]));
-        windowShape.closePath();
-        const windowPane = new THREE.Mesh(new THREE.ShapeGeometry(windowShape), sideGlassMat);
-        windowPane.position.z = side;
-        group.add(windowPane);
-      });
+    // Side Mirrors
+    [-0.96, 0.96].forEach(mz => {
+      const stalk = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.14), darkChassisMat);
+      stalk.position.set(0.50, 0.72, mz * 0.92);
+      group.add(stalk);
 
-      const windowDivider = new THREE.Mesh(
-        new THREE.BoxGeometry(0.045, 0.39, 0.035),
-        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.45, roughness: 0.4 })
-      );
-      windowDivider.position.set(-0.74, 0.90, side);
-      group.add(windowDivider);
+      const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.10, 0.20), bodyMat);
+      mirror.position.set(0.50, 0.76, mz);
+      group.add(mirror);
     });
 
-    // Archetype-Specific Custom Features
-    if (typeIdx === 0) {
-      // 1. Lime-Green i8: Matte black carbon hood scoop & glowing #facc15 LED daytime running light strips
-      const scoopGeo = new THREE.BoxGeometry(0.45, 0.12, 0.55);
-      const scoopMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
-      const scoop = new THREE.Mesh(scoopGeo, scoopMat);
-      scoop.position.set(1.1, 0.75, 0);
-      group.add(scoop);
+    // Rear Horizontal LED Taillight Strip
+    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.42), new THREE.MeshBasicMaterial({ color: 0xff1744 }));
+    tl.position.set(-2.17, 0.68, 0);
+    group.add(tl);
 
-      [-0.52, 0.52].forEach(hz => {
-        const ledStrip = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.38), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-        ledStrip.position.set(2.05, 0.45, hz);
-        group.add(ledStrip);
-      });
-    } else if (typeIdx === 1) {
-      // 2. Silver DeLorean: Rear window louvers & quad square vintage headlights
-      [-1.3, -1.5, -1.7].forEach(lx => {
-        const louver = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.03, 1.15), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-        louver.position.set(lx, 0.95 - (lx + 1.3) * 0.15, 0);
-        group.add(louver);
-      });
-      [-0.56, -0.38, 0.38, 0.56].forEach(hz => {
-        const qHl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.12), new THREE.MeshBasicMaterial({ color: 0xe0f2fe }));
-        qHl.position.set(2.06, 0.45, hz);
-        group.add(qHl);
-      });
-    } else if (typeIdx === 2) {
-      // 3. White & Carbon Hypercar: Carbon splitter & ice-blue LED headlights
-      const splitter = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 1.62), new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.2 }));
-      splitter.position.set(2.12, 0.20, 0);
-      group.add(splitter);
+    // Rear Lower Diffuser & Quad Chrome Exhaust Tips
+    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.14, 1.75), darkChassisMat);
+    diffuser.position.set(-2.15, 0.22, 0);
+    group.add(diffuser);
 
-      [-0.48, 0.48].forEach(hz => {
-        const hl = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.18, 8), new THREE.MeshBasicMaterial({ color: 0x60a5fa }));
-        hl.rotation.x = Math.PI / 2;
-        hl.position.set(2.08, 0.45, hz);
-        group.add(hl);
-      });
-    } else {
-      // 4. Night Muscle: 4 ice-blue xenon headlights & dual hood scoop with 3 glowing red blower lights (#ef4444)
-      [-0.56, -0.40, 0.40, 0.56].forEach(hz => {
-        const xHl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.16, 8), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
-        xHl.rotation.x = Math.PI / 2;
-        xHl.position.set(2.08, 0.44, hz);
-        group.add(xHl);
-      });
-      const blowerScoop = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.20, 0.65), new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.3 }));
-      blowerScoop.position.set(1.0, 0.80, 0);
-      group.add(blowerScoop);
-      [-0.15, 0, 0.15].forEach(bz => {
-        const blowerLight = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.08, 6), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-        blowerLight.rotation.x = Math.PI / 2;
-        blowerLight.position.set(1.28, 0.81, bz);
-        group.add(blowerLight);
-      });
-    }
+    [-0.68, -0.54, 0.54, 0.68].forEach(ez => {
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.18, 8), chromeMat);
+      tip.rotation.z = Math.PI / 2;
+      tip.position.set(-2.22, 0.24, ez);
+      group.add(tip);
+    });
 
-    // Rear Ruby-Red LED Taillight Bar
-    const tlMat = new THREE.MeshBasicMaterial({ color: 0xff1744 });
-    const tlMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.25), tlMat);
-    tlMesh.position.set(-2.08, 0.72, 0);
-    group.add(tlMesh);
-
-    // Four road-ready tires with modeled alloy rims on both visible sides.
-    [-0.82, 0.82].forEach(wz => {
-      [-1.3, 1.3].forEach(wx => {
-        const wheel = create10SpokeAlloyWheel(0.32, 0.20, 0xcbd5e1, false);
-        wheel.position.set(wx, 0.32, wz);
+    // 4 AMG Sport 10-Spoke Alloy Wheels
+    [-0.88, 0.88].forEach(wz => {
+      [-1.35, 1.35].forEach(wx => {
+        const wheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true);
+        wheel.position.set(wx, 0.34, wz);
         group.add(wheel);
         group.userData.wheels.push(wheel);
       });
     });
 
-    // Zero-Lag Additive Headlight Ground Light Pool (Flat transparent plane at y = 0.02)
+    return group;
+  }
+
+  // -------------------------------------------------------------
+  // Model 2: Honda Civic / Accord Fastback Sedan Builder
+  // -------------------------------------------------------------
+  function buildCarHondaSedan(config) {
+    const group = new THREE.Group();
+    group.userData.wheels = [];
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: config.bodyColor,
+      metalness: config.metalness !== undefined ? config.metalness : 0.50,
+      roughness: config.roughness !== undefined ? config.roughness : 0.35
+    });
+    const darkTrimMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.60 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.85, roughness: 0.20 });
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16,
+      roughness: 0.10,
+      metalness: 0.85,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    // Extruded Body Silhouette (Length 4.6, Width 1.85, Height 1.4)
+    const shape = new THREE.Shape();
+    shape.moveTo(2.30, 0.18);
+    shape.lineTo(2.24, 0.54);
+    shape.quadraticCurveTo(1.40, 0.74, 0.85, 0.76);
+    shape.lineTo(0.20, 1.32);
+    shape.quadraticCurveTo(-0.30, 1.37, -0.80, 1.35);
+    shape.lineTo(-1.80, 0.90);
+    shape.lineTo(-2.25, 0.88);
+    shape.lineTo(-2.30, 0.22);
+    shape.bezierCurveTo(-1.85, 0.54, -0.98, 0.54, -0.92, 0.18);
+    shape.lineTo(0.92, 0.18);
+    shape.bezierCurveTo(0.98, 0.54, 1.85, 0.54, 1.90, 0.18);
+    shape.lineTo(2.30, 0.18);
+
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, {
+      depth: 1.73,
+      bevelEnabled: true,
+      bevelThickness: 0.06,
+      bevelSize: 0.06,
+      bevelSegments: 4,
+      curveSegments: 16
+    });
+    bodyGeo.translate(0, 0, -1.73 / 2);
+    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.castShadow = true;
+    group.add(bodyMesh);
+
+    // Front Horizontal Grille
+    const grilleTex = getCarGrilleTexture('honda_sedan');
+    if (grilleTex) {
+      const gPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.42, 1.05),
+        new THREE.MeshBasicMaterial({ map: grilleTex, transparent: true })
+      );
+      gPlane.rotation.y = Math.PI / 2;
+      gPlane.position.set(2.26, 0.54, 0);
+      group.add(gPlane);
+    }
+
+    // Jewel-Eye Horizontal LED Headlights
+    [-0.65, 0.65].forEach(hz => {
+      const hlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.12, 0.34), darkTrimMat);
+      hlHousing.position.set(2.20, 0.56, hz);
+      group.add(hlHousing);
+
+      const hlLens = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.28), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      hlLens.position.set(2.28, 0.56, hz);
+      group.add(hlLens);
+    });
+
+    // Dark Tinted Glass Windshield & Fastback Cabin
+    const glassShape = new THREE.Shape();
+    glassShape.moveTo(0.22, 1.29);
+    glassShape.quadraticCurveTo(-0.30, 1.34, -0.78, 1.32);
+    glassShape.lineTo(-1.74, 0.90);
+    glassShape.lineTo(-1.10, 0.82);
+    glassShape.quadraticCurveTo(0.20, 0.77, 0.80, 0.77);
+    glassShape.closePath();
+    const glassGeo = new THREE.ExtrudeGeometry(glassShape, {
+      depth: 1.65,
+      bevelEnabled: true,
+      bevelThickness: 0.04,
+      bevelSize: 0.04,
+      bevelSegments: 2
+    });
+    glassGeo.translate(0, 0, -1.65 / 2);
+    const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+    group.add(glassMesh);
+
+    // B-Pillar Window Dividers
+    [-0.85, 0.85].forEach(wz => {
+      const bPillar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.04), darkTrimMat);
+      bPillar.position.set(-0.25, 1.05, wz);
+      group.add(bPillar);
+
+      const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.18), bodyMat);
+      mirror.position.set(0.68, 0.84, wz * 1.06);
+      group.add(mirror);
+    });
+
+    // Rear Connected Full-Width LED Taillight Bar Across Trunk
+    const tlBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.09, 1.38), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+    tlBar.position.set(-2.26, 0.86, 0);
+    group.add(tlBar);
+
+    // Rear Dual Exhaust Cutouts in Lower Bumper
+    [-0.60, 0.60].forEach(ez => {
+      const tip = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.06, 0.16), chromeMat);
+      tip.position.set(-2.28, 0.28, ez);
+      group.add(tip);
+    });
+
+    // 4 Two-Tone 10-Spoke Diamond-Cut Alloy Wheels
+    [-0.85, 0.85].forEach(wz => {
+      [-1.42, 1.42].forEach(wx => {
+        const wheel = create10SpokeAlloyWheel(0.35, 0.20, 0xcbd5e1, false);
+        wheel.position.set(wx, 0.35, wz);
+        group.add(wheel);
+        group.userData.wheels.push(wheel);
+      });
+    });
+
+    return group;
+  }
+
+  // -------------------------------------------------------------
+  // Model 3: Range Rover Luxury SUV Builder
+  // -------------------------------------------------------------
+  function buildCarRangeRover(config) {
+    const group = new THREE.Group();
+    group.userData.wheels = [];
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: config.bodyColor,
+      metalness: config.metalness !== undefined ? config.metalness : 0.45,
+      roughness: config.roughness !== undefined ? config.roughness : 0.30
+    });
+    const roofMat = new THREE.MeshStandardMaterial({
+      color: config.roofColor || config.bodyColor,
+      metalness: 0.50,
+      roughness: config.contrastRoof ? 0.25 : (config.roughness || 0.30)
+    });
+    const blackTrimMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.40, metalness: 0.50 });
+    const silverMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.80, roughness: 0.25 });
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x070a12,
+      roughness: 0.08,
+      metalness: 0.90,
+      transparent: true,
+      opacity: 0.88
+    });
+
+    // Monolithic Luxury SUV Body (Length 5.0, Width 2.0, Height 1.8)
+    const shape = new THREE.Shape();
+    shape.moveTo(2.50, 0.30);
+    shape.lineTo(2.46, 0.96);
+    shape.lineTo(0.95, 1.08);
+    shape.lineTo(0.35, 1.72);
+    shape.lineTo(-1.90, 1.70);
+    shape.lineTo(-2.45, 1.05);
+    shape.lineTo(-2.48, 0.34);
+    shape.bezierCurveTo(-2.00, 0.72, -1.10, 0.72, -1.05, 0.30);
+    shape.lineTo(1.05, 0.30);
+    shape.bezierCurveTo(1.10, 0.72, 2.00, 0.72, 2.05, 0.30);
+    shape.lineTo(2.50, 0.30);
+
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, {
+      depth: 1.88,
+      bevelEnabled: true,
+      bevelThickness: 0.06,
+      bevelSize: 0.06,
+      bevelSegments: 4,
+      curveSegments: 12
+    });
+    bodyGeo.translate(0, 0, -1.88 / 2);
+    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.castShadow = true;
+    group.add(bodyMesh);
+
+    // Floating Roof Cap
+    const roofCap = new THREE.Mesh(new THREE.BoxGeometry(2.35, 0.08, 1.82), roofMat);
+    roofCap.position.set(-0.75, 1.74, 0);
+    group.add(roofCap);
+
+    // Front Minimalist Rectangular Grille
+    const grilleTex = getCarGrilleTexture('range_rover');
+    if (grilleTex) {
+      const gPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.42, 1.25),
+        new THREE.MeshBasicMaterial({ map: grilleTex, transparent: true })
+      );
+      gPlane.rotation.y = Math.PI / 2;
+      gPlane.position.set(2.49, 0.88, 0);
+      group.add(gPlane);
+    }
+
+    // LED Matrix Projector Headlights
+    [-0.74, 0.74].forEach(hz => {
+      const hlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.16, 0.34), blackTrimMat);
+      hlHousing.position.set(2.42, 0.92, hz);
+      group.add(hlHousing);
+
+      const hlLens = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.28), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      hlLens.position.set(2.50, 0.92, hz);
+      group.add(hlLens);
+    });
+
+    // Signature Vertical Front Door Graphic Blade
+    [-0.99, 0.99].forEach(sz => {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.44, 0.03), silverMat);
+      blade.position.set(0.65, 0.88, sz);
+      group.add(blade);
+
+      const bladeAccent = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.38, 0.035), blackTrimMat);
+      bladeAccent.position.set(0.65, 0.88, sz);
+      group.add(bladeAccent);
+    });
+
+    // Flush Side Glazing & Dark Tinted Greenhouse
+    const glassShape = new THREE.Shape();
+    glassShape.moveTo(0.32, 1.68);
+    glassShape.lineTo(-1.85, 1.66);
+    glassShape.lineTo(-2.38, 1.08);
+    glassShape.lineTo(-1.20, 1.08);
+    glassShape.lineTo(0.90, 1.08);
+    glassShape.closePath();
+    const glassGeo = new THREE.ExtrudeGeometry(glassShape, {
+      depth: 1.82,
+      bevelEnabled: true,
+      bevelThickness: 0.04,
+      bevelSize: 0.04,
+      bevelSegments: 2
+    });
+    glassGeo.translate(0, 0, -1.82 / 2);
+    const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+    group.add(glassMesh);
+
+    // Side Mirrors
+    [-1.02, 1.02].forEach(mz => {
+      const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.10, 0.20), blackTrimMat);
+      mirror.position.set(0.78, 1.15, mz);
+      group.add(mirror);
+    });
+
+    // Hidden-Until-Lit Vertical Taillight Strips on Rear Corners
+    [-0.88, 0.88].forEach(tz => {
+      const vertLight = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.55, 0.08), new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
+      vertLight.position.set(-2.48, 1.15, tz);
+      group.add(vertLight);
+    });
+
+    // 4 Luxury SUV 10-Spoke Alloy Wheels
+    [-0.92, 0.92].forEach(wz => {
+      [-1.55, 1.55].forEach(wx => {
+        const wheel = create10SpokeAlloyWheel(0.42, 0.24, 0xd1d5db, false);
+        wheel.position.set(wx, 0.42, wz);
+        group.add(wheel);
+        group.userData.wheels.push(wheel);
+      });
+    });
+
+    return group;
+  }
+
+  // -------------------------------------------------------------
+  // Model 4: Toyota Land Cruiser Prado / LC300 SUV Builder
+  // -------------------------------------------------------------
+  function buildCarLandCruiser(config) {
+    const group = new THREE.Group();
+    group.userData.wheels = [];
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: config.bodyColor,
+      metalness: config.metalness !== undefined ? config.metalness : 0.55,
+      roughness: config.roughness !== undefined ? config.roughness : 0.25
+    });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.15 });
+    const blackTrimMat = new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.70 });
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16,
+      roughness: 0.10,
+      metalness: 0.85,
+      transparent: true,
+      opacity: 0.85
+    });
+
+    // Robust Off-Road Body Silhouette (Length 4.9, Width 1.98, Height 1.9)
+    const shape = new THREE.Shape();
+    shape.moveTo(2.45, 0.36);
+    shape.lineTo(2.40, 1.04);
+    shape.lineTo(0.90, 1.16);
+    shape.lineTo(0.30, 1.82);
+    shape.lineTo(-1.80, 1.80);
+    shape.lineTo(-2.40, 1.02);
+    shape.lineTo(-2.45, 0.38);
+    shape.bezierCurveTo(-1.95, 0.74, -1.05, 0.74, -1.00, 0.34);
+    shape.lineTo(1.00, 0.34);
+    shape.bezierCurveTo(1.05, 0.74, 1.95, 0.74, 2.00, 0.34);
+    shape.lineTo(2.45, 0.36);
+
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, {
+      depth: 1.86,
+      bevelEnabled: true,
+      bevelThickness: 0.06,
+      bevelSize: 0.06,
+      bevelSegments: 4,
+      curveSegments: 12
+    });
+    bodyGeo.translate(0, 0, -1.86 / 2);
+    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.castShadow = true;
+    group.add(bodyMesh);
+
+    // Twin Power-Dome Hood Ridges
+    [-0.35, 0.35].forEach(hz => {
+      const ridge = new THREE.Mesh(new THREE.BoxGeometry(1.20, 0.06, 0.18), bodyMat);
+      ridge.position.set(1.65, 1.12, hz);
+      group.add(ridge);
+    });
+
+    // Massive 4-Bar Horizontal Chrome Grille
+    const grilleTex = getCarGrilleTexture('land_cruiser');
+    if (grilleTex) {
+      const gPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.58, 1.30),
+        new THREE.MeshBasicMaterial({ map: grilleTex, transparent: true })
+      );
+      gPlane.rotation.y = Math.PI / 2;
+      gPlane.position.set(2.43, 0.94, 0);
+      group.add(gPlane);
+    }
+
+    // Squared-Off 3-Beam LED Projector Headlights
+    [-0.75, 0.75].forEach(hz => {
+      const hlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.34), blackTrimMat);
+      hlHousing.position.set(2.38, 0.96, hz);
+      group.add(hlHousing);
+
+      const hlLens = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.14, 0.28), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      hlLens.position.set(2.46, 0.96, hz);
+      group.add(hlLens);
+    });
+
+    // Front Lower Skid Plate
+    const skidPlate = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.14, 1.20), chromeMat);
+    skidPlate.position.set(2.42, 0.38, 0);
+    group.add(skidPlate);
+
+    // Roof Rails (Left & Right)
+    [-0.78, 0.78].forEach(rz => {
+      const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.20, 8), chromeMat);
+      rail.rotation.z = Math.PI / 2;
+      rail.position.set(-0.70, 1.86, rz);
+      group.add(rail);
+
+      [-1.6, -0.7, 0.2].forEach(px => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.06), blackTrimMat);
+        post.position.set(px, 1.83, rz);
+        group.add(post);
+      });
+    });
+
+    // Side Running Boards / Steps
+    [-1.02, 1.02].forEach(sz => {
+      const board = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.05, 0.18), chromeMat);
+      board.position.set(0, 0.32, sz);
+      group.add(board);
+
+      const tread = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.02, 0.14), blackTrimMat);
+      tread.position.set(0, 0.35, sz);
+      group.add(tread);
+    });
+
+    // Side Mirrors
+    [-1.04, 1.04].forEach(mz => {
+      const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.11, 0.22), chromeMat);
+      mirror.position.set(0.75, 1.22, mz);
+      group.add(mirror);
+    });
+
+    // Rear Upright Tailgate & Blocky LED Taillights
+    [-0.78, 0.78].forEach(tz => {
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.24, 0.22), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+      tl.position.set(-2.44, 1.10, tz);
+      group.add(tl);
+    });
+
+    const badgeBar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.90), chromeMat);
+    badgeBar.position.set(-2.44, 1.08, 0);
+    group.add(badgeBar);
+
+    // 4 Heavy-Duty All-Terrain Off-Road Wheels
+    [-0.92, 0.92].forEach(wz => {
+      [-1.50, 1.50].forEach(wx => {
+        const wheel = create10SpokeAlloyWheel(0.43, 0.25, 0x94a3b8, true);
+        wheel.position.set(wx, 0.43, wz);
+        group.add(wheel);
+        group.userData.wheels.push(wheel);
+      });
+    });
+
+    return group;
+  }
+
+  // -------------------------------------------------------------
+  // Master Car Package & Procedural 3D Car Factory
+  // -------------------------------------------------------------
+  function buildCarPackage(config, variantIndex) {
+    const carPackage = new THREE.Group();
+    carPackage.userData.wheels = [];
+
+    let carModelGroup;
+    if (config.carType === 'mercedes_amg') {
+      carModelGroup = buildCarMercedesAMGGT(config);
+    } else if (config.carType === 'honda_sedan') {
+      carModelGroup = buildCarHondaSedan(config);
+    } else if (config.carType === 'range_rover') {
+      carModelGroup = buildCarRangeRover(config);
+    } else {
+      carModelGroup = buildCarLandCruiser(config);
+    }
+
+    carPackage.add(carModelGroup);
+    carPackage.userData.wheels = carModelGroup.userData.wheels || [];
+    carPackage.userData.wheelRadius = config.wheelRadius || 0.35;
+    return carPackage;
+  }
+
+  let globalNextCarDeckIndex = 0;
+
+  function createProcedural3DCar(seed, vData) {
+    const rootMesh = new THREE.Group();
+    rootMesh.userData.isCar = true;
+
+    // Pick variant: if vData.variantIndex specified, use it; else cycle through deck
+    let variantIndex;
+    if (vData && typeof vData.variantIndex === 'number') {
+      variantIndex = vData.variantIndex % CAR_VARIANT_DECK.length;
+    } else if (vData && typeof vData.carModelIndex === 'number') {
+      variantIndex = (vData.carModelIndex * 4) % CAR_VARIANT_DECK.length;
+    } else {
+      variantIndex = (globalNextCarDeckIndex++) % CAR_VARIANT_DECK.length;
+    }
+
+    const config = CAR_VARIANT_DECK[variantIndex];
+    const carPackage = buildCarPackage(config, variantIndex);
+    rootMesh.add(carPackage);
+
+    rootMesh.userData.carPackage = carPackage;
+    rootMesh.userData.wheels = carPackage.userData.wheels || [];
+    rootMesh.userData.wheelRadius = (config.wheelRadius || 0.35) * 10;
+    rootMesh.userData.currentVariantIndex = variantIndex;
+    rootMesh.userData.modelKey = config.modelKey;
+    rootMesh.userData.modelTitle = config.modelTitle;
+
+    // Zero-lag additive headlight ground pool (flat plane at y = 0.02)
     const headGlowMat = new THREE.MeshBasicMaterial({
       map: getRadialGlowTexture(),
-      color: headlightColor,
+      color: 0xffffff,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.50,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
-    const headGlow = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.0), headGlowMat);
+    const headGlow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 2.2), headGlowMat);
     headGlow.rotation.x = -Math.PI / 2;
-    headGlow.position.set(3.2, 0.02, 0);
-    group.add(headGlow);
+    headGlow.position.set((config.length / 2) + 0.8, 0.02, 0);
+    rootMesh.add(headGlow);
+    rootMesh.userData.headGlow = headGlow;
 
-    // Coordinate scale matching crossroads traffic grid (Length ~42, Width ~17, Height ~12.5)
-    group.scale.set(10, 10, 10);
-    group.userData.wheelRadius = 3.2;
-    return group;
+    // Coordinate scale matching crossroads traffic grid (Length ~44-50, Width ~19-20, Height ~12.5-19)
+    rootMesh.scale.set(10, 10, 10);
+    return rootMesh;
   }
+
+  function createAerodynamicCar(archetypeIdx) {
+    return createProcedural3DCar(archetypeIdx, { variantIndex: archetypeIdx });
+  }
+
+  // Dynamic Car Variant Swapper on Wrap-Around / Respawn
+  function swapCarVariant(rootMesh, targetVariantIndex) {
+    if (!rootMesh || !rootMesh.userData || !rootMesh.userData.isCar) return;
+
+    let newIndex;
+    if (typeof targetVariantIndex === 'number') {
+      newIndex = ((targetVariantIndex % CAR_VARIANT_DECK.length) + CAR_VARIANT_DECK.length) % CAR_VARIANT_DECK.length;
+    } else {
+      newIndex = ((rootMesh.userData.currentVariantIndex || 0) + 1) % CAR_VARIANT_DECK.length;
+    }
+
+    const config = CAR_VARIANT_DECK[newIndex];
+    if (!config) return;
+
+    // Cleanly remove & dispose old carPackage
+    if (rootMesh.userData.carPackage) {
+      rootMesh.remove(rootMesh.userData.carPackage);
+      rootMesh.userData.carPackage.traverse(obj => {
+        if (obj.geometry && typeof obj.geometry.dispose === 'function') obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => { if (m && typeof m.dispose === 'function') m.dispose(); });
+          } else if (typeof obj.material.dispose === 'function') {
+            obj.material.dispose();
+          }
+        }
+      });
+    }
+
+    const newCarPackage = buildCarPackage(config, newIndex);
+    rootMesh.add(newCarPackage);
+    rootMesh.userData.carPackage = newCarPackage;
+    rootMesh.userData.wheels = newCarPackage.userData.wheels || [];
+    rootMesh.userData.wheelRadius = (config.wheelRadius || 0.35) * 10;
+    rootMesh.userData.modelKey = config.modelKey;
+    rootMesh.userData.modelTitle = config.modelTitle;
+    rootMesh.userData.currentVariantIndex = newIndex;
+
+    if (rootMesh.userData.headGlow) {
+      rootMesh.userData.headGlow.position.x = (config.length / 2) + 0.8;
+    }
+
+    if (activeTargetVehicle && activeTargetVehicle.mesh === rootMesh) {
+      const title = document.getElementById('crossroadsModePillTitle');
+      if (title && activeTargetVehicle.data) {
+        const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
+                         activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
+                         activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
+        title.textContent = `${config.modelTitle} · ${dirLabel}`;
+      }
+    }
+
+    return newIndex;
+  }
+
+  window.createProcedural3DCar = createProcedural3DCar;
   window.createAerodynamicCar = createAerodynamicCar;
   window.createCurvedSportsCar = createAerodynamicCar;
+  window.swapCarVariant = swapCarVariant;
+  window.CAR_VARIANT_DECK = CAR_VARIANT_DECK;
+  window.buildCarMercedesAMGGT = buildCarMercedesAMGGT;
+  window.buildCarHondaSedan = buildCarHondaSedan;
+  window.buildCarRangeRover = buildCarRangeRover;
+  window.buildCarLandCruiser = buildCarLandCruiser;
 
   // ---------------------------------------------------------------------------
   // 2. Articulated Multi-Part Procedural Humans — ZERO Box Cylinders, ZERO GLTF
@@ -8991,8 +9909,11 @@ let sharedRickshawArtTexture = null;
 
   function create3DVehicle(type, colorHex, appearanceId, vData) {
     if (type === 'car') {
-      const car = createAerodynamicCar();
-      scene.add(car);
+      const appearanceSeed = getAppearanceSeed(appearanceId || (vData && vData.id) || type);
+      const car = createProcedural3DCar(appearanceSeed, vData);
+      if (typeof scene !== 'undefined' && scene && scene.add) {
+        scene.add(car);
+      }
       return car;
     }
     if (type === 'bike') {
@@ -10032,18 +10953,11 @@ let sharedRickshawArtTexture = null;
   ];
 
   function loadCarModel() {
-    return loadGLBModel('assets/models/private-car.glb?v=20261109-1');
+    return Promise.resolve(null); // Pure Three.js procedural car models preserved
   }
 
   function loadAllCarModels() {
-    return Promise.all(
-      carModelFiles.map(file =>
-        loadGLBModel(file).catch(err => {
-          console.warn('Failed loading ' + file + ', using fallback:', err);
-          return loadCarModel();
-        })
-      )
-    );
+    return Promise.resolve([]); // Pure Three.js procedural car models preserved
   }
 
   function loadMetroModel() {
@@ -10315,47 +11229,7 @@ let sharedRickshawArtTexture = null;
   }
 
   function replaceCarWithModel(vehicle, prototype) {
-    vehicle.scale.set(1, 1, 1);
-    const model = prototype.clone(true);
-    const bounds = new THREE.Box3().setFromObject(model);
-    const dimensions = bounds.getSize(new THREE.Vector3());
-    if (!Number.isFinite(dimensions.x) || dimensions.x <= 0 || !Number.isFinite(bounds.min.y)) return;
-
-    const scale = 46 / dimensions.x;
-    model.scale.setScalar(scale);
-    model.position.set(
-      -(bounds.min.x + bounds.max.x) * scale / 2,
-      -bounds.min.y * scale,
-      -(bounds.min.z + bounds.max.z) * scale / 2
-    );
-
-    const wheels = [];
-    model.traverse(node => {
-      const name = (node.name || '').toLowerCase();
-      if (name === 'wheel_fl' || name === 'wheel_fr' || name === 'wheel_rl' || name === 'wheel_rr') {
-        wheels.push(node);
-      }
-      if (node.isMesh && node.material) {
-        const matName = (node.material.name || '').toLowerCase();
-        if (matName.includes('glass') || name.includes('glass') || matName.includes('windshield') || name.includes('windshield') || matName.includes('window') || name.includes('window')) {
-          node.material = node.material.clone();
-          node.material.transparent = true;
-          node.material.opacity = 0.65;
-          node.material.roughness = 0.08;
-          node.material.metalness = 0.15;
-          node.material.depthWrite = false;
-        }
-      }
-      if (node.isMesh) {
-        node.castShadow = true;
-        node.receiveShadow = true;
-      }
-    });
-
-    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
-    vehicle.add(model);
-    vehicle.userData.wheels = wheels;
-    vehicle.userData.wheelRadius = 3.3;
+    return; // Pure Three.js procedural car models preserved
   }
 
   function replaceMetroTrainWithModel(prototype) {
@@ -12138,16 +13012,7 @@ let sharedRickshawArtTexture = null;
       // Disabled: Pure Three.js procedural dual motorcycles are authoritative
     }).catch(err => console.warn('Sportbike GLB fallback:', err));
 
-    loadAllCarModels().then(carPrototypes => {
-      let carCounter = 0;
-      Object.values(vehicleMeshMap).forEach(vehicle => {
-        if (vehicle.data && vehicle.data.type === 'car') {
-          const proto = carPrototypes[carCounter % carPrototypes.length];
-          carCounter++;
-          replaceCarWithModel(vehicle.mesh, proto);
-        }
-      });
-    }).catch(err => console.warn('Car GLB fallback:', err));
+    // Procedural Three.js 4-Model Car Fleet (AMG GT, Accord, Range Rover, LC300) is authoritative (no external GLB needed)
 
     loadMetroModel().then(prototype => {
       replaceMetroTrainWithModel(prototype);
@@ -13018,6 +13883,11 @@ let sharedRickshawArtTexture = null;
         if (vm.mesh.userData.isBike && Math.abs(roadDelta) > 200) {
           const nextIdx = (globalNextBikeDeckIndex++) % BIKE_VARIANT_DECK.length;
           swapBikeVariant(vm.mesh, nextIdx);
+        }
+        // Auto-cycle car models & 16 liveries across the master deck on lane wrap-around / respawn
+        if (vm.mesh.userData.isCar && Math.abs(roadDelta) > 200) {
+          const nextIdx = (globalNextCarDeckIndex++) % CAR_VARIANT_DECK.length;
+          swapCarVariant(vm.mesh, nextIdx);
         }
         const forwardDelta = (v.dir === 'EB' || v.dir === 'SB') ? roadDelta : -roadDelta;
         const wheelRadius = vm.mesh.userData.wheelRadius || 3;

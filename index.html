@@ -111,7 +111,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=20261116-metro-rail-v3"></script>
+  <script src="assets/crossroads-3d.js?v=20261116-car-fleet-v1"></script>
   <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
@@ -18481,7 +18481,8 @@
       // Stop lines: EB: x=446, WB: x=752, SB: y=304, NB: y=536
       const vehicles = [
         // Eastbound (Horizontal, moving Right, Y=435 inner, Y=470 outer)
-        { id: 'v_eb_car', dir: 'EB', lane: 1, defaultLane: 1, type: 'car', color: '#f8fafc', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446, currentLaneY: 438 },
+        // Model 1: Mercedes-AMG GT Coupe (Metallic Silver)
+        { id: 'v_eb_car', dir: 'EB', lane: 1, defaultLane: 1, type: 'car', variantIndex: 0, carModel: 'AMG_GT', color: '#e2e8f0', w: 44, h: 20, pos: -40, speed: 65, maxSpeed: 75, stopLine: 446, currentLaneY: 438 },
         // Model A1: White & Black Streetfighter
         { id: 'v_eb_bike', dir: 'EB', lane: 1, defaultLane: 1, type: 'bike', variantIndex: 0, variantId: 'A1', modelType: 'A', color: '#f8fafc', bikeColor: '#f8fafc', helmetColor: '#f8fafc', sunglassesColor: '#090d12', shirtColor: '#1e293b', pantsColor: '#090a0d', shoeColor: '#ffffff', skinColor: '#df9b76', w: 36, h: 20, pos: -170, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 438 },
         { id: 'v_eb_bus', dir: 'EB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 80, speed: 45, maxSpeed: 52, stopLine: 446, currentLaneY: 468 },
@@ -18492,7 +18493,8 @@
         { id: 'v_eb_bike_2', dir: 'EB', lane: 2, defaultLane: 2, type: 'bike', variantIndex: 4, variantId: 'A2', modelType: 'A', color: '#dc2626', bikeColor: '#dc2626', helmetColor: '#dc2626', sunglassesColor: '#090d12', shirtColor: '#334155', pantsColor: '#111317', shoeColor: '#ffffff', skinColor: '#f59e0b', w: 36, h: 20, pos: -390, speed: 70, maxSpeed: 82, stopLine: 446, currentLaneY: 468 },
 
         // Westbound (Horizontal, moving Left, Y=405 inner, Y=370 outer)
-        { id: 'v_wb_car', dir: 'WB', lane: 1, defaultLane: 1, type: 'car', color: '#38bdf8', w: 44, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 405 },
+        // Model 2: Honda Civic / Accord Sedan (Urban Gray)
+        { id: 'v_wb_car', dir: 'WB', lane: 1, defaultLane: 1, type: 'car', variantIndex: 4, carModel: 'HONDA_SEDAN', color: '#64748b', w: 46, h: 20, pos: 1240, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 405 },
         // Model B1: Jet Black & Crimson Cruiser
         { id: 'v_wb_bike', dir: 'WB', lane: 1, defaultLane: 1, type: 'bike', variantIndex: 1, variantId: 'B1', modelType: 'B', color: '#111317', bikeColor: '#111317', helmetColor: '#111317', sunglassesColor: '#dc2626', shirtColor: '#7f1d1d', pantsColor: '#18181b', shoeColor: '#ffffff', skinColor: '#fcd34d', w: 36, h: 20, pos: 1380, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 405 },
         { id: 'v_wb_bus', dir: 'WB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 76, h: 24, pos: 1100, speed: 45, maxSpeed: 52, stopLine: 752, currentLaneY: 368 },
@@ -18501,10 +18503,12 @@
         // Model B2: Matte Navy Cruiser
         { id: 'v_wb_bike_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'bike', variantIndex: 5, variantId: 'B2', modelType: 'B', color: '#172554', bikeColor: '#172554', helmetColor: '#172554', sunglassesColor: '#f8fafc', shirtColor: '#111317', pantsColor: '#334155', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 36, h: 20, pos: 1650, speed: 70, maxSpeed: 80, stopLine: 752, currentLaneY: 368 },
         { id: 'v_wb_cng_2', dir: 'WB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 32, h: 16, pos: 1540, speed: 40, maxSpeed: 48, stopLine: 752, currentLaneY: 405 },
-        { id: 'v_wb_car_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'car', color: '#f472b6', w: 44, h: 20, pos: 1770, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 368 },
+        // Model 1: Mercedes-AMG GT Coupe (Glossy Jet Black)
+        { id: 'v_wb_car_2', dir: 'WB', lane: 2, defaultLane: 2, type: 'car', variantIndex: 1, carModel: 'AMG_GT', color: '#111317', w: 44, h: 20, pos: 1770, speed: 65, maxSpeed: 75, stopLine: 752, currentLaneY: 368 },
 
         // Southbound (Vertical, moving Down, X=580 inner, X=544 outer)
-        { id: 'v_sb_car', dir: 'SB', lane: 1, defaultLane: 1, type: 'car', color: '#e2e8f0', w: 20, h: 44, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304, currentLaneX: 580 },
+        // Model 3: Range Rover Luxury SUV (Satin Champagne)
+        { id: 'v_sb_car', dir: 'SB', lane: 1, defaultLane: 1, type: 'car', variantIndex: 8, carModel: 'RANGE_ROVER', color: '#b49a75', w: 20, h: 50, pos: 60, speed: 65, maxSpeed: 75, stopLine: 304, currentLaneX: 580 },
         // Model C1: Charcoal Black & Gold Retro Bullet
         { id: 'v_sb_bike', dir: 'SB', lane: 1, defaultLane: 1, type: 'bike', variantIndex: 2, variantId: 'C1', modelType: 'C', color: '#1c1917', bikeColor: '#1c1917', helmetColor: '#1c1917', sunglassesColor: '#eab308', shirtColor: '#365314', pantsColor: '#1e293b', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 14, h: 36, pos: -60, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 580 },
         { id: 'v_sb_bus', dir: 'SB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 180, speed: 45, maxSpeed: 52, stopLine: 304, currentLaneX: 542 },
@@ -18515,7 +18519,8 @@
         { id: 'v_sb_bike_2', dir: 'SB', lane: 2, defaultLane: 2, type: 'bike', variantIndex: 6, variantId: 'C2', modelType: 'C', color: '#111317', bikeColor: '#111317', helmetColor: '#111317', sunglassesColor: '#dc2626', shirtColor: '#1e293b', pantsColor: '#18181b', shoeColor: '#ffffff', skinColor: '#fdba74', w: 14, h: 36, pos: -220, speed: 70, maxSpeed: 80, stopLine: 304, currentLaneX: 542 },
 
         // Northbound (Vertical, moving Up, X=620 inner, X=656 outer)
-        { id: 'v_nb_car', dir: 'NB', lane: 1, defaultLane: 1, type: 'car', color: '#ef4444', w: 20, h: 44, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 618 },
+        // Model 4: Toyota Land Cruiser LC300 SUV (Pearl White)
+        { id: 'v_nb_car', dir: 'NB', lane: 1, defaultLane: 1, type: 'car', variantIndex: 12, carModel: 'LAND_CRUISER', color: '#f1f5f9', w: 20, h: 49, pos: 630, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 618 },
         // Model D1: Glossy Jet Black & Chrome Chopper
         { id: 'v_nb_bike', dir: 'NB', lane: 1, defaultLane: 1, type: 'bike', variantIndex: 3, variantId: 'D1', modelType: 'D', color: '#0f1115', bikeColor: '#0f1115', helmetColor: '#0f1115', sunglassesColor: '#94a3b8', shirtColor: '#1e3a8a', pantsColor: '#0f172a', shoeColor: '#ffffff', skinColor: '#fed7aa', w: 14, h: 36, pos: 760, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 618 },
         { id: 'v_nb_bus', dir: 'NB', lane: 2, defaultLane: 2, type: 'bus', color: '#dc2626', w: 24, h: 76, pos: 510, speed: 45, maxSpeed: 52, stopLine: 536, currentLaneX: 656 },
@@ -18524,7 +18529,8 @@
         { id: 'v_nb_bike_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'bike', variantIndex: 7, variantId: 'D2', modelType: 'D', color: '#475569', bikeColor: '#475569', helmetColor: '#475569', sunglassesColor: '#0f172a', shirtColor: '#7f1d1d', pantsColor: '#0f172a', shoeColor: '#ffffff', skinColor: '#fcd34d', w: 14, h: 36, pos: 980, speed: 70, maxSpeed: 80, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_rickshaw', dir: 'NB', lane: 2, defaultLane: 2, type: 'rickshaw', color: '#f59e0b', w: 18, h: 34, pos: 810, speed: 25, maxSpeed: 28, stopLine: 536, currentLaneX: 656 },
         { id: 'v_nb_cng_2', dir: 'NB', lane: 1, defaultLane: 1, type: 'cng', color: '#22c55e', w: 16, h: 32, pos: 900, speed: 40, maxSpeed: 48, stopLine: 536, currentLaneX: 618 },
-        { id: 'v_nb_car_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'car', color: '#a855f7', w: 20, h: 44, pos: 1060, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 656 }
+        // Model 2: Honda Civic / Accord Sedan (Glossy Black)
+        { id: 'v_nb_car_2', dir: 'NB', lane: 2, defaultLane: 2, type: 'car', variantIndex: 5, carModel: 'HONDA_SEDAN', color: '#111317', w: 20, h: 46, pos: 1060, speed: 65, maxSpeed: 75, stopLine: 536, currentLaneX: 656 }
       ];
 
       // Build Vehicle SVG Elements with Bright Warm Gold/White Headlights & Glowing Red Taillights
