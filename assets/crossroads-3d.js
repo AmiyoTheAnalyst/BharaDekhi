@@ -10985,9 +10985,11 @@ let sharedRickshawArtTexture = null;
       metalness: 0.50
     });
     const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x0a101d,
-      roughness: 0.12,
-      metalness: 0.85,
+      color: 0x0e1726,
+      roughness: 0.15,
+      metalness: 0.80,
+      transparent: true,
+      opacity: 0.78,
       side: THREE.DoubleSide
     });
     const headlightLensMat = new THREE.MeshBasicMaterial({
@@ -11034,7 +11036,7 @@ let sharedRickshawArtTexture = null;
         new THREE.MeshBasicMaterial({ map: destTex, transparent: true })
       );
       destPlane.rotation.y = Math.PI / 2;
-      destPlane.rotation.x = 0.16;
+      destPlane.rotation.x = -0.16;
       destPlane.position.set(6.45, 14.8, 0);
       nose.add(destPlane);
     }
@@ -11068,6 +11070,13 @@ let sharedRickshawArtTexture = null;
     const cabDashboard = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.2, 11.0), darkChassisMat);
     cabDashboard.position.set(3.2, 10.2, 0);
     nose.add(cabDashboard);
+
+    const consoleGlow = new THREE.Mesh(
+      new THREE.BoxGeometry(2.0, 0.4, 6.0),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+    );
+    consoleGlow.position.set(3.4, 10.9, 2.6);
+    nose.add(consoleGlow);
 
     const driverHead = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 8), darkChassisMat);
     driverHead.position.set(2.6, 12.8, 2.6);
@@ -11113,7 +11122,7 @@ let sharedRickshawArtTexture = null;
         new THREE.MeshBasicMaterial({ map: dmtclTex, transparent: true })
       );
       emblem.rotation.y = Math.PI / 2;
-      emblem.rotation.x = 0.12;
+      emblem.rotation.x = -0.12;
       emblem.position.set(7.48, 9.2, 0);
       nose.add(emblem);
     }
@@ -11347,17 +11356,21 @@ let sharedRickshawArtTexture = null;
       roughness: 0.40
     });
 
-    const sideTex = getMetroCoachSideTexture(coachType);
+    const southSideTex = getMetroCoachSideTexture(coachType);
+    const northCoachType = isLead ? 'rear' : isRear ? 'lead' : 'mid';
+    const northSideTex = getMetroCoachSideTexture(northCoachType);
     let rightSideMat = stainlessMat;
     let leftSideMat = stainlessMat;
-    if (sideTex) {
+    if (southSideTex) {
       rightSideMat = new THREE.MeshStandardMaterial({
-        map: sideTex,
+        map: southSideTex,
         metalness: 0.55,
         roughness: 0.32
       });
+    }
+    if (northSideTex) {
       leftSideMat = new THREE.MeshStandardMaterial({
-        map: sideTex,
+        map: northSideTex,
         metalness: 0.55,
         roughness: 0.32
       });
@@ -11695,6 +11708,15 @@ let sharedRickshawArtTexture = null;
       scene.add(parapet);
     });
 
+    // Segmented precast concrete panel seams along outer parapet wall
+    const parapetSeamMat = new THREE.MeshBasicMaterial({ color: 0x64748b });
+    for (let sx = -650; sx <= 650; sx += 50) {
+      const seam = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3.8, 0.15), parapetSeamMat);
+      seam.position.set(sx, viaductY + 7.0 + 1.9, VIADUCT_Z + 13.78);
+      freezeStatic(seam);
+      scene.add(seam);
+    }
+
     // Bangladesh Green & Red Ribbon Livery on Outer Parapet Fascia
     const greenRibbonGeo = new THREE.BoxGeometry(1400, 1.8, 0.4);
     const greenRibbonMat = new THREE.MeshBasicMaterial({ color: 0x16a34a });
@@ -11710,17 +11732,17 @@ let sharedRickshawArtTexture = null;
     freezeStatic(redRibbon);
     scene.add(redRibbon);
 
-    // Dual Glowing Rails
+    // Dual Glowing Rails (head top surface at viaductY + 7.8 = 49.8)
     const railMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
-    const rail1Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
+    const rail1Geo = new THREE.BoxGeometry(1400, 0.8, 1.4);
     const rail1 = new THREE.Mesh(rail1Geo, railMat);
-    rail1.position.set(0, viaductY + 7.6, VIADUCT_Z - 4);
+    rail1.position.set(0, viaductY + 7.4, VIADUCT_Z - 4);
     freezeStatic(rail1);
     scene.add(rail1);
 
-    const rail2Geo = new THREE.BoxGeometry(1400, 1.2, 1.8);
+    const rail2Geo = new THREE.BoxGeometry(1400, 0.8, 1.4);
     const rail2 = new THREE.Mesh(rail2Geo, railMat);
-    rail2.position.set(0, viaductY + 7.6, VIADUCT_Z + 4);
+    rail2.position.set(0, viaductY + 7.4, VIADUCT_Z + 4);
     freezeStatic(rail2);
     scene.add(rail2);
 
@@ -11735,26 +11757,26 @@ let sharedRickshawArtTexture = null;
       const gantryGroup = new THREE.Group();
       gantryGroup.position.set(cx, viaductY + 7.0, VIADUCT_Z);
 
-      // Left & right tubular steel vertical columns
+      // Left & right tubular steel vertical columns (height 29.0 reaching top of gantry)
       [-12.2, 12.2].forEach(cz => {
-        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 22.0, 10), catenaryMat);
-        col.position.set(0, 11.0, cz);
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 29.0, 10), catenaryMat);
+        col.position.set(0, 14.5, cz);
         gantryGroup.add(col);
       });
 
       // Arched / horizontal cross-span truss beam
       const crossBeam = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 25.0), catenaryMat);
-      crossBeam.position.set(0, 21.5, 0);
+      crossBeam.position.set(0, 28.5, 0);
       gantryGroup.add(crossBeam);
 
       // Cantilever registration arms & ceramic insulators over tracks
       [-4.0, 4.0].forEach(tz => {
-        const drop = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.2, 8), catenaryMat);
-        drop.position.set(0, 19.5, tz);
+        const drop = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.4, 8), catenaryMat);
+        drop.position.set(0, 26.8, tz);
         gantryGroup.add(drop);
 
         const ins = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.8, 8), new THREE.MeshStandardMaterial({ color: 0xb45309 }));
-        ins.position.set(0, 18.2, tz);
+        ins.position.set(0, 26.0, tz);
         gantryGroup.add(ins);
       });
 
@@ -11762,11 +11784,11 @@ let sharedRickshawArtTexture = null;
       scene.add(gantryGroup);
     });
 
-    // Continuous Overhead Catenary Contact Wire Touching Train Pantograph
+    // Continuous Overhead Catenary Contact Wire Touching Train Pantograph (world Y = 74.65)
     const wireGeo = new THREE.BoxGeometry(1400, 0.12, 0.12);
     const wireMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
     const contactWire = new THREE.Mesh(wireGeo, wireMat);
-    contactWire.position.set(0, viaductY + 7.0 + 17.5, VIADUCT_Z);
+    contactWire.position.set(0, viaductY + 7.0 + 25.65, VIADUCT_Z);
     freezeStatic(contactWire);
     scene.add(contactWire);
 
@@ -11893,7 +11915,7 @@ let sharedRickshawArtTexture = null;
 
     // 7. 3D Metro Rail 3-Coach Train
     trainGroup = new THREE.Group();
-    trainGroup.position.set(-200, viaductY + 7.5, VIADUCT_Z);
+    trainGroup.position.set(-200, viaductY + 8.05, VIADUCT_Z);
 
     // Lead Coach (Driving Motor Car, facing forward +X with aerodynamic cab nose)
     const coach1 = createTrainCoach(true, false, 0);
