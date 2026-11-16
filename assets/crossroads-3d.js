@@ -124,14 +124,30 @@
 
     if (targetTypes.length) {
       const eligible = Object.values(vehicleMeshMap)
-        .filter(vm => vm.mesh && vm.data && targetTypes.includes(vm.data.type))
-        .sort((a, b) => {
+        .filter(vm => vm.mesh && vm.data && targetTypes.includes(vm.data.type));
+      if (modeName === 'bike') {
+        eligible.sort((a, b) => ((a.data && a.data.variantIndex) || 0) - ((b.data && b.data.variantIndex) || 0));
+      } else {
+        eligible.sort((a, b) => {
           const centerA = a.data.dir === 'SB' || a.data.dir === 'NB' ? 420 : 600;
           const centerB = b.data.dir === 'SB' || b.data.dir === 'NB' ? 420 : 600;
           return Math.abs(a.data.pos - centerA) - Math.abs(b.data.pos - centerB);
         });
+      }
       if (eligible.length) {
+        if (modeName === 'bike' && activeTargetVehicle && activeTargetVehicle.type === 'bike') {
+          const curId = (activeTargetVehicle.data && activeTargetVehicle.data.id) || activeTargetVehicle.id;
+          const curIndex = eligible.findIndex(e => e.data && e.data.id === curId);
+          const nextIndex = curIndex !== -1 ? (curIndex + 1) % eligible.length : 0;
+          return {
+            id: eligible[nextIndex].data.id,
+            type: eligible[nextIndex].data.type,
+            mesh: eligible[nextIndex].mesh,
+            data: eligible[nextIndex].data
+          };
+        }
         return {
+          id: eligible[0].data.id,
           type: eligible[0].data.type,
           mesh: eligible[0].mesh,
           data: eligible[0].data
@@ -299,6 +315,30 @@
     }
 
     if (activeCamMode === modeName && modeName !== 'overview') {
+      if (modeName === 'bike') {
+        // Repeated clicks on Ride-share Bike cycle across motorcycle fleet models & colorways
+        activeTargetVehicle = acquireTargetVehicle('bike');
+        if (activeTargetVehicle && activeTargetVehicle.data) {
+          updateLegendHUD('bike');
+          const modePill = document.getElementById('crossroadsModePill');
+          const icon = document.getElementById('crossroadsModePillIcon');
+          const title = document.getElementById('crossroadsModePillTitle');
+          const sub = document.getElementById('crossroadsModePillSub');
+          if (modePill && icon && title && sub) {
+            modePill.classList.remove('hidden');
+            const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
+                             activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
+                             activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
+            const speedKmh = Math.round(activeTargetVehicle.data.speed || 44);
+            icon.textContent = '🏍️';
+            title.textContent = `${(activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
+            sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
+          }
+          const pose = getVehicleOrbitPose(activeTargetVehicle);
+          focusCamera(pose.position, pose.look, 0.8);
+          return;
+        }
+      }
       activeCamMode = 'overview';
       activeTargetVehicle = null;
       orbitPointerId = null;
@@ -3676,16 +3716,18 @@ let sharedRickshawArtTexture = null;
   function createFullFaceHelmet(shellColorHex, cheekTrimColorHex, isCruiser) {
     const helmetGroup = new THREE.Group();
 
-    // Premium realistic helmet materials
+    // Dedicated isolated helmet materials with zero emissive washout and rich saturation
     const shellMat = new THREE.MeshStandardMaterial({
       color: shellColorHex,
-      roughness: 0.18,
-      metalness: 0.35
+      roughness: 0.40,
+      metalness: 0.25,
+      emissive: 0x000000
     });
     const cheekTrimMat = new THREE.MeshStandardMaterial({
       color: cheekTrimColorHex,
-      roughness: 0.25,
-      metalness: 0.28
+      roughness: 0.45,
+      metalness: 0.25,
+      emissive: 0x000000
     });
     const visorTex = getVisorReflectionTexture();
     const visorMat = new THREE.MeshStandardMaterial({
@@ -3871,22 +3913,24 @@ let sharedRickshawArtTexture = null;
       }
     ];
 
-    const outfit = streetwearPalettes[Math.abs(appearanceSeed || 0) % streetwearPalettes.length];
+    const outfit = (bikeSync && bikeSync.outfit)
+      ? bikeSync.outfit
+      : streetwearPalettes[Math.abs(appearanceSeed || 0) % streetwearPalettes.length];
     const hoodieColor = outfit.hoodie;
     const collarColor = outfit.collar;
     const pantsColor = outfit.pants;
     const shoeBodyColor = outfit.shoe;
     const shoeStripeColor = outfit.stripe;
 
-    const hoodieMat = new THREE.MeshStandardMaterial({ color: hoodieColor, roughness: 0.75, metalness: 0.04 });
-    const hoodCollarMat = new THREE.MeshStandardMaterial({ color: collarColor, roughness: 0.82, metalness: 0.02 });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.70, metalness: 0.04 });
+    const hoodieMat = new THREE.MeshStandardMaterial({ color: hoodieColor, roughness: 0.72, metalness: 0.04, emissive: 0x000000 });
+    const hoodCollarMat = new THREE.MeshStandardMaterial({ color: collarColor, roughness: 0.80, metalness: 0.02, emissive: 0x000000 });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.70, metalness: 0.04, emissive: 0x000000 });
 
-    const shoeBodyMat = new THREE.MeshStandardMaterial({ color: shoeBodyColor, roughness: 0.38, metalness: 0.04 });
-    const shoeSoleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45, metalness: 0.02 });
-    const shoeStripeMat = new THREE.MeshStandardMaterial({ color: shoeStripeColor, roughness: 0.60 });
+    const shoeBodyMat = new THREE.MeshStandardMaterial({ color: shoeBodyColor, roughness: 0.38, metalness: 0.04, emissive: 0x000000 });
+    const shoeSoleMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45, metalness: 0.02, emissive: 0x000000 });
+    const shoeStripeMat = new THREE.MeshStandardMaterial({ color: shoeStripeColor, roughness: 0.60, emissive: 0x000000 });
 
-    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.60, metalness: 0.15 });
+    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.60, metalness: 0.15, emissive: 0x000000 });
 
     // -------------------------------------------------------------------------
     // Task 2: Lock Bum 100% Flush ON Seat Cushion (Zero Floating Gap)
@@ -4496,6 +4540,345 @@ let sharedRickshawArtTexture = null;
   }
 
   // ===========================================================================
+  // AUTHORITATIVE 16-COMBINATION 3D MOTORCYCLE MASTER DECK (BIKE_VARIANT_DECK)
+  // Interleaves all 4 distinct motorcycle models (A -> B -> C -> D) across
+  // 4 curated colorways each, with 1:1 helmet-to-bike primary & contrast lock,
+  // dark streetwear jackets/hoodies, and zero daytime lighting washout.
+  // ===========================================================================
+  const BIKE_VARIANT_DECK = [
+    // --- Round 1 ---
+    {
+      id: 'A1',
+      modelKey: 'A',
+      modelTitle: 'Ride-share Sports Bike (Model A Streetfighter - A1 White/Black)',
+      name: 'Model A1 (White & Black)',
+      primaryColor: 0xf8fafc,
+      contrastColor: 0x111317,
+      pinstripeColor: 0x111317,
+      roughness: 0.42,
+      metalness: 0.15,
+      helmColor: 0xf8fafc,
+      helmContrast: 0x111317,
+      outfit: {
+        hoodie: 0x1e293b,
+        collar: 0x0f172a,
+        pants: 0x090a0d,
+        shoe: 0xffffff,
+        stripe: 0x111317
+      }
+    },
+    {
+      id: 'B1',
+      modelKey: 'B',
+      modelTitle: 'Ride-share Cruiser (Model B Muscle Cruiser - B1 Jet Black/Crimson)',
+      name: 'Model B1 (Jet Black & Crimson)',
+      primaryColor: 0x111317,
+      contrastColor: 0x27272a,
+      pinstripeColor: 0xdc2626,
+      roughness: 0.45,
+      metalness: 0.25,
+      helmColor: 0x111317,
+      helmContrast: 0xdc2626,
+      outfit: {
+        hoodie: 0x7f1d1d,
+        collar: 0x450a0a,
+        pants: 0x18181b,
+        shoe: 0xffffff,
+        stripe: 0xdc2626
+      }
+    },
+    {
+      id: 'C1',
+      modelKey: 'C',
+      modelTitle: 'Ride-share Classic (Model C Retro Bullet - C1 Charcoal Black/Gold)',
+      name: 'Model C1 (Charcoal Black & Gold)',
+      primaryColor: 0x1c1917,
+      contrastColor: 0x1c1917,
+      pinstripeColor: 0xeab308,
+      roughness: 0.45,
+      metalness: 0.25,
+      helmColor: 0x1c1917,
+      helmContrast: 0xeab308,
+      outfit: {
+        hoodie: 0x365314,
+        collar: 0x1a2e05,
+        pants: 0x1e293b,
+        shoe: 0xffffff,
+        stripe: 0xeab308
+      }
+    },
+    {
+      id: 'D1',
+      modelKey: 'D',
+      modelTitle: 'Ride-share Chopper (Model D Chrome Chopper - D1 Gloss Black/Chrome)',
+      name: 'Model D1 (Gloss Jet Black & Chrome)',
+      primaryColor: 0x0f1115,
+      contrastColor: 0x1c1e22,
+      pinstripeColor: 0x94a3b8,
+      roughness: 0.44,
+      metalness: 0.28,
+      helmColor: 0x0f1115,
+      helmContrast: 0x94a3b8,
+      outfit: {
+        hoodie: 0x1e3a8a,
+        collar: 0x172554,
+        pants: 0x0f172a,
+        shoe: 0xffffff,
+        stripe: 0x60a5fa
+      }
+    },
+
+    // --- Round 2 ---
+    {
+      id: 'A2',
+      modelKey: 'A',
+      modelTitle: 'Ride-share Sports Bike (Model A Streetfighter - A2 Crimson Red/Black)',
+      name: 'Model A2 (Crimson Red & Black)',
+      primaryColor: 0xdc2626,
+      contrastColor: 0x111317,
+      pinstripeColor: 0x111317,
+      roughness: 0.40,
+      metalness: 0.20,
+      helmColor: 0xdc2626,
+      helmContrast: 0x111317,
+      outfit: {
+        hoodie: 0x334155,
+        collar: 0x1e293b,
+        pants: 0x111317,
+        shoe: 0xffffff,
+        stripe: 0xdc2626
+      }
+    },
+    {
+      id: 'B2',
+      modelKey: 'B',
+      modelTitle: 'Ride-share Cruiser (Model B Muscle Cruiser - B2 Matte Navy/Black)',
+      name: 'Model B2 (Matte Navy Blue)',
+      primaryColor: 0x172554,
+      contrastColor: 0x0f172a,
+      pinstripeColor: 0x3b82f6,
+      roughness: 0.50,
+      metalness: 0.20,
+      helmColor: 0x172554,
+      helmContrast: 0x0f172a,
+      outfit: {
+        hoodie: 0x111317,
+        collar: 0x000000,
+        pants: 0x334155,
+        shoe: 0xffffff,
+        stripe: 0x3b82f6
+      }
+    },
+    {
+      id: 'C2',
+      modelKey: 'C',
+      modelTitle: 'Ride-share Classic (Model C Retro Bullet - C2 Black/Crimson Red)',
+      name: 'Model C2 (Black & Crimson Red)',
+      primaryColor: 0x111317,
+      contrastColor: 0xdc2626,
+      pinstripeColor: 0xdc2626,
+      roughness: 0.45,
+      metalness: 0.22,
+      helmColor: 0x111317,
+      helmContrast: 0xdc2626,
+      outfit: {
+        hoodie: 0x1e293b,
+        collar: 0x0f172a,
+        pants: 0x18181b,
+        shoe: 0xffffff,
+        stripe: 0xdc2626
+      }
+    },
+    {
+      id: 'D2',
+      modelKey: 'D',
+      modelTitle: 'Ride-share Chopper (Model D Chrome Chopper - D2 Slate Gray/Chrome)',
+      name: 'Model D2 (Metallic Slate Gray & Chrome)',
+      primaryColor: 0x475569,
+      contrastColor: 0x1e293b,
+      pinstripeColor: 0x0f172a,
+      roughness: 0.46,
+      metalness: 0.35,
+      helmColor: 0x475569,
+      helmContrast: 0x1e293b,
+      outfit: {
+        hoodie: 0x7f1d1d,
+        collar: 0x450a0a,
+        pants: 0x0f172a,
+        shoe: 0xffffff,
+        stripe: 0x94a3b8
+      }
+    },
+
+    // --- Round 3 ---
+    {
+      id: 'A3',
+      modelKey: 'A',
+      modelTitle: 'Ride-share Sports Bike (Model A Streetfighter - A3 Metallic Ash/Black)',
+      name: 'Model A3 (Metallic Ash & Black)',
+      primaryColor: 0x64748b,
+      contrastColor: 0x111317,
+      pinstripeColor: 0x06b6d4,
+      roughness: 0.44,
+      metalness: 0.32,
+      helmColor: 0x64748b,
+      helmContrast: 0x111317,
+      outfit: {
+        hoodie: 0x365314,
+        collar: 0x1a2e05,
+        pants: 0x18181b,
+        shoe: 0xffffff,
+        stripe: 0x06b6d4
+      }
+    },
+    {
+      id: 'B3',
+      modelKey: 'B',
+      modelTitle: 'Ride-share Cruiser (Model B Muscle Cruiser - B3 Matte Ash Grey)',
+      name: 'Model B3 (Matte Ash Grey)',
+      primaryColor: 0x52525b,
+      contrastColor: 0x111317,
+      pinstripeColor: 0x0f172a,
+      roughness: 0.52,
+      metalness: 0.20,
+      helmColor: 0x52525b,
+      helmContrast: 0x111317,
+      outfit: {
+        hoodie: 0x1e3a8a,
+        collar: 0x172554,
+        pants: 0x111317,
+        shoe: 0xffffff,
+        stripe: 0xf1f5f9
+      }
+    },
+    {
+      id: 'C3',
+      modelKey: 'C',
+      modelTitle: 'Ride-share Classic (Model C Retro Bullet - C3 Black/Navy Blue)',
+      name: 'Model C3 (Black & Navy Blue)',
+      primaryColor: 0x111317,
+      contrastColor: 0x1e3a8a,
+      pinstripeColor: 0xe2e8f0,
+      roughness: 0.45,
+      metalness: 0.25,
+      helmColor: 0x1e3a8a,
+      helmContrast: 0x111317,
+      outfit: {
+        hoodie: 0x334155,
+        collar: 0x1e293b,
+        pants: 0x0f172a,
+        shoe: 0xffffff,
+        stripe: 0x38bdf8
+      }
+    },
+    {
+      id: 'D3',
+      modelKey: 'D',
+      modelTitle: 'Ride-share Chopper (Model D Chrome Chopper - D3 Royal Blue/Chrome)',
+      name: 'Model D3 (Royal Dark Blue & Chrome)',
+      primaryColor: 0x1e3a8a,
+      contrastColor: 0x0f172a,
+      pinstripeColor: 0x38bdf8,
+      roughness: 0.42,
+      metalness: 0.30,
+      helmColor: 0x1e3a8a,
+      helmContrast: 0x38bdf8,
+      outfit: {
+        hoodie: 0x111317,
+        collar: 0x000000,
+        pants: 0x1e293b,
+        shoe: 0xffffff,
+        stripe: 0x38bdf8
+      }
+    },
+
+    // --- Round 4 ---
+    {
+      id: 'A4',
+      modelKey: 'A',
+      modelTitle: 'Ride-share Sports Bike (Model A Streetfighter - A4 Jet Black/Red)',
+      name: 'Model A4 (Jet Black & Red)',
+      primaryColor: 0x141619,
+      contrastColor: 0xdc2626,
+      pinstripeColor: 0xdc2626,
+      roughness: 0.44,
+      metalness: 0.22,
+      helmColor: 0x141619,
+      helmContrast: 0xdc2626,
+      outfit: {
+        hoodie: 0x1e293b,
+        collar: 0x0f172a,
+        pants: 0x111317,
+        shoe: 0xffffff,
+        stripe: 0xdc2626
+      }
+    },
+    {
+      id: 'B4',
+      modelKey: 'B',
+      modelTitle: 'Ride-share Cruiser (Model B Muscle Cruiser - B4 Gunmetal/Gold)',
+      name: 'Model B4 (Ash-Black Gunmetal)',
+      primaryColor: 0x27272a,
+      contrastColor: 0x18181b,
+      pinstripeColor: 0xd4a024,
+      roughness: 0.46,
+      metalness: 0.35,
+      helmColor: 0x27272a,
+      helmContrast: 0xd4a024,
+      outfit: {
+        hoodie: 0x7f1d1d,
+        collar: 0x450a0a,
+        pants: 0x18181b,
+        shoe: 0xffffff,
+        stripe: 0xd4a024
+      }
+    },
+    {
+      id: 'C4',
+      modelKey: 'C',
+      modelTitle: 'Ride-share Classic (Model C Retro Bullet - C4 White/Black)',
+      name: 'Model C4 (White & Black)',
+      primaryColor: 0xf8fafc,
+      contrastColor: 0x111317,
+      pinstripeColor: 0x111317,
+      roughness: 0.42,
+      metalness: 0.15,
+      helmColor: 0xf8fafc,
+      helmContrast: 0x111317,
+      outfit: {
+        hoodie: 0x365314,
+        collar: 0x1a2e05,
+        pants: 0x090a0d,
+        shoe: 0xffffff,
+        stripe: 0x111317
+      }
+    },
+    {
+      id: 'D4',
+      modelKey: 'D',
+      modelTitle: 'Ride-share Chopper (Model D Chrome Chopper - D4 Midnight Navy/Chrome)',
+      name: 'Model D4 (Midnight Navy & Chrome)',
+      primaryColor: 0x172554,
+      contrastColor: 0x0a0f1d,
+      pinstripeColor: 0x60a5fa,
+      roughness: 0.45,
+      metalness: 0.30,
+      helmColor: 0x172554,
+      helmContrast: 0x60a5fa,
+      outfit: {
+        hoodie: 0x1e3a8a,
+        collar: 0x172554,
+        pants: 0x18181b,
+        shoe: 0xffffff,
+        stripe: 0x60a5fa
+      }
+    }
+  ];
+
+  let globalNextBikeDeckIndex = 8; // Cycle counter across all 16 combinations
+  window.BIKE_VARIANT_DECK = BIKE_VARIANT_DECK;
+
+  // ===========================================================================
   // MODEL C: CLASSIC RETRO BULLET STANDARD (ROYAL ENFIELD BULLET STYLE)
   // - Rounded teardrop fuel tank with painted pinstripe loop & gold/red winged emblem
   // - Solo sprung saddle with dual chrome coil springs underneath
@@ -4514,15 +4897,25 @@ let sharedRickshawArtTexture = null;
 
     const bikeBodyMat = new THREE.MeshStandardMaterial({
       color: selectedLivery.primaryColor,
-      roughness: selectedLivery.roughness,
-      metalness: selectedLivery.metalness,
+      roughness: selectedLivery.roughness || 0.45,
+      metalness: selectedLivery.metalness || 0.25,
+      emissive: 0x000000,
+      side: THREE.DoubleSide
+    });
+
+    const contrastMat = new THREE.MeshStandardMaterial({
+      color: (selectedLivery.contrastColor !== undefined) ? selectedLivery.contrastColor : selectedLivery.primaryColor,
+      roughness: selectedLivery.roughness || 0.45,
+      metalness: selectedLivery.metalness || 0.25,
+      emissive: 0x000000,
       side: THREE.DoubleSide
     });
 
     const pinstripeMat = new THREE.MeshStandardMaterial({
-      color: selectedLivery.pinstripeColor,
-      roughness: 0.35,
-      metalness: 0.20
+      color: selectedLivery.pinstripeColor || 0xeab308,
+      roughness: 0.40,
+      metalness: 0.20,
+      emissive: 0x000000
     });
 
     // 1. Realistic Wave-Rotor Wheels
@@ -4851,7 +5244,7 @@ let sharedRickshawArtTexture = null;
     tbShape.closePath();
     const tbGeo = new THREE.ExtrudeGeometry(tbShape, { depth: 0.35, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05 });
     tbGeo.translate(0, 0, 1.05);
-    const tbMesh = new THREE.Mesh(tbGeo, bikeBodyMat);
+    const tbMesh = new THREE.Mesh(tbGeo, contrastMat);
     group.add(tbMesh);
 
     const tbPinstripe = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
@@ -5018,8 +5411,9 @@ let sharedRickshawArtTexture = null;
     });
 
     const bikeSyncC = {
-      helmColor: selectedLivery.primaryColor,
-      contrastColor: selectedLivery.contrastColor
+      helmColor: selectedLivery.helmColor !== undefined ? selectedLivery.helmColor : selectedLivery.primaryColor,
+      contrastColor: selectedLivery.helmContrast !== undefined ? selectedLivery.helmContrast : selectedLivery.contrastColor,
+      outfit: selectedLivery.outfit
     };
     const biker = buildRealisticBiker(false, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed, bikeSyncC);
     group.add(biker);
@@ -5043,15 +5437,17 @@ let sharedRickshawArtTexture = null;
 
     const bikeBodyMat = new THREE.MeshStandardMaterial({
       color: selectedLivery.primaryColor,
-      roughness: selectedLivery.roughness,
-      metalness: selectedLivery.metalness,
+      roughness: selectedLivery.roughness || 0.45,
+      metalness: selectedLivery.metalness || 0.28,
+      emissive: 0x000000,
       side: THREE.DoubleSide
     });
 
     const pinstripeMat = new THREE.MeshStandardMaterial({
-      color: selectedLivery.pinstripeColor,
-      roughness: 0.35,
-      metalness: 0.20
+      color: selectedLivery.pinstripeColor || 0x94a3b8,
+      roughness: 0.40,
+      metalness: 0.20,
+      emissive: 0x000000
     });
 
     // 1. Realistic Wave-Rotor Wheels
@@ -5400,8 +5796,9 @@ let sharedRickshawArtTexture = null;
     });
 
     const bikeSyncD = {
-      helmColor: selectedLivery.primaryColor,
-      contrastColor: selectedLivery.contrastColor
+      helmColor: selectedLivery.helmColor !== undefined ? selectedLivery.helmColor : selectedLivery.primaryColor,
+      contrastColor: selectedLivery.helmContrast !== undefined ? selectedLivery.helmContrast : selectedLivery.contrastColor,
+      outfit: selectedLivery.outfit
     };
     const biker = buildRealisticBiker(true, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed, bikeSyncD);
     group.add(biker);
@@ -5413,255 +5810,37 @@ let sharedRickshawArtTexture = null;
   // - Model B: Muscle Cruiser / Power Cruiser
   // - Model C: Classic Retro Bullet Standard (Royal Enfield style)
   // - Model D: Classic Chrome V-Twin Chopper / Low-Rider (Harley Dyna style)
-  function createRealisticGTABike(colorHex, appearanceSeed, vData) {
-    const root = new THREE.Group();
-    root.userData.wheels = [];
-
-    // Inner child wrapper holding the entire combined Motorcycle + Seated Rider
-    // Scaled uniformly to 0.60x (sweet-spot scale matching BRTA bus, CNG & lane width)
+  function buildBikePackage(variantConfig, appearanceSeed) {
     const bikePackage = new THREE.Group();
     bikePackage.userData.wheels = [];
     const group = bikePackage; // Seamless alias for all internal mesh additions
 
-    let modelKey;
-    if (vData && vData.modelType) {
-      const mt = String(vData.modelType).toLowerCase();
-      if (mt === 'bullet' || mt === 'retro' || mt === 'classic' || mt === 'model_c' || mt === 'c') {
-        modelKey = 'C';
-      } else if (mt === 'chopper' || mt === 'lowrider' || mt === 'dyna' || mt === 'model_d' || mt === 'd') {
-        modelKey = 'D';
-      } else if (mt === 'cruiser' || mt === 'muscle' || mt === 'model_b' || mt === 'b') {
-        modelKey = 'B';
-      } else {
-        modelKey = 'A';
-      }
-    } else {
-      const mIdx = Math.abs(appearanceSeed || 0) % 4;
-      modelKey = mIdx === 0 ? 'A' : (mIdx === 1 ? 'B' : (mIdx === 2 ? 'C' : 'D'));
-    }
-
+    const modelKey = variantConfig.modelKey;
     const isCruiser = (modelKey === 'B' || modelKey === 'D');
     const mats = getBikeSharedMaterials();
 
-    // -------------------------------------------------------------------------
-    // Multi-Color Livery Combinations Across All 4 Models
-    // -------------------------------------------------------------------------
-    const modelA_Liveries = [
-      {
-        name: 'Pearl-White',
-        primaryColor: 0xf5f6fa,
-        contrastColor: 0x1e293b,
-        pinstripeColor: 0x3b82f6,
-        roughness: 0.18,
-        metalness: 0.15
-      },
-      {
-        name: 'Racing Crimson-Red',
-        primaryColor: 0xdc2626,
-        contrastColor: 0x7f1d1d,
-        pinstripeColor: 0x18181b,
-        roughness: 0.20,
-        metalness: 0.22
-      },
-      {
-        name: 'Metallic Ash-Grey',
-        primaryColor: 0x71717a,
-        contrastColor: 0x27272a,
-        pinstripeColor: 0x06b6d4,
-        roughness: 0.25,
-        metalness: 0.45
-      }
-    ];
-
-    const modelB_Liveries = [
-      {
-        name: 'Classic Gloss Black',
-        primaryColor: 0x111317,
-        contrastColor: 0x27272a,
-        pinstripeColor: 0xb91c1c,
-        roughness: 0.15,
-        metalness: 0.30
-      },
-      {
-        name: 'Matte Navy-Blue',
-        primaryColor: 0x1b2a4a,
-        contrastColor: 0x0f172a,
-        pinstripeColor: 0xd4a024,
-        roughness: 0.35,
-        metalness: 0.25
-      },
-      {
-        name: 'Matte Ash Slate',
-        primaryColor: 0x475569,
-        contrastColor: 0x1e293b,
-        pinstripeColor: 0x0f172a,
-        roughness: 0.38,
-        metalness: 0.20
-      },
-      {
-        name: 'Dark Titanium / Ash-Black',
-        primaryColor: 0x27272a,
-        contrastColor: 0x18181b,
-        pinstripeColor: 0xef4444,
-        roughness: 0.28,
-        metalness: 0.40
-      }
-    ];
-
-    const modelC_Liveries = [
-      {
-        name: 'Charcoal Black & Golden-Yellow',
-        primaryColor: 0x26282a,
-        contrastColor: 0x181a1b,
-        pinstripeColor: 0xeab308,
-        roughness: 0.22,
-        metalness: 0.25
-      },
-      {
-        name: 'Pearl-White & Jet-Black',
-        primaryColor: 0xf8fafc,
-        contrastColor: 0x111317,
-        pinstripeColor: 0x111317,
-        roughness: 0.18,
-        metalness: 0.15
-      },
-      {
-        name: 'Jet-Black & Crimson-Red',
-        primaryColor: 0x111317,
-        contrastColor: 0xdc2626,
-        pinstripeColor: 0xdc2626,
-        roughness: 0.20,
-        metalness: 0.28
-      },
-      {
-        name: 'Jet-Black & Deep Navy-Blue',
-        primaryColor: 0x111317,
-        contrastColor: 0x1e3a8a,
-        pinstripeColor: 0xe2e8f0,
-        roughness: 0.20,
-        metalness: 0.30
-      },
-      {
-        name: 'Glossy Black & Vibrant Yellow',
-        primaryColor: 0x0f1115,
-        contrastColor: 0xfacc15,
-        pinstripeColor: 0xfacc15,
-        roughness: 0.16,
-        metalness: 0.35
-      }
-    ];
-
-    const modelD_Liveries = [
-      {
-        name: 'Deep Gloss Black',
-        primaryColor: 0x111317,
-        contrastColor: 0x1c1e22,
-        pinstripeColor: 0x94a3b8,
-        roughness: 0.15,
-        metalness: 0.35
-      },
-      {
-        name: 'Metallic Slate Gray',
-        primaryColor: 0x64748b,
-        contrastColor: 0x334155,
-        pinstripeColor: 0x0f172a,
-        roughness: 0.24,
-        metalness: 0.50
-      },
-      {
-        name: 'Royal Dark Blue',
-        primaryColor: 0x1e3a8a,
-        contrastColor: 0x0f172a,
-        pinstripeColor: 0x38bdf8,
-        roughness: 0.22,
-        metalness: 0.40
-      },
-      {
-        name: 'Midnight Navy Blue',
-        primaryColor: 0x172554,
-        contrastColor: 0x0a0f1d,
-        pinstripeColor: 0x60a5fa,
-        roughness: 0.25,
-        metalness: 0.35
-      }
-    ];
-
-    let selectedLivery;
-    if (modelKey === 'A') {
-      selectedLivery = modelA_Liveries[Math.abs(appearanceSeed || 0) % modelA_Liveries.length];
-      if (colorHex !== null && colorHex !== undefined) {
-        const hexStr = '#' + colorHex.toString(16).padStart(6, '0').toLowerCase();
-        if (hexStr === '#f8fafc' || hexStr === '#ffffff' || hexStr === '#f5f6fa') {
-          selectedLivery = modelA_Liveries[0];
-        } else if (hexStr === '#dc2626' || hexStr === '#ea580c' || hexStr === '#f97316' || hexStr === '#b91c1c') {
-          selectedLivery = modelA_Liveries[1];
-        } else if (hexStr === '#71717a' || hexStr === '#64748b' || hexStr === '#475569') {
-          selectedLivery = modelA_Liveries[2];
-        } else {
-          selectedLivery = {
-            name: 'Custom',
-            primaryColor: colorHex,
-            contrastColor: 0x141619,
-            pinstripeColor: 0x3b82f6,
-            roughness: 0.20,
-            metalness: 0.25
-          };
-        }
-      }
-    } else if (modelKey === 'B') {
-      selectedLivery = modelB_Liveries[Math.abs(appearanceSeed || 0) % modelB_Liveries.length];
-      if (colorHex !== null && colorHex !== undefined) {
-        const hexStr = '#' + colorHex.toString(16).padStart(6, '0').toLowerCase();
-        if (hexStr === '#111827' || hexStr === '#090d12' || hexStr === '#000000' || hexStr === '#111317') {
-          selectedLivery = modelB_Liveries[0];
-        } else if (hexStr === '#172554' || hexStr === '#1b2a4a' || hexStr === '#0066f5' || hexStr === '#1e3a8a') {
-          selectedLivery = modelB_Liveries[1];
-        } else if (hexStr === '#475569' || hexStr === '#64748b') {
-          selectedLivery = modelB_Liveries[2];
-        } else if (hexStr === '#27272a' || hexStr === '#2b3036') {
-          selectedLivery = modelB_Liveries[3];
-        } else {
-          selectedLivery = {
-            name: 'Custom',
-            primaryColor: colorHex,
-            contrastColor: 0x181a1b,
-            pinstripeColor: 0xb91c1c,
-            roughness: 0.25,
-            metalness: 0.30
-          };
-        }
-      }
-    } else if (modelKey === 'C') {
-      selectedLivery = modelC_Liveries[Math.abs(appearanceSeed || 0) % modelC_Liveries.length];
-      if (colorHex !== null && colorHex !== undefined) {
-        selectedLivery = {
-          name: 'Custom Bullet',
-          primaryColor: colorHex,
-          contrastColor: 0x181a1b,
-          pinstripeColor: 0xeab308,
-          roughness: 0.20,
-          metalness: 0.25
-        };
-      }
-    } else { // modelKey === 'D'
-      selectedLivery = modelD_Liveries[Math.abs(appearanceSeed || 0) % modelD_Liveries.length];
-      if (colorHex !== null && colorHex !== undefined) {
-        selectedLivery = {
-          name: 'Custom Chopper',
-          primaryColor: colorHex,
-          contrastColor: 0x181a1b,
-          pinstripeColor: 0x94a3b8,
-          roughness: 0.20,
-          metalness: 0.35
-        };
-      }
-    }
-
+    // Dedicated isolated materials per variant - zero shared mutation, zero daylight washout
     const bikeBodyMat = new THREE.MeshStandardMaterial({
-      color: selectedLivery.primaryColor,
-      roughness: selectedLivery.roughness,
-      metalness: selectedLivery.metalness,
+      color: variantConfig.primaryColor,
+      roughness: variantConfig.roughness || 0.42,
+      metalness: variantConfig.metalness || 0.20,
+      emissive: 0x000000,
       side: THREE.DoubleSide
+    });
+
+    const contrastMat = new THREE.MeshStandardMaterial({
+      color: (variantConfig.contrastColor !== undefined) ? variantConfig.contrastColor : variantConfig.primaryColor,
+      roughness: variantConfig.roughness || 0.42,
+      metalness: variantConfig.metalness || 0.20,
+      emissive: 0x000000,
+      side: THREE.DoubleSide
+    });
+
+    const pinstripeMat = new THREE.MeshStandardMaterial({
+      color: variantConfig.pinstripeColor || 0x111317,
+      roughness: 0.40,
+      metalness: 0.20,
+      emissive: 0x000000
     });
 
     let leftGripPos, rightGripPos;
@@ -5850,7 +6029,7 @@ let sharedRickshawArtTexture = null;
       bellyShape.closePath();
       const bellyGeo = new THREE.ExtrudeGeometry(bellyShape, { depth: 1.55, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06 });
       bellyGeo.translate(0, 0, -1.55 / 2);
-      const bellyPan = new THREE.Mesh(bellyGeo, bikeBodyMat);
+      const bellyPan = new THREE.Mesh(bellyGeo, contrastMat);
       group.add(bellyPan);
 
       // Sculpted Muscular Humpback Fuel Tank (matching primary livery)
@@ -5956,8 +6135,9 @@ let sharedRickshawArtTexture = null;
       // ATTACH REBUILT FURNISHED BIKER (Sport Tuck - Hips seated firmly on saddle)
       // 1:1 Helmet-to-Bike Color Synchronization
       const bikeSyncA = {
-        helmColor: selectedLivery.primaryColor,
-        contrastColor: selectedLivery.contrastColor
+        helmColor: variantConfig.helmColor !== undefined ? variantConfig.helmColor : variantConfig.primaryColor,
+        contrastColor: variantConfig.helmContrast !== undefined ? variantConfig.helmContrast : variantConfig.contrastColor,
+        outfit: variantConfig.outfit
       };
       const biker = buildRealisticBiker(false, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed, bikeSyncA);
       group.add(biker);
@@ -5979,12 +6159,6 @@ let sharedRickshawArtTexture = null;
       rWheel.position.set(rearX, 3.10, 0);
       group.add(rWheel);
       group.userData.wheels.push(rWheel);
-
-      const pinstripeMat = new THREE.MeshStandardMaterial({
-        color: selectedLivery.pinstripeColor,
-        roughness: 0.35,
-        metalness: 0.20
-      });
 
       const fCaliper = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.25, 0.45), mats.darkFrameMat);
       fCaliper.position.set(frontX - 1.25, wheelY + 1.20, 0.75);
@@ -6264,38 +6438,59 @@ let sharedRickshawArtTexture = null;
       // ATTACH REBUILT FURNISHED BIKER (Cruiser Posture - Deeply nested in saddle)
       // 1:1 Helmet-to-Bike Color Synchronization
       const bikeSyncB = {
-        helmColor: selectedLivery.primaryColor,
-        contrastColor: selectedLivery.contrastColor
+        helmColor: variantConfig.helmColor !== undefined ? variantConfig.helmColor : variantConfig.primaryColor,
+        contrastColor: variantConfig.helmContrast !== undefined ? variantConfig.helmContrast : variantConfig.contrastColor,
+        outfit: variantConfig.outfit
       };
       const biker = buildRealisticBiker(true, saddleAnchor, leftGripPos, rightGripPos, pegPosL, pegPosR, mats, appearanceSeed, bikeSyncB);
       group.add(biker);
     } else if (modelKey === 'C') {
-      buildBikeModelC(group, selectedLivery, mats, appearanceSeed);
+      buildBikeModelC(group, variantConfig, mats, appearanceSeed);
     } else { // modelKey === 'D'
-      buildBikeModelD(group, selectedLivery, mats, appearanceSeed);
+      buildBikeModelD(group, variantConfig, mats, appearanceSeed);
     }
 
-    // =========================================================================
-    // TASK 1: UNIFORMLY SCALE BIKE + RIDER PACKAGE TO 0.60x (SWEET SPOT)
-    // Multiplied by 1.70x to hit the exact sweet-spot scale in traffic.
-    // Inner child wrapper ensures the 0.60x world scale is permanent & cannot be overwritten.
-    // Both front & rear tire treads rest 100% flush on the road surface (y = 0.0, zero sink/float).
-    // =========================================================================
+    // World scale permanently locked at 0.60x sweet spot
     const BIKE_WORLD_SCALE = 0.60;
     bikePackage.scale.setScalar(BIKE_WORLD_SCALE);
     bikePackage.position.set(0, 0, 0);
-    root.add(bikePackage);
 
-    root.userData.wheels = bikePackage.userData.wheels;
+    return bikePackage;
+  }
+
+  // Canonical 4-Model 3D Motorcycle Factory
+  function createRealisticGTABike(colorHex, appearanceSeed, vData) {
+    const root = new THREE.Group();
+    root.userData.isBike = true;
+    root.userData.wheels = [];
+
+    // Resolve variant index from master 16-combination deck
+    let variantIndex;
+    if (vData && typeof vData.variantIndex === 'number') {
+      variantIndex = ((vData.variantIndex % BIKE_VARIANT_DECK.length) + BIKE_VARIANT_DECK.length) % BIKE_VARIANT_DECK.length;
+    } else if (vData && vData.variantId) {
+      const foundIdx = BIKE_VARIANT_DECK.findIndex(d => d.id === vData.variantId);
+      variantIndex = foundIdx !== -1 ? foundIdx : 0;
+    } else if (vData && vData.modelType) {
+      const mt = String(vData.modelType).toUpperCase();
+      const foundIdx = BIKE_VARIANT_DECK.findIndex(d => d.modelKey === mt);
+      variantIndex = foundIdx !== -1 ? foundIdx : (Math.abs(appearanceSeed || 0) % BIKE_VARIANT_DECK.length);
+    } else {
+      variantIndex = Math.abs(appearanceSeed || 0) % BIKE_VARIANT_DECK.length;
+    }
+
+    const variantConfig = BIKE_VARIANT_DECK[variantIndex];
+    root.userData.currentVariantIndex = variantIndex;
+
+    const bikePackage = buildBikePackage(variantConfig, appearanceSeed);
+    root.add(bikePackage);
+    root.userData.bikePackage = bikePackage;
+
+    const BIKE_WORLD_SCALE = 0.60;
+    root.userData.wheels = bikePackage.userData.wheels || [];
     root.userData.wheelRadius = 3.25 * BIKE_WORLD_SCALE;
-    root.userData.modelKey = modelKey;
-    root.userData.modelTitle = (modelKey === 'A')
-      ? 'Ride-share Sports Bike (Model A Streetfighter)'
-      : (modelKey === 'B')
-        ? 'Ride-share Cruiser (Model B Muscle Cruiser)'
-        : (modelKey === 'C')
-          ? 'Ride-share Classic (Model C Retro Bullet)'
-          : 'Ride-share Chopper (Model D Chrome V-Twin)';
+    root.userData.modelKey = variantConfig.modelKey;
+    root.userData.modelTitle = variantConfig.modelTitle;
 
     // Zero-Lag Additive Headlight Ground Light Pool (scaled with vehicle)
     const headGlowMat = new THREE.MeshBasicMaterial({
@@ -6307,8 +6502,10 @@ let sharedRickshawArtTexture = null;
     });
     const headPool = new THREE.Mesh(new THREE.PlaneGeometry(36 * BIKE_WORLD_SCALE, 18 * BIKE_WORLD_SCALE), headGlowMat);
     headPool.rotation.x = -Math.PI / 2;
-    headPool.position.set((((modelKey === 'B' || modelKey === 'D') ? 8.8 : 8.0) + 18) * BIKE_WORLD_SCALE, 0.08, 0);
+    const frontOffset = ((variantConfig.modelKey === 'B' || variantConfig.modelKey === 'D') ? 8.8 : 8.0) + 18;
+    headPool.position.set(frontOffset * BIKE_WORLD_SCALE, 0.08, 0);
     root.add(headPool);
+    root.userData.headPool = headPool;
 
     if (typeof scene !== 'undefined' && scene && scene.add) {
       scene.add(root);
@@ -6316,9 +6513,73 @@ let sharedRickshawArtTexture = null;
     return root;
   }
 
+  // Pre-Built Dynamic Variant Swapper on Wrap-Around / Respawn
+  function swapBikeVariant(rootMesh, targetVariantIndex) {
+    if (!rootMesh || !rootMesh.userData || !rootMesh.userData.isBike) return;
+
+    let newIndex;
+    if (typeof targetVariantIndex === 'number') {
+      newIndex = ((targetVariantIndex % BIKE_VARIANT_DECK.length) + BIKE_VARIANT_DECK.length) % BIKE_VARIANT_DECK.length;
+    } else {
+      newIndex = ((rootMesh.userData.currentVariantIndex || 0) + 1) % BIKE_VARIANT_DECK.length;
+    }
+
+    const variantConfig = BIKE_VARIANT_DECK[newIndex];
+    if (!variantConfig) return;
+
+    // Cleanly remove & dispose old bikePackage
+    if (rootMesh.userData.bikePackage) {
+      rootMesh.remove(rootMesh.userData.bikePackage);
+      rootMesh.userData.bikePackage.traverse(obj => {
+        if (obj.geometry && typeof obj.geometry.dispose === 'function') obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => { if (m && typeof m.dispose === 'function') m.dispose(); });
+          } else if (typeof obj.material.dispose === 'function') {
+            obj.material.dispose();
+          }
+        }
+      });
+    }
+
+    const newBikePackage = buildBikePackage(variantConfig, newIndex);
+    rootMesh.add(newBikePackage);
+    rootMesh.userData.bikePackage = newBikePackage;
+    rootMesh.userData.wheels = newBikePackage.userData.wheels || [];
+    rootMesh.userData.wheelRadius = 3.25 * 0.60;
+    rootMesh.userData.modelKey = variantConfig.modelKey;
+    rootMesh.userData.modelTitle = variantConfig.modelTitle;
+    rootMesh.userData.currentVariantIndex = newIndex;
+
+    if (rootMesh.userData.headPool) {
+      const BIKE_WORLD_SCALE = 0.60;
+      const frontOffset = ((variantConfig.modelKey === 'B' || variantConfig.modelKey === 'D') ? 8.8 : 8.0) + 18;
+      rootMesh.userData.headPool.position.set(frontOffset * BIKE_WORLD_SCALE, 0.08, 0);
+    }
+
+    if (activeTargetVehicle && activeTargetVehicle.mesh === rootMesh) {
+      const title = document.getElementById('crossroadsModePillTitle');
+      if (title && activeTargetVehicle.data) {
+        const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
+                         activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
+                         activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
+        title.textContent = `${variantConfig.modelTitle} · ${dirLabel}`;
+      }
+    }
+
+    return newIndex;
+  }
+
   window.buildBikeModelC = buildBikeModelC;
   window.buildBikeModelD = buildBikeModelD;
+  window.buildBikePackage = buildBikePackage;
   window.createRealisticGTABike = createRealisticGTABike;
+  window.swapBikeVariant = swapBikeVariant;
+  window.cycleBikeShowcase = function() {
+    if (typeof window.crossroadsFocusMode === 'function') {
+      window.crossroadsFocusMode('bike');
+    }
+  };
 
 
 
@@ -11741,6 +12002,12 @@ let sharedRickshawArtTexture = null;
         const previousPosition = vm.mesh.userData.previousRoadPosition;
         const roadDelta = Number.isFinite(previousPosition) ? v.pos - previousPosition : 0;
         vm.mesh.userData.previousRoadPosition = v.pos;
+
+        // Auto-cycle bike models & 16 liveries across the master deck on lane wrap-around / respawn
+        if (vm.mesh.userData.isBike && Math.abs(roadDelta) > 200) {
+          const nextIdx = (globalNextBikeDeckIndex++) % BIKE_VARIANT_DECK.length;
+          swapBikeVariant(vm.mesh, nextIdx);
+        }
         const forwardDelta = (v.dir === 'EB' || v.dir === 'SB') ? roadDelta : -roadDelta;
         const wheelRadius = vm.mesh.userData.wheelRadius || 3;
         const rollAngle = Math.abs(forwardDelta) < 100 ? forwardDelta / wheelRadius : 0;
