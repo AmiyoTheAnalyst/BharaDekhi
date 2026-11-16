@@ -1417,44 +1417,48 @@
     }
 
     // 5. Head & Procedural Facial Features
-    // Rounded Head
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.090, 14, 12), skinMat);
-    head.position.set(headX, headY, driverZ);
-    driverGroup.add(head);
+    const headGroup = new THREE.Group();
+    headGroup.position.set(headX, headY, driverZ);
+    driverGroup.add(headGroup);
 
-    // Dark Stylized Hair
+    // Rounded Head
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.090, 16, 14), skinMat);
+    headGroup.add(head);
+
+    // Dark Stylized Hair (Lifted high onto scalp/crown, leaving forehead & eyes 100% visible)
     const hair = new THREE.Mesh(
-      new THREE.SphereGeometry(0.096, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.62),
+      new THREE.SphereGeometry(0.095, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.42),
       hairMat
     );
-    hair.position.set(headX - 0.005, headY + 0.01, driverZ);
-    driverGroup.add(hair);
+    hair.position.set(-0.012, 0.028, 0);
+    hair.rotation.z = 0.35;
+    headGroup.add(hair);
 
-    // Hair Style Detail for Honda Civic Driver (Textured Fringe)
+    // Hair Style Detail for Honda Civic Driver (Textured Fringe lifted above forehead)
     if (carType === 'honda_sedan') {
-      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.025, 0.080), hairMat);
-      fringe.position.set(headX + 0.055, headY + 0.060, driverZ);
-      fringe.rotation.z = -0.30;
-      driverGroup.add(fringe);
+      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.040, 0.020, 0.075), hairMat);
+      fringe.position.set(0.048, 0.065, 0);
+      fringe.rotation.z = -0.20;
+      headGroup.add(fringe);
     }
 
     // High-Visibility Eyes & Eyebrows using MeshBasicMaterial
     [0.030, -0.030].forEach(zOffset => {
-      // White sclera sphere (clearly visible in dark cabins)
+      // White sclera sphere
       const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), eyeWhiteMat);
-      eyeWhite.position.set(headX + 0.078, headY + 0.016, driverZ + zOffset);
-      driverGroup.add(eyeWhite);
+      eyeWhite.position.set(0.076, 0.018, zOffset);
+      headGroup.add(eyeWhite);
 
-      // Dark pupil on the anterior eye surface
+      // Dark pupil on anterior eye surface
       const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 8, 8), eyePupilMat);
-      pupil.position.set(headX + 0.089, headY + 0.016, driverZ + zOffset);
-      driverGroup.add(pupil);
+      pupil.position.set(0.088, 0.018, zOffset);
+      headGroup.add(pupil);
 
-      // Eyebrow bar
+      // Eyebrow bar on forehead
       const eyebrow = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.009, 0.028), eyebrowMat);
-      eyebrow.position.set(headX + 0.080, headY + 0.032, driverZ + zOffset);
+      eyebrow.position.set(0.078, 0.036, zOffset);
       eyebrow.rotation.x = zOffset > 0 ? -0.06 : 0.06;
-      driverGroup.add(eyebrow);
+      headGroup.add(eyebrow);
     });
 
     // Protruding Nasal Bridge & Tip
@@ -1463,83 +1467,69 @@
       skinMat
     );
     noseBridge.rotation.z = -0.22;
-    noseBridge.position.set(headX + 0.089, headY - 0.005, driverZ);
-    driverGroup.add(noseBridge);
+    noseBridge.position.set(0.086, -0.006, 0);
+    headGroup.add(noseBridge);
 
     const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), skinMat);
-    noseTip.position.set(headX + 0.095, headY - 0.016, driverZ);
-    driverGroup.add(noseTip);
+    noseTip.position.set(0.093, -0.018, 0);
+    headGroup.add(noseTip);
 
-    // Dark-Pink / Brown Lip Line
+    // Mustache on Upper Lip Line (Directly below nose, above mouth)
+    const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.008, 0.034), beardMat);
+    mustache.position.set(0.088, -0.034, 0);
+    headGroup.add(mustache);
+
+    // Dark-Pink / Brown Lip Line (Cleanly positioned below mustache)
     const lips = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.007, 0.026), lipMat);
-    lips.position.set(headX + 0.086, headY - 0.028, driverZ);
-    driverGroup.add(lips);
+    lips.position.set(0.084, -0.048, 0);
+    headGroup.add(lips);
 
     // Ears (Left & Right)
     [0.089, -0.089].forEach(zOffset => {
       const ear = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.014, 0.008, 8), skinMat);
       ear.rotation.x = Math.PI / 2;
-      ear.position.set(headX - 0.010, headY - 0.002, driverZ + zOffset);
-      driverGroup.add(ear);
+      ear.position.set(-0.010, -0.002, zOffset);
+      headGroup.add(ear);
     });
 
-    // Distinct Facial Hair / Grooming Styles per Car Model
+    // Distinct Facial Hair / Grooming Styles per Car Model (Trimmed & Positioned on Lower Jaw/Chin)
     if (carType === 'mercedes_amg') {
-      // Executive trimmed mustache + goatee
-      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.008, 0.034), beardMat);
-      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
-      driverGroup.add(mustache);
-
-      const goatee = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.018, 0.028), beardMat);
-      goatee.position.set(headX + 0.072, headY - 0.052, driverZ);
-      driverGroup.add(goatee);
+      // Subtle lower chin patch (down on chin rim, well below mouth)
+      const chinPatch = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.012, 0.022), beardMat);
+      chinPatch.position.set(0.065, -0.076, 0);
+      headGroup.add(chinPatch);
     } else if (carType === 'honda_sedan') {
-      // Modern smart mustache & light chin shadow
-      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.007, 0.030), beardMat);
-      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
-      driverGroup.add(mustache);
-
-      const chinStubble = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.014, 0.024), beardMat);
-      chinStubble.position.set(headX + 0.072, headY - 0.050, driverZ);
-      driverGroup.add(chinStubble);
+      // Clean modern chin - no dark block
     } else if (carType === 'range_rover') {
-      // Sharp manicured executive mustache & jawline beard
-      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.010, 0.036), beardMat);
-      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
-      driverGroup.add(mustache);
+      // Sharp manicured jawline beard along jaw sides & chin rim
+      const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.014, 0.032), beardMat);
+      chinBeard.position.set(0.060, -0.076, 0);
+      headGroup.add(chinBeard);
 
-      const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.024, 0.038), beardMat);
-      chinBeard.position.set(headX + 0.070, headY - 0.052, driverZ);
-      driverGroup.add(chinBeard);
-
-      const jawLeft = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.016, 0.012), beardMat);
-      jawLeft.position.set(headX + 0.030, headY - 0.046, driverZ + 0.055);
+      const jawLeft = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.014, 0.012), beardMat);
+      jawLeft.position.set(0.030, -0.056, 0.055);
       jawLeft.rotation.y = -0.45;
-      driverGroup.add(jawLeft);
+      headGroup.add(jawLeft);
 
-      const jawRight = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.016, 0.012), beardMat);
-      jawRight.position.set(headX + 0.030, headY - 0.046, driverZ - 0.055);
+      const jawRight = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.014, 0.012), beardMat);
+      jawRight.position.set(0.030, -0.056, -0.055);
       jawRight.rotation.y = 0.45;
-      driverGroup.add(jawRight);
+      headGroup.add(jawRight);
     } else {
-      // Rugged full safari beard & mustache for Land Cruiser
-      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.012, 0.040), beardMat);
-      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
-      driverGroup.add(mustache);
+      // Rugged full safari beard for Land Cruiser
+      const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.016, 0.036), beardMat);
+      chinBeard.position.set(0.058, -0.076, 0);
+      headGroup.add(chinBeard);
 
-      const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.028, 0.045), beardMat);
-      chinBeard.position.set(headX + 0.070, headY - 0.054, driverZ);
-      driverGroup.add(chinBeard);
-
-      const jawLeft = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.020, 0.015), beardMat);
-      jawLeft.position.set(headX + 0.028, headY - 0.046, driverZ + 0.055);
+      const jawLeft = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.016, 0.014), beardMat);
+      jawLeft.position.set(0.028, -0.056, 0.055);
       jawLeft.rotation.y = -0.45;
-      driverGroup.add(jawLeft);
+      headGroup.add(jawLeft);
 
-      const jawRight = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.020, 0.015), beardMat);
-      jawRight.position.set(headX + 0.028, headY - 0.046, driverZ - 0.055);
+      const jawRight = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.016, 0.014), beardMat);
+      jawRight.position.set(0.028, -0.056, -0.055);
       jawRight.rotation.y = 0.45;
-      driverGroup.add(jawRight);
+      headGroup.add(jawRight);
     }
 
     // 6. Arms & Hands Gripping Steering Wheel (10 and 2 o'clock)
