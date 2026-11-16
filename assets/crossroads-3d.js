@@ -1302,193 +1302,188 @@
       });
     }
 
-    // 4. Seated Human Driver - Smooth Contoured Anatomical Torso & Shoulders
-    // Main Contoured Ribcage & Abdomen (Smooth elliptical cross-section: broader chest, tapered waist)
+    // Helper: Connect two 3D points with an oriented, seamless cylinder
+    function createConnectingCylinder(p1, p2, radius1, radius2, material) {
+      const v1 = new THREE.Vector3(p1[0], p1[1], p1[2]);
+      const v2 = new THREE.Vector3(p2[0], p2[1], p2[2]);
+      const distance = v1.distanceTo(v2);
+      const cylinder = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius2, radius1, distance, 14),
+        material
+      );
+      const mid = new THREE.Vector3().addVectors(v1, v2).multiplyScalar(0.5);
+      cylinder.position.copy(mid);
+      cylinder.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        new THREE.Vector3().subVectors(v2, v1).normalize()
+      );
+      return cylinder;
+    }
+
+    // 4. Seated Human Driver - Smooth Contoured Torso & Clavicle Yoke (Rickshaw/CNG Anatomy)
+    // Main Contoured Ribcage & Abdomen (Tapered elliptical cylinder: broader chest, tapered waist)
     const mainTorso = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.145, 0.125, 0.34, 20),
+      new THREE.CylinderGeometry(0.145, 0.125, 0.32, 24),
       outfitMat
     );
-    mainTorso.scale.set(0.82, 1.0, 1.18);
+    mainTorso.scale.set(0.72, 1.0, 1.18); // Depth X: 0.21, Height Y: 0.32, Width Z: 0.34
     mainTorso.position.set(torsoX, torsoY, driverZ);
     driverGroup.add(mainTorso);
 
-    // Upper Chest & Clavicle Yoke (Smooth anatomical shoulder shelf & chest curve)
-    const chestYoke = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.150, 0.142, 0.14, 20),
+    // Rounded Shoulder-Yoke Clavicle Ellipsoid (Capping the top of torso with smooth contour)
+    const yokeMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.155, 20, 16),
       outfitMat
     );
-    chestYoke.scale.set(0.85, 1.0, 1.22);
-    chestYoke.position.set(torsoX + 0.005, torsoY + 0.09, driverZ);
-    driverGroup.add(chestYoke);
+    yokeMesh.scale.set(0.70, 0.45, 1.20);
+    yokeMesh.position.set(torsoX, torsoY + 0.13, driverZ);
+    driverGroup.add(yokeMesh);
 
-    // Rounded Spherical Shoulder Joint Sockets (Smooth deltoid blending into arms)
-    const shoulderGeo = new THREE.SphereGeometry(0.046, 14, 12);
-    const lShoulder = new THREE.Mesh(shoulderGeo, outfitMat);
-    lShoulder.scale.set(1.10, 1.05, 1.0);
-    lShoulder.position.set(torsoX + 0.02, torsoY + 0.12, driverZ + 0.16);
-    driverGroup.add(lShoulder);
+    // Fitted Collar & Centered Neck Column
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.046, 0.08, 16), skinMat);
+    neck.position.set(torsoX + 0.02, torsoY + 0.19, driverZ);
+    driverGroup.add(neck);
 
-    const rShoulder = new THREE.Mesh(shoulderGeo, outfitMat);
-    rShoulder.scale.set(1.10, 1.05, 1.0);
-    rShoulder.position.set(torsoX + 0.02, torsoY + 0.12, driverZ - 0.16);
-    driverGroup.add(rShoulder);
-
-    // Collar
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.078, 0.018, 8, 16), collarMat);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.016, 8, 20), collarMat);
     collar.rotation.x = Math.PI / 2;
     collar.position.set(torsoX + 0.02, torsoY + 0.17, driverZ);
     driverGroup.add(collar);
 
-    // Neck
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.048, 0.08, 14), skinMat);
-    neck.position.set(torsoX + 0.02, torsoY + 0.19, driverZ);
-    driverGroup.add(neck);
-
     // Outfit Accessories & Front Detailing (Contoured to curved chest)
     if (carType === 'mercedes_amg') {
       // Crisp white shirt chest piece
-      const shirtInlay = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.16, 0.08), shirtMat);
-      shirtInlay.position.set(torsoX + 0.116, torsoY + 0.07, driverZ);
+      const shirtInlay = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.16, 0.075), shirtMat);
+      shirtInlay.position.set(torsoX + 0.106, torsoY + 0.07, driverZ);
       driverGroup.add(shirtInlay);
 
       // Crimson necktie
       const tieKnot = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.022, 0.024), tieMat);
-      tieKnot.position.set(torsoX + 0.122, torsoY + 0.135, driverZ);
+      tieKnot.position.set(torsoX + 0.112, torsoY + 0.135, driverZ);
       driverGroup.add(tieKnot);
 
       const tieBody = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.12, 0.022), tieMat);
-      tieBody.position.set(torsoX + 0.120, torsoY + 0.065, driverZ);
+      tieBody.position.set(torsoX + 0.110, torsoY + 0.065, driverZ);
       driverGroup.add(tieBody);
 
       // Silver tie clip
       const tieClip = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.005, 0.026), accentMat);
-      tieClip.position.set(torsoX + 0.123, torsoY + 0.080, driverZ);
+      tieClip.position.set(torsoX + 0.113, torsoY + 0.080, driverZ);
       driverGroup.add(tieClip);
 
       // Contoured suit lapels angled with chest curvature
       const lLapel = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.16, 0.038), outfitMat);
-      lLapel.position.set(torsoX + 0.118, torsoY + 0.07, driverZ + 0.050);
+      lLapel.position.set(torsoX + 0.108, torsoY + 0.07, driverZ + 0.046);
       lLapel.rotation.y = -0.18;
       driverGroup.add(lLapel);
 
       const rLapel = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.16, 0.038), outfitMat);
-      rLapel.position.set(torsoX + 0.118, torsoY + 0.07, driverZ - 0.050);
+      rLapel.position.set(torsoX + 0.108, torsoY + 0.07, driverZ - 0.046);
       rLapel.rotation.y = 0.18;
       driverGroup.add(rLapel);
     } else if (carType === 'honda_sedan') {
       // Casual polo placket & collarbone opening
-      const placket = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.13, 0.032), shirtMat);
-      placket.position.set(torsoX + 0.116, torsoY + 0.08, driverZ);
+      const placket = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.13, 0.030), shirtMat);
+      placket.position.set(torsoX + 0.106, torsoY + 0.08, driverZ);
       driverGroup.add(placket);
 
       [0.11, 0.07].forEach(yOff => {
         const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.006, 6), accentMat);
         btn.rotation.z = Math.PI / 2;
-        btn.position.set(torsoX + 0.122, torsoY + yOff, driverZ);
+        btn.position.set(torsoX + 0.112, torsoY + yOff, driverZ);
         driverGroup.add(btn);
       });
 
       const vSkin = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.04, 0.04), skinMat);
-      vSkin.position.set(torsoX + 0.114, torsoY + 0.145, driverZ);
+      vSkin.position.set(torsoX + 0.104, torsoY + 0.145, driverZ);
       driverGroup.add(vSkin);
     } else if (carType === 'range_rover') {
       // Formal white shirt inlay
       const shirtInlay = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.16, 0.08), shirtMat);
-      shirtInlay.position.set(torsoX + 0.116, torsoY + 0.07, driverZ);
+      shirtInlay.position.set(torsoX + 0.106, torsoY + 0.07, driverZ);
       driverGroup.add(shirtInlay);
 
       // Black formal tie
       const tieKnot = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.022, 0.024), tieMat);
-      tieKnot.position.set(torsoX + 0.122, torsoY + 0.135, driverZ);
+      tieKnot.position.set(torsoX + 0.112, torsoY + 0.135, driverZ);
       driverGroup.add(tieKnot);
 
       const tieBody = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.12, 0.022), tieMat);
-      tieBody.position.set(torsoX + 0.120, torsoY + 0.065, driverZ);
+      tieBody.position.set(torsoX + 0.110, torsoY + 0.065, driverZ);
       driverGroup.add(tieBody);
 
       // Gold lapel accent piping
       const lGold = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.13, 0.008), accentMat);
-      lGold.position.set(torsoX + 0.120, torsoY + 0.08, driverZ + 0.042);
+      lGold.position.set(torsoX + 0.110, torsoY + 0.08, driverZ + 0.040);
       driverGroup.add(lGold);
 
       const rGold = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.13, 0.008), accentMat);
-      rGold.position.set(torsoX + 0.120, torsoY + 0.08, driverZ - 0.042);
+      rGold.position.set(torsoX + 0.110, torsoY + 0.08, driverZ - 0.040);
       driverGroup.add(rGold);
 
       // Gold lapel pin / crest
       const goldPin = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.006, 8), accentMat);
       goldPin.rotation.z = Math.PI / 2;
-      goldPin.position.set(torsoX + 0.121, torsoY + 0.12, driverZ + 0.068);
+      goldPin.position.set(torsoX + 0.111, torsoY + 0.12, driverZ + 0.062);
       driverGroup.add(goldPin);
     } else {
       // Land Cruiser Safari button placket
       const placket = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.14, 0.034), shirtMat);
-      placket.position.set(torsoX + 0.116, torsoY + 0.08, driverZ);
+      placket.position.set(torsoX + 0.106, torsoY + 0.08, driverZ);
       driverGroup.add(placket);
 
       [0.12, 0.08, 0.04].forEach(yOff => {
         const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.006, 6), accentMat);
         btn.rotation.z = Math.PI / 2;
-        btn.position.set(torsoX + 0.122, torsoY + yOff, driverZ);
+        btn.position.set(torsoX + 0.112, torsoY + yOff, driverZ);
         driverGroup.add(btn);
       });
 
       // Dual chest utility pocket flaps
       const lPocket = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.024, 0.055), shirtMat);
-      lPocket.position.set(torsoX + 0.118, torsoY + 0.07, driverZ + 0.072);
+      lPocket.position.set(torsoX + 0.108, torsoY + 0.07, driverZ + 0.068);
       driverGroup.add(lPocket);
 
       const rPocket = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.024, 0.055), shirtMat);
-      rPocket.position.set(torsoX + 0.118, torsoY + 0.07, driverZ - 0.072);
+      rPocket.position.set(torsoX + 0.108, torsoY + 0.07, driverZ - 0.068);
       driverGroup.add(rPocket);
     }
 
-    // 5. Head & Procedural Facial Features
+    // 5. Head & Procedural Facial Features (Rickshaw/CNG Head Architecture)
     const headGroup = new THREE.Group();
     headGroup.position.set(headX, headY, driverZ);
     driverGroup.add(headGroup);
 
-    // Rounded Head
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.090, 16, 14), skinMat);
+    // Anatomical Cranium (Proportioned after Rickshaw Puller buildRealisticAdultHead)
+    const craniumGeo = new THREE.SphereGeometry(0.090, 24, 20);
+    craniumGeo.scale(0.85, 1.08, 0.90);
+    const head = new THREE.Mesh(craniumGeo, skinMat);
     headGroup.add(head);
 
-    // Full Volume Dark Stylized Hair (Covers crown, dome, sides & back with zero sparse gaps)
-    // 1. Crown & Top Dome
-    const hairCrown = new THREE.Mesh(
-      new THREE.SphereGeometry(0.098, 18, 14, 0, Math.PI * 2, 0, Math.PI * 0.50),
-      hairMat
-    );
-    hairCrown.position.set(-0.008, 0.014, 0);
-    hairCrown.rotation.z = 0.16;
-    headGroup.add(hairCrown);
-
-    // 2. Back & Lower Scalp Volume (Nape of the neck)
-    const hairBack = new THREE.Mesh(
-      new THREE.SphereGeometry(0.097, 16, 12, Math.PI * 0.45, Math.PI * 1.10, 0, Math.PI * 0.65),
-      hairMat
-    );
-    hairBack.position.set(-0.012, 0.004, 0);
-    headGroup.add(hairBack);
-
-    // 3. Side & Temple Hair Volume (Frames head above ears cleanly)
-    [0.082, -0.082].forEach(zSide => {
-      const sideHair = new THREE.Mesh(
-        new THREE.BoxGeometry(0.048, 0.052, 0.018),
-        hairMat
-      );
-      sideHair.position.set(0.005, 0.024, zSide);
-      headGroup.add(sideHair);
-    });
+    // Full Sculpted Hair Dome (Exact Rickshaw Puller & CNG Driver buildRealisticAdultHead pipeline)
+    const hairGeo = new THREE.SphereGeometry(0.093, 24, 20);
+    hairGeo.scale(0.87, 1.10, 0.92);
+    const hair = new THREE.Mesh(hairGeo, hairMat);
+    hair.position.set(-0.010, 0.010, 0);
+    headGroup.add(hair);
 
     // Hair Style Detail for Honda Civic Driver (Textured Fringe lifted above forehead)
     if (carType === 'honda_sedan') {
-      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.020, 0.075), hairMat);
-      fringe.position.set(0.048, 0.065, 0);
-      fringe.rotation.z = -0.20;
+      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.016, 0.065), hairMat);
+      fringe.position.set(0.048, 0.062, 0);
+      fringe.rotation.z = -0.15;
       headGroup.add(fringe);
     }
 
-    // High-Visibility Eyes & Eyebrows using MeshBasicMaterial
+    // Prominently Visible Anatomical Ears (Matching Rickshaw Puller formula)
+    [-0.086, 0.086].forEach(ez => {
+      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.026, 12, 10), skinMat);
+      ear.scale.set(0.38, 0.82, 0.55);
+      ear.position.set(-0.006, -0.004, ez);
+      ear.rotation.y = ez > 0 ? 0.30 : -0.30; // Flared outward naturally for clear visibility
+      headGroup.add(ear);
+    });
+
+    // High-Visibility Eyes & Eyebrows using MeshBasicMaterial (Coordinates Frozen)
     [0.030, -0.030].forEach(zOffset => {
       // White sclera sphere
       const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), eyeWhiteMat);
@@ -1507,7 +1502,7 @@
       headGroup.add(eyebrow);
     });
 
-    // Protruding Nasal Bridge & Tip
+    // Protruding Nasal Bridge & Tip (Coordinates Frozen)
     const noseBridge = new THREE.Mesh(
       new THREE.CylinderGeometry(0.008, 0.018, 0.036, 5),
       skinMat
@@ -1520,23 +1515,15 @@
     noseTip.position.set(0.093, -0.018, 0);
     headGroup.add(noseTip);
 
-    // Mustache on Upper Lip Line (Directly below nose, above mouth)
+    // Mustache on Upper Lip Line (Coordinates Frozen)
     const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.008, 0.034), beardMat);
     mustache.position.set(0.088, -0.034, 0);
     headGroup.add(mustache);
 
-    // Dark-Pink / Brown Lip Line (Cleanly positioned below mustache)
+    // Dark-Pink / Brown Lip Line (Coordinates Frozen)
     const lips = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.007, 0.026), lipMat);
     lips.position.set(0.084, -0.048, 0);
     headGroup.add(lips);
-
-    // Ears (Left & Right)
-    [0.089, -0.089].forEach(zOffset => {
-      const ear = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.014, 0.008, 8), skinMat);
-      ear.rotation.x = Math.PI / 2;
-      ear.position.set(-0.010, -0.002, zOffset);
-      headGroup.add(ear);
-    });
 
     // Distinct Facial Hair / Grooming Styles per Car Model (Trimmed & Positioned on Lower Jaw/Chin)
     if (carType === 'mercedes_amg') {
@@ -1578,53 +1565,33 @@
       headGroup.add(jawRight);
     }
 
-    // 6. Anatomical Arms & Hands Gripping Steering Wheel (10 and 2 o'clock)
-    // Left Upper Arm (Originating smoothly inside the left shoulder sphere)
-    const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.032, 0.18, 12), outfitMat);
-    lUpperArm.position.set(torsoX + 0.05, torsoY + 0.05, driverZ + 0.145);
-    lUpperArm.rotation.x = 0.30;
-    lUpperArm.rotation.z = -0.52;
-    driverGroup.add(lUpperArm);
+    // 6. Embedded Spherical Shoulder Joints + Two-Segment Articulated Arms (Matching Rickshaw/CNG Pipeline)
+    [-1, 1].forEach(side => {
+      const shoulderPt = [torsoX + 0.02, torsoY + 0.12, driverZ + side * 0.155];
+      const elbowPt = [torsoX + 0.02 + (wheelX - torsoX - 0.02) * 0.48, torsoY - 0.03, driverZ + side * 0.165];
+      const handPt = [wheelX, wheelY + 0.05, driverZ + side * 0.075];
 
-    // Left Elbow Joint
-    const elbowGeo = new THREE.SphereGeometry(0.028, 10, 10);
-    const lElbow = new THREE.Mesh(elbowGeo, outfitMat);
-    lElbow.position.set(wheelX - 0.08, wheelY - 0.01, driverZ + 0.12);
-    driverGroup.add(lElbow);
+      // Deltoid Shoulder Joint Cap (Embedded inside torso yoke - zero air gaps)
+      const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.046, 16, 12), outfitMat);
+      shoulderCap.position.set(...shoulderPt);
+      driverGroup.add(shoulderCap);
 
-    // Left Forearm
-    const lForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.024, 0.17, 10), outfitMat);
-    lForeArm.position.set(wheelX - 0.06, wheelY + 0.01, driverZ + 0.10);
-    lForeArm.rotation.x = -0.28;
-    lForeArm.rotation.z = -1.10;
-    driverGroup.add(lForeArm);
+      // Upper Arm Cylinder (Continuous from inside shoulder cap to elbow sphere)
+      driverGroup.add(createConnectingCylinder(shoulderPt, elbowPt, 0.036, 0.030, outfitMat));
 
-    const lHand = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), skinMat);
-    lHand.position.set(wheelX, wheelY + 0.06, driverZ + 0.07);
-    driverGroup.add(lHand);
+      // Rounded Elbow Joint Sphere
+      const elbowCap = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 10), outfitMat);
+      elbowCap.position.set(...elbowPt);
+      driverGroup.add(elbowCap);
 
-    // Right Upper Arm (Originating smoothly inside the right shoulder sphere)
-    const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.032, 0.18, 12), outfitMat);
-    rUpperArm.position.set(torsoX + 0.05, torsoY + 0.05, driverZ - 0.145);
-    rUpperArm.rotation.x = -0.30;
-    rUpperArm.rotation.z = -0.52;
-    driverGroup.add(rUpperArm);
+      // Forearm Cylinder (Continuous from inside elbow sphere to gripping hand)
+      driverGroup.add(createConnectingCylinder(elbowPt, handPt, 0.028, 0.022, outfitMat));
 
-    // Right Elbow Joint
-    const rElbow = new THREE.Mesh(elbowGeo, outfitMat);
-    rElbow.position.set(wheelX - 0.08, wheelY - 0.01, driverZ - 0.12);
-    driverGroup.add(rElbow);
-
-    // Right Forearm
-    const rForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.024, 0.17, 10), outfitMat);
-    rForeArm.position.set(wheelX - 0.06, wheelY + 0.01, driverZ - 0.10);
-    rForeArm.rotation.x = 0.28;
-    rForeArm.rotation.z = -1.10;
-    driverGroup.add(rForeArm);
-
-    const rHand = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), skinMat);
-    rHand.position.set(wheelX, wheelY + 0.06, driverZ - 0.07);
-    driverGroup.add(rHand);
+      // Sculpted Gripping Hand on Steering Wheel
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), skinMat);
+      hand.position.set(...handPt);
+      driverGroup.add(hand);
+    });
 
     return driverGroup;
   }
