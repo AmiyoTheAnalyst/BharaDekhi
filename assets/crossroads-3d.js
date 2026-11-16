@@ -2293,15 +2293,129 @@
       group.add(hlDrl);
     });
 
-    // 7. Rear Connected Full-Width LED Taillight Bar Across Trunk
-    const tlBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.40), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-    tlBar.position.set(-2.26, 0.86, 0);
-    group.add(tlBar);
+    // -----------------------------------------------------------------
+    // 7. Rear Connected Full-Width LED Taillights, Ducktail CHMSL & Bumper Assembly
+    // -----------------------------------------------------------------
+    // High-Mounted 3rd Brake Light (CHMSL) on Rear Window Base
+    const chmsl = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 0.016, 0.42),
+      new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    chmsl.position.set(-1.78, 0.845, 0);
+    group.add(chmsl);
+
+    // Full-Width Connected LED Taillight Bar Across Trunk
+    const centerHousing = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, 0.048, 1.06),
+      darkTrimMat
+    );
+    centerHousing.position.set(-2.285, 0.775, 0);
+    group.add(centerHousing);
+
+    const centerBar = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 0.032, 1.04),
+      new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    centerBar.position.set(-2.295, 0.775, 0);
+    group.add(centerBar);
+
+    // Left & Right Outer Taillight Clusters (Angled around rear haunches)
+    [-0.62, 0.62].forEach(tz => {
+      const isLeft = tz > 0;
+      const tlGroup = new THREE.Group();
+      tlGroup.position.set(-2.295, 0.775, tz);
+      tlGroup.rotation.y = isLeft ? -0.05 : 0.05;
+
+      // Dark gloss housing
+      const housing = new THREE.Mesh(
+        new THREE.BoxGeometry(0.06, 0.088, 0.32),
+        darkTrimMat
+      );
+      tlGroup.add(housing);
+
+      // Main red LED running light
+      const redLight = new THREE.Mesh(
+        new THREE.BoxGeometry(0.045, 0.052, 0.30),
+        new THREE.MeshBasicMaterial({ color: 0xef4444 })
+      );
+      redLight.position.set(-0.015, 0, 0);
+      tlGroup.add(redLight);
+
+      // Bright inner optic core
+      const opticCore = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 0.020, 0.28),
+        new THREE.MeshBasicMaterial({ color: 0xff6b81 })
+      );
+      opticCore.position.set(-0.022, 0, 0);
+      tlGroup.add(opticCore);
+
+      // Lower white reverse / crystal lens
+      const revLens = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 0.018, 0.24),
+        new THREE.MeshBasicMaterial({ color: 0xf8fafc })
+      );
+      revLens.position.set(-0.018, -0.024, 0);
+      tlGroup.add(revLens);
+
+      // High-gloss outer protective lens
+      const lens = new THREE.Mesh(
+        new THREE.BoxGeometry(0.025, 0.076, 0.31),
+        new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          roughness: 0.05,
+          metalness: 0.90,
+          transparent: true,
+          opacity: 0.45
+        })
+      );
+      lens.position.set(-0.028, 0, 0);
+      tlGroup.add(lens);
+
+      group.add(tlGroup);
+    });
+
+    // Center Chrome Honda 'H' Trunk Emblem
+    const rearHBadge = new THREE.Group();
+    rearHBadge.position.set(-2.315, 0.775, 0);
+    const rearHFrame = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.065, 0.075), chromeMat);
+    rearHBadge.add(rearHFrame);
+    const rearHBar = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.012, 0.045), chromeMat);
+    rearHBadge.add(rearHBar);
+    group.add(rearHBadge);
+
+    // Dhaka License Plate in Recessed Center Bumper
+    const plateHolder = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.38), darkTrimMat);
+    plateHolder.position.set(-2.295, 0.50, 0);
+    group.add(plateHolder);
+
+    const plateFace = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.095, 0.34),
+      new THREE.MeshBasicMaterial({ color: 0xf8fafc })
+    );
+    plateFace.position.set(-2.315, 0.50, 0);
+    group.add(plateFace);
+
+    const plateStripe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.022, 0.022, 0.32),
+      new THREE.MeshBasicMaterial({ color: 0x15803d })
+    );
+    plateStripe.position.set(-2.318, 0.52, 0);
+    group.add(plateStripe);
+
+    // Rear Bumper Lower Red Reflectors
+    [-0.62, 0.62].forEach(rz => {
+      const reflector = new THREE.Mesh(
+        new THREE.BoxGeometry(0.025, 0.022, 0.20),
+        new THREE.MeshBasicMaterial({ color: 0xdc2626 })
+      );
+      reflector.position.set(-2.310, 0.38, rz);
+      group.add(reflector);
+    });
 
     // Rear Dual Exhaust Cutouts in Lower Bumper
     [-0.60, 0.60].forEach(ez => {
-      const tip = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.06, 0.16), chromeMat);
-      tip.position.set(-2.28, 0.28, ez);
+      const tip = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.16), chromeMat);
+      tip.position.set(-2.32, 0.28, ez);
       group.add(tip);
     });
 
