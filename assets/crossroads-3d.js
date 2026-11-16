@@ -1942,38 +1942,138 @@
     });
 
     // -----------------------------------------------------------------
-    // 7. Rear Decklid, Taillights, Diffuser & Quad Exhausts
+    // 7. Rear Decklid, Sleek AMG GT Horizontal Taillights, Diffuser & Quad Exhausts
     // -----------------------------------------------------------------
-    const tlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 1.48), darkChassisMat);
-    tlHousing.position.set(-2.17, 0.68, 0);
-    group.add(tlHousing);
-
-    const tlGlow = new THREE.Mesh(
-      new THREE.BoxGeometry(0.05, 0.045, 1.44),
+    // High-Mounted 3rd Center LED Brake Light on Ducktail Lip (CHMSL)
+    const chmsl = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 0.020, 0.46),
       new THREE.MeshBasicMaterial({ color: 0xff1744 })
     );
-    tlGlow.position.set(-2.19, 0.68, 0);
-    group.add(tlGlow);
+    chmsl.position.set(-2.20, 0.765, 0);
+    group.add(chmsl);
 
-    const rearBadge = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.006, 6, 18), chromeMat);
-    rearBadge.rotation.y = Math.PI / 2;
-    rearBadge.position.set(-2.19, 0.68, 0);
-    group.add(rearBadge);
+    // Left & Right AMG GT Characteristic Horizontal LED Taillight Clusters
+    [-0.54, 0.54].forEach(tz => {
+      const isLeft = tz > 0;
+      const tlGroup = new THREE.Group();
+      // Positioned proudly on the rear shoulder transom, angled around rear corner haunches
+      tlGroup.position.set(-2.22, 0.68, tz);
+      tlGroup.rotation.y = isLeft ? -0.07 : 0.07;
 
+      // A. Dark Smoked Gloss Housing
+      const housing = new THREE.Mesh(
+        new THREE.BoxGeometry(0.06, 0.082, 0.58),
+        darkChassisMat
+      );
+      tlGroup.add(housing);
+
+      // B. Main Vivid Red Neon LED Running Light Bar (Emissive / MeshBasic)
+      const redBar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.045, 0.046, 0.54),
+        new THREE.MeshBasicMaterial({ color: 0xff1744 })
+      );
+      redBar.position.set(-0.015, 0, 0);
+      tlGroup.add(redBar);
+
+      // C. High-Intensity Bright Inner Optic Core Line
+      const opticCore = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 0.018, 0.50),
+        new THREE.MeshBasicMaterial({ color: 0xff6b81 })
+      );
+      opticCore.position.set(-0.022, 0, 0);
+      tlGroup.add(opticCore);
+
+      // D. High-Gloss Smoked Outer Protective Lens
+      const lens = new THREE.Mesh(
+        new THREE.BoxGeometry(0.025, 0.070, 0.56),
+        new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          roughness: 0.05,
+          metalness: 0.90,
+          transparent: true,
+          opacity: 0.45
+        })
+      );
+      lens.position.set(-0.028, 0, 0);
+      tlGroup.add(lens);
+
+      // E. Lower Crystal Reverse / Turn Signal Segment
+      const reverseStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(0.035, 0.012, 0.42),
+        new THREE.MeshBasicMaterial({ color: 0xf8fafc })
+      );
+      reverseStrip.position.set(-0.018, -0.024, 0);
+      tlGroup.add(reverseStrip);
+
+      group.add(tlGroup);
+    });
+
+    // Slim Center Gloss-Black Connecting Bar across Trunk Lid
+    const centerBar = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.036, 0.48), darkChassisMat);
+    centerBar.position.set(-2.21, 0.68, 0);
+    group.add(centerBar);
+
+    // Crisp 3D Mercedes Three-Pointed Star Center Trunk Emblem
+    const rearBadgeGroup = new THREE.Group();
+    rearBadgeGroup.position.set(-2.235, 0.68, 0);
+
+    const rearStarRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.038, 0.006, 8, 24),
+      chromeMat
+    );
+    rearStarRing.rotation.y = Math.PI / 2;
+    rearBadgeGroup.add(rearStarRing);
+
+    const rearStarAngles = [Math.PI / 2, Math.PI / 2 - (2 * Math.PI / 3), Math.PI / 2 + (2 * Math.PI / 3)];
+    rearStarAngles.forEach(ang => {
+      const armLen = 0.032;
+      const armGeo = new THREE.ConeGeometry(0.006, armLen, 4);
+      const arm = new THREE.Mesh(armGeo, chromeMat);
+      arm.position.set(
+        -0.004,
+        Math.sin(ang) * (armLen * 0.48),
+        -Math.cos(ang) * (armLen * 0.48)
+      );
+      arm.rotation.x = -ang + Math.PI / 2;
+      arm.rotation.y = Math.PI / 4;
+      rearBadgeGroup.add(arm);
+    });
+    group.add(rearBadgeGroup);
+
+    // Rear License Plate Holder & Authentic Dhaka Plate
+    const plateHolder = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.38), darkChassisMat);
+    plateHolder.position.set(-2.22, 0.46, 0);
+    group.add(plateHolder);
+
+    const plateFace = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.095, 0.34),
+      new THREE.MeshBasicMaterial({ color: 0xf8fafc })
+    );
+    plateFace.position.set(-2.238, 0.46, 0);
+    group.add(plateFace);
+
+    const plateStripe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.022, 0.022, 0.32),
+      new THREE.MeshBasicMaterial({ color: 0x15803d })
+    );
+    plateStripe.position.set(-2.240, 0.48, 0);
+    group.add(plateStripe);
+
+    // Lower Rear Diffuser with Vertical Aero Fins & Quad Exhaust Tips
     const diffuser = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.13, 1.76), darkChassisMat);
-    diffuser.position.set(-2.14, 0.22, 0);
+    diffuser.position.set(-2.16, 0.22, 0);
     group.add(diffuser);
 
     [-0.30, 0, 0.30].forEach(fx => {
       const fin = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.025), darkChassisMat);
-      fin.position.set(-2.16, 0.18, fx);
+      fin.position.set(-2.18, 0.18, fx);
       group.add(fin);
     });
 
     [-0.68, -0.54, 0.54, 0.68].forEach(ez => {
       const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.18, 12), chromeMat);
       tip.rotation.z = Math.PI / 2;
-      tip.position.set(-2.23, 0.23, ez);
+      tip.position.set(-2.26, 0.23, ez);
       group.add(tip);
     });
 
