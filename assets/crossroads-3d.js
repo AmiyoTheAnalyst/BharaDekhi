@@ -10047,7 +10047,7 @@ let sharedRickshawArtTexture = null;
   }
 
   function loadMetroModel() {
-    return loadGLBModel('assets/models/dhaka-metro.glb');
+    return Promise.resolve(null); // Pure Three.js procedural model preserved
   }
 
   function loadPedestriansModel() {
@@ -10790,13 +10790,13 @@ let sharedRickshawArtTexture = null;
       ctx.fillStyle = '#cbd5e1';
       ctx.fillRect(dx - dw / 2, dy, dw, dh);
 
-      // Door panel vertical divide seam
-      ctx.fillStyle = '#64748b';
-      ctx.fillRect(dx - 1, dy, 2, dh);
-
       // Bold vertical Crimson-Red Center Safety Stripe (#dc2626) down the door seam
       ctx.fillStyle = '#dc2626';
       ctx.fillRect(dx - 9, dy, 18, dh);
+
+      // Door panel vertical divide split seam
+      ctx.fillStyle = '#7f1d1d';
+      ctx.fillRect(dx - 1, dy, 2, dh);
 
       // Left & right door leaf dark tinted glass windows
       [-42, 42].forEach(offset => {
@@ -10993,7 +10993,7 @@ let sharedRickshawArtTexture = null;
       side: THREE.DoubleSide
     });
     const headlightLensMat = new THREE.MeshBasicMaterial({
-      color: 0xffffff
+      color: isForward ? 0xffffff : 0xef4444
     });
 
     // 1. UPPER BOTTLE-GREEN MASK (#006a4e)
