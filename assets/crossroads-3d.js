@@ -1036,7 +1036,7 @@
   ];
 
   // -------------------------------------------------------------
-  // Model 1: Mercedes-AMG GT Coupe Builder
+  // Model 1: Mercedes-AMG GT Coupe Builder (Sleek Sports Coupe & 3D Panamericana Grille)
   // -------------------------------------------------------------
   function buildCarMercedesAMGGT(config) {
     const group = new THREE.Group();
@@ -1044,134 +1044,430 @@
 
     const bodyMat = new THREE.MeshStandardMaterial({
       color: config.bodyColor,
-      metalness: config.metalness !== undefined ? config.metalness : 0.80,
-      roughness: config.roughness !== undefined ? config.roughness : 0.18
+      metalness: config.metalness !== undefined ? config.metalness : 0.82,
+      roughness: config.roughness !== undefined ? config.roughness : 0.16
     });
-    const darkChassisMat = new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.70 });
-    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.15 });
+    const darkChassisMat = new THREE.MeshStandardMaterial({ color: 0x0c0f14, roughness: 0.75, metalness: 0.5 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.96, roughness: 0.10 });
+    const darkMeshMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.88, metalness: 0.3 });
     const glassMat = new THREE.MeshStandardMaterial({
       color: 0x090d16,
-      roughness: 0.08,
-      metalness: 0.90,
+      roughness: 0.06,
+      metalness: 0.92,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.88
     });
 
-    // Extruded Body Silhouette (Length 4.4, Width 1.9, Height 1.25)
-    const shape = new THREE.Shape();
-    shape.moveTo(2.20, 0.16);
-    shape.lineTo(2.10, 0.46);
-    shape.quadraticCurveTo(1.20, 0.65, 0.65, 0.68);
-    shape.lineTo(0.05, 1.15);
-    shape.quadraticCurveTo(-0.35, 1.22, -0.70, 1.18);
-    shape.quadraticCurveTo(-1.35, 1.05, -1.90, 0.72);
-    shape.lineTo(-2.15, 0.76);
-    shape.lineTo(-2.20, 0.20);
-    shape.bezierCurveTo(-1.80, 0.52, -0.90, 0.52, -0.85, 0.16);
-    shape.lineTo(0.85, 0.16);
-    shape.bezierCurveTo(0.90, 0.52, 1.80, 0.52, 1.85, 0.16);
-    shape.lineTo(2.20, 0.16);
+    // 1. Lower Sculpted Body (Beltline Down, Length: 4.40, Width: 1.88, Ground Contact & Arch Cutouts)
+    // Profile extends from X = -2.20 to +2.20, Height up to Beltline Y = 0.68
+    const bodyLowerShape = new THREE.Shape();
+    bodyLowerShape.moveTo(2.18, 0.14);               // Front lower chin / splitter base
+    bodyLowerShape.lineTo(2.14, 0.30);               // Front nose lower contour
+    bodyLowerShape.lineTo(2.04, 0.55);               // Upper nose header / grille top
+    bodyLowerShape.quadraticCurveTo(1.40, 0.65, 0.58, 0.70); // Long sculpted hood
+    bodyLowerShape.lineTo(-1.60, 0.74);              // Beltline along side/cabin base
+    bodyLowerShape.lineTo(-2.18, 0.76);              // Muscular rear decklid with ducktail lip
+    bodyLowerShape.lineTo(-2.20, 0.22);              // Rear bumper tail drop
+    bodyLowerShape.lineTo(-1.85, 0.16);              // Rear under-diffuser
+    bodyLowerShape.lineTo(-1.73, 0.16);              // Rear wheel arch rear base
+    // Rear wheel arch cutout (centered precisely at X = -1.35, clear radius ~0.385)
+    bodyLowerShape.bezierCurveTo(-1.70, 0.52, -1.00, 0.52, -0.97, 0.14);
+    bodyLowerShape.lineTo(0.97, 0.14);               // Side rocker skirt (ground clearance Y = 0.14)
+    // Front wheel arch cutout (centered precisely at X = 1.35, clear radius ~0.385)
+    bodyLowerShape.bezierCurveTo(1.00, 0.52, 1.70, 0.52, 1.73, 0.14);
+    bodyLowerShape.lineTo(2.18, 0.14);               // Front chin connection
 
-    const bodyGeo = new THREE.ExtrudeGeometry(shape, {
-      depth: 1.78,
+    const bodyLowerGeo = new THREE.ExtrudeGeometry(bodyLowerShape, {
+      depth: 1.76,
       bevelEnabled: true,
-      bevelThickness: 0.06,
-      bevelSize: 0.06,
+      bevelThickness: 0.05,
+      bevelSize: 0.05,
       bevelSegments: 4,
       curveSegments: 16
     });
-    bodyGeo.translate(0, 0, -1.78 / 2);
-    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-    bodyMesh.castShadow = true;
-    group.add(bodyMesh);
+    bodyLowerGeo.translate(0, 0, -1.76 / 2);
+    const bodyLowerMesh = new THREE.Mesh(bodyLowerGeo, bodyMat);
+    bodyLowerMesh.castShadow = true;
+    bodyLowerMesh.receiveShadow = true;
+    group.add(bodyLowerMesh);
 
-    // Front Panamericana Grille
-    const grilleTex = getCarGrilleTexture('mercedes_amg');
-    if (grilleTex) {
-      const gPlane = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.50, 1.05),
-        new THREE.MeshBasicMaterial({ map: grilleTex, transparent: true })
-      );
-      gPlane.rotation.y = Math.PI / 2;
-      gPlane.position.set(2.18, 0.44, 0);
-      group.add(gPlane);
-    }
-
-    // Front Lower Splitter
-    const splitter = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 1.84), darkChassisMat);
-    splitter.position.set(2.15, 0.16, 0);
-    group.add(splitter);
-
-    // Front LED Headlights
-    [-0.68, 0.68].forEach(hz => {
-      const hlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.32), darkChassisMat);
-      hlHousing.position.set(2.05, 0.50, hz);
-      group.add(hlHousing);
-
-      const hlLens = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.20, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      hlLens.rotation.x = Math.PI / 2;
-      hlLens.position.set(2.14, 0.50, hz);
-      group.add(hlLens);
-
-      const drlStrip = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.03, 0.30), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
-      drlStrip.position.set(2.08, 0.57, hz);
-      group.add(drlStrip);
+    // Muscular Rear Fender Haunches (Subtle side swell over rear wheels, Width ~1.92)
+    [-0.88, 0.88].forEach(hz => {
+      const haunchGeo = new THREE.CylinderGeometry(0.42, 0.45, 0.12, 16, 1, false, 0, Math.PI);
+      const haunch = new THREE.Mesh(haunchGeo, bodyMat);
+      haunch.rotation.x = Math.PI / 2;
+      haunch.rotation.z = Math.PI;
+      haunch.position.set(-1.35, 0.44, hz);
+      group.add(haunch);
     });
 
-    // Dark Tinted Glass Windshield & Fastback Cabin Canopy
-    const glassShape = new THREE.Shape();
-    glassShape.moveTo(0.08, 1.13);
-    glassShape.quadraticCurveTo(-0.35, 1.19, -0.68, 1.15);
-    glassShape.lineTo(-1.80, 0.73);
-    glassShape.lineTo(-1.10, 0.70);
-    glassShape.quadraticCurveTo(0.10, 0.68, 0.60, 0.68);
-    glassShape.closePath();
-    const glassGeo = new THREE.ExtrudeGeometry(glassShape, {
-      depth: 1.70,
+    // Twin Hood Power Domes (Longitudinal muscular hood creases)
+    [-0.26, 0.26].forEach(pz => {
+      const dome = new THREE.Mesh(
+        new THREE.BoxGeometry(1.20, 0.025, 0.06),
+        bodyMat
+      );
+      dome.rotation.z = -0.10;
+      dome.position.set(1.30, 0.63, pz);
+      group.add(dome);
+    });
+
+    // 2. Low-Slung Tapered Sports Coupe Cabin (Greenhouse / Tumblehome)
+    // Cabin width narrows gracefully to ~1.36 (Z in [-0.68, 0.68])
+    const cabinShape = new THREE.Shape();
+    cabinShape.moveTo(0.60, 0.70);                   // Windshield base
+    cabinShape.lineTo(-0.06, 1.24);                  // Aggressively raked windshield up to roof peak
+    cabinShape.quadraticCurveTo(-0.35, 1.25, -0.58, 1.22); // Curved sports coupe roof
+    cabinShape.quadraticCurveTo(-1.20, 1.04, -1.62, 0.75); // Fastback sloping rear window
+    cabinShape.lineTo(-1.62, 0.70);
+    cabinShape.lineTo(0.60, 0.70);
+    cabinShape.closePath();
+
+    const cabinGeo = new THREE.ExtrudeGeometry(cabinShape, {
+      depth: 1.34,
       bevelEnabled: true,
       bevelThickness: 0.04,
       bevelSize: 0.04,
-      bevelSegments: 2
+      bevelSegments: 3,
+      curveSegments: 16
     });
-    glassGeo.translate(0, 0, -1.70 / 2);
-    const glassMesh = new THREE.Mesh(glassGeo, glassMat);
-    group.add(glassMesh);
+    cabinGeo.translate(0, 0, -1.34 / 2);
+    const cabinMesh = new THREE.Mesh(cabinGeo, glassMat);
+    group.add(cabinMesh);
 
-    // Side Mirrors
-    [-0.96, 0.96].forEach(mz => {
-      const stalk = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.14), darkChassisMat);
-      stalk.position.set(0.50, 0.72, mz * 0.92);
+    // Slim Roof Band (Body-colored center roof spine)
+    const roofSpine = new THREE.Mesh(
+      new THREE.BoxGeometry(0.72, 0.03, 1.10),
+      bodyMat
+    );
+    roofSpine.position.set(-0.30, 1.245, 0);
+    group.add(roofSpine);
+
+    // Sleek A-Pillars & C-Pillars Framing the Windows
+    [-0.67, 0.67].forEach(pz => {
+      // A-pillar
+      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.035, 0.04), bodyMat);
+      aPillar.rotation.z = -0.66;
+      aPillar.position.set(0.26, 0.98, pz);
+      group.add(aPillar);
+
+      // Fastback C-pillar / quarter trim
+      const cPillar = new THREE.Mesh(new THREE.BoxGeometry(1.20, 0.035, 0.04), bodyMat);
+      cPillar.rotation.z = 0.44;
+      cPillar.position.set(-1.12, 0.98, pz);
+      group.add(cPillar);
+
+      // Chrome Window Surround Trim Blade
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(1.70, 0.015, 0.02), chromeMat);
+      trim.position.set(-0.46, 0.71, pz * 1.02);
+      group.add(trim);
+    });
+
+    // -----------------------------------------------------------------
+    // 3. TAPERED 3D PANAMERICANA GRILLE (Flush-Fit, Sloped at 15° Rake)
+    // ZERO Flat Billboards — Full 3D Chrome Surround, 10 Louvers & Star Badge
+    // -----------------------------------------------------------------
+    const grilleGroup = new THREE.Group();
+    // Front nose position: X=2.10, Y=0.43. Tilted backward by 15° (0.2618 rad)
+    const RAKE_RAD = 15 * (Math.PI / 180);
+    grilleGroup.position.set(2.10, 0.43, 0);
+    grilleGroup.rotation.z = RAKE_RAD; // Tilts upper section backward into nose
+
+    // A. Recessed Dark Cavity (100% Embedded inside front bumper, ZERO gaps)
+    const cavityShape = new THREE.Shape();
+    cavityShape.moveTo(-0.38, 0.13);
+    cavityShape.quadraticCurveTo(0, 0.15, 0.38, 0.13);
+    cavityShape.quadraticCurveTo(0.44, 0.02, 0.41, -0.06);
+    cavityShape.quadraticCurveTo(0.35, -0.14, 0.24, -0.14);
+    cavityShape.quadraticCurveTo(0, -0.15, -0.24, -0.14);
+    cavityShape.quadraticCurveTo(-0.35, -0.14, -0.41, -0.06);
+    cavityShape.quadraticCurveTo(-0.44, 0.02, -0.38, 0.13);
+
+    // Cavity backing block extruded backward in -X into bumper
+    const cavityGeo = new THREE.ExtrudeGeometry(cavityShape, {
+      depth: 0.16,
+      bevelEnabled: false
+    });
+    cavityGeo.rotateY(-Math.PI / 2);
+    const cavityMesh = new THREE.Mesh(cavityGeo, darkMeshMat);
+    grilleGroup.add(cavityMesh);
+
+    // B. Streamlined Tapered Chrome Panamericana Outer Bezel Rim
+    const rimPoints = [];
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24;
+      const angle = t * Math.PI * 2;
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      const z = cosA * (0.38 + 0.04 * (sinA < 0 ? -sinA : sinA * 0.4));
+      const y = sinA * 0.14;
+      rimPoints.push(new THREE.Vector3(0.015, y, z));
+    }
+    const rimCurve = new THREE.CatmullRomCurve3(rimPoints, true);
+    const rimGeo = new THREE.TubeGeometry(rimCurve, 32, 0.014, 8, true);
+    const rimMesh = new THREE.Mesh(rimGeo, chromeMat);
+    grilleGroup.add(rimMesh);
+
+    // C. 10 Slender Vertical Chrome Louvers (Panamericana Slats)
+    // Curved convex 3D crown matching aerodynamic AMG nose
+    const louverZs = [-0.34, -0.26, -0.19, -0.12, -0.05, 0.05, 0.12, 0.19, 0.26, 0.34];
+    louverZs.forEach(lz => {
+      const u = Math.abs(lz) / 0.38;
+      const louverH = 0.26 * Math.sqrt(Math.max(0.1, 1 - u * u * 0.55));
+      const bowX = 0.026 * (1 - u * u); // Center louvers bow forward slightly in 3D
+
+      const louverGeo = new THREE.CylinderGeometry(0.007, 0.007, louverH, 8);
+      const louver = new THREE.Mesh(louverGeo, chromeMat);
+      louver.position.set(bowX, 0, lz);
+      grilleGroup.add(louver);
+    });
+
+    // D. Crisp 3D Mercedes Three-Pointed Star Center Badge
+    const badgeGroup = new THREE.Group();
+    badgeGroup.position.set(0.038, 0.005, 0);
+
+    // Glossy Black Backing Plate
+    const badgeBacking = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.082, 0.082, 0.012, 24),
+      new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.15, metalness: 0.85 })
+    );
+    badgeBacking.rotation.z = Math.PI / 2;
+    badgeGroup.add(badgeBacking);
+
+    // Polished Chrome Outer Star Ring
+    const starRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.080, 0.011, 8, 28),
+      chromeMat
+    );
+    starRing.rotation.y = Math.PI / 2;
+    starRing.position.x = 0.008;
+    badgeGroup.add(starRing);
+
+    // Three Embossed Faceted Chrome Star Points (120° apart, top arm vertical)
+    const starAngles = [Math.PI / 2, Math.PI / 2 - (2 * Math.PI / 3), Math.PI / 2 + (2 * Math.PI / 3)];
+    starAngles.forEach(ang => {
+      const armLen = 0.068;
+      const armGeo = new THREE.ConeGeometry(0.013, armLen, 4);
+      const arm = new THREE.Mesh(armGeo, chromeMat);
+      arm.position.set(
+        0.012,
+        Math.sin(ang) * (armLen * 0.48),
+        -Math.cos(ang) * (armLen * 0.48)
+      );
+      arm.rotation.x = -ang + Math.PI / 2;
+      arm.rotation.y = Math.PI / 4; // Rotates cone facets to form central spine
+      badgeGroup.add(arm);
+    });
+
+    // Center Chrome Button Cap
+    const centerCap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.018, 0.018, 0.016, 12),
+      chromeMat
+    );
+    centerCap.rotation.z = Math.PI / 2;
+    centerCap.position.x = 0.014;
+    badgeGroup.add(centerCap);
+
+    grilleGroup.add(badgeGroup);
+    group.add(grilleGroup);
+
+    // -----------------------------------------------------------------
+    // 4. Sleek Recessed LED Headlamps (Smoothly embedded in front fenders)
+    // -----------------------------------------------------------------
+    [-0.66, 0.66].forEach(hz => {
+      const isLeft = hz > 0;
+      const hlGroup = new THREE.Group();
+      hlGroup.position.set(2.03, 0.50, hz);
+      hlGroup.rotation.y = isLeft ? 0.28 : -0.28; // Swept back along curved fender
+      hlGroup.rotation.z = 0.18;                  // Slopes backward along hood line
+
+      // Recessed Dark Housing
+      const housing = new THREE.Mesh(
+        new THREE.BoxGeometry(0.20, 0.11, 0.26),
+        darkChassisMat
+      );
+      hlGroup.add(housing);
+
+      // Dual High-Intensity Jewel LED Projectors
+      [-0.06, 0.06].forEach(pz => {
+        const proj = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.032, 0.032, 0.06, 12),
+          new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        proj.rotation.z = Math.PI / 2;
+        proj.position.set(0.08, -0.01, pz);
+        hlGroup.add(proj);
+      });
+
+      // Sharp Eyebrow DRL Light Guide (Cyan-white glow strip)
+      const drl = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.018, 0.26),
+        new THREE.MeshBasicMaterial({ color: 0xe0f2fe })
+      );
+      drl.position.set(0.06, 0.045, 0);
+      hlGroup.add(drl);
+
+      // Aerodynamic Smoked Glass Outer Lens
+      const lens = new THREE.Mesh(
+        new THREE.BoxGeometry(0.03, 0.10, 0.25),
+        new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          roughness: 0.10,
+          metalness: 0.90,
+          transparent: true,
+          opacity: 0.65
+        })
+      );
+      lens.position.set(0.095, 0, 0);
+      hlGroup.add(lens);
+
+      group.add(hlGroup);
+    });
+
+    // -----------------------------------------------------------------
+    // 5. Front Lower Splitter & Bumper Air Inlets (AMG A-Wing Styling)
+    // -----------------------------------------------------------------
+    // Center Lower Intake
+    const lowerIntake = new THREE.Mesh(
+      new THREE.BoxGeometry(0.22, 0.10, 0.86),
+      darkMeshMat
+    );
+    lowerIntake.position.set(2.14, 0.19, 0);
+    group.add(lowerIntake);
+
+    // Front Lower Splitter Blade (Carbon / Gloss Black with upturned winglets)
+    const splitter = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 0.04, 1.84),
+      darkChassisMat
+    );
+    splitter.position.set(2.18, 0.14, 0);
+    group.add(splitter);
+
+    // Chrome Lower A-Wing Accent Blade
+    const aWingBlade = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.02, 1.10),
+      chromeMat
+    );
+    aWingBlade.position.set(2.21, 0.15, 0);
+    group.add(aWingBlade);
+
+    // Outer Side Bumper Inlets with Aero Flicks
+    [-0.72, 0.72].forEach(sz => {
+      const sideScoop = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.14, 0.24),
+        darkMeshMat
+      );
+      sideScoop.position.set(2.08, 0.26, sz);
+      group.add(sideScoop);
+
+      const flick = new THREE.Mesh(
+        new THREE.BoxGeometry(0.12, 0.015, 0.22),
+        darkChassisMat
+      );
+      flick.position.set(2.12, 0.26, sz);
+      group.add(flick);
+    });
+
+    // -----------------------------------------------------------------
+    // 6. Side Aerodynamics & Mirrors
+    // -----------------------------------------------------------------
+    [-0.92, 0.92].forEach(mz => {
+      // Twin Aero Stalks
+      const stalk = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.12), darkChassisMat);
+      stalk.position.set(0.50, 0.73, mz * 0.90);
       group.add(stalk);
 
-      const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.10, 0.20), bodyMat);
-      mirror.position.set(0.50, 0.76, mz);
+      // Sculpted Mirror Housing
+      const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.09, 0.18), bodyMat);
+      mirror.position.set(0.50, 0.77, mz);
       group.add(mirror);
+
+      // Reflective Glass Face
+      const mGlass = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.12, 0.07),
+        new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95, roughness: 0.1 })
+      );
+      mGlass.rotation.y = mz > 0 ? -Math.PI / 2 : Math.PI / 2;
+      mGlass.position.set(0.50, 0.77, mz + (mz > 0 ? -0.09 : 0.09));
+      group.add(mGlass);
+
+      // Side Rocker Lower Chrome Blade
+      const skirtBlade = new THREE.Mesh(new THREE.BoxGeometry(1.80, 0.02, 0.02), chromeMat);
+      skirtBlade.position.set(0, 0.15, mz);
+      group.add(skirtBlade);
     });
 
-    // Rear Horizontal LED Taillight Strip
-    const tl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.42), new THREE.MeshBasicMaterial({ color: 0xff1744 }));
-    tl.position.set(-2.17, 0.68, 0);
-    group.add(tl);
+    // -----------------------------------------------------------------
+    // 7. Rear Decklid, Taillights, Diffuser & Quad Exhausts
+    // -----------------------------------------------------------------
+    // Sleek OLED Horizontal Taillight Bar with Glowing Accent
+    const tlHousing = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 1.48), darkChassisMat);
+    tlHousing.position.set(-2.17, 0.68, 0);
+    group.add(tlHousing);
 
-    // Rear Lower Diffuser & Quad Chrome Exhaust Tips
-    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.14, 1.75), darkChassisMat);
-    diffuser.position.set(-2.15, 0.22, 0);
+    const tlGlow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, 0.045, 1.44),
+      new THREE.MeshBasicMaterial({ color: 0xff1744 })
+    );
+    tlGlow.position.set(-2.19, 0.68, 0);
+    group.add(tlGlow);
+
+    // Rear Mercedes Star Badge
+    const rearBadge = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.006, 6, 18), chromeMat);
+    rearBadge.rotation.y = Math.PI / 2;
+    rearBadge.position.set(-2.19, 0.68, 0);
+    group.add(rearBadge);
+
+    // Rear Aerodynamic Diffuser with 3 Vertical Strakes
+    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.13, 1.76), darkChassisMat);
+    diffuser.position.set(-2.14, 0.22, 0);
     group.add(diffuser);
 
+    [-0.30, 0, 0.30].forEach(fx => {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.025), darkChassisMat);
+      fin.position.set(-2.16, 0.18, fx);
+      group.add(fin);
+    });
+
+    // Quad Chrome Exhaust Tips (Dual Twin Pipes)
     [-0.68, -0.54, 0.54, 0.68].forEach(ez => {
-      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.18, 8), chromeMat);
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.18, 12), chromeMat);
       tip.rotation.z = Math.PI / 2;
-      tip.position.set(-2.22, 0.24, ez);
+      tip.position.set(-2.23, 0.23, ez);
       group.add(tip);
     });
 
-    // 4 AMG Sport 10-Spoke Alloy Wheels
+    // -----------------------------------------------------------------
+    // 8. 4 AMG Sport 10-Spoke Alloy Wheels (Flush with wheel wells, Y=0 contact)
+    // -----------------------------------------------------------------
+    // Front Axle: X = 1.35, Y = 0.34, Z = ±0.86
+    // Rear Axle:  X = -1.35, Y = 0.34, Z = ±0.88
+    // Wheel Radius: 0.34 -> Bottom touches ground at Y = 0.00 EXACTLY
+    [-0.86, 0.86].forEach(wz => {
+      const fWheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true);
+      fWheel.position.set(1.35, 0.34, wz);
+      group.add(fWheel);
+      group.userData.wheels.push(fWheel);
+    });
+
     [-0.88, 0.88].forEach(wz => {
+      const rWheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true);
+      rWheel.position.set(-1.35, 0.34, wz);
+      group.add(rWheel);
+      group.userData.wheels.push(rWheel);
+    });
+
+    // Dark Wheel Well Tub Liners (Prevents seeing through the car body)
+    [-0.83, 0.83].forEach(wz => {
       [-1.35, 1.35].forEach(wx => {
-        const wheel = create10SpokeAlloyWheel(0.34, 0.22, 0xd1d5db, true);
-        wheel.position.set(wx, 0.34, wz);
-        group.add(wheel);
-        group.userData.wheels.push(wheel);
+        const tub = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.37, 0.37, 0.14, 16, 1, true, 0, Math.PI),
+          darkMeshMat
+        );
+        tub.rotation.x = Math.PI / 2;
+        tub.rotation.z = Math.PI;
+        tub.position.set(wx, 0.34, wz);
+        group.add(tub);
       });
     });
 
