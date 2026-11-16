@@ -4607,18 +4607,18 @@ let sharedRickshawArtTexture = null;
       group.add(new THREE.Mesh(new THREE.TubeGeometry(stayRCurve, 6, 0.06, 6, false), mats.chromeMat));
     });
 
-    // 4. Deep Full-Valance Rear Mudguard (angle = 30° to 150° on rear wheel)
+    // 4. Deep Full-Valance Rear Mudguard (angle = 25° to 155° on rear wheel)
     const rMudguardR = 3.25 + 0.12;
-    const rearMudguard = createUpperArchFender(rearX, wheelY, rMudguardR, 1.65, 30, 150, 26, bikeBodyMat, 0.12);
+    const rearMudguard = createUpperArchFender(rearX, wheelY, rMudguardR, 1.65, 25, 155, 28, bikeBodyMat, 0.12);
     group.add(rearMudguard);
 
     // Rear mudguard pinstripe
     const rStripeCurve = new THREE.CatmullRomCurve3();
-    for (let d = 30; d <= 150; d += 10) {
+    for (let d = 25; d <= 155; d += 10) {
       const rad = d * Math.PI / 180;
       rStripeCurve.points.push(new THREE.Vector3(rearX + Math.cos(rad) * (rMudguardR + 0.05), wheelY + Math.sin(rad) * (rMudguardR + 0.05), 0));
     }
-    const rFenderStripe = new THREE.Mesh(new THREE.TubeGeometry(rStripeCurve, 20, 0.045, 8, false), pinstripeMat);
+    const rFenderStripe = new THREE.Mesh(new THREE.TubeGeometry(rStripeCurve, 24, 0.045, 8, false), pinstripeMat);
     group.add(rFenderStripe);
 
     // Rear chrome fender stays to axle
@@ -4709,7 +4709,7 @@ let sharedRickshawArtTexture = null;
       group.add(mHead);
     });
 
-    // 7. Classic Single-Downtube Cradle Frame
+    // 7. Classic Single-Downtube Cradle Frame & Extended Under-Seat Subframe Loop
     const frameTubes = [
       [[tripleTreeX - 0.4, tripleTreeY - 0.6, 0], [3.2, 4.2, 0], [1.2, 2.3, 0], [-1.8, 2.3, 0], [-3.8, 4.2, 0]],
       [[3.6, 6.8, 0], [0.8, 6.6, 0], [-2.0, 6.4, 0], [-4.0, 6.2, 0]]
@@ -4719,6 +4719,27 @@ let sharedRickshawArtTexture = null;
       const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 16, 0.18, 8, false), mats.darkFrameMat);
       group.add(tube);
     });
+
+    // Left and right black under-seat subframe rails connecting saddle, shock tops, and rear mudguard
+    [-0.95, 0.95].forEach(sz => {
+      const subframePts = [
+        new THREE.Vector3(-1.2, 6.55, sz * 0.85),
+        new THREE.Vector3(-2.4, 6.40, sz),
+        new THREE.Vector3(-3.4, 6.30, sz * 1.05),
+        new THREE.Vector3(-4.6, 6.20, sz * 1.08), // Top shock mount node
+        new THREE.Vector3(-5.6, 6.28, sz * 1.02), // Connecting solidly to rear mudguard arch
+        new THREE.Vector3(-6.2, 6.40, sz * 0.92)
+      ];
+      const sfCurve = new THREE.CatmullRomCurve3(subframePts);
+      const sfTube = new THREE.Mesh(new THREE.TubeGeometry(sfCurve, 18, 0.15, 8, false), mats.darkFrameMat);
+      group.add(sfTube);
+    });
+
+    // Transverse frame cross-member loop bridging left and right subframe rails at the shock top mounts
+    const crossShockBridge = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 2.15, 12), mats.darkFrameMat);
+    crossShockBridge.rotation.x = Math.PI / 2;
+    crossShockBridge.position.set(-4.6, 6.20, 0);
+    group.add(crossShockBridge);
 
     // 8. Classic Rounded Teardrop Fuel Tank with Pinstripe Loop & Winged Emblem
     const bulletTankStations = [
@@ -4780,8 +4801,36 @@ let sharedRickshawArtTexture = null;
     ];
     group.add(createLoftedBodyMesh(bulletSaddleStations, 22, mats.matteBlackKneeMat));
 
-    // Dual underneath chrome coil springs supporting rear lip
+    // Solid black cross-brace / frame bracket directly underneath seat springs
+    const springCrossBrace = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 2.05, 12), mats.darkFrameMat);
+    springCrossBrace.rotation.x = Math.PI / 2;
+    springCrossBrace.position.set(-3.3, 5.60, 0);
+    group.add(springCrossBrace);
+
+    // Frame diagonal struts locking spring bracket into the frame triangle above toolbox
     [-0.60, 0.60].forEach(sz => {
+      // Strut down to toolbox top rail
+      const strutCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-3.3, 5.60, sz),
+        new THREE.Vector3(-2.4, 4.80, sz * 0.90)
+      ]);
+      group.add(new THREE.Mesh(new THREE.TubeGeometry(strutCurve, 6, 0.12, 6, false), mats.darkFrameMat));
+    });
+
+    // Center diagonal tube from spring cross-brace forward to central frame backbone
+    const centerStrutCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-3.3, 5.60, 0),
+      new THREE.Vector3(-2.2, 5.80, 0)
+    ]);
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(centerStrutCurve, 6, 0.14, 6, false), mats.darkFrameMat));
+
+    // Dual underneath chrome coil springs and solid mounting base cups
+    [-0.60, 0.60].forEach(sz => {
+      // Base cup on the cross-brace
+      const baseCup = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.12, 14), mats.darkFrameMat);
+      baseCup.position.set(-3.3, 5.62, sz);
+      group.add(baseCup);
+
       const spring = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.85, 12), mats.chromeMat);
       spring.position.set(-3.3, 6.05, sz);
       group.add(spring);
@@ -4895,7 +4944,7 @@ let sharedRickshawArtTexture = null;
     peaTip.position.set(-9.35, 2.4, 0.95);
     group.add(peaTip);
 
-    // 13. Angled Rear Shocks & Swingarm
+    // 13. Angled Rear Shocks & Swingarm (Locked directly into subframe rails with bolted eye bosses)
     [-1.05, 1.05].forEach(sz => {
       const swingArm = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.70, 0.38), mats.darkFrameMat);
       swingArm.position.set(-4.5, 3.6, sz);
@@ -4904,11 +4953,20 @@ let sharedRickshawArtTexture = null;
     });
 
     [-1.15, 1.15].forEach(sz => {
+      const botX = -7.8;
+      const botY = wheelY + 0.2;
+      const botZ = sz;
+      const topX = -4.6;
+      const topY = 6.20;
+      const topZ = sz * 0.90;
+
       const shockCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-7.8, wheelY + 0.2, sz),
-        new THREE.Vector3(-4.6, 6.2, sz * 0.90)
+        new THREE.Vector3(botX, botY, botZ),
+        new THREE.Vector3(topX, topY, topZ)
       ]);
       group.add(new THREE.Mesh(new THREE.TubeGeometry(shockCurve, 12, 0.16, 8, false), mats.chromeMat));
+
+      // 5 chrome coil spring rings around shock body
       for (let i = 0; i < 5; i++) {
         const t = 0.25 + (i / 4) * 0.50;
         const pt = shockCurve.getPoint(t);
@@ -4917,6 +4975,34 @@ let sharedRickshawArtTexture = null;
         coilRing.rotation.y = Math.PI / 2;
         group.add(coilRing);
       }
+
+      // Top mounting eye boss (bolted directly into extended subframe rail)
+      const topEye = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.38, 16), mats.darkFrameMat);
+      topEye.rotation.x = Math.PI / 2;
+      topEye.position.set(topX, topY, topZ);
+      group.add(topEye);
+
+      const topBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.46, 12), mats.chromeMat);
+      topBolt.rotation.x = Math.PI / 2;
+      topBolt.position.set(topX, topY, topZ);
+      group.add(topBolt);
+
+      // Top shock collar sleeve
+      const topCollar = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.35, 14), mats.chromeMat);
+      topCollar.rotation.z = Math.atan2(topY - botY, topX - botX) - Math.PI / 2;
+      topCollar.position.set(topX - 0.20, topY - 0.25, topZ);
+      group.add(topCollar);
+
+      // Bottom mounting eye boss (bolted to swingarm / axle hub)
+      const botEye = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.36, 16), mats.darkFrameMat);
+      botEye.rotation.x = Math.PI / 2;
+      botEye.position.set(botX, botY, botZ);
+      group.add(botEye);
+
+      const botBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.44, 12), mats.chromeMat);
+      botBolt.rotation.x = Math.PI / 2;
+      botBolt.position.set(botX, botY, botZ);
+      group.add(botBolt);
     });
 
     // 14. Mid-mount Footpegs & Seated Biker (Flush on saddle, upright standard posture)
@@ -5231,13 +5317,52 @@ let sharedRickshawArtTexture = null;
       group.add(strut);
     });
 
-    // Angled chrome coil-over shocks
+    // Angled chrome coil-over shocks with bolted mounting eye bosses
     [-1.22, 1.22].forEach(sz => {
+      const botX = -7.6;
+      const botY = 3.20;
+      const botZ = sz;
+      const topX = -4.5;
+      const topY = 5.60;
+      const topZ = sz * 0.92;
+
       const shockCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-7.6, 3.2, sz),
-        new THREE.Vector3(-4.5, 5.6, sz * 0.92)
+        new THREE.Vector3(botX, botY, botZ),
+        new THREE.Vector3(topX, topY, topZ)
       ]);
       group.add(new THREE.Mesh(new THREE.TubeGeometry(shockCurve, 12, 0.16, 8, false), mats.chromeMat));
+
+      // Chrome coil rings
+      for (let i = 0; i < 5; i++) {
+        const t = 0.25 + (i / 4) * 0.50;
+        const pt = shockCurve.getPoint(t);
+        const coilRing = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.04, 8, 14), mats.chromeMat);
+        coilRing.position.copy(pt);
+        coilRing.rotation.y = Math.PI / 2;
+        group.add(coilRing);
+      }
+
+      // Top mounting eye boss & bolt into frame strut
+      const topEye = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.38, 16), mats.darkFrameMat);
+      topEye.rotation.x = Math.PI / 2;
+      topEye.position.set(topX, topY, topZ);
+      group.add(topEye);
+
+      const topBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.46, 12), mats.chromeMat);
+      topBolt.rotation.x = Math.PI / 2;
+      topBolt.position.set(topX, topY, topZ);
+      group.add(topBolt);
+
+      // Bottom mounting eye boss & bolt on swingarm
+      const botEye = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.36, 16), mats.darkFrameMat);
+      botEye.rotation.x = Math.PI / 2;
+      botEye.position.set(botX, botY, botZ);
+      group.add(botEye);
+
+      const botBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.44, 12), mats.chromeMat);
+      botBolt.rotation.x = Math.PI / 2;
+      botBolt.position.set(botX, botY, botZ);
+      group.add(botBolt);
     });
 
     // Chrome Tombstone Taillight on rear fender tip
