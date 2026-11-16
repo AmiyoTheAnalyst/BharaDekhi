@@ -1048,6 +1048,8 @@
       roughness: config.roughness !== undefined ? config.roughness : 0.16
     });
     const darkChassisMat = new THREE.MeshStandardMaterial({ color: 0x0c0f14, roughness: 0.75, metalness: 0.5 });
+    const darkTrimMat = darkChassisMat;
+    const blackTrimMat = darkChassisMat;
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.96, roughness: 0.10 });
     const darkMeshMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.88, metalness: 0.3 });
     const darkGlassMat = new THREE.MeshStandardMaterial({
@@ -1057,6 +1059,7 @@
       transparent: true,
       opacity: 0.75
     });
+    const glassMat = darkGlassMat;
     const mirrorFaceMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       metalness: 0.95,
@@ -1487,6 +1490,8 @@
       roughness: config.roughness !== undefined ? config.roughness : 0.28
     });
     const darkTrimMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.60 });
+    const blackTrimMat = darkTrimMat;
+    const darkChassisMat = darkTrimMat;
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.15 });
     const darkMeshMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.85, metalness: 0.3 });
     const darkGlassMat = new THREE.MeshStandardMaterial({
@@ -1496,6 +1501,7 @@
       transparent: true,
       opacity: 0.75
     });
+    const glassMat = darkGlassMat;
     const mirrorFaceMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       metalness: 0.95,
@@ -1720,6 +1726,8 @@
       roughness: config.contrastRoof ? 0.25 : (config.roughness || 0.30)
     });
     const blackTrimMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.40, metalness: 0.50 });
+    const darkTrimMat = blackTrimMat;
+    const darkChassisMat = blackTrimMat;
     const silverMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.80, roughness: 0.25 });
     const darkMeshMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.85, metalness: 0.3 });
     const darkGlassMat = new THREE.MeshStandardMaterial({
@@ -1729,6 +1737,7 @@
       transparent: true,
       opacity: 0.75
     });
+    const glassMat = darkGlassMat;
     const mirrorFaceMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       metalness: 0.95,
@@ -1847,7 +1856,7 @@
     gSurround.position.set(0.08, 0, 0);
     grilleAperture.add(gSurround);
 
-    const gMeshFace = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.16, 1.16), darkTrimMat);
+    const gMeshFace = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.16, 1.16), blackTrimMat);
     gMeshFace.position.set(0.085, 0, 0);
     grilleAperture.add(gMeshFace);
 
@@ -1929,6 +1938,8 @@
     });
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.90, roughness: 0.15 });
     const blackTrimMat = new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.70 });
+    const darkTrimMat = blackTrimMat;
+    const darkChassisMat = blackTrimMat;
     const darkMeshMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.85, metalness: 0.3 });
     const darkGlassMat = new THREE.MeshStandardMaterial({
       color: 0x0f172a,
@@ -1937,6 +1948,7 @@
       transparent: true,
       opacity: 0.75
     });
+    const glassMat = darkGlassMat;
     const mirrorFaceMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       metalness: 0.95,
