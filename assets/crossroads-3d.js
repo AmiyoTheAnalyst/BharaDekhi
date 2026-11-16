@@ -7199,35 +7199,64 @@ let sharedRickshawArtTexture = null;
     const crankGroup = new THREE.Group();
     crankGroup.position.set(bb[0], bb[1], bb[2]);
 
-    const crankAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 2.0, 10), chromeMat);
+    // Bottom bracket axle spanning through frame center between left and right crank arms
+    const crankAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.85, 12), chromeMat);
     crankAxle.rotation.x = Math.PI / 2;
+    crankAxle.position.set(0, 0, 0);
     crankGroup.add(crankAxle);
 
-    const chainring = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.08, 18), chromeMat);
+    // Task 1: Black round chainring disc centered strictly on the bicycle frame plane (Z = 0)
+    // Thin axial thickness (0.07) so outer faces sit at Z = ±0.035, cleanly between both legs!
+    const blackChainringMat = new THREE.MeshStandardMaterial({
+      color: 0x111827,
+      roughness: 0.45,
+      metalness: 0.70
+    });
+    const chainring = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.07, 24), blackChainringMat);
     chainring.rotation.x = Math.PI / 2;
-    chainring.position.z = 0.95;
+    chainring.position.set(0, 0, 0); // Strict Z = 0 frame center plane
     crankGroup.add(chainring);
 
+    // Polished central chainring hub collar on the center plane
+    const chainringHub = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.11, 16), chromeMat);
+    chainringHub.rotation.x = Math.PI / 2;
+    chainringHub.position.set(0, 0, 0);
+    crankGroup.add(chainringHub);
+
+    // Left crank arm at Z = -0.85
     const crankArmL = new THREE.Mesh(new THREE.BoxGeometry(0.22, crankR, 0.12), chromeMat);
     crankArmL.position.set(0, crankR / 2, -0.85);
     crankGroup.add(crankArmL);
 
+    // Left pedal assembly at Z = -0.85 with inward horizontal spindle pin
     const pedalLGroup = new THREE.Group();
     pedalLGroup.position.set(0, crankR, -0.85);
     const pedalLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.18, 0.45), rubberMat);
     pedalLMesh.castShadow = true;
     pedalLGroup.add(pedalLMesh);
+
+    const spindleL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.26, 8), chromeMat);
+    spindleL.rotation.x = Math.PI / 2;
+    spindleL.position.set(0, 0, 0.12);
+    pedalLGroup.add(spindleL);
     crankGroup.add(pedalLGroup);
 
+    // Right crank arm at Z = +0.85 (symmetrically outside the black disc face at Z = +0.035)
     const crankArmR = new THREE.Mesh(new THREE.BoxGeometry(0.22, crankR, 0.12), chromeMat);
     crankArmR.position.set(0, -crankR / 2, 0.85);
     crankGroup.add(crankArmR);
 
+    // Right pedal assembly at Z = +0.85 with inward horizontal spindle pin
     const pedalRGroup = new THREE.Group();
     pedalRGroup.position.set(0, -crankR, 0.85);
     const pedalRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.18, 0.45), rubberMat);
     pedalRMesh.castShadow = true;
     pedalRGroup.add(pedalRMesh);
+
+    const spindleR = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.26, 8), chromeMat);
+    spindleR.rotation.x = Math.PI / 2;
+    spindleR.position.set(0, 0, -0.12);
+    pedalRGroup.add(spindleR);
     crankGroup.add(pedalRGroup);
 
     group.add(crankGroup);
