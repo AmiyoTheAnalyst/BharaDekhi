@@ -1045,19 +1045,23 @@
     // Dedicated interior & driver materials
     const skinMat = new THREE.MeshStandardMaterial({
       color: 0xc68662, // Warm natural South Asian skin tone
-      roughness: 0.72,
+      emissive: 0x3d2218, // Warm subtle self-illumination for cabin visibility
+      emissiveIntensity: 0.35,
+      roughness: 0.65,
       metalness: 0.05
-    });
-    const jacketMat = new THREE.MeshStandardMaterial({
-      color: 0x1e293b, // Dark charcoal-navy professional jacket
-      roughness: 0.70,
-      metalness: 0.15
     });
     const hairMat = new THREE.MeshStandardMaterial({
       color: 0x111317, // Dark natural hair
       roughness: 0.90,
       metalness: 0.10
     });
+    // Emissive / Basic materials for high visibility through tinted glass
+    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
+    const eyebrowMat = new THREE.MeshBasicMaterial({ color: 0x111317 });
+    const beardMat = new THREE.MeshBasicMaterial({ color: 0x111317 });
+    const lipMat = new THREE.MeshBasicMaterial({ color: 0x9e4747 }); // Natural dark-pink / brown lip line
+
     const seatMat = new THREE.MeshStandardMaterial({
       color: 0x18181b, // Dark leather sports/luxury seat
       roughness: 0.65,
@@ -1124,6 +1128,20 @@
 
     const { driverZ, seatX, seatY, backrestX, backrestY, headrestX, headrestY, dashX, dashY, dashW, wheelX, wheelY, wheelR, wheelTilt, torsoX, torsoY, headX, headY } = cfg;
 
+    // -----------------------------------------------------------
+    // 0. Soft Warm Cabin Point Light & Dome Fixture (Illuminates Driver)
+    // -----------------------------------------------------------
+    const cabinLight = new THREE.PointLight(0xffedd5, 0.85, 2.2);
+    cabinLight.position.set(headX + 0.10, headY + 0.18, driverZ * 0.65);
+    driverGroup.add(cabinLight);
+
+    const domeFixture = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.028, 0.028, 0.010, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffedd5 })
+    );
+    domeFixture.position.set(headX + 0.10, headY + 0.19, driverZ * 0.65);
+    driverGroup.add(domeFixture);
+
     // 1. Interior Bucket Seats (Driver & Passenger)
     [driverZ, -driverZ].forEach(sz => {
       // Cushion
@@ -1179,14 +1197,119 @@
     horn.position.set(wheelX, wheelY, driverZ);
     driverGroup.add(horn);
 
-    // 3. Seated Human Driver
-    // Torso (Dark professional jacket)
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.34, 0.28), jacketMat);
+    // 3. Distinct Driver Outfits & Colorways per Car Model
+    let outfitMat, collarMat, shirtMat, tieMat, accentMat;
+
+    if (carType === 'mercedes_amg') {
+      // Executive dark navy suit with crisp white collar and crimson necktie
+      outfitMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b, // Charcoal navy suit
+        emissive: 0x0a101d,
+        emissiveIntensity: 0.30,
+        roughness: 0.65,
+        metalness: 0.15
+      });
+      collarMat = outfitMat;
+      shirtMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc, // Crisp white dress shirt
+        emissive: 0x64748b,
+        emissiveIntensity: 0.35,
+        roughness: 0.50,
+        metalness: 0.05
+      });
+      tieMat = new THREE.MeshStandardMaterial({
+        color: 0xb91c1c, // Crimson red executive necktie
+        emissive: 0x500707,
+        emissiveIntensity: 0.40,
+        roughness: 0.35,
+        metalness: 0.20
+      });
+      accentMat = silverTrimMat;
+    } else if (carType === 'honda_sedan') {
+      // Casual-smart polo shirt: vibrant royal blue polo
+      outfitMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7, // Royal blue polo
+        emissive: 0x02456e,
+        emissiveIntensity: 0.35,
+        roughness: 0.75,
+        metalness: 0.05
+      });
+      collarMat = new THREE.MeshStandardMaterial({
+        color: 0x0369a1, // Deep cobalt blue collar trim
+        emissive: 0x01324f,
+        emissiveIntensity: 0.30,
+        roughness: 0.70,
+        metalness: 0.05
+      });
+      shirtMat = collarMat;
+      tieMat = null;
+      accentMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc }); // White buttons
+    } else if (carType === 'range_rover') {
+      // Premium chauffeur / sharp luxury blazer: jet black with gold lapel accents
+      outfitMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a, // Jet black luxury blazer
+        emissive: 0x080c14,
+        emissiveIntensity: 0.30,
+        roughness: 0.55,
+        metalness: 0.20
+      });
+      collarMat = outfitMat;
+      shirtMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc, // Crisp white dress shirt
+        emissive: 0x64748b,
+        emissiveIntensity: 0.35,
+        roughness: 0.50,
+        metalness: 0.05
+      });
+      tieMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a, // Formal black tie
+        emissive: 0x080c14,
+        emissiveIntensity: 0.25,
+        roughness: 0.40,
+        metalness: 0.20
+      });
+      accentMat = new THREE.MeshStandardMaterial({
+        color: 0xd97706, // Gold lapel accents & tie bar
+        emissive: 0x78350f,
+        emissiveIntensity: 0.45,
+        roughness: 0.25,
+        metalness: 0.85
+      });
+    } else {
+      // land_cruiser: Safari / rugged utility button-down shirt: earthy khaki/brown
+      outfitMat = new THREE.MeshStandardMaterial({
+        color: 0x78350f, // Warm earthy safari brown
+        emissive: 0x3d1704,
+        emissiveIntensity: 0.35,
+        roughness: 0.80,
+        metalness: 0.05
+      });
+      collarMat = new THREE.MeshStandardMaterial({
+        color: 0x5c2b09, // Darker leather/canvas brown collar
+        emissive: 0x2e1202,
+        emissiveIntensity: 0.30,
+        roughness: 0.80,
+        metalness: 0.05
+      });
+      shirtMat = collarMat;
+      tieMat = null;
+      accentMat = new THREE.MeshStandardMaterial({
+        color: 0xb45309, // Amber utility buttons
+        emissive: 0x542604,
+        emissiveIntensity: 0.35,
+        roughness: 0.40,
+        metalness: 0.20
+      });
+    }
+
+    // 4. Seated Human Driver
+    // Torso (Tailored jacket / shirt)
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.34, 0.28), outfitMat);
     torso.position.set(torsoX, torsoY, driverZ);
     driverGroup.add(torso);
 
-    // Jacket Collar
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.018, 6, 12), jacketMat);
+    // Collar
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.018, 6, 12), collarMat);
     collar.rotation.x = Math.PI / 2;
     collar.position.set(torsoX + 0.02, torsoY + 0.17, driverZ);
     driverGroup.add(collar);
@@ -1196,6 +1319,104 @@
     neck.position.set(torsoX + 0.03, torsoY + 0.19, driverZ);
     driverGroup.add(neck);
 
+    // Outfit Accessories & Front Detailing
+    if (carType === 'mercedes_amg') {
+      // Crisp white shirt chest piece
+      const shirtInlay = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.16, 0.08), shirtMat);
+      shirtInlay.position.set(torsoX + 0.111, torsoY + 0.07, driverZ);
+      driverGroup.add(shirtInlay);
+
+      // Crimson necktie
+      const tieKnot = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.022, 0.024), tieMat);
+      tieKnot.position.set(torsoX + 0.118, torsoY + 0.135, driverZ);
+      driverGroup.add(tieKnot);
+
+      const tieBody = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.12, 0.022), tieMat);
+      tieBody.position.set(torsoX + 0.116, torsoY + 0.065, driverZ);
+      driverGroup.add(tieBody);
+
+      // Silver tie clip
+      const tieClip = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.005, 0.026), accentMat);
+      tieClip.position.set(torsoX + 0.119, torsoY + 0.080, driverZ);
+      driverGroup.add(tieClip);
+
+      // Suit lapels
+      const lLapel = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.16, 0.038), outfitMat);
+      lLapel.position.set(torsoX + 0.114, torsoY + 0.07, driverZ + 0.052);
+      driverGroup.add(lLapel);
+
+      const rLapel = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.16, 0.038), outfitMat);
+      rLapel.position.set(torsoX + 0.114, torsoY + 0.07, driverZ - 0.052);
+      driverGroup.add(rLapel);
+    } else if (carType === 'honda_sedan') {
+      // Casual polo placket & collarbone opening
+      const placket = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.13, 0.032), shirtMat);
+      placket.position.set(torsoX + 0.111, torsoY + 0.08, driverZ);
+      driverGroup.add(placket);
+
+      [0.11, 0.07].forEach(yOff => {
+        const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.006, 6), accentMat);
+        btn.rotation.z = Math.PI / 2;
+        btn.position.set(torsoX + 0.118, torsoY + yOff, driverZ);
+        driverGroup.add(btn);
+      });
+
+      const vSkin = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.04, 0.04), skinMat);
+      vSkin.position.set(torsoX + 0.110, torsoY + 0.145, driverZ);
+      driverGroup.add(vSkin);
+    } else if (carType === 'range_rover') {
+      // Formal white shirt inlay
+      const shirtInlay = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.16, 0.08), shirtMat);
+      shirtInlay.position.set(torsoX + 0.111, torsoY + 0.07, driverZ);
+      driverGroup.add(shirtInlay);
+
+      // Black formal tie
+      const tieKnot = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.022, 0.024), tieMat);
+      tieKnot.position.set(torsoX + 0.118, torsoY + 0.135, driverZ);
+      driverGroup.add(tieKnot);
+
+      const tieBody = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.12, 0.022), tieMat);
+      tieBody.position.set(torsoX + 0.116, torsoY + 0.065, driverZ);
+      driverGroup.add(tieBody);
+
+      // Gold lapel accent piping
+      const lGold = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.13, 0.008), accentMat);
+      lGold.position.set(torsoX + 0.117, torsoY + 0.08, driverZ + 0.042);
+      driverGroup.add(lGold);
+
+      const rGold = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.13, 0.008), accentMat);
+      rGold.position.set(torsoX + 0.117, torsoY + 0.08, driverZ - 0.042);
+      driverGroup.add(rGold);
+
+      // Gold lapel pin / crest
+      const goldPin = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.006, 8), accentMat);
+      goldPin.rotation.z = Math.PI / 2;
+      goldPin.position.set(torsoX + 0.118, torsoY + 0.12, driverZ + 0.068);
+      driverGroup.add(goldPin);
+    } else {
+      // Land Cruiser Safari button placket
+      const placket = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.14, 0.034), shirtMat);
+      placket.position.set(torsoX + 0.111, torsoY + 0.08, driverZ);
+      driverGroup.add(placket);
+
+      [0.12, 0.08, 0.04].forEach(yOff => {
+        const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.006, 6), accentMat);
+        btn.rotation.z = Math.PI / 2;
+        btn.position.set(torsoX + 0.118, torsoY + yOff, driverZ);
+        driverGroup.add(btn);
+      });
+
+      // Dual chest utility pocket flaps
+      const lPocket = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.024, 0.055), shirtMat);
+      lPocket.position.set(torsoX + 0.113, torsoY + 0.07, driverZ + 0.072);
+      driverGroup.add(lPocket);
+
+      const rPocket = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.024, 0.055), shirtMat);
+      rPocket.position.set(torsoX + 0.113, torsoY + 0.07, driverZ - 0.072);
+      driverGroup.add(rPocket);
+    }
+
+    // 5. Head & Procedural Facial Features
     // Rounded Head
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.090, 14, 12), skinMat);
     head.position.set(headX, headY, driverZ);
@@ -1209,15 +1430,127 @@
     hair.position.set(headX - 0.005, headY + 0.01, driverZ);
     driverGroup.add(hair);
 
-    // 4. Arms & Hands Gripping Steering Wheel (10 and 2 o'clock)
+    // Hair Style Detail for Honda Civic Driver (Textured Fringe)
+    if (carType === 'honda_sedan') {
+      const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.025, 0.080), hairMat);
+      fringe.position.set(headX + 0.055, headY + 0.060, driverZ);
+      fringe.rotation.z = -0.30;
+      driverGroup.add(fringe);
+    }
+
+    // High-Visibility Eyes & Eyebrows using MeshBasicMaterial
+    [0.030, -0.030].forEach(zOffset => {
+      // White sclera sphere (clearly visible in dark cabins)
+      const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), eyeWhiteMat);
+      eyeWhite.position.set(headX + 0.078, headY + 0.016, driverZ + zOffset);
+      driverGroup.add(eyeWhite);
+
+      // Dark pupil on the anterior eye surface
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.0075, 8, 8), eyePupilMat);
+      pupil.position.set(headX + 0.089, headY + 0.016, driverZ + zOffset);
+      driverGroup.add(pupil);
+
+      // Eyebrow bar
+      const eyebrow = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.009, 0.028), eyebrowMat);
+      eyebrow.position.set(headX + 0.080, headY + 0.032, driverZ + zOffset);
+      eyebrow.rotation.x = zOffset > 0 ? -0.06 : 0.06;
+      driverGroup.add(eyebrow);
+    });
+
+    // Protruding Nasal Bridge & Tip
+    const noseBridge = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.008, 0.018, 0.036, 5),
+      skinMat
+    );
+    noseBridge.rotation.z = -0.22;
+    noseBridge.position.set(headX + 0.089, headY - 0.005, driverZ);
+    driverGroup.add(noseBridge);
+
+    const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), skinMat);
+    noseTip.position.set(headX + 0.095, headY - 0.016, driverZ);
+    driverGroup.add(noseTip);
+
+    // Dark-Pink / Brown Lip Line
+    const lips = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.007, 0.026), lipMat);
+    lips.position.set(headX + 0.086, headY - 0.028, driverZ);
+    driverGroup.add(lips);
+
+    // Ears (Left & Right)
+    [0.089, -0.089].forEach(zOffset => {
+      const ear = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.014, 0.008, 8), skinMat);
+      ear.rotation.x = Math.PI / 2;
+      ear.position.set(headX - 0.010, headY - 0.002, driverZ + zOffset);
+      driverGroup.add(ear);
+    });
+
+    // Distinct Facial Hair / Grooming Styles per Car Model
+    if (carType === 'mercedes_amg') {
+      // Executive trimmed mustache + goatee
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.008, 0.034), beardMat);
+      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
+      driverGroup.add(mustache);
+
+      const goatee = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.018, 0.028), beardMat);
+      goatee.position.set(headX + 0.072, headY - 0.052, driverZ);
+      driverGroup.add(goatee);
+    } else if (carType === 'honda_sedan') {
+      // Modern smart mustache & light chin shadow
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.007, 0.030), beardMat);
+      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
+      driverGroup.add(mustache);
+
+      const chinStubble = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.014, 0.024), beardMat);
+      chinStubble.position.set(headX + 0.072, headY - 0.050, driverZ);
+      driverGroup.add(chinStubble);
+    } else if (carType === 'range_rover') {
+      // Sharp manicured executive mustache & jawline beard
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.010, 0.036), beardMat);
+      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
+      driverGroup.add(mustache);
+
+      const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.024, 0.038), beardMat);
+      chinBeard.position.set(headX + 0.070, headY - 0.052, driverZ);
+      driverGroup.add(chinBeard);
+
+      const jawLeft = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.016, 0.012), beardMat);
+      jawLeft.position.set(headX + 0.030, headY - 0.046, driverZ + 0.055);
+      jawLeft.rotation.y = -0.45;
+      driverGroup.add(jawLeft);
+
+      const jawRight = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.016, 0.012), beardMat);
+      jawRight.position.set(headX + 0.030, headY - 0.046, driverZ - 0.055);
+      jawRight.rotation.y = 0.45;
+      driverGroup.add(jawRight);
+    } else {
+      // Rugged full safari beard & mustache for Land Cruiser
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.012, 0.040), beardMat);
+      mustache.position.set(headX + 0.089, headY - 0.018, driverZ);
+      driverGroup.add(mustache);
+
+      const chinBeard = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.028, 0.045), beardMat);
+      chinBeard.position.set(headX + 0.070, headY - 0.054, driverZ);
+      driverGroup.add(chinBeard);
+
+      const jawLeft = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.020, 0.015), beardMat);
+      jawLeft.position.set(headX + 0.028, headY - 0.046, driverZ + 0.055);
+      jawLeft.rotation.y = -0.45;
+      driverGroup.add(jawLeft);
+
+      const jawRight = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.020, 0.015), beardMat);
+      jawRight.position.set(headX + 0.028, headY - 0.046, driverZ - 0.055);
+      jawRight.rotation.y = 0.45;
+      driverGroup.add(jawRight);
+    }
+
+    // 6. Arms & Hands Gripping Steering Wheel (10 and 2 o'clock)
     // Left Arm (Outer side)
-    const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.18, 8), jacketMat);
+    const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.18, 8), outfitMat);
     lUpperArm.position.set(torsoX + 0.06, torsoY + 0.07, driverZ + 0.15);
     lUpperArm.rotation.x = 0.35;
     lUpperArm.rotation.z = -0.55;
     driverGroup.add(lUpperArm);
 
-    const lForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.17, 8), jacketMat);
+    const lForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.17, 8), outfitMat);
     lForeArm.position.set(wheelX - 0.07, wheelY + 0.01, driverZ + 0.11);
     lForeArm.rotation.x = -0.30;
     lForeArm.rotation.z = -1.10;
@@ -1228,13 +1561,13 @@
     driverGroup.add(lHand);
 
     // Right Arm (Inner side)
-    const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.18, 8), jacketMat);
+    const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.032, 0.18, 8), outfitMat);
     rUpperArm.position.set(torsoX + 0.06, torsoY + 0.07, driverZ - 0.15);
     rUpperArm.rotation.x = -0.35;
     rUpperArm.rotation.z = -0.55;
     driverGroup.add(rUpperArm);
 
-    const rForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.17, 8), jacketMat);
+    const rForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.025, 0.17, 8), outfitMat);
     rForeArm.position.set(wheelX - 0.07, wheelY + 0.01, driverZ - 0.11);
     rForeArm.rotation.x = 0.30;
     rForeArm.rotation.z = -1.10;
