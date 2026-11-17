@@ -3539,6 +3539,260 @@
   }
 
   // ===========================================================================
+  // Dedicated Procedural Seated Female Bus Passenger Builder
+  // (Authentic Dhaka Attire: Salwar Kameez, Saree, Draped Dupatta, Hair Bun & Hijab)
+  // ===========================================================================
+  function buildFemaleBusPassenger(fDataOrColor, dupattaColor, headwearStyle, hijabColor) {
+    let fData = {};
+    if (typeof fDataOrColor === 'object' && fDataOrColor !== null) {
+      fData = Object.assign({}, fDataOrColor);
+    } else {
+      fData = {
+        outfitColor: fDataOrColor || 0xdb2777,
+        dupattaColor: dupattaColor || 0xf8fafc,
+        headwearStyle: headwearStyle || 'bun',
+        hijabColor: hijabColor || null
+      };
+    }
+
+    const skinColor = fData.skinColor || 0xd69e72;
+    const skinMat = new THREE.MeshStandardMaterial({
+      color: skinColor,
+      emissive: 0x2e1810,
+      emissiveIntensity: 0.28,
+      roughness: 0.60,
+      metalness: 0.05
+    });
+
+    const outfitMat = new THREE.MeshStandardMaterial({
+      color: fData.outfitColor,
+      emissive: fData.outfitEmissive || 0x3b0764,
+      emissiveIntensity: 0.32,
+      roughness: 0.50,
+      metalness: 0.08
+    });
+
+    const dupattaColorVal = fData.dupattaColor || 0xf8fafc;
+    const dupattaMat = new THREE.MeshStandardMaterial({
+      color: dupattaColorVal,
+      emissive: fData.dupattaEmissive || 0x1f2937,
+      emissiveIntensity: 0.25,
+      roughness: 0.55
+    });
+
+    const hairMat = new THREE.MeshStandardMaterial({
+      color: fData.hairColor || 0x111317,
+      roughness: 0.90,
+      metalness: 0.10
+    });
+
+    const lipColorVal = fData.lipColor || 0xbe185d;
+    const lipMat = new THREE.MeshBasicMaterial({ color: lipColorVal });
+    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
+    const eyebrowMat = new THREE.MeshBasicMaterial({ color: 0x1f2937 });
+
+    const femaleGroup = new THREE.Group();
+
+    // 1. Contoured Upper Torso & Shoulders
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(1.20, 1.05, 3.2, 14), outfitMat);
+    torso.scale.set(0.82, 1.0, 1.12);
+    torso.position.set(0, 1.8, 0);
+    femaleGroup.add(torso);
+
+    const yoke = new THREE.Mesh(new THREE.SphereGeometry(1.28, 14, 10), outfitMat);
+    yoke.scale.set(0.78, 0.42, 1.15);
+    yoke.position.set(0, 3.2, 0);
+    femaleGroup.add(yoke);
+
+    // Neck
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.40, 0.75, 10), skinMat);
+    neck.position.set(0.1, 3.85, 0);
+    femaleGroup.add(neck);
+
+    // Draped Dupatta / Orna Sash across Shoulder and Chest
+    const dupattaLoop = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.22, 8, 16), dupattaMat);
+    dupattaLoop.rotation.x = Math.PI / 2;
+    dupattaLoop.position.set(0.08, 3.65, 0);
+    femaleGroup.add(dupattaLoop);
+
+    const dupattaSash = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.5, 0.95), dupattaMat);
+    dupattaSash.position.set(0.48, 2.4, 0.55);
+    femaleGroup.add(dupattaSash);
+
+    // Saree Pallu or Back Drape
+    const dupattaBack = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.2, 0.70), dupattaMat);
+    dupattaBack.position.set(-0.45, 2.2, 0.65);
+    femaleGroup.add(dupattaBack);
+
+    // Salwar / Saree Seated Thighs
+    [-1, 1].forEach(side => {
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.45, 2.6, 10), outfitMat);
+      thigh.rotation.z = Math.PI / 2 - 0.2;
+      thigh.position.set(1.2, 0.2, side * 0.72);
+      femaleGroup.add(thigh);
+    });
+
+    // 2. Head & Clean Female Facial Features
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0.12, 4.8, 0);
+    femaleGroup.add(headGroup);
+
+    const cranium = new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 14), skinMat);
+    cranium.scale.set(0.85, 1.05, 0.90);
+    headGroup.add(cranium);
+
+    // Eyes (Emissive basic material for clear visibility through glass)
+    [0.30, -0.30].forEach(ez => {
+      const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), eyeWhiteMat);
+      eyeWhite.position.set(0.86, 0.16, ez);
+      headGroup.add(eyeWhite);
+
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), eyePupilMat);
+      pupil.position.set(0.98, 0.16, ez);
+      headGroup.add(pupil);
+
+      // Delicate arched eyebrow
+      const eyebrow = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.07, 0.32), eyebrowMat);
+      eyebrow.position.set(0.90, 0.36, ez);
+      headGroup.add(eyebrow);
+    });
+
+    // Petite Nose
+    const noseBridge = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.16, 0.40, 6), skinMat);
+    noseBridge.rotation.z = -0.22;
+    noseBridge.position.set(0.96, -0.05, 0);
+    headGroup.add(noseBridge);
+
+    const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), skinMat);
+    noseTip.position.set(1.05, -0.16, 0);
+    headGroup.add(noseTip);
+
+    // Soft Rose / Coral Lips (NO MUSTACHE, NO BEARD)
+    const lips = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.30), lipMat);
+    lips.position.set(0.96, -0.46, 0);
+    headGroup.add(lips);
+
+    // Small Ears
+    [-1, 1].forEach(ez => {
+      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.30, 8, 6), skinMat);
+      ear.scale.set(0.35, 0.75, 0.45);
+      ear.position.set(-0.05, -0.04, ez * 1.02);
+      headGroup.add(ear);
+    });
+
+    // 3. Hair & Headwear Styles (Style A: Bun vs Style B: Hijab)
+    const style = fData.headwearStyle || 'bun';
+    if (style === 'hijab' || fData.hijabColor) {
+      // Style B: Modest Draped Hijab / Headscarf
+      const hijabTone = fData.hijabColor || 0xfef3c7;
+      const hijabMat = new THREE.MeshStandardMaterial({
+        color: hijabTone,
+        emissive: fData.outfitEmissive || 0x1e293b,
+        emissiveIntensity: 0.20,
+        roughness: 0.55
+      });
+
+      const hijabDome = new THREE.Mesh(new THREE.SphereGeometry(1.15, 18, 14), hijabMat);
+      hijabDome.scale.set(0.90, 1.10, 0.95);
+      hijabDome.position.set(0.02, 0.04, 0);
+      headGroup.add(hijabDome);
+
+      // Undercap / forehead trim band
+      const trimBand = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.12, 8, 16), hijabMat);
+      trimBand.rotation.y = Math.PI / 2;
+      trimBand.position.set(0.35, 0.25, 0);
+      headGroup.add(trimBand);
+
+      // Draped hijab cowl covering neck and shoulders
+      const hijabCowl = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.45, 1.2, 14), hijabMat);
+      hijabCowl.position.set(0.05, 3.65, 0);
+      femaleGroup.add(hijabCowl);
+
+    } else {
+      // Style A: Traditional Dark Hair Dome with Back Hair Bun
+      const fHair = new THREE.Mesh(new THREE.SphereGeometry(1.10, 16, 14), hairMat);
+      fHair.scale.set(0.88, 1.08, 0.94);
+      fHair.position.set(-0.08, 0.08, 0);
+      headGroup.add(fHair);
+
+      // Rounded hair bun at back of head
+      const bun = new THREE.Mesh(new THREE.SphereGeometry(0.68, 14, 12), hairMat);
+      bun.scale.set(0.75, 0.95, 0.95);
+      bun.position.set(-1.08, 0.05, 0);
+      headGroup.add(bun);
+
+      // Decorative gold hair pin ring around bun
+      const hairPin = new THREE.Mesh(
+        new THREE.TorusGeometry(0.48, 0.07, 6, 14),
+        new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.35, metalness: 0.70 })
+      );
+      hairPin.rotation.y = Math.PI / 2;
+      hairPin.position.set(-0.95, 0.05, 0);
+      headGroup.add(hairPin);
+    }
+
+    // 4. Deltoid Shoulders, Articulated Arms Resting on Lap
+    [-1, 1].forEach(side => {
+      const shoulderPt = [0.08, 3.2, side * 1.42];
+      const elbowPt = [1.05, 1.8, side * 1.32];
+      const handPt = [1.60, 0.8, side * 0.50];
+
+      // Shoulder Cap
+      const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.46, 12, 8), outfitMat);
+      shoulder.position.set(...shoulderPt);
+      femaleGroup.add(shoulder);
+
+      // Upper Arm
+      const v1 = new THREE.Vector3(...shoulderPt);
+      const v2 = new THREE.Vector3(...elbowPt);
+      const armLen1 = v1.distanceTo(v2);
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.38, armLen1, 8), outfitMat);
+      upperArm.position.copy(v1.clone().add(v2).multiplyScalar(0.5));
+      upperArm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v2.clone().sub(v1).normalize());
+      femaleGroup.add(upperArm);
+
+      // Elbow Sphere
+      const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.30, 10, 8), outfitMat);
+      elbow.position.set(...elbowPt);
+      femaleGroup.add(elbow);
+
+      // Forearm
+      const v3 = new THREE.Vector3(...handPt);
+      const armLen2 = v2.distanceTo(v3);
+      const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, armLen2, 8), outfitMat);
+      forearm.position.copy(v2.clone().add(v3).multiplyScalar(0.5));
+      forearm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v3.clone().sub(v2).normalize());
+      femaleGroup.add(forearm);
+
+      // Hand
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 6), skinMat);
+      hand.position.set(...handPt);
+      femaleGroup.add(hand);
+    });
+
+    // 5. Chic Handbag Resting on Lap
+    const bagMat = new THREE.MeshStandardMaterial({
+      color: 0x78350f, // Warm leather handbag
+      roughness: 0.65,
+      metalness: 0.15
+    });
+    const bag = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.4, 1.8), bagMat);
+    bag.position.set(1.5, 0.9, 0);
+    femaleGroup.add(bag);
+
+    const bagBuckle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.35, 0.45),
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.25 })
+    );
+    bagBuckle.position.set(1.96, 0.9, 0);
+    femaleGroup.add(bagBuckle);
+
+    return femaleGroup;
+  }
+  window.buildFemaleBusPassenger = buildFemaleBusPassenger;
+
+  // ===========================================================================
   // Smooth Anatomical Bus Passenger Builder (12 Distinct Colorful Outfits)
   // Supports buildBusPassenger(outfitColor, hasBeard, isFemale) and buildBusPassenger(pData)
   // ===========================================================================
@@ -3552,6 +3806,10 @@
         hasBeard: !!hasBeard,
         isFemale: !!isFemale
       };
+    }
+
+    if (pData.isFemale) {
+      return buildFemaleBusPassenger(pData);
     }
 
     if (pData.hasMustache === undefined) {
@@ -4294,20 +4552,84 @@
 
     const passengersData = [
       // Left side window seats (Driver side, Z = 6.8):
-      { outfitColor: 0xdc2626, outfitEmissive: 0x450a0a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }, // 1: Crimson Red Panjabi/Shirt
-      { outfitColor: 0xeab308, outfitEmissive: 0x713f12, skinColor: 0xd69e72, isFemale: true, dupattaColor: 0xffffff }, // 2: Mustard Yellow Salwar Kameez with white dupatta
-      { outfitColor: 0x059669, outfitEmissive: 0x064e3b, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false }, // 3: Emerald Green Shirt
-      { outfitColor: 0x2563eb, outfitEmissive: 0x1e3a8a, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false }, // 4: Royal Blue Polo/Shirt
-      { outfitColor: 0xdb2777, outfitEmissive: 0x831843, skinColor: 0xd69e72, isFemale: true, dupattaColor: 0xf472b6 }, // 5: Bright Magenta / Pink Kameez
-      { outfitColor: 0x0d9488, outfitEmissive: 0x134e4a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }, // 6: Turquoise / Teal Kurta
+      // 1: Female Passenger 1 (Front Window Seat - Dedicated Women's Section behind driver)
+      {
+        name: 'Female Passenger 1 (Bright Magenta / Rani Pink Salwar Kameez & White Dupatta)',
+        outfitColor: 0xdb2777,
+        outfitEmissive: 0x831843,
+        dupattaColor: 0xf8fafc,
+        dupattaEmissive: 0x334155,
+        headwearStyle: 'bun',
+        skinColor: 0xd69e72,
+        lipColor: 0xbe185d,
+        isFemale: true
+      },
+      // 2: Female Passenger 2 (Second Row Window Seat - Dedicated Women's Section)
+      {
+        name: 'Female Passenger 2 (Mustard Yellow Saree, Maroon Pallu & Cream-White Hijab)',
+        outfitColor: 0xeab308,
+        outfitEmissive: 0x713f12,
+        dupattaColor: 0x881337,
+        dupattaEmissive: 0x4c0519,
+        hijabColor: 0xfef3c7,
+        headwearStyle: 'hijab',
+        skinColor: 0xe0ac84,
+        lipColor: 0xe11d48,
+        isFemale: true
+      },
+      // 3: Female Passenger 3 (Middle Window Seat)
+      {
+        name: 'Female Passenger 3 (Emerald / Teal Green Kameez & Peach Coral Dupatta)',
+        outfitColor: 0x0d9488,
+        outfitEmissive: 0x134e4a,
+        dupattaColor: 0xfda4af,
+        dupattaEmissive: 0x9f1239,
+        headwearStyle: 'bun',
+        skinColor: 0xd69e72,
+        lipColor: 0xbe185d,
+        isFemale: true
+      },
+      // 4: Male Passenger (Royal Blue Polo)
+      { outfitColor: 0x2563eb, outfitEmissive: 0x1e3a8a, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false },
+      // 5: Male Passenger (Emerald Green Shirt with Beard)
+      { outfitColor: 0x059669, outfitEmissive: 0x064e3b, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false },
+      // 6: Male Passenger (Turquoise / Teal Kurta)
+      { outfitColor: 0x0d9488, outfitEmissive: 0x134e4a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false },
 
       // Right side window seats (Curbside, Z = -6.8):
-      { outfitColor: 0xea580c, outfitEmissive: 0x7c2d12, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false }, // 7: Vibrant Orange Shirt
-      { outfitColor: 0x7c3aed, outfitEmissive: 0x4c1d95, skinColor: 0xd69e72, isFemale: true, dupattaColor: 0xc084fc }, // 8: Rich Purple Kameez
-      { outfitColor: 0xf8fafc, outfitEmissive: 0x334155, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false, hasCap: true }, // 9: Crisp White Panjabi & Topi
-      { outfitColor: 0x0284c7, outfitEmissive: 0x0c4a6e, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false }, // 10: Sky Blue Formal Shirt
-      { outfitColor: 0x65a30d, outfitEmissive: 0x365314, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }, // 11: Lime / Olive Green Shirt
-      { outfitColor: 0x991b1b, outfitEmissive: 0x450a0a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false } // 12: Maroon / Burgundy Shirt
+      // 7: Female Passenger 4 (Opposite Side Front Window Seat right behind entry door)
+      {
+        name: 'Female Passenger 4 (Royal Purple / Violet Kameez & Lavender-White Hijab)',
+        outfitColor: 0x7c3aed,
+        outfitEmissive: 0x4c1d95,
+        dupattaColor: 0xc084fc,
+        dupattaEmissive: 0x581c87,
+        hijabColor: 0xede9fe,
+        headwearStyle: 'hijab',
+        skinColor: 0xe0ac84,
+        lipColor: 0xe11d48,
+        isFemale: true
+      },
+      // 8: Male Passenger (Vibrant Orange Shirt)
+      { outfitColor: 0xea580c, outfitEmissive: 0x7c2d12, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false },
+      // 9: Male Passenger (Crisp White Panjabi & Topi)
+      { outfitColor: 0xf8fafc, outfitEmissive: 0x334155, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false, hasCap: true },
+      // 10: Male Passenger (Sky Blue Formal Shirt)
+      { outfitColor: 0x0284c7, outfitEmissive: 0x0c4a6e, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false },
+      // 11: Female Passenger 5 (Rear-Middle Window Seat)
+      {
+        name: 'Female Passenger 5 (Coral Red / Terracotta Saree & Golden-Beige Dupatta)',
+        outfitColor: 0xe11d48,
+        outfitEmissive: 0x881337,
+        dupattaColor: 0xfde68a,
+        dupattaEmissive: 0x78350f,
+        headwearStyle: 'bun',
+        skinColor: 0xd69e72,
+        lipColor: 0xbe185d,
+        isFemale: true
+      },
+      // 12: Male Passenger (Maroon / Burgundy Shirt)
+      { outfitColor: 0x991b1b, outfitEmissive: 0x450a0a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }
     ];
 
     windowXs.forEach((sx, idx) => {
@@ -4436,6 +4758,7 @@
   window.buildHasanTransitBus = buildHasanTransitBus;
   window.createHasanTransitBus = buildHasanTransitBus;
   window.buildBusPassenger = buildBusPassenger;
+  window.buildFemaleBusPassenger = buildFemaleBusPassenger;
 
   // ---------------------------------------------------------------------------
   // 2. Articulated Multi-Part Procedural Humans — ZERO Box Cylinders, ZERO GLTF
