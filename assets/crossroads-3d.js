@@ -3540,11 +3540,33 @@
 
   // ===========================================================================
   // Smooth Anatomical Bus Passenger Builder (12 Distinct Colorful Outfits)
+  // Supports buildBusPassenger(outfitColor, hasBeard, isFemale) and buildBusPassenger(pData)
   // ===========================================================================
-  function buildBusPassenger(pData) {
+  function buildBusPassenger(outfitColorOrData, hasBeard, isFemale) {
+    let pData = {};
+    if (typeof outfitColorOrData === 'object' && outfitColorOrData !== null) {
+      pData = Object.assign({}, outfitColorOrData);
+    } else {
+      pData = {
+        outfitColor: outfitColorOrData || 0xdc2626,
+        hasBeard: !!hasBeard,
+        isFemale: !!isFemale
+      };
+    }
+
+    if (pData.hasMustache === undefined) {
+      pData.hasMustache = !pData.isFemale;
+    }
+    if (pData.isFemale && !pData.dupattaColor) {
+      pData.dupattaColor = 0xffffff;
+    }
+    if (!pData.skinColor) {
+      pData.skinColor = pData.isFemale ? 0xd69e72 : 0xc68662;
+    }
+
     const passengerGroup = new THREE.Group();
 
-    const skinColor = pData.skinColor || 0xc68662;
+    const skinColor = pData.skinColor;
     const skinMat = new THREE.MeshStandardMaterial({
       color: skinColor,
       emissive: 0x2e1810,
@@ -3744,6 +3766,7 @@
 
     return passengerGroup;
   }
+  window.buildBusPassenger = buildBusPassenger;
 
   function buildHasanTransitBus(vData) {
     const group = new THREE.Group();
@@ -3783,9 +3806,10 @@
       transparent: true,
       opacity: 0.22,
       roughness: 0.08,
-      metalness: 0.10,
+      metalness: 0.1,
       depthWrite: false
     });
+    group.userData.busClearGlassMat = busClearGlassMat;
 
     const length = 76.0;
     const width = 22.0;
@@ -3889,9 +3913,14 @@
     rGlass.position.set(-37.85, 15.0, 0);
     group.add(rGlass);
 
-    const rGlassFrame = new THREE.Mesh(new THREE.BoxGeometry(0.35, 5.6, 17.2), blackTrimMat);
-    rGlassFrame.position.set(-37.85, 15.0, 0);
-    group.add(rGlassFrame);
+    // Slender Top Header & Bottom Sill Bars for Rear Window (Completely Open Cutout)
+    const rGlassTop = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 17.2), blackTrimMat);
+    rGlassTop.position.set(-37.85, 17.6, 0);
+    group.add(rGlassTop);
+
+    const rGlassSill = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 17.2), blackTrimMat);
+    rGlassSill.position.set(-37.85, 12.4, 0);
+    group.add(rGlassSill);
 
     // Main Red Roof Cap
     const roof = new THREE.Mesh(new THREE.BoxGeometry(length - 0.4, 1.4, width), redMat);
@@ -4139,75 +4168,111 @@
     }
 
     const windowXs = [18.5, 9.5, 0.5, -8.5, -17.5, -26.5];
+    const windowPillarXs = [22.8, 14.0, 5.0, -4.0, -13.0, -22.0, -30.6];
 
-    // Right side (Curbside: 6 windows + Front Bi-Fold Passenger Door)
+    // Right side (Curbside: 6 windows + Slender Window Mullions + Front Bi-Fold Passenger Door)
     windowXs.forEach(wx => {
-      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.25), busClearGlassMat);
+      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.15), busClearGlassMat);
       wPane.position.set(wx, 15.0, -10.8);
       group.add(wPane);
 
-      const wFrame = new THREE.Mesh(new THREE.BoxGeometry(8.2, 6.8, 0.35), blackTrimMat);
-      wFrame.position.set(wx, 15.0, -10.8);
-      group.add(wFrame);
-
-      const transom = new THREE.Mesh(new THREE.BoxGeometry(8.0, 0.18, 0.40), blackTrimMat);
+      const transom = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.16, 0.25), blackTrimMat);
       transom.position.set(wx, 16.6, -10.8);
       group.add(transom);
     });
 
-    // Front Bi-Fold Glass Passenger Entry Door (Curbside)
+    windowPillarXs.forEach(px => {
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.7, 6.4, 0.35), blackTrimMat);
+      pillar.position.set(px, 15.0, -10.8);
+      group.add(pillar);
+    });
+
+    const rSillRail = new THREE.Mesh(new THREE.BoxGeometry(54.0, 0.25, 0.35), blackTrimMat);
+    rSillRail.position.set(1.0, 11.7, -10.8);
+    group.add(rSillRail);
+
+    const rTopRail = new THREE.Mesh(new THREE.BoxGeometry(54.0, 0.25, 0.35), blackTrimMat);
+    rTopRail.position.set(1.0, 18.3, -10.8);
+    group.add(rTopRail);
+
+    // Front Bi-Fold Glass Passenger Entry Door (Curbside — Open Doorway with Clear Glass Leaves)
     const doorGroup = new THREE.Group();
     doorGroup.position.set(31.5, 11.0, -10.85);
 
-    const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(6.4, 14.8, 0.35), blackTrimMat);
-    doorGroup.add(doorFrame);
+    [-3.1, 3.1].forEach(dx => {
+      const doorPost = new THREE.Mesh(new THREE.BoxGeometry(0.35, 14.8, 0.35), blackTrimMat);
+      doorPost.position.set(dx, 0, 0);
+      doorGroup.add(doorPost);
+    });
+    const doorTop = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.35, 0.35), blackTrimMat);
+    doorTop.position.set(0, 7.3, 0);
+    doorGroup.add(doorTop);
 
-    [-1.4, 1.4].forEach(dx => {
-      const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14.0, 0.22), busClearGlassMat);
+    [-1.45, 1.45].forEach(dx => {
+      const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14.0, 0.15), busClearGlassMat);
       doorLeaf.position.set(dx, 0, 0);
       doorGroup.add(doorLeaf);
 
-      const leafFrame = new THREE.Mesh(new THREE.BoxGeometry(2.7, 14.2, 0.26), blackTrimMat);
-      leafFrame.position.set(dx, 0, 0);
-      doorGroup.add(leafFrame);
+      [-1.25, 1.25].forEach(sx => {
+        const seal = new THREE.Mesh(new THREE.BoxGeometry(0.10, 14.0, 0.22), blackTrimMat);
+        seal.position.set(dx + sx, 0, 0);
+        doorGroup.add(seal);
+      });
     });
     group.add(doorGroup);
 
-    // Left side (Driver side: 6 windows + Driver signaling window)
+    // Left side (Driver side: 6 windows + Slender Window Mullions + Driver signaling window)
     windowXs.forEach(wx => {
-      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.25), busClearGlassMat);
+      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.15), busClearGlassMat);
       wPane.position.set(wx, 15.0, 10.8);
       group.add(wPane);
 
-      const wFrame = new THREE.Mesh(new THREE.BoxGeometry(8.2, 6.8, 0.35), blackTrimMat);
-      wFrame.position.set(wx, 15.0, 10.8);
-      group.add(wFrame);
-
-      const transom = new THREE.Mesh(new THREE.BoxGeometry(8.0, 0.18, 0.40), blackTrimMat);
+      const transom = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.16, 0.25), blackTrimMat);
       transom.position.set(wx, 16.6, 10.8);
       group.add(transom);
     });
 
-    const dWin = new THREE.Mesh(new THREE.BoxGeometry(6.4, 6.4, 0.25), busClearGlassMat);
+    windowPillarXs.forEach(px => {
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.7, 6.4, 0.35), blackTrimMat);
+      pillar.position.set(px, 15.0, 10.8);
+      group.add(pillar);
+    });
+
+    const lSillRail = new THREE.Mesh(new THREE.BoxGeometry(54.0, 0.25, 0.35), blackTrimMat);
+    lSillRail.position.set(1.0, 11.7, 10.8);
+    group.add(lSillRail);
+
+    const lTopRail = new THREE.Mesh(new THREE.BoxGeometry(54.0, 0.25, 0.35), blackTrimMat);
+    lTopRail.position.set(1.0, 18.3, 10.8);
+    group.add(lTopRail);
+
+    // Driver signaling window (Clear Glass with Slender Frame)
+    const dWin = new THREE.Mesh(new THREE.BoxGeometry(6.4, 6.4, 0.15), busClearGlassMat);
     dWin.position.set(31.5, 15.0, 10.8);
     group.add(dWin);
-    const dWinFrame = new THREE.Mesh(new THREE.BoxGeometry(6.8, 6.8, 0.35), blackTrimMat);
-    dWinFrame.position.set(31.5, 15.0, 10.8);
-    group.add(dWinFrame);
+
+    [-3.1, 3.1].forEach(dx => {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.35, 6.4, 0.35), blackTrimMat);
+      post.position.set(31.5 + dx, 15.0, 10.8);
+      group.add(post);
+    });
+    const dTrack = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.15, 0.22), blackTrimMat);
+    dTrack.position.set(31.5, 15.0, 10.8);
+    group.add(dTrack);
 
     // -------------------------------------------------------------
-    // Bright Interior Bus Lighting (3 Warm Ceiling Point Lights + Linear LED Strips)
+    // Bright Interior Bus Lighting (3 Warm Ceiling PointLights: 0xfffbeb, 1.2, 6.0)
     // -------------------------------------------------------------
-    const busDomeLight1 = new THREE.PointLight(0xfffbeb, 1.25, 28.0);
-    busDomeLight1.position.set(16.0, 20.2, 0);
+    const busDomeLight1 = new THREE.PointLight(0xfffbeb, 1.2, 6.0);
+    busDomeLight1.position.set(16.0, 17.5, 0);
     group.add(busDomeLight1);
 
-    const busDomeLight2 = new THREE.PointLight(0xfffbeb, 1.25, 28.0);
-    busDomeLight2.position.set(0.0, 20.2, 0);
+    const busDomeLight2 = new THREE.PointLight(0xfffbeb, 1.2, 6.0);
+    busDomeLight2.position.set(0.0, 17.5, 0);
     group.add(busDomeLight2);
 
-    const busDomeLight3 = new THREE.PointLight(0xfffbeb, 1.25, 28.0);
-    busDomeLight3.position.set(-16.0, 20.2, 0);
+    const busDomeLight3 = new THREE.PointLight(0xfffbeb, 1.2, 6.0);
+    busDomeLight3.position.set(-16.0, 17.5, 0);
     group.add(busDomeLight3);
 
     // Continuous glowing ceiling LED diffuser strips
@@ -4370,6 +4435,7 @@
 
   window.buildHasanTransitBus = buildHasanTransitBus;
   window.createHasanTransitBus = buildHasanTransitBus;
+  window.buildBusPassenger = buildBusPassenger;
 
   // ---------------------------------------------------------------------------
   // 2. Articulated Multi-Part Procedural Humans — ZERO Box Cylinders, ZERO GLTF
