@@ -105,6 +105,19 @@
   let activeCamMode = 'overview';
   let activeTargetVehicle = null;
 
+  function setupCrispCanvasTexture(tex) {
+    if (!tex) return tex;
+    const maxAniso = (renderer && renderer.capabilities && typeof renderer.capabilities.getMaxAnisotropy === 'function')
+      ? renderer.capabilities.getMaxAnisotropy()
+      : 16;
+    tex.anisotropy = Math.max(1, maxAniso);
+    tex.generateMipmaps = true;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
   function acquireTargetVehicle(modeName, excludeId) {
     if (modeName === 'metro') {
       if (trainGroup) {
@@ -3225,31 +3238,31 @@
     if (cachedHasanLedTexture) return cachedHasanLedTexture;
     if (typeof document === 'undefined') return null;
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 128;
+    canvas.width = 1024;
+    canvas.height = 256;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     ctx.fillStyle = '#070a0f';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#fbbf24';
-    ctx.font = "bold 28px 'Noto Sans Bengali', 'Segoe UI', sans-serif";
-    ctx.fillText('হাসান পরিবহন', canvas.width / 2, 36);
+    ctx.font = "bold 56px 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif";
+    ctx.fillText('হাসান পরিবহন', canvas.width / 2, 72);
 
     ctx.fillStyle = '#f59e0b';
     ctx.shadowColor = '#f59e0b';
-    ctx.shadowBlur = 10;
-    ctx.font = "bold 52px 'Noto Sans Bengali', 'Segoe UI', sans-serif";
-    ctx.fillText('আজিমপুর - উত্তরা', canvas.width / 2, 84);
+    ctx.shadowBlur = 16;
+    ctx.font = "900 104px 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif";
+    ctx.fillText('আজিমপুর - উত্তরা', canvas.width / 2, 168);
 
     cachedHasanLedTexture = new THREE.CanvasTexture(canvas);
-    cachedHasanLedTexture.minFilter = THREE.LinearFilter;
+    setupCrispCanvasTexture(cachedHasanLedTexture);
     return cachedHasanLedTexture;
   }
 
@@ -3261,25 +3274,31 @@
     if (typeof document === 'undefined') return null;
 
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 128;
+    canvas.width = 2048;
+    canvas.height = 256;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
+    
+    // Subtle dark drop-shadow stroke behind the letters for razor-sharp legibility on mobile
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 4;
+
+    ctx.font = "900 128px 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif";
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.9)';
+    ctx.lineWidth = 6;
+    ctx.strokeText('হাসান   |   আজিমপুর - উত্তরা', canvas.width / 2, canvas.height / 2);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = "900 64px 'Noto Sans Bengali', 'Segoe UI', sans-serif";
     ctx.fillText('হাসান   |   আজিমপুর - উত্তরা', canvas.width / 2, canvas.height / 2);
 
     const tex = new THREE.CanvasTexture(canvas);
-    tex.minFilter = THREE.LinearFilter;
+    setupCrispCanvasTexture(tex);
     if (isRightSide) cachedHasanSideTextureRight = tex;
     else cachedHasanSideTextureLeft = tex;
     return tex;
@@ -3291,29 +3310,32 @@
     if (typeof document === 'undefined') return null;
 
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 256;
+    canvas.width = 1024;
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 6;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 4;
+
+    ctx.font = "900 128px 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif";
     ctx.fillStyle = '#ffffff';
-    ctx.font = "900 64px 'Noto Sans Bengali', 'Segoe UI', sans-serif";
-    ctx.fillText('হাসান', canvas.width / 2, 70);
+    ctx.fillText('হাসান', canvas.width / 2, 140);
 
-    ctx.font = "bold 44px 'Noto Sans Bengali', 'Segoe UI', sans-serif";
-    ctx.fillText('আজিমপুর - উত্তরা', canvas.width / 2, 140);
+    ctx.font = "bold 88px 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif";
+    ctx.fillText('আজিমপুর - উত্তরা', canvas.width / 2, 280);
 
-    ctx.font = "bold 32px 'Segoe UI', sans-serif";
+    ctx.font = "bold 64px 'Segoe UI', sans-serif";
     ctx.fillStyle = '#facc15';
-    ctx.fillText('CITY TRANSIT · ROUTE 12', canvas.width / 2, 200);
+    ctx.fillText('CITY TRANSIT · ROUTE 12', canvas.width / 2, 400);
 
     cachedHasanRearTexture = new THREE.CanvasTexture(canvas);
-    cachedHasanRearTexture.minFilter = THREE.LinearFilter;
+    setupCrispCanvasTexture(cachedHasanRearTexture);
     return cachedHasanRearTexture;
   }
 
@@ -5342,8 +5364,8 @@
   // Texture generator helpers
   function createSignboardTexture(title, subtitle, bgColor, textColor, subColor, borderColor, width, height) {
     const canvas = document.createElement('canvas');
-    canvas.width = width || 256;
-    canvas.height = height || 64;
+    canvas.width = (width || 256) * 2;
+    canvas.height = (height || 64) * 2;
     const ctx = canvas.getContext('2d');
 
     ctx.fillStyle = bgColor;
@@ -5351,12 +5373,12 @@
 
     if (borderColor) {
       ctx.strokeStyle = borderColor;
-      ctx.lineWidth = Math.max(3, Math.floor(canvas.height * 0.06));
+      ctx.lineWidth = Math.max(4, Math.floor(canvas.height * 0.06));
       ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
     }
 
     ctx.fillStyle = textColor;
-    ctx.font = 'bold ' + Math.floor(canvas.height * 0.44) + "px 'Noto Sans Bengali', 'Segoe UI', sans-serif";
+    ctx.font = 'bold ' + Math.floor(canvas.height * 0.44) + "px 'Noto Sans Bengali', 'Hind Siliguri', 'Segoe UI', sans-serif";
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(title, canvas.width / 2, subtitle ? canvas.height * 0.38 : canvas.height / 2);
@@ -5368,7 +5390,7 @@
     }
 
     const texture = new THREE.CanvasTexture(canvas);
-    texture.minFilter = THREE.LinearFilter;
+    setupCrispCanvasTexture(texture);
     return texture;
   }
 
@@ -14409,44 +14431,44 @@ let sharedRickshawArtTexture = null;
     if (metroTextureCache.destBoard) return metroTextureCache.destBoard;
     if (typeof document === 'undefined') return null;
     const cv = document.createElement('canvas');
-    cv.width = 512;
-    cv.height = 128;
+    cv.width = 1024;
+    cv.height = 256;
     const ctx = cv.getContext('2d');
 
     // High-contrast black LED display background
     ctx.fillStyle = '#05070a';
-    ctx.fillRect(0, 0, 512, 128);
+    ctx.fillRect(0, 0, cv.width, cv.height);
 
     // Subtle dark LED dot matrix mesh background
     ctx.fillStyle = 'rgba(251, 191, 36, 0.05)';
-    for (let x = 6; x < 506; x += 6) {
-      for (let y = 6; y < 122; y += 6) {
-        ctx.fillRect(x, y, 2.5, 2.5);
+    for (let x = 12; x < 1012; x += 12) {
+      for (let y = 12; y < 244; y += 12) {
+        ctx.fillRect(x, y, 5, 5);
       }
     }
 
     // Outer border with subtle amber glow
     ctx.strokeStyle = '#d97706';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(6, 6, 500, 116);
+    ctx.lineWidth = 6;
+    ctx.strokeRect(12, 12, 1000, 232);
 
     // Crisp glowing amber-yellow Bengali text: উত্তরা-মতিঝিল
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = 'bold 52px "Hind Siliguri", "Kalpurush", "SolaimanLipi", sans-serif';
+    ctx.font = '900 104px "Noto Sans Bengali", "Hind Siliguri", "Kalpurush", sans-serif';
     ctx.shadowColor = '#f59e0b';
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 24;
     ctx.fillStyle = '#fbbf24';
-    ctx.fillText('উত্তরা-মতিঝিল', 256, 52);
+    ctx.fillText('উত্তরা-মতিঝিল', cv.width / 2, 104);
 
     // Subtitle English text: UTTARA - MOTIJHEEL
-    ctx.font = 'bold 22px sans-serif';
-    ctx.shadowBlur = 10;
+    ctx.font = 'bold 44px sans-serif';
+    ctx.shadowBlur = 12;
     ctx.fillStyle = '#fef08a';
-    ctx.fillText('UTTARA ⇄ MOTIJHEEL · MRT LINE-6', 256, 96);
+    ctx.fillText('UTTARA ⇄ MOTIJHEEL · MRT LINE-6', cv.width / 2, 192);
 
     const tex = new THREE.CanvasTexture(cv);
-    tex.anisotropy = 4;
+    setupCrispCanvasTexture(tex);
     metroTextureCache.destBoard = tex;
     return tex;
   }
@@ -14498,6 +14520,7 @@ let sharedRickshawArtTexture = null;
     ctx.fillText('DMTCL', cx, cy - 12);
 
     const tex = new THREE.CanvasTexture(cv);
+    setupCrispCanvasTexture(tex);
     metroTextureCache.dmtclLogo = tex;
     return tex;
   }
@@ -14586,7 +14609,7 @@ let sharedRickshawArtTexture = null;
     ctx.stroke();
 
     const tex = new THREE.CanvasTexture(cv);
-    tex.anisotropy = 4;
+    setupCrispCanvasTexture(tex);
     metroTextureCache.windshield = tex;
     return tex;
   }
@@ -14787,7 +14810,7 @@ let sharedRickshawArtTexture = null;
     });
 
     const tex = new THREE.CanvasTexture(cv);
-    tex.anisotropy = 4;
+    setupCrispCanvasTexture(tex);
     metroTextureCache[cacheKey] = tex;
     return tex;
   }
@@ -14813,6 +14836,7 @@ let sharedRickshawArtTexture = null;
     }
 
     const tex = new THREE.CanvasTexture(cv);
+    setupCrispCanvasTexture(tex);
     metroTextureCache.hvacGrille = tex;
     return tex;
   }
@@ -15386,7 +15410,7 @@ let sharedRickshawArtTexture = null;
     // 1. Fog & Background (Dusk Sky Gradient: #1b1035 zenith to #5b2245 horizon)
     duskSkyTexture = createDuskSkyGradientTexture();
     scene.background = duskSkyTexture;
-    scene.fog = new THREE.FogExp2(0x2e1538, 0.008);
+    scene.fog = new THREE.FogExp2(0x2e1538, 0.00020);
 
     // 2. Camera: Isometric Drone Aerial 3/4 Perspective
     let width = 0, height = 0;
@@ -15417,12 +15441,27 @@ let sharedRickshawArtTexture = null;
       stencil: false
     });
     renderer.setSize(width, height, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
-    renderer.shadowMap.enabled = false;
-    if (typeof THREE.ACESFilmicToneMapping !== 'undefined') {
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.05;
+    const isMobileClient = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    const targetPixelRatio = dpr >= 1.5
+      ? Math.max(1.5, Math.min(dpr, isMobileClient ? 2.0 : 1.75))
+      : 1.0;
+    renderer.setPixelRatio(targetPixelRatio);
+
+    if (isMobileClient) {
+      renderer.shadowMap.enabled = false;
+    } else {
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
+
+    if (typeof THREE.SRGBColorSpace !== 'undefined') {
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+    } else if (typeof THREE.sRGBEncoding !== 'undefined') {
+      renderer.outputEncoding = THREE.sRGBEncoding;
+    }
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
 
     // Pause WebGL rendering loop when off-screen (e.g. scrolled down to #planner)
     if (typeof IntersectionObserver !== 'undefined' && containerEl) {
@@ -16310,7 +16349,23 @@ let sharedRickshawArtTexture = null;
       if (!activeTargetVehicle) return;
 
       e.preventDefault();
-      vehicleOrbitYaw += e.key === 'ArrowLeft' ? Math.PI / 4 : -Math.PI / 4;
+      e.stopPropagation();
+
+      const step = Math.PI / 8; // 22.5° per keypress for smooth 360° orbiting
+      vehicleOrbitYaw += (e.key === 'ArrowLeft' ? step : -step);
+      while (vehicleOrbitYaw > Math.PI) vehicleOrbitYaw -= Math.PI * 2;
+      while (vehicleOrbitYaw < -Math.PI) vehicleOrbitYaw += Math.PI * 2;
+
+      const immediatePose = getVehicleOrbitPose(activeTargetVehicle);
+      if (Number.isFinite(immediatePose.position.x) && Number.isFinite(immediatePose.look.x)) {
+        camera.position.x = immediatePose.position.x;
+        camera.position.y = immediatePose.position.y;
+        camera.position.z = immediatePose.position.z;
+        currentCamLook.x = immediatePose.look.x;
+        currentCamLook.y = immediatePose.look.y;
+        currentCamLook.z = immediatePose.look.z;
+        camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+      }
     });
 
     window.addEventListener('resize', onResize);
@@ -16370,6 +16425,32 @@ let sharedRickshawArtTexture = null;
           child.matrixAutoUpdate = false;
           child.updateMatrix();
         }
+
+        // Desktop & Mobile shadow optimization: strip shadow casting/receiving on interior/small sub-meshes
+        const u = child.userData || {};
+        const pu = p ? (p.userData || {}) : {};
+        const isInteriorOrSmall = (
+          u.isPassenger || u.isDriver || u.isPedestrian ||
+          pu.isPassenger || pu.isDriver || pu.isPedestrian ||
+          u.isHeadlight || u.isWheel || u.isSpoke || u.isRooftopPod ||
+          (child.name && (child.name.includes('Driver') || child.name.includes('Passenger') ||
+           child.name.includes('Headlight') || child.name.includes('Wheel') ||
+           child.name.includes('Spoke') || child.name.includes('Biker')))
+        );
+        if (isInteriorOrSmall) {
+          child.castShadow = false;
+          child.receiveShadow = false;
+        }
+
+        // Apply maximum anisotropic filtering to every texture in the scene
+        if (child.material) {
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach(m => {
+            if (m && m.map) {
+              setupCrispCanvasTexture(m.map);
+            }
+          });
+        }
       }
     });
 
@@ -16392,7 +16473,12 @@ let sharedRickshawArtTexture = null;
     if (width > 0 && height > 0) {
       const aspect = width / height;
       updateCameraFraming(aspect);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
+      const isMobileClient = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+      const targetPixelRatio = dpr >= 1.5
+        ? Math.max(1.5, Math.min(dpr, isMobileClient ? 2.0 : 1.75))
+        : 1.0;
+      renderer.setPixelRatio(targetPixelRatio);
       renderer.setSize(width, height, false);
       if (activeTargetVehicle && isOrbitableVehicleMode(activeCamMode) && !scrollProgressCameraActive) {
         const pose = getVehicleOrbitPose(activeTargetVehicle);
@@ -16492,12 +16578,17 @@ let sharedRickshawArtTexture = null;
 
       if (newTier !== currentTier || currentAdaptivePixelRatio === 0) {
         currentTier = newTier;
+        const isMobileClient = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || (typeof window !== 'undefined' && window.innerWidth < 768);
         const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
         let targetPR = 1.0;
-        if (currentTier === 'high') {
-          targetPR = Math.min(dpr, 1.75);
-        } else if (currentTier === 'mid') {
-          targetPR = Math.min(dpr, 1.25);
+        if (dpr >= 1.5) {
+          if (currentTier === 'high') {
+            targetPR = Math.max(1.5, Math.min(dpr, isMobileClient ? 2.0 : 1.75));
+          } else if (currentTier === 'mid') {
+            targetPR = Math.max(1.5, Math.min(dpr, 1.5));
+          } else {
+            targetPR = Math.max(1.5, Math.min(dpr, 1.5));
+          }
         } else {
           targetPR = 1.0;
         }
@@ -16508,10 +16599,10 @@ let sharedRickshawArtTexture = null;
           }
         }
         if (renderer && renderer.shadowMap) {
-          if (currentTier === 'low') {
-            renderer.shadowMap.autoUpdate = false;
-            renderer.shadowMap.needsUpdate = true;
+          if (isMobileClient || currentTier === 'low') {
+            renderer.shadowMap.enabled = false;
           } else {
+            renderer.shadowMap.enabled = true;
             renderer.shadowMap.autoUpdate = true;
           }
         }
@@ -16622,7 +16713,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x24142b : 0x1e0e24);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0xa84370 : 0x863359);
-          scene.fog.density = 0.0006;
+          scene.fog.density = 0.00018;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -16641,7 +16732,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x1f1b29 : 0x16131f);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d3242 : 0x2d2433);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
+          scene.fog.density = isMobileScreen ? 0.00022 : 0.00025;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xddd6fe);
@@ -16660,7 +16751,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x342238 : 0x27172b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x754757 : 0x613745);
-          scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
+          scene.fog.density = isMobileScreen ? 0.00028 : 0.00030;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -16679,7 +16770,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x222836 : 0x1a202c);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x333d4f : 0x27303f);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0009;
+          scene.fog.density = isMobileScreen ? 0.00020 : 0.00024;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xcbd5e1);
@@ -16698,7 +16789,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(0x0284c7);
         if (scene.fog) {
           scene.fog.color.setHex(0x0284c7);
-          scene.fog.density = 0.0004;
+          scene.fog.density = 0.00010;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xe0f2fe);
@@ -16717,7 +16808,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x262e3d : 0x1c2330);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3f4a5c : 0x303a49);
-          scene.fog.density = isMobileScreen ? 0.0007 : 0.0008;
+          scene.fog.density = isMobileScreen ? 0.00018 : 0.00022;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xcbd5e1);
@@ -16736,7 +16827,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x3a1409 : 0x2c0d05);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x66220d : 0x4d1607);
-          scene.fog.density = 0.0006;
+          scene.fog.density = 0.00016;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -16755,7 +16846,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x241620 : 0x1b0f17);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x422633 : 0x321a25);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
+          scene.fog.density = isMobileScreen ? 0.00022 : 0.00026;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfbcfe8);
@@ -16774,7 +16865,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x301812 : 0x24100b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x6b2b18 : 0x542011);
-          scene.fog.density = isMobileScreen ? 0.0011 : 0.0013;
+          scene.fog.density = isMobileScreen ? 0.00028 : 0.00030;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -16793,7 +16884,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x718096 : 0x64748b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x94a3b8 : 0x8293a7);
-          scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
+          scene.fog.density = isMobileScreen ? 0.00026 : 0.00030;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xe2e8f0);
@@ -16813,7 +16904,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x091020 : 0x060c18);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d182d : 0x0a1426);
-          scene.fog.density = isMobileScreen ? 0.0010 : 0.0012;
+          scene.fog.density = isMobileScreen ? 0.00026 : 0.00030;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0x94a3b8);
@@ -16833,7 +16924,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x080c16 : 0x050810);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d1422 : 0x090e18);
-          scene.fog.density = isMobileScreen ? 0.0008 : 0.0010;
+          scene.fog.density = isMobileScreen ? 0.00020 : 0.00025;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0x94a3b8);
@@ -16852,7 +16943,7 @@ let sharedRickshawArtTexture = null;
         setSceneBackgroundColor(isMobileScreen ? 0x0d1628 : 0x08101e);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x121e36 : 0x0d172b);
-          scene.fog.density = isMobileScreen ? 0.0009 : 0.0011;
+          scene.fog.density = isMobileScreen ? 0.00024 : 0.00028;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0x94a3b8);
@@ -16875,7 +16966,7 @@ let sharedRickshawArtTexture = null;
         }
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d173d : 0x2d122e);
-          scene.fog.density = isMobileScreen ? 0.0006 : 0.0007;
+          scene.fog.density = isMobileScreen ? 0.00015 : 0.00018;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xf472b6);
@@ -16950,18 +17041,17 @@ let sharedRickshawArtTexture = null;
         (v.dir === 'NB' && v.pos < 160)
       );
 
-      if (isTracked && (Math.abs(roadDelta) > 180 || isNearBoundary)) {
-        const vType = v.type || (activeTargetVehicle && activeTargetVehicle.type);
-        const nextTarget = acquireTargetVehicle(vType, v.id);
-        if (nextTarget && nextTarget.mesh && nextTarget.mesh.parent && nextTarget.data && nextTarget.id !== v.id) {
-          activeTargetVehicle = nextTarget;
-          updateTrackedVehicleHUD(nextTarget, true);
-          const nextPose = getVehicleOrbitPose(nextTarget);
-          if (Number.isFinite(nextPose.position.x) && Number.isFinite(nextPose.look.x)) {
-            focusCamera(nextPose.position, nextPose.look, 1.2);
-          }
-        } else if (Math.abs(roadDelta) > 180) {
-          clearTrackedVehicle();
+      if (isTracked && Math.abs(roadDelta) > 180) {
+        // Keep tracking the same vehicle through lane wrap-around; instantly snap camera pose so there is no flying across the city
+        const wrapPose = getVehicleOrbitPose(activeTargetVehicle);
+        if (Number.isFinite(wrapPose.position.x) && Number.isFinite(wrapPose.look.x)) {
+          camera.position.x = wrapPose.position.x;
+          camera.position.y = wrapPose.position.y;
+          camera.position.z = wrapPose.position.z;
+          currentCamLook.x = wrapPose.look.x;
+          currentCamLook.y = wrapPose.look.y;
+          currentCamLook.z = wrapPose.look.z;
+          camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
         }
       }
 
@@ -17278,8 +17368,17 @@ let sharedRickshawArtTexture = null;
           if (distSq > 0.01) {
             camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
           }
-        } else {
-          clearTrackedVehicle();
+        } else if (activeTargetVehicle) {
+          const emergencyPose = getVehicleOrbitPose(activeTargetVehicle);
+          if (Number.isFinite(emergencyPose.position.x) && Number.isFinite(emergencyPose.look.x)) {
+            camera.position.x = emergencyPose.position.x;
+            camera.position.y = emergencyPose.position.y;
+            camera.position.z = emergencyPose.position.z;
+            currentCamLook.x = emergencyPose.look.x;
+            currentCamLook.y = emergencyPose.look.y;
+            currentCamLook.z = emergencyPose.look.z;
+            camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+          }
         }
       } else {
         const safeDt = Math.max(0.0001, Math.min(delta, 0.05));
