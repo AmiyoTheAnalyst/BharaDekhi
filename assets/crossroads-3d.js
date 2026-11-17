@@ -5444,25 +5444,51 @@
     torsoGroup.add(leftArmPivot);
     torsoGroup.add(rightArmPivot);
 
-    // Procedural Rain Umbrella attached to right hand
+    // Procedural Overhead Rain Umbrella (Canopy at Y = 1.45, Hand grip at Y = 0.82)
     const umbrellaGroup = new THREE.Group();
+    umbrellaGroup.position.set(0, 0, 0);
+
+    // Domed Overhead Canopy (Y = 1.45, leaves clean 23cm gap above head Y = 1.22)
     const umbrellaCanopy = new THREE.Mesh(
-      getPedGeo('pedUmbrellaCanopy', () => new THREE.ConeGeometry(0.48, 0.22, 14, 1, true)),
-      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.35, side: THREE.DoubleSide })
+      getPedGeo('pedUmbrellaCanopy', () => new THREE.SphereGeometry(0.38, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.38)),
+      new THREE.MeshStandardMaterial({
+        color: [0x1e293b, 0x0f172a, 0x1e3a8a, 0x7f1d1d][styleSeed % 4],
+        roughness: 0.35,
+        side: THREE.DoubleSide
+      })
     );
-    umbrellaCanopy.position.set(0, 0.28, 0);
+    umbrellaCanopy.position.set(0, 1.16, 0.02); // Apex at 1.54, rim at 1.30 (well above head top at 1.22!)
     umbrellaGroup.add(umbrellaCanopy);
 
-    const umbrellaShaft = new THREE.Mesh(
-      getPedGeo('pedUmbrellaShaft', () => new THREE.CylinderGeometry(0.010, 0.010, 0.52, 8)),
+    // Top Finial Tip at Y = 1.54
+    const finial = new THREE.Mesh(
+      getPedGeo('pedUmbrellaFinial', () => new THREE.CylinderGeometry(0.008, 0.004, 0.06, 8)),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 })
+    );
+    finial.position.set(0, 1.54, 0.02);
+    umbrellaGroup.add(finial);
+
+    // Vertical Metal Shaft (extends from hand at y = 0.82 up to canopy at y = 1.45)
+    const shaftMesh = new THREE.Mesh(
+      getPedGeo('pedUmbrellaShaft', () => new THREE.CylinderGeometry(0.008, 0.008, 0.65, 8)),
       new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.8, roughness: 0.2 })
     );
-    umbrellaShaft.position.set(0, 0.02, 0);
-    umbrellaGroup.add(umbrellaShaft);
+    shaftMesh.position.set(0.065, 1.135, 0.09);
+    const shaftDir = new THREE.Vector3(-0.13, 0.63, -0.14).normalize();
+    shaftMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), shaftDir);
+    umbrellaGroup.add(shaftMesh);
 
-    umbrellaGroup.position.set(0, -0.355, 0.035);
+    // Curved J-Handle Grip at Hand (x = 0.13, y = 0.82, z = 0.16)
+    const jHandle = new THREE.Mesh(
+      getPedGeo('pedUmbrellaHandle', () => new THREE.TorusGeometry(0.022, 0.008, 8, 12, Math.PI)),
+      new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5 })
+    );
+    jHandle.rotation.z = Math.PI;
+    jHandle.position.set(0.13, 0.80, 0.16);
+    umbrellaGroup.add(jHandle);
+
     umbrellaGroup.visible = false;
-    rightArmPivot.add(umbrellaGroup);
+    bodyRoot.add(umbrellaGroup);
 
     // =========================================================================
     // 3. CONNECTED NECK & HEAD (Y = 0.96 to Y = 1.24 — ZERO FLOATING HEAD GAP!)
@@ -5499,33 +5525,38 @@
     headGroup.add(head);
 
     // =========================================================================
-    // 4. NATURAL SCULPTED HAIR (Uncovered Forehead & Rich Dark Tones)
+    // 4. NATURAL SCULPTED HAIR & OPEN-FACE HIJAB (100% Exposed Warm Skin Face)
     // =========================================================================
     if (archetype.hasHijab) {
       const hijabMat = new THREE.MeshStandardMaterial({
         color: archetype.hijabColor || 0xfef3c7,
         roughness: 0.75
       });
+      // 1. Back & Crown Hijab Hood (Shifted backward on -Z, covers back/crown/sides only)
       const hijabHood = new THREE.Mesh(
-        getPedGeo('pedHijabHood', () => new THREE.SphereGeometry(0.114, 18, 14)),
+        getPedGeo('pedHijabHood', () => new THREE.SphereGeometry(0.106, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.65)),
         hijabMat
       );
-      hijabHood.position.set(0, 0.008, -0.018);
+      hijabHood.rotation.x = -0.58;
+      hijabHood.position.set(0, 0.008, -0.024);
       headGroup.add(hijabHood);
 
+      // 2. Oval Face-Framing Hijab Trim (Torus neatly framing forehead hairline, cheekbones & chin)
       const faceRing = new THREE.Mesh(
-        getPedGeo('pedHijabRing', () => new THREE.TorusGeometry(0.082, 0.018, 10, 20)),
+        getPedGeo('pedHijabRing', () => new THREE.TorusGeometry(0.088, 0.015, 12, 24)),
         hijabMat
       );
-      faceRing.position.set(0, 0.004, 0.014);
+      faceRing.scale.set(0.88, 1.06, 0.72);
+      faceRing.position.set(0, 0.002, 0.056);
       headGroup.add(faceRing);
 
+      // 3. Under-Chin Neck & Chest Drape (Placed on bodyRoot strictly BELOW chin Y = 1.005)
       const shoulderDrape = new THREE.Mesh(
-        getPedGeo('pedHijabDrape', () => new THREE.CylinderGeometry(0.11, 0.15, 0.10, 14)),
+        getPedGeo('pedHijabDrape', () => new THREE.CylinderGeometry(0.062, 0.125, 0.12, 16)),
         hijabMat
       );
-      shoulderDrape.position.set(0, -0.10, -0.01);
-      headGroup.add(shoulderDrape);
+      shoulderDrape.position.set(0, 0.96, -0.005);
+      bodyRoot.add(shoulderDrape);
     } else if (archetype.hasCap) {
       const capMat = new THREE.MeshStandardMaterial({ color: archetype.capColor || 0x1e3a8a, roughness: 0.6 });
       const capDome = new THREE.Mesh(
@@ -17577,9 +17608,9 @@ let sharedRickshawArtTexture = null;
 
       if (pm.mesh.userData.rightArm) {
         if (isRain && pm.mesh.userData.umbrella) {
-          // Hand raised holding umbrella shaft upright
-          pm.mesh.userData.rightArm.rotation.x = -0.65;
-          pm.mesh.userData.rightArm.rotation.z = 0.22;
+          // Stabilize umbrella-holding arm forward & upright so canopy stays overhead
+          pm.mesh.userData.rightArm.rotation.x = -0.55 + Math.sin(walkPhase) * 0.04;
+          pm.mesh.userData.rightArm.rotation.z = 0.12;
         } else {
           pm.mesh.userData.rightArm.rotation.x = armSwing;
           pm.mesh.userData.rightArm.rotation.z = 0;
@@ -17617,6 +17648,10 @@ let sharedRickshawArtTexture = null;
         const breath = Math.sin(socialIdleTime + sIdx * 1.7) * 0.03;
         if (sm.userData.torso) sm.userData.torso.rotation.z = breath;
         if (sm.userData.umbrella) sm.userData.umbrella.visible = !!isRain;
+        if (sm.userData.rightArm && isRain && sm.userData.umbrella) {
+          sm.userData.rightArm.rotation.x = -0.55;
+          sm.userData.rightArm.rotation.z = 0.12;
+        }
       }
     }
 
