@@ -3625,12 +3625,52 @@
     dupattaBack.position.set(-0.45, 2.2, 0.65);
     femaleGroup.add(dupattaBack);
 
-    // Salwar / Saree Seated Thighs
+    // Salwar / Saree Seated Legs Assembly (Thighs to Seat Edge + Knees + Shins to Floor + Shoes)
+    const shoeMat = new THREE.MeshStandardMaterial({
+      color: fData.shoeColor || 0x18181b, // Elegant dark footwear
+      roughness: 0.60,
+      metalness: 0.15
+    });
+    const soleMat = new THREE.MeshBasicMaterial({ color: 0x090a0f });
+
     [-1, 1].forEach(side => {
-      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.45, 2.6, 10), outfitMat);
-      thigh.rotation.z = Math.PI / 2 - 0.2;
-      thigh.position.set(1.2, 0.2, side * 0.72);
+      const legZ = side * 0.72;
+
+      // Thigh cylinder extending forward from hip to seat front edge (X = 0.1 to 2.15)
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.50, 0.44, 2.10, 12), outfitMat);
+      thigh.rotation.z = Math.PI / 2 - 0.05;
+      thigh.position.set(1.10, 0.22, legZ);
       femaleGroup.add(thigh);
+
+      // Rounded Knee Joint at seat bench edge
+      const knee = new THREE.Mesh(new THREE.SphereGeometry(0.44, 14, 10), outfitMat);
+      knee.position.set(2.15, 0.16, legZ);
+      femaleGroup.add(knee);
+
+      // Vertical Lower Shin / Salwar Leg descending ~4.8 units down to floor
+      const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.32, 4.76, 12), outfitMat);
+      shin.rotation.z = -0.032;
+      shin.position.set(2.225, -2.22, legZ);
+      femaleGroup.add(shin);
+
+      // Ankle joint cap
+      const ankle = new THREE.Mesh(new THREE.SphereGeometry(0.30, 10, 8), outfitMat);
+      ankle.position.set(2.30, -4.60, legZ);
+      femaleGroup.add(ankle);
+
+      // Styled Shoe / Sandal resting flat on bus floor (Y_floor = -5.10)
+      const shoe = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.44, 0.62), shoeMat);
+      shoe.position.set(2.72, -4.86, legZ);
+      femaleGroup.add(shoe);
+
+      const shoeToe = new THREE.Mesh(new THREE.SphereGeometry(0.28, 10, 8), shoeMat);
+      shoeToe.scale.set(1.1, 0.75, 1.0);
+      shoeToe.position.set(3.40, -4.88, legZ);
+      femaleGroup.add(shoeToe);
+
+      const shoeSole = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.08, 0.66), soleMat);
+      shoeSole.position.set(2.75, -5.06, legZ);
+      femaleGroup.add(shoeSole);
     });
 
     // 2. Head & Clean Female Facial Features
@@ -3685,6 +3725,7 @@
     const style = fData.headwearStyle || 'bun';
     if (style === 'hijab' || fData.hijabColor) {
       // Style B: Modest Draped Hijab / Headscarf
+      // Cleanly frames the warm skin-tone face — ZERO "snowman" overlap!
       const hijabTone = fData.hijabColor || 0xfef3c7;
       const hijabMat = new THREE.MeshStandardMaterial({
         color: hijabTone,
@@ -3692,22 +3733,54 @@
         emissiveIntensity: 0.20,
         roughness: 0.55
       });
+      const trimMat = new THREE.MeshStandardMaterial({
+        color: fData.dupattaColor || hijabTone,
+        roughness: 0.50
+      });
 
-      const hijabDome = new THREE.Mesh(new THREE.SphereGeometry(1.15, 18, 14), hijabMat);
-      hijabDome.scale.set(0.90, 1.10, 0.95);
-      hijabDome.position.set(0.02, 0.04, 0);
+      // Back & Crown Outer Hood: shifted backward along -X (x = -0.32)
+      // Covers crown, back of head, and sides/ears without overlapping the front face
+      const hijabDome = new THREE.Mesh(new THREE.SphereGeometry(1.16, 20, 16), hijabMat);
+      hijabDome.scale.set(0.84, 1.08, 0.94);
+      hijabDome.position.set(-0.32, 0.06, 0);
       headGroup.add(hijabDome);
 
-      // Undercap / forehead trim band
-      const trimBand = new THREE.Mesh(new THREE.TorusGeometry(0.92, 0.12, 8, 16), hijabMat);
-      trimBand.rotation.y = Math.PI / 2;
-      trimBand.position.set(0.35, 0.25, 0);
-      headGroup.add(trimBand);
+      // Oval Face-Framing Hijab Trim (TorusGeometry in Y-Z face plane)
+      // Frames the warm skin-tone face across forehead, cheeks, and under chin
+      const faceTrim = new THREE.Mesh(
+        new THREE.TorusGeometry(0.94, 0.13, 12, 24),
+        trimMat
+      );
+      faceTrim.rotation.y = Math.PI / 2;
+      faceTrim.scale.set(0.85, 1.06, 0.92);
+      faceTrim.position.set(0.46, -0.02, 0);
+      headGroup.add(faceTrim);
 
-      // Draped hijab cowl covering neck and shoulders
-      const hijabCowl = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.45, 1.2, 14), hijabMat);
-      hijabCowl.position.set(0.05, 3.65, 0);
+      // Forehead undercap trim band (adds realistic tailored look)
+      const undercap = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.88, 0.90, 0.18, 16),
+        trimMat
+      );
+      undercap.rotation.z = 0.20;
+      undercap.position.set(0.48, 0.76, 0);
+      undercap.scale.set(0.82, 1.0, 0.90);
+      headGroup.add(undercap);
+
+      // Contoured Neck & Shoulder Drape in femaleGroup
+      // Cleanly tucked BELOW the chin (y <= 3.80) to maintain crisp jawline shadow
+      const hijabCowl = new THREE.Mesh(new THREE.CylinderGeometry(0.80, 1.45, 1.10, 16), hijabMat);
+      hijabCowl.position.set(0.05, 3.25, 0);
       femaleGroup.add(hijabCowl);
+
+      const cowlRim = new THREE.Mesh(new THREE.TorusGeometry(0.82, 0.16, 8, 16), hijabMat);
+      cowlRim.rotation.x = Math.PI / 2;
+      cowlRim.position.set(0.06, 3.75, 0);
+      femaleGroup.add(cowlRim);
+
+      const cowlFront = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.4, 0.95), hijabMat);
+      cowlFront.rotation.z = -0.15;
+      cowlFront.position.set(0.52, 2.75, 0);
+      femaleGroup.add(cowlFront);
 
     } else {
       // Style A: Traditional Dark Hair Dome with Back Hair Bun
@@ -3897,12 +3970,52 @@
       passengerGroup.add(collar);
     }
 
-    // Seated Thighs / Lap
+    // Seated Legs Assembly (Thighs to Seat Edge + Knees + Shins to Floor + Shoes)
+    const shoeMat = new THREE.MeshStandardMaterial({
+      color: pData.shoeColor || 0x18181b,
+      roughness: 0.55,
+      metalness: 0.20
+    });
+    const soleMat = new THREE.MeshBasicMaterial({ color: 0x090a0f });
+
     [-1, 1].forEach(side => {
-      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.48, 2.6, 10), pantsMat);
-      thigh.rotation.z = Math.PI / 2 - 0.2;
-      thigh.position.set(1.2, 0.2, side * 0.75);
+      const legZ = side * 0.75;
+
+      // Thigh cylinder extending forward from hip to seat front edge (X = 0.1 to 2.15)
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.48, 2.10, 12), pantsMat);
+      thigh.rotation.z = Math.PI / 2 - 0.05;
+      thigh.position.set(1.10, 0.22, legZ);
       passengerGroup.add(thigh);
+
+      // Rounded Knee Joint at seat bench edge
+      const knee = new THREE.Mesh(new THREE.SphereGeometry(0.48, 14, 10), pantsMat);
+      knee.position.set(2.15, 0.16, legZ);
+      passengerGroup.add(knee);
+
+      // Vertical Lower Shin / Trouser Leg descending ~4.8 units down to floor
+      const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.36, 4.76, 12), pantsMat);
+      shin.rotation.z = -0.032;
+      shin.position.set(2.225, -2.22, legZ);
+      passengerGroup.add(shin);
+
+      // Ankle joint cap
+      const ankle = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), pantsMat);
+      ankle.position.set(2.30, -4.60, legZ);
+      passengerGroup.add(ankle);
+
+      // Styled Shoe resting flat on bus floor (Y_floor = -5.10)
+      const shoe = new THREE.Mesh(new THREE.BoxGeometry(1.60, 0.50, 0.72), shoeMat);
+      shoe.position.set(2.80, -4.83, legZ);
+      passengerGroup.add(shoe);
+
+      const shoeToe = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), shoeMat);
+      shoeToe.scale.set(1.1, 0.75, 1.05);
+      shoeToe.position.set(3.54, -4.85, legZ);
+      passengerGroup.add(shoeToe);
+
+      const shoeSole = new THREE.Mesh(new THREE.BoxGeometry(1.70, 0.08, 0.76), soleMat);
+      shoeSole.position.set(2.82, -5.06, legZ);
+      passengerGroup.add(shoeSole);
     });
 
     // 2. Head, Hair Dome / Cap & Facial Features
