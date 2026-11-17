@@ -5097,74 +5097,74 @@
       // 0. Executive Adult Man
       {
         type: 'man_exec', isFemale: false, scale: 1.0,
-        topColor: 0x0284c7, bottomColor: 0x1e293b, shoeColor: 0x0f172a, hairColor: 0x111317,
+        topColor: 0x0284c7, bottomColor: 0x1e293b, shoeColor: 0x18181b, hairColor: 0x111317,
         hasTie: true, tieColor: 0x991b1b, hasMustache: true, hairStyle: 'crop'
       },
       // 1. Traditional Panjabi Adult Man
       {
         type: 'man_panjabi', isFemale: false, scale: 1.0,
-        topColor: 0x059669, bottomColor: 0xf8fafc, shoeColor: 0x78350f, hairColor: 0x18181b,
+        topColor: 0x059669, bottomColor: 0xf8fafc, shoeColor: 0x451a03, hairColor: 0x24170b,
         hasPanjabiHem: true, hasBeard: true, hasMustache: true, hairStyle: 'crop'
       },
       // 2. Casual Commuter Adult Man
       {
         type: 'man_casual', isFemale: false, scale: 1.0,
-        topColor: 0xe11d48, bottomColor: 0x1d4ed8, shoeColor: 0xf8fafc, hairColor: 0x1c1917,
+        topColor: 0xe11d48, bottomColor: 0x1d4ed8, shoeColor: 0x1e3a8a, hairColor: 0x111317,
         cleanShaven: true, hairStyle: 'crop'
       },
       // 3. Salwar Kameez Adult Woman (Hair Bun Style)
       {
         type: 'woman_salwar', isFemale: true, scale: 0.94,
-        topColor: 0xdb2777, bottomColor: 0xf8fafc, shoeColor: 0x831843, hairColor: 0x0f172a,
-        hasDupatta: true, dupattaColor: 0xfbbf24, hairStyle: 'bun', lipColor: 0xe11d48
+        topColor: 0xdb2777, bottomColor: 0xf8fafc, shoeColor: 0x18181b, hairColor: 0x111317,
+        hasDupatta: true, dupattaColor: 0xfbbf24, hairStyle: 'bun', lipColor: 0xd9385a
       },
       // 4. Salwar Kameez Adult Woman (Open-Face Hijab Style)
       {
         type: 'woman_hijab', isFemale: true, scale: 0.94,
-        topColor: 0x8b5cf6, bottomColor: 0xf1f5f9, shoeColor: 0x1f2937, hairColor: 0x111317,
-        hasHijab: true, hijabColor: 0xfef3c7, lipColor: 0xe11d48
+        topColor: 0x8b5cf6, bottomColor: 0xf1f5f9, shoeColor: 0x18181b, hairColor: 0x111317,
+        hasHijab: true, hijabColor: 0xfef3c7, lipColor: 0xd9385a
       },
       // 5. Bangladeshi Saree Adult Woman
       {
         type: 'woman_saree', isFemale: true, scale: 0.94,
-        topColor: 0xdc2626, bottomColor: 0xdc2626, shoeColor: 0x451a03, hairColor: 0x18181b,
-        hasSareePallu: true, goldColor: 0xfacc15, hairStyle: 'bun', lipColor: 0xbe185d
+        topColor: 0xdc2626, bottomColor: 0xdc2626, shoeColor: 0x451a03, hairColor: 0x111317,
+        hasSareePallu: true, goldColor: 0xfacc15, hairStyle: 'bun', lipColor: 0xd9385a
       },
       // 6. College / Teen Boy
       {
         type: 'teen_boy', isFemale: false, scale: 0.88,
-        topColor: 0xf97316, bottomColor: 0x1e40af, shoeColor: 0xf8fafc, hairColor: 0x111317,
+        topColor: 0xf97316, bottomColor: 0x1e40af, shoeColor: 0x18181b, hairColor: 0x111317,
         hasBackpack: true, backpackColor: 0x1e293b, hairStyle: 'crop'
       },
       // 7. College / Teen Girl
       {
         type: 'teen_girl', isFemale: true, scale: 0.84,
-        topColor: 0xfb7185, bottomColor: 0xf8fafc, shoeColor: 0x334155, hairColor: 0x111317,
-        hasTote: true, toteColor: 0x475569, hairStyle: 'bun', lipColor: 0xe11d48
+        topColor: 0xfb7185, bottomColor: 0xf8fafc, shoeColor: 0x18181b, hairColor: 0x24170b,
+        hasTote: true, toteColor: 0x475569, hairStyle: 'bun', lipColor: 0xd9385a
       },
       // 8. Dhaka School Boy
       {
         type: 'school_boy', isFemale: false, scale: 0.68,
-        topColor: 0xf8fafc, bottomColor: 0x1e3a8a, shoeColor: 0x0f172a, hairColor: 0x18181b,
+        topColor: 0xf8fafc, bottomColor: 0x1e3a8a, shoeColor: 0x18181b, hairColor: 0x111317,
         hasTie: true, tieColor: 0x1e3a8a, hasBackpack: true, backpackColor: 0x2563eb, hairStyle: 'crop'
       },
       // 9. Dhaka School Girl
       {
         type: 'school_girl', isFemale: true, scale: 0.66,
-        topColor: 0xf8fafc, bottomColor: 0x14532d, shoeColor: 0x0f172a, hairColor: 0x111317,
-        hasSkirt: true, hasPigtails: true, hasBackpack: true, backpackColor: 0xec4899, lipColor: 0xe11d48
+        topColor: 0xf8fafc, bottomColor: 0x14532d, shoeColor: 0x18181b, hairColor: 0x111317,
+        hasSkirt: true, hasPigtails: true, hasBackpack: true, backpackColor: 0xec4899, lipColor: 0xd9385a
       },
       // 10. Casual Kid Boy
       {
         type: 'kid_boy', isFemale: false, scale: 0.64,
-        topColor: 0x38bdf8, bottomColor: 0xdc2626, shoeColor: 0xf8fafc, hairColor: 0x111317,
+        topColor: 0x38bdf8, bottomColor: 0xdc2626, shoeColor: 0x18181b, hairColor: 0x111317,
         hasCap: true, capColor: 0x1e3a8a, hairStyle: 'crop'
       },
       // 11. Casual Kid Girl
       {
         type: 'kid_girl', isFemale: true, scale: 0.62,
-        topColor: 0xf43f5e, bottomColor: 0xf43f5e, shoeColor: 0xfb7185, hairColor: 0x18181b,
-        hasDress: true, hasPigtails: true, hasHairband: true, hairbandColor: 0xfbbf24, lipColor: 0xe11d48
+        topColor: 0xf43f5e, bottomColor: 0xf43f5e, shoeColor: 0x18181b, hairColor: 0x24170b,
+        hasDress: true, hasPigtails: true, hasHairband: true, hairbandColor: 0xfbbf24, lipColor: 0xd9385a
       }
     ];
 
@@ -5172,15 +5172,16 @@
     const topHex = (p && p.color) ? p.color : archetype.topColor;
     const topMat = new THREE.MeshStandardMaterial({ color: topHex, roughness: 0.60 });
     const bottomMat = new THREE.MeshStandardMaterial({ color: archetype.bottomColor, roughness: 0.70 });
-    const shoeMat = new THREE.MeshStandardMaterial({ color: archetype.shoeColor, roughness: 0.45 });
-    const hairMat = new THREE.MeshStandardMaterial({ color: archetype.hairColor, roughness: 0.88 });
+    const shoeMat = new THREE.MeshStandardMaterial({ color: archetype.shoeColor || 0x18181b, roughness: 0.45 });
+    const soleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.50 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: archetype.hairColor || 0x111317, roughness: 0.80 });
     const sharedMats = getPedSharedMats();
 
-    const lipColorHex = archetype.lipColor || (archetype.isFemale ? 0xe11d48 : 0x9f4236);
+    const lipColorHex = archetype.lipColor || (archetype.isFemale ? 0xd9385a : 0xa3483b);
     const lipMat = new THREE.MeshBasicMaterial({ color: lipColorHex });
-    const browMat = new THREE.MeshBasicMaterial({ color: archetype.hairColor });
+    const browMat = new THREE.MeshBasicMaterial({ color: archetype.hairColor || 0x111317 });
 
-    // Base world scaling factor: matches ~10.35 unit height of world sidewalks
+    // Base world scaling factor: matches ~10.5 unit height of world sidewalks
     const BASE_SCALE = 9.0;
     const bodyRoot = new THREE.Group();
     const shoulderRatio = archetype.isFemale ? 0.90 : 1.0;
@@ -5196,347 +5197,243 @@
     shadowDisc.position.set(0, 0.02, 0);
     bodyRoot.add(shadowDisc);
 
-    // 1. Smooth Pelvis / Hips Group (anchored at y = 0.48)
+    // =========================================================================
+    // 1. VISIBLE SHOES & ARTICULATED LEGS (Y = 0.00 to Y = 0.56)
+    // Hip placed at hipY = 0.56, shoeGroup at y = -0.25 inside kneePivot
+    // =========================================================================
+    function buildLeg(isRight) {
+      const legPivot = new THREE.Group();
+      legPivot.position.set(isRight ? 0.062 : -0.062, 0.56, 0);
+
+      // Hip Sphere
+      const hip = new THREE.Mesh(
+        getPedGeo('pedHip', () => new THREE.SphereGeometry(0.048, 12, 12)),
+        bottomMat
+      );
+      legPivot.add(hip);
+
+      // Upper Thigh Cylinder (centered at y = -0.12, reaches down to -0.24)
+      const thigh = new THREE.Mesh(
+        getPedGeo('pedThigh', () => new THREE.CylinderGeometry(0.048, 0.040, 0.24, 12)),
+        bottomMat
+      );
+      thigh.position.set(0, -0.12, 0);
+      legPivot.add(thigh);
+
+      // Articulated Knee Pivot Group (anchored at y = -0.24, which is Y = 0.32 above ground)
+      const kneePivot = new THREE.Group();
+      kneePivot.position.set(0, -0.24, 0);
+      legPivot.add(kneePivot);
+
+      // Knee Sphere
+      const knee = new THREE.Mesh(
+        getPedGeo('pedKnee', () => new THREE.SphereGeometry(0.039, 12, 12)),
+        bottomMat
+      );
+      kneePivot.add(knee);
+
+      // Lower Shin Cylinder (centered at y = -0.11, reaches down to -0.22)
+      const shin = new THREE.Mesh(
+        getPedGeo('pedShin', () => new THREE.CylinderGeometry(0.038, 0.030, 0.22, 12)),
+        bottomMat
+      );
+      shin.position.set(0, -0.11, 0);
+      kneePivot.add(shin);
+
+      // Visible 3D Shoe (shoeGroup at y = -0.25 inside kneePivot, resting 100% visible above ground)
+      const shoeGroup = new THREE.Group();
+      shoeGroup.position.set(0, -0.25, 0);
+      kneePivot.add(shoeGroup);
+
+      // Dark Shoe Body
+      const shoeBase = new THREE.Mesh(
+        getPedGeo('pedShoeBase', () => new THREE.BoxGeometry(0.072, 0.055, 0.135)),
+        shoeMat
+      );
+      shoeBase.position.set(0, 0, 0.022);
+      shoeGroup.add(shoeBase);
+
+      // Rounded Toe Cap
+      const toeCap = new THREE.Mesh(
+        getPedGeo('pedToeCap', () => new THREE.SphereGeometry(0.036, 10, 10)),
+        shoeMat
+      );
+      toeCap.position.set(0, -0.005, 0.085);
+      shoeGroup.add(toeCap);
+
+      // Contrasting White / Light-Grey Shoe Sole (bottom sits at Y = 0.035, never buried!)
+      const shoeSole = new THREE.Mesh(
+        getPedGeo('pedShoeSole', () => new THREE.BoxGeometry(0.076, 0.016, 0.145)),
+        soleMat
+      );
+      shoeSole.position.set(0, -0.028, 0.022);
+      shoeGroup.add(shoeSole);
+
+      return { legPivot, kneePivot };
+    }
+
+    const leftLegData = buildLeg(false);
+    const rightLegData = buildLeg(true);
+    bodyRoot.add(leftLegData.legPivot);
+    bodyRoot.add(rightLegData.legPivot);
+
+    // =========================================================================
+    // 2. PELVIS, TORSO & SHOULDER YOKE (Y = 0.54 to Y = 0.98 — ZERO Z-FIGHTING)
+    // =========================================================================
+    // Pelvis / Hips (radius 0.098 to 0.095, centered at y = 0.57)
     const pelvis = new THREE.Mesh(
-      getPedGeo('pedPelvis', () => new THREE.CylinderGeometry(0.115, 0.125, 0.14, 16)),
+      getPedGeo('pedPelvis', () => new THREE.CylinderGeometry(0.098, 0.095, 0.10, 14)),
       bottomMat
     );
-    pelvis.scale.set(1.10, 1.0, 0.75);
-    pelvis.position.set(0, 0.48, 0);
+    pelvis.position.set(0, 0.57, 0);
     bodyRoot.add(pelvis);
 
-    // Traditional Lower Garments (Panjabi Kurta Hem, Saree Drape, School Skirt, Frock Dress)
+    // Traditional Lower Garments
     if (archetype.hasPanjabiHem) {
       const kurtaHem = new THREE.Mesh(
-        getPedGeo('pedKurtaHem', () => new THREE.CylinderGeometry(0.125, 0.155, 0.26, 14)),
+        getPedGeo('pedKurtaHem', () => new THREE.CylinderGeometry(0.118, 0.145, 0.26, 14)),
         topMat
       );
-      kurtaHem.scale.set(1.12, 1.0, 0.75);
-      kurtaHem.position.set(0, 0.38, 0);
+      kurtaHem.position.set(0, 0.44, 0);
       bodyRoot.add(kurtaHem);
     } else if (archetype.hasSareePallu) {
       const sareeDrape = new THREE.Mesh(
-        getPedGeo('pedSareeDrape', () => new THREE.CylinderGeometry(0.120, 0.150, 0.42, 14)),
+        getPedGeo('pedSareeDrape', () => new THREE.CylinderGeometry(0.110, 0.140, 0.44, 14)),
         bottomMat
       );
-      sareeDrape.scale.set(1.08, 1.0, 0.74);
-      sareeDrape.position.set(0, 0.28, 0);
+      sareeDrape.position.set(0, 0.35, 0);
       bodyRoot.add(sareeDrape);
     } else if (archetype.hasSkirt || archetype.hasDress) {
       const skirt = new THREE.Mesh(
-        getPedGeo('pedSkirt', () => new THREE.CylinderGeometry(0.120, 0.165, 0.24, 14)),
+        getPedGeo('pedSkirt', () => new THREE.CylinderGeometry(0.112, 0.155, 0.24, 14)),
         bottomMat
       );
-      skirt.scale.set(1.10, 1.0, 0.78);
-      skirt.position.set(0, 0.38, 0);
+      skirt.position.set(0, 0.44, 0);
       bodyRoot.add(skirt);
     }
 
-    // 2. Contoured Torso Group (anchored at y = 0.48)
+    // Torso Group (for subtle natural stride sway)
     const torsoGroup = new THREE.Group();
-    torsoGroup.position.set(0, 0.48, 0);
+    torsoGroup.position.set(0, 0, 0);
     bodyRoot.add(torsoGroup);
 
+    // Torso / Shirt: Radius 0.122 to 0.108 > 0.098 (Zero Z-Fighting at waist!)
     const torso = new THREE.Mesh(
-      getPedGeo('pedTorso', () => new THREE.CylinderGeometry(0.135, 0.115, 0.36, 16)),
+      getPedGeo('pedTorso', () => new THREE.CylinderGeometry(0.122, 0.108, 0.34, 16)),
       topMat
     );
-    torso.scale.set(1.12, 1.0, 0.72);
-    torso.position.set(0, 0.18, 0);
+    torso.scale.set(1.08, 1.0, 0.74);
+    torso.position.set(0, 0.77, 0); // Spans 0.60 to 0.94
     torsoGroup.add(torso);
 
+    // Rounded Shoulder Yoke: Centered at y = 0.94, top reaches 0.985
     const yoke = new THREE.Mesh(
-      getPedGeo('pedYoke', () => new THREE.SphereGeometry(0.145, 16, 12)),
+      getPedGeo('pedYoke', () => new THREE.SphereGeometry(0.122, 16, 12)),
       topMat
     );
-    yoke.scale.set(1.18, 0.52, 0.78);
-    yoke.position.set(0, 0.35, 0);
+    yoke.scale.set(1.08, 0.36, 0.74);
+    yoke.position.set(0, 0.94, 0);
     torsoGroup.add(yoke);
 
-    // Torso Accessories & Attire Specializations
+    // Attire Accessories
     if (archetype.hasTie) {
       const tieMat = new THREE.MeshStandardMaterial({ color: archetype.tieColor || 0x991b1b, roughness: 0.5 });
       const tie = new THREE.Mesh(
-        getPedGeo('pedTie', () => new THREE.BoxGeometry(0.038, 0.22, 0.015)),
+        getPedGeo('pedTie', () => new THREE.BoxGeometry(0.034, 0.20, 0.012)),
         tieMat
       );
-      tie.position.set(0, 0.22, 0.095);
+      tie.position.set(0, 0.80, 0.092);
       torsoGroup.add(tie);
     }
     if (archetype.hasDupatta) {
       const dupattaMat = new THREE.MeshStandardMaterial({ color: archetype.dupattaColor || 0xfbbf24, roughness: 0.55 });
       const dupattaLoop = new THREE.Mesh(
-        getPedGeo('pedDupattaLoop', () => new THREE.TorusGeometry(0.12, 0.032, 8, 16)),
+        getPedGeo('pedDupattaLoop', () => new THREE.TorusGeometry(0.105, 0.028, 8, 16)),
         dupattaMat
       );
       dupattaLoop.rotation.x = Math.PI / 2;
-      dupattaLoop.position.set(0, 0.33, 0);
+      dupattaLoop.position.set(0, 0.93, 0);
       torsoGroup.add(dupattaLoop);
 
       const dupattaSash = new THREE.Mesh(
-        getPedGeo('pedDupattaSash', () => new THREE.BoxGeometry(0.055, 0.30, 0.035)),
+        getPedGeo('pedDupattaSash', () => new THREE.BoxGeometry(0.048, 0.28, 0.028)),
         dupattaMat
       );
       dupattaSash.rotation.z = -0.28;
-      dupattaSash.position.set(0.05, 0.20, 0.095);
+      dupattaSash.position.set(0.05, 0.78, 0.092);
       torsoGroup.add(dupattaSash);
     }
     if (archetype.hasSareePallu) {
       const goldMat = new THREE.MeshStandardMaterial({ color: archetype.goldColor || 0xfacc15, roughness: 0.4, metalness: 0.4 });
       const pallu = new THREE.Mesh(
-        getPedGeo('pedSareePallu', () => new THREE.CylinderGeometry(0.045, 0.065, 0.36, 8)),
+        getPedGeo('pedSareePallu', () => new THREE.CylinderGeometry(0.040, 0.060, 0.34, 8)),
         goldMat
       );
       pallu.rotation.z = -0.32;
-      pallu.position.set(0.04, 0.22, 0.10);
+      pallu.position.set(0.04, 0.80, 0.095);
       torsoGroup.add(pallu);
     }
     if (archetype.hasBackpack) {
       const packMat = new THREE.MeshStandardMaterial({ color: archetype.backpackColor || 0x1e293b, roughness: 0.7 });
       const pack = new THREE.Mesh(
-        getPedGeo('pedBackpack', () => new THREE.BoxGeometry(0.16, 0.22, 0.10)),
+        getPedGeo('pedBackpack', () => new THREE.BoxGeometry(0.15, 0.20, 0.09)),
         packMat
       );
-      pack.position.set(0, 0.20, -0.12);
+      pack.position.set(0, 0.78, -0.11);
       torsoGroup.add(pack);
     } else if (archetype.hasTote) {
       const toteMat = new THREE.MeshStandardMaterial({ color: archetype.toteColor || 0x475569, roughness: 0.7 });
       const tote = new THREE.Mesh(
-        getPedGeo('pedTote', () => new THREE.BoxGeometry(0.08, 0.20, 0.16)),
+        getPedGeo('pedTote', () => new THREE.BoxGeometry(0.07, 0.18, 0.15)),
         toteMat
       );
-      tote.position.set(-0.16, 0.14, 0.04);
+      tote.position.set(-0.15, 0.72, 0.04);
       torsoGroup.add(tote);
     }
 
-    // 3. Smooth Head & Articulated Face (Facing forward along local +Z)
-    const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.84, 0); // Mounted at neck base
-    torsoGroup.add(headGroup);
-
-    const neck = new THREE.Mesh(
-      getPedGeo('pedNeck', () => new THREE.CylinderGeometry(0.042, 0.048, 0.07, 12)),
-      skinMat
-    );
-    neck.position.set(0, 0.035, 0);
-    headGroup.add(neck);
-
-    const head = new THREE.Mesh(
-      getPedGeo('pedHead', () => new THREE.SphereGeometry(0.115, 20, 16)),
-      skinMat
-    );
-    head.scale.set(0.94, 1.06, 0.96);
-    head.position.set(0, 0.185, 0);
-    headGroup.add(head);
-
-    // Eyes (White Sclera + Dark Pupils)
-    [-0.038, 0.038].forEach((xEye, sideIdx) => {
-      const eye = new THREE.Mesh(
-        getPedGeo('pedEye', () => new THREE.SphereGeometry(0.022, 10, 8)),
-        sharedMats.eyeWhite
-      );
-      eye.scale.set(1.0, 1.25, 0.55);
-      eye.position.set(xEye, 0.200, 0.098);
-      headGroup.add(eye);
-
-      const pupil = new THREE.Mesh(
-        getPedGeo('pedPupil', () => new THREE.SphereGeometry(0.011, 8, 6)),
-        sharedMats.pupil
-      );
-      pupil.position.set(xEye, 0.200, 0.111);
-      headGroup.add(pupil);
-
-      const brow = new THREE.Mesh(
-        getPedGeo('pedBrow', () => new THREE.BoxGeometry(0.042, 0.012, 0.016)),
-        browMat
-      );
-      brow.position.set(xEye, 0.228, 0.104);
-      brow.rotation.z = sideIdx === 0 ? -0.08 : 0.08;
-      headGroup.add(brow);
-    });
-
-    // Protruding Rounded Nose Bridge
-    const nose = new THREE.Mesh(
-      getPedGeo('pedNose', () => new THREE.ConeGeometry(0.022, 0.055, 6)),
-      skinMat
-    );
-    nose.rotation.x = Math.PI / 2;
-    nose.position.set(0, 0.176, 0.118);
-    headGroup.add(nose);
-
-    // Left and Right Ears
-    [-0.110, 0.110].forEach(xEar => {
-      const ear = new THREE.Mesh(
-        getPedGeo('pedEar', () => new THREE.SphereGeometry(0.024, 8, 8)),
-        skinMat
-      );
-      ear.scale.set(0.45, 1.0, 0.75);
-      ear.position.set(xEar, 0.190, -0.012);
-      headGroup.add(ear);
-    });
-
-    // Natural Lip Contour
-    const lips = new THREE.Mesh(
-      getPedGeo('pedLips', () => new THREE.BoxGeometry(0.048, 0.018, 0.022)),
-      lipMat
-    );
-    lips.position.set(0, 0.138, 0.104);
-    headGroup.add(lips);
-
-    // Adult Men Facial Hair (Clean-shaven, mustache, or beard)
-    if (archetype.hasMustache) {
-      const mustache = new THREE.Mesh(
-        getPedGeo('pedMustache', () => new THREE.BoxGeometry(0.068, 0.018, 0.025)),
-        hairMat
-      );
-      mustache.position.set(0, 0.154, 0.110);
-      headGroup.add(mustache);
-    }
-    if (archetype.hasBeard) {
-      const beard = new THREE.Mesh(
-        getPedGeo('pedBeard', () => new THREE.CylinderGeometry(0.045, 0.030, 0.065, 8)),
-        hairMat
-      );
-      beard.position.set(0, 0.102, 0.082);
-      headGroup.add(beard);
-    }
-
-    // Full Sculpted Hair Styles & Headwear (Zero Flat Grey Blocks)
-    if (archetype.hasHijab) {
-      const hijabMat = new THREE.MeshStandardMaterial({
-        color: archetype.hijabColor || 0xfef3c7,
-        roughness: 0.75
-      });
-      // Outer back-shifted hood
-      const hijabHood = new THREE.Mesh(
-        getPedGeo('pedHijabHood', () => new THREE.SphereGeometry(0.132, 18, 14)),
-        hijabMat
-      );
-      hijabHood.position.set(0, 0.195, -0.025);
-      headGroup.add(hijabHood);
-
-      // Oval face-framing border ring
-      const faceRing = new THREE.Mesh(
-        getPedGeo('pedHijabRing', () => new THREE.TorusGeometry(0.095, 0.022, 10, 20)),
-        hijabMat
-      );
-      faceRing.position.set(0, 0.190, 0.016);
-      headGroup.add(faceRing);
-
-      // Neck and shoulder drape cleanly below chin
-      const shoulderDrape = new THREE.Mesh(
-        getPedGeo('pedHijabDrape', () => new THREE.CylinderGeometry(0.13, 0.18, 0.12, 14)),
-        hijabMat
-      );
-      shoulderDrape.position.set(0, 0.075, -0.01);
-      headGroup.add(shoulderDrape);
-    } else if (archetype.hairStyle === 'bun') {
-      const hairDome = new THREE.Mesh(
-        getPedGeo('pedHairWomen', () => new THREE.SphereGeometry(0.124, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.62)),
-        hairMat
-      );
-      hairDome.rotation.x = -0.20;
-      hairDome.position.set(0, 0.197, -0.010);
-      headGroup.add(hairDome);
-
-      const bun = new THREE.Mesh(
-        getPedGeo('pedBun', () => new THREE.SphereGeometry(0.055, 14, 14)),
-        hairMat
-      );
-      bun.position.set(0, 0.210, -0.118);
-      headGroup.add(bun);
-    } else if (archetype.hasCap) {
-      const capMat = new THREE.MeshStandardMaterial({ color: archetype.capColor || 0x1e3a8a, roughness: 0.6 });
-      const capDome = new THREE.Mesh(
-        getPedGeo('pedCapDome', () => new THREE.SphereGeometry(0.124, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.5)),
-        capMat
-      );
-      capDome.rotation.x = -0.15;
-      capDome.position.set(0, 0.205, -0.010);
-      headGroup.add(capDome);
-
-      const capBrim = new THREE.Mesh(
-        getPedGeo('pedCapBrim', () => new THREE.CylinderGeometry(0.09, 0.09, 0.012, 10, 1, false, 0, Math.PI)),
-        capMat
-      );
-      capBrim.rotation.x = 0.20;
-      capBrim.position.set(0, 0.210, 0.095);
-      headGroup.add(capBrim);
-    } else {
-      // Men / Boys / Crop Sculpted Hair Dome
-      const hairDome = new THREE.Mesh(
-        getPedGeo('pedHairMen', () => new THREE.SphereGeometry(0.122, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.58)),
-        hairMat
-      );
-      hairDome.rotation.x = -0.24;
-      hairDome.position.set(0, 0.200, -0.012);
-      headGroup.add(hairDome);
-
-      if (archetype.hasPigtails) {
-        [-0.125, 0.125].forEach(xPig => {
-          const pigtail = new THREE.Mesh(
-            getPedGeo('pedPigtail', () => new THREE.SphereGeometry(0.038, 10, 8)),
-            hairMat
-          );
-          pigtail.position.set(xPig, 0.200, -0.035);
-          headGroup.add(pigtail);
-        });
-        if (archetype.hasHairband) {
-          const bandMat = new THREE.MeshStandardMaterial({ color: archetype.hairbandColor || 0xfbbf24, roughness: 0.5 });
-          const hairband = new THREE.Mesh(
-            getPedGeo('pedHairband', () => new THREE.TorusGeometry(0.120, 0.014, 8, 18)),
-            bandMat
-          );
-          hairband.rotation.x = Math.PI / 2;
-          hairband.position.set(0, 0.210, 0.012);
-          headGroup.add(hairband);
-        }
-      }
-    }
-
-    // 4. Articulated Arms (Pivoting at shoulders y = 0.81, x = ±0.165)
+    // Articulated Arms (Pivoting at shoulders x = ±0.145, y = 0.93)
     function buildArm(isRight) {
       const armPivot = new THREE.Group();
-      armPivot.position.set(isRight ? 0.165 : -0.165, 0.81, 0);
+      armPivot.position.set(isRight ? 0.145 : -0.145, 0.93, 0);
 
       // Embedded Spherical Shoulder Cap
       const shoulderCap = new THREE.Mesh(
-        getPedGeo('pedShoulderCap', () => new THREE.SphereGeometry(0.048, 12, 10)),
+        getPedGeo('pedShoulderCap', () => new THREE.SphereGeometry(0.044, 12, 10)),
         topMat
       );
       armPivot.add(shoulderCap);
 
       // Upper Arm Cylinder
       const upperArm = new THREE.Mesh(
-        getPedGeo('pedUpperArm', () => new THREE.CylinderGeometry(0.038, 0.033, 0.20, 12)),
+        getPedGeo('pedUpperArm', () => new THREE.CylinderGeometry(0.036, 0.031, 0.18, 12)),
         topMat
       );
-      upperArm.position.set(0, -0.10, 0);
+      upperArm.position.set(0, -0.09, 0);
       armPivot.add(upperArm);
 
       // Elbow Sphere
       const elbow = new THREE.Mesh(
-        getPedGeo('pedElbow', () => new THREE.SphereGeometry(0.033, 10, 8)),
+        getPedGeo('pedElbow', () => new THREE.SphereGeometry(0.030, 10, 8)),
         topMat
       );
-      elbow.position.set(0, -0.20, 0);
+      elbow.position.set(0, -0.18, 0);
       armPivot.add(elbow);
 
       // Forearm Cylinder (Tilted slightly forward)
       const forearm = new THREE.Mesh(
-        getPedGeo('pedForearm', () => new THREE.CylinderGeometry(0.032, 0.026, 0.18, 12)),
+        getPedGeo('pedForearm', () => new THREE.CylinderGeometry(0.029, 0.024, 0.17, 12)),
         skinMat
       );
-      forearm.rotation.x = -0.25;
-      forearm.position.set(0, -0.29, 0.02);
+      forearm.rotation.x = -0.22;
+      forearm.position.set(0, -0.265, 0.02);
       armPivot.add(forearm);
 
       // Rounded Skin-Tone Hand Sphere
       const hand = new THREE.Mesh(
-        getPedGeo('pedHand', () => new THREE.SphereGeometry(0.030, 10, 8)),
+        getPedGeo('pedHand', () => new THREE.SphereGeometry(0.028, 10, 8)),
         skinMat
       );
-      hand.position.set(0, -0.38, 0.04);
+      hand.position.set(0, -0.355, 0.035);
       armPivot.add(hand);
 
       return armPivot;
@@ -5544,10 +5441,10 @@
 
     const leftArmPivot = buildArm(false);
     const rightArmPivot = buildArm(true);
-    bodyRoot.add(leftArmPivot);
-    bodyRoot.add(rightArmPivot);
+    torsoGroup.add(leftArmPivot);
+    torsoGroup.add(rightArmPivot);
 
-    // Procedural Rain Umbrella attached to right arm (auto-toggled during rain)
+    // Procedural Rain Umbrella attached to right hand
     const umbrellaGroup = new THREE.Group();
     const umbrellaCanopy = new THREE.Mesh(
       getPedGeo('pedUmbrellaCanopy', () => new THREE.ConeGeometry(0.48, 0.22, 14, 1, true)),
@@ -5563,77 +5460,212 @@
     umbrellaShaft.position.set(0, 0.02, 0);
     umbrellaGroup.add(umbrellaShaft);
 
-    umbrellaGroup.position.set(0, -0.38, 0.04); // Held in right hand
+    umbrellaGroup.position.set(0, -0.355, 0.035);
     umbrellaGroup.visible = false;
     rightArmPivot.add(umbrellaGroup);
 
-    // 5. Articulated Legs with Knee Pivots & Shoes (Pivoting at hips y = 0.48, x = ±0.068)
-    function buildLeg(isRight) {
-      const legPivot = new THREE.Group();
-      legPivot.position.set(isRight ? 0.068 : -0.068, 0.48, 0);
+    // =========================================================================
+    // 3. CONNECTED NECK & HEAD (Y = 0.96 to Y = 1.24 — ZERO FLOATING HEAD GAP!)
+    // =========================================================================
+    // Neck Cylinder: Centered at (0, 0.99, 0), embedded firmly into shoulder yoke at 0.985
+    const neck = new THREE.Mesh(
+      getPedGeo('pedNeck', () => new THREE.CylinderGeometry(0.036, 0.042, 0.08, 12)),
+      skinMat
+    );
+    neck.position.set(0, 0.99, 0);
+    bodyRoot.add(neck);
 
-      // Hip Sphere
-      const hip = new THREE.Mesh(
-        getPedGeo('pedHip', () => new THREE.SphereGeometry(0.052, 12, 10)),
-        bottomMat
+    // Shirt Collar Ring: Encircles neck base right at shoulders
+    const collarRing = new THREE.Mesh(
+      getPedGeo('pedCollar', () => new THREE.TorusGeometry(0.044, 0.012, 8, 16)),
+      topMat
+    );
+    collarRing.rotation.x = Math.PI / 2;
+    collarRing.position.set(0, 0.975, 0);
+    bodyRoot.add(collarRing);
+
+    // Head Group: Positioned at y = 1.11 (chin at 1.005 overlaps neck top at 1.03 — ZERO GAP!)
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 1.11, 0);
+    bodyRoot.add(headGroup);
+
+    // Head Sphere: Radius 0.10, scaled (0.92, 1.05, 0.95), front skin surface at z ≈ 0.095
+    const head = new THREE.Mesh(
+      getPedGeo('pedHead', () => new THREE.SphereGeometry(0.10, 22, 18)),
+      skinMat
+    );
+    head.scale.set(0.92, 1.05, 0.95);
+    head.position.set(0, 0, 0);
+    headGroup.add(head);
+
+    // =========================================================================
+    // 4. NATURAL SCULPTED HAIR (Uncovered Forehead & Rich Dark Tones)
+    // =========================================================================
+    if (archetype.hasHijab) {
+      const hijabMat = new THREE.MeshStandardMaterial({
+        color: archetype.hijabColor || 0xfef3c7,
+        roughness: 0.75
+      });
+      const hijabHood = new THREE.Mesh(
+        getPedGeo('pedHijabHood', () => new THREE.SphereGeometry(0.114, 18, 14)),
+        hijabMat
       );
-      legPivot.add(hip);
+      hijabHood.position.set(0, 0.008, -0.018);
+      headGroup.add(hijabHood);
 
-      // Upper Thigh Cylinder
-      const thigh = new THREE.Mesh(
-        getPedGeo('pedThigh', () => new THREE.CylinderGeometry(0.052, 0.042, 0.24, 12)),
-        bottomMat
+      const faceRing = new THREE.Mesh(
+        getPedGeo('pedHijabRing', () => new THREE.TorusGeometry(0.082, 0.018, 10, 20)),
+        hijabMat
       );
-      thigh.position.set(0, -0.12, 0);
-      legPivot.add(thigh);
+      faceRing.position.set(0, 0.004, 0.014);
+      headGroup.add(faceRing);
 
-      // Articulated Knee Pivot Group (Anchored at y = -0.24)
-      const kneePivot = new THREE.Group();
-      kneePivot.position.set(0, -0.24, 0);
-      legPivot.add(kneePivot);
-
-      // Knee Sphere
-      const knee = new THREE.Mesh(
-        getPedGeo('pedKnee', () => new THREE.SphereGeometry(0.042, 12, 10)),
-        bottomMat
+      const shoulderDrape = new THREE.Mesh(
+        getPedGeo('pedHijabDrape', () => new THREE.CylinderGeometry(0.11, 0.15, 0.10, 14)),
+        hijabMat
       );
-      kneePivot.add(knee);
-
-      // Lower Shin Cylinder
-      const shin = new THREE.Mesh(
-        getPedGeo('pedShin', () => new THREE.CylinderGeometry(0.040, 0.032, 0.24, 12)),
-        bottomMat
+      shoulderDrape.position.set(0, -0.10, -0.01);
+      headGroup.add(shoulderDrape);
+    } else if (archetype.hasCap) {
+      const capMat = new THREE.MeshStandardMaterial({ color: archetype.capColor || 0x1e3a8a, roughness: 0.6 });
+      const capDome = new THREE.Mesh(
+        getPedGeo('pedCapDome', () => new THREE.SphereGeometry(0.104, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.45)),
+        capMat
       );
-      shin.position.set(0, -0.12, 0);
-      kneePivot.add(shin);
+      capDome.rotation.x = -0.20;
+      capDome.position.set(0, 0.018, -0.008);
+      headGroup.add(capDome);
 
-      // Contoured Shoe / Sandal (Resting flush at world Y = 0)
-      const shoeGroup = new THREE.Group();
-      shoeGroup.position.set(0, -0.24, 0);
-      kneePivot.add(shoeGroup);
-
-      const shoeBase = new THREE.Mesh(
-        getPedGeo('pedShoeBase', () => new THREE.BoxGeometry(0.072, 0.050, 0.13)),
-        shoeMat
+      const capBrim = new THREE.Mesh(
+        getPedGeo('pedCapBrim', () => new THREE.CylinderGeometry(0.075, 0.075, 0.010, 10, 1, false, 0, Math.PI)),
+        capMat
       );
-      shoeBase.position.set(0, 0.025, 0.025);
-      shoeGroup.add(shoeBase);
-
-      const toeCap = new THREE.Mesh(
-        getPedGeo('pedToeCap', () => new THREE.SphereGeometry(0.035, 8, 6)),
-        shoeMat
+      capBrim.rotation.x = 0.20;
+      capBrim.position.set(0, 0.015, 0.082);
+      headGroup.add(capBrim);
+    } else {
+      // Natural Two-Part Hair Sculpture: Uncovered Forehead + Full Back/Side Coverage
+      const crownHair = new THREE.Mesh(
+        getPedGeo('pedCrownHair', () => new THREE.SphereGeometry(0.104, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.42)),
+        hairMat
       );
-      toeCap.scale.set(1.0, 0.72, 1.25);
-      toeCap.position.set(0, 0.025, 0.080);
-      shoeGroup.add(toeCap);
+      crownHair.rotation.x = -0.42;
+      crownHair.position.set(0, 0.018, -0.010);
+      headGroup.add(crownHair);
 
-      return { legPivot, kneePivot };
+      const backHair = new THREE.Mesh(
+        getPedGeo('pedBackHair', () => new THREE.SphereGeometry(0.103, 18, 14)),
+        hairMat
+      );
+      backHair.scale.set(0.93, 0.96, 0.82);
+      backHair.position.set(0, -0.005, -0.022);
+      headGroup.add(backHair);
+
+      if (archetype.hairStyle === 'bun') {
+        const bun = new THREE.Mesh(
+          getPedGeo('pedBun', () => new THREE.SphereGeometry(0.048, 14, 14)),
+          hairMat
+        );
+        bun.position.set(0, 0.010, -0.105);
+        headGroup.add(bun);
+      }
+
+      if (archetype.hasPigtails) {
+        [-0.105, 0.105].forEach(xPig => {
+          const pigtail = new THREE.Mesh(
+            getPedGeo('pedPigtail', () => new THREE.SphereGeometry(0.034, 10, 8)),
+            hairMat
+          );
+          pigtail.position.set(xPig, 0.010, -0.028);
+          headGroup.add(pigtail);
+        });
+        if (archetype.hasHairband) {
+          const bandMat = new THREE.MeshStandardMaterial({ color: archetype.hairbandColor || 0xfbbf24, roughness: 0.5 });
+          const hairband = new THREE.Mesh(
+            getPedGeo('pedHairband', () => new THREE.TorusGeometry(0.105, 0.012, 8, 18)),
+            bandMat
+          );
+          hairband.rotation.x = Math.PI / 2;
+          hairband.position.set(0, 0.018, 0.010);
+          headGroup.add(hairband);
+        }
+      }
     }
 
-    const leftLegData = buildLeg(false);
-    const rightLegData = buildLeg(true);
-    bodyRoot.add(leftLegData.legPivot);
-    bodyRoot.add(rightLegData.legPivot);
+    // =========================================================================
+    // 5. FLUSH-MOUNTED FACIAL FEATURES (Directly on Skin Surface at z ≈ 0.088–0.095)
+    // =========================================================================
+    // Eyes: White Sclera Spheres Embedded into Face + Dark Pupils
+    [-0.032, 0.032].forEach((xEye, sideIdx) => {
+      const eye = new THREE.Mesh(
+        getPedGeo('pedEye', () => new THREE.SphereGeometry(0.012, 10, 10)),
+        sharedMats.eyeWhite
+      );
+      eye.position.set(xEye, 0.012, 0.086);
+      headGroup.add(eye);
+
+      const pupil = new THREE.Mesh(
+        getPedGeo('pedPupil', () => new THREE.SphereGeometry(0.006, 8, 8)),
+        sharedMats.pupil
+      );
+      pupil.position.set(xEye, 0.012, 0.094);
+      headGroup.add(pupil);
+
+      // Flush Eyebrows
+      const brow = new THREE.Mesh(
+        getPedGeo('pedBrow', () => new THREE.BoxGeometry(0.024, 0.005, 0.005)),
+        browMat
+      );
+      brow.position.set(xEye, 0.032, 0.090);
+      brow.rotation.z = sideIdx === 0 ? -0.08 : 0.08;
+      headGroup.add(brow);
+    });
+
+    // Flush Rounded Nose Bridge (ZERO cone spike!)
+    const nose = new THREE.Mesh(
+      getPedGeo('pedNose', () => new THREE.SphereGeometry(0.011, 10, 10)),
+      skinMat
+    );
+    nose.scale.set(0.75, 1.25, 0.85);
+    nose.position.set(0, -0.006, 0.094);
+    headGroup.add(nose);
+
+    // Subtle Flush Lips (ZERO protruding pink block!)
+    const lips = new THREE.Mesh(
+      getPedGeo('pedLips', () => new THREE.BoxGeometry(0.024, 0.007, 0.006)),
+      lipMat
+    );
+    lips.position.set(0, -0.036, 0.088);
+    headGroup.add(lips);
+
+    // Flush Ears
+    [-0.092, 0.092].forEach(xEar => {
+      const ear = new THREE.Mesh(
+        getPedGeo('pedEar', () => new THREE.SphereGeometry(0.016, 8, 8)),
+        skinMat
+      );
+      ear.scale.set(0.5, 1.1, 0.7);
+      ear.position.set(xEar, 0.00, -0.005);
+      headGroup.add(ear);
+    });
+
+    // Adult Men Facial Hair (Flush mustache / beard)
+    if (archetype.hasMustache) {
+      const mustache = new THREE.Mesh(
+        getPedGeo('pedMustache', () => new THREE.BoxGeometry(0.038, 0.008, 0.008)),
+        hairMat
+      );
+      mustache.position.set(0, -0.024, 0.092);
+      headGroup.add(mustache);
+    }
+    if (archetype.hasBeard) {
+      const beard = new THREE.Mesh(
+        getPedGeo('pedBeard', () => new THREE.CylinderGeometry(0.032, 0.022, 0.045, 8)),
+        hairMat
+      );
+      beard.position.set(0, -0.075, 0.068);
+      headGroup.add(beard);
+    }
 
     // Save pivot references for live walking kinematics
     group.userData.leftLeg = leftLegData.legPivot;
