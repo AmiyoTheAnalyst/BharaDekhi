@@ -1129,12 +1129,8 @@
     const { driverZ, seatX, seatY, backrestX, backrestY, headrestX, headrestY, dashX, dashY, dashW, wheelX, wheelY, wheelR, wheelTilt, torsoX, torsoY, headX, headY } = cfg;
 
     // -----------------------------------------------------------
-    // 0. Soft Warm Cabin Point Light & Dome Fixture (Illuminates Driver)
+    // 0. Soft Warm Cabin Dome Fixture (Self-lit fixture, zero PointLight overhead)
     // -----------------------------------------------------------
-    const cabinLight = new THREE.PointLight(0xffedd5, 0.85, 2.2);
-    cabinLight.position.set(headX + 0.10, headY + 0.18, driverZ * 0.65);
-    driverGroup.add(cabinLight);
-
     const domeFixture = new THREE.Mesh(
       new THREE.CylinderGeometry(0.028, 0.028, 0.010, 8),
       new THREE.MeshBasicMaterial({ color: 0xffedd5 })
@@ -3530,10 +3526,13 @@
     column.position.set(wheelX + 0.8, wheelY - 1.2, driverZ);
     driverGroup.add(column);
 
-    // Soft Warm Cabin Light illuminating Driver
-    const cabinLight = new THREE.PointLight(0xffedd5, 0.90, 16.0);
-    cabinLight.position.set(driverX + 1.0, driverY + 7.5, driverZ);
-    driverGroup.add(cabinLight);
+    // Soft Warm Glowing Dome Fixture illuminating Driver (Zero PointLight overhead)
+    const domeFixture = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.8, 0.8, 0.15, 10),
+      new THREE.MeshBasicMaterial({ color: 0xffedd5 })
+    );
+    domeFixture.position.set(driverX + 1.0, driverY + 7.5, driverZ);
+    driverGroup.add(domeFixture);
 
     return driverGroup;
   }
@@ -4632,25 +4631,23 @@
     group.add(dTrack);
 
     // -------------------------------------------------------------
-    // Bright Interior Bus Lighting (3 Warm Ceiling PointLights: 0xfffbeb, 1.2, 6.0)
+    // Bright Interior Bus Lighting (Self-Lit Glowing Ceiling Fixtures & LED Strips)
     // -------------------------------------------------------------
-    const busDomeLight1 = new THREE.PointLight(0xfffbeb, 1.2, 6.0);
-    busDomeLight1.position.set(16.0, 17.5, 0);
-    group.add(busDomeLight1);
-
-    const busDomeLight2 = new THREE.PointLight(0xfffbeb, 1.2, 6.0);
-    busDomeLight2.position.set(0.0, 17.5, 0);
-    group.add(busDomeLight2);
-
-    const busDomeLight3 = new THREE.PointLight(0xfffbeb, 1.2, 6.0);
-    busDomeLight3.position.set(-16.0, 17.5, 0);
-    group.add(busDomeLight3);
+    const ceilingFixtureMat = new THREE.MeshBasicMaterial({ color: 0xfffbeb });
+    [16.0, 0.0, -16.0].forEach(lx => {
+      const domeFixture = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.85, 0.85, 0.15, 12),
+        ceilingFixtureMat
+      );
+      domeFixture.position.set(lx, 21.0, 0);
+      group.add(domeFixture);
+    });
 
     // Continuous glowing ceiling LED diffuser strips
     [-2.2, 2.2].forEach(lz => {
       const ledStrip = new THREE.Mesh(
         new THREE.BoxGeometry(62.0, 0.12, 0.7),
-        new THREE.MeshBasicMaterial({ color: 0xfffbeb })
+        ceilingFixtureMat
       );
       ledStrip.position.set(0, 21.0, lz);
       group.add(ledStrip);
@@ -15346,8 +15343,14 @@ let sharedRickshawArtTexture = null;
     camera = new THREE.PerspectiveCamera(38, aspect, 10, 4000);
     updateCameraFraming(aspect);
 
-    // 3. Renderer (High performance WebGL locked to 120 FPS with capped pixel ratio)
-    renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    // 3. Renderer (High performance WebGL with zero stencil overhead)
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvasEl,
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance',
+      stencil: false
+    });
     renderer.setSize(width, height, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth <= 768 ? 1.5 : 2));
     renderer.shadowMap.enabled = false;
@@ -16292,6 +16295,27 @@ let sharedRickshawArtTexture = null;
       if (rainParticles) rainParticles.visible = false;
     }
 
+    // Static Matrix Freeze: Freeze matrixAutoUpdate on all static environment meshes
+    // (Roads, buildings, trees, streetlamps, Metro pillars/tracks, zebra crossings)
+    scene.traverse(child => {
+      if (child.isMesh) {
+        const isDyn = child.userData && (child.userData.isDynamic || child.userData.isCar || child.userData.isBike || child.userData.isBus || child.userData.isCNG || child.userData.isRickshaw || child.userData.wheels);
+        let p = child.parent;
+        let parentIsDynamic = false;
+        while (p && p !== scene) {
+          if (p === trainGroup || p === ambulanceGroup || (p.userData && (p.userData.isDynamic || p.userData.isCar || p.userData.isBike || p.userData.isBus || p.userData.isCNG || p.userData.isRickshaw))) {
+            parentIsDynamic = true;
+            break;
+          }
+          p = p.parent;
+        }
+        if (!isDyn && !parentIsDynamic && child !== rainParticles) {
+          child.matrixAutoUpdate = false;
+          child.updateMatrix();
+        }
+      }
+    });
+
     isReady = true;
   }
 
@@ -16376,13 +16400,64 @@ let sharedRickshawArtTexture = null;
   let strobeTimer = 0;
   let lastWeatherMode = null;
   let lastIsMobile = null;
+  let lastFrameTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  let frameTimeEMA = 16.6;
+  let currentTier = 'high';
+  let tierFrameCounter = 0;
+  let currentAdaptivePixelRatio = 0;
 
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
     if (isRenderLoopPaused) return;
 
-    // 120Hz Delta-Time Physics (clamped to max 0.05 to avoid frame-skip spikes)
-    const delta = clock ? Math.min(clock.getDelta(), 0.05) : (dt || 0.016);
+    // 1. Native Refresh-Rate Loop (60/90/120/144 FPS) with Clamped Delta-Time (Zero lag spikes)
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const dtFromPerf = (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+    const delta = Math.min(Math.max(dtFromPerf, 0.001), 0.05);
+
+    // 2. Real-Time Adaptive Performance Scaler (Auto-Tunes for Low, Mid & High-End Devices)
+    const frameDurationMs = dtFromPerf * 1000;
+    frameTimeEMA = frameTimeEMA * 0.95 + frameDurationMs * 0.05;
+    tierFrameCounter++;
+    if (tierFrameCounter >= 45) {
+      tierFrameCounter = 0;
+      let newTier = 'high';
+      if (frameTimeEMA > 19.2) {
+        newTier = 'low'; // < 52 FPS
+      } else if (frameTimeEMA > 11.5) {
+        newTier = 'mid'; // 52 - 87 FPS (60Hz - 90Hz)
+      } else {
+        newTier = 'high'; // > 87 FPS (90Hz - 120Hz+)
+      }
+
+      if (newTier !== currentTier || currentAdaptivePixelRatio === 0) {
+        currentTier = newTier;
+        const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+        let targetPR = 1.0;
+        if (currentTier === 'high') {
+          targetPR = Math.min(dpr, 1.75);
+        } else if (currentTier === 'mid') {
+          targetPR = Math.min(dpr, 1.25);
+        } else {
+          targetPR = 1.0;
+        }
+        if (Math.abs(currentAdaptivePixelRatio - targetPR) > 0.02) {
+          currentAdaptivePixelRatio = targetPR;
+          if (renderer && typeof renderer.setPixelRatio === 'function') {
+            renderer.setPixelRatio(targetPR);
+          }
+        }
+        if (renderer && renderer.shadowMap) {
+          if (currentTier === 'low') {
+            renderer.shadowMap.autoUpdate = false;
+            renderer.shadowMap.needsUpdate = true;
+          } else {
+            renderer.shadowMap.autoUpdate = true;
+          }
+        }
+      }
+    }
 
     // Atmospheric Weather Mode Transition (Sunrise, Sun, Sunset, Night, Fog Day, Fog Night, Rain)
     const currentMode = weatherMode || containerEl?.dataset?.crossroadsWeather || (isRain ? 'rain' : 'night');
@@ -16995,7 +17070,7 @@ let sharedRickshawArtTexture = null;
         const windSlantZ = -1.8;
         for (let i = 0; i < rainCount; i++) {
           const idx = i * 6;
-          const fallDist = rainSpeeds[i] * dt;
+          const fallDist = rainSpeeds[i] * delta;
           positions[idx + 1] -= fallDist;
           positions[idx + 4] = positions[idx + 1] - rainLengths[i];
           if (positions[idx + 1] < 0) {
@@ -17018,8 +17093,8 @@ let sharedRickshawArtTexture = null;
     if (roadMaterial) {
       const targetRoughness = isRain ? 0.45 : 0.85;
       const targetMetalness = isRain ? 0.20 : 0.05;
-      roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * Math.min(1, dt * 3.0);
-      roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, dt * 3.0);
+      roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * Math.min(1, delta * 3.0);
+      roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, delta * 3.0);
     }
 
     // 7. Dynamic GTA-5 Third-Person Chase Camera & Aerial Drone Hover

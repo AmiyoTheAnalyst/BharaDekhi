@@ -111,7 +111,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=20261117-hasan-transit-bus-v21"></script>
+  <script src="assets/crossroads-3d.js?v=20261117-120fps-adaptive"></script>
   <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
@@ -19085,7 +19085,8 @@
       // Animation Loop
       function tick(currentTime) {
         if (!dhakaCrossroadsRunning) return;
-        const dt = Math.min(0.08, (currentTime - lastTime) / 1000);
+        // High-precision unclamped native refresh rate dt (clamped at 50ms to prevent tab-switch jumps)
+        const dt = Math.min(0.05, (currentTime - lastTime) / 1000);
         lastTime = currentTime;
 
         if (!prefersReducedMotion) {
