@@ -105,7 +105,7 @@
   let activeCamMode = 'overview';
   let activeTargetVehicle = null;
 
-  function acquireTargetVehicle(modeName) {
+  function acquireTargetVehicle(modeName, excludeId) {
     if (modeName === 'metro') {
       if (trainGroup) {
         return { type: 'metro', mesh: trainGroup, dir: 'EB', speed: 78 };
@@ -124,9 +124,13 @@
 
     if (targetTypes.length) {
       const eligible = Object.values(vehicleMeshMap)
-        .filter(vm => vm.mesh && vm.data && targetTypes.includes(vm.data.type));
+        .filter(vm => vm.mesh && vm.mesh.parent && vm.data && targetTypes.includes(vm.data.type) && (!excludeId || vm.data.id !== excludeId));
       if (modeName === 'bike') {
-        eligible.sort((a, b) => ((a.data && a.data.variantIndex) || 0) - ((b.data && b.data.variantIndex) || 0));
+        eligible.sort((a, b) => {
+          const centerA = a.data.dir === 'SB' || a.data.dir === 'NB' ? 420 : 600;
+          const centerB = b.data.dir === 'SB' || b.data.dir === 'NB' ? 420 : 600;
+          return Math.abs(a.data.pos - centerA) - Math.abs(b.data.pos - centerB);
+        });
       } else {
         eligible.sort((a, b) => {
           const centerA = a.data.dir === 'SB' || a.data.dir === 'NB' ? 420 : 600;
@@ -135,26 +139,16 @@
         });
       }
       if (eligible.length) {
-        if (modeName === 'bike' && activeTargetVehicle && activeTargetVehicle.type === 'bike') {
-          const curId = (activeTargetVehicle.data && activeTargetVehicle.data.id) || activeTargetVehicle.id;
-          const curIndex = eligible.findIndex(e => e.data && e.data.id === curId);
-          const nextIndex = curIndex !== -1 ? (curIndex + 1) % eligible.length : 0;
-          return {
-            id: eligible[nextIndex].data.id,
-            type: eligible[nextIndex].data.type,
-            mesh: eligible[nextIndex].mesh,
-            data: eligible[nextIndex].data
-          };
-        }
         return {
           id: eligible[0].data.id,
           type: eligible[0].data.type,
           mesh: eligible[0].mesh,
-          data: eligible[0].data
+          data: eligible[0].data,
+          speed: eligible[0].data.speed || (modeName === 'bike' ? 44 : modeName === 'bus' ? 26 : modeName === 'cng' ? 34 : 38)
         };
       }
     } else if (modeName === 'walking') {
-      const eligible = Object.values(pedMeshMap).filter(pm => pm.mesh && pm.data);
+      const eligible = Object.values(pedMeshMap).filter(pm => pm.mesh && pm.mesh.parent && pm.data);
       if (eligible.length > 0) {
         return { type: 'ped', mesh: eligible[0].mesh, data: eligible[0].data };
       }
@@ -163,7 +157,73 @@
     return null;
   }
 
+  function clearTrackedVehicle() {
+    activeCamMode = 'overview';
+    activeTargetVehicle = null;
+    orbitPointerId = null;
+    if (canvasEl) canvasEl.style.touchAction = 'auto';
+
+    const modePill = document.getElementById('crossroadsModePill');
+    if (modePill) modePill.classList.add('hidden');
+
+    updateLegendHUD('overview');
+    updateCameraModeBadge('overview');
+
+    if (CAM_MODES && CAM_MODES.overview) {
+      focusCamera(CAM_MODES.overview.pos, CAM_MODES.overview.look, 1.6);
+    }
+  }
+  window.clearTrackedVehicle = clearTrackedVehicle;
+
+  let lastTrackedHUDUpdate = 0;
+  function updateTrackedVehicleHUD(target, force) {
+    const now = performance.now();
+    if (!force && (now - lastTrackedHUDUpdate < 100)) return; // 10 Hz DOM throttle
+    lastTrackedHUDUpdate = now;
+
+    if (!target || !target.data) return;
+    const modePill = document.getElementById('crossroadsModePill');
+    const icon = document.getElementById('crossroadsModePillIcon');
+    const title = document.getElementById('crossroadsModePillTitle');
+    const sub = document.getElementById('crossroadsModePillSub');
+    if (!modePill || !title) return;
+
+    modePill.classList.remove('hidden');
+    const dirLabel = target.data.dir === 'EB' ? 'Eastbound' :
+                     target.data.dir === 'WB' ? 'Westbound' :
+                     target.data.dir === 'SB' ? 'Southbound' : 'Northbound';
+    const speedKmh = Math.round(target.data.speed || target.speed || 40);
+    const vType = target.type;
+
+    if (vType === 'bike') {
+      if (icon) icon.textContent = '🏍️';
+      title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
+      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
+    } else if (vType === 'cng') {
+      if (icon) icon.textContent = '🛺';
+      title.textContent = `CNG Auto-Rickshaw · One Paribahan (${dirLabel})`;
+      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Reg: ঢাকা মেট্রো-থ ১১-৪৫৬৭ · Base ৳40 + ৳12/km`;
+    } else if (vType === 'bus') {
+      if (icon) icon.textContent = '🚌';
+      title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'হাসান পরিবহন (আজিমপুর - উত্তরা)'} · ${dirLabel}`;
+      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · আজিমপুর ➔ উত্তরা · Dhaka City Transit Bus`;
+    } else if (vType === 'rickshaw') {
+      if (icon) icon.textContent = '🛺';
+      title.textContent = `Dhaka Cycle Rickshaw · ${dirLabel}`;
+      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Traditional Rickshaw Art · Local Mirpur fare ৳25 – ৳50`;
+    } else if (vType === 'car') {
+      if (icon) icon.textContent = '🚗';
+      title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Aerodynamic Ride-share Car'} · ${dirLabel}`;
+      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Executive Fleet · Base ৳50 + ৳20/km`;
+    }
+  }
+
   function focusCamera(targetPos, targetLook, duration) {
+    if (!targetPos || !targetLook) return;
+    if (!Number.isFinite(targetPos.x) || !Number.isFinite(targetPos.y) || !Number.isFinite(targetPos.z) ||
+        !Number.isFinite(targetLook.x) || !Number.isFinite(targetLook.y) || !Number.isFinite(targetLook.z)) {
+      return;
+    }
     if (typeof gsap !== 'undefined') {
       gsap.killTweensOf(camBasePos);
       gsap.killTweensOf(camBaseLook);
@@ -192,43 +252,78 @@
   }
 
   function getVehicleCameraPose(target, yaw, radius, pitch) {
+    if (!target || !target.mesh || !target.mesh.position) {
+      return {
+        position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
+        look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
+      };
+    }
     const position = target.mesh.position;
+    if (!Number.isFinite(position.x) || !Number.isFinite(position.y) || !Number.isFinite(position.z)) {
+      return {
+        position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
+        look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
+      };
+    }
+
+    const safeYaw = Number.isFinite(yaw) ? yaw : DEFAULT_VEHICLE_YAW;
+    const safePitch = Number.isFinite(pitch) ? Math.max(0.12, Math.min(0.55, pitch)) : 0.28;
+    const safeRadius = Number.isFinite(radius) && radius > 0 ? radius : 50;
+
     const direction = target.data ? target.data.dir : target.dir;
     const forward = direction === 'EB' ? { x: 1, z: 0 }
       : direction === 'WB' ? { x: -1, z: 0 }
         : direction === 'SB' ? { x: 0, z: 1 }
           : { x: 0, z: -1 };
     const right = { x: -forward.z, z: forward.x };
-    const horizontalRadius = radius * Math.cos(pitch);
+    const horizontalRadius = safeRadius * Math.cos(safePitch);
     const targetX = position.x;
     const targetY = position.y + (target.type === 'bike' ? 4.5 : target.type === 'bus' ? 9.5 : target.type === 'car' ? 4.5 : 5.5);
     const targetZ = position.z;
 
+    const posX = targetX - forward.x * horizontalRadius * Math.cos(safeYaw) + right.x * horizontalRadius * Math.sin(safeYaw);
+    const posY = targetY + safeRadius * Math.sin(safePitch);
+    const posZ = targetZ - forward.z * horizontalRadius * Math.cos(safeYaw) + right.z * horizontalRadius * Math.sin(safeYaw);
+
+    const lookX = targetX;
+    const lookY = targetY + (target.type === 'bus' ? 2.0 : 1.0);
+    const lookZ = targetZ;
+
     return {
       position: {
-        x: targetX - forward.x * horizontalRadius * Math.cos(yaw) + right.x * horizontalRadius * Math.sin(yaw),
-        y: targetY + radius * Math.sin(pitch),
-        z: targetZ - forward.z * horizontalRadius * Math.cos(yaw) + right.z * horizontalRadius * Math.sin(yaw)
+        x: Number.isFinite(posX) ? posX : camBasePos.x,
+        y: Number.isFinite(posY) ? posY : camBasePos.y,
+        z: Number.isFinite(posZ) ? posZ : camBasePos.z
       },
       look: {
-        x: targetX,
-        y: targetY + (target.type === 'bus' ? 2.0 : 1.0),
-        z: targetZ
+        x: Number.isFinite(lookX) ? lookX : camBaseLook.x,
+        y: Number.isFinite(lookY) ? lookY : camBaseLook.y,
+        z: Number.isFinite(lookZ) ? lookZ : camBaseLook.z
       }
     };
   }
 
   function getVehicleOrbitPose(target) {
-    const yaw = vehicleOrbitYaw;
-    const pitch = Math.max(0.12, Math.min(0.55, vehicleOrbitPitch));
+    if (!target) {
+      return {
+        position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
+        look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
+      };
+    }
+    const yaw = Number.isFinite(vehicleOrbitYaw) ? vehicleOrbitYaw : DEFAULT_VEHICLE_YAW;
+    const pitch = Math.max(0.12, Math.min(0.55, Number.isFinite(vehicleOrbitPitch) ? vehicleOrbitPitch : 0.28));
     const baseRadius = target.type === 'car' ? 52
       : target.type === 'bike' ? 36
         : target.type === 'rickshaw' ? 38
           : target.type === 'cng' ? 40
             : 96;
-    const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+    const fovDeg = (camera && Number.isFinite(camera.fov)) ? camera.fov : 38;
+    const aspect = (camera && Number.isFinite(camera.aspect) && camera.aspect > 0) ? camera.aspect : 1.6;
+    const horizontalCoverage = Math.tan(THREE.MathUtils.degToRad(fovDeg / 2)) * aspect;
     const desktopCoverage = Math.tan(THREE.MathUtils.degToRad(38 / 2)) * 1.6;
-    const framingScale = horizontalCoverage > 0 ? Math.max(1, desktopCoverage / horizontalCoverage) : 1;
+    const framingScale = (Number.isFinite(horizontalCoverage) && horizontalCoverage > 0)
+      ? Math.max(1, desktopCoverage / horizontalCoverage)
+      : 1;
 
     return getVehicleCameraPose(target, yaw, baseRadius * framingScale, pitch);
   }
@@ -318,61 +413,34 @@
     if (activeCamMode === modeName && modeName !== 'overview') {
       if (modeName === 'bike') {
         // Repeated clicks on Ride-share Bike cycle across motorcycle fleet models & colorways
-        activeTargetVehicle = acquireTargetVehicle('bike');
+        activeTargetVehicle = acquireTargetVehicle('bike', activeTargetVehicle ? activeTargetVehicle.id : null);
         if (activeTargetVehicle && activeTargetVehicle.data) {
           updateLegendHUD('bike');
-          const modePill = document.getElementById('crossroadsModePill');
-          const icon = document.getElementById('crossroadsModePillIcon');
-          const title = document.getElementById('crossroadsModePillTitle');
-          const sub = document.getElementById('crossroadsModePillSub');
-          if (modePill && icon && title && sub) {
-            modePill.classList.remove('hidden');
-            const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
-                             activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
-                             activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
-            const speedKmh = Math.round(activeTargetVehicle.data.speed || 44);
-            icon.textContent = '🏍️';
-            title.textContent = `${(activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
-            sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
-          }
+          updateTrackedVehicleHUD(activeTargetVehicle, true);
           const pose = getVehicleOrbitPose(activeTargetVehicle);
-          focusCamera(pose.position, pose.look, 0.8);
+          if (Number.isFinite(pose.position.x) && Number.isFinite(pose.look.x)) {
+            focusCamera(pose.position, pose.look, 0.8);
+          }
           return;
         }
       }
       if (modeName === 'car') {
         // Repeated clicks on Car cycle across the 4 car models & 16 colorways
-        activeTargetVehicle = acquireTargetVehicle('car');
+        activeTargetVehicle = acquireTargetVehicle('car', activeTargetVehicle ? activeTargetVehicle.id : null);
         if (activeTargetVehicle && activeTargetVehicle.data) {
           if (activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isCar) {
             swapCarVariant(activeTargetVehicle.mesh);
           }
           updateLegendHUD('car');
-          const modePill = document.getElementById('crossroadsModePill');
-          const icon = document.getElementById('crossroadsModePillIcon');
-          const title = document.getElementById('crossroadsModePillTitle');
-          const sub = document.getElementById('crossroadsModePillSub');
-          if (modePill && icon && title && sub) {
-            modePill.classList.remove('hidden');
-            const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
-                             activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
-                             activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
-            const speedKmh = Math.round(activeTargetVehicle.data.speed || 55);
-            icon.textContent = '🚗';
-            title.textContent = `${(activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) || 'Private Car'} · ${dirLabel}`;
-            sub.textContent = `Speed: ${speedKmh} km/h · Executive Fleet · Base ৳50 + ৳20/km`;
-          }
+          updateTrackedVehicleHUD(activeTargetVehicle, true);
           const pose = getVehicleOrbitPose(activeTargetVehicle);
-          focusCamera(pose.position, pose.look, 0.8);
+          if (Number.isFinite(pose.position.x) && Number.isFinite(pose.look.x)) {
+            focusCamera(pose.position, pose.look, 0.8);
+          }
           return;
         }
       }
-      activeCamMode = 'overview';
-      activeTargetVehicle = null;
-      orbitPointerId = null;
-      if (canvasEl) canvasEl.style.touchAction = 'auto';
-      focusCamera(CAM_MODES.overview.pos, CAM_MODES.overview.look, 1.6);
-      updateLegendHUD('overview');
+      clearTrackedVehicle();
       return;
     }
 
@@ -391,15 +459,20 @@
     }
 
     if (activeTargetVehicle && activeTargetVehicle.data) {
+      updateTrackedVehicleHUD(activeTargetVehicle, true);
       const pose = getVehicleOrbitPose(activeTargetVehicle);
-      camera.position.set(pose.position.x, pose.position.y, pose.position.z);
-      currentCamLook.x = pose.look.x;
-      currentCamLook.y = pose.look.y;
-      currentCamLook.z = pose.look.z;
-      camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
-      focusCamera(pose.position, pose.look, 0.3);
+      if (Number.isFinite(pose.position.x) && Number.isFinite(pose.look.x)) {
+        camera.position.set(pose.position.x, pose.position.y, pose.position.z);
+        currentCamLook.x = pose.look.x;
+        currentCamLook.y = pose.look.y;
+        currentCamLook.z = pose.look.z;
+        camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+        focusCamera(pose.position, pose.look, 0.3);
+      }
     } else {
-      focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.2);
+      if (CAM_MODES[targetMode]) {
+        focusCamera(CAM_MODES[targetMode].pos, CAM_MODES[targetMode].look, 1.2);
+      }
     }
     updateLegendHUD(targetMode);
   };
@@ -3126,13 +3199,7 @@
     }
 
     if (activeTargetVehicle && activeTargetVehicle.mesh === rootMesh) {
-      const title = document.getElementById('crossroadsModePillTitle');
-      if (title && activeTargetVehicle.data) {
-        const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
-                         activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
-                         activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
-        title.textContent = `${config.modelTitle} · ${dirLabel}`;
-      }
+      updateTrackedVehicleHUD(activeTargetVehicle, true);
     }
 
     return newIndex;
@@ -10628,13 +10695,7 @@ let sharedRickshawArtTexture = null;
     }
 
     if (activeTargetVehicle && activeTargetVehicle.mesh === rootMesh) {
-      const title = document.getElementById('crossroadsModePillTitle');
-      if (title && activeTargetVehicle.data) {
-        const dirLabel = activeTargetVehicle.data.dir === 'EB' ? 'Eastbound' :
-                         activeTargetVehicle.data.dir === 'WB' ? 'Westbound' :
-                         activeTargetVehicle.data.dir === 'SB' ? 'Southbound' : 'Northbound';
-        title.textContent = `${variantConfig.modelTitle} · ${dirLabel}`;
-      }
+      updateTrackedVehicleHUD(activeTargetVehicle, true);
     }
 
     return newIndex;
@@ -13981,7 +14042,8 @@ let sharedRickshawArtTexture = null;
       throw new Error(`The Blender cycle-rickshaw model must contain three named wheel pivots; found ${wheels.length}`);
     }
 
-    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    let childGuard1 = 0;
+    while (vehicle.children.length && ++childGuard1 < 50) vehicle.remove(vehicle.children[0]);
     vehicle.add(model);
     vehicle.userData.wheels = wheels;
     vehicle.userData.wheelRadius = 3.65;
@@ -14101,7 +14163,8 @@ let sharedRickshawArtTexture = null;
       }
     });
 
-    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    let childGuard1 = 0;
+    while (vehicle.children.length && ++childGuard1 < 50) vehicle.remove(vehicle.children[0]);
     vehicle.add(model);
     vehicle.userData.wheels = wheels;
     vehicle.userData.wheelRadius = 3.0;
@@ -14144,7 +14207,8 @@ let sharedRickshawArtTexture = null;
       }
     });
 
-    while (vehicle.children.length) vehicle.remove(vehicle.children[0]);
+    let childGuard1 = 0;
+    while (vehicle.children.length && ++childGuard1 < 50) vehicle.remove(vehicle.children[0]);
     vehicle.add(model);
     vehicle.userData.wheels = wheels;
     vehicle.userData.wheelRadius = 2.6;
@@ -14203,7 +14267,8 @@ let sharedRickshawArtTexture = null;
           }
         }
       });
-      while (pedEntry.mesh.children.length) pedEntry.mesh.remove(pedEntry.mesh.children[0]);
+      let pedGuard = 0;
+      while (pedEntry.mesh.children.length && ++pedGuard < 50) pedEntry.mesh.remove(pedEntry.mesh.children[0]);
       pedEntry.mesh.add(clone);
     });
   }
@@ -16211,42 +16276,12 @@ let sharedRickshawArtTexture = null;
         };
         if (canvasEl) canvasEl.style.touchAction = isOrbitableVehicleMode(vType) ? 'none' : 'auto';
         updateLegendHUD(vType);
-
-        const modePill = document.getElementById('crossroadsModePill');
-        const icon = document.getElementById('crossroadsModePillIcon');
-        const title = document.getElementById('crossroadsModePillTitle');
-        const sub = document.getElementById('crossroadsModePillSub');
-
-        if (modePill && icon && title && sub) {
-          modePill.classList.remove('hidden');
-          const dirLabel = info.data.dir === 'EB' ? 'Eastbound' : info.data.dir === 'WB' ? 'Westbound' : info.data.dir === 'SB' ? 'Southbound' : 'Northbound';
-          const speedKmh = Math.round(activeTargetVehicle.speed);
-
-          if (vType === 'bike') {
-            icon.textContent = '🏍️';
-            title.textContent = `${(info.mesh && info.mesh.userData && info.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
-            sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
-          } else if (vType === 'cng') {
-            icon.textContent = '🛺';
-            title.textContent = `CNG Auto-Rickshaw · One Paribahan (${dirLabel})`;
-            sub.textContent = `Speed: ${speedKmh} km/h · Reg: ঢাকা মেট্রো-থ ১১-৪৫৬৭ · Base ৳40 + ৳12/km`;
-          } else if (vType === 'bus') {
-            icon.textContent = '🚌';
-            title.textContent = `${(info.mesh && info.mesh.userData && info.mesh.userData.modelTitle) || 'হাসান পরিবহন (আজিমপুর - উত্তরা)'} · ${dirLabel}`;
-            sub.textContent = `Speed: ${speedKmh} km/h · আজিমপুর ➔ উত্তরা · Dhaka City Transit Bus`;
-          } else if (vType === 'rickshaw') {
-            icon.textContent = '🛺';
-            title.textContent = `Dhaka Cycle Rickshaw · ${dirLabel}`;
-            sub.textContent = `Speed: ${speedKmh} km/h · Traditional Rickshaw Art · Local Mirpur fare ৳25 – ৳50`;
-          } else if (vType === 'car') {
-            icon.textContent = '🚗';
-            title.textContent = `Aerodynamic Ride-share Car · ${dirLabel}`;
-            sub.textContent = `Speed: ${speedKmh} km/h · AC Ride · Base ৳60 + ৳18/km`;
-          }
-        }
+        updateTrackedVehicleHUD(activeTargetVehicle, true);
 
         const pose = getVehicleOrbitPose(activeTargetVehicle);
-        focusCamera(pose.position, pose.look, 1.4);
+        if (Number.isFinite(pose.position.x) && Number.isFinite(pose.look.x)) {
+          focusCamera(pose.position, pose.look, 1.4);
+        }
 
       } else if (info.kind === 'metro') {
         window.crossroadsFocusMode('metro');
@@ -16299,11 +16334,33 @@ let sharedRickshawArtTexture = null;
     // (Roads, buildings, trees, streetlamps, Metro pillars/tracks, zebra crossings)
     scene.traverse(child => {
       if (child.isMesh) {
-        const isDyn = child.userData && (child.userData.isDynamic || child.userData.isCar || child.userData.isBike || child.userData.isBus || child.userData.isCNG || child.userData.isRickshaw || child.userData.wheels);
+        const isDyn = child.userData && (
+          child.userData.isDynamic ||
+          child.userData.isCar ||
+          child.userData.isBike ||
+          child.userData.isBus ||
+          child.userData.isCNG ||
+          child.userData.isRickshaw ||
+          child.userData.isPedestrian ||
+          child.userData.isDriver ||
+          child.userData.isPassenger ||
+          child.userData.wheels
+        );
         let p = child.parent;
         let parentIsDynamic = false;
-        while (p && p !== scene) {
-          if (p === trainGroup || p === ambulanceGroup || (p.userData && (p.userData.isDynamic || p.userData.isCar || p.userData.isBike || p.userData.isBus || p.userData.isCNG || p.userData.isRickshaw))) {
+        let guard = 0;
+        while (p && p !== scene && ++guard < 50) {
+          if (p === trainGroup || p === ambulanceGroup || (p.userData && (
+            p.userData.isDynamic ||
+            p.userData.isCar ||
+            p.userData.isBike ||
+            p.userData.isBus ||
+            p.userData.isCNG ||
+            p.userData.isRickshaw ||
+            p.userData.isPedestrian ||
+            p.userData.isDriver ||
+            p.userData.isPassenger
+          ))) {
             parentIsDynamic = true;
             break;
           }
@@ -16409,6 +16466,8 @@ let sharedRickshawArtTexture = null;
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
     if (isRenderLoopPaused) return;
+
+    try {
 
     // 1. Native Refresh-Rate Loop (60/90/120/144 FPS) with Clamped Delta-Time (Zero lag spikes)
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
@@ -16873,11 +16932,40 @@ let sharedRickshawArtTexture = null;
         vm.mesh.rotation.x = -tiltZ;
       }
       // Roll wheels by the distance the vehicle actually travelled this frame.
-      if (vm.mesh.userData && vm.mesh.userData.wheels) {
-        const previousPosition = vm.mesh.userData.previousRoadPosition;
-        const roadDelta = Number.isFinite(previousPosition) ? v.pos - previousPosition : 0;
-        vm.mesh.userData.previousRoadPosition = v.pos;
+      const previousPosition = vm.mesh.userData ? vm.mesh.userData.previousRoadPosition : undefined;
+      const roadDelta = Number.isFinite(previousPosition) ? v.pos - previousPosition : 0;
+      if (vm.mesh.userData) vm.mesh.userData.previousRoadPosition = v.pos;
 
+      // Safe lifecycle hook on vehicle removal / recycling / boundary wrap-around
+      const isTracked = activeTargetVehicle && (
+        activeTargetVehicle.mesh === vm.mesh ||
+        (activeTargetVehicle.data && activeTargetVehicle.data.id === v.id) ||
+        activeTargetVehicle.id === v.id
+      );
+
+      const isNearBoundary = (
+        (v.dir === 'EB' && v.pos > 1240) ||
+        (v.dir === 'WB' && v.pos < -100) ||
+        (v.dir === 'SB' && v.pos > 690) ||
+        (v.dir === 'NB' && v.pos < 160)
+      );
+
+      if (isTracked && (Math.abs(roadDelta) > 180 || isNearBoundary)) {
+        const vType = v.type || (activeTargetVehicle && activeTargetVehicle.type);
+        const nextTarget = acquireTargetVehicle(vType, v.id);
+        if (nextTarget && nextTarget.mesh && nextTarget.mesh.parent && nextTarget.data && nextTarget.id !== v.id) {
+          activeTargetVehicle = nextTarget;
+          updateTrackedVehicleHUD(nextTarget, true);
+          const nextPose = getVehicleOrbitPose(nextTarget);
+          if (Number.isFinite(nextPose.position.x) && Number.isFinite(nextPose.look.x)) {
+            focusCamera(nextPose.position, nextPose.look, 1.2);
+          }
+        } else if (Math.abs(roadDelta) > 180) {
+          clearTrackedVehicle();
+        }
+      }
+
+      if (vm.mesh.userData && vm.mesh.userData.wheels) {
         // Auto-cycle bike models & 16 liveries across the master deck on lane wrap-around / respawn
         if (vm.mesh.userData.isBike && Math.abs(roadDelta) > 200) {
           const nextIdx = (globalNextBikeDeckIndex++) % BIKE_VARIANT_DECK.length;
@@ -17015,9 +17103,15 @@ let sharedRickshawArtTexture = null;
         pm.mesh.userData.currentRotY = targetRotY;
       }
       let rotDiff = targetRotY - pm.mesh.userData.currentRotY;
-      while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
-      while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
-      pm.mesh.userData.currentRotY += rotDiff * Math.min(1.0, delta * 12);
+      if (Number.isFinite(rotDiff)) {
+        let guard = 0;
+        while (rotDiff > Math.PI && ++guard < 10) rotDiff -= Math.PI * 2;
+        guard = 0;
+        while (rotDiff < -Math.PI && ++guard < 10) rotDiff += Math.PI * 2;
+        pm.mesh.userData.currentRotY += rotDiff * Math.min(1.0, delta * 12);
+      } else {
+        pm.mesh.userData.currentRotY = targetRotY;
+      }
 
       pm.mesh.position.set(posX, 1 + bob, posZ);
       pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
@@ -17106,6 +17200,17 @@ let sharedRickshawArtTexture = null;
         if (activeTargetVehicle) updateCameraModeBadge(activeCamMode);
       }
 
+      // Guard: never allow activeTargetVehicle to point to a detached mesh
+      if (activeTargetVehicle && (!activeTargetVehicle.mesh || !activeTargetVehicle.mesh.parent)) {
+        const fallbackTarget = acquireTargetVehicle(activeCamMode, activeTargetVehicle.id);
+        if (fallbackTarget && fallbackTarget.mesh && fallbackTarget.mesh.parent) {
+          activeTargetVehicle = fallbackTarget;
+          updateTrackedVehicleHUD(fallbackTarget, true);
+        } else {
+          clearTrackedVehicle();
+        }
+      }
+
       let desiredCamPos = null;
       let desiredCamLook = null;
 
@@ -17123,7 +17228,7 @@ let sharedRickshawArtTexture = null;
         };
       } else if (activeCamMode === 'walking') {
         if (!activeTargetVehicle) activeTargetVehicle = acquireTargetVehicle('walking');
-        if (activeTargetVehicle && activeTargetVehicle.mesh) {
+        if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.parent) {
           const pPos = activeTargetVehicle.mesh.position;
           desiredCamPos = {
             x: pPos.x - 24,
@@ -17136,35 +17241,63 @@ let sharedRickshawArtTexture = null;
             z: pPos.z
           };
         }
-      } else if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.data) {
+      } else if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.parent && activeTargetVehicle.data) {
+        updateTrackedVehicleHUD(activeTargetVehicle, false); // 10 Hz throttled HUD update
         const pose = getVehicleOrbitPose(activeTargetVehicle);
         desiredCamPos = pose.position;
         desiredCamLook = pose.look;
       }
 
-      if (desiredCamPos && desiredCamLook) {
+      if (desiredCamPos && desiredCamLook &&
+          Number.isFinite(desiredCamPos.x) && Number.isFinite(desiredCamPos.y) && Number.isFinite(desiredCamPos.z) &&
+          Number.isFinite(desiredCamLook.x) && Number.isFinite(desiredCamLook.y) && Number.isFinite(desiredCamLook.z)) {
         // Silky-smooth 120Hz exponential damping: 1 - Math.exp(-k * delta)
-        const camLerp = 1 - Math.exp(-6 * delta);
-        const lookLerp = 1 - Math.exp(-8 * delta);
+        const safeDt = Math.max(0.0001, Math.min(delta, 0.05));
+        const camLerp = 1 - Math.exp(-6 * safeDt);
+        const lookLerp = 1 - Math.exp(-8 * safeDt);
 
-        camera.position.x += (desiredCamPos.x - camera.position.x) * camLerp;
-        camera.position.y += (desiredCamPos.y - camera.position.y) * camLerp;
-        camera.position.z += (desiredCamPos.z - camera.position.z) * camLerp;
+        const newCamX = camera.position.x + (desiredCamPos.x - camera.position.x) * camLerp;
+        const newCamY = camera.position.y + (desiredCamPos.y - camera.position.y) * camLerp;
+        const newCamZ = camera.position.z + (desiredCamPos.z - camera.position.z) * camLerp;
 
-        currentCamLook.x += (desiredCamLook.x - currentCamLook.x) * lookLerp;
-        currentCamLook.y += (desiredCamLook.y - currentCamLook.y) * lookLerp;
-        currentCamLook.z += (desiredCamLook.z - currentCamLook.z) * lookLerp;
+        const newLookX = currentCamLook.x + (desiredCamLook.x - currentCamLook.x) * lookLerp;
+        const newLookY = currentCamLook.y + (desiredCamLook.y - currentCamLook.y) * lookLerp;
+        const newLookZ = currentCamLook.z + (desiredCamLook.z - currentCamLook.z) * lookLerp;
 
-        camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+        if (Number.isFinite(newCamX) && Number.isFinite(newCamY) && Number.isFinite(newCamZ) &&
+            Number.isFinite(newLookX) && Number.isFinite(newLookY) && Number.isFinite(newLookZ)) {
+          camera.position.x = newCamX;
+          camera.position.y = newCamY;
+          camera.position.z = newCamZ;
+          currentCamLook.x = newLookX;
+          currentCamLook.y = newLookY;
+          currentCamLook.z = newLookZ;
+
+          // Guard against camera position and look target coinciding (which creates NaN in lookAt)
+          const distSq = (newCamX - newLookX) ** 2 + (newCamY - newLookY) ** 2 + (newCamZ - newLookZ) ** 2;
+          if (distSq > 0.01) {
+            camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+          }
+        } else {
+          clearTrackedVehicle();
+        }
       } else {
-        const camLerp = 1 - Math.exp(-5 * delta);
-        camera.position.x += (camBasePos.x - camera.position.x) * camLerp;
-        camera.position.y += (camBasePos.y - camera.position.y) * camLerp;
-        camera.position.z += (camBasePos.z - camera.position.z) * camLerp;
-        currentCamLook.x += (camBaseLook.x - currentCamLook.x) * camLerp;
-        currentCamLook.y += (camBaseLook.y - currentCamLook.y) * camLerp;
-        currentCamLook.z += (camBaseLook.z - currentCamLook.z) * camLerp;
-        camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+        const safeDt = Math.max(0.0001, Math.min(delta, 0.05));
+        const camLerp = 1 - Math.exp(-5 * safeDt);
+        if (Number.isFinite(camBasePos.x) && Number.isFinite(camera.position.x)) {
+          camera.position.x += (camBasePos.x - camera.position.x) * camLerp;
+          camera.position.y += (camBasePos.y - camera.position.y) * camLerp;
+          camera.position.z += (camBasePos.z - camera.position.z) * camLerp;
+        }
+        if (Number.isFinite(camBaseLook.x) && Number.isFinite(currentCamLook.x)) {
+          currentCamLook.x += (camBaseLook.x - currentCamLook.x) * camLerp;
+          currentCamLook.y += (camBaseLook.y - currentCamLook.y) * camLerp;
+          currentCamLook.z += (camBaseLook.z - currentCamLook.z) * camLerp;
+        }
+        const distSq = (camera.position.x - currentCamLook.x) ** 2 + (camera.position.y - currentCamLook.y) ** 2 + (camera.position.z - currentCamLook.z) ** 2;
+        if (distSq > 0.01 && Number.isFinite(currentCamLook.x)) {
+          camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+        }
       }
     } else {
       // Overview mode: 3/4 aerial drone hover with figure-8 sway and mouse parallax
@@ -17173,20 +17306,26 @@ let sharedRickshawArtTexture = null;
       const driftZ = Math.sin(idleDroneTime * 0.28) * 5.5;
 
       const parallaxScale = isMobileScreen ? 25 : 65;
-      targetCamX = camBasePos.x + mouseRelX * parallaxScale + driftX;
-      targetCamY = camBasePos.y - mouseRelY * (parallaxScale * 0.7) + driftY;
+      const targetCamX = camBasePos.x + mouseRelX * parallaxScale + driftX;
+      const targetCamY = camBasePos.y - mouseRelY * (parallaxScale * 0.7) + driftY;
       const targetCamZ = camBasePos.z + driftZ;
 
-      const lerpFactor = 1 - Math.exp(-5 * delta);
-      camera.position.x += (targetCamX - camera.position.x) * lerpFactor;
-      camera.position.y += (targetCamY - camera.position.y) * lerpFactor;
-      camera.position.z += (targetCamZ - camera.position.z) * lerpFactor;
-
-      currentCamLook.x += (camBaseLook.x - currentCamLook.x) * lerpFactor;
-      currentCamLook.y += (camBaseLook.y - currentCamLook.y) * lerpFactor;
-      currentCamLook.z += (camBaseLook.z - currentCamLook.z) * lerpFactor;
-
-      camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+      const safeDt = Math.max(0.0001, Math.min(delta, 0.05));
+      const lerpFactor = 1 - Math.exp(-5 * safeDt);
+      if (Number.isFinite(targetCamX) && Number.isFinite(camera.position.x)) {
+        camera.position.x += (targetCamX - camera.position.x) * lerpFactor;
+        camera.position.y += (targetCamY - camera.position.y) * lerpFactor;
+        camera.position.z += (targetCamZ - camera.position.z) * lerpFactor;
+      }
+      if (Number.isFinite(camBaseLook.x) && Number.isFinite(currentCamLook.x)) {
+        currentCamLook.x += (camBaseLook.x - currentCamLook.x) * lerpFactor;
+        currentCamLook.y += (camBaseLook.y - currentCamLook.y) * lerpFactor;
+        currentCamLook.z += (camBaseLook.z - currentCamLook.z) * lerpFactor;
+      }
+      const distSq = (camera.position.x - currentCamLook.x) ** 2 + (camera.position.y - currentCamLook.y) ** 2 + (camera.position.z - currentCamLook.z) ** 2;
+      if (distSq > 0.01 && Number.isFinite(currentCamLook.x)) {
+        camera.lookAt(currentCamLook.x, currentCamLook.y, currentCamLook.z);
+      }
     }
 
     if (chaseCamLight) {
@@ -17213,6 +17352,12 @@ let sharedRickshawArtTexture = null;
       perfFrameCount = 0;
       perfTotalCpuMs = 0;
       perfLastSampleTime = nowTime;
+    }
+    } catch (err) {
+      console.error('[3D Loop Guard]', err);
+      if (typeof activeCamMode !== 'undefined' && activeCamMode !== 'overview' && typeof clearTrackedVehicle === 'function') {
+        clearTrackedVehicle();
+      }
     }
   };
 
