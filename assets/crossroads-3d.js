@@ -1599,6 +1599,69 @@
   const buildMercedesDriver = () => buildCarDriver('mercedes_amg');
 
   // -------------------------------------------------------------
+  // Authentic Bangladesh / Dhaka Metro Retroreflective Number Plate
+  // High-contrast white face, green security stripe & embossed Bengali registration codes
+  // -------------------------------------------------------------
+  function createDhakaNumberPlate(isRear = false) {
+    const plateGroup = new THREE.Group();
+    const bracketMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, roughness: 0.80, metalness: 0.20 });
+    const whiteFaceMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+    const greenHeaderMat = new THREE.MeshBasicMaterial({ color: 0x15803d });
+    const textMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+
+    // 1. Black mounting bracket
+    const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.118, 0.40), bracketMat);
+    plateGroup.add(bracket);
+
+    // 2. High-contrast reflective white plate face
+    const face = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.096, 0.38), whiteFaceMat);
+    face.position.x = isRear ? -0.008 : 0.008;
+    plateGroup.add(face);
+
+    // 3. Bangladesh national green header stripe
+    const greenStripe = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.020, 0.36), greenHeaderMat);
+    greenStripe.position.set(isRear ? -0.010 : 0.010, 0.030, 0);
+    plateGroup.add(greenStripe);
+
+    // 4. Embossed dark registration code blocks (ঢাকা মেট্রো-গ ১২-৩৪৫৬)
+    // Top line 'ঢাকা মেট্রো'
+    [-0.08, 0.08].forEach(tz => {
+      const topText = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.014, 0.12), textMat);
+      topText.position.set(isRear ? -0.011 : 0.011, 0.030, tz);
+      plateGroup.add(topText);
+    });
+
+    // Bottom line: vehicle class code & 6 registration digits
+    const classCode = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.026, 0.045), textMat);
+    classCode.position.set(isRear ? -0.011 : 0.011, -0.014, -0.12);
+    plateGroup.add(classCode);
+
+    const seriesCode = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.026, 0.065), textMat);
+    seriesCode.position.set(isRear ? -0.011 : 0.011, -0.014, -0.05);
+    plateGroup.add(seriesCode);
+
+    const hyphen = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.008, 0.020), textMat);
+    hyphen.position.set(isRear ? -0.011 : 0.011, -0.014, 0.005);
+    plateGroup.add(hyphen);
+
+    const regDigits = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.026, 0.110), textMat);
+    regDigits.position.set(isRear ? -0.011 : 0.011, -0.014, 0.085);
+    plateGroup.add(regDigits);
+
+    if (isRear) {
+      // License plate illumination lamp housing above
+      const lamp = new THREE.Mesh(
+        new THREE.BoxGeometry(0.032, 0.012, 0.10),
+        new THREE.MeshBasicMaterial({ color: 0xffedd5 })
+      );
+      lamp.position.set(-0.012, 0.062, 0);
+      plateGroup.add(lamp);
+    }
+
+    return plateGroup;
+  }
+
+  // -------------------------------------------------------------
   // Model 1: Mercedes-AMG GT Coupe Builder (Sleek Sports Coupe & 3D Panamericana Grille)
   // -------------------------------------------------------------
   function buildCarMercedesAMGGT(config) {
@@ -1918,6 +1981,11 @@
       group.add(flick);
     });
 
+    // Front Lower Center Number Plate (Dhaka Metro)
+    const frontPlate = createDhakaNumberPlate(false);
+    frontPlate.position.set(2.21, 0.28, 0);
+    group.add(frontPlate);
+
     // -------------------------------------------------------------
     // 6. Side Aerodynamics & Compact Door-Mounted Side Mirrors (Box 0.08x0.08x0.12 + Silver Mirror Face)
     // -------------------------------------------------------------
@@ -2040,24 +2108,10 @@
     });
     group.add(rearBadgeGroup);
 
-    // Rear License Plate Holder & Authentic Dhaka Plate
-    const plateHolder = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.38), darkChassisMat);
-    plateHolder.position.set(-2.22, 0.46, 0);
-    group.add(plateHolder);
-
-    const plateFace = new THREE.Mesh(
-      new THREE.BoxGeometry(0.02, 0.095, 0.34),
-      new THREE.MeshBasicMaterial({ color: 0xf8fafc })
-    );
-    plateFace.position.set(-2.238, 0.46, 0);
-    group.add(plateFace);
-
-    const plateStripe = new THREE.Mesh(
-      new THREE.BoxGeometry(0.022, 0.022, 0.32),
-      new THREE.MeshBasicMaterial({ color: 0x15803d })
-    );
-    plateStripe.position.set(-2.240, 0.48, 0);
-    group.add(plateStripe);
+    // Rear Lower Center Number Plate (Dhaka Metro)
+    const rearPlate = createDhakaNumberPlate(true);
+    rearPlate.position.set(-2.255, 0.46, 0);
+    group.add(rearPlate);
 
     // Lower Rear Diffuser with Vertical Aero Fins & Quad Exhaust Tips
     const diffuser = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.13, 1.76), darkChassisMat);
@@ -2293,6 +2347,11 @@
       group.add(hlDrl);
     });
 
+    // Front Lower Center Number Plate (Dhaka Metro)
+    const frontPlate = createDhakaNumberPlate(false);
+    frontPlate.position.set(2.305, 0.36, 0);
+    group.add(frontPlate);
+
     // -----------------------------------------------------------------
     // 7. Rear Connected Full-Width LED Taillights, Ducktail CHMSL & Bumper Assembly
     // -----------------------------------------------------------------
@@ -2383,24 +2442,10 @@
     rearHBadge.add(rearHBar);
     group.add(rearHBadge);
 
-    // Dhaka License Plate in Recessed Center Bumper
-    const plateHolder = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.38), darkTrimMat);
-    plateHolder.position.set(-2.295, 0.50, 0);
-    group.add(plateHolder);
-
-    const plateFace = new THREE.Mesh(
-      new THREE.BoxGeometry(0.02, 0.095, 0.34),
-      new THREE.MeshBasicMaterial({ color: 0xf8fafc })
-    );
-    plateFace.position.set(-2.315, 0.50, 0);
-    group.add(plateFace);
-
-    const plateStripe = new THREE.Mesh(
-      new THREE.BoxGeometry(0.022, 0.022, 0.32),
-      new THREE.MeshBasicMaterial({ color: 0x15803d })
-    );
-    plateStripe.position.set(-2.318, 0.52, 0);
-    group.add(plateStripe);
+    // Rear Lower Center Number Plate (Dhaka Metro)
+    const rearPlate = createDhakaNumberPlate(true);
+    rearPlate.position.set(-2.355, 0.48, 0);
+    group.add(rearPlate);
 
     // Rear Bumper Lower Red Reflectors
     [-0.62, 0.62].forEach(rz => {
@@ -2619,6 +2664,11 @@
       group.add(hlLens);
     });
 
+    // Front Lower Center Number Plate (Dhaka Metro)
+    const frontPlate = createDhakaNumberPlate(false);
+    frontPlate.position.set(2.545, 0.54, 0);
+    group.add(frontPlate);
+
     // 7. Signature Vertical Front Door Graphic Blade
     [-0.99, 0.99].forEach(sz => {
       const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.44, 0.03), silverMat);
@@ -2644,6 +2694,11 @@
     const tailgateBar = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.035, 1.68), blackTrimMat);
     tailgateBar.position.set(-2.435, 1.60, 0);
     group.add(tailgateBar);
+
+    // Rear Lower Center Number Plate (Dhaka Metro)
+    const rearPlate = createDhakaNumberPlate(true);
+    rearPlate.position.set(-2.525, 0.56, 0);
+    group.add(rearPlate);
 
     // 9. 4 Luxury SUV 10-Spoke Alloy Wheels (Charcoal-Black Rubber Tires #1c1e21)
     [-0.92, 0.92].forEach(wz => {
@@ -2860,6 +2915,11 @@
     skidPlate.position.set(2.40, 0.38, 0);
     group.add(skidPlate);
 
+    // Front Lower Center Number Plate (Dhaka Metro)
+    const frontPlate = createDhakaNumberPlate(false);
+    frontPlate.position.set(2.510, 0.54, 0);
+    group.add(frontPlate);
+
     // 8. Roof Rails (Left & Right)
     [-0.78, 0.78].forEach(rz => {
       const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.20, 8), chromeMat);
@@ -2895,6 +2955,11 @@
     const badgeBar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.90), chromeMat);
     badgeBar.position.set(-2.44, 1.08, 0);
     group.add(badgeBar);
+
+    // Rear Lower Center Number Plate (Dhaka Metro)
+    const rearPlate = createDhakaNumberPlate(true);
+    rearPlate.position.set(-2.485, 0.58, 0);
+    group.add(rearPlate);
 
     // 11. 4 Heavy-Duty All-Terrain Off-Road Wheels (Charcoal-Black Rubber Tires #1c1e21)
     [-0.92, 0.92].forEach(wz => {
