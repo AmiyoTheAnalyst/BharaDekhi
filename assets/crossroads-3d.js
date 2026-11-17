@@ -3538,6 +3538,213 @@
     return driverGroup;
   }
 
+  // ===========================================================================
+  // Smooth Anatomical Bus Passenger Builder (12 Distinct Colorful Outfits)
+  // ===========================================================================
+  function buildBusPassenger(pData) {
+    const passengerGroup = new THREE.Group();
+
+    const skinColor = pData.skinColor || 0xc68662;
+    const skinMat = new THREE.MeshStandardMaterial({
+      color: skinColor,
+      emissive: 0x2e1810,
+      emissiveIntensity: 0.30,
+      roughness: 0.65,
+      metalness: 0.05
+    });
+
+    const outfitMat = new THREE.MeshStandardMaterial({
+      color: pData.outfitColor,
+      emissive: pData.outfitEmissive || 0x1e293b,
+      emissiveIntensity: 0.35,
+      roughness: 0.50,
+      metalness: 0.08
+    });
+
+    const hairMat = new THREE.MeshStandardMaterial({
+      color: pData.hairColor || 0x111317,
+      roughness: 0.90,
+      metalness: 0.10
+    });
+
+    const pantsMat = new THREE.MeshStandardMaterial({
+      color: pData.isFemale ? (pData.dupattaColor || pData.outfitColor) : 0x1e293b,
+      roughness: 0.80
+    });
+
+    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x111827 });
+    const eyebrowMat = new THREE.MeshBasicMaterial({ color: 0x111317 });
+    const mustacheMat = new THREE.MeshBasicMaterial({ color: 0x111317 });
+    const lipMat = new THREE.MeshBasicMaterial({ color: 0x9e4747 });
+
+    // 1. Tapered Contoured Torso & Upper Chest Yoke
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(1.30, 1.15, 3.2, 14), outfitMat);
+    torso.scale.set(0.85, 1.0, 1.15);
+    torso.position.set(0, 1.8, 0);
+    passengerGroup.add(torso);
+
+    const yoke = new THREE.Mesh(new THREE.SphereGeometry(1.35, 14, 10), outfitMat);
+    yoke.scale.set(0.80, 0.45, 1.18);
+    yoke.position.set(0, 3.2, 0);
+    passengerGroup.add(yoke);
+
+    // Neck
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 0.75, 10), skinMat);
+    neck.position.set(0.1, 3.85, 0);
+    passengerGroup.add(neck);
+
+    // Collar / Dupatta / Scarf
+    if (pData.isFemale && pData.dupattaColor) {
+      const dupattaMat = new THREE.MeshStandardMaterial({
+        color: pData.dupattaColor,
+        emissive: pData.outfitEmissive || 0x334155,
+        emissiveIntensity: 0.25,
+        roughness: 0.60
+      });
+      const scarfLoop = new THREE.Mesh(new THREE.TorusGeometry(0.82, 0.22, 8, 16), dupattaMat);
+      scarfLoop.rotation.x = Math.PI / 2;
+      scarfLoop.position.set(0.1, 3.75, 0);
+      passengerGroup.add(scarfLoop);
+
+      const drape = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.4, 0.8), dupattaMat);
+      drape.position.set(0.45, 2.5, 0.6);
+      passengerGroup.add(drape);
+    } else {
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.14, 8, 16), outfitMat);
+      collar.rotation.x = Math.PI / 2;
+      collar.position.set(0.1, 3.75, 0);
+      passengerGroup.add(collar);
+    }
+
+    // Seated Thighs / Lap
+    [-1, 1].forEach(side => {
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.48, 2.6, 10), pantsMat);
+      thigh.rotation.z = Math.PI / 2 - 0.2;
+      thigh.position.set(1.2, 0.2, side * 0.75);
+      passengerGroup.add(thigh);
+    });
+
+    // 2. Head, Hair Dome / Cap & Facial Features
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0.15, 4.8, 0);
+    passengerGroup.add(headGroup);
+
+    const cranium = new THREE.Mesh(new THREE.SphereGeometry(1.08, 16, 14), skinMat);
+    cranium.scale.set(0.85, 1.05, 0.90);
+    headGroup.add(cranium);
+
+    if (pData.hasCap) {
+      const capMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.60 });
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.96, 1.02, 0.65, 16), capMat);
+      cap.position.set(-0.05, 0.85, 0);
+      headGroup.add(cap);
+    } else if (pData.isFemale && pData.dupattaColor) {
+      const fHair = new THREE.Mesh(new THREE.SphereGeometry(1.12, 16, 14), hairMat);
+      fHair.scale.set(0.88, 1.08, 0.94);
+      fHair.position.set(-0.08, 0.08, 0);
+      headGroup.add(fHair);
+    } else {
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(1.12, 16, 14), hairMat);
+      hair.scale.set(0.88, 1.08, 0.92);
+      hair.position.set(-0.08, 0.08, 0);
+      headGroup.add(hair);
+    }
+
+    // Ears
+    [-1, 1].forEach(ez => {
+      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 6), skinMat);
+      ear.scale.set(0.35, 0.80, 0.50);
+      ear.position.set(-0.05, -0.04, ez * 1.05);
+      headGroup.add(ear);
+    });
+
+    // Eyes & Eyebrows (Emissive basic materials for clear window penetration)
+    [0.32, -0.32].forEach(ez => {
+      const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), eyeWhiteMat);
+      eyeWhite.position.set(0.88, 0.16, ez);
+      headGroup.add(eyeWhite);
+
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), eyePupilMat);
+      pupil.position.set(1.00, 0.16, ez);
+      headGroup.add(pupil);
+
+      const eyebrow = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.10, 0.34), eyebrowMat);
+      eyebrow.position.set(0.92, 0.38, ez);
+      headGroup.add(eyebrow);
+    });
+
+    // Nose
+    const noseBridge = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.18, 0.42, 6), skinMat);
+    noseBridge.rotation.z = -0.22;
+    noseBridge.position.set(0.98, -0.05, 0);
+    headGroup.add(noseBridge);
+
+    const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), skinMat);
+    noseTip.position.set(1.08, -0.18, 0);
+    headGroup.add(noseTip);
+
+    // Lips
+    const lips = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.32), lipMat);
+    lips.position.set(0.98, -0.48, 0);
+    headGroup.add(lips);
+
+    // Optional Mustache
+    if (pData.hasMustache) {
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.10, 0.40), mustacheMat);
+      mustache.position.set(1.02, -0.34, 0);
+      headGroup.add(mustache);
+    }
+
+    // Optional Beard
+    if (pData.hasBeard) {
+      const beard = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.32, 0.65), mustacheMat);
+      beard.position.set(0.85, -0.65, 0);
+      headGroup.add(beard);
+    }
+
+    // 3. Deltoid Shoulders, Articulated Arms Resting on Lap
+    [-1, 1].forEach(side => {
+      const shoulderPt = [0.1, 3.2, side * 1.5];
+      const elbowPt = [1.1, 1.8, side * 1.4];
+      const handPt = [1.7, 0.8, side * 0.55];
+
+      // Shoulder Cap
+      const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.50, 12, 8), outfitMat);
+      shoulder.position.set(...shoulderPt);
+      passengerGroup.add(shoulder);
+
+      // Upper Arm
+      const v1 = new THREE.Vector3(...shoulderPt);
+      const v2 = new THREE.Vector3(...elbowPt);
+      const armLen1 = v1.distanceTo(v2);
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.42, armLen1, 8), outfitMat);
+      upperArm.position.copy(v1.clone().add(v2).multiplyScalar(0.5));
+      upperArm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v2.clone().sub(v1).normalize());
+      passengerGroup.add(upperArm);
+
+      // Elbow Sphere
+      const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), outfitMat);
+      elbow.position.set(...elbowPt);
+      passengerGroup.add(elbow);
+
+      // Forearm
+      const v3 = new THREE.Vector3(...handPt);
+      const armLen2 = v2.distanceTo(v3);
+      const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, armLen2, 8), outfitMat);
+      forearm.position.copy(v2.clone().add(v3).multiplyScalar(0.5));
+      forearm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v3.clone().sub(v2).normalize());
+      passengerGroup.add(forearm);
+
+      // Resting Hand
+      const hand = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), skinMat);
+      hand.position.set(...handPt);
+      passengerGroup.add(hand);
+    });
+
+    return passengerGroup;
+  }
+
   function buildHasanTransitBus(vData) {
     const group = new THREE.Group();
     group.userData.wheels = [];
@@ -3571,12 +3778,13 @@
       roughness: 0.30,
       metalness: 0.65
     });
-    const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      roughness: 0.08,
-      metalness: 0.20,
+    const busClearGlassMat = new THREE.MeshStandardMaterial({
+      color: 0xe0f2fe,
       transparent: true,
-      opacity: 0.62
+      opacity: 0.22,
+      roughness: 0.08,
+      metalness: 0.10,
+      depthWrite: false
     });
 
     const length = 76.0;
@@ -3589,7 +3797,7 @@
       const skirtShape = new THREE.Shape();
       skirtShape.moveTo(37.0, 2.4);
       skirtShape.lineTo(37.0, 11.2);
-      skirtShape.lineTo(-26.0, 11.2);
+      skirtShape.lineTo(-30.6, 11.2);
       skirtShape.lineTo(-37.8, 15.6); // Signature upward diagonal sweep behind rear wheel!
       skirtShape.lineTo(-37.8, 2.4);
       skirtShape.lineTo(-16.0, 2.4);
@@ -3607,8 +3815,8 @@
 
       // Matching red wedge behind rear wheel arch up to window line
       const redWedgeShape = new THREE.Shape();
-      redWedgeShape.moveTo(-26.0, 11.2);
-      redWedgeShape.lineTo(-26.0, 18.4);
+      redWedgeShape.moveTo(-30.6, 11.2);
+      redWedgeShape.lineTo(-30.6, 18.4);
       redWedgeShape.lineTo(-37.8, 18.4);
       redWedgeShape.lineTo(-37.8, 15.6);
       redWedgeShape.closePath();
@@ -3660,14 +3868,30 @@
     fForehead.position.set(36.6, 20.2, 0);
     group.add(fForehead);
 
-    // Rear Fascia Panels
-    const rLower = new THREE.Mesh(new THREE.BoxGeometry(0.6, 11.8, width - 0.4), whiteMat);
-    rLower.position.set(-37.8, 9.5, 0);
+    // Rear Fascia Panels with Cutout for Crystal-Clear Rear Window
+    const rLower = new THREE.Mesh(new THREE.BoxGeometry(0.6, 8.6, width - 0.4), whiteMat);
+    rLower.position.set(-37.8, 7.9, 0);
     group.add(rLower);
 
-    const rUpper = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6.8, width - 0.4), redMat);
-    rUpper.position.set(-37.8, 18.8, 0);
+    const rUpper = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.4, width - 0.4), redMat);
+    rUpper.position.set(-37.8, 20.0, 0);
     group.add(rUpper);
+
+    // Rear Side Corner Pillars flanking the rear window
+    [-1, 1].forEach(side => {
+      const rPillar = new THREE.Mesh(new THREE.BoxGeometry(0.6, 5.6, 2.4), redMat);
+      rPillar.position.set(-37.8, 15.0, side * 9.6);
+      group.add(rPillar);
+    });
+
+    // Crystal-Clear Rear Window Glass & Frame (depthWrite: false)
+    const rGlass = new THREE.Mesh(new THREE.BoxGeometry(0.25, 5.4, 16.8), busClearGlassMat);
+    rGlass.position.set(-37.85, 15.0, 0);
+    group.add(rGlass);
+
+    const rGlassFrame = new THREE.Mesh(new THREE.BoxGeometry(0.35, 5.6, 17.2), blackTrimMat);
+    rGlassFrame.position.set(-37.85, 15.0, 0);
+    group.add(rGlassFrame);
 
     // Main Red Roof Cap
     const roof = new THREE.Mesh(new THREE.BoxGeometry(length - 0.4, 1.4, width), redMat);
@@ -3763,7 +3987,7 @@
       group.add(marker);
     });
 
-    const fGlass = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.2, 19.6), glassMat);
+    const fGlass = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6.2, 19.6), busClearGlassMat);
     fGlass.position.set(37.2, 15.1, 0);
     group.add(fGlass);
 
@@ -3820,20 +4044,54 @@
     fPlateGroup.add(fPlateText);
     group.add(fPlateGroup);
 
+    // Heavy-Duty Commercial C-Arm Transit Mirrors with Silver Reflective Faces
+    const mirrorFaceMat = new THREE.MeshStandardMaterial({
+      color: 0xf1f5f9,
+      metalness: 0.95,
+      roughness: 0.05
+    });
+
     [-1, 1].forEach(side => {
-      const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 3.8, 8), blackTrimMat);
-      stalk.position.set(36.8, 16.0, side * 12.2);
-      stalk.rotation.x = side * (Math.PI / 2 - 0.2);
-      group.add(stalk);
+      const mirrorGroup = new THREE.Group();
+      mirrorGroup.position.set(36.8, 15.6, side * 13.6);
 
-      const mirrorHead = new THREE.Mesh(new THREE.BoxGeometry(0.8, 4.2, 1.6), blackTrimMat);
-      mirrorHead.position.set(36.8, 16.0, side * 13.8);
-      group.add(mirrorHead);
+      // Upper C-arm tubular bracket
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.2, 8), blackTrimMat);
+      upperArm.rotation.z = -0.38;
+      upperArm.rotation.x = -side * 0.42;
+      upperArm.position.set(-0.2, 2.3, -side * 1.1);
+      mirrorGroup.add(upperArm);
 
-      const mirrorGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 3.8), silverMat);
-      mirrorGlass.rotation.y = -Math.PI / 2;
-      mirrorGlass.position.set(36.38, 16.0, side * 13.8);
-      group.add(mirrorGlass);
+      // Lower C-arm tubular bracket
+      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.2, 8), blackTrimMat);
+      lowerArm.rotation.z = 0.38;
+      lowerArm.rotation.x = side * 0.42;
+      lowerArm.position.set(-0.2, -2.3, -side * 1.1);
+      mirrorGroup.add(lowerArm);
+
+      // Main Mirror Housing
+      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.9, 4.4, 1.8), blackTrimMat);
+      mainHousing.position.set(0, 0.6, 0);
+      mirrorGroup.add(mainHousing);
+
+      // Main Mirror Face (facing rear toward -X)
+      const mainFace = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 4.2), mirrorFaceMat);
+      mainFace.rotation.y = -Math.PI / 2;
+      mainFace.position.set(-0.46, 0.6, 0);
+      mirrorGroup.add(mainFace);
+
+      // Lower Spotter Mirror Housing
+      const spotHousing = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 1.8), blackTrimMat);
+      spotHousing.position.set(0, -2.6, 0);
+      mirrorGroup.add(spotHousing);
+
+      // Spotter Mirror Face
+      const spotFace = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), mirrorFaceMat);
+      spotFace.rotation.y = -Math.PI / 2;
+      spotFace.position.set(-0.43, -2.6, 0);
+      mirrorGroup.add(spotFace);
+
+      group.add(mirrorGroup);
     });
 
     // -------------------------------------------------------------
@@ -3884,7 +4142,7 @@
 
     // Right side (Curbside: 6 windows + Front Bi-Fold Passenger Door)
     windowXs.forEach(wx => {
-      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.25), glassMat);
+      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.25), busClearGlassMat);
       wPane.position.set(wx, 15.0, -10.8);
       group.add(wPane);
 
@@ -3905,7 +4163,7 @@
     doorGroup.add(doorFrame);
 
     [-1.4, 1.4].forEach(dx => {
-      const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14.0, 0.22), glassMat);
+      const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14.0, 0.22), busClearGlassMat);
       doorLeaf.position.set(dx, 0, 0);
       doorGroup.add(doorLeaf);
 
@@ -3917,7 +4175,7 @@
 
     // Left side (Driver side: 6 windows + Driver signaling window)
     windowXs.forEach(wx => {
-      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.25), glassMat);
+      const wPane = new THREE.Mesh(new THREE.BoxGeometry(7.8, 6.4, 0.25), busClearGlassMat);
       wPane.position.set(wx, 15.0, 10.8);
       group.add(wPane);
 
@@ -3930,58 +4188,107 @@
       group.add(transom);
     });
 
-    const dWin = new THREE.Mesh(new THREE.BoxGeometry(6.4, 6.4, 0.25), glassMat);
+    const dWin = new THREE.Mesh(new THREE.BoxGeometry(6.4, 6.4, 0.25), busClearGlassMat);
     dWin.position.set(31.5, 15.0, 10.8);
     group.add(dWin);
     const dWinFrame = new THREE.Mesh(new THREE.BoxGeometry(6.8, 6.8, 0.35), blackTrimMat);
     dWinFrame.position.set(31.5, 15.0, 10.8);
     group.add(dWinFrame);
 
-    // Interior Layout: Blue Transit Passenger Seats & Yellow Grab Poles
-    const seatMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.70 });
+    // -------------------------------------------------------------
+    // Bright Interior Bus Lighting (3 Warm Ceiling Point Lights + Linear LED Strips)
+    // -------------------------------------------------------------
+    const busDomeLight1 = new THREE.PointLight(0xfffbeb, 1.25, 28.0);
+    busDomeLight1.position.set(16.0, 20.2, 0);
+    group.add(busDomeLight1);
+
+    const busDomeLight2 = new THREE.PointLight(0xfffbeb, 1.25, 28.0);
+    busDomeLight2.position.set(0.0, 20.2, 0);
+    group.add(busDomeLight2);
+
+    const busDomeLight3 = new THREE.PointLight(0xfffbeb, 1.25, 28.0);
+    busDomeLight3.position.set(-16.0, 20.2, 0);
+    group.add(busDomeLight3);
+
+    // Continuous glowing ceiling LED diffuser strips
+    [-2.2, 2.2].forEach(lz => {
+      const ledStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(62.0, 0.12, 0.7),
+        new THREE.MeshBasicMaterial({ color: 0xfffbeb })
+      );
+      ledStrip.position.set(0, 21.0, lz);
+      group.add(ledStrip);
+    });
+
+    // -------------------------------------------------------------
+    // Interior Layout: Blue Transit Seats & 12 Distinct Seated Passengers
+    // -------------------------------------------------------------
+    const seatMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.65 });
     const seatBaseMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
     const poleMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.25, metalness: 0.40 });
-    const passengerColors = [0xf97316, 0x0284c7, 0x8b5cf6, 0x22c55e, 0xec4899, 0xfacc15];
+
+    const passengersData = [
+      // Left side window seats (Driver side, Z = 6.8):
+      { outfitColor: 0xdc2626, outfitEmissive: 0x450a0a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }, // 1: Crimson Red Panjabi/Shirt
+      { outfitColor: 0xeab308, outfitEmissive: 0x713f12, skinColor: 0xd69e72, isFemale: true, dupattaColor: 0xffffff }, // 2: Mustard Yellow Salwar Kameez with white dupatta
+      { outfitColor: 0x059669, outfitEmissive: 0x064e3b, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false }, // 3: Emerald Green Shirt
+      { outfitColor: 0x2563eb, outfitEmissive: 0x1e3a8a, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false }, // 4: Royal Blue Polo/Shirt
+      { outfitColor: 0xdb2777, outfitEmissive: 0x831843, skinColor: 0xd69e72, isFemale: true, dupattaColor: 0xf472b6 }, // 5: Bright Magenta / Pink Kameez
+      { outfitColor: 0x0d9488, outfitEmissive: 0x134e4a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }, // 6: Turquoise / Teal Kurta
+
+      // Right side window seats (Curbside, Z = -6.8):
+      { outfitColor: 0xea580c, outfitEmissive: 0x7c2d12, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false }, // 7: Vibrant Orange Shirt
+      { outfitColor: 0x7c3aed, outfitEmissive: 0x4c1d95, skinColor: 0xd69e72, isFemale: true, dupattaColor: 0xc084fc }, // 8: Rich Purple Kameez
+      { outfitColor: 0xf8fafc, outfitEmissive: 0x334155, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false, hasCap: true }, // 9: Crisp White Panjabi & Topi
+      { outfitColor: 0x0284c7, outfitEmissive: 0x0c4a6e, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false }, // 10: Sky Blue Formal Shirt
+      { outfitColor: 0x65a30d, outfitEmissive: 0x365314, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }, // 11: Lime / Olive Green Shirt
+      { outfitColor: 0x991b1b, outfitEmissive: 0x450a0a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false } // 12: Maroon / Burgundy Shirt
+    ];
 
     windowXs.forEach((sx, idx) => {
-      [-6.4, 6.4].forEach(sz => {
-        const cushion = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.8, 7.2), seatMat);
-        cushion.position.set(sx, 7.4, sz);
-        group.add(cushion);
+      // Left side seat (Driver side):
+      const leftSeatCushion = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.8, 7.2), seatMat);
+      leftSeatCushion.position.set(sx, 9.4, 6.4);
+      group.add(leftSeatCushion);
 
-        const back = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3.8, 7.0), seatMat);
-        back.position.set(sx - 1.8, 9.4, sz);
-        group.add(back);
+      const leftSeatBack = new THREE.Mesh(new THREE.BoxGeometry(0.8, 4.4, 7.0), seatMat);
+      leftSeatBack.position.set(sx - 1.8, 11.8, 6.4);
+      group.add(leftSeatBack);
 
-        const base = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.6, 1.6), seatBaseMat);
-        base.position.set(sx, 5.7, sz);
-        group.add(base);
+      const leftSeatBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 4.6, 3.4), seatBaseMat);
+      leftSeatBase.position.set(sx, 6.9, 6.4);
+      group.add(leftSeatBase);
 
-        if ((idx + (sz > 0 ? 1 : 0)) % 2 === 0) {
-          const pShirt = new THREE.MeshStandardMaterial({
-            color: passengerColors[idx % passengerColors.length],
-            roughness: 0.75
-          });
-          const pSkin = new THREE.MeshStandardMaterial({ color: 0xb87958, roughness: 0.80 });
+      const pLeft = buildBusPassenger(passengersData[idx]);
+      pLeft.position.set(sx, 9.8, 6.8);
+      group.add(pLeft);
 
-          const pTorso = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.4, 3.2), pShirt);
-          pTorso.position.set(sx, 10.6, sz);
-          group.add(pTorso);
+      // Right side seat (Curbside):
+      const rightSeatCushion = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.8, 7.2), seatMat);
+      rightSeatCushion.position.set(sx, 9.4, -6.4);
+      group.add(rightSeatCushion);
 
-          const pHead = new THREE.Mesh(new THREE.SphereGeometry(1.0, 10, 8), pSkin);
-          pHead.position.set(sx, 12.8, sz);
-          group.add(pHead);
-        }
-      });
+      const rightSeatBack = new THREE.Mesh(new THREE.BoxGeometry(0.8, 4.4, 7.0), seatMat);
+      rightSeatBack.position.set(sx - 1.8, 11.8, -6.4);
+      group.add(rightSeatBack);
 
-      [-3.2, 3.2].forEach(pz => {
-        const vPole = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 16.0, 6), poleMat);
+      const rightSeatBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 4.6, 3.4), seatBaseMat);
+      rightSeatBase.position.set(sx, 6.9, -6.4);
+      group.add(rightSeatBase);
+
+      const pRight = buildBusPassenger(passengersData[idx + 6]);
+      pRight.position.set(sx, 9.8, -6.8);
+      group.add(pRight);
+
+      // Vertical yellow safety grab poles along aisle at each seat row
+      [-2.8, 2.8].forEach(pz => {
+        const vPole = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 16.4, 8), poleMat);
         vPole.position.set(sx, 12.8, pz);
         group.add(vPole);
       });
     });
 
-    [-3.2, 3.2].forEach(pz => {
+    [-2.8, 2.8].forEach(pz => {
       const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 56.0, 6), poleMat);
       rail.rotation.z = Math.PI / 2;
       rail.position.set(-4.0, 20.2, pz);
@@ -3994,16 +4301,16 @@
     const rearTex = getHasanRearBrandingTexture();
     if (rearTex) {
       const rBadge = new THREE.Mesh(
-        new THREE.PlaneGeometry(12.0, 5.8),
+        new THREE.PlaneGeometry(11.0, 3.8),
         new THREE.MeshBasicMaterial({ map: rearTex, transparent: true })
       );
       rBadge.rotation.y = -Math.PI / 2;
-      rBadge.position.set(-38.15, 18.6, 0);
+      rBadge.position.set(-38.15, 20.0, 0);
       group.add(rBadge);
     }
 
-    const rLouver = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4.2, 14.0), blackTrimMat);
-    rLouver.position.set(-38.12, 11.2, 0);
+    const rLouver = new THREE.Mesh(new THREE.BoxGeometry(0.4, 3.6, 14.0), blackTrimMat);
+    rLouver.position.set(-38.12, 8.4, 0);
     group.add(rLouver);
 
     const tlAmberMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
