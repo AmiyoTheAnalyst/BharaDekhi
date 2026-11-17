@@ -902,17 +902,17 @@
       wheelRadius: 0.35
     },
 
-    // Model 3: Range Rover Luxury SUV (4 variants)
+    // Model 3: Range Rover Luxury SUV (4 Two-Tone Matte Lower / Gloss Black Upper Variants)
     {
       id: 'RR_1',
       modelKey: 'RANGE_ROVER',
-      modelTitle: 'Range Rover SUV (Satin Champagne)',
+      modelTitle: 'Range Rover SUV (Matte White & Gloss Black)',
       carType: 'range_rover',
-      bodyColor: 0xb49a75,
-      metalness: 0.45,
-      roughness: 0.30,
-      roofColor: 0xb49a75,
-      contrastRoof: false,
+      bodyColor: 0xf8fafc,
+      metalness: 0.10,
+      roughness: 0.85,
+      roofColor: 0x0f172a,
+      contrastRoof: true,
       headlightColor: 0xffffff,
       length: 5.0,
       width: 2.0,
@@ -922,12 +922,12 @@
     {
       id: 'RR_2',
       modelKey: 'RANGE_ROVER',
-      modelTitle: 'Range Rover SUV (Black & White Contrast)',
+      modelTitle: 'Range Rover SUV (Matte Gray & Gloss Black)',
       carType: 'range_rover',
-      bodyColor: 0x111317,
-      metalness: 0.70,
-      roughness: 0.15,
-      roofColor: 0xf8fafc,
+      bodyColor: 0x64748b,
+      metalness: 0.10,
+      roughness: 0.85,
+      roofColor: 0x0f172a,
       contrastRoof: true,
       headlightColor: 0xffffff,
       length: 5.0,
@@ -938,12 +938,12 @@
     {
       id: 'RR_3',
       modelKey: 'RANGE_ROVER',
-      modelTitle: 'Range Rover SUV (Black & Navy Blue Contrast)',
+      modelTitle: 'Range Rover SUV (Matte Black & Gloss Black)',
       carType: 'range_rover',
       bodyColor: 0x111317,
-      metalness: 0.70,
-      roughness: 0.15,
-      roofColor: 0x172554,
+      metalness: 0.10,
+      roughness: 0.90,
+      roofColor: 0x0f172a,
       contrastRoof: true,
       headlightColor: 0xffffff,
       length: 5.0,
@@ -954,12 +954,12 @@
     {
       id: 'RR_4',
       modelKey: 'RANGE_ROVER',
-      modelTitle: 'Range Rover SUV (Black & Dark Ash Contrast)',
+      modelTitle: 'Range Rover SUV (Matte Blue & Gloss Black)',
       carType: 'range_rover',
-      bodyColor: 0x111317,
-      metalness: 0.70,
-      roughness: 0.15,
-      roofColor: 0x334155,
+      bodyColor: 0x1e3a8a,
+      metalness: 0.10,
+      roughness: 0.85,
+      roofColor: 0x0f172a,
       contrastRoof: true,
       headlightColor: 0xffffff,
       length: 5.0,
@@ -2498,19 +2498,23 @@
     const group = new THREE.Group();
     group.userData.wheels = [];
 
+    // Dedicated Upper Gloss Black Material (Roof, pillars, upper window framing, mirrors, rear tailgate trim)
+    const upperGlossBlackMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.10,
+      metalness: 0.90
+    });
+
+    // Lower Matte Body Panels (Doors, front fenders, hood sides, rear quarter panels)
     const bodyMat = new THREE.MeshStandardMaterial({
       color: config.bodyColor,
-      metalness: config.metalness !== undefined ? config.metalness : 0.45,
-      roughness: config.roughness !== undefined ? config.roughness : 0.30
+      metalness: config.metalness !== undefined ? config.metalness : 0.10,
+      roughness: config.roughness !== undefined ? config.roughness : 0.85
     });
-    const roofMat = new THREE.MeshStandardMaterial({
-      color: config.roofColor || config.bodyColor,
-      metalness: 0.50,
-      roughness: config.contrastRoof ? 0.25 : (config.roughness || 0.30)
-    });
-    const blackTrimMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.40, metalness: 0.50 });
-    const darkTrimMat = blackTrimMat;
-    const darkChassisMat = blackTrimMat;
+    const roofMat = upperGlossBlackMat;
+    const blackTrimMat = upperGlossBlackMat;
+    const darkTrimMat = upperGlossBlackMat;
+    const darkChassisMat = new THREE.MeshStandardMaterial({ color: 0x090a0d, roughness: 0.40, metalness: 0.50 });
     const silverMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.80, roughness: 0.25 });
     const darkMeshMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.85, metalness: 0.3 });
     const darkGlassMat = new THREE.MeshStandardMaterial({
@@ -2583,43 +2587,53 @@
     const driverGroup = buildCarDriver('range_rover');
     group.add(driverGroup);
 
-    // Floating Roof Cap (Blacked-out pillars & contrast or matching roof)
-    const roofCap = new THREE.Mesh(new THREE.BoxGeometry(2.92, 0.05, 1.72), roofMat);
+    // Floating Roof Cap (Always Dark Glossy Black)
+    const roofCap = new THREE.Mesh(new THREE.BoxGeometry(2.92, 0.05, 1.72), upperGlossBlackMat);
     roofCap.position.set(-0.98, 1.685, 0);
     group.add(roofCap);
 
-    // Blacked-Out A, B, C, D Pillars (Terminating flush under roof cap)
+    // Dark Glossy Black A, B, C, D Pillars (Terminating flush under roof cap)
     [-0.84, 0.84].forEach(pz => {
       // Slanted A-Pillar
-      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.04, 0.04), blackTrimMat);
+      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.04, 0.04), upperGlossBlackMat);
       aPillar.rotation.z = -0.74;
       aPillar.position.set(0.65, 1.38, pz);
       group.add(aPillar);
 
       // Vertical B-Pillar
-      const bPillar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.56, 0.04), blackTrimMat);
+      const bPillar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.56, 0.04), upperGlossBlackMat);
       bPillar.position.set(-0.15, 1.37, pz);
       group.add(bPillar);
 
       // C-Pillar
-      const cPillar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.56, 0.04), blackTrimMat);
+      const cPillar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.56, 0.04), upperGlossBlackMat);
       cPillar.position.set(-1.25, 1.37, pz);
       group.add(cPillar);
 
       // Upright D-Pillar (At rear corner edge)
-      const dPillar = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.56, 0.04), blackTrimMat);
+      const dPillar = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.56, 0.04), upperGlossBlackMat);
       dPillar.position.set(-2.38, 1.37, pz);
       group.add(dPillar);
     });
 
-    // 3. Compact Door-Mounted Side Mirrors (Box 0.08x0.08x0.12 + Silver Mirror Face)
+    // Upper Window-Line Beltline Trim (Mirror Level Upward, Dark Gloss Black)
+    [-0.85, 0.85].forEach(wz => {
+      const beltlineTrim = new THREE.Mesh(
+        new THREE.BoxGeometry(3.32, 0.025, 0.03),
+        upperGlossBlackMat
+      );
+      beltlineTrim.position.set(-0.76, 1.08, wz);
+      group.add(beltlineTrim);
+    });
+
+    // 3. Compact Door-Mounted Side Mirrors (Gloss Black Stalk + Pod + Silver Mirror Face)
     [-0.88, 0.88].forEach(mz => {
       const isLeft = mz > 0;
-      const stalk = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.04), blackTrimMat);
+      const stalk = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.04), upperGlossBlackMat);
       stalk.position.set(0.80, 1.12, mz * 0.94);
       group.add(stalk);
 
-      const mirrorPod = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.12), blackTrimMat);
+      const mirrorPod = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.12), upperGlossBlackMat);
       mirrorPod.position.set(0.80, 1.14, mz);
       group.add(mirrorPod);
 
@@ -2691,7 +2705,7 @@
     });
 
     // Horizontal Gloss-Black Connecting Bar across Upper Tailgate
-    const tailgateBar = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.035, 1.68), blackTrimMat);
+    const tailgateBar = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.035, 1.68), upperGlossBlackMat);
     tailgateBar.position.set(-2.435, 1.60, 0);
     group.add(tailgateBar);
 
@@ -2725,6 +2739,12 @@
     });
 
     return group;
+  }
+
+  // Alias for Range Rover builder
+  const buildRangeRover = buildCarRangeRover;
+  if (typeof window !== 'undefined') {
+    window.buildRangeRover = buildCarRangeRover;
   }
 
   // -------------------------------------------------------------
