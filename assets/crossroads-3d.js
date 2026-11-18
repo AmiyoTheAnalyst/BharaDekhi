@@ -16507,6 +16507,14 @@ let sharedRickshawArtTexture = null;
         const mesh = create3DVehicle(v.type, colorHex, v.id, v);
         mesh.rotation.y = getHeading(v.dir);
         mesh.userData.previousRoadPosition = v.pos;
+
+        // Exact Front & Rear Bumper Half-Length from 3D Bounding Box + Safety Margin
+        const vBox = new THREE.Box3().setFromObject(mesh);
+        const boxLength = Math.max(vBox.max.x - vBox.min.x, vBox.max.z - vBox.min.z);
+        const measuredHalf = boxLength > 5 ? (boxLength * 0.5 + 0.6) : (v.type === 'bus' ? 38.6 : 22.0);
+        v.halfLength = measuredHalf;
+        mesh.userData.halfLength = measuredHalf;
+
         vehicleMeshMap[v.id] = {
           mesh: mesh,
           data: v
@@ -17498,24 +17506,27 @@ let sharedRickshawArtTexture = null;
       const bounce = Math.sin((v.pos || 0) * 0.12) * 0.25;
       const tiltZ = Math.sin((v.pos || 0) * 0.08) * 0.012;
 
+      // Center 3D mesh precisely from 2D coordinates so front bumper halts exactly at the stop bar before zebra crossings:
+      const hLen = (v.dir === 'EB' || v.dir === 'WB') ? ((v.w || 44) * 0.5) : ((v.h || 44) * 0.5);
+
       if (v.dir === 'EB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? 18 : 48);
-        vm.mesh.position.set(v.pos - 600, bounce, laneZ);
+        vm.mesh.position.set((v.pos + hLen) - 600, bounce, laneZ);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.z = -tiltZ;
       } else if (v.dir === 'WB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? -15 : -52);
-        vm.mesh.position.set(v.pos - 600, bounce, laneZ);
+        vm.mesh.position.set((v.pos + hLen) - 600, bounce, laneZ);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.z = tiltZ;
       } else if (v.dir === 'SB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? -20 : -58);
-        vm.mesh.position.set(laneX, bounce, v.pos - 420);
+        vm.mesh.position.set(laneX, bounce, (v.pos + hLen) - 420);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.x = tiltZ;
       } else if (v.dir === 'NB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? 18 : 56);
-        vm.mesh.position.set(laneX, bounce, v.pos - 420);
+        vm.mesh.position.set(laneX, bounce, (v.pos + hLen) - 420);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.x = -tiltZ;
       }
@@ -17633,7 +17644,7 @@ let sharedRickshawArtTexture = null;
       } else {
         // Crosswalk pedestrian
         coord = (typeof p.currentCoord !== 'undefined') ? p.currentCoord : p.start;
-        isMoving = Math.abs(coord - p.start) > 2;
+        isMoving = Math.abs(coord - p.start) > 2 && !p.isPausedForVehicle;
         if (p.axis === 'H') {
           posX = coord - 600;
           posZ = p.y - 420;
