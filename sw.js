@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v82';
+const CACHE_NAME = 'bharadekhi-pwa-v83';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -25,17 +25,17 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => {
-        return Promise.all(
-          keys.map(key => {
-            if (key !== CACHE_NAME) {
-              return caches.delete(key);
-            }
-          })
-        );
-      })
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+      await self.clients.claim();
+    })()
   );
 });
 
@@ -45,7 +45,7 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(event.request.url);
 
-  // Network-first for external APIs (e.g. Open-Meteo weather)
+  // Network-First for external APIs (e.g. Open-Meteo weather)
   if (url.origin !== self.location.origin) {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(event.request))
@@ -53,8 +53,13 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Network-first for navigation requests to ensure always fresh HTML
-  if (event.request.mode === 'navigate') {
+  // Network-First for all HTML, JS, CSS, navigation, and query-versioned requests
+  // Ensures all code/animation updates appear immediately on refresh (offline fallback only)
+  const isCodeOrDoc = event.request.mode === 'navigate' ||
+                      /\.(html|js|css)($|\?)/i.test(url.pathname) ||
+                      Boolean(url.search);
+
+  if (isCodeOrDoc) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
@@ -64,28 +69,18 @@ self.addEventListener('fetch', event => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html') || caches.match('/'))
-    );
-    return;
-  }
-
-  // Network-first for versioned query assets (?v=...) to prevent stale caching
-  if (url.search) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          if (response && response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') {
+            return (await caches.match('/index.html')) || (await caches.match('/'));
           }
-          return response;
         })
-        .catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // Stale-while-revalidate for local static assets
+  // Stale-while-revalidate for static binary assets (images, icons, fonts)
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       const fetchPromise = fetch(event.request)

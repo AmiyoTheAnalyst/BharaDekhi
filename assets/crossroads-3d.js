@@ -5188,15 +5188,6 @@
     bodyRoot.scale.set(BASE_SCALE * archetype.scale * shoulderRatio, BASE_SCALE * archetype.scale, BASE_SCALE * archetype.scale);
     group.add(bodyRoot);
 
-    // Ground Contact Shadow Disc (GPU-free soft contact shadow under feet)
-    const shadowDisc = new THREE.Mesh(
-      getPedGeo('pedShadowDisc', () => new THREE.CircleGeometry(0.24, 16)),
-      sharedMats.shadow
-    );
-    shadowDisc.rotation.x = -Math.PI / 2;
-    shadowDisc.position.set(0, 0.002, 0);
-    bodyRoot.add(shadowDisc);
-
     // =========================================================================
     // 1. VISIBLE SHOES & ARTICULATED LEGS (Y = 0.000 Flush Ground Contact)
     // Hip placed at hipY = 0.524, shoeGroup at y = -0.25 inside kneePivot
@@ -5527,7 +5518,6 @@
     umbrellaGroup.add(jHandle);
 
     umbrellaGroup.visible = false;
-    bodyRoot.add(umbrellaGroup);
 
     // =========================================================================
     // 3. CONNECTED NECK & HEAD (Y = 0.92 to Y = 1.20 — ZERO FLOATING HEAD GAP!)
@@ -5736,6 +5726,32 @@
       beard.position.set(0, -0.075, 0.068);
       headGroup.add(beard);
     }
+
+    // Auto-clamp every pedestrian's shoe soles to exact Y = 0.000 using THREE.Box3 (Zero Floating)
+    leftLegData.legPivot.rotation.set(0, 0, 0);
+    rightLegData.legPivot.rotation.set(0, 0, 0);
+    leftLegData.kneePivot.rotation.set(0, 0, 0);
+    rightLegData.kneePivot.rotation.set(0, 0, 0);
+    bodyRoot.updateMatrixWorld(true);
+
+    const bbox = new THREE.Box3().setFromObject(bodyRoot);
+    const shoeBottomY = bbox.min.y;
+    bodyRoot.position.y -= shoeBottomY; // Shifts bodyRoot down so the bottom of the white shoe soles sits at exact Y = 0.000
+    bodyRoot.userData.groundedBaseY = bodyRoot.position.y;
+
+    // Attach umbrella to bodyRoot after shoe bounding measurement
+    bodyRoot.add(umbrellaGroup);
+
+    // Ground Contact Shadow Disc (Added to group at ground level Y = 0.002)
+    const shadowDisc = new THREE.Mesh(
+      getPedGeo('pedShadowDisc', () => new THREE.CircleGeometry(0.24, 16)),
+      sharedMats.shadow
+    );
+    shadowDisc.rotation.x = -Math.PI / 2;
+    const shadowScale = BASE_SCALE * archetype.scale;
+    shadowDisc.scale.set(shadowScale, shadowScale, shadowScale);
+    shadowDisc.position.set(0, 0.002, 0);
+    group.add(shadowDisc);
 
     // Save pivot references for live walking kinematics
     group.userData.leftLeg = leftLegData.legPivot;
@@ -17666,7 +17682,12 @@ let sharedRickshawArtTexture = null;
       // Compensate hip height downward for leg angle (1 - cos(swing)) so stance shoe stays planted at Y = 0.000:
       const legLength = 0.524;
       const hipDrop = legLength * (1 - Math.cos(swing)) * 0.85;
-      if (pm.mesh.userData.bodyRoot) pm.mesh.userData.bodyRoot.position.y = -hipDrop;
+      const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
+        ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
+        : 0;
+      if (pm.mesh.userData.bodyRoot) {
+        pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
+      }
 
       // Smooth 180° turnaround heading interpolation so pedestrians turn around naturally
       if (typeof pm.mesh.userData.currentRotY === 'undefined') {
