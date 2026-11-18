@@ -5064,6 +5064,7 @@
   let pedSharedEyeWhiteMat = null;
   let pedSharedPupilMat = null;
   let pedSharedShadowMat = null;
+  let pedSharedFootShadowMat = null;
   function getPedSharedMats() {
     if (!pedSharedEyeWhiteMat) {
       pedSharedEyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -5071,11 +5072,22 @@
       pedSharedShadowMat = new THREE.MeshBasicMaterial({
         color: 0x05070a,
         transparent: true,
-        opacity: 0.32,
+        opacity: 0.18,
+        depthWrite: false
+      });
+      pedSharedFootShadowMat = new THREE.MeshBasicMaterial({
+        color: 0x05070a,
+        transparent: true,
+        opacity: 0.45,
         depthWrite: false
       });
     }
-    return { eyeWhite: pedSharedEyeWhiteMat, pupil: pedSharedPupilMat, shadow: pedSharedShadowMat };
+    return {
+      eyeWhite: pedSharedEyeWhiteMat,
+      pupil: pedSharedPupilMat,
+      shadow: pedSharedShadowMat,
+      footShadow: pedSharedFootShadowMat
+    };
   }
 
   function createArticulatedHuman(p, isSocial) {
@@ -5190,12 +5202,12 @@
 
     // =========================================================================
     // 1. VISIBLE SHOES & ARTICULATED LEGS (Y = 0.000 Flush Ground Contact)
-    // Hip placed at hipY = 0.524, shoeGroup at y = -0.25 inside kneePivot
-    // Chain: 0.524 - 0.24 - 0.25 - 0.034 = 0.000 (Bottom of sole sits at Y = 0.000)
+    // Hip placed at hipY = 0.508, shoeGroup at y = -0.22 inside kneePivot
+    // Chain: 0.508 - 0.24 - 0.22 - 0.048 = 0.000 (Bottom of sole sits at exact Y = 0.000)
     // =========================================================================
     function buildLeg(isRight) {
       const legPivot = new THREE.Group();
-      legPivot.position.set(isRight ? 0.062 : -0.062, 0.524, 0);
+      legPivot.position.set(isRight ? 0.062 : -0.062, 0.508, 0);
 
       // Hip Sphere
       const hip = new THREE.Mesh(
@@ -5212,7 +5224,7 @@
       thigh.position.set(0, -0.12, 0);
       legPivot.add(thigh);
 
-      // Articulated Knee Pivot Group (anchored at y = -0.24, which is Y = 0.284 above ground)
+      // Articulated Knee Pivot Group (anchored at y = -0.24)
       const kneePivot = new THREE.Group();
       kneePivot.position.set(0, -0.24, 0);
       legPivot.add(kneePivot);
@@ -5232,34 +5244,44 @@
       shin.position.set(0, -0.11, 0);
       kneePivot.add(shin);
 
-      // Visible 3D Shoe (shoeGroup at y = -0.25 inside kneePivot, resting 100% visible flush on ground)
+      // Visible 3D Shoe (shoeGroup at y = -0.22 inside kneePivot, attached directly to bottom of shin!)
       const shoeGroup = new THREE.Group();
-      shoeGroup.position.set(0, -0.25, 0);
+      shoeGroup.position.set(0, -0.22, 0);
       kneePivot.add(shoeGroup);
 
-      // Dark Shoe Body
+      // High-Contrast Shoe Colors (#111317 jet black, #451a03 dark brown, #1e3a8a navy, #991b1b burgundy)
+      // Shoe Upper: BoxGeometry(0.078, 0.052, 0.145) at (0, -0.012, 0.025)
       const shoeBase = new THREE.Mesh(
-        getPedGeo('pedShoeBase', () => new THREE.BoxGeometry(0.072, 0.055, 0.135)),
+        getPedGeo('pedShoeBase', () => new THREE.BoxGeometry(0.078, 0.052, 0.145)),
         shoeMat
       );
-      shoeBase.position.set(0, 0, 0.022);
+      shoeBase.position.set(0, -0.012, 0.025);
       shoeGroup.add(shoeBase);
 
-      // Rounded Toe Cap
+      // Rounded Toe Cap: SphereGeometry(0.039, 10, 10) at (0, -0.016, 0.090)
       const toeCap = new THREE.Mesh(
-        getPedGeo('pedToeCap', () => new THREE.SphereGeometry(0.036, 10, 10)),
+        getPedGeo('pedToeCap', () => new THREE.SphereGeometry(0.039, 10, 10)),
         shoeMat
       );
-      toeCap.position.set(0, -0.005, 0.085);
+      toeCap.position.set(0, -0.016, 0.090);
       shoeGroup.add(toeCap);
 
-      // Contrasting White / Light-Grey Shoe Sole (bottom sits flush at Y = 0.000 on ground disc!)
+      // Contrasting White / Light-Grey Shoe Sole: BoxGeometry(0.082, 0.016, 0.155) at (0, -0.040, 0.025)
       const shoeSole = new THREE.Mesh(
-        getPedGeo('pedShoeSole', () => new THREE.BoxGeometry(0.076, 0.016, 0.145)),
+        getPedGeo('pedShoeSole', () => new THREE.BoxGeometry(0.082, 0.016, 0.155)),
         soleMat
       );
-      shoeSole.position.set(0, -0.028, 0.022);
+      shoeSole.position.set(0, -0.040, 0.025);
       shoeGroup.add(shoeSole);
+
+      // Tight Dark Contact Shadow Pad directly underneath each shoe sole
+      const footShadow = new THREE.Mesh(
+        getPedGeo('pedFootShadow', () => new THREE.CircleGeometry(0.055, 10)),
+        sharedMats.footShadow
+      );
+      footShadow.rotation.x = -Math.PI / 2;
+      footShadow.position.set(0, -0.047, 0.025);
+      shoeGroup.add(footShadow);
 
       return { legPivot, kneePivot };
     }
@@ -5270,14 +5292,14 @@
     bodyRoot.add(rightLegData.legPivot);
 
     // =========================================================================
-    // 2. PELVIS, TORSO & SHOULDER YOKE (Lowered by -0.036 to match hipY = 0.524)
+    // 2. PELVIS, TORSO & SHOULDER YOKE (Lowered by -0.016 to match hipY = 0.508)
     // =========================================================================
-    // Pelvis / Hips (radius 0.098 to 0.095, centered at y = 0.535)
+    // Pelvis / Hips (radius 0.098 to 0.095, centered at y = 0.519)
     const pelvis = new THREE.Mesh(
       getPedGeo('pedPelvis', () => new THREE.CylinderGeometry(0.098, 0.095, 0.10, 14)),
       bottomMat
     );
-    pelvis.position.set(0, 0.535, 0);
+    pelvis.position.set(0, 0.519, 0);
     bodyRoot.add(pelvis);
 
     // Traditional Lower Garments
@@ -5286,21 +5308,21 @@
         getPedGeo('pedKurtaHem', () => new THREE.CylinderGeometry(0.118, 0.145, 0.26, 14)),
         topMat
       );
-      kurtaHem.position.set(0, 0.404, 0);
+      kurtaHem.position.set(0, 0.388, 0);
       bodyRoot.add(kurtaHem);
     } else if (archetype.hasSareePallu) {
       const sareeDrape = new THREE.Mesh(
         getPedGeo('pedSareeDrape', () => new THREE.CylinderGeometry(0.110, 0.140, 0.44, 14)),
         bottomMat
       );
-      sareeDrape.position.set(0, 0.314, 0);
+      sareeDrape.position.set(0, 0.298, 0);
       bodyRoot.add(sareeDrape);
     } else if (archetype.hasSkirt || archetype.hasDress) {
       const skirt = new THREE.Mesh(
         getPedGeo('pedSkirt', () => new THREE.CylinderGeometry(0.112, 0.155, 0.24, 14)),
         bottomMat
       );
-      skirt.position.set(0, 0.404, 0);
+      skirt.position.set(0, 0.388, 0);
       bodyRoot.add(skirt);
     }
 
@@ -5315,16 +5337,16 @@
       topMat
     );
     torso.scale.set(1.08, 1.0, 0.74);
-    torso.position.set(0, 0.735, 0); // Spans 0.565 to 0.905
+    torso.position.set(0, 0.719, 0);
     torsoGroup.add(torso);
 
-    // Rounded Shoulder Yoke: Centered at y = 0.905, top reaches 0.949
+    // Rounded Shoulder Yoke: Centered at y = 0.889, top reaches 0.933
     const yoke = new THREE.Mesh(
       getPedGeo('pedYoke', () => new THREE.SphereGeometry(0.122, 16, 12)),
       topMat
     );
     yoke.scale.set(1.08, 0.36, 0.74);
-    yoke.position.set(0, 0.905, 0);
+    yoke.position.set(0, 0.889, 0);
     torsoGroup.add(yoke);
 
     // Attire Accessories
@@ -5334,7 +5356,7 @@
         getPedGeo('pedTie', () => new THREE.BoxGeometry(0.034, 0.20, 0.012)),
         tieMat
       );
-      tie.position.set(0, 0.764, 0.092);
+      tie.position.set(0, 0.748, 0.092);
       torsoGroup.add(tie);
     }
     if (archetype.hasDupatta) {
@@ -5344,7 +5366,7 @@
         dupattaMat
       );
       dupattaLoop.rotation.x = Math.PI / 2;
-      dupattaLoop.position.set(0, 0.894, 0);
+      dupattaLoop.position.set(0, 0.878, 0);
       torsoGroup.add(dupattaLoop);
 
       const dupattaSash = new THREE.Mesh(
@@ -5352,7 +5374,7 @@
         dupattaMat
       );
       dupattaSash.rotation.z = -0.28;
-      dupattaSash.position.set(0.05, 0.744, 0.092);
+      dupattaSash.position.set(0.05, 0.728, 0.092);
       torsoGroup.add(dupattaSash);
     }
     if (archetype.hasSareePallu) {
@@ -5362,7 +5384,7 @@
         goldMat
       );
       pallu.rotation.z = -0.32;
-      pallu.position.set(0.04, 0.764, 0.095);
+      pallu.position.set(0.04, 0.748, 0.095);
       torsoGroup.add(pallu);
     }
     if (archetype.hasBackpack) {
@@ -5371,7 +5393,7 @@
         getPedGeo('pedBackpack', () => new THREE.BoxGeometry(0.15, 0.20, 0.09)),
         packMat
       );
-      pack.position.set(0, 0.744, -0.11);
+      pack.position.set(0, 0.728, -0.11);
       torsoGroup.add(pack);
     } else if (archetype.hasTote) {
       const toteMat = new THREE.MeshStandardMaterial({ color: archetype.toteColor || 0x475569, roughness: 0.7 });
@@ -5379,17 +5401,17 @@
         getPedGeo('pedTote', () => new THREE.BoxGeometry(0.07, 0.18, 0.15)),
         toteMat
       );
-      tote.position.set(-0.15, 0.684, 0.04);
+      tote.position.set(-0.15, 0.668, 0.04);
       torsoGroup.add(tote);
     }
 
-    // Articulated Arms (Pivoting at shoulders x = ±0.145, y = 0.895)
+    // Articulated Arms (Pivoting at shoulders x = ±0.145, y = 0.879)
     let rightElbowPivot = null;
     let rightHandMesh = null;
 
     function buildArm(isRight) {
       const armPivot = new THREE.Group();
-      armPivot.position.set(isRight ? 0.145 : -0.145, 0.895, 0);
+      armPivot.position.set(isRight ? 0.145 : -0.145, 0.879, 0);
 
       // Embedded Spherical Shoulder Cap
       const shoulderCap = new THREE.Mesh(
@@ -5470,11 +5492,11 @@
     torsoGroup.add(leftArmPivot);
     torsoGroup.add(rightArmPivot);
 
-    // Procedural Overhead Rain Umbrella (Canopy apex at Y = 1.45, Hand grip at Y = 0.79)
+    // Procedural Overhead Rain Umbrella (Canopy apex at Y = 1.434, Hand grip at Y = 0.774)
     const umbrellaGroup = new THREE.Group();
     umbrellaGroup.position.set(0, 0, 0);
 
-    // Domed Overhead Canopy (apex at Y = 1.45, rim at Y = 1.25, leaves clean gap above head)
+    // Domed Overhead Canopy (apex at Y = 1.434, rim at Y = 1.234, leaves clean gap above head)
     const umbrellaCanopy = new THREE.Mesh(
       getPedGeo('pedUmbrellaCanopy', () => new THREE.SphereGeometry(0.38, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.38)),
       new THREE.MeshStandardMaterial({
@@ -5483,20 +5505,20 @@
         side: THREE.DoubleSide
       })
     );
-    umbrellaCanopy.position.set(0, 1.15, 0.03); // apex at 1.45, rim at 1.25
+    umbrellaCanopy.position.set(0, 1.134, 0.03);
     umbrellaGroup.add(umbrellaCanopy);
 
-    // Top Finial Tip at Y = 1.48
+    // Top Finial Tip at Y = 1.464
     const finial = new THREE.Mesh(
       getPedGeo('pedUmbrellaFinial', () => new THREE.CylinderGeometry(0.008, 0.004, 0.06, 8)),
       new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 })
     );
-    finial.position.set(0, 1.48, 0.03);
+    finial.position.set(0, 1.464, 0.03);
     umbrellaGroup.add(finial);
 
-    // Vertical Metal Shaft (extends from hand at (0.085, 0.79, 0.165) up to canopy (0, 1.45, 0.03))
-    const pHand = new THREE.Vector3(0.085, 0.79, 0.165);
-    const pCanopy = new THREE.Vector3(0, 1.45, 0.03);
+    // Vertical Metal Shaft (extends from hand at (0.085, 0.774, 0.165) up to canopy (0, 1.434, 0.03))
+    const pHand = new THREE.Vector3(0.085, 0.774, 0.165);
+    const pCanopy = new THREE.Vector3(0, 1.434, 0.03);
     const shaftVec = new THREE.Vector3().subVectors(pCanopy, pHand);
     const shaftMid = new THREE.Vector3().addVectors(pHand, pCanopy).multiplyScalar(0.5);
 
@@ -5508,26 +5530,26 @@
     shaftMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), shaftVec.clone().normalize());
     umbrellaGroup.add(shaftMesh);
 
-    // Curved J-Handle Grip at Hand (hooks neatly below hand from y = 0.79 down to 0.74)
+    // Curved J-Handle Grip at Hand (hooks neatly below hand from y = 0.774 down to 0.724)
     const jHandle = new THREE.Mesh(
       getPedGeo('pedUmbrellaHandle', () => new THREE.TorusGeometry(0.022, 0.008, 8, 12, Math.PI)),
       new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5 })
     );
     jHandle.rotation.z = Math.PI;
-    jHandle.position.set(0.085, 0.765, 0.165);
+    jHandle.position.set(0.085, 0.749, 0.165);
     umbrellaGroup.add(jHandle);
 
     umbrellaGroup.visible = false;
 
     // =========================================================================
-    // 3. CONNECTED NECK & HEAD (Y = 0.92 to Y = 1.20 — ZERO FLOATING HEAD GAP!)
+    // 3. CONNECTED NECK & HEAD (Y = 0.90 to Y = 1.18 — ZERO FLOATING HEAD GAP!)
     // =========================================================================
-    // Neck Cylinder: Centered at (0, 0.955, 0), embedded firmly into shoulder yoke at 0.949
+    // Neck Cylinder: Centered at (0, 0.939, 0), embedded firmly into shoulder yoke at 0.933
     const neck = new THREE.Mesh(
       getPedGeo('pedNeck', () => new THREE.CylinderGeometry(0.036, 0.042, 0.08, 12)),
       skinMat
     );
-    neck.position.set(0, 0.955, 0);
+    neck.position.set(0, 0.939, 0);
     bodyRoot.add(neck);
 
     // Shirt Collar Ring: Encircles neck base right at shoulders
@@ -5536,12 +5558,12 @@
       topMat
     );
     collarRing.rotation.x = Math.PI / 2;
-    collarRing.position.set(0, 0.940, 0);
+    collarRing.position.set(0, 0.924, 0);
     bodyRoot.add(collarRing);
 
-    // Head Group: Positioned at y = 1.075 (chin at 0.970 overlaps neck top at 0.995 — ZERO GAP!)
+    // Head Group: Positioned at y = 1.059 (chin at 0.954 overlaps neck top at 0.979 — ZERO GAP!)
     const headGroup = new THREE.Group();
-    headGroup.position.set(0, 1.075, 0);
+    headGroup.position.set(0, 1.059, 0);
     bodyRoot.add(headGroup);
 
     // Head Sphere: Radius 0.10, scaled (0.92, 1.05, 0.95), front skin surface at z ≈ 0.095
@@ -5579,12 +5601,12 @@
       faceRing.position.set(0, 0.002, 0.056);
       headGroup.add(faceRing);
 
-      // 3. Under-Chin Neck & Chest Drape (Placed on bodyRoot strictly BELOW chin Y = 0.970)
+      // 3. Under-Chin Neck & Chest Drape (Placed on bodyRoot strictly BELOW chin)
       const shoulderDrape = new THREE.Mesh(
         getPedGeo('pedHijabDrape', () => new THREE.CylinderGeometry(0.062, 0.125, 0.12, 16)),
         hijabMat
       );
-      shoulderDrape.position.set(0, 0.924, -0.005);
+      shoulderDrape.position.set(0, 0.908, -0.005);
       bodyRoot.add(shoulderDrape);
     } else if (archetype.hasCap) {
       const capMat = new THREE.MeshStandardMaterial({ color: archetype.capColor || 0x1e3a8a, roughness: 0.6 });
@@ -5742,9 +5764,9 @@
     // Attach umbrella to bodyRoot after shoe bounding measurement
     bodyRoot.add(umbrellaGroup);
 
-    // Ground Contact Shadow Disc (Added to group at ground level Y = 0.002)
+    // Ground Contact Shadow Disc (Added to group at ground level Y = 0.002, radius 0.13, opacity 0.18)
     const shadowDisc = new THREE.Mesh(
-      getPedGeo('pedShadowDisc', () => new THREE.CircleGeometry(0.24, 16)),
+      getPedGeo('pedShadowDisc', () => new THREE.CircleGeometry(0.13, 16)),
       sharedMats.shadow
     );
     shadowDisc.rotation.x = -Math.PI / 2;
@@ -6886,8 +6908,16 @@ let sharedRickshawArtTexture = null;
   // Sidewalk Corners with Curbs & Pedestrian Safety Railings
   let railingMat = null;
   function addSidewalkCorner(w, d, x, z) {
-    if (!sidewalkMat) sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9, metalness: 0.05 });
-    if (!curbMat) curbMat = new THREE.MeshStandardMaterial({ map: getCurbCanvasTexture(), roughness: 0.65, metalness: 0.1 });
+    if (!sidewalkMat) sidewalkMat = new THREE.MeshStandardMaterial({
+      color: 0x2d333b, // Dark Ash footpath (contrasts cleanly with the black asphalt road)
+      roughness: 0.86,
+      metalness: 0.08
+    });
+    if (!curbMat) curbMat = new THREE.MeshStandardMaterial({
+      color: 0x3e4652, // Subtle curb/tile edging (#3e4652) for crisp modern border against black road
+      roughness: 0.82,
+      metalness: 0.12
+    });
     if (!railingMat) railingMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.5, roughness: 0.4 });
 
     const swGeo = new THREE.BoxGeometry(w, 2, d);
@@ -6898,9 +6928,9 @@ let sharedRickshawArtTexture = null;
     sw.updateMatrix();
     scene.add(sw);
 
-    const curbGeo = new THREE.BoxGeometry(w, 2.5, 3);
+    const curbGeo = new THREE.BoxGeometry(w, 2.05, 3);
     const curb = new THREE.Mesh(curbGeo, curbMat);
-    curb.position.set(x, 1.25, z > 0 ? z - d / 2 : z + d / 2);
+    curb.position.set(x, 1.025, z > 0 ? z - d / 2 : z + d / 2);
     curb.matrixAutoUpdate = false;
     curb.updateMatrix();
     scene.add(curb);
@@ -16539,7 +16569,7 @@ let sharedRickshawArtTexture = null;
     ];
     socialSpots.forEach((loc, gIdx) => {
       const clusterGroup = new THREE.Group();
-      clusterGroup.position.set(loc[0], 1.0, loc[1]);
+      clusterGroup.position.set(loc[0], 2.005, loc[1]); // SIDEWALK_TOP_Y + 0.005 (Unburied flush on footpath surface)
       clusterGroup.rotation.y = loc[2];
 
       [-2.4, 2.4].forEach((offset, pIdx) => {
@@ -17649,16 +17679,16 @@ let sharedRickshawArtTexture = null;
       pm.mesh.userData.moveBlend += (targetBlend - pm.mesh.userData.moveBlend) * Math.min(1.0, delta * 10);
       const blend = pm.mesh.userData.moveBlend;
 
-      const swing = Math.sin(walkPhase) * 0.46 * blend;
-      const leftLift = Math.max(0, -Math.sin(walkPhase + 0.35)) * blend;
-      const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.35)) * blend;
+      const swing = Math.sin(walkPhase) * 0.42 * blend;
+      const leftLift = Math.max(0, -Math.sin(walkPhase + 0.3)) * blend;
+      const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.3)) * blend;
       const armSwing = swing * 0.75;
       const torsoSway = Math.sin(walkPhase) * 0.06 * blend;
 
       if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = swing;
       if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -swing;
-      if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.58;
-      if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.58;
+      if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.52;
+      if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.52;
       if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armSwing;
 
       if (pm.mesh.userData.rightArm) {
@@ -17679,12 +17709,11 @@ let sharedRickshawArtTexture = null;
 
       if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = torsoSway;
 
-      // Compensate hip height downward for leg angle (1 - cos(swing)) so stance shoe stays planted at Y = 0.000:
-      const legLength = 0.524;
-      const hipDrop = legLength * (1 - Math.cos(swing)) * 0.85;
+      // Drop bodyRoot by exact (1 - cos(swing)) of leg length (0.508) so stance shoe stays locked at Y = 0.000:
       const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
         ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
         : 0;
+      const hipDrop = 0.508 * (1 - Math.cos(swing));
       if (pm.mesh.userData.bodyRoot) {
         pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
       }
@@ -17704,15 +17733,18 @@ let sharedRickshawArtTexture = null;
         pm.mesh.userData.currentRotY = targetRotY;
       }
 
-      // Dynamic Road vs. Sidewalk Surface Elevation (0.02 on road, 1.0 on sidewalk)
+      // Exact Top Surface Heights: Sidewalk slab top is Y = 2.0, Road plane is Y = 0.0
+      const SIDEWALK_TOP_Y = 2.0;
+      const ROAD_TOP_Y = 0.0;
       const onSidewalk = !!(p.isSidewalk || (Math.abs(posX) > 115 && Math.abs(posZ) > 85));
-      const targetGroundY = onSidewalk ? 1.0 : 0.02;
+      const targetGroundY = onSidewalk ? (SIDEWALK_TOP_Y + 0.005) : (ROAD_TOP_Y + 0.002);
       if (typeof pm.mesh.userData.currentGroundY === 'undefined') {
         pm.mesh.userData.currentGroundY = targetGroundY;
       }
       pm.mesh.userData.currentGroundY += (targetGroundY - pm.mesh.userData.currentGroundY) * Math.min(1.0, delta * 10);
 
       pm.mesh.position.set(posX, pm.mesh.userData.currentGroundY, posZ);
+      pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
       pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
     }
 
