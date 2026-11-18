@@ -17652,17 +17652,26 @@ let sharedRickshawArtTexture = null;
       pm.mesh.userData.lastZ = posZ;
 
       const dispDist = Math.hypot(dX, dZ);
-      let targetRotY = (typeof pm.mesh.userData.targetRotY !== 'undefined') ? pm.mesh.userData.targetRotY : 0;
-      if (dispDist > 0.001) {
-        targetRotY = Math.atan2(dX, dZ);
-        pm.mesh.userData.targetRotY = targetRotY;
-      } else if (typeof pm.mesh.userData.targetRotY === 'undefined') {
+      // Forward heading orientation:
+      // Crosswalk pedestrians strictly face across the road toward p.end (never flipped 180° by wrap-around snap):
+      let targetRotY = 0;
+      if (!p.isSidewalk) {
         if (p.axis === 'H') {
-          targetRotY = (p.end > p.start) ? Math.PI / 2 : -Math.PI / 2;
+          targetRotY = (p.end > p.start) ? (Math.PI / 2) : (-Math.PI / 2);
         } else {
           targetRotY = (p.end > p.start) ? 0 : Math.PI;
         }
         pm.mesh.userData.targetRotY = targetRotY;
+      } else {
+        if (dispDist > 0.001 && dispDist < 10) {
+          targetRotY = Math.atan2(dX, dZ);
+          pm.mesh.userData.targetRotY = targetRotY;
+        } else if (typeof pm.mesh.userData.targetRotY === 'undefined') {
+          targetRotY = (p.axis === 'H') ? ((p.end > p.start) ? (Math.PI / 2) : (-Math.PI / 2)) : ((p.end > p.start) ? 0 : Math.PI);
+          pm.mesh.userData.targetRotY = targetRotY;
+        } else {
+          targetRotY = pm.mesh.userData.targetRotY;
+        }
       }
 
       // Stride Cycle Kinematics: Hip swing, knee bending, counter-arm swinging & vertical bob
@@ -17679,43 +17688,64 @@ let sharedRickshawArtTexture = null;
       pm.mesh.userData.moveBlend += (targetBlend - pm.mesh.userData.moveBlend) * Math.min(1.0, delta * 10);
       const blend = pm.mesh.userData.moveBlend;
 
-      const swing = Math.sin(walkPhase) * 0.42 * blend;
-      const leftLift = Math.max(0, -Math.sin(walkPhase + 0.3)) * blend;
-      const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.3)) * blend;
-      const armSwing = swing * 0.75;
-      const torsoSway = Math.sin(walkPhase) * 0.06 * blend;
+      if (!isMoving) {
+        // While waiting at curb: limbs upright, stance flat on sidewalk
+        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.set(0, 0, 0);
+        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.set(0, 0, 0);
+        if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.set(0, 0, 0);
+        if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.set(0, 0, 0);
+        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.set(0, 0, 0);
+        if (pm.mesh.userData.bodyRoot) pm.mesh.userData.bodyRoot.position.y = 0;
+        if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = 0;
 
-      if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = swing;
-      if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -swing;
-      if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.52;
-      if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.52;
-      if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armSwing;
-
-      if (pm.mesh.userData.rightArm) {
-        if (isRain && pm.mesh.userData.umbrella) {
-          // Locked umbrella-holding pose with subtle natural stride damping (±0.02 rad)
-          const armBreath = Math.sin(walkPhase) * 0.02;
-          pm.mesh.userData.rightArm.rotation.set(-0.42 + armBreath, 0, -0.16);
-          if (pm.mesh.userData.rightElbow) {
-            pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
-          }
-        } else {
-          pm.mesh.userData.rightArm.rotation.set(armSwing, 0, 0);
-          if (pm.mesh.userData.rightElbow) {
-            pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
+        if (pm.mesh.userData.rightArm) {
+          if (isRain && pm.mesh.userData.umbrella) {
+            pm.mesh.userData.rightArm.rotation.set(-0.42, 0, -0.16);
+            if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
+          } else {
+            pm.mesh.userData.rightArm.rotation.set(0, 0, 0);
+            if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
           }
         }
-      }
+      } else {
+        const swing = Math.sin(walkPhase) * 0.42 * blend;
+        const leftLift = Math.max(0, -Math.sin(walkPhase + 0.3)) * blend;
+        const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.3)) * blend;
+        const armSwing = swing * 0.75;
+        const torsoSway = Math.sin(walkPhase) * 0.06 * blend;
 
-      if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = torsoSway;
+        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = swing;
+        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -swing;
+        if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.52;
+        if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.52;
+        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armSwing;
 
-      // Drop bodyRoot by exact (1 - cos(swing)) of leg length (0.508) so stance shoe stays locked at Y = 0.000:
-      const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
-        ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
-        : 0;
-      const hipDrop = 0.508 * (1 - Math.cos(swing));
-      if (pm.mesh.userData.bodyRoot) {
-        pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
+        if (pm.mesh.userData.rightArm) {
+          if (isRain && pm.mesh.userData.umbrella) {
+            // Locked umbrella-holding pose with subtle natural stride damping (±0.02 rad)
+            const armBreath = Math.sin(walkPhase) * 0.02;
+            pm.mesh.userData.rightArm.rotation.set(-0.42 + armBreath, 0, -0.16);
+            if (pm.mesh.userData.rightElbow) {
+              pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
+            }
+          } else {
+            pm.mesh.userData.rightArm.rotation.set(armSwing, 0, 0);
+            if (pm.mesh.userData.rightElbow) {
+              pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
+            }
+          }
+        }
+
+        if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = torsoSway;
+
+        // Drop bodyRoot by exact (1 - cos(swing)) of leg length (0.508) so stance shoe stays locked at Y = 0.000:
+        const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
+          ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
+          : 0;
+        const hipDrop = 0.508 * (1 - Math.cos(swing));
+        if (pm.mesh.userData.bodyRoot) {
+          pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
+        }
       }
 
       // Smooth 180° turnaround heading interpolation so pedestrians turn around naturally
@@ -17736,15 +17766,23 @@ let sharedRickshawArtTexture = null;
       // Exact Top Surface Heights: Sidewalk slab top is Y = 2.0, Road plane is Y = 0.0
       const SIDEWALK_TOP_Y = 2.0;
       const ROAD_TOP_Y = 0.0;
-      const onSidewalk = !!(p.isSidewalk || (Math.abs(posX) > 115 && Math.abs(posZ) > 85));
-      const targetGroundY = onSidewalk ? (SIDEWALK_TOP_Y + 0.005) : (ROAD_TOP_Y + 0.002);
+      let onSidewalk = false;
+      if (p.isSidewalk) {
+        onSidewalk = true;
+      } else if (!isMoving) {
+        // Crosswalk pedestrians waiting at curb are always on top of sidewalk
+        onSidewalk = true;
+      } else {
+        // While crossing, on curb slab if at the ends, on asphalt road in the middle
+        onSidewalk = (p.axis === 'V') ? (Math.abs(posZ) >= 79) : (Math.abs(posX) >= 107);
+      }
+      const targetGroundY = onSidewalk ? (SIDEWALK_TOP_Y + 0.005) : (ROAD_TOP_Y + 0.005);
       if (typeof pm.mesh.userData.currentGroundY === 'undefined') {
         pm.mesh.userData.currentGroundY = targetGroundY;
       }
-      pm.mesh.userData.currentGroundY += (targetGroundY - pm.mesh.userData.currentGroundY) * Math.min(1.0, delta * 10);
+      pm.mesh.userData.currentGroundY += (targetGroundY - pm.mesh.userData.currentGroundY) * Math.min(1.0, delta * 12);
 
       pm.mesh.position.set(posX, pm.mesh.userData.currentGroundY, posZ);
-      pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
       pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
     }
 
