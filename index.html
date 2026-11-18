@@ -111,7 +111,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=20261119-zebra-stopline-fix"></script>
+  <script src="assets/crossroads-3d.js?v=20261119-ultra-smooth-fps"></script>
   <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
@@ -19245,16 +19245,33 @@
         const SLOW_FOLLOW_GAP = 110; // Proactive deceleration distance (px)
 
         // Check if pedestrians are actively crossing each of the 4 crosswalks (yield vehicles on green until clear)
-        const isWestCrosswalkActive = pedestrians.some(p => (p.id === 'ped_w1' || p.id === 'ped_w2') && Math.abs(p.currentCoord - p.start) > 2 && Math.abs(p.currentCoord - p.end) > 2);
-        const isEastCrosswalkActive = pedestrians.some(p => (p.id === 'ped_e1' || p.id === 'ped_e2') && Math.abs(p.currentCoord - p.start) > 2 && Math.abs(p.currentCoord - p.end) > 2);
-        const isNorthCrosswalkActive = pedestrians.some(p => (p.id === 'ped_n1' || p.id === 'ped_n2') && Math.abs(p.currentCoord - p.start) > 2 && Math.abs(p.currentCoord - p.end) > 2);
-        const isSouthCrosswalkActive = pedestrians.some(p => (p.id === 'ped_s1' || p.id === 'ped_s2') && Math.abs(p.currentCoord - p.start) > 2 && Math.abs(p.currentCoord - p.end) > 2);
+        let isWestCrosswalkActive = false;
+        let isEastCrosswalkActive = false;
+        let isNorthCrosswalkActive = false;
+        let isSouthCrosswalkActive = false;
+        for (let pi = 0; pi < pedestrians.length; pi++) {
+          const p = pedestrians[pi];
+          const isCrossing = Math.abs(p.currentCoord - p.start) > 2 && Math.abs(p.currentCoord - p.end) > 2;
+          if (isCrossing) {
+            if (p.id === 'ped_w1' || p.id === 'ped_w2') isWestCrosswalkActive = true;
+            else if (p.id === 'ped_e1' || p.id === 'ped_e2') isEastCrosswalkActive = true;
+            else if (p.id === 'ped_n1' || p.id === 'ped_n2') isNorthCrosswalkActive = true;
+            else if (p.id === 'ped_s1' || p.id === 'ped_s2') isSouthCrosswalkActive = true;
+          }
+        }
 
         // Check if any moving clearing vehicle is currently occupying each crosswalk
-        const isWestZebraOccupied = vehicles.some(v => v.dir === 'EB' && (v.pos + v.w) > 460 && v.pos < 495);
-        const isEastZebraOccupied = vehicles.some(v => v.dir === 'WB' && v.pos < 740 && (v.pos + v.w) > 705);
-        const isNorthZebraOccupied = vehicles.some(v => v.dir === 'SB' && (v.pos + v.h) > 310 && v.pos < 345);
-        const isSouthZebraOccupied = vehicles.some(v => v.dir === 'NB' && v.pos < 530 && (v.pos + v.h) > 495);
+        let isWestZebraOccupied = false;
+        let isEastZebraOccupied = false;
+        let isNorthZebraOccupied = false;
+        let isSouthZebraOccupied = false;
+        for (let vi = 0; vi < vehicles.length; vi++) {
+          const cv = vehicles[vi];
+          if (cv.dir === 'EB' && (cv.pos + cv.w) > 460 && cv.pos < 495) isWestZebraOccupied = true;
+          else if (cv.dir === 'WB' && cv.pos < 740 && (cv.pos + cv.w) > 705) isEastZebraOccupied = true;
+          else if (cv.dir === 'SB' && (cv.pos + cv.h) > 310 && cv.pos < 345) isNorthZebraOccupied = true;
+          else if (cv.dir === 'NB' && cv.pos < 530 && (cv.pos + cv.h) > 495) isSouthZebraOccupied = true;
+        }
 
         laneGroupKeys.forEach(key => {
           const laneVehicles = laneGroups[key];
@@ -19304,8 +19321,11 @@
 
               // Collision-free wrap-around respawn
               if (v.pos > 1280) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos);
-                const minPos = otherPositions.length ? Math.min(...otherPositions) : -140;
+                let minPos = 1280;
+                for (let oi = 0; oi < laneVehicles.length; oi++) {
+                  const ov = laneVehicles[oi];
+                  if (ov !== v && ov.pos < minPos) minPos = ov.pos;
+                }
                 v.pos = Math.min(-140, minPos - v.w - 70);
                 v.speed = v.maxSpeed * 0.7;
               }
@@ -19315,7 +19335,14 @@
                 const distFromAmb = v.pos - (ambulanceX + 54);
                 if (v.lane === 1 && distFromAmb >= -20 && distFromAmb < 260) {
                   // Check if lane 2 has an open gap
-                  const lane2Blocked = vehicles.some(o => o.dir === 'EB' && o.lane === 2 && Math.abs(o.pos - v.pos) < (v.w + 45));
+                  let lane2Blocked = false;
+                  for (let vi = 0; vi < vehicles.length; vi++) {
+                    const ov = vehicles[vi];
+                    if (ov.dir === 'EB' && ov.lane === 2 && Math.abs(ov.pos - v.pos) < (v.w + 45)) {
+                      lane2Blocked = true;
+                      break;
+                    }
+                  }
                   if (!lane2Blocked) {
                     v.currentLaneY = (v.currentLaneY || 438) + (468 - (v.currentLaneY || 438)) * Math.min(1, dt * 4.5);
                     if (v.currentLaneY >= 464) {
@@ -19326,7 +19353,14 @@
                 }
               } else if (!emergencyWaveActive && v.defaultLane === 1 && v.lane === 2) {
                 // Return safely to lane 1 when clear
-                const lane1Blocked = vehicles.some(o => o.dir === 'EB' && o.lane === 1 && Math.abs(o.pos - v.pos) < (v.w + 45));
+                let lane1Blocked = false;
+                for (let vi = 0; vi < vehicles.length; vi++) {
+                  const ov = vehicles[vi];
+                  if (ov.dir === 'EB' && ov.lane === 1 && Math.abs(ov.pos - v.pos) < (v.w + 45)) {
+                    lane1Blocked = true;
+                    break;
+                  }
+                }
                 if (!lane1Blocked) {
                   v.currentLaneY = (v.currentLaneY || 468) + (438 - (v.currentLaneY || 468)) * Math.min(1, dt * 3.5);
                   if (v.currentLaneY <= 442) {
@@ -19379,8 +19413,11 @@
               if (mustStop) v.pos = Math.max(v.pos, v.stopLine);
 
               if (v.pos < -140) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos + o.w);
-                const maxPos = otherPositions.length ? Math.max(...otherPositions) : 1340;
+                let maxPos = -140;
+                for (let oi = 0; oi < laneVehicles.length; oi++) {
+                  const ov = laneVehicles[oi];
+                  if (ov !== v && (ov.pos + ov.w) > maxPos) maxPos = ov.pos + ov.w;
+                }
                 v.pos = Math.max(1340, maxPos + 70);
                 v.speed = v.maxSpeed * 0.7;
               }
@@ -19426,8 +19463,11 @@
               if (mustStop) v.pos = Math.min(v.pos, v.stopLine - v.h);
 
               if (v.pos > 730) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos);
-                const minPos = otherPositions.length ? Math.min(...otherPositions) : 100;
+                let minPos = 730;
+                for (let oi = 0; oi < laneVehicles.length; oi++) {
+                  const ov = laneVehicles[oi];
+                  if (ov !== v && ov.pos < minPos) minPos = ov.pos;
+                }
                 v.pos = Math.min(100, minPos - v.h - 70);
                 v.speed = v.maxSpeed * 0.7;
               }
@@ -19473,8 +19513,11 @@
               if (mustStop) v.pos = Math.max(v.pos, v.stopLine);
 
               if (v.pos < 120) {
-                const otherPositions = laneVehicles.filter(o => o !== v).map(o => o.pos + o.h);
-                const maxPos = otherPositions.length ? Math.max(...otherPositions) : 760;
+                let maxPos = 120;
+                for (let oi = 0; oi < laneVehicles.length; oi++) {
+                  const ov = laneVehicles[oi];
+                  if (ov !== v && (ov.pos + ov.h) > maxPos) maxPos = ov.pos + ov.h;
+                }
                 v.pos = Math.max(760, maxPos + 70);
                 v.speed = v.maxSpeed * 0.7;
               }
