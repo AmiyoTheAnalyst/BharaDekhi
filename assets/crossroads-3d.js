@@ -38,6 +38,70 @@
   let rainParticles = null;
   const gltfModelPromises = {};
 
+  // Hasan Transit Bus Live Mirror Subsystem
+  const hasanBusList = [];
+  let mirrorLeftRT = null;
+  let mirrorRightRT = null;
+  let mirrorCam = null;
+  let staticMirrorMat = null;
+  let liveLeftMirrorMat = null;
+  let liveRightMirrorMat = null;
+  let staticMirrorTex = null;
+  const _mPos = new THREE.Vector3();
+  const _mLook = new THREE.Vector3();
+  let mirrorFrameCounter = 0;
+  let lastActiveMirrorBus = null;
+
+  function initLiveBusMirrors() {
+    if (mirrorLeftRT) return;
+    mirrorLeftRT = new THREE.WebGLRenderTarget(128, 256, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      generateMipmaps: false
+    });
+    mirrorRightRT = new THREE.WebGLRenderTarget(128, 256, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      generateMipmaps: false
+    });
+    // Flip horizontally so reflections behave like a true physical mirror:
+    mirrorLeftRT.texture.wrapS = THREE.RepeatWrapping;
+    mirrorLeftRT.texture.repeat.x = -1;
+    mirrorLeftRT.texture.offset.x = 1;
+    mirrorRightRT.texture.wrapS = THREE.RepeatWrapping;
+    mirrorRightRT.texture.repeat.x = -1;
+    mirrorRightRT.texture.offset.x = 1;
+
+    mirrorCam = new THREE.PerspectiveCamera(68, 128 / 256, 0.45, 95);
+
+    if (typeof document !== 'undefined') {
+      const cv = document.createElement('canvas');
+      cv.width = 64;
+      cv.height = 128;
+      const ctx = cv.getContext('2d');
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 56);
+      skyGrad.addColorStop(0, '#38bdf8');
+      skyGrad.addColorStop(1, '#bae6fd');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, 64, 56);
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(0, 52, 64, 8);
+      const roadGrad = ctx.createLinearGradient(0, 60, 0, 128);
+      roadGrad.addColorStop(0, '#1e293b');
+      roadGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = roadGrad;
+      ctx.fillRect(0, 60, 64, 68);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(28, 70, 8, 18);
+      ctx.fillRect(28, 100, 8, 22);
+      staticMirrorTex = new THREE.CanvasTexture(cv);
+    }
+
+    staticMirrorMat = new THREE.MeshBasicMaterial({ map: staticMirrorTex, side: THREE.DoubleSide });
+    liveLeftMirrorMat = new THREE.MeshBasicMaterial({ map: mirrorLeftRT.texture, side: THREE.DoubleSide });
+    liveRightMirrorMat = new THREE.MeshBasicMaterial({ map: mirrorRightRT.texture, side: THREE.DoubleSide });
+  }
+
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
   const DEFAULT_VEHICLE_YAW = 2.35;
@@ -4550,72 +4614,87 @@
     fPlateGroup.add(fPlateText);
     group.add(fPlateGroup);
 
-    // Heavy-Duty Commercial Transit Side Mirrors with Reflective Silver Mirror Glass
-    const mirrorGlassMat = new THREE.MeshStandardMaterial({
-      color: 0xdbeafe,
-      metalness: 0.92,
-      roughness: 0.08
-    });
+    // Heavy-Duty Commercial Transit Side Mirrors with Live Rear-View Mirror Glass
+    initLiveBusMirrors();
 
     [-1, 1].forEach(side => {
+      // 1. Solid Vertical Front Corner A-Pillar (bridges windshield to side windows with zero clear glass seam)
+      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(1.4, 6.6, 0.65), blackTrimMat);
+      aPillar.position.set(36.6, 15.1, side * 10.85);
+      group.add(aPillar);
+
       const mirrorGroup = new THREE.Group();
 
-      // 1. Solid Pillar Mounting Flanges (Anchored directly to bus front corner A-pillar)
+      // 2. Solid Pillar Mounting Flanges (Anchored directly to bus front corner A-pillar)
       const upperFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.45, 0.16), blackTrimMat);
-      upperFlange.position.set(36.8, 16.6, side * 10.95);
+      upperFlange.position.set(36.6, 16.6, side * 10.95);
       mirrorGroup.add(upperFlange);
 
       const lowerFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.45, 0.16), blackTrimMat);
-      lowerFlange.position.set(36.8, 13.6, side * 10.95);
+      lowerFlange.position.set(36.6, 13.6, side * 10.95);
       mirrorGroup.add(lowerFlange);
 
-      // 2. Continuous Tubular Support Brackets (Firmly span from bus pillar at 10.85 to mirror at 12.30)
+      // 3. Continuous Tubular Support Brackets (Firmly span from bus pillar at 10.85 to mirror at 12.15)
       const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.45, 8), blackTrimMat);
       upperArm.rotation.x = Math.PI / 2;
-      upperArm.position.set(36.8, 16.6, side * 11.58);
+      upperArm.position.set(36.6, 16.6, side * 11.55);
       mirrorGroup.add(upperArm);
 
       const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.45, 8), blackTrimMat);
       lowerArm.rotation.x = Math.PI / 2;
-      lowerArm.position.set(36.8, 13.6, side * 11.58);
+      lowerArm.position.set(36.6, 13.6, side * 11.55);
       mirrorGroup.add(lowerArm);
 
       // Vertical tie-strut tying upper and lower support arms together at mirror base
       const verticalStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 3.1, 8), blackTrimMat);
-      verticalStrut.position.set(36.8, 15.1, side * 11.72);
+      verticalStrut.position.set(36.6, 15.1, side * 11.70);
       mirrorGroup.add(verticalStrut);
 
-      // 3. Mirror Pod Assembly (Pulled close to bus body, angled outward for front & 3-quarter visibility)
+      // 4. Mirror Pod Assembly
       const podGroup = new THREE.Group();
-      podGroup.position.set(36.8, 15.1, side * 12.25);
-      podGroup.rotation.y = -side * 0.28;
+      podGroup.position.set(36.6, 15.1, side * 12.15);
 
-      // Main Upper Mirror Dark Border Housing
-      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.58, 2.20, 1.05), blackTrimMat);
-      mainHousing.position.set(0, 0.55, 0);
+      // Dark Border Housing
+      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.55, 3.20, 1.05), blackTrimMat);
+      mainHousing.position.set(0, 0, 0);
       podGroup.add(mainHousing);
 
-      // Main Upper Reflective Silver Mirror Glass (Recessed inside dark housing)
-      const mainGlass = new THREE.Mesh(new THREE.BoxGeometry(0.50, 2.02, 0.88), mirrorGlassMat);
-      mainGlass.position.set(0, 0.55, 0);
-      podGroup.add(mainGlass);
+      // Front Aerodynamic Accent Pane (recessed on +X front face)
+      const frontAccent = new THREE.Mesh(
+        new THREE.BoxGeometry(0.06, 2.8, 0.85),
+        new THREE.MeshStandardMaterial({ color: 0xdbeafe, metalness: 0.85, roughness: 0.15 })
+      );
+      frontAccent.position.set(0.26, 0, 0);
+      podGroup.add(frontAccent);
+
+      // Inward angle toward driver (~10° = 0.174 rad)
+      const planeRotY = -Math.PI / 2 - (side * 0.174);
+
+      // Upper Main Mirror Pane (~72% height, live rear-view road & passing traffic reflection)
+      const upperMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.90, 2.12), staticMirrorMat);
+      upperMirror.position.set(-0.283, 0.42, 0);
+      upperMirror.rotation.y = planeRotY;
+      podGroup.add(upperMirror);
 
       // Divider Trim Bar
-      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.12, 1.08), blackTrimMat);
-      divider.position.set(0, -0.65, 0);
+      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.10, 0.98), blackTrimMat);
+      divider.position.set(-0.285, -0.71, 0);
+      divider.rotation.y = planeRotY;
       podGroup.add(divider);
 
-      // Lower Convex Spotter Mirror Dark Border Housing
-      const spotHousing = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.88, 1.05), blackTrimMat);
-      spotHousing.position.set(0, -1.20, 0);
-      podGroup.add(spotHousing);
-
-      // Lower Spotter Reflective Silver Mirror Glass (Recessed inside dark housing)
-      const spotGlass = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.74, 0.88), mirrorGlassMat);
-      spotGlass.position.set(0, -1.20, 0);
-      podGroup.add(spotGlass);
+      // Lower Convex Blind-Spot Mirror Pane (~22% height, separated by thin dark divider bar)
+      const lowerMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.90, 0.66), staticMirrorMat);
+      lowerMirror.position.set(-0.283, -1.14, 0);
+      lowerMirror.rotation.y = planeRotY;
+      podGroup.add(lowerMirror);
 
       mirrorGroup.add(podGroup);
+
+      if (side === 1) {
+        group.userData.leftMirrorMeshes = [upperMirror, lowerMirror];
+      } else {
+        group.userData.rightMirrorMeshes = [upperMirror, lowerMirror];
+      }
 
       // Zero-lag 120 FPS freeze on all mirror sub-meshes
       mirrorGroup.traverse(child => {
@@ -5004,6 +5083,7 @@
       group.userData.wheels.push(rWheel);
     });
 
+    hasanBusList.push(group);
     return group;
   }
 
@@ -15975,6 +16055,9 @@ let sharedRickshawArtTexture = null;
   // Primary Scene Construction
   // -------------------------------------------------------------
   function buildScene(vehiclesData, pedestriansData) {
+    hasanBusList.length = 0;
+    initLiveBusMirrors();
+
     // 1. Fog & Background (Dusk Sky Gradient: #1b1035 zenith to #5b2245 horizon)
     duskSkyTexture = createDuskSkyGradientTexture();
     scene.background = duskSkyTexture;
@@ -18109,6 +18192,79 @@ let sharedRickshawArtTexture = null;
         chaseCamLight.intensity = isMobileScreen ? 1.4 : 1.15;
       } else {
         chaseCamLight.intensity = 0;
+      }
+    }
+
+    // 7.5. Live Rear-View Mirror Rendering for Active / Closest Hasan Bus
+    if (renderer && scene && mirrorLeftRT && mirrorRightRT && mirrorCam) {
+      let activeBus = null;
+      if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isBus) {
+        activeBus = activeTargetVehicle.mesh;
+      } else if (hasanBusList.length > 0 && camera) {
+        let closestDistSq = 35 * 35;
+        for (let bi = 0; bi < hasanBusList.length; bi++) {
+          const b = hasanBusList[bi];
+          if (!b || !b.parent) continue;
+          const dSq = b.position.distanceToSquared(camera.position);
+          if (dSq < closestDistSq) {
+            closestDistSq = dSq;
+            activeBus = b;
+          }
+        }
+      }
+
+      if (lastActiveMirrorBus && lastActiveMirrorBus !== activeBus) {
+        if (lastActiveMirrorBus.userData.leftMirrorMeshes) {
+          lastActiveMirrorBus.userData.leftMirrorMeshes.forEach(m => { m.material = staticMirrorMat; });
+        }
+        if (lastActiveMirrorBus.userData.rightMirrorMeshes) {
+          lastActiveMirrorBus.userData.rightMirrorMeshes.forEach(m => { m.material = staticMirrorMat; });
+        }
+      }
+      lastActiveMirrorBus = activeBus;
+
+      if (activeBus) {
+        if (activeBus.userData.leftMirrorMeshes) {
+          activeBus.userData.leftMirrorMeshes.forEach(m => {
+            if (m.material !== liveLeftMirrorMat) m.material = liveLeftMirrorMat;
+          });
+        }
+        if (activeBus.userData.rightMirrorMeshes) {
+          activeBus.userData.rightMirrorMeshes.forEach(m => {
+            if (m.material !== liveRightMirrorMat) m.material = liveRightMirrorMat;
+          });
+        }
+
+        mirrorFrameCounter++;
+        if (mirrorFrameCounter % 2 === 0) {
+          const updateLeft = (mirrorFrameCounter % 4 === 0);
+          const targetRT = updateLeft ? mirrorLeftRT : mirrorRightRT;
+          const targetMeshes = updateLeft ? activeBus.userData.leftMirrorMeshes : activeBus.userData.rightMirrorMeshes;
+
+          if (targetMeshes && targetMeshes[0]) {
+            const sideSign = updateLeft ? 1 : -1;
+            // Position mirrorCam slightly behind and outside the mirror housing
+            _mPos.set(36.3, 15.1, sideSign * 12.4);
+            activeBus.localToWorld(_mPos);
+
+            // Point mirrorCam backward down adjacent lane (~18 units behind, ~2.2 units outward)
+            _mLook.set(36.3 - 18.0, 14.5, sideSign * (12.4 + 2.2));
+            activeBus.localToWorld(_mLook);
+
+            mirrorCam.position.copy(_mPos);
+            mirrorCam.lookAt(_mLook);
+
+            // Temporarily hide the mirror's own glass meshes to prevent self-reflection
+            targetMeshes.forEach(m => { m.visible = false; });
+
+            const prevRT = renderer.getRenderTarget();
+            renderer.setRenderTarget(targetRT);
+            renderer.render(scene, mirrorCam);
+            renderer.setRenderTarget(prevRT);
+
+            targetMeshes.forEach(m => { m.visible = true; });
+          }
+        }
       }
     }
 
