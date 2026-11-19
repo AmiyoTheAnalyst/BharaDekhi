@@ -4550,53 +4550,84 @@
     fPlateGroup.add(fPlateText);
     group.add(fPlateGroup);
 
-    // Heavy-Duty Commercial C-Arm Transit Mirrors with Silver Reflective Faces
-    const mirrorFaceMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9,
-      metalness: 0.95,
-      roughness: 0.05
+    // Heavy-Duty Commercial Transit Side Mirrors with Reflective Silver Mirror Glass
+    const mirrorGlassMat = new THREE.MeshStandardMaterial({
+      color: 0xdbeafe,
+      metalness: 0.92,
+      roughness: 0.08
     });
 
     [-1, 1].forEach(side => {
       const mirrorGroup = new THREE.Group();
-      mirrorGroup.position.set(36.8, 15.6, side * 13.6);
 
-      // Upper C-arm tubular bracket
-      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.2, 8), blackTrimMat);
-      upperArm.rotation.z = -0.38;
-      upperArm.rotation.x = -side * 0.42;
-      upperArm.position.set(-0.2, 2.3, -side * 1.1);
+      // 1. Solid Pillar Mounting Flanges (Anchored directly to bus front corner A-pillar)
+      const upperFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.45, 0.16), blackTrimMat);
+      upperFlange.position.set(36.8, 16.6, side * 10.95);
+      mirrorGroup.add(upperFlange);
+
+      const lowerFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.45, 0.16), blackTrimMat);
+      lowerFlange.position.set(36.8, 13.6, side * 10.95);
+      mirrorGroup.add(lowerFlange);
+
+      // 2. Continuous Tubular Support Brackets (Firmly span from bus pillar at 10.85 to mirror at 12.30)
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.45, 8), blackTrimMat);
+      upperArm.rotation.x = Math.PI / 2;
+      upperArm.position.set(36.8, 16.6, side * 11.58);
       mirrorGroup.add(upperArm);
 
-      // Lower C-arm tubular bracket
-      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.2, 8), blackTrimMat);
-      lowerArm.rotation.z = 0.38;
-      lowerArm.rotation.x = side * 0.42;
-      lowerArm.position.set(-0.2, -2.3, -side * 1.1);
+      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.45, 8), blackTrimMat);
+      lowerArm.rotation.x = Math.PI / 2;
+      lowerArm.position.set(36.8, 13.6, side * 11.58);
       mirrorGroup.add(lowerArm);
 
-      // Main Mirror Housing
-      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.9, 4.4, 1.8), blackTrimMat);
-      mainHousing.position.set(0, 0.6, 0);
-      mirrorGroup.add(mainHousing);
+      // Vertical tie-strut tying upper and lower support arms together at mirror base
+      const verticalStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 3.1, 8), blackTrimMat);
+      verticalStrut.position.set(36.8, 15.1, side * 11.72);
+      mirrorGroup.add(verticalStrut);
 
-      // Main Mirror Face (facing rear toward -X)
-      const mainFace = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 4.2), mirrorFaceMat);
-      mainFace.rotation.y = -Math.PI / 2;
-      mainFace.position.set(-0.46, 0.6, 0);
-      mirrorGroup.add(mainFace);
+      // 3. Mirror Pod Assembly (Pulled close to bus body, angled outward for front & 3-quarter visibility)
+      const podGroup = new THREE.Group();
+      podGroup.position.set(36.8, 15.1, side * 12.25);
+      podGroup.rotation.y = -side * 0.28;
 
-      // Lower Spotter Mirror Housing
-      const spotHousing = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 1.8), blackTrimMat);
-      spotHousing.position.set(0, -2.6, 0);
-      mirrorGroup.add(spotHousing);
+      // Main Upper Mirror Dark Border Housing
+      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.58, 2.20, 1.05), blackTrimMat);
+      mainHousing.position.set(0, 0.55, 0);
+      podGroup.add(mainHousing);
 
-      // Spotter Mirror Face
-      const spotFace = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), mirrorFaceMat);
-      spotFace.rotation.y = -Math.PI / 2;
-      spotFace.position.set(-0.43, -2.6, 0);
-      mirrorGroup.add(spotFace);
+      // Main Upper Reflective Silver Mirror Glass (Recessed inside dark housing)
+      const mainGlass = new THREE.Mesh(new THREE.BoxGeometry(0.50, 2.02, 0.88), mirrorGlassMat);
+      mainGlass.position.set(0, 0.55, 0);
+      podGroup.add(mainGlass);
 
+      // Divider Trim Bar
+      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.12, 1.08), blackTrimMat);
+      divider.position.set(0, -0.65, 0);
+      podGroup.add(divider);
+
+      // Lower Convex Spotter Mirror Dark Border Housing
+      const spotHousing = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.88, 1.05), blackTrimMat);
+      spotHousing.position.set(0, -1.20, 0);
+      podGroup.add(spotHousing);
+
+      // Lower Spotter Reflective Silver Mirror Glass (Recessed inside dark housing)
+      const spotGlass = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.74, 0.88), mirrorGlassMat);
+      spotGlass.position.set(0, -1.20, 0);
+      podGroup.add(spotGlass);
+
+      mirrorGroup.add(podGroup);
+
+      // Zero-lag 120 FPS freeze on all mirror sub-meshes
+      mirrorGroup.traverse(child => {
+        if (child.isMesh) {
+          child.castShadow = false;
+          child.receiveShadow = false;
+          child.matrixAutoUpdate = false;
+          child.updateMatrix();
+        }
+      });
+      mirrorGroup.updateMatrix();
+      mirrorGroup.matrixAutoUpdate = false;
       group.add(mirrorGroup);
     });
 
