@@ -5857,6 +5857,10 @@
     if (!obj) return;
     obj.matrixAutoUpdate = false;
     obj.updateMatrix();
+    if (obj.isMesh) {
+      obj.castShadow = false;
+      obj.receiveShadow = false;
+    }
     if (obj.children && obj.children.length > 0) {
       for (let i = 0; i < obj.children.length; i++) {
         freezeStatic(obj.children[i]);
@@ -6938,7 +6942,8 @@ let sharedRickshawArtTexture = null;
     const swGeo = new THREE.BoxGeometry(w, 2, d);
     const sw = new THREE.Mesh(swGeo, sidewalkMat);
     sw.position.set(x, 1, z);
-    sw.receiveShadow = true;
+    sw.castShadow = false;
+    sw.receiveShadow = false;
     sw.matrixAutoUpdate = false;
     sw.updateMatrix();
     scene.add(sw);
@@ -6946,6 +6951,8 @@ let sharedRickshawArtTexture = null;
     const curbGeo = new THREE.BoxGeometry(w, 2.05, 3);
     const curb = new THREE.Mesh(curbGeo, curbMat);
     curb.position.set(x, 1.025, z > 0 ? z - d / 2 : z + d / 2);
+    curb.castShadow = false;
+    curb.receiveShadow = false;
     curb.matrixAutoUpdate = false;
     curb.updateMatrix();
     scene.add(curb);
@@ -16060,7 +16067,8 @@ let sharedRickshawArtTexture = null;
     const groundGeo = new THREE.PlaneGeometry(1600, 1600);
     const ground = new THREE.Mesh(groundGeo, roadMat);
     ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
+    ground.castShadow = false;
+    ground.receiveShadow = false;
     ground.matrixAutoUpdate = false;
     ground.updateMatrix();
     scene.add(ground);
@@ -16641,8 +16649,13 @@ let sharedRickshawArtTexture = null;
     rainParticles.visible = false;
     scene.add(rainParticles);
 
-    // 14. Interactive Mouse Tracking
+    // 14. Interactive Mouse Tracking (Clamped to 16ms to prevent layout thrashing on high-Hz mice)
+    let lastPointerMoveTime = 0;
     containerEl.addEventListener('pointermove', (e) => {
+      const now = performance.now();
+      if (now - lastPointerMoveTime < 16) return;
+      lastPointerMoveTime = now;
+
       const rect = containerEl.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       mouseRelX = (e.clientX - rect.left) / rect.width - 0.5;
@@ -16716,29 +16729,37 @@ let sharedRickshawArtTexture = null;
     });
 
     // -------------------------------------------------------------
-    // Interactive 3D Raycaster & Object Telemetry HUD
+    // Interactive 3D Raycaster & Object Telemetry HUD (Throttled & Non-Recursive)
     // -------------------------------------------------------------
+    let lastRaycastTime = 0;
+    const clickRaycaster = new THREE.Raycaster();
+    const clickMouseVec = new THREE.Vector2();
+
     function handleSceneRaycastClick(clientX, clientY) {
       if (!renderer || !camera || !scene || !canvasEl) return;
+      const now = performance.now();
+      if (now - lastRaycastTime < 100) return; // 100ms raycast throttle
+      lastRaycastTime = now;
+
       const rect = canvasEl.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
 
-      const mouse = new THREE.Vector2(
+      clickMouseVec.set(
         ((clientX - rect.left) / rect.width) * 2 - 1,
         -((clientY - rect.top) / rect.height) * 2 + 1
       );
-
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(mouse, camera);
+      clickRaycaster.setFromCamera(clickMouseVec, camera);
 
       const candidateMeshes = [];
       const hitMap = new Map();
 
-      // 1. Vehicles
-      Object.keys(vehicleMeshMap).forEach(vId => {
+      // 1. Vehicles: pick only top-level vehicle hull/chassis meshes (non-recursive, zero passenger traversal)
+      for (const vId in vehicleMeshMap) {
         const entry = vehicleMeshMap[vId];
         if (entry && entry.mesh && entry.mesh.visible !== false) {
-          entry.mesh.traverse(child => {
+          const m = entry.mesh;
+          for (let ci = 0; ci < m.children.length; ci++) {
+            const child = m.children[ci];
             if (child.isMesh) {
               candidateMeshes.push(child);
               hitMap.set(child, {
@@ -16748,14 +16769,16 @@ let sharedRickshawArtTexture = null;
                 data: entry.data,
                 mesh: entry.mesh
               });
+              break; // 1 primary hull mesh is plenty for ray hit detection
             }
-          });
+          }
         }
-      });
+      }
 
       // 2. Metro Train
       if (trainGroup && trainGroup.visible !== false) {
-        trainGroup.traverse(child => {
+        for (let ci = 0; ci < trainGroup.children.length; ci++) {
+          const child = trainGroup.children[ci];
           if (child.isMesh) {
             candidateMeshes.push(child);
             hitMap.set(child, {
@@ -16764,13 +16787,15 @@ let sharedRickshawArtTexture = null;
               type: 'metro',
               mesh: trainGroup
             });
+            break;
           }
-        });
+        }
       }
 
       // 3. Ambulance
       if (ambulanceGroup && ambulanceGroup.visible) {
-        ambulanceGroup.traverse(child => {
+        for (let ci = 0; ci < ambulanceGroup.children.length; ci++) {
+          const child = ambulanceGroup.children[ci];
           if (child.isMesh) {
             candidateMeshes.push(child);
             hitMap.set(child, {
@@ -16779,30 +16804,31 @@ let sharedRickshawArtTexture = null;
               type: 'ambulance',
               mesh: ambulanceGroup
             });
+            break;
           }
-        });
+        }
       }
 
-      // 4. Pedestrians
-      Object.keys(pedMeshMap).forEach(pId => {
+      // 4. Pedestrians: pick torso or primary body mesh
+      for (const pId in pedMeshMap) {
         const entry = pedMeshMap[pId];
-        if (entry && entry.mesh) {
-          entry.mesh.traverse(child => {
-            if (child.isMesh) {
-              candidateMeshes.push(child);
-              hitMap.set(child, {
-                kind: 'walking',
-                id: pId,
-                type: 'walking',
-                data: entry.data,
-                mesh: entry.mesh
-              });
-            }
-          });
+        if (entry && entry.mesh && entry.mesh.visible !== false) {
+          const torso = entry.mesh.userData && entry.mesh.userData.torso;
+          const targetMesh = (torso && torso.children && torso.children[0]) || entry.mesh.children[0];
+          if (targetMesh && targetMesh.isMesh) {
+            candidateMeshes.push(targetMesh);
+            hitMap.set(targetMesh, {
+              kind: 'walking',
+              id: pId,
+              type: 'walking',
+              data: entry.data,
+              mesh: entry.mesh
+            });
+          }
         }
-      });
+      }
 
-      const intersects = raycaster.intersectObjects(candidateMeshes, false);
+      const intersects = clickRaycaster.intersectObjects(candidateMeshes, false);
       if (intersects && intersects.length > 0) {
         const hit = intersects[0];
         const info = hitMap.get(hit.object);
@@ -17054,6 +17080,7 @@ let sharedRickshawArtTexture = null;
   let lastWeatherMode = null;
   let lastIsMobile = null;
   let lastFrameTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  let slowFrameLogs = 0;
   let frameTimeEMA = 16.6;
   let currentTier = 'high';
   let tierFrameCounter = 0;
@@ -17067,7 +17094,9 @@ let sharedRickshawArtTexture = null;
 
     // 1. Native Refresh-Rate Loop (60/90/120/144 FPS) with Clamped Delta-Time (Zero lag spikes)
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-    const dtFromPerf = (now - lastFrameTime) / 1000;
+    const rawDelta = now - lastFrameTime;
+    if (rawDelta > 120 && ++slowFrameLogs <= 5) console.warn('[Perf]', rawDelta.toFixed(1) + 'ms');
+    const dtFromPerf = rawDelta / 1000;
     lastFrameTime = now;
     const delta = Math.min(Math.max(dtFromPerf, 0.001), 0.05);
 
