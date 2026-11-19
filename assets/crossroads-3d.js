@@ -3951,7 +3951,14 @@
     bagBuckle.position.set(1.96, 0.9, 0);
     femaleGroup.add(bagBuckle);
 
-    freezeStatic(femaleGroup);
+    femaleGroup.traverse(child => {
+      if (child.isMesh) {
+        child.castShadow = false;
+        child.receiveShadow = false;
+        child.matrixAutoUpdate = false;
+        child.updateMatrix();
+      }
+    });
     return femaleGroup;
   }
   window.buildFemaleBusPassenger = buildFemaleBusPassenger;
@@ -4226,7 +4233,14 @@
       passengerGroup.add(hand);
     });
 
-    freezeStatic(passengerGroup);
+    passengerGroup.traverse(child => {
+      if (child.isMesh) {
+        child.castShadow = false;
+        child.receiveShadow = false;
+        child.matrixAutoUpdate = false;
+        child.updateMatrix();
+      }
+    });
     return passengerGroup;
   }
   window.buildBusPassenger = buildBusPassenger;
@@ -4796,8 +4810,8 @@
       { outfitColor: 0x2563eb, outfitEmissive: 0x1e3a8a, skinColor: 0xc68662, hasMustache: false, hasBeard: false, isFemale: false },
       // 5: Male Passenger (Emerald Green Shirt with Beard)
       { outfitColor: 0x059669, outfitEmissive: 0x064e3b, skinColor: 0xc68662, hasMustache: true, hasBeard: true, isFemale: false },
-      // 6: Male Passenger (Turquoise / Teal Kurta)
-      { outfitColor: 0x0d9488, outfitEmissive: 0x134e4a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false },
+      // 6: Male Passenger (Olive Green Shirt)
+      { outfitColor: 0x65a30d, outfitEmissive: 0x365314, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false },
 
       // Right side window seats (Curbside, Z = -6.8):
       // 7: Female Passenger 4 (Opposite Side Front Window Seat right behind entry door)
@@ -4831,8 +4845,8 @@
         lipColor: 0xbe185d,
         isFemale: true
       },
-      // 12: Male Passenger (Maroon / Burgundy Shirt)
-      { outfitColor: 0x991b1b, outfitEmissive: 0x450a0a, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }
+      // 12: Male Passenger (Crimson Red Shirt)
+      { outfitColor: 0xdc2626, outfitEmissive: 0x7f1d1d, skinColor: 0xc68662, hasMustache: true, hasBeard: false, isFemale: false }
     ];
 
     windowXs.forEach((sx, idx) => {
@@ -4851,6 +4865,8 @@
 
       const pLeft = buildBusPassenger(passengersData[idx]);
       pLeft.position.set(sx, 9.8, 6.8);
+      pLeft.updateMatrix();
+      pLeft.matrixAutoUpdate = false;
       group.add(pLeft);
 
       // Right side seat (Curbside):
@@ -4868,6 +4884,8 @@
 
       const pRight = buildBusPassenger(passengersData[idx + 6]);
       pRight.position.set(sx, 9.8, -6.8);
+      pRight.updateMatrix();
+      pRight.matrixAutoUpdate = false;
       group.add(pRight);
 
       // Vertical yellow safety grab poles along aisle at each seat row
