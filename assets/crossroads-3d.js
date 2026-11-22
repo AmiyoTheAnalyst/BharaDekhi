@@ -5416,7 +5416,18 @@
       footShadow.position.set(0, -0.047, 0.025);
       shoeGroup.add(footShadow);
 
-      return { legPivot, kneePivot };
+      // Articulated Ankle Pivot Group (anchored at y = -0.22 inside kneePivot for mocap heel-to-toe roll)
+      const anklePivot = new THREE.Group();
+      anklePivot.name = isRight ? 'rightAnklePivot' : 'leftAnklePivot';
+      anklePivot.position.set(0, -0.22, 0);
+      kneePivot.add(anklePivot);
+      anklePivot.add(shoeGroup);
+      shoeGroup.position.set(0, 0, 0);
+
+      legPivot.name = isRight ? 'rightLegPivot' : 'leftLegPivot';
+      kneePivot.name = isRight ? 'rightKneePivot' : 'leftKneePivot';
+
+      return { legPivot, kneePivot, anklePivot };
     }
 
     const leftLegData = buildLeg(false);
@@ -5427,13 +5438,19 @@
     // =========================================================================
     // 2. PELVIS, TORSO & SHOULDER YOKE (Lowered by -0.016 to match hipY = 0.508)
     // =========================================================================
+    // Pelvis Group (for pelvis counter-twist and lateral weight shift)
+    const pelvisGroup = new THREE.Group();
+    pelvisGroup.name = 'pelvisGroup';
+    pelvisGroup.position.set(0, 0, 0);
+    bodyRoot.add(pelvisGroup);
+
     // Pelvis / Hips (radius 0.098 to 0.095, centered at y = 0.519)
     const pelvis = new THREE.Mesh(
       getPedGeo('pedPelvis', () => new THREE.CylinderGeometry(0.098, 0.095, 0.10, 10)),
       bottomMat
     );
     pelvis.position.set(0, 0.519, 0);
-    bodyRoot.add(pelvis);
+    pelvisGroup.add(pelvis);
 
     // Traditional Lower Garments
     if (archetype.hasPanjabiHem) {
@@ -5442,25 +5459,26 @@
         topMat
       );
       kurtaHem.position.set(0, 0.388, 0);
-      bodyRoot.add(kurtaHem);
+      pelvisGroup.add(kurtaHem);
     } else if (archetype.hasSareePallu) {
       const sareeDrape = new THREE.Mesh(
         getPedGeo('pedSareeDrape', () => new THREE.CylinderGeometry(0.110, 0.140, 0.44, 10)),
         bottomMat
       );
       sareeDrape.position.set(0, 0.298, 0);
-      bodyRoot.add(sareeDrape);
+      pelvisGroup.add(sareeDrape);
     } else if (archetype.hasSkirt || archetype.hasDress) {
       const skirt = new THREE.Mesh(
         getPedGeo('pedSkirt', () => new THREE.CylinderGeometry(0.112, 0.155, 0.24, 10)),
         bottomMat
       );
       skirt.position.set(0, 0.388, 0);
-      bodyRoot.add(skirt);
+      pelvisGroup.add(skirt);
     }
 
-    // Torso Group (for subtle natural stride sway)
+    // Upper Torso Group (for spine counter-twist & breathing)
     const torsoGroup = new THREE.Group();
+    torsoGroup.name = 'upperTorsoGroup';
     torsoGroup.position.set(0, 0, 0);
     bodyRoot.add(torsoGroup);
 
@@ -5539,11 +5557,13 @@
     }
 
     // Articulated Arms (Pivoting at shoulders x = ±0.145, y = 0.879)
+    let leftElbowPivot = null;
     let rightElbowPivot = null;
     let rightHandMesh = null;
 
     function buildArm(isRight) {
       const armPivot = new THREE.Group();
+      armPivot.name = isRight ? 'rightArmPivot' : 'leftArmPivot';
       armPivot.position.set(isRight ? 0.145 : -0.145, 0.879, 0);
 
       // Embedded Spherical Shoulder Cap
@@ -5564,6 +5584,7 @@
       if (isRight) {
         // Articulated Right Elbow Pivot Group at y = -0.18 inside rightArmPivot
         rightElbowPivot = new THREE.Group();
+        rightElbowPivot.name = 'rightElbowPivot';
         rightElbowPivot.position.set(0, -0.18, 0);
         armPivot.add(rightElbowPivot);
 
@@ -5593,28 +5614,33 @@
         // Default dry resting elbow angle
         rightElbowPivot.rotation.set(-0.22, 0, 0);
       } else {
-        // Left arm: standard swinging arm
+        // Articulated Left Elbow Pivot Group at y = -0.18 inside leftArmPivot
+        leftElbowPivot = new THREE.Group();
+        leftElbowPivot.name = 'leftElbowPivot';
+        leftElbowPivot.position.set(0, -0.18, 0);
+        armPivot.add(leftElbowPivot);
+
         const elbow = new THREE.Mesh(
           getPedGeo('pedElbow', () => new THREE.SphereGeometry(0.030, 8, 6)),
           topMat
         );
-        elbow.position.set(0, -0.18, 0);
-        armPivot.add(elbow);
+        leftElbowPivot.add(elbow);
 
         const forearm = new THREE.Mesh(
           getPedGeo('pedForearm', () => new THREE.CylinderGeometry(0.029, 0.024, 0.17, 8)),
           skinMat
         );
-        forearm.rotation.x = -0.22;
-        forearm.position.set(0, -0.265, 0.02);
-        armPivot.add(forearm);
+        forearm.position.set(0, -0.085, 0);
+        leftElbowPivot.add(forearm);
 
         const hand = new THREE.Mesh(
           getPedGeo('pedHand', () => new THREE.SphereGeometry(0.028, 8, 6)),
           skinMat
         );
-        hand.position.set(0, -0.355, 0.035);
-        armPivot.add(hand);
+        hand.position.set(0, -0.175, 0);
+        leftElbowPivot.add(hand);
+
+        leftElbowPivot.rotation.set(-0.18, 0, 0);
       }
 
       return armPivot;
@@ -5887,6 +5913,8 @@
     rightLegData.legPivot.rotation.set(0, 0, 0);
     leftLegData.kneePivot.rotation.set(0, 0, 0);
     rightLegData.kneePivot.rotation.set(0, 0, 0);
+    leftLegData.anklePivot.rotation.set(0, 0, 0);
+    rightLegData.anklePivot.rotation.set(0, 0, 0);
     bodyRoot.updateMatrixWorld(true);
 
     const bbox = new THREE.Box3().setFromObject(bodyRoot);
@@ -5908,29 +5936,55 @@
     shadowDisc.position.set(0, 0.002, 0);
     group.add(shadowDisc);
 
+    // Drive with AnimationMixer (Mocap Keyframe Clips)
+    ensureSharedMocapClips();
+    const mixer = new THREE.AnimationMixer(bodyRoot);
+    const walkAction = mixer.clipAction(sharedMocapWalkClip);
+    const idleAction = mixer.clipAction(sharedMocapIdleClip);
+    walkAction.setLoop(THREE.LoopRepeat);
+    idleAction.setLoop(THREE.LoopRepeat);
+    walkAction.play();
+
     // Save pivot references for live walking kinematics
+    group.userData.pelvisGroup = pelvisGroup;
+    group.userData.upperTorsoGroup = torsoGroup;
+    group.userData.torso = torsoGroup;
+    group.userData.headGroup = headGroup;
+    group.userData.leftLegPivot = leftLegData.legPivot;
     group.userData.leftLeg = leftLegData.legPivot;
+    group.userData.rightLegPivot = rightLegData.legPivot;
     group.userData.rightLeg = rightLegData.legPivot;
+    group.userData.leftKneePivot = leftLegData.kneePivot;
     group.userData.leftKnee = leftLegData.kneePivot;
-    group.userData.rightKnee = rightLegData.kneePivot;
+    group.userData.leftAnklePivot = leftLegData.anklePivot;
+    group.userData.rightAnklePivot = rightLegData.anklePivot;
+    group.userData.leftArmPivot = leftArmPivot;
     group.userData.leftArm = leftArmPivot;
+    group.userData.leftElbowPivot = leftElbowPivot;
+    group.userData.leftElbow = leftElbowPivot;
+    group.userData.rightArmPivot = rightArmPivot;
     group.userData.rightArm = rightArmPivot;
+    group.userData.rightElbowPivot = rightElbowPivot;
     group.userData.rightElbow = rightElbowPivot;
     group.userData.rightHand = rightHandMesh;
-    group.userData.torso = torsoGroup;
     group.userData.bodyRoot = bodyRoot;
     group.userData.umbrella = umbrellaGroup;
     group.userData.pedScale = archetype.scale;
     group.userData.baseScale = BASE_SCALE;
     group.userData.isPedestrian = true;
+    group.userData.mixer = mixer;
+    group.userData.walkAction = walkAction;
+    group.userData.idleAction = idleAction;
+    group.userData.currentAction = 'walk';
 
     // Zero-lag 120 FPS optimization: freeze static sub-meshes & disable shadow pass on all pedestrian meshes
     const animatedPivots = new Set([
-      group, bodyRoot,
+      group, bodyRoot, pelvisGroup, torsoGroup, headGroup,
       leftLegData.legPivot, rightLegData.legPivot,
       leftLegData.kneePivot, rightLegData.kneePivot,
-      leftArmPivot, rightArmPivot, rightElbowPivot,
-      torsoGroup, umbrellaGroup
+      leftLegData.anklePivot, rightLegData.anklePivot,
+      leftArmPivot, rightArmPivot, leftElbowPivot, rightElbowPivot,
+      umbrellaGroup
     ]);
     group.traverse(child => {
       if (child.isMesh) {
@@ -5945,6 +5999,9 @@
     });
 
     if (isSocial) {
+      walkAction.stop();
+      idleAction.play();
+      group.userData.currentAction = 'idle';
       leftLegData.legPivot.rotation.x = (Math.random() - 0.5) * 0.16;
       rightLegData.legPivot.rotation.x = -leftLegData.legPivot.rotation.x;
       leftArmPivot.rotation.z = 0.06 + Math.random() * 0.08;
@@ -14745,23 +14802,123 @@ let sharedRickshawArtTexture = null;
     return clone;
   }
 
-  function loadRiggedPedestrian(type, filename) {
-    return loadRiggedGLBModel('assets/models/' + filename)
-      .then(res => {
-        if (res && res.scene) {
-          riggedPedPrototypes[type] = res;
+  // =========================================================================
+  // SHARED MOCAP-DERIVED ANIMATION CLIPS (AnimationMixer Keyframe Gait)
+  // Normalized 1.0s Walk Cycle + 3.2s Traffic-Check Idle Loop
+  // =========================================================================
+  let sharedMocapWalkClip = null;
+  let sharedMocapIdleClip = null;
+
+  function ensureSharedMocapClips() {
+    if (sharedMocapWalkClip && sharedMocapIdleClip) return;
+    if (typeof THREE === 'undefined') return;
+
+    // 1.0-second normalized mocap gait cycle with Double-Peak Knee Flexion & Ankle Roll
+    const wTimes = [0, 0.12, 0.25, 0.38, 0.50, 0.62, 0.75, 0.88, 1.0];
+    const wTracks = [
+      // Asymmetric hip swing (60% stance / 40% swing)
+      new THREE.NumberKeyframeTrack('leftLegPivot.rotation[x]', wTimes, [-0.46, -0.28, 0.0, 0.22, 0.34, 0.10, -0.20, -0.42, -0.46], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightLegPivot.rotation[x]', wTimes, [0.34, 0.10, -0.20, -0.42, -0.46, -0.28, 0.0, 0.22, 0.34], THREE.InterpolateSmooth),
+      // Double-peak knee flexion: 0.18 rad shock absorption at t=0.12, 0.88 rad peak swing at t=0.62
+      new THREE.NumberKeyframeTrack('leftKneePivot.rotation[x]', wTimes, [0.05, 0.18, 0.06, 0.14, 0.48, 0.88, 0.65, 0.16, 0.05], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightKneePivot.rotation[x]', wTimes, [0.48, 0.88, 0.65, 0.16, 0.05, 0.18, 0.06, 0.14, 0.48], THREE.InterpolateSmooth),
+      // Heel-to-toe ankle roll: dorsiflexion (-0.18 rad) -> flat (0.0 rad) -> toe-off (+0.28 rad)
+      new THREE.NumberKeyframeTrack('leftAnklePivot.rotation[x]', wTimes, [-0.18, 0.0, 0.0, 0.15, 0.28, 0.08, -0.06, -0.14, -0.18], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightAnklePivot.rotation[x]', wTimes, [0.28, 0.08, -0.06, -0.14, -0.18, 0.0, 0.0, 0.15, 0.28], THREE.InterpolateSmooth),
+      // Pelvis & upper torso counter-twist (±0.10 rad)
+      new THREE.NumberKeyframeTrack('pelvisGroup.rotation[y]', wTimes, [-0.10, -0.05, 0.0, 0.06, 0.10, 0.05, 0.0, -0.06, -0.10], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('upperTorsoGroup.rotation[y]', wTimes, [0.09, 0.04, 0.0, -0.05, -0.09, -0.04, 0.0, 0.05, 0.09], THREE.InterpolateSmooth),
+      // Lateral pelvic weight shift (±0.04 rad)
+      new THREE.NumberKeyframeTrack('pelvisGroup.rotation[z]', wTimes, [0.0, 0.03, 0.04, 0.02, 0.0, -0.03, -0.04, -0.02, 0.0], THREE.InterpolateSmooth),
+      // Head counter-stabilization
+      new THREE.NumberKeyframeTrack('headGroup.rotation[y]', wTimes, [-0.08, -0.04, 0.0, 0.04, 0.08, 0.04, 0.0, -0.04, -0.08], THREE.InterpolateSmooth),
+      // Counter arm swing
+      new THREE.NumberKeyframeTrack('leftArmPivot.rotation[x]', wTimes, [0.32, 0.18, 0.0, -0.22, -0.36, -0.20, 0.0, 0.20, 0.32], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightArmPivot.rotation[x]', wTimes, [-0.36, -0.20, 0.0, 0.20, 0.32, 0.18, 0.0, -0.22, -0.36], THREE.InterpolateSmooth),
+      // Natural elbow flexion lag (-0.55 rad forward, -0.18 rad backswing)
+      new THREE.NumberKeyframeTrack('leftElbowPivot.rotation[x]', wTimes, [-0.18, -0.24, -0.34, -0.48, -0.55, -0.42, -0.28, -0.20, -0.18], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightElbowPivot.rotation[x]', wTimes, [-0.55, -0.42, -0.28, -0.20, -0.18, -0.24, -0.34, -0.48, -0.55], THREE.InterpolateSmooth)
+    ];
+    sharedMocapWalkClip = new THREE.AnimationClip('mocapWalkClip', 1.0, wTracks);
+
+    // 3.2-second curb-waiting idle loop with traffic check head turns (left +0.32 rad, right -0.32 rad)
+    const iTimes = [0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2];
+    const iTracks = [
+      new THREE.NumberKeyframeTrack('headGroup.rotation[y]', iTimes, [0.0, 0.18, 0.32, 0.16, 0.0, -0.16, -0.32, -0.18, 0.0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('upperTorsoGroup.rotation[x]', iTimes, [0.0, 0.012, 0.022, 0.012, 0.0, 0.012, 0.022, 0.012, 0.0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('upperTorsoGroup.position[y]', iTimes, [0.0, 0.004, 0.008, 0.004, 0.0, 0.004, 0.008, 0.004, 0.0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('pelvisGroup.rotation[z]', iTimes, [0.015, 0.025, 0.030, 0.015, -0.015, -0.025, -0.030, -0.015, 0.015], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('leftLegPivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightLegPivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('leftKneePivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightKneePivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('leftAnklePivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightAnklePivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('leftArmPivot.rotation[x]', iTimes, [0.02, 0.01, 0.0, -0.01, 0.02, 0.01, 0.0, -0.01, 0.02], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightArmPivot.rotation[x]', iTimes, [-0.01, 0.0, 0.02, 0.01, -0.01, 0.0, 0.02, 0.01, -0.01], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('leftElbowPivot.rotation[x]', iTimes, [-0.18, -0.16, -0.15, -0.16, -0.18, -0.16, -0.15, -0.16, -0.18], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('rightElbowPivot.rotation[x]', iTimes, [-0.18, -0.16, -0.15, -0.16, -0.18, -0.16, -0.15, -0.16, -0.18], THREE.InterpolateSmooth)
+    ];
+    sharedMocapIdleClip = new THREE.AnimationClip('mocapIdleClip', 3.2, iTracks);
+  }
+
+  function loadMixamoFBXModel(walkPath, idlePath) {
+    if (typeof THREE === 'undefined' || typeof THREE.FBXLoader !== 'function') {
+      return Promise.reject(new Error('FBXLoader unavailable'));
+    }
+    const loader = new THREE.FBXLoader();
+    return new Promise((resolve, reject) => {
+      loader.load(walkPath, walkObj => {
+        const animations = walkObj.animations ? [...walkObj.animations] : [];
+        if (idlePath) {
+          loader.load(idlePath, idleObj => {
+            if (idleObj.animations && idleObj.animations.length > 0) {
+              idleObj.animations.forEach(a => { a.name = 'idle'; animations.push(a); });
+            }
+            resolve({ scene: walkObj, animations: animations });
+          }, undefined, () => resolve({ scene: walkObj, animations: animations }));
+        } else {
+          resolve({ scene: walkObj, animations: animations });
         }
+      }, undefined, reject);
+    });
+  }
+
+  function loadRiggedPedestrian(type) {
+    // 1. Try direct .glb first (e.g. assets/models/ped-male.glb)
+    return loadRiggedGLBModel(`assets/models/ped-${type}.glb`)
+      .then(res => {
+        if (res && res.scene) riggedPedPrototypes[type] = res;
         return res;
       })
-      .catch(() => null);
+      .catch(() => {
+        // 2. Try direct Mixamo .fbx (e.g. assets/models/ped-male-walk.fbx + ped-male-idle.fbx)
+        return loadMixamoFBXModel(
+          `assets/models/ped-${type}-walk.fbx`,
+          `assets/models/ped-${type}-idle.fbx`
+        ).then(res => {
+          if (res && res.scene) riggedPedPrototypes[type] = res;
+          return res;
+        }).catch(() => null);
+      });
   }
 
   function loadAllRiggedPedestrians() {
+    ensureSharedMocapClips();
     return Promise.all([
-      loadRiggedPedestrian('male', 'ped-male.glb'),
-      loadRiggedPedestrian('female', 'ped-female.glb'),
-      loadRiggedPedestrian('child', 'ped-child.glb')
-    ]).catch(() => null);
+      loadRiggedPedestrian('male'),
+      loadRiggedPedestrian('female'),
+      loadRiggedPedestrian('child')
+    ]).then(() => {
+      const loadedTypes = Object.keys(riggedPedPrototypes).filter(k => riggedPedPrototypes[k]);
+      if (loadedTypes.length > 0) {
+        console.info(`[Pedestrians] Active mode: External Mixamo models loaded (${loadedTypes.join(', ')})`);
+      } else {
+        console.info('[Pedestrians] Active mode: Built-in Mocap Keyframe Rig (AnimationMixer, 13-pivot articulation)');
+      }
+    }).catch(() => {
+      console.info('[Pedestrians] Active mode: Built-in Mocap Keyframe Rig (AnimationMixer, 13-pivot articulation)');
+    });
   }
 
   function loadPedestriansModel() {
@@ -18112,31 +18269,28 @@ let sharedRickshawArtTexture = null;
         }
       }
 
-      if (pm.mesh.userData && pm.mesh.userData.isRigged) {
-        // Mixamo Mocap AnimationMixer update
-        if (pm.mesh.userData.mixer) {
-          pm.mesh.userData.mixer.update(Math.min(delta, 0.1));
-        }
-
+      // Drive Every Pedestrian with THREE.AnimationMixer (Mocap Gait Keyframe Clips or Direct Mixamo)
+      if (pm.mesh.userData && pm.mesh.userData.mixer) {
+        const mixer = pm.mesh.userData.mixer;
         const walkAction = pm.mesh.userData.walkAction;
         const idleAction = pm.mesh.userData.idleAction;
 
         if (isMoving) {
           if (walkAction) {
             if (pm.mesh.userData.currentAction !== 'walk') {
-              if (idleAction) idleAction.fadeOut(0.25);
-              walkAction.reset().fadeIn(0.25).play();
+              walkAction.reset().play();
+              if (idleAction) idleAction.crossFadeTo(walkAction, 0.25, false);
               pm.mesh.userData.currentAction = 'walk';
             }
-            // Sync walk animation playback speed (walkAction.timeScale) with speed so feet never slip
-            const speedFactor = (p.speed || 8) * 0.12;
-            walkAction.timeScale = Math.max(0.6, Math.min(2.0, speedFactor));
+            // Sync walk animation playback speed: walkAction.timeScale = ped.speed * 0.75
+            const speedFactor = Math.max(0.4, Math.min(2.5, (p.speed || 1.0) * 0.75));
+            walkAction.timeScale = speedFactor;
           }
         } else {
           if (idleAction) {
             if (pm.mesh.userData.currentAction !== 'idle') {
-              if (walkAction) walkAction.fadeOut(0.25);
-              idleAction.reset().fadeIn(0.25).play();
+              idleAction.reset().play();
+              if (walkAction) walkAction.crossFadeTo(idleAction, 0.25, false);
               pm.mesh.userData.currentAction = 'idle';
             }
           } else if (walkAction) {
@@ -18144,78 +18298,21 @@ let sharedRickshawArtTexture = null;
             pm.mesh.userData.currentAction = 'idle';
           }
         }
-      } else {
-        // Stride Cycle Kinematics: Hip swing, knee bending, counter-arm swinging & vertical bob
-        if (typeof pm.mesh.userData.walkPhase === 'undefined') pm.mesh.userData.walkPhase = 0;
-        if (isMoving) {
-          const walkSpeed = (p.speed || 8) * 0.42;
-          pm.mesh.userData.walkPhase += delta * walkSpeed;
+
+        mixer.update(Math.min(delta, 0.1));
+
+        // Keep grounded stance contact flush at exact Y = 0.000 (groundedBaseY)
+        if (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined) {
+          pm.mesh.userData.bodyRoot.position.y = pm.mesh.userData.bodyRoot.userData.groundedBaseY;
         }
-        const walkPhase = pm.mesh.userData.walkPhase;
 
-        // Smooth interpolation for stopping and starting
-        if (typeof pm.mesh.userData.moveBlend === 'undefined') pm.mesh.userData.moveBlend = 1.0;
-        const targetBlend = isMoving ? 1.0 : 0.0;
-        pm.mesh.userData.moveBlend += (targetBlend - pm.mesh.userData.moveBlend) * Math.min(1.0, delta * 10);
-        const blend = pm.mesh.userData.moveBlend;
-
-        if (!isMoving) {
-          // While waiting at curb: limbs upright, stance flat on sidewalk
-          if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.set(0, 0, 0);
-          if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.set(0, 0, 0);
-          if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.set(0, 0, 0);
-          if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.set(0, 0, 0);
-          if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.set(0, 0, 0);
-          if (pm.mesh.userData.bodyRoot) pm.mesh.userData.bodyRoot.position.y = (pm.mesh.userData.bodyRoot.userData.groundedBaseY || 0);
-          if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = 0;
-
-          if (pm.mesh.userData.rightArm) {
-            if (isRain && pm.mesh.userData.umbrella) {
-              pm.mesh.userData.rightArm.rotation.set(-0.42, 0, -0.16);
-              if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
-            } else {
-              pm.mesh.userData.rightArm.rotation.set(0, 0, 0);
-              if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
-            }
+        // Lock right arm & elbow to hold umbrella during rain
+        if (isRain && pm.mesh.userData.umbrella) {
+          if (pm.mesh.userData.rightArmPivot) {
+            pm.mesh.userData.rightArmPivot.rotation.set(-0.42, 0, -0.16);
           }
-        } else {
-          const swing = Math.sin(walkPhase) * 0.42 * blend;
-          const leftLift = Math.max(0, -Math.sin(walkPhase + 0.3)) * blend;
-          const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.3)) * blend;
-          const armSwing = swing * 0.75;
-          const torsoSway = Math.sin(walkPhase) * 0.06 * blend;
-
-          if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = swing;
-          if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -swing;
-          if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.52;
-          if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.52;
-          if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armSwing;
-
-          if (pm.mesh.userData.rightArm) {
-            if (isRain && pm.mesh.userData.umbrella) {
-              // Locked umbrella-holding pose with subtle natural stride damping (±0.02 rad)
-              const armBreath = Math.sin(walkPhase) * 0.02;
-              pm.mesh.userData.rightArm.rotation.set(-0.42 + armBreath, 0, -0.16);
-              if (pm.mesh.userData.rightElbow) {
-                pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
-              }
-            } else {
-              pm.mesh.userData.rightArm.rotation.set(armSwing, 0, 0);
-              if (pm.mesh.userData.rightElbow) {
-                pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
-              }
-            }
-          }
-
-          if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = torsoSway;
-
-          // Drop bodyRoot by exact (1 - cos(swing)) of leg length (0.508) so stance shoe stays locked at Y = 0.000:
-          const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
-            ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
-            : 0;
-          const hipDrop = 0.508 * (1 - Math.cos(swing));
-          if (pm.mesh.userData.bodyRoot) {
-            pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
+          if (pm.mesh.userData.rightElbowPivot) {
+            pm.mesh.userData.rightElbowPivot.rotation.set(-1.18, 0.28, 0);
           }
         }
       }
