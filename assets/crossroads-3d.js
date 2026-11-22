@@ -14673,8 +14673,281 @@ let sharedRickshawArtTexture = null;
     return Promise.resolve(null); // Pure Three.js procedural model preserved
   }
 
+  // =========================================================================
+  // RIGGED .GLB BASE MESHES & MIXAMO MOCAP PEDESTRIAN SUBSYSTEM
+  // Supports ped-male.glb, ped-female.glb, ped-child.glb with AnimationMixer
+  // and 100% seamless fallback to procedural pedestrians.
+  // =========================================================================
+  const riggedGLBPromises = {};
+  const riggedPedPrototypes = { male: null, female: null, child: null };
+  let activeRiggedWalkerCount = 0;
+
+  function loadRiggedGLBModel(path) {
+    if (!riggedGLBPromises[path]) {
+      riggedGLBPromises[path] = new Promise((resolve, reject) => {
+        if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader !== 'function') {
+          reject(new Error('Three.js GLTFLoader is unavailable'));
+          return;
+        }
+        const loader = new THREE.GLTFLoader();
+        if (typeof THREE.DRACOLoader === 'function') {
+          try {
+            const dracoLoader = new THREE.DRACOLoader();
+            dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+            loader.setDRACOLoader(dracoLoader);
+          } catch (e) {
+            // ignore draco config error
+          }
+        }
+        loader.load(
+          path,
+          gltf => resolve({ scene: gltf.scene, animations: gltf.animations || [] }),
+          undefined,
+          reject
+        );
+      });
+    }
+    return riggedGLBPromises[path];
+  }
+
+  function cloneRiggedModel(source) {
+    if (typeof THREE !== 'undefined' && THREE.SkeletonUtils && typeof THREE.SkeletonUtils.clone === 'function') {
+      return THREE.SkeletonUtils.clone(source);
+    }
+    // High-fidelity fallback clone for SkinnedMesh and bones
+    const cloneLookup = new Map();
+    const clone = source.clone(false);
+    cloneLookup.set(source, clone);
+
+    function parallelTraverse(a, b) {
+      for (let i = 0; i < a.children.length; i++) {
+        const childA = a.children[i];
+        const childB = childA.clone(false);
+        cloneLookup.set(childA, childB);
+        b.add(childB);
+        parallelTraverse(childA, childB);
+      }
+    }
+    parallelTraverse(source, clone);
+
+    source.traverse(node => {
+      if (!node.isSkinnedMesh) return;
+      const clonedMesh = cloneLookup.get(node);
+      if (!clonedMesh || !node.skeleton) return;
+      const skeleton = node.skeleton;
+      const orderedBones = [];
+      for (let i = 0; i < skeleton.bones.length; i++) {
+        const clonedBone = cloneLookup.get(skeleton.bones[i]);
+        orderedBones.push(clonedBone || skeleton.bones[i]);
+      }
+      clonedMesh.bind(new THREE.Skeleton(orderedBones, skeleton.boneInverses), clonedMesh.matrixWorld);
+    });
+    return clone;
+  }
+
+  function loadRiggedPedestrian(type, filename) {
+    return loadRiggedGLBModel('assets/models/' + filename)
+      .then(res => {
+        if (res && res.scene) {
+          riggedPedPrototypes[type] = res;
+        }
+        return res;
+      })
+      .catch(() => null);
+  }
+
+  function loadAllRiggedPedestrians() {
+    return Promise.all([
+      loadRiggedPedestrian('male', 'ped-male.glb'),
+      loadRiggedPedestrian('female', 'ped-female.glb'),
+      loadRiggedPedestrian('child', 'ped-child.glb')
+    ]).catch(() => null);
+  }
+
   function loadPedestriansModel() {
-    return Promise.resolve(null); // Pure Three.js procedural humans preserved (zero GLB)
+    return loadAllRiggedPedestrians();
+  }
+
+  function createRiggedPedestrian(p, protoData, typeName) {
+    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+    const maxRiggedWalkers = isMobileScreen ? 8 : 12;
+    if (activeRiggedWalkerCount >= maxRiggedWalkers) {
+      return null;
+    }
+
+    const sourceScene = protoData.scene;
+    const animations = protoData.animations || [];
+    const model = cloneRiggedModel(sourceScene);
+
+    const group = new THREE.Group();
+    group.add(model);
+
+    // Target Dhaka heights: Male ~1.72m, Female ~1.62m, Child ~1.20m
+    let targetHeight = 1.72;
+    if (typeName === 'female') targetHeight = 1.62;
+    else if (typeName === 'child') targetHeight = 1.20;
+
+    const bbox = new THREE.Box3().setFromObject(model);
+    const size = bbox.getSize(new THREE.Vector3());
+    const modelH = size.y > 0.1 ? size.y : targetHeight;
+    const scaleFactor = targetHeight / modelH;
+    model.scale.setScalar(scaleFactor);
+
+    // Soles flush at Y = 0.000
+    model.position.y = -bbox.min.y * scaleFactor;
+
+    // Authentic Dhaka street palettes
+    const DHAKA_PALETTES = [
+      { primary: 0x1e3a8a, secondary: 0xf1f5f9 },
+      { primary: 0x059669, secondary: 0x334155 },
+      { primary: 0xdc2626, secondary: 0xfef08a },
+      { primary: 0x7c3aed, secondary: 0xe2e8f0 },
+      { primary: 0xd97706, secondary: 0x1e293b },
+      { primary: 0x0284c7, secondary: 0xffffff },
+      { primary: 0x475569, secondary: 0x0f172a },
+      { primary: 0xbe185d, secondary: 0xfde047 }
+    ];
+    const palette = DHAKA_PALETTES[Math.abs(p.id || 0) % DHAKA_PALETTES.length];
+
+    let rightHandBone = null;
+    model.traverse(node => {
+      if (node.isBone) {
+        const bName = node.name.toLowerCase();
+        if ((bName.includes('hand') && (bName.includes('r') || bName.includes('right'))) ||
+            bName.includes('mixamorigrighthand') || bName.includes('righthand')) {
+          if (!rightHandBone) rightHandBone = node;
+        }
+      }
+      if (node.isMesh) {
+        node.castShadow = false;
+        node.receiveShadow = false;
+        if (node.material) {
+          node.material = node.material.clone();
+          const matName = (node.material.name || '').toLowerCase();
+          if (matName.includes('shirt') || matName.includes('panjabi') || matName.includes('top') || matName.includes('saree') || matName.includes('cloth')) {
+            if (node.material.color) node.material.color.setHex(palette.primary);
+          } else if (matName.includes('pant') || matName.includes('pajama') || matName.includes('skirt') || matName.includes('bottom')) {
+            if (node.material.color) node.material.color.setHex(palette.secondary);
+          }
+        }
+      }
+    });
+
+    // Monsoon rain umbrella attached to right hand bone
+    const umbrellaGroup = new THREE.Group();
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.35,
+      side: THREE.DoubleSide
+    });
+    const shaftMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
+    const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.70, 0.28, 12, 1, true), canopyMat);
+    canopy.position.y = 0.95;
+    umbrellaGroup.add(canopy);
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 1.05, 8), shaftMat);
+    shaft.position.y = 0.45;
+    umbrellaGroup.add(shaft);
+    umbrellaGroup.visible = false;
+
+    if (rightHandBone) {
+      umbrellaGroup.position.set(0, 0, 0);
+      umbrellaGroup.rotation.set(0, 0, 0);
+      rightHandBone.add(umbrellaGroup);
+    } else {
+      umbrellaGroup.position.set(0.3, 0.9, 0);
+      model.add(umbrellaGroup);
+    }
+
+    // Mixamo Motion Capture AnimationMixer
+    let mixer = null;
+    let walkAction = null;
+    let idleAction = null;
+
+    if (animations.length > 0) {
+      mixer = new THREE.AnimationMixer(model);
+      let walkClip = animations.find(c => /walk/i.test(c.name));
+      let idleClip = animations.find(c => /idle|stand/i.test(c.name));
+      if (!walkClip && animations.length > 0) walkClip = animations[0];
+      if (!idleClip && animations.length > 1) idleClip = animations[1];
+
+      if (walkClip) {
+        walkAction = mixer.clipAction(walkClip);
+        walkAction.setLoop(THREE.LoopRepeat);
+      }
+      if (idleClip) {
+        idleAction = mixer.clipAction(idleClip);
+        idleAction.setLoop(THREE.LoopRepeat);
+      }
+    }
+
+    group.userData.isRigged = true;
+    group.userData.mixer = mixer;
+    group.userData.walkAction = walkAction;
+    group.userData.idleAction = idleAction;
+    group.userData.currentAction = '';
+    group.userData.umbrella = umbrellaGroup;
+    group.userData.bodyRoot = model;
+
+    activeRiggedWalkerCount++;
+    return group;
+  }
+
+  function upgradeActiveWalkersToRigged() {
+    if (typeof pedMeshMap === 'undefined') return;
+    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+    const maxRiggedWalkers = isMobileScreen ? 8 : 12;
+
+    for (const key in pedMeshMap) {
+      if (activeRiggedWalkerCount >= maxRiggedWalkers) break;
+      const pm = pedMeshMap[key];
+      if (!pm || !pm.mesh || !pm.data) continue;
+      if (pm.mesh.userData && pm.mesh.userData.isRigged) continue;
+
+      const p = pm.data;
+      let type = 'male';
+      if ((p.id || 0) % 7 === 0 && riggedPedPrototypes.child) {
+        type = 'child';
+      } else if ((p.id || 0) % 2 === 1 && riggedPedPrototypes.female) {
+        type = 'female';
+      } else if (riggedPedPrototypes.male) {
+        type = 'male';
+      }
+      const proto = riggedPedPrototypes[type];
+      if (!proto) continue;
+
+      const newRigged = createRiggedPedestrian(p, proto, type);
+      if (newRigged) {
+        newRigged.position.copy(pm.mesh.position);
+        newRigged.rotation.copy(pm.mesh.rotation);
+        const parent = pm.mesh.parent || (typeof scene !== 'undefined' ? scene : null);
+        if (parent) {
+          parent.remove(pm.mesh);
+          parent.add(newRigged);
+        }
+        pm.mesh = newRigged;
+      }
+    }
+  }
+
+  function instantiatePedestrian(p) {
+    const isWalker = p && (p.isSidewalk || typeof p.currentCoord !== 'undefined' || p.axis);
+    if (isWalker) {
+      let type = 'male';
+      if ((p.id || 0) % 7 === 0 && riggedPedPrototypes.child) {
+        type = 'child';
+      } else if ((p.id || 0) % 2 === 1 && riggedPedPrototypes.female) {
+        type = 'female';
+      } else if (riggedPedPrototypes.male) {
+        type = 'male';
+      }
+
+      const proto = riggedPedPrototypes[type];
+      if (proto) {
+        const riggedMesh = createRiggedPedestrian(p, proto, type);
+        if (riggedMesh) return riggedMesh;
+      }
+    }
+    return createArticulatedHuman(p, false);
   }
 
   function replaceRickshawWithModel(vehicle, prototype) {
@@ -15063,9 +15336,9 @@ let sharedRickshawArtTexture = null;
     return ambGroup;
   }
 
-  // 3D Human Pedestrian Builder — Articulated Procedural Pedestrians
+  // 3D Human Pedestrian Builder — Rigged Base Meshes or Articulated Procedural Pedestrians
   function create3DPedestrian(p) {
-    return createArticulatedHuman(p, false);
+    return instantiatePedestrian(p);
   }
 
   // =========================================================================
@@ -16704,7 +16977,12 @@ let sharedRickshawArtTexture = null;
     // 11. Instantiate 3D Emergency Ambulance (EB -> Heading 0)
     ambulanceGroup = create3DAmbulance();
 
-    // 12. Instantiate 3D Pedestrians
+    // 12. Instantiate 3D Pedestrians (Rigged .GLB Base Meshes + Mixamo Mocap or Procedural)
+    activeRiggedWalkerCount = 0;
+    loadAllRiggedPedestrians().then(() => {
+      upgradeActiveWalkersToRigged();
+    }).catch(() => {});
+
     if (pedestriansData && Array.isArray(pedestriansData)) {
       pedestriansData.forEach((p, idx) => {
         const mesh = create3DPedestrian(p);
@@ -17834,77 +18112,111 @@ let sharedRickshawArtTexture = null;
         }
       }
 
-      // Stride Cycle Kinematics: Hip swing, knee bending, counter-arm swinging & vertical bob
-      if (typeof pm.mesh.userData.walkPhase === 'undefined') pm.mesh.userData.walkPhase = 0;
-      if (isMoving) {
-        const walkSpeed = (p.speed || 8) * 0.42;
-        pm.mesh.userData.walkPhase += delta * walkSpeed;
-      }
-      const walkPhase = pm.mesh.userData.walkPhase;
+      if (pm.mesh.userData && pm.mesh.userData.isRigged) {
+        // Mixamo Mocap AnimationMixer update
+        if (pm.mesh.userData.mixer) {
+          pm.mesh.userData.mixer.update(Math.min(delta, 0.1));
+        }
 
-      // Smooth interpolation for stopping and starting
-      if (typeof pm.mesh.userData.moveBlend === 'undefined') pm.mesh.userData.moveBlend = 1.0;
-      const targetBlend = isMoving ? 1.0 : 0.0;
-      pm.mesh.userData.moveBlend += (targetBlend - pm.mesh.userData.moveBlend) * Math.min(1.0, delta * 10);
-      const blend = pm.mesh.userData.moveBlend;
+        const walkAction = pm.mesh.userData.walkAction;
+        const idleAction = pm.mesh.userData.idleAction;
 
-      if (!isMoving) {
-        // While waiting at curb: limbs upright, stance flat on sidewalk
-        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.set(0, 0, 0);
-        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.set(0, 0, 0);
-        if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.set(0, 0, 0);
-        if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.set(0, 0, 0);
-        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.set(0, 0, 0);
-        if (pm.mesh.userData.bodyRoot) pm.mesh.userData.bodyRoot.position.y = (pm.mesh.userData.bodyRoot.userData.groundedBaseY || 0);
-        if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = 0;
-
-        if (pm.mesh.userData.rightArm) {
-          if (isRain && pm.mesh.userData.umbrella) {
-            pm.mesh.userData.rightArm.rotation.set(-0.42, 0, -0.16);
-            if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
-          } else {
-            pm.mesh.userData.rightArm.rotation.set(0, 0, 0);
-            if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
+        if (isMoving) {
+          if (walkAction) {
+            if (pm.mesh.userData.currentAction !== 'walk') {
+              if (idleAction) idleAction.fadeOut(0.25);
+              walkAction.reset().fadeIn(0.25).play();
+              pm.mesh.userData.currentAction = 'walk';
+            }
+            // Sync walk animation playback speed (walkAction.timeScale) with speed so feet never slip
+            const speedFactor = (p.speed || 8) * 0.12;
+            walkAction.timeScale = Math.max(0.6, Math.min(2.0, speedFactor));
+          }
+        } else {
+          if (idleAction) {
+            if (pm.mesh.userData.currentAction !== 'idle') {
+              if (walkAction) walkAction.fadeOut(0.25);
+              idleAction.reset().fadeIn(0.25).play();
+              pm.mesh.userData.currentAction = 'idle';
+            }
+          } else if (walkAction) {
+            walkAction.fadeOut(0.25);
+            pm.mesh.userData.currentAction = 'idle';
           }
         }
       } else {
-        const swing = Math.sin(walkPhase) * 0.42 * blend;
-        const leftLift = Math.max(0, -Math.sin(walkPhase + 0.3)) * blend;
-        const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.3)) * blend;
-        const armSwing = swing * 0.75;
-        const torsoSway = Math.sin(walkPhase) * 0.06 * blend;
+        // Stride Cycle Kinematics: Hip swing, knee bending, counter-arm swinging & vertical bob
+        if (typeof pm.mesh.userData.walkPhase === 'undefined') pm.mesh.userData.walkPhase = 0;
+        if (isMoving) {
+          const walkSpeed = (p.speed || 8) * 0.42;
+          pm.mesh.userData.walkPhase += delta * walkSpeed;
+        }
+        const walkPhase = pm.mesh.userData.walkPhase;
 
-        if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = swing;
-        if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -swing;
-        if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.52;
-        if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.52;
-        if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armSwing;
+        // Smooth interpolation for stopping and starting
+        if (typeof pm.mesh.userData.moveBlend === 'undefined') pm.mesh.userData.moveBlend = 1.0;
+        const targetBlend = isMoving ? 1.0 : 0.0;
+        pm.mesh.userData.moveBlend += (targetBlend - pm.mesh.userData.moveBlend) * Math.min(1.0, delta * 10);
+        const blend = pm.mesh.userData.moveBlend;
 
-        if (pm.mesh.userData.rightArm) {
-          if (isRain && pm.mesh.userData.umbrella) {
-            // Locked umbrella-holding pose with subtle natural stride damping (±0.02 rad)
-            const armBreath = Math.sin(walkPhase) * 0.02;
-            pm.mesh.userData.rightArm.rotation.set(-0.42 + armBreath, 0, -0.16);
-            if (pm.mesh.userData.rightElbow) {
-              pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
-            }
-          } else {
-            pm.mesh.userData.rightArm.rotation.set(armSwing, 0, 0);
-            if (pm.mesh.userData.rightElbow) {
-              pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
+        if (!isMoving) {
+          // While waiting at curb: limbs upright, stance flat on sidewalk
+          if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.set(0, 0, 0);
+          if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.set(0, 0, 0);
+          if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.set(0, 0, 0);
+          if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.set(0, 0, 0);
+          if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.set(0, 0, 0);
+          if (pm.mesh.userData.bodyRoot) pm.mesh.userData.bodyRoot.position.y = (pm.mesh.userData.bodyRoot.userData.groundedBaseY || 0);
+          if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = 0;
+
+          if (pm.mesh.userData.rightArm) {
+            if (isRain && pm.mesh.userData.umbrella) {
+              pm.mesh.userData.rightArm.rotation.set(-0.42, 0, -0.16);
+              if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
+            } else {
+              pm.mesh.userData.rightArm.rotation.set(0, 0, 0);
+              if (pm.mesh.userData.rightElbow) pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
             }
           }
-        }
+        } else {
+          const swing = Math.sin(walkPhase) * 0.42 * blend;
+          const leftLift = Math.max(0, -Math.sin(walkPhase + 0.3)) * blend;
+          const rightLift = Math.max(0, -Math.sin(walkPhase + Math.PI + 0.3)) * blend;
+          const armSwing = swing * 0.75;
+          const torsoSway = Math.sin(walkPhase) * 0.06 * blend;
 
-        if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = torsoSway;
+          if (pm.mesh.userData.leftLeg) pm.mesh.userData.leftLeg.rotation.x = swing;
+          if (pm.mesh.userData.rightLeg) pm.mesh.userData.rightLeg.rotation.x = -swing;
+          if (pm.mesh.userData.leftKnee) pm.mesh.userData.leftKnee.rotation.x = leftLift * 0.52;
+          if (pm.mesh.userData.rightKnee) pm.mesh.userData.rightKnee.rotation.x = rightLift * 0.52;
+          if (pm.mesh.userData.leftArm) pm.mesh.userData.leftArm.rotation.x = -armSwing;
 
-        // Drop bodyRoot by exact (1 - cos(swing)) of leg length (0.508) so stance shoe stays locked at Y = 0.000:
-        const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
-          ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
-          : 0;
-        const hipDrop = 0.508 * (1 - Math.cos(swing));
-        if (pm.mesh.userData.bodyRoot) {
-          pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
+          if (pm.mesh.userData.rightArm) {
+            if (isRain && pm.mesh.userData.umbrella) {
+              // Locked umbrella-holding pose with subtle natural stride damping (±0.02 rad)
+              const armBreath = Math.sin(walkPhase) * 0.02;
+              pm.mesh.userData.rightArm.rotation.set(-0.42 + armBreath, 0, -0.16);
+              if (pm.mesh.userData.rightElbow) {
+                pm.mesh.userData.rightElbow.rotation.set(-1.18, 0.28, 0);
+              }
+            } else {
+              pm.mesh.userData.rightArm.rotation.set(armSwing, 0, 0);
+              if (pm.mesh.userData.rightElbow) {
+                pm.mesh.userData.rightElbow.rotation.set(-0.22, 0, 0);
+              }
+            }
+          }
+
+          if (pm.mesh.userData.torso) pm.mesh.userData.torso.rotation.y = torsoSway;
+
+          // Drop bodyRoot by exact (1 - cos(swing)) of leg length (0.508) so stance shoe stays locked at Y = 0.000:
+          const groundedBaseY = (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined)
+            ? pm.mesh.userData.bodyRoot.userData.groundedBaseY
+            : 0;
+          const hipDrop = 0.508 * (1 - Math.cos(swing));
+          if (pm.mesh.userData.bodyRoot) {
+            pm.mesh.userData.bodyRoot.position.y = groundedBaseY - hipDrop;
+          }
         }
       }
 
