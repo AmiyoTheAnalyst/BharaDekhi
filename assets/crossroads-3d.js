@@ -163,32 +163,94 @@
     liveRightMirrorMat = new THREE.MeshBasicMaterial({ map: mirrorRightRT.texture, side: THREE.DoubleSide });
   }
 
+  const BLANK_PIXEL_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
+
+  // Safe TextureLoader guard: prevent non-string or undefined url from causing url.search() TypeError
+  // and prevent this.path from being prepended to data: and blob: URIs (which triggers 404 network requests)
+  if (typeof THREE !== 'undefined' && THREE.TextureLoader && !THREE.TextureLoader.prototype._safeUrlGuardedV3) {
+    const origTextureLoaderLoad = THREE.TextureLoader.prototype.load;
+    THREE.TextureLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+      const safeUrl = (typeof url === 'string' && url.length > 0 && url !== 'undefined' && !url.endsWith('/undefined'))
+        ? url
+        : BLANK_PIXEL_DATA_URI;
+
+      if (typeof safeUrl === 'string' && (safeUrl.startsWith('data:') || safeUrl.startsWith('blob:'))) {
+        const savedPath = this.path;
+        this.path = '';
+        try {
+          return origTextureLoaderLoad.call(this, safeUrl, onLoad, onProgress, onError);
+        } finally {
+          this.path = savedPath;
+        }
+      }
+      return origTextureLoaderLoad.call(this, safeUrl, onLoad, onProgress, onError);
+    };
+    THREE.TextureLoader.prototype._safeUrlGuardedV3 = true;
+  }
+
+  // Also guard THREE.ImageLoader directly to ensure this.path is never prepended to data: or blob: URIs
+  if (typeof THREE !== 'undefined' && THREE.ImageLoader && !THREE.ImageLoader.prototype._safeDataUriGuarded) {
+    const origImageLoaderLoad = THREE.ImageLoader.prototype.load;
+    THREE.ImageLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+      let targetUrl = (typeof url === 'string' && url.length > 0 && url !== 'undefined' && !url.endsWith('/undefined'))
+        ? url
+        : BLANK_PIXEL_DATA_URI;
+
+      if (typeof targetUrl === 'string' && (targetUrl.startsWith('data:') || targetUrl.startsWith('blob:'))) {
+        const savedPath = this.path;
+        this.path = '';
+        try {
+          return origImageLoaderLoad.call(this, targetUrl, onLoad, onProgress, onError);
+        } finally {
+          this.path = savedPath;
+        }
+      }
+      return origImageLoaderLoad.call(this, targetUrl, onLoad, onProgress, onError);
+    };
+    THREE.ImageLoader.prototype._safeDataUriGuarded = true;
+  }
+
   // Safe prototype guard: prevent null or undefined from ever being pushed into Object3D.children
-  if (typeof THREE !== 'undefined' && THREE.Object3D && !THREE.Object3D.prototype._safeAddGuardedV2) {
+  if (typeof THREE !== 'undefined' && THREE.Object3D && !THREE.Object3D.prototype._safeAddGuardedV3) {
     const origAdd = THREE.Object3D.prototype.add;
     THREE.Object3D.prototype.add = function (...args) {
       const valid = [];
       for (let i = 0; i < args.length; i++) {
         if (args[i] && args[i].isObject3D && args[i] !== this) valid.push(args[i]);
       }
+      if (this.children && this.children.length) {
+        this.children = this.children.filter(Boolean);
+      }
       if (!valid.length) return this;
-      return origAdd.apply(this, valid);
+      const res = origAdd.apply(this, valid);
+      if (this.children && this.children.length) {
+        this.children = this.children.filter(Boolean);
+      }
+      return res;
     };
-    THREE.Object3D.prototype._safeAddGuardedV2 = true;
+    THREE.Object3D.prototype._safeAddGuardedV3 = true;
   }
 
-  function purgeNullChildren(node) {
-    if (!node || !Array.isArray(node.children)) return;
-    for (let i = node.children.length - 1; i >= 0; i--) {
-      const c = node.children[i];
-      if (!c || !c.isObject3D) {
-        node.children.splice(i, 1);
-        console.warn('[SceneGraph] Purged invalid child from:', node.name || node.type || 'Object3D');
-      } else {
-        purgeNullChildren(c);
+  // Lightweight sanitizer helper: recursively filters out any falsy/null entries from obj.children
+  // and logs a one-time warning with the parent name when a null child is found and purged.
+  const warnedPrunedNullMap = new Set();
+  function pruneNullChildren(root) {
+    if (!root || !Array.isArray(root.children)) return root;
+    const hasInvalid = root.children.some(c => !c || (typeof c.isObject3D !== 'undefined' && !c.isObject3D));
+    if (hasInvalid) {
+      const parentName = root.name || root.type || 'Object3D';
+      if (!warnedPrunedNullMap.has(parentName)) {
+        warnedPrunedNullMap.add(parentName);
+        console.warn('[SceneGraph] Pruned null/invalid child from:', parentName);
       }
+      root.children = root.children.filter(c => Boolean(c) && (typeof c.isObject3D === 'undefined' || c.isObject3D));
     }
+    for (let i = 0; i < root.children.length; i++) {
+      pruneNullChildren(root.children[i]);
+    }
+    return root;
   }
+  const purgeNullChildren = pruneNullChildren;
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
@@ -515,7 +577,8 @@
     const horizontalRadius = safeRadius * Math.cos(safePitch);
     const targetX = position.x;
     const isPed = target.type === 'ped' || target.type === 'walking';
-    const targetY = position.y + (target.type === 'bike' ? 4.5 : target.type === 'bus' ? 9.5 : target.type === 'car' ? 4.5 : isPed ? 5.5 : 5.5);
+    const isChildPed = isPed && (target.category === 'child' || (target.data && (target.data.pedCategory === 'child' || target.data.isChild)));
+    const targetY = position.y + (target.type === 'bike' ? 4.5 : target.type === 'bus' ? 9.5 : target.type === 'car' ? 4.5 : isPed ? (isChildPed ? 4.8 : 6.2) : 5.5);
     const targetZ = position.z;
 
     const posX = targetX - forward.x * horizontalRadius * Math.cos(safeYaw) + right.x * horizontalRadius * Math.sin(safeYaw);
@@ -553,7 +616,7 @@
       : target.type === 'bike' ? 36
         : target.type === 'rickshaw' ? 38
           : target.type === 'cng' ? 40
-            : (target.type === 'ped' || target.type === 'walking') ? 32
+            : (target.type === 'ped' || target.type === 'walking') ? ((target.category === 'child' || (target.data && (target.data.pedCategory === 'child' || target.data.isChild))) ? 28 : 34)
               : 96;
     const fovDeg = (camera && Number.isFinite(camera.fov)) ? camera.fov : 38;
     const aspect = (camera && Number.isFinite(camera.aspect) && camera.aspect > 0) ? camera.aspect : 1.6;
@@ -12755,56 +12818,6 @@ let sharedRickshawArtTexture = null;
       new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ancholChestPts), 16, 0.18, 8, false),
       femaleSareeMat
     ));
-
-    const sareeCurvePts = [
-      [-0.10, 0.0, 0],
-      [1.20, 0.05, 0],
-      [2.50, 0.0, 0],
-      [2.65, -0.75, 0],
-      [2.70, -1.55, 0]
-    ];
-    const sareeSkirtTube = createSplineTube(sareeCurvePts, 0.84, femaleSkirtMat, 20, 14);
-    sareeSkirtTube.scale.set(1.0, 0.70, 1.05);
-    femaleGroup.add(sareeSkirtTube);
-
-    const hemBorder = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.15, 1.75), goldTrimMat);
-    hemBorder.position.set(2.60, -1.50, 0);
-    femaleGroup.add(hemBorder);
-
-    [-0.42, 0.42].forEach(tz => {
-      const sandal = new THREE.Mesh(new THREE.BoxGeometry(1.20, 0.15, 0.45), pinkSandalMat);
-      sandal.position.set(2.75, -1.58, tz);
-      femaleGroup.add(sandal);
-    });
-
-    [-0.75, 0.75].forEach(az => {
-      // Deltoid saree blouse shoulder cap
-      const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.30, 12, 10), femaleSareeMat);
-      shoulderCap.position.set(0.10, 2.25, az);
-      femaleGroup.add(shoulderCap);
-
-      const armPts = [
-        [0.10, 2.25, az],
-        [0.80, 1.20, az * 0.85],
-        [1.65, 0.50, az * 0.38],
-        [2.20, 0.35, 0]
-      ];
-      femaleGroup.add(createSplineTube(armPts, 0.15, femaleSkinMat, 18, 8));
-
-      femaleGroup.add(createSplineTube([[0.10, 2.25, az], [0.50, 1.75, az * 0.90]], 0.24, femaleSareeMat, 8, 8));
-
-      [0xdc2626, 0xf59e0b, 0x16a34a].forEach((bColor, bIdx) => {
-        const bangle = new THREE.Mesh(
-          new THREE.TorusGeometry(0.14, 0.028, 6, 14),
-          new THREE.MeshStandardMaterial({ color: bColor, roughness: 0.25, metalness: 0.6 })
-        );
-        bangle.position.set(1.80 + bIdx * 0.07, 0.44, az * 0.24);
-        bangle.rotation.y = Math.PI / 2;
-        femaleGroup.add(bangle);
-      });
-    });
-
-    // Sculpted delicate hands resting gently in lap
     const fHands = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), femaleSkinMat);
     fHands.scale.set(1.2, 0.45, 1.4);
     fHands.position.set(2.25, 0.36, 0);
@@ -15059,14 +15072,20 @@ let sharedRickshawArtTexture = null;
   if (typeof THREE !== 'undefined' && !THREE.SkeletonUtils) {
     THREE.SkeletonUtils = {
       clone: function (source) {
+        if (!source || !source.isObject3D) return null;
+        pruneNullChildren(source);
         const sourceLookup = new Map();
         const cloneLookup = new Map();
         const clone = source.clone();
+        pruneNullChildren(clone);
         function parallelTraverse(a, b) {
+          if (!a || !b) return;
           sourceLookup.set(b, a);
           cloneLookup.set(a, b);
           for (let i = 0; i < a.children.length; i++) {
-            parallelTraverse(a.children[i], b.children[i]);
+            if (a.children[i] && b.children && b.children[i]) {
+              parallelTraverse(a.children[i], b.children[i]);
+            }
           }
         }
         parallelTraverse(source, clone);
@@ -15084,9 +15103,20 @@ let sharedRickshawArtTexture = null;
           }
           node.bind(new THREE.Skeleton(orderedBones, skeleton.boneInverses), node.matrixWorld);
         });
+        pruneNullChildren(clone);
         return clone;
       }
     };
+  } else if (typeof THREE !== 'undefined' && THREE.SkeletonUtils && typeof THREE.SkeletonUtils.clone === 'function' && !THREE.SkeletonUtils._pruneSafeWrapped) {
+    const origSkeletonClone = THREE.SkeletonUtils.clone;
+    THREE.SkeletonUtils.clone = function (source) {
+      if (!source || !source.isObject3D) return null;
+      pruneNullChildren(source);
+      const res = origSkeletonClone.call(this, source);
+      if (res) pruneNullChildren(res);
+      return res;
+    };
+    THREE.SkeletonUtils._pruneSafeWrapped = true;
   }
 
   function loadRiggedGLBModel(path) {
@@ -15133,6 +15163,7 @@ let sharedRickshawArtTexture = null;
 
   function cloneRiggedModel(source) {
     if (!source || !source.isObject3D) return null;
+    pruneNullChildren(source);
     let clone = null;
     if (typeof THREE !== 'undefined' && THREE.SkeletonUtils && typeof THREE.SkeletonUtils.clone === 'function') {
       try {
@@ -15148,12 +15179,14 @@ let sharedRickshawArtTexture = null;
       cloneLookup.set(source, clone);
 
       function parallelTraverse(a, b) {
+        if (!a || !b) return;
+        pruneNullChildren(a);
         for (let i = 0; i < a.children.length; i++) {
           const childA = a.children[i];
           if (!childA || !childA.isObject3D) continue;
           const childB = childA.clone(false);
           cloneLookup.set(childA, childB);
-          b.add(childB);
+          if (childB && childB.isObject3D) b.add(childB);
           parallelTraverse(childA, childB);
         }
       }
@@ -15173,7 +15206,13 @@ let sharedRickshawArtTexture = null;
       });
     }
     if (clone) {
-      purgeNullChildren(clone);
+      pruneNullChildren(clone);
+      clone.traverse(child => {
+        if (child.isMesh || child.isSkinnedMesh) {
+          child.frustumCulled = false;
+          child.visible = true;
+        }
+      });
     }
     return clone;
   }
@@ -15256,19 +15295,484 @@ let sharedRickshawArtTexture = null;
     ud.currentAction = nextState;
   }
 
-  function stripRootMotion(clip) {
-    if (!clip || !clip.tracks) return;
-    clip.tracks.forEach(track => {
-      // Matches mixamorig:Hips.position, mixamorig2:Hips.position, mixamorigHips.position, etc.
-      if (/Hips\.position$/i.test(track.name)) {
-        const vals = track.values;
-        for (let i = 0; i < vals.length; i += 3) {
-          vals[i] = 0;     // Strip X lateral translation
-          // Keep vals[i + 1] (Y vertical hip bounce)
-          vals[i + 2] = 0; // Strip Z forward translation
+  // =========================================================================
+  // MIXAMO MULTI-CHARACTER ROSTER & NORMALIZATION PIPELINE
+  // Normalizes bone names (mixamorig\d* -> standard), auto-scales Box3 height,
+  // grounds shoe soles at Y = 0.000, and falls back broken/missing textures.
+  // Proportions strictly derived from the 3D BRTA Bus (busHeight = 24.47 world units).
+  // =========================================================================
+  const BRTA_BUS_HEIGHT = 24.47;
+  const TARGET_PED_HEIGHTS = {
+    male: 13.0,   // Adult Males (5'10"–6'0"): ~half bus height, head well above 8-unit railing
+    female: 11.5, // Adult Females (5'2"–5'3"): proportional commuter height
+    child: 8.5    // School Kid (little_boy, 3'8"–4'0"): clearly shorter than adults, head just clearing railing
+  };
+  const BENCH_SEAT_Y = parseFloat((BRTA_BUS_HEIGHT * 0.15).toFixed(2)); // 3.67 (~0.47m equiv)
+
+  const CHARACTER_ROSTER = [
+    { id: 'male_remy', category: 'male', format: 'glb', walkPath: 'assets/models/ped-male-walk.glb', idlePath: 'assets/models/ped-male-idle.glb', height: TARGET_PED_HEIGHTS.male, name: 'Remy (Street Casual)' },
+    { id: 'female_ch22', category: 'female', format: 'glb', walkPath: 'assets/models/ped-female-walk.glb', idlePath: 'assets/models/ped-female-idle.glb', height: TARGET_PED_HEIGHTS.female, name: 'Ch22 (Modern Commuter)' },
+    { id: 'female_salwar', category: 'female', format: 'fbx', path: 'assets/models/ped-female-salwar.fbx', height: TARGET_PED_HEIGHTS.female, name: 'Salwar Kameez Commuter' },
+    { id: 'little_boy', category: 'child', format: 'fbx', path: 'assets/models/ped-little-boy.fbx', height: TARGET_PED_HEIGHTS.child, name: 'School Kid Walker' },
+    { id: 'male_formal', category: 'male', format: 'fbx', path: 'assets/models/ped-male-formal.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Formal Office Commuter' },
+    { id: 'male_hoodie', category: 'male', format: 'fbx', path: 'assets/models/ped-male-hoodie.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Streetwear Hoodie Walker' },
+    { id: 'male_sweater', category: 'male', format: 'fbx', path: 'assets/models/ped-male-sweater.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Winter Sweater Walker' },
+    { id: 'male_tshirt', category: 'male', format: 'fbx', path: 'assets/models/ped-male-tshirt.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Casual T-Shirt Walker' }
+  ];
+
+  function isFallbackTexture(map) {
+    if (!map) return true;
+    if (map.image) {
+      const img = map.image;
+      if (typeof img.src === 'string') {
+        if (img.src === BLANK_PIXEL_DATA_URI || (img.src.startsWith('data:image') && img.src.length < 300)) return true;
+        if (/\.dds($|\?)/i.test(img.src) || img.src.includes('undefined')) return true;
+      }
+      if (typeof img.width === 'number' && img.width > 0 && img.width <= 2 &&
+          typeof img.height === 'number' && img.height > 0 && img.height <= 2) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const riggedPedLibrary = {};
+  const sharedMixamoClips = {
+    maleWalk: null,
+    maleIdle: null,
+    femaleWalk: null,
+    femaleIdle: null
+  };
+
+  // Authentic Dhaka Streetwear Color Combinations (for clothing material variations)
+  const DHAKA_STREET_PALETTES = [
+    { primary: 0x1e3a8a, secondary: 0x334155 }, // Navy blue & Dark Charcoal
+    { primary: 0x881337, secondary: 0x1e293b }, // Deep Maroon & Slate
+    { primary: 0x3f6212, secondary: 0xfef3c7 }, // Olive green & Warm Cream
+    { primary: 0xb45309, secondary: 0x1e3a8a }, // Mustard amber & Deep Navy
+    { primary: 0x0f766e, secondary: 0x475569 }, // Teal & Steel Gray
+    { primary: 0x9a3412, secondary: 0x1e293b }, // Rust terracotta & Charcoal
+    { primary: 0x38bdf8, secondary: 0x1e3a8a }, // Sky blue & Classic Denim
+    { primary: 0x1d4ed8, secondary: 0x64748b }, // Denim blue & Light Slate
+    { primary: 0x475569, secondary: 0x0f172a }, // Charcoal slate & Obsidian
+    { primary: 0xd97706, secondary: 0x334155 }, // Spiced saffron & Dark Gray
+    { primary: 0x059669, secondary: 0xf1f5f9 }, // Emerald green & Clean White
+    { primary: 0x7c3aed, secondary: 0x1e293b }  // Royal violet & Dark Navy
+  ];
+
+  function isExplicitClothingName(str) {
+    if (!str) return false;
+    const n = str.toLowerCase();
+    if (/skin|face|head|body|hair|eye|lash|brow|teeth|mouth|tongue|cornea|tear|glass/i.test(n)) {
+      return false;
+    }
+    return /cloth|shirt|pant|tshirt|hoodie|sweater|jacket|suit|trouser|salwar|kameez|dress|skirt|vest|top|bottom|coat/i.test(n);
+  }
+
+  function applyDhakaClothingVariations(characterGroup, seed) {
+    if (!characterGroup) return;
+    const gName = ((characterGroup.name || '') + ' ' + (characterGroup.userData?.charId || '')).toLowerCase();
+    if (gName.includes('little_boy') || gName.includes('salwar') || gName.includes('boy')) return;
+    const palette = DHAKA_STREET_PALETTES[Math.abs(seed) % DHAKA_STREET_PALETTES.length];
+    let pieceIndex = 0;
+
+    characterGroup.traverse(node => {
+      if (!node || (!node.isMesh && !node.isSkinnedMesh)) return;
+      if (!node.material) return;
+
+      const isArr = Array.isArray(node.material);
+      const mats = isArr ? node.material.slice() : [node.material];
+
+      for (let i = 0; i < mats.length; i++) {
+        const origMat = mats[i];
+        if (!origMat) continue;
+
+        // 1. NEVER tint textured materials: reset color to pure white so diffuse texture atlas remains natural & bright
+        if (origMat.map && !isFallbackTexture(origMat.map)) {
+          if (origMat.color) origMat.color.setHex(0xffffff);
+          continue;
         }
+
+        // 2. Only untextured clothing-only materials receive randomized Dhaka street colors
+        const matName = (origMat.name || '') + ' ' + (origMat.id || '');
+        const meshName = node.name || '';
+        const isClothing = isExplicitClothingName(matName) || isExplicitClothingName(meshName);
+        const isExcluded = /skin|face|head|body|hair|eye|lash|brow|teeth|mouth|tongue|cornea|tear|glass/i.test(matName + ' ' + meshName);
+
+        if (!isClothing || isExcluded) {
+          continue;
+        }
+
+        const newMat = origMat.clone();
+        newMat.roughness = Math.max(newMat.roughness ?? 0.82, 0.76);
+        newMat.metalness = Math.min(newMat.metalness ?? 0, 0.05);
+
+        const colorToApply = (pieceIndex % 2 === 0) ? palette.primary : palette.secondary;
+        pieceIndex++;
+
+        if (newMat.color) {
+          newMat.color.setHex(colorToApply);
+        }
+        mats[i] = newMat;
+      }
+      node.material = isArr ? mats : mats[0];
+    });
+  }
+
+  function normalizeClipTracks(clip) {
+    if (!clip || !clip.tracks) return clip;
+    const cloned = clip.clone();
+    const cleanTracks = [];
+    cloned.tracks.forEach(track => {
+      // Strip mixamorig prefixes (e.g. mixamorig:Hips.position -> Hips.position, mixamorigHips -> Hips)
+      track.name = track.name.replace(/^mixamorig\d*[:_]?/i, '');
+      if (/Hips\.position$/i.test(track.name)) {
+        // Strip Hips.position root translation to keep gait grounded across all heights
+        return;
+      }
+      cleanTracks.push(track);
+    });
+    cloned.tracks = cleanTracks;
+    return cloned;
+  }
+
+  function stripRootMotion(clip) {
+    return normalizeClipTracks(clip);
+  }
+
+  function normalizeCharacterTemplate(modelRoot, targetHeight, charId) {
+    if (!modelRoot) return null;
+
+    const isChild = (charId === 'little_boy') ||
+      (modelRoot.name && modelRoot.name.includes('little_boy')) ||
+      (typeof targetHeight === 'number' && Math.abs(targetHeight - TARGET_PED_HEIGHTS.child) < 0.5);
+
+    const isSalwar = (charId === 'female_salwar') ||
+      (modelRoot.name && modelRoot.name.includes('salwar'));
+
+    if (isChild) {
+      const matSummary = [];
+      modelRoot.traverse(node => {
+        if (node.isMesh || node.isSkinnedMesh) {
+          const mats = Array.isArray(node.material) ? node.material : [node.material];
+          mats.forEach((m, idx) => {
+            matSummary.push({
+              node: node.name,
+              slot: idx,
+              mat: m ? m.name : 'null',
+              hasMap: !!(m && m.map && !isFallbackTexture(m.map)),
+              color: m && m.color ? m.color.getHexString() : null
+            });
+          });
+        }
+      });
+      console.log('[little_boy mats]', JSON.stringify(matSummary));
+    }
+
+    // 1. Strip bone name prefixes across all bones (supporting both mixamorig: and mixamorig prefixes)
+    modelRoot.traverse(node => {
+      if (node.isBone) {
+        node.name = node.name.replace(/^mixamorig\d*[:_]?/i, '');
+      }
+      if (node.isMesh || node.isSkinnedMesh) {
+        node.castShadow = false;
+        node.receiveShadow = false;
+        node.frustumCulled = false;
+        node.visible = true;
+
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach(mat => {
+          if (!mat) return;
+
+          // Trap 1x1 fallback dummy texture: null it out so clean authentic colors can apply
+          if (isFallbackTexture(mat.map)) {
+            mat.map = null;
+            mat.needsUpdate = true;
+          }
+
+          mat.roughness = Math.max(mat.roughness ?? 0.82, 0.76);
+          mat.metalness = Math.min(mat.metalness ?? 0, 0.05);
+          mat.visible = true;
+          mat.side = THREE.DoubleSide;
+          if (typeof mat.opacity === 'number' && mat.opacity < 0.1) {
+            mat.opacity = 1.0;
+          }
+          if (mat.alphaTest && mat.alphaTest > 0.5) {
+            mat.alphaTest = 0.0;
+          }
+          if (mat.transparent && mat.opacity >= 0.99 && !mat.map) {
+            mat.transparent = false;
+          }
+
+          if (mat.map) {
+            // Keep real high-res diffuse textures (width > 4, e.g. Remy, Ch22) bright with pure white diffuse
+            mat.color.setHex(0xffffff);
+          } else {
+            // Material map is null/fallback: assign clean realistic colors by material & mesh slot
+            const slotName = ((node.name || '') + ' ' + (mat.name || '')).toLowerCase();
+
+            if (isChild) {
+              if (node.name === 'Boy01_Body_Geo') {
+                // Apply vertex colors across distinct character body regions
+                const pos = node.geometry && node.geometry.attributes && node.geometry.attributes.position;
+                if (pos && pos.count > 0) {
+                  const count = pos.count;
+                  const colors = new Float32Array(count * 3);
+                  const colCap = new THREE.Color(0x1e3a8a);      // Navy blue cap
+                  const colSkin = new THREE.Color(0xc68662);     // Warm South Asian skin
+                  const colShirt = new THREE.Color(0x0284c7);    // Sky blue school shirt
+                  const colBackpack = new THREE.Color(0xd97706); // Amber school backpack
+                  const colPants = new THREE.Color(0x1e293b);    // Navy trousers
+                  const colShoes = new THREE.Color(0x18181b);    // Black school shoes
+
+                  for (let i = 0; i < count; i++) {
+                    const y = pos.getY(i);
+                    const z = pos.getZ(i);
+                    const x = Math.abs(pos.getX(i));
+                    let c;
+                    if (y < 18) {
+                      c = colShoes;
+                    } else if (y < 86) {
+                      c = colPants;
+                    } else if (y < 144) {
+                      if (z < -8 && y > 95 && y < 140 && x < 22) {
+                        c = colBackpack;
+                      } else if (x > 28 && y < 112) {
+                        c = colSkin; // Hands
+                      } else {
+                        c = colShirt;
+                      }
+                    } else if (y < 168) {
+                      c = colSkin; // Face & neck
+                    } else {
+                      c = colCap; // Cap
+                    }
+                    colors[i * 3] = c.r;
+                    colors[i * 3 + 1] = c.g;
+                    colors[i * 3 + 2] = c.b;
+                  }
+                  node.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                  mat.vertexColors = true;
+                  mat.color.setHex(0xffffff);
+                }
+              } else if (/brow|hair/i.test(slotName)) {
+                mat.color.setHex(0x1f1a17); // Dark hair
+              } else if (/eye|glass/i.test(slotName)) {
+                mat.color.setHex(0x111827); // Dark glasses / eyes
+              } else if (/mouth|tongue/i.test(slotName)) {
+                mat.color.setHex(0x991b1b); // Natural mouth
+              } else {
+                mat.color.setHex(0xc68662); // Warm South Asian skin
+              }
+            } else if (isSalwar) {
+              if (/eye/i.test(slotName) && !/eyelash/i.test(slotName)) {
+                mat.color.setHex(0xf8fafc); // Realistic white sclera
+              } else if (/cornea/i.test(slotName)) {
+                mat.color.setHex(0x111827); // Dark pupil
+                mat.transparent = true;
+                mat.opacity = 0.9;
+              } else if (/teeth/i.test(slotName)) {
+                mat.color.setHex(0xf1f5f9); // Clean white teeth
+              } else if (/tongue|mouth/i.test(slotName)) {
+                mat.color.setHex(0x991b1b); // Tongue
+              } else if (/hair|eyelash|scalp/i.test(slotName)) {
+                mat.color.setHex(0x1a1512); // Dark hair
+              } else if (/skin|head|arm|leg|nail/i.test(slotName)) {
+                mat.color.setHex(0xc68662); // Warm South Asian skin
+              } else if (/lambert2/i.test(slotName)) {
+                mat.color.setHex(0x0f766e); // Teal upper kameez tunic
+              } else if (/lambert3/i.test(slotName)) {
+                mat.color.setHex(0xfef3c7); // Cream salwar trousers
+              } else if (/lambert4/i.test(slotName)) {
+                mat.color.setHex(0xd97706); // Amber saffron dupatta / borders
+              } else {
+                mat.color.setHex(0x0f766e); // Default rich teal salwar
+              }
+            } else {
+              // Untextured male/female fallback
+              if (/skin|face|head|body|arm|leg/i.test(slotName)) {
+                mat.color.setHex(0xc68662);
+              } else if (/hair|brow/i.test(slotName)) {
+                mat.color.setHex(0x1a1512);
+              } else {
+                mat.color.setHex(0x1e3a8a);
+              }
+            }
+          }
+
+          mat.needsUpdate = true;
+        });
       }
     });
+
+    // 2. Wrap modelRoot inside a clean THREE.Group wrapper if not already wrapped
+    if (modelRoot.parent) {
+      modelRoot.parent.remove(modelRoot);
+    }
+    const wrapper = new THREE.Group();
+    wrapper.name = (charId || modelRoot.name || 'char') + '_normalized_wrapper';
+    wrapper.userData.charId = charId || null;
+    wrapper.add(modelRoot);
+
+    // 3. Measure raw bounds
+    modelRoot.scale.set(1, 1, 1);
+    modelRoot.position.set(0, 0, 0);
+    modelRoot.rotation.set(0, 0, 0);
+    modelRoot.updateMatrixWorld(true);
+    wrapper.updateMatrixWorld(true);
+
+    const rawBox = new THREE.Box3().setFromObject(modelRoot);
+    let rawHeight = rawBox.max.y - rawBox.min.y;
+    if (!Number.isFinite(rawHeight) || rawHeight <= 0.001) {
+      rawHeight = targetHeight;
+    }
+
+    // 4. Normalize template to target height strictly proportional to busHeight
+    const unitScale = targetHeight / rawHeight;
+    modelRoot.scale.setScalar(unitScale);
+    modelRoot.position.set(0, 0, 0);
+    modelRoot.updateMatrixWorld(true);
+
+    // 5. Ground shoe soles flush at Y = 0.000 and center horizontally inside wrapper
+    const scaledBox = new THREE.Box3().setFromObject(modelRoot);
+    modelRoot.position.y = -scaledBox.min.y;
+    const midX = (scaledBox.min.x + scaledBox.max.x) * 0.5;
+    const midZ = (scaledBox.min.z + scaledBox.max.z) * 0.5;
+    if (Math.abs(midX) > 0.5) modelRoot.position.x = -midX;
+    if (Math.abs(midZ) > 0.5) modelRoot.position.z = -midZ;
+    modelRoot.updateMatrixWorld(true);
+    wrapper.updateMatrixWorld(true);
+
+    wrapper.userData.groundedBaseY = 0;
+    wrapper.userData.modelScale = unitScale;
+    wrapper.userData.targetHeight = targetHeight;
+    modelRoot.userData.groundedBaseY = modelRoot.position.y;
+    modelRoot.userData.modelScale = unitScale;
+    modelRoot.userData.targetHeight = targetHeight;
+
+    wrapper.traverse(child => {
+      if (child.isMesh || child.isSkinnedMesh) {
+        child.frustumCulled = false;
+        child.visible = true;
+      }
+    });
+
+    pruneNullChildren(wrapper);
+    return wrapper;
+  }
+
+  function cloneRiggedCharacter(sourceScene, seed) {
+    if (!sourceScene || !sourceScene.isObject3D) return null;
+    pruneNullChildren(sourceScene);
+    let cloned = null;
+    if (typeof THREE !== 'undefined' && THREE.SkeletonUtils && typeof THREE.SkeletonUtils.clone === 'function') {
+      try {
+        cloned = THREE.SkeletonUtils.clone(sourceScene);
+      } catch (e) {
+        console.warn('[Pedestrians] SkeletonUtils.clone fallback:', e);
+      }
+    }
+    if (!cloned) {
+      cloned = cloneRiggedModel(sourceScene);
+    }
+    if (!cloned) return null;
+
+    pruneNullChildren(cloned);
+    applyDhakaClothingVariations(cloned, seed || Math.floor(Math.random() * 1000));
+    pruneNullChildren(cloned);
+    cloned.traverse(child => {
+      if (child.isMesh || child.isSkinnedMesh) {
+        child.frustumCulled = false;
+        child.visible = true;
+      }
+    });
+    return cloned;
+  }
+
+  // Shuffled round-robin pool across all 8 character templates
+  let characterBag = [];
+  let bagIndex = 0;
+  let lastAssignedTemplateId = null;
+
+  function refillCharacterBag() {
+    const allAvailable = Object.values(riggedPedLibrary).filter(t => t && t.scene);
+    if (!allAvailable.length) return [];
+    const templates = allAvailable.slice();
+    // Fisher-Yates shuffle
+    for (let i = templates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = templates[i];
+      templates[i] = templates[j];
+      templates[j] = temp;
+    }
+    // Prevent first item in new bag from repeating the last assigned template
+    if (templates.length > 1 && lastAssignedTemplateId && templates[0].id === lastAssignedTemplateId) {
+      const swapIdx = 1 + Math.floor(Math.random() * (templates.length - 1));
+      const temp = templates[0];
+      templates[0] = templates[swapIdx];
+      templates[swapIdx] = temp;
+    }
+    return templates;
+  }
+
+  function getNextRoundRobinTemplate(preferredCategory, previousNeighborId) {
+    const allAvailable = Object.values(riggedPedLibrary).filter(t => t && t.scene);
+    if (!allAvailable.length) return null;
+
+    if (!characterBag.length) {
+      characterBag = refillCharacterBag();
+      bagIndex = 0;
+    }
+
+    let chosenIdx = -1;
+    if (preferredCategory) {
+      for (let offset = 0; offset < characterBag.length; offset++) {
+        const idx = (bagIndex + offset) % characterBag.length;
+        const candidate = characterBag[idx];
+        if (candidate.category === preferredCategory && candidate.id !== previousNeighborId && candidate.id !== lastAssignedTemplateId) {
+          chosenIdx = idx;
+          break;
+        }
+      }
+      if (chosenIdx === -1) {
+        for (let offset = 0; offset < characterBag.length; offset++) {
+          const idx = (bagIndex + offset) % characterBag.length;
+          const candidate = characterBag[idx];
+          if (candidate.category === preferredCategory && candidate.id !== previousNeighborId) {
+            chosenIdx = idx;
+            break;
+          }
+        }
+      }
+    }
+
+    if (chosenIdx === -1) {
+      for (let offset = 0; offset < characterBag.length; offset++) {
+        const idx = (bagIndex + offset) % characterBag.length;
+        const candidate = characterBag[idx];
+        if (candidate.id !== previousNeighborId && candidate.id !== lastAssignedTemplateId) {
+          chosenIdx = idx;
+          break;
+        }
+      }
+    }
+    if (chosenIdx === -1) {
+      chosenIdx = bagIndex % characterBag.length;
+    }
+
+    const chosen = characterBag[chosenIdx];
+    characterBag.splice(chosenIdx, 1);
+    if (bagIndex >= characterBag.length) bagIndex = 0;
+
+    lastAssignedTemplateId = chosen.id;
+    return chosen;
+  }
+
+  function getTemplateForCategory(category, preferredId, seed) {
+    if (preferredId && riggedPedLibrary[preferredId]) {
+      return riggedPedLibrary[preferredId];
+    }
+    return getNextRoundRobinTemplate(category, null);
   }
 
   function loadMixamoGLBModel(walkPath, idlePath) {
@@ -15276,19 +15780,17 @@ let sharedRickshawArtTexture = null;
       const animations = [];
       if (walkRes && walkRes.animations && walkRes.animations.length > 0) {
         const walkClip = walkRes.animations.find(c => /walk/i.test(c.name)) || walkRes.animations[0];
-        const clonedWalk = walkClip.clone();
-        clonedWalk.name = 'walk';
-        stripRootMotion(clonedWalk);
-        animations.push(clonedWalk);
+        const normWalk = normalizeClipTracks(walkClip);
+        normWalk.name = 'walk';
+        animations.push(normWalk);
       }
       if (idlePath) {
         return loadRiggedGLBModel(idlePath).then(idleRes => {
           if (idleRes && idleRes.animations && idleRes.animations.length > 0) {
             const idleClip = idleRes.animations.find(c => /idle|stand/i.test(c.name)) || idleRes.animations[0];
-            const clonedIdle = idleClip.clone();
-            clonedIdle.name = 'idle';
-            stripRootMotion(clonedIdle);
-            animations.push(clonedIdle);
+            const normIdle = normalizeClipTracks(idleClip);
+            normIdle.name = 'idle';
+            animations.push(normIdle);
           }
           return { scene: walkRes.scene, animations: animations };
         }).catch(err => {
@@ -15304,53 +15806,198 @@ let sharedRickshawArtTexture = null;
   }
 
   function loadRiggedPedestrian(type) {
-    if (type === 'child') {
-      return Promise.resolve(null);
-    }
-    // High-performance compressed Mixamo .glb loader (< 3 MB each)
-    return loadMixamoGLBModel(
-      `assets/models/ped-${type}-walk.glb`,
-      `assets/models/ped-${type}-idle.glb`
-    ).then(res => {
+    const glbPath = type === 'female' ? 'assets/models/ped-female-walk.glb' : 'assets/models/ped-male-walk.glb';
+    const idlePath = type === 'female' ? 'assets/models/ped-female-idle.glb' : 'assets/models/ped-male-idle.glb';
+    return loadMixamoGLBModel(glbPath, idlePath).then(res => {
       if (res && res.scene) {
         riggedPedPrototypes[type] = res;
-        const walkClip = (res.animations || []).find(c => /walk/i.test(c.name)) || (res.animations && res.animations[0]);
-        const idleClip = (res.animations || []).find(c => /idle|stand/i.test(c.name)) || (res.animations && res.animations[1]);
-        console.info('[Pedestrians] Loaded:', type, 'walk:', walkClip ? walkClip.name : 'none', 'idle:', idleClip ? idleClip.name : 'none');
-        // Hot-swap already-spawned walkers as soon as either model resolves
-        try {
-          upgradeActiveWalkersToRigged();
-        } catch (swapErr) {
-          console.error('[Pedestrians] Hot-swap error:', swapErr);
-        }
       }
       return res;
-    }).catch(err => {
-      console.error(`[Pedestrians] Mixamo GLB load failed for ${type}:`, err);
-      return null;
     });
   }
 
   function loadAllRiggedPedestrians() {
-    console.info('[Pedestrians] Loading Mixamo GLB assets...');
+    console.info('[Pedestrians] Initializing Mixamo character pipeline (GLB + FBX)...');
     ensureSharedMocapClips();
-    return Promise.all([
-      loadRiggedPedestrian('male'),
-      loadRiggedPedestrian('female'),
-      loadRiggedPedestrian('child')
-    ]).then(() => {
-      const loadedTypes = Object.keys(riggedPedPrototypes).filter(k => riggedPedPrototypes[k]);
-      if (loadedTypes.length > 0) {
-        try {
-          upgradeActiveWalkersToRigged();
-        } catch (e) {
-          console.error('[Pedestrians] Initial upgrade error:', e);
+
+    // 1. Load GLB templates (provides male & female mocap walk/idle clips)
+    const remyPromise = loadMixamoGLBModel(
+      'assets/models/ped-male-walk.glb',
+      'assets/models/ped-male-idle.glb'
+    ).then(res => {
+      if (res && res.scene) {
+        const normScene = normalizeCharacterTemplate(res.scene, TARGET_PED_HEIGHTS.male, 'male_remy');
+        const sceneToStore = normScene || res.scene;
+        pruneNullChildren(sceneToStore);
+        riggedPedLibrary.male_remy = {
+          id: 'male_remy',
+          category: 'male',
+          name: 'Remy (Street Casual)',
+          scene: sceneToStore,
+          animations: res.animations,
+          height: TARGET_PED_HEIGHTS.male
+        };
+        riggedPedPrototypes.male = riggedPedLibrary.male_remy;
+        if (res.animations && res.animations.length) {
+          sharedMixamoClips.maleWalk = res.animations.find(c => c.name === 'walk') || res.animations[0];
+          sharedMixamoClips.maleIdle = res.animations.find(c => c.name === 'idle') || res.animations[1] || sharedMixamoClips.maleWalk;
         }
-      } else {
-        console.warn('[Pedestrians] No GLB models loaded. Active mode: Built-in Mocap Keyframe Rig (AnimationMixer, 13-pivot articulation)');
+        sceneToStore.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(sceneToStore);
+        const h = box.max.y - box.min.y;
+        console.log('[Pedestrians] Normalized male_remy height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
+        console.info('[Pedestrians] Loaded male_remy template');
+        upgradeActiveWalkersToRigged();
+        upgradeGossipingHumansToRigged();
       }
+      return res;
     }).catch(err => {
-      console.error('[Pedestrians] Error loading Mixamo GLB models:', err);
+      console.warn('[Pedestrians] Error loading male_remy GLB:', err);
+      return null;
+    });
+
+    const ch22Promise = loadMixamoGLBModel(
+      'assets/models/ped-female-walk.glb',
+      'assets/models/ped-female-idle.glb'
+    ).then(res => {
+      if (res && res.scene) {
+        const normScene = normalizeCharacterTemplate(res.scene, TARGET_PED_HEIGHTS.female, 'female_ch22');
+        const sceneToStore = normScene || res.scene;
+        pruneNullChildren(sceneToStore);
+        riggedPedLibrary.female_ch22 = {
+          id: 'female_ch22',
+          category: 'female',
+          name: 'Ch22 (Modern Commuter)',
+          scene: sceneToStore,
+          animations: res.animations,
+          height: TARGET_PED_HEIGHTS.female
+        };
+        riggedPedPrototypes.female = riggedPedLibrary.female_ch22;
+        if (res.animations && res.animations.length) {
+          sharedMixamoClips.femaleWalk = res.animations.find(c => c.name === 'walk') || res.animations[0];
+          sharedMixamoClips.femaleIdle = res.animations.find(c => c.name === 'idle') || res.animations[1] || sharedMixamoClips.femaleWalk;
+        }
+        sceneToStore.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(sceneToStore);
+        const h = box.max.y - box.min.y;
+        console.log('[Pedestrians] Normalized female_ch22 height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
+        console.info('[Pedestrians] Loaded female_ch22 template');
+        upgradeActiveWalkersToRigged();
+        upgradeGossipingHumansToRigged();
+      }
+      return res;
+    }).catch(err => {
+      console.warn('[Pedestrians] Error loading female_ch22 GLB:', err);
+      return null;
+    });
+
+    // 2. Load FBX character models (when FBXLoader is available)
+    let fbxLoadingManager = null;
+    function getFBXLoadingManager() {
+      if (fbxLoadingManager) return fbxLoadingManager;
+      if (typeof THREE === 'undefined' || typeof THREE.LoadingManager !== 'function') {
+        return null;
+      }
+      const manager = new THREE.LoadingManager();
+      manager.setURLModifier(url => {
+        if (typeof url !== 'string' || !url || url === 'undefined' || url.endsWith('/undefined')) {
+          return BLANK_PIXEL_DATA_URI;
+        }
+        let cleanUrl = url;
+        if (cleanUrl.startsWith('undefinedblob:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
+        if (cleanUrl.startsWith('undefineddata:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
+        if (cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
+          return cleanUrl;
+        }
+        let decoded = cleanUrl;
+        try { decoded = decodeURI(cleanUrl); } catch (_) {}
+        // Check for Windows drive paths, trailing /undefined, or non-existent .dds textures
+        if (/[A-Za-z]:[\\/]/.test(cleanUrl) || /[A-Za-z]:[\\/]/.test(decoded) ||
+            decoded.endsWith('/undefined') ||
+            /\.dds($|\?)/i.test(cleanUrl) || /\.dds($|\?)/i.test(decoded)) {
+          return BLANK_PIXEL_DATA_URI;
+        }
+        return cleanUrl;
+      });
+      manager.onError = function () {
+        // Silent error handler for missing FBX textures
+      };
+      fbxLoadingManager = manager;
+      return fbxLoadingManager;
+    }
+
+    const fbxModels = [
+      { id: 'female_salwar', category: 'female', path: 'assets/models/ped-female-salwar.fbx', height: TARGET_PED_HEIGHTS.female, name: 'Salwar Kameez Commuter' },
+      { id: 'little_boy', category: 'child', path: 'assets/models/ped-little-boy.fbx', height: TARGET_PED_HEIGHTS.child, name: 'School Kid Walker' },
+      { id: 'male_formal', category: 'male', path: 'assets/models/ped-male-formal.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Formal Office Commuter' },
+      { id: 'male_hoodie', category: 'male', path: 'assets/models/ped-male-hoodie.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Streetwear Hoodie Walker' },
+      { id: 'male_sweater', category: 'male', path: 'assets/models/ped-male-sweater.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Winter Sweater Walker' },
+      { id: 'male_tshirt', category: 'male', path: 'assets/models/ped-male-tshirt.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Casual T-Shirt Walker' }
+    ];
+
+    function loadFBXTemplate(def) {
+      if (typeof THREE === 'undefined' || typeof THREE.FBXLoader !== 'function') {
+        return Promise.resolve(null);
+      }
+      return new Promise(resolve => {
+        try {
+          const manager = getFBXLoadingManager();
+          const loader = manager ? new THREE.FBXLoader(manager) : new THREE.FBXLoader();
+          loader.load(def.path, fbx => {
+            if (!fbx) { resolve(null); return; }
+            pruneNullChildren(fbx);
+            const normScene = normalizeCharacterTemplate(fbx, def.height, def.id);
+            const sceneToStore = normScene || fbx;
+            pruneNullChildren(sceneToStore);
+
+            const isFem = (def.category === 'female');
+            const walkClip = isFem ? (sharedMixamoClips.femaleWalk || sharedMixamoClips.maleWalk) : sharedMixamoClips.maleWalk;
+            const idleClip = isFem ? (sharedMixamoClips.femaleIdle || sharedMixamoClips.maleIdle) : sharedMixamoClips.maleIdle;
+            const anims = [];
+            if (walkClip) anims.push(walkClip);
+            if (idleClip) anims.push(idleClip);
+
+            riggedPedLibrary[def.id] = {
+              id: def.id,
+              category: def.category,
+              name: def.name,
+              scene: sceneToStore,
+              animations: anims,
+              height: def.height
+            };
+            if (def.category === 'child') {
+              riggedPedPrototypes.child = riggedPedLibrary[def.id];
+            }
+
+            sceneToStore.updateMatrixWorld(true);
+            const box = new THREE.Box3().setFromObject(sceneToStore);
+            const h = box.max.y - box.min.y;
+            console.log('[Pedestrians] Normalized', def.id, 'height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
+            console.info(`[Pedestrians] Loaded FBX character: ${def.id} (${def.name})`);
+            upgradeActiveWalkersToRigged();
+            upgradeGossipingHumansToRigged();
+            resolve(riggedPedLibrary[def.id]);
+          }, undefined, err => {
+            console.warn(`[Pedestrians] FBX load failed for ${def.id}:`, err);
+            resolve(null);
+          });
+        } catch (e) {
+          console.warn(`[Pedestrians] FBXLoader exception for ${def.id}:`, e);
+          resolve(null);
+        }
+      });
+    }
+
+    return Promise.all([remyPromise, ch22Promise]).then(() => {
+      return Promise.all(fbxModels.map(loadFBXTemplate));
+    }).then(() => {
+      const loadedCount = Object.keys(riggedPedLibrary).length;
+      console.info(`[Pedestrians] Mixamo Library ready: ${loadedCount} character templates active`);
+      upgradeActiveWalkersToRigged();
+      upgradeGossipingHumansToRigged();
+      if (typeof scene !== 'undefined' && scene) {
+        pruneNullChildren(scene);
+      }
     });
   }
 
@@ -15358,134 +16005,103 @@ let sharedRickshawArtTexture = null;
     return loadAllRiggedPedestrians();
   }
 
-  function createRiggedPedestrian(p, protoData, typeName, measuredHeight) {
-    if (!protoData || !protoData.scene) return null;
+  const loggedSpawnedCheck = {};
+  function enforceWalkerWorldScale(spawnedRoot, targetHeight, id) {
+    if (!spawnedRoot || !spawnedRoot.isObject3D) return;
+    spawnedRoot.updateMatrixWorld(true);
+    let box = new THREE.Box3().setFromObject(spawnedRoot);
+    let currentH = box.max.y - box.min.y;
+    if (Number.isFinite(currentH) && currentH > 0.05 && Number.isFinite(targetHeight) && targetHeight > 0) {
+      const scaleMultiplier = targetHeight / currentH;
+      spawnedRoot.scale.multiplyScalar(scaleMultiplier);
+      spawnedRoot.updateMatrixWorld(true);
 
-    const sourceScene = protoData.scene;
-    const animations = protoData.animations || [];
-    // Strict SkeletonUtils clone to preserve SkinnedMesh bone bindings
-    const riggedModel = cloneRiggedModel(sourceScene);
+      box = new THREE.Box3().setFromObject(spawnedRoot);
+      const dy = box.min.y - spawnedRoot.position.y;
+      const dx = (box.min.x + box.max.x) * 0.5 - spawnedRoot.position.x;
+      const dz = (box.min.z + box.max.z) * 0.5 - spawnedRoot.position.z;
+
+      if (spawnedRoot.children.length > 0) {
+        const inner = spawnedRoot.children[0];
+        inner.position.y -= dy / (spawnedRoot.scale.y || 1);
+        if (Math.abs(dx) > 0.5) inner.position.x -= dx / (spawnedRoot.scale.x || 1);
+        if (Math.abs(dz) > 0.5) inner.position.z -= dz / (spawnedRoot.scale.z || 1);
+        inner.userData.groundedBaseY = inner.position.y;
+        spawnedRoot.updateMatrixWorld(true);
+      }
+
+      box = new THREE.Box3().setFromObject(spawnedRoot);
+      if (!loggedSpawnedCheck[id]) {
+        loggedSpawnedCheck[id] = true;
+        console.log('[Spawned Walker World Check]', id, 'worldHeight:', box.getSize(new THREE.Vector3()).y.toFixed(2), 'worldMinY:', box.min.y.toFixed(2));
+      }
+    }
+  }
+
+  function createRiggedPedestrian(p, protoData, typeName, measuredHeight, preferredCharId) {
+    const type = (typeName === 'female') ? 'female' : (typeName === 'child' ? 'child' : 'male');
+    const pSeed = (p && typeof p.id === 'number') ? p.id : (p && typeof p.id === 'string' ? (parseInt(p.id.replace(/\D/g, ''), 10) || 0) : 0);
+    const template = getTemplateForCategory(type, preferredCharId, pSeed) || protoData;
+    if (!template || !template.scene) return null;
+
+    const sourceScene = template.scene;
+    const animations = template.animations || [];
+    const riggedModel = cloneRiggedCharacter(sourceScene, pSeed);
     if (!riggedModel) return null;
     purgeNullChildren(riggedModel);
 
-    // Clean outer wrapper: world pos & rot never conflict with inner scale/grounding
     const wrapper = new THREE.Group();
-    wrapper.name = 'mixamo-ped-' + typeName;
+    wrapper.name = 'mixamo-ped-' + (template.id || type);
     wrapper.visible = true;
     riggedModel.visible = true;
     wrapper.frustumCulled = false;
     riggedModel.frustumCulled = false;
-    wrapper.add(riggedModel);
 
-    // 1. Reset transforms before measurement
-    riggedModel.scale.set(1, 1, 1);
+    // The template was already normalized once to targetHeight and grounded at y=0 inside its clean THREE.Group wrapper.
+    // Keep clone.scale.set(1, 1, 1) and position at (0, 0, 0)
     riggedModel.position.set(0, 0, 0);
-    riggedModel.updateMatrixWorld(true);
-
-    // 2. Measure raw bounds
-    const rawBox = new THREE.Box3().setFromObject(riggedModel);
-    let rawHeight = rawBox.max.y - rawBox.min.y;
-    if (!Number.isFinite(rawHeight) || rawHeight <= 0.001) {
-      rawHeight = 180;
-    }
-
-    // 3. Match Mixamo Height directly to Procedural Pedestrian Height in Scene Units (~11.5 male / ~10.8 female)
-    const type = (typeName === 'female') ? 'female' : 'male';
-    const procHeight = (typeof measuredHeight === 'number' && Number.isFinite(measuredHeight)) ? measuredHeight : 0;
-    const targetHeight = (type === 'female')
-      ? ((procHeight > 3) ? procHeight * 0.94 : 10.8)
-      : ((procHeight > 3) ? procHeight : 11.5);
-    const unitScale = targetHeight / rawHeight;
-
-    // 4. Apply unit scale to riggedModel
-    riggedModel.scale.setScalar(unitScale);
-    riggedModel.updateMatrixWorld(true);
-
-    // 5. Recompute Box3 and clamp shoe soles flush at Y = 0.000 inside wrapper
-    const scaledBox = new THREE.Box3().setFromObject(riggedModel);
-    riggedModel.position.y = -scaledBox.min.y;
-    riggedModel.rotation.set(0, 0, 0); // Mixamo +Z forward aligns directly with scene canonical forward
-    riggedModel.userData.groundedBaseY = riggedModel.position.y;
-    riggedModel.userData.modelScale = unitScale;
-
-    // 6. Ensure wrapper scale is strictly 1, 1, 1
+    riggedModel.rotation.set(0, 0, 0);
+    riggedModel.scale.set(1, 1, 1);
+    wrapper.add(riggedModel);
     wrapper.scale.set(1, 1, 1);
+    wrapper.updateMatrixWorld(true);
 
-    // Enable matrixAutoUpdate on wrapper root, model root, and all skeleton bones
+    // Target total heights strictly proportional to busHeight (male: 13.0, female: 11.5, child: 8.5)
+    const targetHeight = (type === 'female') ? TARGET_PED_HEIGHTS.female : (type === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
+    enforceWalkerWorldScale(wrapper, targetHeight, template.id || type);
+    const unitScale = (riggedModel.userData && riggedModel.userData.modelScale) || (sourceScene.userData && sourceScene.userData.modelScale) || 1.0;
+
+    wrapper.traverse(node => {
+      if (node.isMesh || node.isSkinnedMesh) {
+        node.frustumCulled = false;
+        node.visible = true;
+      }
+    });
+
+    riggedModel.userData.groundedBaseY = 0;
+    riggedModel.userData.modelScale = unitScale;
+    riggedModel.userData.targetHeight = targetHeight;
+    wrapper.userData.groundedBaseY = 0;
+    wrapper.userData.modelScale = unitScale;
+    wrapper.userData.targetHeight = targetHeight;
+
     wrapper.matrixAutoUpdate = true;
     riggedModel.matrixAutoUpdate = true;
 
-    // Authentic Dhaka street palettes with safe fallback
-    const DHAKA_PALETTES = [
-      { primary: 0x1e3a8a, secondary: 0xf1f5f9 },
-      { primary: 0x059669, secondary: 0x334155 },
-      { primary: 0xdc2626, secondary: 0xfef08a },
-      { primary: 0x7c3aed, secondary: 0xe2e8f0 },
-      { primary: 0xd97706, secondary: 0x1e293b },
-      { primary: 0x0284c7, secondary: 0xffffff },
-      { primary: 0x475569, secondary: 0x0f172a },
-      { primary: 0xbe185d, secondary: 0xfde047 }
-    ];
-    let safePalette = { primary: 0x3b82f6, secondary: 0x1e293b, skin: 0xd2a17c };
-    try {
-      if (p && p.palette && typeof p.palette === 'object') {
-        safePalette = p.palette;
-      } else {
-        const rawId = (p && typeof p.id === 'number') ? p.id : (p && typeof p.id === 'string' ? (parseInt(p.id.replace(/\D/g, ''), 10) || 0) : 0);
-        const chosen = DHAKA_PALETTES[Math.abs(rawId) % DHAKA_PALETTES.length];
-        if (chosen && typeof chosen === 'object') safePalette = chosen;
-      }
-    } catch (e) {
-      // fallback preserved
-    }
-
+    // Locate RightHand bone for rain umbrella
     let rightHandBone = null;
     riggedModel.traverse(node => {
       if (!node) return;
       node.matrixAutoUpdate = true;
-      if (node.isBone) {
-        // Matches mixamorig:RightHand, mixamorig2:RightHand, RightHand
-        if (/RightHand$/i.test(node.name)) {
-          if (!rightHandBone) rightHandBone = node;
-        }
-      }
-      if (node.isSkinnedMesh || node.isMesh) {
-        node.castShadow = false;
-        node.receiveShadow = false;
-        node.frustumCulled = false;
-        node.visible = true;
-        if (node.material) {
-          node.material = node.material.clone();
-          const mat = node.material;
-          // Set matte fabric finish
-          mat.roughness = Math.max(mat.roughness ?? 0.82, 0.78);
-          mat.metalness = Math.min(mat.metalness ?? 0, 0.05);
-          if (typeof mat.shininess !== 'undefined') mat.shininess = 6;
-          if (mat.specular && typeof mat.specular.setRGB === 'function') mat.specular.setRGB(0.06, 0.06, 0.06);
-
-          if (mat.map) {
-            // Preserve Mixamo's embedded skin, face, clothing, and hair textures cleanly without dark tinting:
-            if (mat.color) mat.color.setHex(0xffffff);
-          } else {
-            const matName = (mat.name || '').toLowerCase();
-            if (matName.includes('shirt') || matName.includes('panjabi') || matName.includes('top') || matName.includes('saree') || matName.includes('cloth')) {
-              if (mat.color && safePalette?.primary) mat.color.setHex(safePalette.primary);
-            } else if (matName.includes('pant') || matName.includes('pajama') || matName.includes('skirt') || matName.includes('bottom')) {
-              if (mat.color && safePalette?.secondary) mat.color.setHex(safePalette.secondary);
-            }
-          }
-        }
+      if (node.isBone && /RightHand$/i.test(node.name)) {
+        if (!rightHandBone) rightHandBone = node;
       }
     });
 
-    // Monsoon rain umbrella attached directly to right hand bone
+    // Monsoon rain umbrella
     const umbrella = new THREE.Group();
     umbrella.name = 'mixamo-umbrella';
-    const canopyMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
-      roughness: 0.35,
-      side: THREE.DoubleSide
-    });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35, side: THREE.DoubleSide });
     const shaftMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
     const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.70, 0.28, 12, 1, true), canopyMat);
     canopy.position.y = 0.95;
@@ -15495,14 +16111,15 @@ let sharedRickshawArtTexture = null;
     umbrella.add(shaft);
     umbrella.visible = false;
 
+    const umbrellaScaleFactor = (targetHeight / 1.70);
     if (rightHandBone) {
-      // Counter-scale so umbrella retains normal world dimensions inside scaled skeleton (1 / unitScale)
-      umbrella.scale.setScalar(1 / unitScale);
+      umbrella.scale.setScalar(umbrellaScaleFactor / (unitScale || 1));
       umbrella.position.set(0, 0, 0);
       umbrella.rotation.set(0, 0, 0);
       rightHandBone.add(umbrella);
     } else {
-      umbrella.position.set(0.3, 0.9, 0);
+      umbrella.scale.setScalar(umbrellaScaleFactor);
+      umbrella.position.set(0.3 * umbrellaScaleFactor, targetHeight * 0.55, 0);
       riggedModel.add(umbrella);
     }
 
@@ -15513,22 +16130,34 @@ let sharedRickshawArtTexture = null;
       sharedMats.shadow
     );
     shadowDisc.rotation.x = -Math.PI / 2;
+    const shadowScale = (targetHeight / 1.73) * 8.0;
+    shadowDisc.scale.set(shadowScale, shadowScale, shadowScale);
     shadowDisc.position.set(0, 0.002, 0);
     wrapper.add(shadowDisc);
 
-    // Mixamo Motion Capture AnimationMixer
+    // AnimationMixer with normalized mocap clips
     let mixer = null;
     let walkAction = null;
     let idleAction = null;
 
-    if (animations && animations.length > 0) {
+    let activeAnims = (animations && animations.length > 0) ? animations.slice() : [];
+    if (!activeAnims.length) {
+      const isFem = (type === 'female');
+      const wClip = isFem ? (sharedMixamoClips.femaleWalk || sharedMixamoClips.maleWalk) : sharedMixamoClips.maleWalk;
+      const iClip = isFem ? (sharedMixamoClips.femaleIdle || sharedMixamoClips.maleIdle) : sharedMixamoClips.maleIdle;
+      if (wClip) activeAnims.push(wClip);
+      if (iClip) activeAnims.push(iClip);
+    }
+
+    if (activeAnims.length > 0) {
       mixer = new THREE.AnimationMixer(riggedModel);
-      let walkClip = animations.find(c => /walk/i.test(c.name)) || animations[0];
-      let idleClip = animations.find(c => /idle|stand/i.test(c.name)) || (animations.length > 1 ? animations[1] : animations[0]);
+      const walkClip = activeAnims.find(c => /walk/i.test(c.name)) || activeAnims[0];
+      const idleClip = activeAnims.find(c => /idle|stand/i.test(c.name)) || (activeAnims.length > 1 ? activeAnims[1] : activeAnims[0]);
 
       if (walkClip) {
         walkAction = mixer.clipAction(walkClip);
         walkAction.setLoop(THREE.LoopRepeat);
+        if (type === 'child') walkAction.timeScale = 1.35;
       }
       if (idleClip) {
         idleAction = mixer.clipAction(idleClip);
@@ -15546,6 +16175,8 @@ let sharedRickshawArtTexture = null;
     wrapper.userData.isRigged = true;
     wrapper.userData.isRiggedMixamo = true;
     wrapper.userData.pedCategory = type;
+    wrapper.userData.charId = template.id || type;
+    wrapper.userData.charName = template.name || type;
     wrapper.userData.mixer = mixer;
     wrapper.userData.walkAction = walkAction;
     wrapper.userData.idleAction = idleAction;
@@ -15558,6 +16189,8 @@ let sharedRickshawArtTexture = null;
       p.group = wrapper;
       p.isRiggedMixamo = true;
       p.pedCategory = type;
+      p.charId = template.id || type;
+      p.charName = template.name || type;
     }
 
     purgeNullChildren(wrapper);
@@ -15568,11 +16201,10 @@ let sharedRickshawArtTexture = null;
   function upgradeActiveWalkersToRigged() {
     if (typeof pedMeshMap === 'undefined') return 0;
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-    const maxRiggedWalkers = isMobileScreen ? 8 : 12;
+    const maxRiggedWalkers = isMobileScreen ? 20 : 30;
     let swappedCount = 0;
     const totalWalkers = Object.keys(pedMeshMap).length;
 
-    // Prioritize spotlight walker tracked in Walking view first
     const entries = [];
     let spotlightKey = null;
 
@@ -15593,48 +16225,58 @@ let sharedRickshawArtTexture = null;
       }
     }
 
+    // Sort entries so walkers along the same sidewalk/path are sequential to prevent adjacent clones
+    entries.sort((a, b) => {
+      const pa = a.pm?.data || {};
+      const pb = b.pm?.data || {};
+      const axisA = pa.axis || '';
+      const axisB = pb.axis || '';
+      if (axisA !== axisB) return axisA.localeCompare(axisB);
+      const posA = pa.currentCoord || pa.pos || 0;
+      const posB = pb.currentCoord || pb.pos || 0;
+      return posA - posB;
+    });
+
+    let lastAssignedWalkerId = null;
+
     for (let idx = 0; idx < entries.length; idx++) {
       if (swappedCount >= maxRiggedWalkers) break;
       const { key, pm } = entries[idx];
       if (!pm || !pm.mesh || !pm.data) continue;
 
       const p = pm.data;
-      if (p.isChild || p.pedCategory === 'child') {
-        continue; // Keep procedural articulated child (Dhaka school kid)
-      }
-
-      let type = 'male';
-      if (p.pedCategory === 'female' || p.isFemale || p.gender === 'female') {
-        type = 'female';
+      let requestedCat = null;
+      if (p.isChild || p.pedCategory === 'child' || p.gender === 'child') {
+        requestedCat = 'child';
+      } else if (p.pedCategory === 'female' || p.isFemale || p.gender === 'female') {
+        requestedCat = 'female';
       } else if (p.pedCategory === 'male' || p.isFemale === false || p.gender === 'male') {
-        type = 'male';
-      } else {
-        type = (idx % 2 === 0 ? 'male' : 'female');
+        requestedCat = 'male';
       }
 
-      // If already rigged with the correct category, keep it
-      if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.pedCategory === type) {
+      // Shuffled round-robin selection across all 8 character templates, avoiding adjacent clones
+      const template = getNextRoundRobinTemplate(requestedCat, lastAssignedWalkerId);
+      if (!template || !template.scene) continue;
+      lastAssignedWalkerId = template.id;
+
+      const type = template.category;
+      const targetHeight = (type === 'female') ? TARGET_PED_HEIGHTS.female : (type === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
+
+      if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.pedCategory === type && pm.mesh.userData.charId === template.id && pm.mesh.userData.mixer) {
         swappedCount++;
         continue;
       }
 
-      // Strictly wait for female prototype if female; do NOT fallback to male!
-      if (!riggedPedPrototypes[type]) continue;
-      const proto = riggedPedPrototypes[type];
-
       try {
         const oldMesh = pm.mesh;
         oldMesh.updateMatrixWorld(true);
-        const procBox = new THREE.Box3().setFromObject(oldMesh);
-        const procHeight = procBox.max.y - procBox.min.y;
 
-        const wrapper = createRiggedPedestrian(p, proto, type, procHeight);
+        const wrapper = createRiggedPedestrian(p, template, type, targetHeight, template.id);
         if (wrapper && wrapper.isObject3D) {
           wrapper.position.copy(oldMesh.position);
           wrapper.rotation.copy(oldMesh.rotation);
           wrapper.scale.set(1, 1, 1);
 
-          // Preserve kinematics and orientation memory
           if (oldMesh.userData) {
             if (oldMesh.userData.lastX !== undefined) wrapper.userData.lastX = oldMesh.userData.lastX;
             if (oldMesh.userData.lastZ !== undefined) wrapper.userData.lastZ = oldMesh.userData.lastZ;
@@ -15649,20 +16291,23 @@ let sharedRickshawArtTexture = null;
             parent.add(wrapper);
             purgeNullChildren(parent);
           }
+          enforceWalkerWorldScale(wrapper, targetHeight, template.id || type);
 
           pm.mesh = wrapper;
           p.mesh = wrapper;
           p.group = wrapper;
           p.isRiggedMixamo = true;
           p.pedCategory = type;
+          p.charId = template.id;
           wrapper.userData.isRiggedMixamo = true;
           wrapper.userData.pedCategory = type;
+          wrapper.userData.charId = template.id;
 
-          // Synchronize spotlight / tracked vehicle target if active walker is tracked
           if (typeof activeTargetVehicle !== 'undefined' && activeTargetVehicle) {
             if (activeTargetVehicle === p || activeTargetVehicle.mesh === oldMesh || activeTargetVehicle.data === p) {
               activeTargetVehicle.mesh = wrapper;
               activeTargetVehicle.category = type;
+              if (activeTargetVehicle.data) activeTargetVehicle.data.pedCategory = type;
             }
           }
 
@@ -15676,45 +16321,414 @@ let sharedRickshawArtTexture = null;
     if (typeof scene !== 'undefined' && scene) {
       purgeNullChildren(scene);
     }
-    console.info(`[Pedestrians] Mixamo GLB active — swapped ${swappedCount} of ${totalWalkers} walkers`);
+    console.info(`[Pedestrians] Mixamo crowd active — upgraded ${swappedCount} of ${totalWalkers} walkers`);
     return swappedCount;
   }
 
   function instantiatePedestrian(p) {
     const isWalker = p && (p.isSidewalk || typeof p.currentCoord !== 'undefined' || p.axis);
     if (isWalker) {
-      if (p.isChild || p.pedCategory === 'child') {
-        return createArticulatedHuman(p, false);
-      }
-      let type = 'male';
-      if (p.pedCategory === 'female' || p.isFemale || p.gender === 'female') {
-        type = 'female';
+      let requestedCat = null;
+      if (p.isChild || p.pedCategory === 'child' || p.gender === 'child') {
+        requestedCat = 'child';
+      } else if (p.pedCategory === 'female' || p.isFemale || p.gender === 'female') {
+        requestedCat = 'female';
       } else if (p.pedCategory === 'male' || p.isFemale === false || p.gender === 'male') {
-        type = 'male';
-      } else {
-        type = ((p.id || 0) % 2 === 0 ? 'male' : 'female');
-      }
-      if (type === 'female' && !riggedPedPrototypes.female) {
-        return createArticulatedHuman(p, false);
-      }
-      if (!riggedPedPrototypes[type]) {
-        return createArticulatedHuman(p, false);
+        requestedCat = 'male';
       }
 
-      const proto = riggedPedPrototypes[type];
-      if (proto) {
-        const defaultHeight = (type === 'female') ? 10.8 : 11.5;
-        const riggedMesh = createRiggedPedestrian(p, proto, type, defaultHeight);
+      const template = getTemplateForCategory(requestedCat, p.charId, (p.id || 0));
+      if (template && template.scene) {
+        const defaultHeight = (template.category === 'female') ? TARGET_PED_HEIGHTS.female : (template.category === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
+        const riggedMesh = createRiggedPedestrian(p, template, template.category, defaultHeight, template.id);
         if (riggedMesh && riggedMesh.isObject3D) {
           riggedMesh.scale.set(1, 1, 1);
           if (typeof scene !== 'undefined' && scene && scene.add) {
             scene.add(riggedMesh);
           }
+          enforceWalkerWorldScale(riggedMesh, defaultHeight, template.id || template.category);
           return riggedMesh;
         }
       }
     }
     return createArticulatedHuman(p, false);
+  }
+
+  // =========================================================================
+  // DHAKA SIDEWALK PUBLIC BENCHES & GOSSIPING CROWD SUBSYSTEM
+  // Authentic slatted teak wood benches with forged iron armrests & legs.
+  // Hosts seated Mixamo character pairs chatting, nodding, and gesturing.
+  // =========================================================================
+  function createDhakaSidewalkBench() {
+    const bench = new THREE.Group();
+    bench.name = 'dhaka-sidewalk-bench';
+
+    const woodMat = new THREE.MeshStandardMaterial({
+      color: 0x78350f, // Warm teak wood stain
+      roughness: 0.68,
+      metalness: 0.05
+    });
+    const ironMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b, // Forged cast-iron dark charcoal
+      roughness: 0.45,
+      metalness: 0.82
+    });
+
+    const benchWidth = 18.0;
+    const seatY = 2.8;
+
+    // 3 Wooden Seat Slats
+    const slatGeo = new THREE.BoxGeometry(benchWidth, 0.42, 1.15);
+    [-1.3, 0.0, 1.3].forEach(zOff => {
+      const slat = new THREE.Mesh(slatGeo, woodMat);
+      slat.position.set(0, seatY, zOff);
+      bench.add(slat);
+    });
+
+    // 2 Wooden Backrest Slats (tilted 7°)
+    const backSlatGeo = new THREE.BoxGeometry(benchWidth, 0.85, 0.35);
+    [4.2, 5.4].forEach((by, idx) => {
+      const backSlat = new THREE.Mesh(backSlatGeo, woodMat);
+      backSlat.position.set(0, by, -1.85 - idx * 0.15);
+      backSlat.rotation.x = -0.12;
+      bench.add(backSlat);
+    });
+
+    // Cast-Iron Side Legs and Armrests
+    [-8.5, 8.5].forEach(sideX => {
+      const legGroup = new THREE.Group();
+      legGroup.position.set(sideX, 0, 0);
+
+      // Front leg
+      const fLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, seatY, 8), ironMat);
+      fLeg.position.set(0, seatY * 0.5, 1.4);
+      legGroup.add(fLeg);
+
+      // Back leg & backrest support
+      const bLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 5.8, 8), ironMat);
+      bLeg.position.set(0, 2.9, -1.9);
+      bLeg.rotation.x = -0.12;
+      legGroup.add(bLeg);
+
+      // Horizontal seat support beam
+      const sBeam = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 3.8), ironMat);
+      sBeam.position.set(0, seatY - 0.25, 0);
+      legGroup.add(sBeam);
+
+      // Curved armrest
+      const armrest = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.28, 3.6), ironMat);
+      armrest.position.set(0, seatY + 1.1, 0);
+      legGroup.add(armrest);
+
+      // Armrest vertical strut
+      const armStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.1, 6), ironMat);
+      armStrut.position.set(0, seatY + 0.55, 1.2);
+      legGroup.add(armStrut);
+
+      bench.add(legGroup);
+    });
+
+    // Scale bench to match world bus scale (seatY = BENCH_SEAT_Y = 3.67, busHeight * 0.15)
+    const benchScale = BENCH_SEAT_Y / seatY; // 3.67 / 2.8 ≈ 1.3107
+    bench.scale.set(benchScale, benchScale, benchScale);
+    freezeStatic(bench);
+    return bench;
+  }
+
+  function extractCharacterBones(characterGroup) {
+    const bones = {};
+    characterGroup.traverse(node => {
+      if (node.isBone) {
+        const cleanName = node.name.replace(/^mixamorig\d*[:_]?/i, '');
+        bones[cleanName] = node;
+      }
+    });
+    return bones;
+  }
+
+  function applySeatedPoseToRiggedModel(characterModel, seatIdx, totalInBench, isChild = false, isFemale = false) {
+    const bones = extractCharacterBones(characterModel);
+
+    // Thighs forward horizontal
+    if (bones.LeftUpLeg) bones.LeftUpLeg.rotation.set(-1.48, 0, -0.12);
+    if (bones.RightUpLeg) bones.RightUpLeg.rotation.set(-1.48, 0, 0.12);
+
+    // Knees bent down 90°
+    if (bones.LeftLeg) bones.LeftLeg.rotation.set(1.48, 0, 0);
+    if (bones.RightLeg) bones.RightLeg.rotation.set(1.48, 0, 0);
+
+    // Feet flat
+    if (bones.LeftFoot) bones.LeftFoot.rotation.set(0, 0, 0);
+    if (bones.RightFoot) bones.RightFoot.rotation.set(0, 0, 0);
+
+    // Pelvis seated at bench seat height (seatY = BENCH_SEAT_Y)
+    const charHeight = isChild ? TARGET_PED_HEIGHTS.child : (isFemale ? TARGET_PED_HEIGHTS.female : TARGET_PED_HEIGHTS.male);
+    characterModel.position.y = BENCH_SEAT_Y - (charHeight * 0.50);
+
+    // Natural arm resting positions
+    if (seatIdx === 0) {
+      if (bones.LeftArm) bones.LeftArm.rotation.set(0.35, 0.15, -0.42);
+      if (bones.LeftForeArm) bones.LeftForeArm.rotation.set(0.65, 0.25, 0.20);
+      if (bones.RightArm) bones.RightArm.rotation.set(0.42, -0.12, 0.18);
+      if (bones.RightForeArm) bones.RightForeArm.rotation.set(0.75, -0.20, -0.15);
+    } else {
+      if (bones.RightArm) bones.RightArm.rotation.set(0.35, -0.15, 0.42);
+      if (bones.RightForeArm) bones.RightForeArm.rotation.set(0.65, -0.25, -0.20);
+      if (bones.LeftArm) bones.LeftArm.rotation.set(0.42, 0.12, -0.18);
+      if (bones.LeftForeArm) bones.LeftForeArm.rotation.set(0.75, 0.20, 0.15);
+    }
+
+    if (bones.Spine) bones.Spine.rotation.set(0.08, 0, 0);
+    if (bones.Head) bones.Head.rotation.set(0.04, 0, 0);
+
+    return bones;
+  }
+
+  const gossipingCrowd = [];
+
+  function spawnSeatedBenchHuman(preferredCharId, bIdx, seatIdx, totalInBench) {
+    const seed = bIdx * 10 + seatIdx;
+    let template = preferredCharId ? riggedPedLibrary[preferredCharId] : null;
+    if (!template) {
+      const targetCat = preferredCharId?.includes('female') ? 'female' : (preferredCharId?.includes('boy') ? 'child' : 'male');
+      template = getTemplateForCategory(targetCat, null, seed);
+    }
+
+    const group = new THREE.Group();
+    group.name = `seated-human-${bIdx}-${seatIdx}`;
+
+    // Monsoon rain umbrella
+    const umbrella = new THREE.Group();
+    umbrella.name = 'bench-umbrella';
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35, side: THREE.DoubleSide });
+    const shaftMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
+    const canopy = new THREE.Mesh(new THREE.ConeGeometry(5.0, 2.0, 12, 1, true), canopyMat);
+    canopy.position.y = 7.0;
+    umbrella.add(canopy);
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 7.8, 8), shaftMat);
+    shaft.position.y = 3.5;
+    umbrella.add(shaft);
+    umbrella.visible = false;
+    umbrella.position.set(1.2, 0.5, 0.8);
+    group.add(umbrella);
+
+    if (template && template.scene) {
+      const riggedModel = cloneRiggedCharacter(template.scene, seed);
+      if (riggedModel && riggedModel.isObject3D) {
+        group.add(riggedModel);
+        pruneNullChildren(group);
+        const isChild = (preferredCharId && preferredCharId.includes('boy')) || (template && template.category === 'child');
+        const isFemale = (preferredCharId && preferredCharId.includes('female')) || (template && template.category === 'female');
+        const bones = applySeatedPoseToRiggedModel(riggedModel, seatIdx, totalInBench, isChild, isFemale);
+
+        const neighborAngle = (seatIdx === 0) ? 0.26 : ((seatIdx === 1 && totalInBench === 3) ? 0.0 : -0.26);
+        group.rotation.y = neighborAngle;
+
+        return {
+          group: group,
+          benchIdx: bIdx,
+          seatIdx: seatIdx,
+          totalInBench: totalInBench,
+          preferredCharId: preferredCharId,
+          charId: template.id,
+          category: template.category,
+          isProcedural: false,
+          isSkinned: true,
+          bones: {
+            head: bones.Head,
+            neck: bones.Neck,
+            spine: bones.Spine || bones.Spine1,
+            gestureForeArm: (seatIdx === 0 ? bones.RightForeArm : bones.LeftForeArm),
+            gestureHand: (seatIdx === 0 ? bones.RightHand : bones.LeftHand)
+          },
+          baseRot: {
+            headX: 0.04, headY: 0, headZ: 0,
+            spineX: 0.08, spineY: 0,
+            foreArmX: 0.75
+          },
+          cycleOffset: bIdx * 2.3 + seatIdx * 3.7,
+          umbrella: umbrella
+        };
+      }
+    }
+
+    // Procedural seated human fallback
+    const procHuman = createArticulatedHuman({
+      id: 970 + bIdx * 10 + seatIdx,
+      isSitting: true
+    }, true);
+    if (procHuman && procHuman.isObject3D) {
+      group.add(procHuman);
+    }
+    pruneNullChildren(group);
+
+    if (procHuman.userData) {
+      if (procHuman.userData.leftLegPivot) procHuman.userData.leftLegPivot.rotation.x = -1.48;
+      if (procHuman.userData.leftKneePivot) procHuman.userData.leftKneePivot.rotation.x = 1.48;
+      if (procHuman.userData.rightLegPivot) procHuman.userData.rightLegPivot.rotation.x = -1.48;
+      if (procHuman.userData.rightKneePivot) procHuman.userData.rightKneePivot.rotation.x = 1.48;
+      if (procHuman.userData.bodyRoot) procHuman.userData.bodyRoot.position.y = BENCH_SEAT_Y;
+      if (procHuman.userData.rightArmPivot) procHuman.userData.rightArmPivot.rotation.set(0.42, -0.15, 0.2);
+      if (procHuman.userData.rightElbowPivot) procHuman.userData.rightElbowPivot.rotation.set(0.75, -0.2, -0.2);
+      if (procHuman.userData.leftArmPivot) procHuman.userData.leftArmPivot.rotation.set(0.35, 0.15, -0.4);
+      if (procHuman.userData.leftElbowPivot) procHuman.userData.leftElbowPivot.rotation.set(0.65, 0.25, 0.2);
+    }
+
+    const neighborAngle = (seatIdx === 0) ? 0.26 : ((seatIdx === 1 && totalInBench === 3) ? 0.0 : -0.26);
+    group.rotation.y = neighborAngle;
+
+    return {
+      group: group,
+      benchIdx: bIdx,
+      seatIdx: seatIdx,
+      totalInBench: totalInBench,
+      preferredCharId: preferredCharId,
+      charId: 'procedural',
+      category: preferredCharId?.includes('female') ? 'female' : 'male',
+      isProcedural: true,
+      isSkinned: false,
+      bones: {
+        head: procHuman.userData.headGroup,
+        neck: null,
+        spine: procHuman.userData.torso,
+        gestureForeArm: procHuman.userData.rightElbowPivot,
+        gestureHand: null
+      },
+      baseRot: {
+        headX: 0, headY: 0, headZ: 0,
+        spineX: 0, spineY: 0,
+        foreArmX: 0.75
+      },
+      cycleOffset: bIdx * 2.3 + seatIdx * 3.7,
+      umbrella: umbrella
+    };
+  }
+
+  function updateGossipingCrowd(time, delta, isRain = false) {
+    if (!gossipingCrowd || !gossipingCrowd.length) return;
+
+    const rainActive = Boolean(isRain);
+
+    for (let i = 0; i < gossipingCrowd.length; i++) {
+      const person = gossipingCrowd[i];
+      if (!person || !person.group || !person.group.isObject3D || !person.group.visible) continue;
+
+      if (person.umbrella) {
+        person.umbrella.visible = rainActive;
+      }
+
+      const { bones, baseRot, cycleOffset, seatIdx, totalInBench, isProcedural } = person;
+      if (!bones) continue;
+
+      const groupTime = time * 0.75 + cycleOffset;
+      const isSpeaker = (seatIdx === 0) ? (Math.sin(groupTime) > 0.0) : (Math.sin(groupTime) <= 0.0);
+      const intensity = Math.abs(Math.sin(groupTime));
+
+      const neighborTurn = (seatIdx === 0) ? 0.32 : ((seatIdx === 1 && totalInBench === 3) ? (Math.sin(time * 0.5 + cycleOffset) * 0.3) : -0.32);
+
+      if (bones.head) {
+        if (isSpeaker) {
+          const nod = Math.sin(time * 4.5) * 0.09 * intensity + Math.sin(time * 2.2) * 0.05;
+          const tilt = Math.sin(time * 1.8) * 0.05 * intensity;
+          bones.head.rotation.x = baseRot.headX + nod;
+          bones.head.rotation.y = baseRot.headY + neighborTurn + Math.sin(time * 1.2) * 0.06;
+          bones.head.rotation.z = baseRot.headZ + tilt;
+        } else {
+          const listenerNod = (Math.sin(time * 1.5) > 0.3) ? (Math.sin(time * 1.5) * 0.06) : 0;
+          bones.head.rotation.x = baseRot.headX + listenerNod;
+          bones.head.rotation.y = baseRot.headY + neighborTurn + Math.sin(time * 0.8) * 0.03;
+          bones.head.rotation.z = baseRot.headZ;
+        }
+      }
+
+      if (bones.spine) {
+        const lean = isSpeaker ? (Math.sin(time * 1.2) * 0.04 * intensity + 0.04) : (Math.sin(time * 0.8) * 0.02);
+        bones.spine.rotation.x = baseRot.spineX + lean;
+        bones.spine.rotation.y = baseRot.spineY + (isSpeaker ? neighborTurn * 0.4 : neighborTurn * 0.2);
+      }
+
+      if (bones.gestureForeArm) {
+        if (isSpeaker) {
+          const gesture = (Math.sin(time * 3.2) * 0.22 + 0.15) * intensity;
+          bones.gestureForeArm.rotation.x = baseRot.foreArmX + gesture;
+          if (bones.gestureHand) bones.gestureHand.rotation.z = Math.sin(time * 3.5) * 0.18 * intensity;
+        } else {
+          bones.gestureForeArm.rotation.x = baseRot.foreArmX;
+          if (bones.gestureHand) bones.gestureHand.rotation.z = 0;
+        }
+      }
+
+      if (!isProcedural && person.group) {
+        person.group.traverse(node => {
+          if (node && node.isSkinnedMesh && node.skeleton) {
+            node.skeleton.update();
+          }
+        });
+      }
+    }
+  }
+
+  function upgradeGossipingHumansToRigged() {
+    if (!gossipingCrowd || !gossipingCrowd.length) return;
+    for (let i = 0; i < gossipingCrowd.length; i++) {
+      const p = gossipingCrowd[i];
+      if (!p || !p.group || !p.group.isObject3D) continue;
+      if (!p.isProcedural && p.charId === p.preferredCharId) continue;
+
+      const targetId = p.preferredCharId;
+      const template = targetId ? riggedPedLibrary[targetId] : null;
+      if (!template || !template.scene) continue;
+
+      try {
+        const seed = p.benchIdx * 10 + p.seatIdx;
+        const riggedModel = cloneRiggedCharacter(template.scene, seed);
+        if (!riggedModel || !riggedModel.isObject3D) continue;
+
+        const toRemove = [];
+        p.group.children.forEach(c => {
+          if (c && c !== p.umbrella) toRemove.push(c);
+        });
+        toRemove.forEach(c => {
+          if (c && c.isObject3D) p.group.remove(c);
+        });
+
+        if (riggedModel && riggedModel.isObject3D) {
+          p.group.add(riggedModel);
+        }
+        pruneNullChildren(p.group);
+
+        const isChild = (template && template.category === 'child') || (p.preferredCharId && p.preferredCharId.includes('boy'));
+        const bones = applySeatedPoseToRiggedModel(riggedModel, p.seatIdx, p.totalInBench, isChild);
+
+        p.charId = template.id;
+        p.category = template.category;
+        p.isProcedural = false;
+        p.isSkinned = true;
+        p.bones = {
+          head: bones.Head,
+          neck: bones.Neck,
+          spine: bones.Spine || bones.Spine1,
+          gestureForeArm: (p.seatIdx === 0 ? bones.RightForeArm : bones.LeftForeArm),
+          gestureHand: (p.seatIdx === 0 ? bones.RightHand : bones.LeftHand)
+        };
+        p.baseRot = {
+          headX: 0.04, headY: 0, headZ: 0,
+          spineX: 0.08, spineY: 0,
+          foreArmX: 0.75
+        };
+      } catch (err) {
+        console.warn('[Pedestrians] Failed to upgrade bench human to rigged:', err);
+      }
+    }
+
+    for (let i = 0; i < gossipingCrowd.length; i++) {
+      if (gossipingCrowd[i] && gossipingCrowd[i].group) {
+        pruneNullChildren(gossipingCrowd[i].group);
+      }
+    }
+    if (typeof scene !== 'undefined' && scene) {
+      pruneNullChildren(scene);
+    }
   }
 
   function replaceRickshawWithModel(vehicle, prototype) {
@@ -17776,31 +18790,38 @@ let sharedRickshawArtTexture = null;
       });
     }
 
-    // 13. Standing Sidewalk Social Groups (Diverse Street Life)
-    const socialSpots = [
-      [-160, -125, 0],
-      [165, -125, Math.PI / 3],
-      [-165, 125, -Math.PI / 4],
-      [160, 125, Math.PI]
+    // 13. Dhaka Sidewalk Public Benches with Seated Gossiping Crowd
+    const benchLocations = [
+      { id: 'bench_nw', pos: [-160, 2.005, -125], rotY: Math.PI / 4, people: ['male_formal', 'male_sweater'] },
+      { id: 'bench_ne', pos: [165, 2.005, -125], rotY: -Math.PI / 4, people: ['female_salwar', 'female_ch22'] },
+      { id: 'bench_sw', pos: [-165, 2.005, 125], rotY: 3 * Math.PI / 4, people: ['male_hoodie', 'little_boy', 'male_tshirt'] },
+      { id: 'bench_se', pos: [160, 2.005, 125], rotY: -3 * Math.PI / 4, people: ['male_remy', 'male_formal'] }
     ];
-    socialSpots.forEach((loc, gIdx) => {
-      const clusterGroup = new THREE.Group();
-      clusterGroup.position.set(loc[0], 2.005, loc[1]); // SIDEWALK_TOP_Y + 0.005 (Unburied flush on footpath surface)
-      clusterGroup.rotation.y = loc[2];
 
-      [-2.4, 2.4].forEach((offset, pIdx) => {
-        const friend = create3DPedestrian({
-          id: 950 + gIdx * 10 + pIdx,
-          color: pIdx === 0 ? '#10b981' : '#f59e0b',
-          x: loc[0] + offset,
-          y: loc[1]
-        });
-        friend.position.set(offset, 0, (pIdx === 0 ? 1 : -1) * 1.5);
-        friend.rotation.y = (pIdx === 0 ? Math.PI * 0.7 : -Math.PI * 0.3);
-        clusterGroup.add(friend);
-        socialPedestrians.push({ mesh: friend, parent: clusterGroup });
+    benchLocations.forEach((bDef, bIdx) => {
+      const benchGroup = new THREE.Group();
+      benchGroup.position.set(bDef.pos[0], bDef.pos[1], bDef.pos[2]);
+      benchGroup.rotation.y = bDef.rotY;
+
+      const benchMesh = createDhakaSidewalkBench();
+      if (benchMesh && benchMesh.isObject3D) benchGroup.add(benchMesh);
+
+      const count = bDef.people.length;
+      const xOffsets = (count === 2) ? [-4.8, 4.8] : [-6.8, 0.0, 6.8];
+
+      bDef.people.forEach((preferredCharId, sIdx) => {
+        const xOff = xOffsets[sIdx];
+        const seatedPerson = spawnSeatedBenchHuman(preferredCharId, bIdx, sIdx, count);
+        if (seatedPerson && seatedPerson.group && seatedPerson.group.isObject3D) {
+          seatedPerson.group.position.set(xOff, 0, 0);
+          benchGroup.add(seatedPerson.group);
+          gossipingCrowd.push(seatedPerson);
+          socialPedestrians.push({ mesh: seatedPerson.group, parent: benchGroup });
+        }
       });
-      scene.add(clusterGroup);
+
+      pruneNullChildren(benchGroup);
+      if (benchGroup && benchGroup.isObject3D) scene.add(benchGroup);
     });
 
     // 13. Realistic Slanted Rain Line Segments System (Pooled & Lightweight)
@@ -18002,15 +19023,19 @@ let sharedRickshawArtTexture = null;
         }
       }
 
-      // 4. Pedestrians: pick torso or primary body mesh
+      // 4. Pedestrians: pick primary body mesh or SkinnedMesh
       for (const pId in pedMeshMap) {
         const entry = pedMeshMap[pId];
         if (entry && entry.mesh && entry.mesh.visible !== false) {
-          const torso = entry.mesh.userData && entry.mesh.userData.torso;
-          const targetMesh = (torso && torso.children && torso.children[0]) || entry.mesh.children[0];
-          if (targetMesh && targetMesh.isMesh) {
-            candidateMeshes.push(targetMesh);
-            hitMap.set(targetMesh, {
+          let foundMesh = null;
+          entry.mesh.traverse(c => {
+            if (!foundMesh && (c.isMesh || c.isSkinnedMesh) && c.visible && !c.name?.includes('shadow') && !c.name?.includes('umbrella')) {
+              foundMesh = c;
+            }
+          });
+          if (foundMesh) {
+            candidateMeshes.push(foundMesh);
+            hitMap.set(foundMesh, {
               kind: 'walking',
               id: pId,
               type: 'walking',
@@ -19013,7 +20038,8 @@ let sharedRickshawArtTexture = null;
       pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
     }
 
-    // Gentle idle sway & rain umbrella sync for standing sidewalk social groups
+    // 13. Gossiping Sidewalk Benches Crowd & Idle Social Groups
+    updateGossipingCrowd(now * 0.001, delta, isRain);
     if (socialPedestrians && socialPedestrians.length) {
       const socialIdleTime = now * 0.002;
       for (let sIdx = 0; sIdx < socialPedestrians.length; sIdx++) {
@@ -19319,9 +20345,9 @@ let sharedRickshawArtTexture = null;
               if (b.userData.leftMirrorMeshes) allMirrorsToHide.push(...b.userData.leftMirrorMeshes);
               if (b.userData.rightMirrorMeshes) allMirrorsToHide.push(...b.userData.rightMirrorMeshes);
             }
-            allMirrorsToHide.forEach(m => { m.visible = false; });
+            allMirrorsToHide.forEach(m => { if (m) m.visible = false; });
 
-            purgeNullChildren(scene);
+            pruneNullChildren(scene);
             const prevRT = renderer.getRenderTarget();
             try {
               renderer.setRenderTarget(targetRT);
@@ -19330,7 +20356,7 @@ let sharedRickshawArtTexture = null;
               // Graceful render guard
             } finally {
               renderer.setRenderTarget(prevRT);
-              allMirrorsToHide.forEach(m => { m.visible = true; });
+              allMirrorsToHide.forEach(m => { if (m) m.visible = true; });
             }
           }
         }
@@ -19338,7 +20364,7 @@ let sharedRickshawArtTexture = null;
     }
 
     // 8. Crisp Direct WebGL Render (No Blur or Washout)
-    purgeNullChildren(scene);
+    pruneNullChildren(scene);
     const renderT0 = performance.now();
     renderer.render(scene, camera);
     const renderTimeMs = performance.now() - renderT0;

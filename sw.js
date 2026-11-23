@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v107';
+const CACHE_NAME = 'bharadekhi-pwa-v109-scale-fix';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -8,6 +8,9 @@ const STATIC_ASSETS = [
   '/icon-512.png',
   '/assets/bharadekhi-mark.svg',
   '/assets/GLTFLoader.js',
+  '/assets/SkeletonUtils.js',
+  '/assets/fflate.min.js',
+  '/assets/FBXLoader.js',
   '/assets/dhaka-bus-routes.json'
 ];
 
