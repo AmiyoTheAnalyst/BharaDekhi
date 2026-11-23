@@ -4617,42 +4617,63 @@
     // Heavy-Duty Commercial Transit Side Mirrors with Live Rear-View Mirror Glass
     initLiveBusMirrors();
 
+    // High-reflectivity mirror glass chrome backing material
+    const mirrorChromeMat = new THREE.MeshStandardMaterial({
+      color: 0xf1f5f9,
+      metalness: 0.98,
+      roughness: 0.04
+    });
+
     [-1, 1].forEach(side => {
-      // 1. Solid Vertical Front Corner A-Pillar (bridges windshield to side windows with zero clear glass seam)
-      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(1.4, 6.6, 0.65), blackTrimMat);
-      aPillar.position.set(36.6, 15.1, side * 10.85);
+      // 1. Solid Structural Front Corner A-Pillar (bridges windshield to side windows with zero clear glass seam or air gap)
+      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(1.8, 6.8, 1.45), blackTrimMat);
+      aPillar.position.set(36.6, 15.1, side * 10.45);
       group.add(aPillar);
+
+      // Corner Pillar Outer Cap (solid exterior pillar casing at edge of bus body)
+      const aPillarCap = new THREE.Mesh(new THREE.BoxGeometry(1.6, 6.8, 0.40), blackTrimMat);
+      aPillarCap.position.set(36.6, 15.1, side * 11.05);
+      group.add(aPillarCap);
 
       const mirrorGroup = new THREE.Group();
 
-      // 2. Solid Pillar Mounting Flanges (Anchored directly to bus front corner A-pillar)
-      const upperFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.45, 0.16), blackTrimMat);
-      upperFlange.position.set(36.6, 16.6, side * 10.95);
+      // 2. Solid Commercial Base Mounting Plates (Anchored deeply into bus front corner A-pillar)
+      const upperFlange = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.65, 0.35), blackTrimMat);
+      upperFlange.position.set(36.8, 16.6, side * 10.95);
       mirrorGroup.add(upperFlange);
 
-      const lowerFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.45, 0.16), blackTrimMat);
-      lowerFlange.position.set(36.6, 13.6, side * 10.95);
+      const lowerFlange = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.65, 0.35), blackTrimMat);
+      lowerFlange.position.set(36.8, 13.6, side * 10.95);
       mirrorGroup.add(lowerFlange);
 
-      // 3. Continuous Tubular Support Brackets (Firmly span from bus pillar at 10.85 to mirror at 12.15)
-      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.45, 8), blackTrimMat);
+      // 3. Sturdy Heavy-Duty Tubular Support Arms (Firmly span from A-pillar at 10.95 to mirror at 11.75 with zero gap)
+      const armLength = 0.95;
+      const armCenterZ = side * (10.95 + armLength * 0.5);
+
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, armLength, 12), blackTrimMat);
       upperArm.rotation.x = Math.PI / 2;
-      upperArm.position.set(36.6, 16.6, side * 11.55);
+      upperArm.position.set(36.8, 16.6, armCenterZ);
       mirrorGroup.add(upperArm);
 
-      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.45, 8), blackTrimMat);
+      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, armLength, 12), blackTrimMat);
       lowerArm.rotation.x = Math.PI / 2;
-      lowerArm.position.set(36.6, 13.6, side * 11.55);
+      lowerArm.position.set(36.8, 13.6, armCenterZ);
       mirrorGroup.add(lowerArm);
 
-      // Vertical tie-strut tying upper and lower support arms together at mirror base
-      const verticalStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 3.1, 8), blackTrimMat);
-      verticalStrut.position.set(36.6, 15.1, side * 11.70);
+      // Reinforced diagonal brace / gusset under lower arm
+      const gusset = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.60), blackTrimMat);
+      gusset.position.set(36.8, 13.1, side * 11.15);
+      gusset.rotation.x = side * 0.45;
+      mirrorGroup.add(gusset);
+
+      // Heavy vertical tie-strut tying upper and lower support arms together at mirror base
+      const verticalStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.2, 12), blackTrimMat);
+      verticalStrut.position.set(36.8, 15.1, side * 11.50);
       mirrorGroup.add(verticalStrut);
 
-      // 4. Mirror Pod Assembly
+      // 4. Mirror Pod Assembly (Snug against bus body at Z = side * 11.75 — zero detached floating)
       const podGroup = new THREE.Group();
-      podGroup.position.set(36.6, 15.1, side * 12.15);
+      podGroup.position.set(36.8, 15.1, side * 11.75);
 
       // Dark Border Housing
       const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.55, 3.20, 1.05), blackTrimMat);
@@ -4661,30 +4682,42 @@
 
       // Front Aerodynamic Accent Pane (recessed on +X front face)
       const frontAccent = new THREE.Mesh(
-        new THREE.BoxGeometry(0.06, 2.8, 0.85),
-        new THREE.MeshStandardMaterial({ color: 0xdbeafe, metalness: 0.85, roughness: 0.15 })
+        new THREE.BoxGeometry(0.08, 2.9, 0.90),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.20 })
       );
       frontAccent.position.set(0.26, 0, 0);
       podGroup.add(frontAccent);
 
-      // Inward angle toward driver (~10° = 0.174 rad)
-      const planeRotY = -Math.PI / 2 - (side * 0.174);
+      // Inward angle toward driver (~11° = 0.192 rad)
+      const planeRotY = -Math.PI / 2 - (side * 0.192);
+
+      // Upper Mirror Chrome Backing Border (Visible reflective silver rim)
+      const upperBacking = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 2.15), mirrorChromeMat);
+      upperBacking.position.set(-0.282, 0.42, 0);
+      upperBacking.rotation.y = planeRotY;
+      podGroup.add(upperBacking);
 
       // Upper Main Mirror Pane (~72% height, live rear-view road & passing traffic reflection)
-      const upperMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.90, 2.12), staticMirrorMat);
-      upperMirror.position.set(-0.283, 0.42, 0);
+      const upperMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.88, 2.10), staticMirrorMat);
+      upperMirror.position.set(-0.284, 0.42, 0);
       upperMirror.rotation.y = planeRotY;
       podGroup.add(upperMirror);
 
       // Divider Trim Bar
-      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.10, 0.98), blackTrimMat);
+      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 1.0), blackTrimMat);
       divider.position.set(-0.285, -0.71, 0);
       divider.rotation.y = planeRotY;
       podGroup.add(divider);
 
+      // Lower Blind-Spot Chrome Backing Border
+      const lowerBacking = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.68), mirrorChromeMat);
+      lowerBacking.position.set(-0.282, -1.14, 0);
+      lowerBacking.rotation.y = planeRotY;
+      podGroup.add(lowerBacking);
+
       // Lower Convex Blind-Spot Mirror Pane (~22% height, separated by thin dark divider bar)
-      const lowerMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.90, 0.66), staticMirrorMat);
-      lowerMirror.position.set(-0.283, -1.14, 0);
+      const lowerMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.88, 0.64), staticMirrorMat);
+      lowerMirror.position.set(-0.284, -1.14, 0);
       lowerMirror.rotation.y = planeRotY;
       podGroup.add(lowerMirror);
 
@@ -5432,17 +5465,21 @@
 
     const leftLegData = buildLeg(false);
     const rightLegData = buildLeg(true);
-    bodyRoot.add(leftLegData.legPivot);
-    bodyRoot.add(rightLegData.legPivot);
 
     // =========================================================================
     // 2. PELVIS, TORSO & SHOULDER YOKE (Lowered by -0.016 to match hipY = 0.508)
     // =========================================================================
-    // Pelvis Group (for pelvis counter-twist and lateral weight shift)
+    bodyRoot.name = 'pedBodyRoot';
+
+    // Pelvis Group (root for pelvic counter-twist, lateral weight shift & hips)
     const pelvisGroup = new THREE.Group();
     pelvisGroup.name = 'pelvisGroup';
     pelvisGroup.position.set(0, 0, 0);
     bodyRoot.add(pelvisGroup);
+
+    // Both legs attached into pelvisGroup for anatomically sound gait articulation
+    pelvisGroup.add(leftLegData.legPivot);
+    pelvisGroup.add(rightLegData.legPivot);
 
     // Pelvis / Hips (radius 0.098 to 0.095, centered at y = 0.519)
     const pelvis = new THREE.Mesh(
@@ -5476,11 +5513,11 @@
       pelvisGroup.add(skirt);
     }
 
-    // Upper Torso Group (for spine counter-twist & breathing)
+    // Upper Torso Group (nested inside pelvisGroup for spine counter-twist & breathing)
     const torsoGroup = new THREE.Group();
-    torsoGroup.name = 'upperTorsoGroup';
+    torsoGroup.name = 'upperTorso';
     torsoGroup.position.set(0, 0, 0);
-    bodyRoot.add(torsoGroup);
+    pelvisGroup.add(torsoGroup);
 
     // Torso / Shirt: Radius 0.122 to 0.108 > 0.098 (Zero Z-Fighting at waist!)
     const torso = new THREE.Mesh(
@@ -5708,22 +5745,25 @@
       getPedGeo('pedNeck', () => new THREE.CylinderGeometry(0.036, 0.042, 0.08, 8)),
       skinMat
     );
+    neck.name = 'neck';
     neck.position.set(0, 0.939, 0);
-    bodyRoot.add(neck);
+    torsoGroup.add(neck);
 
     // Shirt Collar Ring: Encircles neck base right at shoulders
     const collarRing = new THREE.Mesh(
       getPedGeo('pedCollar', () => new THREE.TorusGeometry(0.044, 0.012, 6, 12)),
       topMat
     );
+    collarRing.name = 'collarRing';
     collarRing.rotation.x = Math.PI / 2;
     collarRing.position.set(0, 0.924, 0);
-    bodyRoot.add(collarRing);
+    torsoGroup.add(collarRing);
 
     // Head Group: Positioned at y = 1.059 (chin at 0.954 overlaps neck top at 0.979 — ZERO GAP!)
     const headGroup = new THREE.Group();
+    headGroup.name = 'headGroup';
     headGroup.position.set(0, 1.059, 0);
-    bodyRoot.add(headGroup);
+    torsoGroup.add(headGroup);
 
     // Head Sphere: Radius 0.10, scaled (0.92, 1.05, 0.95), front skin surface at z ≈ 0.095
     const head = new THREE.Mesh(
@@ -5979,13 +6019,16 @@
 
     // Zero-lag 120 FPS optimization: freeze static sub-meshes & disable shadow pass on all pedestrian meshes
     const animatedPivots = new Set([
-      group, bodyRoot, pelvisGroup, torsoGroup, headGroup,
+      group, bodyRoot, pelvisGroup, torsoGroup, headGroup, neck, collarRing,
       leftLegData.legPivot, rightLegData.legPivot,
       leftLegData.kneePivot, rightLegData.kneePivot,
       leftLegData.anklePivot, rightLegData.anklePivot,
       leftArmPivot, rightArmPivot, leftElbowPivot, rightElbowPivot,
       umbrellaGroup
     ]);
+    animatedPivots.forEach(p => {
+      if (p) p.matrixAutoUpdate = true;
+    });
     group.traverse(child => {
       if (child.isMesh) {
         child.castShadow = false;
@@ -14827,7 +14870,7 @@ let sharedRickshawArtTexture = null;
       new THREE.NumberKeyframeTrack('rightAnklePivot.rotation[x]', wTimes, [0.28, 0.08, -0.06, -0.14, -0.18, 0.0, 0.0, 0.15, 0.28], THREE.InterpolateSmooth),
       // Pelvis & upper torso counter-twist (±0.10 rad)
       new THREE.NumberKeyframeTrack('pelvisGroup.rotation[y]', wTimes, [-0.10, -0.05, 0.0, 0.06, 0.10, 0.05, 0.0, -0.06, -0.10], THREE.InterpolateSmooth),
-      new THREE.NumberKeyframeTrack('upperTorsoGroup.rotation[y]', wTimes, [0.09, 0.04, 0.0, -0.05, -0.09, -0.04, 0.0, 0.05, 0.09], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('upperTorso.rotation[y]', wTimes, [0.09, 0.04, 0.0, -0.05, -0.09, -0.04, 0.0, 0.05, 0.09], THREE.InterpolateSmooth),
       // Lateral pelvic weight shift (±0.04 rad)
       new THREE.NumberKeyframeTrack('pelvisGroup.rotation[z]', wTimes, [0.0, 0.03, 0.04, 0.02, 0.0, -0.03, -0.04, -0.02, 0.0], THREE.InterpolateSmooth),
       // Head counter-stabilization
@@ -14845,8 +14888,8 @@ let sharedRickshawArtTexture = null;
     const iTimes = [0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2];
     const iTracks = [
       new THREE.NumberKeyframeTrack('headGroup.rotation[y]', iTimes, [0.0, 0.18, 0.32, 0.16, 0.0, -0.16, -0.32, -0.18, 0.0], THREE.InterpolateSmooth),
-      new THREE.NumberKeyframeTrack('upperTorsoGroup.rotation[x]', iTimes, [0.0, 0.012, 0.022, 0.012, 0.0, 0.012, 0.022, 0.012, 0.0], THREE.InterpolateSmooth),
-      new THREE.NumberKeyframeTrack('upperTorsoGroup.position[y]', iTimes, [0.0, 0.004, 0.008, 0.004, 0.0, 0.004, 0.008, 0.004, 0.0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('upperTorso.rotation[x]', iTimes, [0.0, 0.012, 0.022, 0.012, 0.0, 0.012, 0.022, 0.012, 0.0], THREE.InterpolateSmooth),
+      new THREE.NumberKeyframeTrack('upperTorso.position[y]', iTimes, [0.0, 0.004, 0.008, 0.004, 0.0, 0.004, 0.008, 0.004, 0.0], THREE.InterpolateSmooth),
       new THREE.NumberKeyframeTrack('pelvisGroup.rotation[z]', iTimes, [0.015, 0.025, 0.030, 0.015, -0.015, -0.025, -0.030, -0.015, 0.015], THREE.InterpolateSmooth),
       new THREE.NumberKeyframeTrack('leftLegPivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
       new THREE.NumberKeyframeTrack('rightLegPivot.rotation[x]', iTimes, [0, 0, 0, 0, 0, 0, 0, 0, 0], THREE.InterpolateSmooth),
@@ -14860,6 +14903,28 @@ let sharedRickshawArtTexture = null;
       new THREE.NumberKeyframeTrack('rightElbowPivot.rotation[x]', iTimes, [-0.18, -0.16, -0.15, -0.16, -0.18, -0.16, -0.15, -0.16, -0.18], THREE.InterpolateSmooth)
     ];
     sharedMocapIdleClip = new THREE.AnimationClip('mocapIdleClip', 3.2, iTracks);
+  }
+
+  function setPedAnimState(pedMesh, nextState) {
+    if (!pedMesh || !pedMesh.userData || !pedMesh.userData.mixer) return;
+    const ud = pedMesh.userData;
+    if (ud.currentAction === nextState) return;
+    const walkAction = ud.walkAction;
+    const idleAction = ud.idleAction;
+    if (nextState === 'walk') {
+      if (walkAction) {
+        walkAction.reset().play();
+        if (idleAction) idleAction.crossFadeTo(walkAction, 0.25, false);
+      }
+    } else {
+      if (idleAction) {
+        idleAction.reset().play();
+        if (walkAction) walkAction.crossFadeTo(idleAction, 0.25, false);
+      } else if (walkAction) {
+        walkAction.fadeOut(0.25);
+      }
+    }
+    ud.currentAction = nextState;
   }
 
   function loadMixamoFBXModel(walkPath, idlePath) {
@@ -18092,25 +18157,47 @@ let sharedRickshawArtTexture = null;
 
       // Center 3D mesh precisely from 2D coordinates so front bumper halts exactly at the stop bar before zebra crossings:
       const hLen = (v.dir === 'EB' || v.dir === 'WB') ? ((v.w || 44) * 0.5) : ((v.h || 44) * 0.5);
+      const halfLen = v.halfLength || (vm.mesh.userData && vm.mesh.userData.halfLength) || (v.type === 'bus' ? 39.5 : (v.type === 'car' ? 25.0 : 18.0));
 
       if (v.dir === 'EB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? 18 : 48);
-        vm.mesh.position.set((v.pos + hLen) - 600, bounce, laneZ);
+        let posX = (v.pos + hLen) - 600;
+        // Stop Bar is at X = -135. Zebra Crossing is X in [-131, -109]. Front bumper is posX + halfLen.
+        // If stopping or before the crosswalk, clamp front bumper strictly before -136.5 (5.5 units before zebra stripes)
+        if (posX < -90 && (v.speed < 2.0 || (posX + halfLen > -136.5 && posX < -105))) {
+          posX = Math.min(posX, -136.5 - halfLen);
+        }
+        vm.mesh.position.set(posX, bounce, laneZ);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.z = -tiltZ;
       } else if (v.dir === 'WB') {
         const laneZ = (typeof v.currentLaneY !== 'undefined') ? (v.currentLaneY - 420) : (v.lane === 1 ? -15 : -52);
-        vm.mesh.position.set((v.pos + hLen) - 600, bounce, laneZ);
+        let posX = (v.pos + hLen) - 600;
+        // Stop Bar is at X = +135. Zebra Crossing is X in [109, 131]. Heading Math.PI points -X. Front bumper is posX - halfLen.
+        if (posX > 90 && (v.speed < 2.0 || (posX - halfLen < 136.5 && posX > 105))) {
+          posX = Math.max(posX, 136.5 + halfLen);
+        }
+        vm.mesh.position.set(posX, bounce, laneZ);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.z = tiltZ;
       } else if (v.dir === 'SB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? -20 : -58);
-        vm.mesh.position.set(laneX, bounce, (v.pos + hLen) - 420);
+        let posZ = (v.pos + hLen) - 420;
+        // Stop Bar is at Z = -105. Zebra Crossing is Z in [-103, -81]. Front bumper is posZ + halfLen.
+        if (posZ < -70 && (v.speed < 2.0 || (posZ + halfLen > -106.5 && posZ < -80))) {
+          posZ = Math.min(posZ, -106.5 - halfLen);
+        }
+        vm.mesh.position.set(laneX, bounce, posZ);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.x = tiltZ;
       } else if (v.dir === 'NB') {
         const laneX = (typeof v.currentLaneX !== 'undefined') ? (v.currentLaneX - 600) : (v.lane === 1 ? 18 : 56);
-        vm.mesh.position.set(laneX, bounce, (v.pos + hLen) - 420);
+        let posZ = (v.pos + hLen) - 420;
+        // Stop Bar is at Z = +105. Zebra Crossing is Z in [81, 103]. Front bumper is posZ - halfLen.
+        if (posZ > 70 && (v.speed < 2.0 || (posZ - halfLen < 106.5 && posZ > 80))) {
+          posZ = Math.max(posZ, 106.5 + halfLen);
+        }
+        vm.mesh.position.set(laneX, bounce, posZ);
         vm.mesh.rotation.y = getHeading(v.dir);
         vm.mesh.rotation.x = -tiltZ;
       }
@@ -18275,28 +18362,11 @@ let sharedRickshawArtTexture = null;
         const walkAction = pm.mesh.userData.walkAction;
         const idleAction = pm.mesh.userData.idleAction;
 
-        if (isMoving) {
-          if (walkAction) {
-            if (pm.mesh.userData.currentAction !== 'walk') {
-              walkAction.reset().play();
-              if (idleAction) idleAction.crossFadeTo(walkAction, 0.25, false);
-              pm.mesh.userData.currentAction = 'walk';
-            }
-            // Sync walk animation playback speed: walkAction.timeScale = ped.speed * 0.75
-            const speedFactor = Math.max(0.4, Math.min(2.5, (p.speed || 1.0) * 0.75));
-            walkAction.timeScale = speedFactor;
-          }
-        } else {
-          if (idleAction) {
-            if (pm.mesh.userData.currentAction !== 'idle') {
-              idleAction.reset().play();
-              if (walkAction) walkAction.crossFadeTo(idleAction, 0.25, false);
-              pm.mesh.userData.currentAction = 'idle';
-            }
-          } else if (walkAction) {
-            walkAction.fadeOut(0.25);
-            pm.mesh.userData.currentAction = 'idle';
-          }
+        setPedAnimState(pm.mesh, isMoving ? 'walk' : 'idle');
+        if (isMoving && walkAction) {
+          // Sync walk animation playback speed: walkAction.timeScale = ped.speed * 0.75
+          const speedFactor = Math.max(0.4, Math.min(2.5, (p.speed || 1.0) * 0.75));
+          walkAction.timeScale = speedFactor;
         }
 
         mixer.update(Math.min(delta, 0.1));
