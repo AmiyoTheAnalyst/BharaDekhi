@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v94';
+const CACHE_NAME = 'bharadekhi-pwa-v106';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -40,60 +40,62 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Only intercept GET requests
-  if (event.request.method !== 'GET') return;
+  const req = event.request;
+  // 1. Only call event.respondWith for same-origin GET requests;
+  // bypass non-GET, WebSocket (/ws), and external CDN requests so the browser handles them normally.
+  if (req.method !== 'GET') return;
 
-  const url = new URL(event.request.url);
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.includes('/ws')) return;
 
-  // Network-First for external APIs (e.g. Open-Meteo weather)
-  if (url.origin !== self.location.origin) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Network-First for all HTML, JS, CSS, navigation, and query-versioned requests
-  // Ensures all code/animation updates appear immediately on refresh (offline fallback only)
-  const isCodeOrDoc = event.request.mode === 'navigate' ||
+  const isCodeOrDoc = req.mode === 'navigate' ||
                       /\.(html|js|css)($|\?)/i.test(url.pathname) ||
                       Boolean(url.search);
 
-  if (isCodeOrDoc) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          if (response && response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(async () => {
-          const cached = await caches.match(event.request);
-          if (cached) return cached;
-          if (event.request.mode === 'navigate') {
-            return (await caches.match('/index.html')) || (await caches.match('/'));
-          }
-        })
-    );
-    return;
-  }
+  // 2. Inside respondWith async chain, ALWAYS return a valid Response (never null/undefined, never unhandled rejection)
+  event.respondWith((async () => {
+    if (isCodeOrDoc) {
+      // Network-First for code, HTML, CSS, JS, and query-versioned requests so live updates appear immediately
+      try {
+        const netRes = await fetch(req);
+        if (netRes && netRes.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(req, netRes.clone()).catch(() => {});
+        }
+        if (netRes) return netRes;
+      } catch (err) {
+        // Fall back to cache on network failure
+      }
 
-  // Stale-while-revalidate for static binary assets (images, icons, fonts)
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      const fetchPromise = fetch(event.request)
-        .then(networkResponse => {
-          if (networkResponse && networkResponse.ok) {
-            const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return networkResponse;
-        })
-        .catch(() => cachedResponse);
+      try {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        if (req.mode === 'navigate') {
+          const navFallback = (await caches.match('/index.html')) || (await caches.match('/'));
+          if (navFallback) return navFallback;
+        }
+      } catch (err) {
+        // Cache lookup failed
+      }
 
-      return cachedResponse || fetchPromise;
-    })
-  );
+      return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+    }
+
+    // Cache-First for static binary assets (images, icons, fonts, json)
+    try {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+
+      const netRes = await fetch(req);
+      if (netRes && netRes.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(req, netRes.clone()).catch(() => {});
+      }
+      return netRes || new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+    } catch (err) {
+      const fallback = await caches.match(req).catch(() => null);
+      return fallback || new Response('Network error', { status: 502, statusText: 'Bad Gateway' });
+    }
+  })());
 });

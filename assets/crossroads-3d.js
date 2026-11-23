@@ -57,13 +57,25 @@
     mirrorLeftRT = new THREE.WebGLRenderTarget(128, 256, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
-      generateMipmaps: false
+      generateMipmaps: false,
+      depthBuffer: true,
+      stencilBuffer: false
     });
+    mirrorLeftRT.texture.generateMipmaps = false;
+    mirrorLeftRT.texture.minFilter = THREE.LinearFilter;
+    mirrorLeftRT.texture.magFilter = THREE.LinearFilter;
+
     mirrorRightRT = new THREE.WebGLRenderTarget(128, 256, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
-      generateMipmaps: false
+      generateMipmaps: false,
+      depthBuffer: true,
+      stencilBuffer: false
     });
+    mirrorRightRT.texture.generateMipmaps = false;
+    mirrorRightRT.texture.minFilter = THREE.LinearFilter;
+    mirrorRightRT.texture.magFilter = THREE.LinearFilter;
+
     // Flip horizontally so reflections behave like a true physical mirror:
     mirrorLeftRT.texture.wrapS = THREE.RepeatWrapping;
     mirrorLeftRT.texture.repeat.x = -1;
@@ -76,30 +88,106 @@
 
     if (typeof document !== 'undefined') {
       const cv = document.createElement('canvas');
-      cv.width = 64;
-      cv.height = 128;
+      cv.width = 128;
+      cv.height = 256;
       const ctx = cv.getContext('2d');
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, 56);
+
+      // 1. Daytime Sky Reflection (Top half of mirror)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 140);
       skyGrad.addColorStop(0, '#38bdf8');
-      skyGrad.addColorStop(1, '#bae6fd');
+      skyGrad.addColorStop(0.55, '#93c5fd');
+      skyGrad.addColorStop(1.0, '#e0f2fe');
       ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, 64, 56);
+      ctx.fillRect(0, 0, 128, 140);
+
+      // Distant city horizon silhouette
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(0, 115, 128, 25);
       ctx.fillStyle = '#475569';
-      ctx.fillRect(0, 52, 64, 8);
-      const roadGrad = ctx.createLinearGradient(0, 60, 0, 128);
-      roadGrad.addColorStop(0, '#1e293b');
-      roadGrad.addColorStop(1, '#0f172a');
+      ctx.fillRect(20, 100, 24, 40);
+      ctx.fillRect(52, 92, 28, 48);
+      ctx.fillRect(88, 105, 26, 35);
+
+      // 2. Asphalt Roadway Reflection (Bottom half of mirror)
+      const roadGrad = ctx.createLinearGradient(0, 140, 0, 256);
+      roadGrad.addColorStop(0, '#334155');
+      roadGrad.addColorStop(1.0, '#1e293b');
       ctx.fillStyle = roadGrad;
-      ctx.fillRect(0, 60, 64, 68);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(28, 70, 8, 18);
-      ctx.fillRect(28, 100, 8, 22);
+      ctx.fillRect(0, 140, 128, 116);
+
+      // Yellow lane divider line
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(56, 140);
+      ctx.lineTo(42, 256);
+      ctx.stroke();
+
+      // White outer lane marker
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(96, 140);
+      ctx.lineTo(114, 256);
+      ctx.stroke();
+
+      // Red bus body reflection along inner edge (left 24px)
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(0, 0, 24, 256);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(20, 0, 4, 256);
+
+      // Trailing vehicle silhouette
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(56, 168, 30, 20);
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(59, 180, 5, 4);
+      ctx.fillRect(78, 180, 5, 4);
+
+      // Subtle diagonal reflective sheen
+      const glare = ctx.createLinearGradient(0, 0, 128, 256);
+      glare.addColorStop(0, 'rgba(255, 255, 255, 0.32)');
+      glare.addColorStop(0.35, 'rgba(255, 255, 255, 0.08)');
+      glare.addColorStop(0.5, 'rgba(255, 255, 255, 0.0)');
+      glare.addColorStop(0.7, 'rgba(255, 255, 255, 0.10)');
+      glare.addColorStop(1.0, 'rgba(255, 255, 255, 0.25)');
+      ctx.fillStyle = glare;
+      ctx.fillRect(0, 0, 128, 256);
+
       staticMirrorTex = new THREE.CanvasTexture(cv);
+      staticMirrorTex.needsUpdate = true;
     }
 
     staticMirrorMat = new THREE.MeshBasicMaterial({ map: staticMirrorTex, side: THREE.DoubleSide });
     liveLeftMirrorMat = new THREE.MeshBasicMaterial({ map: mirrorLeftRT.texture, side: THREE.DoubleSide });
     liveRightMirrorMat = new THREE.MeshBasicMaterial({ map: mirrorRightRT.texture, side: THREE.DoubleSide });
+  }
+
+  // Safe prototype guard: prevent null or undefined from ever being pushed into Object3D.children
+  if (typeof THREE !== 'undefined' && THREE.Object3D && !THREE.Object3D.prototype._safeAddGuardedV2) {
+    const origAdd = THREE.Object3D.prototype.add;
+    THREE.Object3D.prototype.add = function (...args) {
+      const valid = [];
+      for (let i = 0; i < args.length; i++) {
+        if (args[i] && args[i].isObject3D && args[i] !== this) valid.push(args[i]);
+      }
+      if (!valid.length) return this;
+      return origAdd.apply(this, valid);
+    };
+    THREE.Object3D.prototype._safeAddGuardedV2 = true;
+  }
+
+  function purgeNullChildren(node) {
+    if (!node || !Array.isArray(node.children)) return;
+    for (let i = node.children.length - 1; i >= 0; i--) {
+      const c = node.children[i];
+      if (!c || !c.isObject3D) {
+        node.children.splice(i, 1);
+        console.warn('[SceneGraph] Purged invalid child from:', node.name || node.type || 'Object3D');
+      } else {
+        purgeNullChildren(c);
+      }
+    }
   }
 
   // Camera & Mouse control
@@ -171,14 +259,25 @@
 
   function setupCrispCanvasTexture(tex) {
     if (!tex) return tex;
+    // Guard: never attempt mipmapping or texture upload on render target textures or textures without valid image
+    if (tex.isRenderTargetTexture || !tex.image) {
+      tex.generateMipmaps = false;
+      return tex;
+    }
     const maxAniso = (renderer && renderer.capabilities && typeof renderer.capabilities.getMaxAnisotropy === 'function')
       ? renderer.capabilities.getMaxAnisotropy()
       : 16;
     tex.anisotropy = Math.max(1, maxAniso);
-    tex.generateMipmaps = true;
-    tex.minFilter = THREE.LinearMipmapLinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.needsUpdate = true;
+    if (tex.image && (tex.image.width > 0 && tex.image.height > 0)) {
+      tex.generateMipmaps = true;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.needsUpdate = true;
+    } else {
+      tex.generateMipmaps = false;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+    }
     return tex;
   }
 
@@ -4625,108 +4724,147 @@
     });
 
     [-1, 1].forEach(side => {
-      // 1. Solid Structural Front Corner A-Pillar (bridges windshield to side windows with zero clear glass seam or air gap)
-      const aPillar = new THREE.Mesh(new THREE.BoxGeometry(1.8, 6.8, 1.45), blackTrimMat);
-      aPillar.position.set(36.6, 15.1, side * 10.45);
-      group.add(aPillar);
+      // 1. Solid Structural Front Corner A-Pillar (Zero clear glass seams, zero air gaps, full structural bus body)
+      // Solid structural corner post bridging front windshield (X=37.3) to side window/door line (X=34.5)
+      const cornerPillarBlock = new THREE.Mesh(new THREE.BoxGeometry(2.8, 6.6, 1.25), blackTrimMat);
+      cornerPillarBlock.position.set(35.9, 15.1, side * 10.35);
+      group.add(cornerPillarBlock);
 
-      // Corner Pillar Outer Cap (solid exterior pillar casing at edge of bus body)
-      const aPillarCap = new THREE.Mesh(new THREE.BoxGeometry(1.6, 6.8, 0.40), blackTrimMat);
-      aPillarCap.position.set(36.6, 15.1, side * 11.05);
-      group.add(aPillarCap);
+      // Outer flush A-pillar surface providing solid mounting foundation at Z = side * 10.85
+      const cornerOuterTrunk = new THREE.Mesh(new THREE.BoxGeometry(1.6, 6.6, 0.45), blackTrimMat);
+      cornerOuterTrunk.position.set(36.2, 15.1, side * 10.85);
+      group.add(cornerOuterTrunk);
+
+      // Smooth beveled corner wrap meeting the front windshield edge with zero seam
+      const cornerWindshieldWrap = new THREE.Mesh(new THREE.BoxGeometry(0.8, 6.6, 0.8), blackTrimMat);
+      cornerWindshieldWrap.position.set(37.0, 15.1, side * 10.20);
+      group.add(cornerWindshieldWrap);
+
+      // Lower corner cowl / red waistband continuation (seamless connection to front red mid-band)
+      const cornerWaist = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.4, 1.25), redMat);
+      cornerWaist.position.set(35.9, 11.9, side * 10.35);
+      group.add(cornerWaist);
+
+      // Lower white cowl skirt continuation
+      const cornerSkirt = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.2, 1.25), whiteMat);
+      cornerSkirt.position.set(35.9, 9.6, side * 10.35);
+      group.add(cornerSkirt);
+
+      // Upper corner header / red roof cap continuation
+      const cornerHeader = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.5, 1.25), redMat);
+      cornerHeader.position.set(35.9, 20.05, side * 10.35);
+      group.add(cornerHeader);
 
       const mirrorGroup = new THREE.Group();
 
-      // 2. Solid Commercial Base Mounting Plates (Anchored deeply into bus front corner A-pillar)
-      const upperFlange = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.65, 0.35), blackTrimMat);
-      upperFlange.position.set(36.8, 16.6, side * 10.95);
+      // 2. Heavy-Duty Commercial Cast Mounting Bases (anchored flush into solid corner A-pillar trunk at Z = side * 10.82)
+      const upperFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.55, 0.25), blackTrimMat);
+      upperFlange.position.set(36.2, 16.5, side * 10.80);
       mirrorGroup.add(upperFlange);
 
-      const lowerFlange = new THREE.Mesh(new THREE.BoxGeometry(0.70, 0.65, 0.35), blackTrimMat);
-      lowerFlange.position.set(36.8, 13.6, side * 10.95);
+      const lowerFlange = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.55, 0.25), blackTrimMat);
+      lowerFlange.position.set(36.2, 13.5, side * 10.80);
       mirrorGroup.add(lowerFlange);
 
-      // 3. Sturdy Heavy-Duty Tubular Support Arms (Firmly span from A-pillar at 10.95 to mirror at 11.75 with zero gap)
-      const armLength = 0.95;
-      const armCenterZ = side * (10.95 + armLength * 0.5);
+      // Decorative chrome mounting bolts on base flanges
+      [-0.15, 0.15].forEach(by => {
+        const uBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.30, 8), silverMat);
+        uBolt.rotation.x = Math.PI / 2;
+        uBolt.position.set(36.2, 16.5 + by, side * 10.82);
+        mirrorGroup.add(uBolt);
 
-      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, armLength, 12), blackTrimMat);
+        const lBolt = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.30, 8), silverMat);
+        lBolt.rotation.x = Math.PI / 2;
+        lBolt.position.set(36.2, 13.5 + by, side * 10.82);
+        mirrorGroup.add(lBolt);
+      });
+
+      // 3. Sturdy Heavy-Duty Support Arms (Firmly span from A-pillar at 10.80 to vertical pivot tube at 11.25)
+      const armLength = 0.52;
+      const armCenterZ = side * (10.80 + armLength * 0.5);
+
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, armLength, 12), blackTrimMat);
       upperArm.rotation.x = Math.PI / 2;
-      upperArm.position.set(36.8, 16.6, armCenterZ);
+      upperArm.position.set(36.3, 16.5, armCenterZ);
       mirrorGroup.add(upperArm);
 
-      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, armLength, 12), blackTrimMat);
+      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, armLength, 12), blackTrimMat);
       lowerArm.rotation.x = Math.PI / 2;
-      lowerArm.position.set(36.8, 13.6, armCenterZ);
+      lowerArm.position.set(36.3, 13.5, armCenterZ);
       mirrorGroup.add(lowerArm);
 
-      // Reinforced diagonal brace / gusset under lower arm
-      const gusset = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.60), blackTrimMat);
-      gusset.position.set(36.8, 13.1, side * 11.15);
+      // Triangular diagonal reinforcement strut / gusset from lower cowl up to lower arm elbow
+      const gusset = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.10, 10), blackTrimMat);
       gusset.rotation.x = side * 0.45;
+      gusset.position.set(36.25, 12.5, side * 10.98);
       mirrorGroup.add(gusset);
 
-      // Heavy vertical tie-strut tying upper and lower support arms together at mirror base
-      const verticalStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 3.2, 12), blackTrimMat);
-      verticalStrut.position.set(36.8, 15.1, side * 11.50);
-      mirrorGroup.add(verticalStrut);
+      // Vertical mounting pivot spindle tube linking upper and lower arms at mirror inner edge
+      const pivotTube = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 3.40, 12), blackTrimMat);
+      pivotTube.position.set(36.35, 15.0, side * 11.25);
+      mirrorGroup.add(pivotTube);
 
-      // 4. Mirror Pod Assembly (Snug against bus body at Z = side * 11.75 — zero detached floating)
+      // Pivot tube top & bottom cap nuts
+      [-1, 1].forEach(capEnd => {
+        const capNut = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), blackTrimMat);
+        capNut.position.set(36.35, 15.0 + capEnd * 1.72, side * 11.25);
+        mirrorGroup.add(capNut);
+      });
+
+      // 4. Snug Commercial Mirror Pod Assembly (Positioned at Z = side * 11.40, angled inward toward driver)
       const podGroup = new THREE.Group();
-      podGroup.position.set(36.8, 15.1, side * 11.75);
+      podGroup.position.set(36.4, 15.0, side * 11.40);
+      // Inward angle toward driver: negative on driver side (side=1), positive on curbside (side=-1)
+      podGroup.rotation.y = side === 1 ? -0.16 : 0.20;
 
-      // Dark Border Housing
-      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.55, 3.20, 1.05), blackTrimMat);
+      // Main Mirror Housing (casing)
+      const mainHousing = new THREE.Mesh(new THREE.BoxGeometry(0.36, 3.00, 0.76), blackTrimMat);
       mainHousing.position.set(0, 0, 0);
       podGroup.add(mainHousing);
 
-      // Front Aerodynamic Accent Pane (recessed on +X front face)
+      // Front Aerodynamic Accent Bezel (facing +X road traffic)
       const frontAccent = new THREE.Mesh(
-        new THREE.BoxGeometry(0.08, 2.9, 0.90),
+        new THREE.BoxGeometry(0.04, 2.80, 0.66),
         new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.20 })
       );
-      frontAccent.position.set(0.26, 0, 0);
+      frontAccent.position.set(0.185, 0, 0);
       podGroup.add(frontAccent);
 
-      // Inward angle toward driver (~11° = 0.192 rad)
-      const planeRotY = -Math.PI / 2 - (side * 0.192);
+      // Rear Reflective Chrome Border & Bezel (facing -X rearward toward driver and traffic)
+      const mirrorChromeBacking = new THREE.Mesh(new THREE.BoxGeometry(0.02, 2.84, 0.68), mirrorChromeMat);
+      mirrorChromeBacking.position.set(-0.182, 0, 0);
+      podGroup.add(mirrorChromeBacking);
 
-      // Upper Mirror Chrome Backing Border (Visible reflective silver rim)
-      const upperBacking = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 2.15), mirrorChromeMat);
-      upperBacking.position.set(-0.282, 0.42, 0);
-      upperBacking.rotation.y = planeRotY;
-      podGroup.add(upperBacking);
-
-      // Upper Main Mirror Pane (~72% height, live rear-view road & passing traffic reflection)
-      const upperMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.88, 2.10), staticMirrorMat);
-      upperMirror.position.set(-0.284, 0.42, 0);
-      upperMirror.rotation.y = planeRotY;
+      // Upper Main Mirror Pane (~70% height, live rear-view road & passing traffic reflection)
+      // Solid BoxGeometry prevents backface culling, clipping, and zero-normal culling
+      const upperMirror = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.94, 0.62), staticMirrorMat);
+      upperMirror.position.set(-0.186, 0.40, 0);
       podGroup.add(upperMirror);
 
-      // Divider Trim Bar
-      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 1.0), blackTrimMat);
-      divider.position.set(-0.285, -0.71, 0);
-      divider.rotation.y = planeRotY;
+      // Divider Trim Bar between upper and lower panes
+      const divider = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.66), blackTrimMat);
+      divider.position.set(-0.188, -0.62, 0);
       podGroup.add(divider);
 
-      // Lower Blind-Spot Chrome Backing Border
-      const lowerBacking = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.68), mirrorChromeMat);
-      lowerBacking.position.set(-0.282, -1.14, 0);
-      lowerBacking.rotation.y = planeRotY;
-      podGroup.add(lowerBacking);
-
-      // Lower Convex Blind-Spot Mirror Pane (~22% height, separated by thin dark divider bar)
-      const lowerMirror = new THREE.Mesh(new THREE.PlaneGeometry(0.88, 0.64), staticMirrorMat);
-      lowerMirror.position.set(-0.284, -1.14, 0);
-      lowerMirror.rotation.y = planeRotY;
+      // Lower Convex Blind-Spot Mirror Pane (~25% height)
+      const lowerMirror = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.64, 0.62), staticMirrorMat);
+      lowerMirror.position.set(-0.186, -1.02, 0);
       podGroup.add(lowerMirror);
 
       mirrorGroup.add(podGroup);
 
       if (side === 1) {
         group.userData.leftMirrorMeshes = [upperMirror, lowerMirror];
+        if (liveLeftMirrorMat) {
+          upperMirror.material = liveLeftMirrorMat;
+          lowerMirror.material = liveLeftMirrorMat;
+        }
       } else {
         group.userData.rightMirrorMeshes = [upperMirror, lowerMirror];
+        if (liveRightMirrorMat) {
+          upperMirror.material = liveRightMirrorMat;
+          lowerMirror.material = liveRightMirrorMat;
+        }
       }
 
       // Zero-lag 120 FPS freeze on all mirror sub-meshes
@@ -5481,9 +5619,9 @@
     pelvisGroup.add(leftLegData.legPivot);
     pelvisGroup.add(rightLegData.legPivot);
 
-    // Pelvis / Hips (radius 0.098 to 0.095, centered at y = 0.519)
+    // Pelvis / Hips (radius 0.092 to 0.089, tapered by 0.006 to eliminate waist clipping notch)
     const pelvis = new THREE.Mesh(
-      getPedGeo('pedPelvis', () => new THREE.CylinderGeometry(0.098, 0.095, 0.10, 10)),
+      getPedGeo('pedPelvis', () => new THREE.CylinderGeometry(0.092, 0.089, 0.10, 10)),
       bottomMat
     );
     pelvis.position.set(0, 0.519, 0);
@@ -5519,9 +5657,9 @@
     torsoGroup.position.set(0, 0, 0);
     pelvisGroup.add(torsoGroup);
 
-    // Torso / Shirt: Radius 0.122 to 0.108 > 0.098 (Zero Z-Fighting at waist!)
+    // Torso / Shirt: Radius 0.122 to 0.114 (Widened lower hem by 0.006 to eliminate waist clipping)
     const torso = new THREE.Mesh(
-      getPedGeo('pedTorso', () => new THREE.CylinderGeometry(0.122, 0.108, 0.34, 12)),
+      getPedGeo('pedTorso', () => new THREE.CylinderGeometry(0.122, 0.114, 0.34, 12)),
       topMat
     );
     torso.scale.set(1.08, 1.0, 0.74);
@@ -5577,12 +5715,37 @@
     }
     if (archetype.hasBackpack) {
       const packMat = new THREE.MeshStandardMaterial({ color: archetype.backpackColor || 0x1e293b, roughness: 0.7 });
-      const pack = new THREE.Mesh(
-        getPedGeo('pedBackpack', () => new THREE.BoxGeometry(0.15, 0.20, 0.09)),
+      const packGroup = new THREE.Group();
+      packGroup.position.set(0, 0.728, -0.11);
+
+      // Main rounded body
+      const packBody = new THREE.Mesh(
+        getPedGeo('pedBackpackBody', () => new THREE.BoxGeometry(0.15, 0.18, 0.09)),
         packMat
       );
-      pack.position.set(0, 0.728, -0.11);
-      torsoGroup.add(pack);
+      packGroup.add(packBody);
+
+      // Curved top dome
+      const packDome = new THREE.Mesh(
+        getPedGeo('pedBackpackDome', () => new THREE.CylinderGeometry(0.045, 0.045, 0.15, 8)),
+        packMat
+      );
+      packDome.rotation.z = Math.PI / 2;
+      packDome.position.set(0, 0.09, 0);
+      packGroup.add(packDome);
+
+      // Ergonomic shoulder straps wrapping over shoulders
+      const strapMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+      [-0.05, 0.05].forEach(sx => {
+        const strap = new THREE.Mesh(
+          getPedGeo('pedBackpackStrap', () => new THREE.BoxGeometry(0.022, 0.20, 0.05)),
+          strapMat
+        );
+        strap.position.set(sx, 0.04, 0.04);
+        packGroup.add(strap);
+      });
+
+      torsoGroup.add(packGroup);
     } else if (archetype.hasTote) {
       const toteMat = new THREE.MeshStandardMaterial({ color: archetype.toteColor || 0x475569, roughness: 0.7 });
       const tote = new THREE.Mesh(
@@ -14782,11 +14945,47 @@ let sharedRickshawArtTexture = null;
   const riggedPedPrototypes = { male: null, female: null, child: null };
   let activeRiggedWalkerCount = 0;
 
+  // Fallback SkeletonUtils clone helper to guarantee skeleton cloning even without CDN
+  if (typeof THREE !== 'undefined' && !THREE.SkeletonUtils) {
+    THREE.SkeletonUtils = {
+      clone: function (source) {
+        const sourceLookup = new Map();
+        const cloneLookup = new Map();
+        const clone = source.clone();
+        function parallelTraverse(a, b) {
+          sourceLookup.set(b, a);
+          cloneLookup.set(a, b);
+          for (let i = 0; i < a.children.length; i++) {
+            parallelTraverse(a.children[i], b.children[i]);
+          }
+        }
+        parallelTraverse(source, clone);
+        clone.traverse(node => {
+          if (!node || !node.isSkinnedMesh) return;
+          if (node.morphTargetDictionary !== undefined) {
+            node.morphTargetDictionary = Object.assign({}, node.morphTargetDictionary);
+          }
+          const skeleton = node.skeleton;
+          if (!skeleton) return;
+          const orderedBones = [];
+          for (let i = 0; i < skeleton.bones.length; ++i) {
+            const clonedBone = cloneLookup.get(skeleton.bones[i]);
+            orderedBones.push(clonedBone || skeleton.bones[i]);
+          }
+          node.bind(new THREE.Skeleton(orderedBones, skeleton.boneInverses), node.matrixWorld);
+        });
+        return clone;
+      }
+    };
+  }
+
   function loadRiggedGLBModel(path) {
     if (!riggedGLBPromises[path]) {
       riggedGLBPromises[path] = new Promise((resolve, reject) => {
         if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader !== 'function') {
-          reject(new Error('Three.js GLTFLoader is unavailable'));
+          const err = new Error('Three.js GLTFLoader is unavailable');
+          console.error('[Pedestrians]', err);
+          reject(err);
           return;
         }
         const loader = new THREE.GLTFLoader();
@@ -14796,14 +14995,26 @@ let sharedRickshawArtTexture = null;
             dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
             loader.setDRACOLoader(dracoLoader);
           } catch (e) {
-            // ignore draco config error
+            console.error('[Pedestrians] DRACOLoader init error:', e);
           }
         }
         loader.load(
           path,
-          gltf => resolve({ scene: gltf.scene, animations: gltf.animations || [] }),
+          gltf => {
+            if (!gltf || !gltf.scene) {
+              const parseErr = new Error(`Failed to parse scene from ${path}`);
+              console.error('[Pedestrians]', parseErr);
+              reject(parseErr);
+              return;
+            }
+            purgeNullChildren(gltf.scene);
+            resolve({ scene: gltf.scene, animations: gltf.animations || [] });
+          },
           undefined,
-          reject
+          err => {
+            console.error(`[Pedestrians] GLTFLoader error for ${path}:`, err);
+            reject(err);
+          }
         );
       });
     }
@@ -14811,37 +15022,49 @@ let sharedRickshawArtTexture = null;
   }
 
   function cloneRiggedModel(source) {
+    if (!source || !source.isObject3D) return null;
+    let clone = null;
     if (typeof THREE !== 'undefined' && THREE.SkeletonUtils && typeof THREE.SkeletonUtils.clone === 'function') {
-      return THREE.SkeletonUtils.clone(source);
-    }
-    // High-fidelity fallback clone for SkinnedMesh and bones
-    const cloneLookup = new Map();
-    const clone = source.clone(false);
-    cloneLookup.set(source, clone);
-
-    function parallelTraverse(a, b) {
-      for (let i = 0; i < a.children.length; i++) {
-        const childA = a.children[i];
-        const childB = childA.clone(false);
-        cloneLookup.set(childA, childB);
-        b.add(childB);
-        parallelTraverse(childA, childB);
+      try {
+        clone = THREE.SkeletonUtils.clone(source);
+      } catch (e) {
+        console.error('[Pedestrians] THREE.SkeletonUtils.clone error:', e);
       }
     }
-    parallelTraverse(source, clone);
+    if (!clone) {
+      // High-fidelity fallback clone for SkinnedMesh and bones
+      const cloneLookup = new Map();
+      clone = source.clone(false);
+      cloneLookup.set(source, clone);
 
-    source.traverse(node => {
-      if (!node.isSkinnedMesh) return;
-      const clonedMesh = cloneLookup.get(node);
-      if (!clonedMesh || !node.skeleton) return;
-      const skeleton = node.skeleton;
-      const orderedBones = [];
-      for (let i = 0; i < skeleton.bones.length; i++) {
-        const clonedBone = cloneLookup.get(skeleton.bones[i]);
-        orderedBones.push(clonedBone || skeleton.bones[i]);
+      function parallelTraverse(a, b) {
+        for (let i = 0; i < a.children.length; i++) {
+          const childA = a.children[i];
+          if (!childA || !childA.isObject3D) continue;
+          const childB = childA.clone(false);
+          cloneLookup.set(childA, childB);
+          b.add(childB);
+          parallelTraverse(childA, childB);
+        }
       }
-      clonedMesh.bind(new THREE.Skeleton(orderedBones, skeleton.boneInverses), clonedMesh.matrixWorld);
-    });
+      parallelTraverse(source, clone);
+
+      source.traverse(node => {
+        if (!node || !node.isSkinnedMesh) return;
+        const clonedMesh = cloneLookup.get(node);
+        if (!clonedMesh || !node.skeleton) return;
+        const skeleton = node.skeleton;
+        const orderedBones = [];
+        for (let i = 0; i < skeleton.bones.length; i++) {
+          const clonedBone = cloneLookup.get(skeleton.bones[i]);
+          orderedBones.push(clonedBone || skeleton.bones[i]);
+        }
+        clonedMesh.bind(new THREE.Skeleton(orderedBones, skeleton.boneInverses), clonedMesh.matrixWorld);
+      });
+    }
+    if (clone) {
+      purgeNullChildren(clone);
+    }
     return clone;
   }
 
@@ -14911,64 +15134,95 @@ let sharedRickshawArtTexture = null;
     if (ud.currentAction === nextState) return;
     const walkAction = ud.walkAction;
     const idleAction = ud.idleAction;
-    if (nextState === 'walk') {
-      if (walkAction) {
-        walkAction.reset().play();
-        if (idleAction) idleAction.crossFadeTo(walkAction, 0.25, false);
-      }
-    } else {
-      if (idleAction) {
-        idleAction.reset().play();
-        if (walkAction) walkAction.crossFadeTo(idleAction, 0.25, false);
-      } else if (walkAction) {
-        walkAction.fadeOut(0.25);
+    const prevAction = ud.currentAction === 'walk' ? walkAction : (ud.currentAction === 'idle' ? idleAction : null);
+    const nextAction = nextState === 'walk' ? walkAction : idleAction;
+
+    if (nextAction) {
+      nextAction.reset().play();
+      if (prevAction && prevAction !== nextAction && typeof prevAction.crossFadeTo === 'function') {
+        prevAction.crossFadeTo(nextAction, 0.3, true);
       }
     }
     ud.currentAction = nextState;
   }
 
-  function loadMixamoFBXModel(walkPath, idlePath) {
-    if (typeof THREE === 'undefined' || typeof THREE.FBXLoader !== 'function') {
-      return Promise.reject(new Error('FBXLoader unavailable'));
-    }
-    const loader = new THREE.FBXLoader();
-    return new Promise((resolve, reject) => {
-      loader.load(walkPath, walkObj => {
-        const animations = walkObj.animations ? [...walkObj.animations] : [];
-        if (idlePath) {
-          loader.load(idlePath, idleObj => {
-            if (idleObj.animations && idleObj.animations.length > 0) {
-              idleObj.animations.forEach(a => { a.name = 'idle'; animations.push(a); });
-            }
-            resolve({ scene: walkObj, animations: animations });
-          }, undefined, () => resolve({ scene: walkObj, animations: animations }));
-        } else {
-          resolve({ scene: walkObj, animations: animations });
+  function stripRootMotion(clip) {
+    if (!clip || !clip.tracks) return;
+    clip.tracks.forEach(track => {
+      // Matches mixamorig:Hips.position, mixamorig2:Hips.position, mixamorigHips.position, etc.
+      if (/Hips\.position$/i.test(track.name)) {
+        const vals = track.values;
+        for (let i = 0; i < vals.length; i += 3) {
+          vals[i] = 0;     // Strip X lateral translation
+          // Keep vals[i + 1] (Y vertical hip bounce)
+          vals[i + 2] = 0; // Strip Z forward translation
         }
-      }, undefined, reject);
+      }
+    });
+  }
+
+  function loadMixamoGLBModel(walkPath, idlePath) {
+    return loadRiggedGLBModel(walkPath).then(walkRes => {
+      const animations = [];
+      if (walkRes && walkRes.animations && walkRes.animations.length > 0) {
+        const walkClip = walkRes.animations.find(c => /walk/i.test(c.name)) || walkRes.animations[0];
+        const clonedWalk = walkClip.clone();
+        clonedWalk.name = 'walk';
+        stripRootMotion(clonedWalk);
+        animations.push(clonedWalk);
+      }
+      if (idlePath) {
+        return loadRiggedGLBModel(idlePath).then(idleRes => {
+          if (idleRes && idleRes.animations && idleRes.animations.length > 0) {
+            const idleClip = idleRes.animations.find(c => /idle|stand/i.test(c.name)) || idleRes.animations[0];
+            const clonedIdle = idleClip.clone();
+            clonedIdle.name = 'idle';
+            stripRootMotion(clonedIdle);
+            animations.push(clonedIdle);
+          }
+          return { scene: walkRes.scene, animations: animations };
+        }).catch(err => {
+          console.error(`[Pedestrians] Failed to load idle GLB from ${idlePath}:`, err);
+          return { scene: walkRes.scene, animations: animations };
+        });
+      }
+      return { scene: walkRes.scene, animations: animations };
+    }).catch(err => {
+      console.error(`[Pedestrians] Failed to load walk GLB from ${walkPath}:`, err);
+      throw err;
     });
   }
 
   function loadRiggedPedestrian(type) {
-    // 1. Try direct .glb first (e.g. assets/models/ped-male.glb)
-    return loadRiggedGLBModel(`assets/models/ped-${type}.glb`)
-      .then(res => {
-        if (res && res.scene) riggedPedPrototypes[type] = res;
-        return res;
-      })
-      .catch(() => {
-        // 2. Try direct Mixamo .fbx (e.g. assets/models/ped-male-walk.fbx + ped-male-idle.fbx)
-        return loadMixamoFBXModel(
-          `assets/models/ped-${type}-walk.fbx`,
-          `assets/models/ped-${type}-idle.fbx`
-        ).then(res => {
-          if (res && res.scene) riggedPedPrototypes[type] = res;
-          return res;
-        }).catch(() => null);
-      });
+    if (type === 'child') {
+      return Promise.resolve(null);
+    }
+    // High-performance compressed Mixamo .glb loader (< 3 MB each)
+    return loadMixamoGLBModel(
+      `assets/models/ped-${type}-walk.glb`,
+      `assets/models/ped-${type}-idle.glb`
+    ).then(res => {
+      if (res && res.scene) {
+        riggedPedPrototypes[type] = res;
+        const walkClip = (res.animations || []).find(c => /walk/i.test(c.name)) || (res.animations && res.animations[0]);
+        const idleClip = (res.animations || []).find(c => /idle|stand/i.test(c.name)) || (res.animations && res.animations[1]);
+        console.info('[Pedestrians] Loaded:', type, 'walk:', walkClip ? walkClip.name : 'none', 'idle:', idleClip ? idleClip.name : 'none');
+        // Hot-swap already-spawned walkers as soon as either model resolves
+        try {
+          upgradeActiveWalkersToRigged();
+        } catch (swapErr) {
+          console.error('[Pedestrians] Hot-swap error:', swapErr);
+        }
+      }
+      return res;
+    }).catch(err => {
+      console.error(`[Pedestrians] Mixamo GLB load failed for ${type}:`, err);
+      return null;
+    });
   }
 
   function loadAllRiggedPedestrians() {
+    console.info('[Pedestrians] Loading Mixamo GLB assets...');
     ensureSharedMocapClips();
     return Promise.all([
       loadRiggedPedestrian('male'),
@@ -14977,12 +15231,16 @@ let sharedRickshawArtTexture = null;
     ]).then(() => {
       const loadedTypes = Object.keys(riggedPedPrototypes).filter(k => riggedPedPrototypes[k]);
       if (loadedTypes.length > 0) {
-        console.info(`[Pedestrians] Active mode: External Mixamo models loaded (${loadedTypes.join(', ')})`);
+        try {
+          upgradeActiveWalkersToRigged();
+        } catch (e) {
+          console.error('[Pedestrians] Initial upgrade error:', e);
+        }
       } else {
-        console.info('[Pedestrians] Active mode: Built-in Mocap Keyframe Rig (AnimationMixer, 13-pivot articulation)');
+        console.warn('[Pedestrians] No GLB models loaded. Active mode: Built-in Mocap Keyframe Rig (AnimationMixer, 13-pivot articulation)');
       }
-    }).catch(() => {
-      console.info('[Pedestrians] Active mode: Built-in Mocap Keyframe Rig (AnimationMixer, 13-pivot articulation)');
+    }).catch(err => {
+      console.error('[Pedestrians] Error loading Mixamo GLB models:', err);
     });
   }
 
@@ -14990,35 +15248,64 @@ let sharedRickshawArtTexture = null;
     return loadAllRiggedPedestrians();
   }
 
-  function createRiggedPedestrian(p, protoData, typeName) {
-    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-    const maxRiggedWalkers = isMobileScreen ? 8 : 12;
-    if (activeRiggedWalkerCount >= maxRiggedWalkers) {
-      return null;
-    }
+  function createRiggedPedestrian(p, protoData, typeName, measuredHeight) {
+    if (!protoData || !protoData.scene) return null;
 
     const sourceScene = protoData.scene;
     const animations = protoData.animations || [];
-    const model = cloneRiggedModel(sourceScene);
+    // Strict SkeletonUtils clone to preserve SkinnedMesh bone bindings
+    const riggedModel = cloneRiggedModel(sourceScene);
+    if (!riggedModel) return null;
+    purgeNullChildren(riggedModel);
 
-    const group = new THREE.Group();
-    group.add(model);
+    // Clean outer wrapper: world pos & rot never conflict with inner scale/grounding
+    const wrapper = new THREE.Group();
+    wrapper.name = 'mixamo-ped-' + typeName;
+    wrapper.visible = true;
+    riggedModel.visible = true;
+    wrapper.frustumCulled = false;
+    riggedModel.frustumCulled = false;
+    wrapper.add(riggedModel);
 
-    // Target Dhaka heights: Male ~1.72m, Female ~1.62m, Child ~1.20m
-    let targetHeight = 1.72;
-    if (typeName === 'female') targetHeight = 1.62;
-    else if (typeName === 'child') targetHeight = 1.20;
+    // 1. Reset transforms before measurement
+    riggedModel.scale.set(1, 1, 1);
+    riggedModel.position.set(0, 0, 0);
+    riggedModel.updateMatrixWorld(true);
 
-    const bbox = new THREE.Box3().setFromObject(model);
-    const size = bbox.getSize(new THREE.Vector3());
-    const modelH = size.y > 0.1 ? size.y : targetHeight;
-    const scaleFactor = targetHeight / modelH;
-    model.scale.setScalar(scaleFactor);
+    // 2. Measure raw bounds
+    const rawBox = new THREE.Box3().setFromObject(riggedModel);
+    let rawHeight = rawBox.max.y - rawBox.min.y;
+    if (!Number.isFinite(rawHeight) || rawHeight <= 0.001) {
+      rawHeight = 180;
+    }
 
-    // Soles flush at Y = 0.000
-    model.position.y = -bbox.min.y * scaleFactor;
+    // 3. Match Mixamo Height directly to Procedural Pedestrian Height in Scene Units (~11.5 male / ~10.8 female)
+    const type = (typeName === 'female') ? 'female' : 'male';
+    const procHeight = (typeof measuredHeight === 'number' && Number.isFinite(measuredHeight)) ? measuredHeight : 0;
+    const targetHeight = (type === 'female')
+      ? ((procHeight > 3) ? procHeight * 0.94 : 10.8)
+      : ((procHeight > 3) ? procHeight : 11.5);
+    const unitScale = targetHeight / rawHeight;
 
-    // Authentic Dhaka street palettes
+    // 4. Apply unit scale to riggedModel
+    riggedModel.scale.setScalar(unitScale);
+    riggedModel.updateMatrixWorld(true);
+
+    // 5. Recompute Box3 and clamp shoe soles flush at Y = 0.000 inside wrapper
+    const scaledBox = new THREE.Box3().setFromObject(riggedModel);
+    riggedModel.position.y = -scaledBox.min.y;
+    riggedModel.rotation.set(0, 0, 0); // Mixamo +Z forward aligns directly with scene canonical forward
+    riggedModel.userData.groundedBaseY = riggedModel.position.y;
+    riggedModel.userData.modelScale = unitScale;
+
+    // 6. Ensure wrapper scale is strictly 1, 1, 1
+    wrapper.scale.set(1, 1, 1);
+
+    // Enable matrixAutoUpdate on wrapper root, model root, and all skeleton bones
+    wrapper.matrixAutoUpdate = true;
+    riggedModel.matrixAutoUpdate = true;
+
+    // Authentic Dhaka street palettes with safe fallback
     const DHAKA_PALETTES = [
       { primary: 0x1e3a8a, secondary: 0xf1f5f9 },
       { primary: 0x059669, secondary: 0x334155 },
@@ -15029,34 +15316,61 @@ let sharedRickshawArtTexture = null;
       { primary: 0x475569, secondary: 0x0f172a },
       { primary: 0xbe185d, secondary: 0xfde047 }
     ];
-    const palette = DHAKA_PALETTES[Math.abs(p.id || 0) % DHAKA_PALETTES.length];
+    let safePalette = { primary: 0x3b82f6, secondary: 0x1e293b, skin: 0xd2a17c };
+    try {
+      if (p && p.palette && typeof p.palette === 'object') {
+        safePalette = p.palette;
+      } else {
+        const rawId = (p && typeof p.id === 'number') ? p.id : (p && typeof p.id === 'string' ? (parseInt(p.id.replace(/\D/g, ''), 10) || 0) : 0);
+        const chosen = DHAKA_PALETTES[Math.abs(rawId) % DHAKA_PALETTES.length];
+        if (chosen && typeof chosen === 'object') safePalette = chosen;
+      }
+    } catch (e) {
+      // fallback preserved
+    }
 
     let rightHandBone = null;
-    model.traverse(node => {
+    riggedModel.traverse(node => {
+      if (!node) return;
+      node.matrixAutoUpdate = true;
       if (node.isBone) {
-        const bName = node.name.toLowerCase();
-        if ((bName.includes('hand') && (bName.includes('r') || bName.includes('right'))) ||
-            bName.includes('mixamorigrighthand') || bName.includes('righthand')) {
+        // Matches mixamorig:RightHand, mixamorig2:RightHand, RightHand
+        if (/RightHand$/i.test(node.name)) {
           if (!rightHandBone) rightHandBone = node;
         }
       }
-      if (node.isMesh) {
+      if (node.isSkinnedMesh || node.isMesh) {
         node.castShadow = false;
         node.receiveShadow = false;
+        node.frustumCulled = false;
+        node.visible = true;
         if (node.material) {
           node.material = node.material.clone();
-          const matName = (node.material.name || '').toLowerCase();
-          if (matName.includes('shirt') || matName.includes('panjabi') || matName.includes('top') || matName.includes('saree') || matName.includes('cloth')) {
-            if (node.material.color) node.material.color.setHex(palette.primary);
-          } else if (matName.includes('pant') || matName.includes('pajama') || matName.includes('skirt') || matName.includes('bottom')) {
-            if (node.material.color) node.material.color.setHex(palette.secondary);
+          const mat = node.material;
+          // Set matte fabric finish
+          mat.roughness = Math.max(mat.roughness ?? 0.82, 0.78);
+          mat.metalness = Math.min(mat.metalness ?? 0, 0.05);
+          if (typeof mat.shininess !== 'undefined') mat.shininess = 6;
+          if (mat.specular && typeof mat.specular.setRGB === 'function') mat.specular.setRGB(0.06, 0.06, 0.06);
+
+          if (mat.map) {
+            // Preserve Mixamo's embedded skin, face, clothing, and hair textures cleanly without dark tinting:
+            if (mat.color) mat.color.setHex(0xffffff);
+          } else {
+            const matName = (mat.name || '').toLowerCase();
+            if (matName.includes('shirt') || matName.includes('panjabi') || matName.includes('top') || matName.includes('saree') || matName.includes('cloth')) {
+              if (mat.color && safePalette?.primary) mat.color.setHex(safePalette.primary);
+            } else if (matName.includes('pant') || matName.includes('pajama') || matName.includes('skirt') || matName.includes('bottom')) {
+              if (mat.color && safePalette?.secondary) mat.color.setHex(safePalette.secondary);
+            }
           }
         }
       }
     });
 
-    // Monsoon rain umbrella attached to right hand bone
-    const umbrellaGroup = new THREE.Group();
+    // Monsoon rain umbrella attached directly to right hand bone
+    const umbrella = new THREE.Group();
+    umbrella.name = 'mixamo-umbrella';
     const canopyMat = new THREE.MeshStandardMaterial({
       color: 0x0f172a,
       roughness: 0.35,
@@ -15065,32 +15379,42 @@ let sharedRickshawArtTexture = null;
     const shaftMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
     const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.70, 0.28, 12, 1, true), canopyMat);
     canopy.position.y = 0.95;
-    umbrellaGroup.add(canopy);
+    umbrella.add(canopy);
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 1.05, 8), shaftMat);
     shaft.position.y = 0.45;
-    umbrellaGroup.add(shaft);
-    umbrellaGroup.visible = false;
+    umbrella.add(shaft);
+    umbrella.visible = false;
 
     if (rightHandBone) {
-      umbrellaGroup.position.set(0, 0, 0);
-      umbrellaGroup.rotation.set(0, 0, 0);
-      rightHandBone.add(umbrellaGroup);
+      // Counter-scale so umbrella retains normal world dimensions inside scaled skeleton (1 / unitScale)
+      umbrella.scale.setScalar(1 / unitScale);
+      umbrella.position.set(0, 0, 0);
+      umbrella.rotation.set(0, 0, 0);
+      rightHandBone.add(umbrella);
     } else {
-      umbrellaGroup.position.set(0.3, 0.9, 0);
-      model.add(umbrellaGroup);
+      umbrella.position.set(0.3, 0.9, 0);
+      riggedModel.add(umbrella);
     }
+
+    // Ground contact shadow disc
+    const sharedMats = getPedSharedMats();
+    const shadowDisc = new THREE.Mesh(
+      getPedGeo('pedShadowDisc', () => new THREE.CircleGeometry(0.13, 16)),
+      sharedMats.shadow
+    );
+    shadowDisc.rotation.x = -Math.PI / 2;
+    shadowDisc.position.set(0, 0.002, 0);
+    wrapper.add(shadowDisc);
 
     // Mixamo Motion Capture AnimationMixer
     let mixer = null;
     let walkAction = null;
     let idleAction = null;
 
-    if (animations.length > 0) {
-      mixer = new THREE.AnimationMixer(model);
-      let walkClip = animations.find(c => /walk/i.test(c.name));
-      let idleClip = animations.find(c => /idle|stand/i.test(c.name));
-      if (!walkClip && animations.length > 0) walkClip = animations[0];
-      if (!idleClip && animations.length > 1) idleClip = animations[1];
+    if (animations && animations.length > 0) {
+      mixer = new THREE.AnimationMixer(riggedModel);
+      let walkClip = animations.find(c => /walk/i.test(c.name)) || animations[0];
+      let idleClip = animations.find(c => /idle|stand/i.test(c.name)) || (animations.length > 1 ? animations[1] : animations[0]);
 
       if (walkClip) {
         walkAction = mixer.clipAction(walkClip);
@@ -15100,73 +15424,168 @@ let sharedRickshawArtTexture = null;
         idleAction = mixer.clipAction(idleClip);
         idleAction.setLoop(THREE.LoopRepeat);
       }
+
+      const isCurrentlyMoving = p && (p.isMoving || (p.currentCoord !== undefined && Math.abs(p.currentCoord - (p.start || 0)) > 2 && !p.isPausedForVehicle));
+      const initAction = isCurrentlyMoving ? (walkAction || idleAction) : (idleAction || walkAction);
+      if (initAction) {
+        initAction.play();
+        wrapper.userData.currentAction = (initAction === walkAction ? 'walk' : 'idle');
+      }
     }
 
-    group.userData.isRigged = true;
-    group.userData.mixer = mixer;
-    group.userData.walkAction = walkAction;
-    group.userData.idleAction = idleAction;
-    group.userData.currentAction = '';
-    group.userData.umbrella = umbrellaGroup;
-    group.userData.bodyRoot = model;
+    wrapper.userData.isRigged = true;
+    wrapper.userData.isRiggedMixamo = true;
+    wrapper.userData.mixer = mixer;
+    wrapper.userData.walkAction = walkAction;
+    wrapper.userData.idleAction = idleAction;
+    wrapper.userData.umbrella = umbrella;
+    wrapper.userData.bodyRoot = riggedModel;
+    wrapper.userData.isPedestrian = true;
 
+    if (p) {
+      p.mesh = wrapper;
+      p.group = wrapper;
+      p.isRiggedMixamo = true;
+    }
+
+    purgeNullChildren(wrapper);
     activeRiggedWalkerCount++;
-    return group;
+    return wrapper;
   }
 
   function upgradeActiveWalkersToRigged() {
-    if (typeof pedMeshMap === 'undefined') return;
+    if (typeof pedMeshMap === 'undefined') return 0;
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
     const maxRiggedWalkers = isMobileScreen ? 8 : 12;
+    let swappedCount = 0;
+    const totalWalkers = Object.keys(pedMeshMap).length;
 
-    for (const key in pedMeshMap) {
-      if (activeRiggedWalkerCount >= maxRiggedWalkers) break;
-      const pm = pedMeshMap[key];
+    // Prioritize spotlight walker tracked in Walking view first
+    const entries = [];
+    let spotlightKey = null;
+
+    if (typeof activeTargetVehicle !== 'undefined' && activeTargetVehicle) {
+      for (const k in pedMeshMap) {
+        const pm = pedMeshMap[k];
+        if (pm && (pm.mesh === activeTargetVehicle.mesh || pm.data === activeTargetVehicle.data || pm.data === activeTargetVehicle)) {
+          spotlightKey = k;
+          entries.push({ key: k, pm: pm, isSpotlight: true });
+          break;
+        }
+      }
+    }
+
+    for (const k in pedMeshMap) {
+      if (k !== spotlightKey) {
+        entries.push({ key: k, pm: pedMeshMap[k], isSpotlight: false });
+      }
+    }
+
+    for (let idx = 0; idx < entries.length; idx++) {
+      if (swappedCount >= maxRiggedWalkers) break;
+      const { key, pm } = entries[idx];
       if (!pm || !pm.mesh || !pm.data) continue;
-      if (pm.mesh.userData && pm.mesh.userData.isRigged) continue;
+      if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo) {
+        swappedCount++;
+        continue;
+      }
 
       const p = pm.data;
       let type = 'male';
-      if ((p.id || 0) % 7 === 0 && riggedPedPrototypes.child) {
-        type = 'child';
-      } else if ((p.id || 0) % 2 === 1 && riggedPedPrototypes.female) {
-        type = 'female';
-      } else if (riggedPedPrototypes.male) {
-        type = 'male';
+      if (p.isFemale !== undefined) {
+        type = p.isFemale ? 'female' : 'male';
+      } else if (p.gender) {
+        type = p.gender === 'female' ? 'female' : 'male';
+      } else {
+        type = (idx % 2 === 0 ? 'male' : 'female');
       }
+      if (!riggedPedPrototypes[type]) {
+        type = riggedPedPrototypes.male ? 'male' : (riggedPedPrototypes.female ? 'female' : null);
+      }
+      if (!type || !riggedPedPrototypes[type]) continue;
       const proto = riggedPedPrototypes[type];
-      if (!proto) continue;
 
-      const newRigged = createRiggedPedestrian(p, proto, type);
-      if (newRigged) {
-        newRigged.position.copy(pm.mesh.position);
-        newRigged.rotation.copy(pm.mesh.rotation);
-        const parent = pm.mesh.parent || (typeof scene !== 'undefined' ? scene : null);
-        if (parent) {
-          parent.remove(pm.mesh);
-          parent.add(newRigged);
+      try {
+        const oldMesh = pm.mesh;
+        oldMesh.updateMatrixWorld(true);
+        const procBox = new THREE.Box3().setFromObject(oldMesh);
+        const procHeight = procBox.max.y - procBox.min.y;
+
+        const wrapper = createRiggedPedestrian(p, proto, type, procHeight);
+        if (wrapper && wrapper.isObject3D) {
+          wrapper.position.copy(oldMesh.position);
+          wrapper.rotation.copy(oldMesh.rotation);
+          wrapper.scale.set(1, 1, 1);
+
+          // Preserve kinematics and orientation memory
+          if (oldMesh.userData) {
+            if (oldMesh.userData.lastX !== undefined) wrapper.userData.lastX = oldMesh.userData.lastX;
+            if (oldMesh.userData.lastZ !== undefined) wrapper.userData.lastZ = oldMesh.userData.lastZ;
+            if (oldMesh.userData.targetRotY !== undefined) wrapper.userData.targetRotY = oldMesh.userData.targetRotY;
+            if (oldMesh.userData.currentRotY !== undefined) wrapper.userData.currentRotY = oldMesh.userData.currentRotY;
+            if (oldMesh.userData.currentGroundY !== undefined) wrapper.userData.currentGroundY = oldMesh.userData.currentGroundY;
+          }
+
+          const parent = oldMesh.parent || (typeof scene !== 'undefined' ? scene : null);
+          if (parent) {
+            parent.remove(oldMesh);
+            parent.add(wrapper);
+            purgeNullChildren(parent);
+          }
+
+          pm.mesh = wrapper;
+          p.mesh = wrapper;
+          p.group = wrapper;
+          p.isRiggedMixamo = true;
+          wrapper.userData.isRiggedMixamo = true;
+
+          // Synchronize spotlight / tracked vehicle target if active walker is tracked
+          if (typeof activeTargetVehicle !== 'undefined' && activeTargetVehicle) {
+            if (activeTargetVehicle === p || activeTargetVehicle.mesh === oldMesh || activeTargetVehicle.data === p) {
+              activeTargetVehicle.mesh = wrapper;
+            }
+          }
+
+          swappedCount++;
         }
-        pm.mesh = newRigged;
+      } catch (err) {
+        console.error(`[Pedestrians] Failed to upgrade walker ${key}:`, err);
       }
     }
+
+    if (typeof scene !== 'undefined' && scene) {
+      purgeNullChildren(scene);
+    }
+    console.info(`[Pedestrians] Mixamo GLB active — swapped ${swappedCount} of ${totalWalkers} walkers`);
+    return swappedCount;
   }
 
   function instantiatePedestrian(p) {
     const isWalker = p && (p.isSidewalk || typeof p.currentCoord !== 'undefined' || p.axis);
     if (isWalker) {
       let type = 'male';
-      if ((p.id || 0) % 7 === 0 && riggedPedPrototypes.child) {
-        type = 'child';
-      } else if ((p.id || 0) % 2 === 1 && riggedPedPrototypes.female) {
-        type = 'female';
-      } else if (riggedPedPrototypes.male) {
-        type = 'male';
+      if (p.isFemale !== undefined) {
+        type = p.isFemale ? 'female' : 'male';
+      } else if (p.gender) {
+        type = p.gender === 'female' ? 'female' : 'male';
+      } else {
+        type = ((p.id || 0) % 2 === 0 ? 'male' : 'female');
+      }
+      if (!riggedPedPrototypes[type]) {
+        type = riggedPedPrototypes.male ? 'male' : (riggedPedPrototypes.female ? 'female' : null);
       }
 
       const proto = riggedPedPrototypes[type];
       if (proto) {
-        const riggedMesh = createRiggedPedestrian(p, proto, type);
-        if (riggedMesh) return riggedMesh;
+        const defaultHeight = (type === 'female') ? 10.8 : 11.5;
+        const riggedMesh = createRiggedPedestrian(p, proto, type, defaultHeight);
+        if (riggedMesh && riggedMesh.isObject3D) {
+          riggedMesh.scale.set(1, 1, 1);
+          if (typeof scene !== 'undefined' && scene && scene.add) {
+            scene.add(riggedMesh);
+          }
+          return riggedMesh;
+        }
       }
     }
     return createArticulatedHuman(p, false);
@@ -16608,6 +17027,9 @@ let sharedRickshawArtTexture = null;
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           isRenderLoopPaused = !entry.isIntersecting;
+          if (!isRenderLoopPaused) {
+            lastFrameTime = 0;
+          }
         });
       }, { threshold: 0.05 });
       observer.observe(containerEl);
@@ -17201,9 +17623,7 @@ let sharedRickshawArtTexture = null;
 
     // 12. Instantiate 3D Pedestrians (Rigged .GLB Base Meshes + Mixamo Mocap or Procedural)
     activeRiggedWalkerCount = 0;
-    loadAllRiggedPedestrians().then(() => {
-      upgradeActiveWalkersToRigged();
-    }).catch(() => {});
+    loadAllRiggedPedestrians();
 
     if (pedestriansData && Array.isArray(pedestriansData)) {
       pedestriansData.forEach((p, idx) => {
@@ -17612,11 +18032,11 @@ let sharedRickshawArtTexture = null;
           child.receiveShadow = false;
         }
 
-        // Apply maximum anisotropic filtering to every texture in the scene
+        // Apply maximum anisotropic filtering to genuine image textures in the scene (never render targets)
         if (child.material) {
           const mats = Array.isArray(child.material) ? child.material : [child.material];
           mats.forEach(m => {
-            if (m && m.map) {
+            if (m && m.map && m.map.image && m.map !== mirrorLeftRT?.texture && m.map !== mirrorRightRT?.texture) {
               setupCrispCanvasTexture(m.map);
             }
           });
@@ -17624,6 +18044,7 @@ let sharedRickshawArtTexture = null;
       }
     });
 
+    purgeNullChildren(scene);
     isReady = true;
   }
 
@@ -17675,6 +18096,7 @@ let sharedRickshawArtTexture = null;
 
   window.resizeDhakaCrossroads3D = function() {
     isRenderLoopPaused = false;
+    lastFrameTime = 0;
     onResize();
   };
 
@@ -17711,7 +18133,7 @@ let sharedRickshawArtTexture = null;
   let strobeTimer = 0;
   let lastWeatherMode = null;
   let lastIsMobile = null;
-  let lastFrameTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  let lastFrameTime = 0;
   let slowFrameLogs = 0;
   let frameTimeEMA = 16.6;
   let currentTier = 'high';
@@ -17720,12 +18142,18 @@ let sharedRickshawArtTexture = null;
 
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
-    if (isRenderLoopPaused) return;
+    if (isRenderLoopPaused) {
+      lastFrameTime = 0;
+      return;
+    }
 
     try {
 
     // 1. Native Refresh-Rate Loop (60/90/120/144 FPS) with Clamped Delta-Time (Zero lag spikes)
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (!lastFrameTime || (now - lastFrameTime) > 1000) {
+      lastFrameTime = now;
+    }
     const rawDelta = now - lastFrameTime;
     if (rawDelta > 120 && ++slowFrameLogs <= 5) console.warn('[Perf]', rawDelta.toFixed(1) + 'ms');
     const dtFromPerf = rawDelta / 1000;
@@ -18376,8 +18804,8 @@ let sharedRickshawArtTexture = null;
           pm.mesh.userData.bodyRoot.position.y = pm.mesh.userData.bodyRoot.userData.groundedBaseY;
         }
 
-        // Lock right arm & elbow to hold umbrella during rain
-        if (isRain && pm.mesh.userData.umbrella) {
+        // Lock right arm & elbow to hold umbrella during rain (procedural humans only)
+        if (!p.isRiggedMixamo && !(pm.mesh.userData && pm.mesh.userData.isRiggedMixamo) && isRain && pm.mesh.userData.umbrella) {
           if (pm.mesh.userData.rightArmPivot) {
             pm.mesh.userData.rightArmPivot.rotation.set(-0.42, 0, -0.16);
           }
@@ -18679,12 +19107,12 @@ let sharedRickshawArtTexture = null;
       let activeBus = null;
       if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isBus) {
         activeBus = activeTargetVehicle.mesh;
-      } else if (hasanBusList.length > 0 && camera) {
-        let closestDistSq = 35 * 35;
+      } else if (hasanBusList.length > 0) {
+        let closestDistSq = Infinity;
         for (let bi = 0; bi < hasanBusList.length; bi++) {
           const b = hasanBusList[bi];
           if (!b || !b.parent) continue;
-          const dSq = b.position.distanceToSquared(camera.position);
+          const dSq = camera ? b.position.distanceToSquared(camera.position) : 0;
           if (dSq < closestDistSq) {
             closestDistSq = dSq;
             activeBus = b;
@@ -18722,32 +19150,45 @@ let sharedRickshawArtTexture = null;
 
           if (targetMeshes && targetMeshes[0]) {
             const sideSign = updateLeft ? 1 : -1;
-            // Position mirrorCam slightly behind and outside the mirror housing
-            _mPos.set(36.3, 15.1, sideSign * 12.4);
+            // Position mirrorCam slightly behind and outside the mirror housing (anchored at Z = sideSign * 11.40)
+            _mPos.set(36.2, 15.0, sideSign * 11.40);
             activeBus.localToWorld(_mPos);
 
-            // Point mirrorCam backward down adjacent lane (~18 units behind, ~2.2 units outward)
-            _mLook.set(36.3 - 18.0, 14.5, sideSign * (12.4 + 2.2));
+            // Point mirrorCam backward down adjacent lane (~25 units behind, ~1.2 units outward)
+            _mLook.set(36.2 - 25.0, 14.5, sideSign * (11.40 + 1.2));
             activeBus.localToWorld(_mLook);
 
             mirrorCam.position.copy(_mPos);
             mirrorCam.lookAt(_mLook);
 
-            // Temporarily hide the mirror's own glass meshes to prevent self-reflection
-            targetMeshes.forEach(m => { m.visible = false; });
+            // Temporarily hide ALL mirror meshes on all buses to prevent self-reflection & WebGL feedback loops
+            const allMirrorsToHide = [];
+            for (let bi = 0; bi < hasanBusList.length; bi++) {
+              const b = hasanBusList[bi];
+              if (!b) continue;
+              if (b.userData.leftMirrorMeshes) allMirrorsToHide.push(...b.userData.leftMirrorMeshes);
+              if (b.userData.rightMirrorMeshes) allMirrorsToHide.push(...b.userData.rightMirrorMeshes);
+            }
+            allMirrorsToHide.forEach(m => { m.visible = false; });
 
+            purgeNullChildren(scene);
             const prevRT = renderer.getRenderTarget();
-            renderer.setRenderTarget(targetRT);
-            renderer.render(scene, mirrorCam);
-            renderer.setRenderTarget(prevRT);
-
-            targetMeshes.forEach(m => { m.visible = true; });
+            try {
+              renderer.setRenderTarget(targetRT);
+              renderer.render(scene, mirrorCam);
+            } catch (e) {
+              // Graceful render guard
+            } finally {
+              renderer.setRenderTarget(prevRT);
+              allMirrorsToHide.forEach(m => { m.visible = true; });
+            }
           }
         }
       }
     }
 
     // 8. Crisp Direct WebGL Render (No Blur or Washout)
+    purgeNullChildren(scene);
     const renderT0 = performance.now();
     renderer.render(scene, camera);
     const renderTimeMs = performance.now() - renderT0;
