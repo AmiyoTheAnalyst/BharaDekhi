@@ -15312,7 +15312,10 @@ let sharedRickshawArtTexture = null;
     female: 11.5, // Adult Females (5'2"–5'3"): proportional commuter height
     child: 8.5    // School Kid (little_boy, 3'8"–4'0"): clearly shorter than adults, head just clearing railing
   };
-  const BENCH_SEAT_Y = parseFloat((BRTA_BUS_HEIGHT * 0.15).toFixed(2)); // 3.67 (~0.47m equiv)
+  const BENCH_SEAT_TOP_Y = 3.15; // Exact top Y surface of sidewalk bench seat (~25% of 13-unit adult height, ~43cm park bench)
+  const BENCH_SEAT_FRONT_Z = 2.20; // Exact front-most Z edge of front wooden seat slat
+  const BENCH_SEAT_DEPTH = 3.35; // Realistic bench seat depth (~3.2–3.5 units) from backrest front face to front slat edge
+  const BENCH_SEAT_Y = BENCH_SEAT_TOP_Y;
 
   const CHARACTER_ROSTER = [
     { id: 'male_remy', category: 'male', format: 'glb', walkPath: 'assets/models/ped-male-walk.glb', idlePath: 'assets/models/ped-male-idle.glb', height: TARGET_PED_HEIGHTS.male, name: 'Remy (Street Casual)' },
@@ -16431,76 +16434,100 @@ let sharedRickshawArtTexture = null;
     });
 
     const benchWidth = 18.0;
-    const seatY = 2.8;
+    const seatTopY = BENCH_SEAT_TOP_Y; // 3.15 world units (~25% of 13-unit adult height, ~43cm park bench)
+    const slatThick = 0.40;
+    const seatSlatY = seatTopY - slatThick * 0.5; // 2.95 (so top surface is exactly 3.15)
+    const slatDepth = 1.0;
+    const slatGeo = new THREE.BoxGeometry(benchWidth, slatThick, slatDepth);
 
-    // 3 Wooden Seat Slats
-    const slatGeo = new THREE.BoxGeometry(benchWidth, 0.42, 1.15);
-    [-1.3, 0.0, 1.3].forEach(zOff => {
+    // 3 Wooden Seat Slats:
+    // Back slat: z = -0.60 (depth -1.10 to -0.10)
+    // Middle slat: z = 0.55 (depth 0.05 to 1.05)
+    // Front slat: z = 1.70 (depth 1.20 to 2.20) -> front-most Z edge = 2.20
+    [-0.60, 0.55, 1.70].forEach(zOff => {
       const slat = new THREE.Mesh(slatGeo, woodMat);
-      slat.position.set(0, seatY, zOff);
+      slat.position.set(0, seatSlatY, zOff);
       bench.add(slat);
     });
 
-    // 2 Wooden Backrest Slats (tilted 7°)
+    // 2 Wooden Backrest Slats (tilted ~8°, backrest front face at z = -1.15)
+    // Seat depth from backrest front face (-1.15) to front slat edge (2.20) = 3.35 units
     const backSlatGeo = new THREE.BoxGeometry(benchWidth, 0.85, 0.35);
-    [4.2, 5.4].forEach((by, idx) => {
+    [
+      { y: 4.60, z: -1.35 },
+      { y: 5.80, z: -1.55 }
+    ].forEach(cfg => {
       const backSlat = new THREE.Mesh(backSlatGeo, woodMat);
-      backSlat.position.set(0, by, -1.85 - idx * 0.15);
-      backSlat.rotation.x = -0.12;
+      backSlat.position.set(0, cfg.y, cfg.z);
+      backSlat.rotation.x = -0.14;
       bench.add(backSlat);
     });
 
-    // Cast-Iron Side Legs and Armrests
+    // Cast-Iron Side Legs, Horizontal Beams, and Armrests
     [-8.5, 8.5].forEach(sideX => {
       const legGroup = new THREE.Group();
       legGroup.position.set(sideX, 0, 0);
 
-      // Front leg
-      const fLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, seatY, 8), ironMat);
-      fLeg.position.set(0, seatY * 0.5, 1.4);
+      // Front leg (touches sidewalk at y=0 up to seat bottom at y=2.75)
+      const fLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, seatSlatY, 8), ironMat);
+      fLeg.position.set(0, seatSlatY * 0.5, 1.55);
       legGroup.add(fLeg);
 
-      // Back leg & backrest support
-      const bLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 5.8, 8), ironMat);
-      bLeg.position.set(0, 2.9, -1.9);
-      bLeg.rotation.x = -0.12;
+      // Back leg & backrest support (from y=0 up to y=6.0, tilted)
+      const bLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.30, 6.0, 8), ironMat);
+      bLeg.position.set(0, 3.0, -1.45);
+      bLeg.rotation.x = -0.14;
       legGroup.add(bLeg);
 
-      // Horizontal seat support beam
-      const sBeam = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 3.8), ironMat);
-      sBeam.position.set(0, seatY - 0.25, 0);
+      // Horizontal seat support beam directly under wooden slats
+      const sBeam = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.32, 3.6), ironMat);
+      sBeam.position.set(0, seatSlatY - 0.25, 0.55);
       legGroup.add(sBeam);
 
-      // Curved armrest
-      const armrest = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.28, 3.6), ironMat);
-      armrest.position.set(0, seatY + 1.1, 0);
+      // Curved armrest (top surface at y = 4.25 = seatTopY + 1.10)
+      const armrest = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.28, 3.4), ironMat);
+      armrest.position.set(0, seatTopY + 1.10, 0.55);
       legGroup.add(armrest);
 
       // Armrest vertical strut
-      const armStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.1, 6), ironMat);
-      armStrut.position.set(0, seatY + 0.55, 1.2);
+      const armStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.10, 6), ironMat);
+      armStrut.position.set(0, seatTopY + 0.55, 1.55);
       legGroup.add(armStrut);
 
       bench.add(legGroup);
     });
 
-    // Scale bench to match world bus scale (seatY = BENCH_SEAT_Y = 3.67, busHeight * 0.15)
-    const benchScale = BENCH_SEAT_Y / seatY; // 3.67 / 2.8 ≈ 1.3107
-    bench.scale.set(benchScale, benchScale, benchScale);
+    // Measure and store exact bench-local coordinates on bench.userData
+    bench.userData.seatTopY = BENCH_SEAT_TOP_Y;     // 3.15
+    bench.userData.seatFrontZ = BENCH_SEAT_FRONT_Z; // 2.20
+    bench.userData.seatDepth = BENCH_SEAT_DEPTH;   // 3.35
+
+    bench.scale.set(1, 1, 1);
     freezeStatic(bench);
     return bench;
   }
 
   function aimBoneInCharacterSpace(bone, childBone, targetDirCharSpace, rootObj) {
-    if (!bone || !childBone || !rootObj) return;
+    if (!bone || !rootObj) return;
     rootObj.updateMatrixWorld(true);
 
     const boneWorldPos = new THREE.Vector3();
-    const childWorldPos = new THREE.Vector3();
     bone.getWorldPosition(boneWorldPos);
-    childBone.getWorldPosition(childWorldPos);
 
-    const worldDir = new THREE.Vector3().subVectors(childWorldPos, boneWorldPos);
+    let worldDir;
+    if (childBone) {
+      const childWorldPos = new THREE.Vector3();
+      childBone.getWorldPosition(childWorldPos);
+      worldDir = new THREE.Vector3().subVectors(childWorldPos, boneWorldPos);
+    } else {
+      // If a rig has no toe bone, derive forward direction in world space from bone orientation
+      const forwardLocal = new THREE.Vector3(0, 0, 1).applyQuaternion(bone.quaternion);
+      if (bone.parent) {
+        forwardLocal.applyQuaternion(bone.parent.getWorldQuaternion(new THREE.Quaternion()));
+      }
+      worldDir = forwardLocal;
+    }
+
     const rootWorldQuat = new THREE.Quaternion();
     rootObj.getWorldQuaternion(rootWorldQuat);
     const rootWorldQuatInv = rootWorldQuat.clone().invert();
@@ -16540,7 +16567,7 @@ let sharedRickshawArtTexture = null;
     return bones;
   }
 
-  function applySeatedPoseToRiggedModel(characterModel, seatIdx, totalInBench, isChild = false, isFemale = false) {
+  function applySeatedPoseToRiggedModel(characterModel, seatIdx, totalInBench, isChild = false, isFemale = false, benchObj = null, bIdx = 0, charId = null) {
     if (!characterModel || !characterModel.isObject3D) return {};
 
     // 1. Stop any walking mixer & ensure no animation overrides seated pose
@@ -16560,6 +16587,16 @@ let sharedRickshawArtTexture = null;
       }
     });
 
+    // Reset all bones to restQuat before applying seated pose
+    characterModel.traverse(node => {
+      if (node.isBone && node.userData.restQuat) {
+        node.quaternion.copy(node.userData.restQuat);
+      }
+    });
+    characterModel.position.set(0, 0, 0);
+    characterModel.rotation.set(0, 0, 0);
+    characterModel.updateMatrixWorld(true);
+
     const bones = extractCharacterBones(characterModel);
 
     // 2. Character-space bone aiming top-down (parent before child)
@@ -16569,30 +16606,6 @@ let sharedRickshawArtTexture = null;
     }
     if (bones.Spine1 && (bones.Neck || bones.Head)) {
       aimBoneInCharacterSpace(bones.Spine1, bones.Neck || bones.Head, new THREE.Vector3(0, 0.995, -0.06), characterModel);
-    }
-
-    // Thighs: aim forward along (±0.08, -0.08, 0.99) (~85-90° forward, slight outward knee spacing)
-    if (bones.LeftUpLeg && bones.LeftLeg) {
-      aimBoneInCharacterSpace(bones.LeftUpLeg, bones.LeftLeg, new THREE.Vector3(0.08, -0.08, 0.99), characterModel);
-    }
-    if (bones.RightUpLeg && bones.RightLeg) {
-      aimBoneInCharacterSpace(bones.RightUpLeg, bones.RightLeg, new THREE.Vector3(-0.08, -0.08, 0.99), characterModel);
-    }
-
-    // Lower legs: aim straight down along (0, -0.99, -0.08)
-    if (bones.LeftLeg && bones.LeftFoot) {
-      aimBoneInCharacterSpace(bones.LeftLeg, bones.LeftFoot, new THREE.Vector3(0, -0.99, -0.08), characterModel);
-    }
-    if (bones.RightLeg && bones.RightFoot) {
-      aimBoneInCharacterSpace(bones.RightLeg, bones.RightFoot, new THREE.Vector3(0, -0.99, -0.08), characterModel);
-    }
-
-    // Feet: aim flat forward if toes exist
-    if (bones.LeftFoot && bones.LeftToeBase) {
-      aimBoneInCharacterSpace(bones.LeftFoot, bones.LeftToeBase, new THREE.Vector3(0, 0.10, 0.99), characterModel);
-    }
-    if (bones.RightFoot && bones.RightToeBase) {
-      aimBoneInCharacterSpace(bones.RightFoot, bones.RightToeBase, new THREE.Vector3(0, 0.10, 0.99), characterModel);
     }
 
     // Upper arms: drop completely out of T-pose down and slightly forward along (±0.22, -0.92, 0.30)
@@ -16611,37 +16624,153 @@ let sharedRickshawArtTexture = null;
       aimBoneInCharacterSpace(bones.RightForeArm, bones.RightHand, new THREE.Vector3(0.20, -0.35, 0.91), characterModel);
     }
 
-    // Save seatedQuat on all posed bones
+    // 3. Exact Bench-Local Coordinate Alignment
+    const seatTopY = (benchObj && benchObj.userData && typeof benchObj.userData.seatTopY === 'number')
+      ? benchObj.userData.seatTopY
+      : BENCH_SEAT_TOP_Y;
+    const seatFrontZ = (benchObj && benchObj.userData && typeof benchObj.userData.seatFrontZ === 'number')
+      ? benchObj.userData.seatFrontZ
+      : BENCH_SEAT_FRONT_Z;
+
+    // Find bench container reference for bench-local coordinate transformations
+    let benchRef = benchObj && benchObj.isObject3D ? benchObj : null;
+    if (!benchRef && characterModel.parent && characterModel.parent.parent && characterModel.parent.parent.isObject3D) {
+      benchRef = characterModel.parent.parent;
+    }
+    if (benchRef) {
+      benchRef.updateMatrixWorld(true);
+    }
+
+    const benchInv = new THREE.Matrix4();
+    if (benchRef) {
+      benchInv.copy(benchRef.matrixWorld).invert();
+    }
+
+    const _vTemp = new THREE.Vector3();
+    function getBenchLocal(obj) {
+      if (!obj) return new THREE.Vector3();
+      obj.getWorldPosition(_vTemp);
+      if (benchRef) {
+        _vTemp.applyMatrix4(benchInv);
+      }
+      return _vTemp.clone();
+    }
+
+    // Center hips horizontally inside group
+    characterModel.updateMatrixWorld(true);
+    const rootInv = characterModel.matrixWorld.clone().invert();
+    const hPos = new THREE.Vector3();
+    if (bones.Hips) bones.Hips.getWorldPosition(hPos).applyMatrix4(rootInv);
+    characterModel.position.x = -hPos.x;
+    characterModel.updateMatrixWorld(true);
+
+    const charHeight = (characterModel.userData && characterModel.userData.targetHeight)
+      || (isChild ? TARGET_PED_HEIGHTS.child : (isFemale ? TARGET_PED_HEIGHTS.female : TARGET_PED_HEIGHTS.male));
+
+    const leftToe = bones.LeftToeBase || bones.LeftToe_End || bones.LeftToe;
+    const rightToe = bones.RightToeBase || bones.RightToe_End || bones.RightToe;
+
+    let pitchY = -0.05;
+    let finalKneeZ = 0;
+    let finalThighBottomY = 0;
+    let finalFootBottomY = 0;
+
+    for (let iter = 0; iter < 5; iter++) {
+      const pitchZ = Math.sqrt(Math.max(0.1, 1 - 0.06 * 0.06 - pitchY * pitchY));
+
+      // Thighs: aim forward and very slightly outward/downward along (±0.06, pitchY, pitchZ)
+      if (bones.LeftUpLeg && bones.LeftLeg) {
+        aimBoneInCharacterSpace(bones.LeftUpLeg, bones.LeftLeg, new THREE.Vector3(0.06, pitchY, pitchZ), characterModel);
+      }
+      if (bones.RightUpLeg && bones.RightLeg) {
+        aimBoneInCharacterSpace(bones.RightUpLeg, bones.RightLeg, new THREE.Vector3(-0.06, pitchY, pitchZ), characterModel);
+      }
+
+      // Shins: aim straight down and slightly forward along (0, -0.98, 0.18) — NEVER backward
+      if (bones.LeftLeg && bones.LeftFoot) {
+        aimBoneInCharacterSpace(bones.LeftLeg, bones.LeftFoot, new THREE.Vector3(0, -0.98, 0.18), characterModel);
+      }
+      if (bones.RightLeg && bones.RightFoot) {
+        aimBoneInCharacterSpace(bones.RightLeg, bones.RightFoot, new THREE.Vector3(0, -0.98, 0.18), characterModel);
+      }
+
+      // Feet: aim horizontally forward along (0, -0.05, 0.99) so shoe soles sit flat on sidewalk
+      if (bones.LeftFoot) {
+        aimBoneInCharacterSpace(bones.LeftFoot, leftToe, new THREE.Vector3(0, -0.05, 0.99), characterModel);
+      }
+      if (bones.RightFoot) {
+        aimBoneInCharacterSpace(bones.RightFoot, rightToe, new THREE.Vector3(0, -0.05, 0.99), characterModel);
+      }
+
+      characterModel.updateMatrixWorld(true);
+
+      // Z-Alignment: Compute kneeZ and shift characterModel.position.z so knee sits 0.65 units IN FRONT OF seatFrontZ
+      const leftKneeL = getBenchLocal(bones.LeftLeg);
+      const rightKneeL = getBenchLocal(bones.RightLeg);
+      const kneeZ = (leftKneeL.z + rightKneeL.z) * 0.5;
+
+      const groupRotY = (characterModel.parent && characterModel.parent.rotation) ? characterModel.parent.rotation.y : 0;
+      const cosAngle = Math.max(0.5, Math.cos(groupRotY));
+      const targetKneeZ = seatFrontZ + 0.65;
+      const deltaZ = (targetKneeZ - kneeZ) / cosAngle;
+      characterModel.position.z += deltaZ;
+      characterModel.updateMatrixWorld(true);
+
+      // Re-measure knees after Z-alignment
+      const leftKneeL2 = getBenchLocal(bones.LeftLeg);
+      const rightKneeL2 = getBenchLocal(bones.RightLeg);
+      finalKneeZ = (leftKneeL2.z + rightKneeL2.z) * 0.5;
+      const kneeLocalY = Math.min(leftKneeL2.y, rightKneeL2.y);
+
+      // Y-Alignment: Estimate thigh underside Y and shift characterModel.position.y so thighs sit flush on top of seatTopY + 0.08
+      const hipsL = getBenchLocal(bones.Hips);
+      const thighThickness = charHeight * 0.055;
+      const thighBottomY = Math.min(hipsL.y, kneeLocalY) - thighThickness;
+
+      const targetThighY = seatTopY + 0.08;
+      const deltaY = targetThighY - thighBottomY;
+      characterModel.position.y += deltaY;
+      characterModel.updateMatrixWorld(true);
+
+      finalThighBottomY = targetThighY;
+
+      // Re-measure foot bottom Y (ankle minus sole thickness ~charHeight * 0.04)
+      const leftFootL = getBenchLocal(bones.LeftFoot);
+      const rightFootL = getBenchLocal(bones.RightFoot);
+      const ankleLocalY = Math.min(leftFootL.y, rightFootL.y);
+
+      let toeLocalY = ankleLocalY;
+      if (leftToe && rightToe) {
+        toeLocalY = Math.min(getBenchLocal(leftToe).y, getBenchLocal(rightToe).y);
+      }
+      const soleOffset = charHeight * 0.04;
+      finalFootBottomY = Math.min(ankleLocalY - soleOffset, toeLocalY - charHeight * 0.025);
+
+      // If foot soles sit within 0.00–0.15 of sidewalk (or if child whose legs naturally hang), alignment is complete!
+      if (finalFootBottomY <= 0.15 || isChild) {
+        break;
+      }
+
+      // If feet hover (> 0.15), pitch thighs downward slightly more to reach sidewalk
+      pitchY -= 0.035;
+    }
+
+    // Save seatedQuat on all posed bones for safe conversational animation
     characterModel.traverse(node => {
       if (node.isBone) {
         node.userData.seatedQuat = node.quaternion.clone();
       }
     });
 
-    // 3. Exact bench seat placement (zero wood clipping & grounded feet)
-    characterModel.updateMatrixWorld(true);
-    const rootInv = characterModel.matrixWorld.clone().invert();
-    const hPos = new THREE.Vector3();
-    if (bones.Hips) bones.Hips.getWorldPosition(hPos).applyMatrix4(rootInv);
-    const sPos = new THREE.Vector3();
-    if (bones.Spine1 || bones.Spine) (bones.Spine1 || bones.Spine).getWorldPosition(sPos).applyMatrix4(rootInv);
-
-    const benchSeatTopY = 3.95;
-    const thighRadius = isChild ? 0.48 : (isFemale ? 0.62 : 0.76);
-    const targetHipsY = benchSeatTopY + thighRadius;
-
-    // Bench grounding polish: lower seated pose ~0.5 units so shoes touch sidewalk flush
-    characterModel.position.y = (targetHipsY - hPos.y) - 0.5;
-    characterModel.position.z = -1.50 - sPos.z;
-    characterModel.position.x = -hPos.x;
-    characterModel.updateMatrixWorld(true);
+    // Requirement 4: Log one compact line per bench sitter
+    console.log(`[Bench Sitter ${charId || (isChild ? 'child' : (isFemale ? 'female' : 'male'))} b${bIdx} s${seatIdx}] seatTopY: ${seatTopY.toFixed(2)}, seatFrontZ: ${seatFrontZ.toFixed(2)}, finalKneeZ: ${finalKneeZ.toFixed(2)}, finalThighBottomY: ${finalThighBottomY.toFixed(2)}, finalFootBottomY: ${finalFootBottomY.toFixed(2)}`);
 
     return bones;
   }
 
   const gossipingCrowd = [];
 
-  function spawnSeatedBenchHuman(preferredCharId, bIdx, seatIdx, totalInBench) {
+  function spawnSeatedBenchHuman(preferredCharId, bIdx, seatIdx, totalInBench, benchMesh = null, benchGroup = null, xOff = null) {
     const seed = bIdx * 10 + seatIdx;
     let template = preferredCharId ? riggedPedLibrary[preferredCharId] : null;
     if (!template) {
@@ -16667,6 +16796,15 @@ let sharedRickshawArtTexture = null;
     umbrella.position.set(1.2, 0.5, 0.8);
     group.add(umbrella);
 
+    const neighborAngle = (seatIdx === 0) ? 0.26 : ((seatIdx === 1 && totalInBench === 3) ? 0.0 : -0.26);
+    group.rotation.y = neighborAngle;
+
+    if (benchGroup && typeof xOff === 'number') {
+      group.position.set(xOff, 0, 0);
+      benchGroup.add(group);
+      benchGroup.updateMatrixWorld(true);
+    }
+
     if (template && template.scene) {
       const riggedModel = cloneRiggedCharacter(template.scene, seed);
       if (riggedModel && riggedModel.isObject3D) {
@@ -16674,10 +16812,7 @@ let sharedRickshawArtTexture = null;
         pruneNullChildren(group);
         const isChild = (preferredCharId && preferredCharId.includes('boy')) || (template && template.category === 'child');
         const isFemale = (preferredCharId && preferredCharId.includes('female')) || (template && template.category === 'female');
-        const bones = applySeatedPoseToRiggedModel(riggedModel, seatIdx, totalInBench, isChild, isFemale);
-
-        const neighborAngle = (seatIdx === 0) ? 0.26 : ((seatIdx === 1 && totalInBench === 3) ? 0.0 : -0.26);
-        group.rotation.y = neighborAngle;
+        const bones = applySeatedPoseToRiggedModel(riggedModel, seatIdx, totalInBench, isChild, isFemale, benchMesh || benchGroup, bIdx, template.id);
 
         return {
           group: group,
@@ -16689,6 +16824,7 @@ let sharedRickshawArtTexture = null;
           category: template.category,
           isProcedural: false,
           isSkinned: true,
+          benchMesh: benchMesh,
           bones: {
             head: bones.Head,
             neck: bones.Neck,
@@ -16723,15 +16859,12 @@ let sharedRickshawArtTexture = null;
       if (procHuman.userData.leftKneePivot) procHuman.userData.leftKneePivot.rotation.x = 1.48;
       if (procHuman.userData.rightLegPivot) procHuman.userData.rightLegPivot.rotation.x = -1.48;
       if (procHuman.userData.rightKneePivot) procHuman.userData.rightKneePivot.rotation.x = 1.48;
-      if (procHuman.userData.bodyRoot) procHuman.userData.bodyRoot.position.y = BENCH_SEAT_Y - 0.5;
+      if (procHuman.userData.bodyRoot) procHuman.userData.bodyRoot.position.y = BENCH_SEAT_TOP_Y;
       if (procHuman.userData.rightArmPivot) procHuman.userData.rightArmPivot.rotation.set(0.42, -0.15, 0.2);
       if (procHuman.userData.rightElbowPivot) procHuman.userData.rightElbowPivot.rotation.set(0.75, -0.2, -0.2);
       if (procHuman.userData.leftArmPivot) procHuman.userData.leftArmPivot.rotation.set(0.35, 0.15, -0.4);
       if (procHuman.userData.leftElbowPivot) procHuman.userData.leftElbowPivot.rotation.set(0.65, 0.25, 0.2);
     }
-
-    const neighborAngle = (seatIdx === 0) ? 0.26 : ((seatIdx === 1 && totalInBench === 3) ? 0.0 : -0.26);
-    group.rotation.y = neighborAngle;
 
     return {
       group: group,
@@ -16743,6 +16876,7 @@ let sharedRickshawArtTexture = null;
       category: preferredCharId?.includes('female') ? 'female' : 'male',
       isProcedural: true,
       isSkinned: false,
+      benchMesh: benchMesh,
       bones: {
         head: procHuman.userData.headGroup,
         neck: null,
@@ -16932,7 +17066,10 @@ let sharedRickshawArtTexture = null;
 
         const isChild = (template && template.category === 'child') || (p.preferredCharId && p.preferredCharId.includes('boy'));
         const isFemale = (template && template.category === 'female') || (p.preferredCharId && p.preferredCharId.includes('female'));
-        const bones = applySeatedPoseToRiggedModel(riggedModel, p.seatIdx, p.totalInBench, isChild, isFemale);
+        const benchGroup = p.group.parent;
+        const benchMesh = p.benchMesh || (benchGroup ? benchGroup.children.find(c => c.name === 'dhaka-sidewalk-bench') : null);
+        if (benchGroup) benchGroup.updateMatrixWorld(true);
+        const bones = applySeatedPoseToRiggedModel(riggedModel, p.seatIdx, p.totalInBench, isChild, isFemale, benchMesh || benchGroup, p.benchIdx, template.id);
 
         p.charId = template.id;
         p.category = template.category;
@@ -19039,16 +19176,21 @@ let sharedRickshawArtTexture = null;
 
       const benchMesh = createDhakaSidewalkBench();
       if (benchMesh && benchMesh.isObject3D) benchGroup.add(benchMesh);
+      benchGroup.userData.seatTopY = benchMesh.userData.seatTopY;
+      benchGroup.userData.seatFrontZ = benchMesh.userData.seatFrontZ;
+      benchGroup.userData.seatDepth = benchMesh.userData.seatDepth;
 
       const count = bDef.people.length;
       const xOffsets = (count === 2) ? [-4.8, 4.8] : [-6.8, 0.0, 6.8];
 
       bDef.people.forEach((preferredCharId, sIdx) => {
         const xOff = xOffsets[sIdx];
-        const seatedPerson = spawnSeatedBenchHuman(preferredCharId, bIdx, sIdx, count);
+        const seatedPerson = spawnSeatedBenchHuman(preferredCharId, bIdx, sIdx, count, benchMesh, benchGroup, xOff);
         if (seatedPerson && seatedPerson.group && seatedPerson.group.isObject3D) {
-          seatedPerson.group.position.set(xOff, 0, 0);
-          benchGroup.add(seatedPerson.group);
+          if (seatedPerson.group.parent !== benchGroup) {
+            seatedPerson.group.position.set(xOff, 0, 0);
+            benchGroup.add(seatedPerson.group);
+          }
           gossipingCrowd.push(seatedPerson);
           socialPedestrians.push({ mesh: seatedPerson.group, parent: benchGroup });
         }
