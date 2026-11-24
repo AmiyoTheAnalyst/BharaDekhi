@@ -15611,13 +15611,13 @@ let sharedRickshawArtTexture = null;
         mats.forEach(mat => {
           if (!mat) return;
 
-          // Trap fallback dummy texture or untextured procedural models (child / salwar):
-          // NEVER wipe mat.map for female_ch22!
-          if (isCh22) {
+          // Trap fallback dummy texture or untextured procedural models (salwar):
+          // NEVER wipe mat.map for female_ch22 or little_boy (both have authentic diffuse maps)!
+          if (isCh22 || isChild) {
             if (mat.map && mat.map.userData) {
               mat.map.userData.isBlankFallback = false;
             }
-          } else if (isChild || isSalwar || isFallbackTexture(mat.map)) {
+          } else if (isSalwar || isFallbackTexture(mat.map)) {
             mat.map = null;
             mat.needsUpdate = true;
           }
@@ -15654,7 +15654,18 @@ let sharedRickshawArtTexture = null;
             mat.transparent = false;
           }
 
-          if (mat.map) {
+          if (isChild) {
+            // Delete procedural vertex color hack on little_boy geometry
+            if (node.geometry) {
+              if (node.geometry.deleteAttribute) node.geometry.deleteAttribute('color');
+              else if (node.geometry.removeAttribute) node.geometry.removeAttribute('color');
+            }
+            mat.vertexColors = false;
+            mat.color.setHex(0xffffff);
+            if (mat.transparent) {
+              mat.depthWrite = false;
+            }
+          } else if (mat.map) {
             // Textured GLB materials: 0xe8e8e8 prevents daytime sunlight (1.75) blowout
             mat.color.setHex(0xe8e8e8);
           } else {
@@ -15675,59 +15686,6 @@ let sharedRickshawArtTexture = null;
                 mat.color.setHex(0x1e3a8a); // Denim blue
               } else if (/shoe|sneaker|foot/i.test(combinedName)) {
                 mat.color.setHex(0x27272a); // Charcoal sneakers
-              } else {
-                mat.color.setHex(0xc68662); // Warm South Asian skin
-              }
-            } else if (isChild) {
-              if (node.name === 'Boy01_Body_Geo') {
-                // Apply vertex colors across distinct character body regions
-                const pos = node.geometry && node.geometry.attributes && node.geometry.attributes.position;
-                if (pos && pos.count > 0) {
-                  const count = pos.count;
-                  const colors = new Float32Array(count * 3);
-                  const colCap = new THREE.Color(0x1e3a8a);      // Navy blue cap
-                  const colSkin = new THREE.Color(0xc68662);     // Warm South Asian skin
-                  const colShirt = new THREE.Color(0x0284c7);    // Sky blue school shirt
-                  const colBackpack = new THREE.Color(0xd97706); // Amber school backpack
-                  const colPants = new THREE.Color(0x1e293b);    // Navy trousers
-                  const colShoes = new THREE.Color(0x18181b);    // Black school shoes
-
-                  for (let i = 0; i < count; i++) {
-                    const y = pos.getY(i);
-                    const z = pos.getZ(i);
-                    const x = Math.abs(pos.getX(i));
-                    let c;
-                    if (y < 20) {
-                      c = colShoes;
-                    } else if (y < 92) {
-                      c = colPants;
-                    } else if (y < 148) {
-                      if (z < -5 && y > 95 && y < 145 && x < 24) {
-                        c = colBackpack;
-                      } else if (x > 28 && y < 115) {
-                        c = colSkin; // Hands
-                      } else {
-                        c = colShirt;
-                      }
-                    } else if (y < 170) {
-                      c = colSkin; // Face & neck
-                    } else {
-                      c = colCap; // Cap
-                    }
-                    colors[i * 3] = c.r;
-                    colors[i * 3 + 1] = c.g;
-                    colors[i * 3 + 2] = c.b;
-                  }
-                  node.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-                  mat.vertexColors = true;
-                  mat.color.setHex(0xffffff);
-                }
-              } else if (/brow|hair/i.test(combinedName)) {
-                mat.color.setHex(0x1f1a17); // Dark hair
-              } else if (/eye|glass/i.test(combinedName)) {
-                mat.color.setHex(0x111827); // Dark glasses / eyes
-              } else if (/mouth|tongue/i.test(combinedName)) {
-                mat.color.setHex(0x991b1b); // Natural mouth
               } else {
                 mat.color.setHex(0xc68662); // Warm South Asian skin
               }
@@ -15854,19 +15812,31 @@ let sharedRickshawArtTexture = null;
     pruneNullChildren(cloned);
     applyDhakaClothingVariations(cloned, seed || Math.floor(Math.random() * 1000));
     pruneNullChildren(cloned);
+    const isBoyCloned = ((cloned.name || '') + ' ' + (cloned.userData?.charId || '') + ' ' + (sourceScene.name || '') + ' ' + (sourceScene.userData?.charId || '')).toLowerCase().includes('boy');
     cloned.traverse(child => {
       if (child.isMesh || child.isSkinnedMesh) {
         child.frustumCulled = false;
         child.visible = true;
         child.castShadow = false;
         child.receiveShadow = false;
+        if (isBoyCloned && child.geometry) {
+          if (child.geometry.deleteAttribute) child.geometry.deleteAttribute('color');
+          else if (child.geometry.removeAttribute) child.geometry.removeAttribute('color');
+        }
         const mats = Array.isArray(child.material) ? child.material : [child.material];
         mats.forEach(mat => {
           if (!mat) return;
           mat.side = THREE.FrontSide;
           if (mat.emissive && typeof mat.emissive.setHex === 'function') mat.emissive.setHex(0x000000);
           mat.emissiveIntensity = 0;
-          if (mat.map) {
+          if (isBoyCloned) {
+            mat.vertexColors = false;
+            mat.color.setHex(0xffffff);
+            if (mat.transparent) {
+              mat.depthWrite = false;
+            }
+            mat.needsUpdate = true;
+          } else if (mat.map) {
             mat.color.setHex(0xe8e8e8); // Preserves diffuse map without daytime blowout
             mat.needsUpdate = true;
           }
@@ -16155,6 +16125,12 @@ let sharedRickshawArtTexture = null;
         let cleanUrl = url;
         if (cleanUrl.startsWith('undefinedblob:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
         if (cleanUrl.startsWith('undefineddata:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
+        if (cleanUrl.includes('blob:')) {
+          return cleanUrl.slice(cleanUrl.indexOf('blob:'));
+        }
+        if (cleanUrl.includes('data:image')) {
+          return cleanUrl.slice(cleanUrl.indexOf('data:image'));
+        }
         if (cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
           return cleanUrl;
         }

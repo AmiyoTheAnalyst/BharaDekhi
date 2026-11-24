@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v114-smooth-mixamo-crowd';
+const CACHE_NAME = 'bharadekhi-pwa-v115-ped-little-boy-texture';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
