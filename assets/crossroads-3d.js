@@ -170,20 +170,26 @@
   if (typeof THREE !== 'undefined' && THREE.TextureLoader && !THREE.TextureLoader.prototype._safeUrlGuardedV3) {
     const origTextureLoaderLoad = THREE.TextureLoader.prototype.load;
     THREE.TextureLoader.prototype.load = function (url, onLoad, onProgress, onError) {
-      const safeUrl = (typeof url === 'string' && url.length > 0 && url !== 'undefined' && !url.endsWith('/undefined'))
-        ? url
-        : BLANK_PIXEL_DATA_URI;
+      const isBlank = !(typeof url === 'string' && url.length > 0 && url !== 'undefined' && !url.endsWith('/undefined'));
+      const safeUrl = isBlank ? BLANK_PIXEL_DATA_URI : url;
 
+      let tex;
       if (typeof safeUrl === 'string' && (safeUrl.startsWith('data:') || safeUrl.startsWith('blob:'))) {
         const savedPath = this.path;
         this.path = '';
         try {
-          return origTextureLoaderLoad.call(this, safeUrl, onLoad, onProgress, onError);
+          tex = origTextureLoaderLoad.call(this, safeUrl, onLoad, onProgress, onError);
         } finally {
           this.path = savedPath;
         }
+      } else {
+        tex = origTextureLoaderLoad.call(this, safeUrl, onLoad, onProgress, onError);
       }
-      return origTextureLoaderLoad.call(this, safeUrl, onLoad, onProgress, onError);
+      if (tex && (isBlank || safeUrl === BLANK_PIXEL_DATA_URI)) {
+        tex.userData = tex.userData || {};
+        tex.userData.isBlankFallback = true;
+      }
+      return tex;
     };
     THREE.TextureLoader.prototype._safeUrlGuardedV3 = true;
   }
@@ -192,9 +198,8 @@
   if (typeof THREE !== 'undefined' && THREE.ImageLoader && !THREE.ImageLoader.prototype._safeDataUriGuarded) {
     const origImageLoaderLoad = THREE.ImageLoader.prototype.load;
     THREE.ImageLoader.prototype.load = function (url, onLoad, onProgress, onError) {
-      let targetUrl = (typeof url === 'string' && url.length > 0 && url !== 'undefined' && !url.endsWith('/undefined'))
-        ? url
-        : BLANK_PIXEL_DATA_URI;
+      const isBlank = !(typeof url === 'string' && url.length > 0 && url !== 'undefined' && !url.endsWith('/undefined'));
+      let targetUrl = isBlank ? BLANK_PIXEL_DATA_URI : url;
 
       if (typeof targetUrl === 'string' && (targetUrl.startsWith('data:') || targetUrl.startsWith('blob:'))) {
         const savedPath = this.path;
@@ -15322,18 +15327,20 @@ let sharedRickshawArtTexture = null;
 
   function isFallbackTexture(map) {
     if (!map) return true;
-    if (map.image) {
-      const img = map.image;
-      if (typeof img.src === 'string') {
-        if (!img.src || img.src === BLANK_PIXEL_DATA_URI || (img.src.startsWith('data:image') && img.src.length < 500)) return true;
-        if (/\.dds($|\?)/i.test(img.src) || img.src.includes('undefined')) return true;
+    if (map.userData && map.userData.isBlankFallback) return true;
+    const img = map.image;
+    if (img) {
+      const src = (typeof img.src === 'string') ? img.src : '';
+      if (!src || src === BLANK_PIXEL_DATA_URI) return true;
+      if (src.startsWith('data:image') && src.length < 500) return true;
+      if (/\.dds($|\?)/i.test(src) || src.includes('undefined')) return true;
+      if (img.complete && typeof img.naturalWidth === 'number' && img.naturalWidth > 0 && img.naturalWidth <= 2) {
+        return true;
       }
-      if (typeof img.width === 'number' && img.width > 4 &&
-          typeof img.height === 'number' && img.height > 4) {
-        return false;
-      }
+      // Embedded blob: textures or external diffuse URLs decode asynchronously — NEVER wipe when width is 0 or !complete
+      return false;
     }
-    return true;
+    return false;
   }
 
   const riggedPedLibrary = {};
@@ -15390,6 +15397,16 @@ let sharedRickshawArtTexture = null;
         // 1. NEVER tint textured materials: reset color to pure white so diffuse texture atlas remains natural & bright
         if (origMat.map && !isFallbackTexture(origMat.map)) {
           if (origMat.color) origMat.color.setHex(0xffffff);
+          if (origMat.emissive && typeof origMat.emissive.setHex === 'function') origMat.emissive.setHex(0x000000);
+          origMat.emissiveIntensity = 0;
+          if (origMat.isMeshPhongMaterial || origMat.type === 'MeshPhongMaterial') {
+            if (origMat.specular && typeof origMat.specular.setHex === 'function') origMat.specular.setHex(0x181818);
+            origMat.shininess = 6;
+          } else if (origMat.isMeshStandardMaterial || origMat.type === 'MeshStandardMaterial') {
+            origMat.roughness = 0.88;
+            origMat.metalness = 0.0;
+          }
+          origMat.side = THREE.FrontSide;
           continue;
         }
 
@@ -15404,8 +15421,15 @@ let sharedRickshawArtTexture = null;
         }
 
         const newMat = origMat.clone();
-        newMat.roughness = Math.max(newMat.roughness ?? 0.82, 0.76);
-        newMat.metalness = Math.min(newMat.metalness ?? 0, 0.05);
+        newMat.roughness = 0.88;
+        newMat.metalness = 0.0;
+        if (newMat.emissive && typeof newMat.emissive.setHex === 'function') newMat.emissive.setHex(0x000000);
+        newMat.emissiveIntensity = 0;
+        if (newMat.isMeshPhongMaterial || newMat.type === 'MeshPhongMaterial') {
+          if (newMat.specular && typeof newMat.specular.setHex === 'function') newMat.specular.setHex(0x181818);
+          newMat.shininess = 6;
+        }
+        newMat.side = THREE.FrontSide;
 
         const colorToApply = (pieceIndex % 2 === 0) ? palette.primary : palette.secondary;
         pieceIndex++;
@@ -15484,16 +15508,35 @@ let sharedRickshawArtTexture = null;
         mats.forEach(mat => {
           if (!mat) return;
 
-          // Trap 1x1 fallback dummy texture or untextured FBX models: null it out so clean authentic colors can apply
+          // Trap 1x1 fallback dummy texture or untextured procedural models (child / salwar):
+          // NEVER wipe mat.map for real FBX models (male_formal, male_hoodie, etc.) just because blob: is still decoding!
           if (isChild || isSalwar || isFallbackTexture(mat.map)) {
             mat.map = null;
             mat.needsUpdate = true;
           }
 
-          mat.roughness = Math.max(mat.roughness ?? 0.82, 0.76);
-          mat.metalness = Math.min(mat.metalness ?? 0, 0.05);
+          // Kill blinding daytime lighting blow-out: force matte, non-emissive shading
+          if (mat.emissive && typeof mat.emissive.setHex === 'function') {
+            mat.emissive.setHex(0x000000);
+          }
+          mat.emissiveIntensity = 0;
+
+          if (mat.isMeshPhongMaterial || mat.type === 'MeshPhongMaterial') {
+            if (mat.specular && typeof mat.specular.setHex === 'function') {
+              mat.specular.setHex(0x181818);
+            }
+            mat.shininess = 6;
+          }
+          if (mat.isMeshStandardMaterial || mat.type === 'MeshStandardMaterial') {
+            mat.roughness = 0.88;
+            mat.metalness = 0.0;
+          } else {
+            if (mat.roughness !== undefined) mat.roughness = 0.88;
+            if (mat.metalness !== undefined) mat.metalness = 0.0;
+          }
+
           mat.visible = true;
-          mat.side = THREE.DoubleSide;
+          mat.side = THREE.FrontSide;
           if (typeof mat.opacity === 'number' && mat.opacity < 0.1) {
             mat.opacity = 1.0;
           }
@@ -15505,7 +15548,7 @@ let sharedRickshawArtTexture = null;
           }
 
           if (mat.map) {
-            // Keep real high-res diffuse textures (width > 4, e.g. Remy, Ch22) bright with pure white diffuse
+            // Keep real diffuse textures bright with natural pure white diffuse
             mat.color.setHex(0xffffff);
           } else {
             // Material map is null/fallback: assign clean realistic colors by material & mesh slot
@@ -15687,6 +15730,22 @@ let sharedRickshawArtTexture = null;
       if (child.isMesh || child.isSkinnedMesh) {
         child.frustumCulled = false;
         child.visible = true;
+        child.castShadow = false;
+        child.receiveShadow = false;
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(mat => {
+          if (!mat) return;
+          mat.side = THREE.FrontSide;
+          if (mat.emissive && typeof mat.emissive.setHex === 'function') mat.emissive.setHex(0x000000);
+          mat.emissiveIntensity = 0;
+          if (mat.isMeshPhongMaterial || mat.type === 'MeshPhongMaterial') {
+            if (mat.specular && typeof mat.specular.setHex === 'function') mat.specular.setHex(0x181818);
+            mat.shininess = 6;
+          } else if (mat.isMeshStandardMaterial || mat.type === 'MeshStandardMaterial') {
+            mat.roughness = 0.88;
+            mat.metalness = 0.0;
+          }
+        });
       }
     });
     return cloned;
@@ -16066,6 +16125,8 @@ let sharedRickshawArtTexture = null;
       if (node.isMesh || node.isSkinnedMesh) {
         node.frustumCulled = false;
         node.visible = true;
+        node.castShadow = false;
+        node.receiveShadow = false;
       }
     });
 
@@ -16192,7 +16253,7 @@ let sharedRickshawArtTexture = null;
   function upgradeActiveWalkersToRigged() {
     if (typeof pedMeshMap === 'undefined') return 0;
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-    const maxRiggedWalkers = isMobileScreen ? 20 : 30;
+    const maxRiggedWalkers = isMobileScreen ? 10 : 13;
     let swappedCount = 0;
     const totalWalkers = Object.keys(pedMeshMap).length;
 
@@ -16328,17 +16389,21 @@ let sharedRickshawArtTexture = null;
         requestedCat = 'male';
       }
 
-      const template = getTemplateForCategory(requestedCat, p.charId, (p.id || 0));
-      if (template && template.scene) {
-        const defaultHeight = (template.category === 'female') ? TARGET_PED_HEIGHTS.female : (template.category === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
-        const riggedMesh = createRiggedPedestrian(p, template, template.category, defaultHeight, template.id);
-        if (riggedMesh && riggedMesh.isObject3D) {
-          riggedMesh.scale.set(1, 1, 1);
-          if (typeof scene !== 'undefined' && scene && scene.add) {
-            scene.add(riggedMesh);
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      const maxRigged = isMobile ? 10 : 13;
+      if (activeRiggedWalkerCount < maxRigged) {
+        const template = getTemplateForCategory(requestedCat, p.charId, (p.id || 0));
+        if (template && template.scene) {
+          const defaultHeight = (template.category === 'female') ? TARGET_PED_HEIGHTS.female : (template.category === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
+          const riggedMesh = createRiggedPedestrian(p, template, template.category, defaultHeight, template.id);
+          if (riggedMesh && riggedMesh.isObject3D) {
+            riggedMesh.scale.set(1, 1, 1);
+            if (typeof scene !== 'undefined' && scene && scene.add) {
+              scene.add(riggedMesh);
+            }
+            enforceWalkerWorldScale(riggedMesh, defaultHeight, template.id || template.category);
+            return riggedMesh;
           }
-          enforceWalkerWorldScale(riggedMesh, defaultHeight, template.id || template.category);
-          return riggedMesh;
         }
       }
     }
@@ -16565,7 +16630,8 @@ let sharedRickshawArtTexture = null;
     const thighRadius = isChild ? 0.48 : (isFemale ? 0.62 : 0.76);
     const targetHipsY = benchSeatTopY + thighRadius;
 
-    characterModel.position.y = targetHipsY - hPos.y;
+    // Bench grounding polish: lower seated pose ~0.5 units so shoes touch sidewalk flush
+    characterModel.position.y = (targetHipsY - hPos.y) - 0.5;
     characterModel.position.z = -1.50 - sPos.z;
     characterModel.position.x = -hPos.x;
     characterModel.updateMatrixWorld(true);
@@ -16657,7 +16723,7 @@ let sharedRickshawArtTexture = null;
       if (procHuman.userData.leftKneePivot) procHuman.userData.leftKneePivot.rotation.x = 1.48;
       if (procHuman.userData.rightLegPivot) procHuman.userData.rightLegPivot.rotation.x = -1.48;
       if (procHuman.userData.rightKneePivot) procHuman.userData.rightKneePivot.rotation.x = 1.48;
-      if (procHuman.userData.bodyRoot) procHuman.userData.bodyRoot.position.y = BENCH_SEAT_Y;
+      if (procHuman.userData.bodyRoot) procHuman.userData.bodyRoot.position.y = BENCH_SEAT_Y - 0.5;
       if (procHuman.userData.rightArmPivot) procHuman.userData.rightArmPivot.rotation.set(0.42, -0.15, 0.2);
       if (procHuman.userData.rightElbowPivot) procHuman.userData.rightElbowPivot.rotation.set(0.75, -0.2, -0.2);
       if (procHuman.userData.leftArmPivot) procHuman.userData.leftArmPivot.rotation.set(0.35, 0.15, -0.4);
@@ -16694,6 +16760,8 @@ let sharedRickshawArtTexture = null;
     };
   }
 
+  const _sitterWorldPos = new THREE.Vector3();
+
   function updateGossipingCrowd(time, delta, isRain = false) {
     if (!gossipingCrowd || !gossipingCrowd.length) return;
 
@@ -16707,6 +16775,14 @@ let sharedRickshawArtTexture = null;
 
       if (person.umbrella) {
         person.umbrella.visible = rainActive;
+      }
+
+      // Distance LOD: skip updating bench-sitters farther than 160 units from camera
+      if (typeof camera !== 'undefined' && camera && person.group) {
+        person.group.getWorldPosition(_sitterWorldPos);
+        if (_sitterWorldPos.distanceTo(camera.position) > 160) {
+          continue;
+        }
       }
 
       const { bones, baseRot, cycleOffset, seatIdx, totalInBench, isProcedural } = person;
@@ -18949,12 +19025,11 @@ let sharedRickshawArtTexture = null;
       });
     }
 
-    // 13. Dhaka Sidewalk Public Benches with Seated Gossiping Crowd
+    // 13. Dhaka Sidewalk Public Benches with Seated Gossiping Crowd (Capped to 6 sitters across 3 benches)
     const benchLocations = [
-      { id: 'bench_nw', pos: [-160, 2.005, -125], rotY: Math.PI / 4, people: ['male_formal', 'male_sweater'] },
-      { id: 'bench_ne', pos: [165, 2.005, -125], rotY: -Math.PI / 4, people: ['female_salwar', 'female_ch22'] },
-      { id: 'bench_sw', pos: [-165, 2.005, 125], rotY: 3 * Math.PI / 4, people: ['male_hoodie', 'little_boy', 'male_tshirt'] },
-      { id: 'bench_se', pos: [160, 2.005, 125], rotY: -3 * Math.PI / 4, people: ['male_remy', 'male_formal'] }
+      { id: 'bench_nw', pos: [-160, 2.005, -125], rotY: Math.PI / 4, people: ['male_formal', 'female_salwar'] },
+      { id: 'bench_ne', pos: [165, 2.005, -125], rotY: -Math.PI / 4, people: ['male_hoodie', 'female_ch22'] },
+      { id: 'bench_sw', pos: [-165, 2.005, 125], rotY: 3 * Math.PI / 4, people: ['male_sweater', 'little_boy'] }
     ];
 
     benchLocations.forEach((bDef, bIdx) => {
@@ -20141,7 +20216,20 @@ let sharedRickshawArtTexture = null;
           walkAction.timeScale = speedFactor;
         }
 
-        mixer.update(Math.min(delta, 0.1));
+        // Distance LOD: full-rate animation updates within ~150 units of camera; throttle to every 3rd frame (delta * 3) beyond
+        const walkerDist = camera ? pm.mesh.position.distanceTo(camera.position) : 0;
+        if (walkerDist <= 150) {
+          pm.mesh.userData._lodAccDelta = 0;
+          mixer.update(Math.min(delta, 0.1));
+        } else {
+          pm.mesh.userData._lodFrameCount = ((pm.mesh.userData._lodFrameCount || 0) + 1) % 3;
+          pm.mesh.userData._lodAccDelta = (pm.mesh.userData._lodAccDelta || 0) + delta;
+          if (pm.mesh.userData._lodFrameCount === 0) {
+            const stepDelta = Math.min(pm.mesh.userData._lodAccDelta, 0.3);
+            pm.mesh.userData._lodAccDelta = 0;
+            mixer.update(stepDelta);
+          }
+        }
 
         // Keep grounded stance contact flush at exact Y = 0.000 (groundedBaseY)
         if (pm.mesh.userData.bodyRoot && pm.mesh.userData.bodyRoot.userData.groundedBaseY !== undefined) {
@@ -20506,7 +20594,27 @@ let sharedRickshawArtTexture = null;
             }
             allMirrorsToHide.forEach(m => { if (m) m.visible = false; });
 
-            pruneNullChildren(scene);
+            // Temporarily hide Mixamo pedestrians & bench-sitter groups during mirrorCam pass to skip duplicate skinning
+            const crowdToRestore = [];
+            if (typeof pedMeshMap !== 'undefined') {
+              for (const pk in pedMeshMap) {
+                const pm = pedMeshMap[pk];
+                if (pm && pm.mesh && pm.mesh.visible) {
+                  pm.mesh.visible = false;
+                  crowdToRestore.push(pm.mesh);
+                }
+              }
+            }
+            if (typeof gossipingCrowd !== 'undefined') {
+              for (let gi = 0; gi < gossipingCrowd.length; gi++) {
+                const gp = gossipingCrowd[gi];
+                if (gp && gp.group && gp.group.visible) {
+                  gp.group.visible = false;
+                  crowdToRestore.push(gp.group);
+                }
+              }
+            }
+
             const prevRT = renderer.getRenderTarget();
             try {
               renderer.setRenderTarget(targetRT);
@@ -20516,6 +20624,7 @@ let sharedRickshawArtTexture = null;
             } finally {
               renderer.setRenderTarget(prevRT);
               allMirrorsToHide.forEach(m => { if (m) m.visible = true; });
+              crowdToRestore.forEach(obj => { if (obj) obj.visible = true; });
             }
           }
         }
@@ -20523,7 +20632,6 @@ let sharedRickshawArtTexture = null;
     }
 
     // 8. Crisp Direct WebGL Render (No Blur or Washout)
-    pruneNullChildren(scene);
     const renderT0 = performance.now();
     renderer.render(scene, camera);
     const renderTimeMs = performance.now() - renderT0;
