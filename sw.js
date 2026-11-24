@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v113-bench-legs-grounded';
+const CACHE_NAME = 'bharadekhi-pwa-v114-smooth-mixamo-crowd';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
