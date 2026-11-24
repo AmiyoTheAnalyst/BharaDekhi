@@ -325,6 +325,68 @@
   let activeTargetVehicle = null;
   let walkingCycleIndex = 0;
   const WALKING_CYCLE_CATEGORIES = ['male', 'female', 'child'];
+  const CANONICAL_WALKING_ROSTER = [
+    'male_remy',
+    'female_ch22',
+    'female_salwar',
+    'little_boy',
+    'male_formal',
+    'male_hoodie',
+    'male_sweater',
+    'male_tshirt'
+  ];
+  let lastFocusedTemplateId = null;
+
+  const CHARACTER_INFO = {
+    male_remy: {
+      icon: '🚶‍♂️',
+      name: 'Remy (Street Casual)',
+      badge: 'Remy (Street Casual)',
+      sub: 'Executive commuter crossing zebra stripes · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    female_ch22: {
+      icon: '🚶‍♀️',
+      name: 'Ch22 (Modern Commuter)',
+      badge: 'Ch22 (Modern Commuter)',
+      sub: 'Urban commuter crossing Mirpur 10 · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    female_salwar: {
+      icon: '🚶‍♀️',
+      name: 'Salwar Kameez Commuter',
+      badge: 'Salwar Kameez Commuter',
+      sub: 'Traditional South Asian attire commuter · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    little_boy: {
+      icon: '🧒',
+      name: 'School Kid Walker',
+      badge: 'School Kid Walker',
+      sub: 'Dhaka student crossing zebra stripes · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    male_formal: {
+      icon: '🚶‍♂️',
+      name: 'Formal Office Commuter',
+      badge: 'Formal Office Commuter',
+      sub: 'Formal business commuter crossing Mirpur 10 · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    male_hoodie: {
+      icon: '🚶‍♂️',
+      name: 'Streetwear Hoodie Walker',
+      badge: 'Streetwear Hoodie Walker',
+      sub: 'Dhaka youth streetwear commuter · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    male_sweater: {
+      icon: '🚶‍♂️',
+      name: 'Winter Sweater Walker',
+      badge: 'Winter Sweater Walker',
+      sub: 'Winter casual commuter crossing zebra stripes · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    },
+    male_tshirt: {
+      icon: '🚶‍♂️',
+      name: 'Casual T-Shirt Walker',
+      badge: 'Casual T-Shirt Walker',
+      sub: 'Casual commuter strolling across zebra crosswalk · 360° Orbit (Click Walking to cycle) · 0 carbon'
+    }
+  };
 
   function setupCrispCanvasTexture(tex) {
     if (!tex) return tex;
@@ -350,9 +412,8 @@
     return tex;
   }
 
-  function acquireTargetWalker(desiredCategory) {
+  function acquireTargetWalker(desiredId, advanceCycle = false) {
     if (typeof pedMeshMap === 'undefined') return null;
-    const cat = desiredCategory || WALKING_CYCLE_CATEGORIES[walkingCycleIndex] || 'male';
 
     // STRICT: Only consider walkers whose Mixamo model is ALREADY spawned, visible === true, and isRiggedMixamo === true
     const readyMixamoPeds = Object.values(pedMeshMap).filter(pm =>
@@ -367,19 +428,50 @@
 
     if (!readyMixamoPeds.length) return null;
 
-    // Filter by matching pedCategory if available
-    const matching = readyMixamoPeds.filter(pm => {
-      const pCat = (pm.mesh.userData && pm.mesh.userData.pedCategory) || pm.data.pedCategory;
-      if (cat === 'child') {
-        return pCat === 'child' || pm.data.isChild;
-      }
-      if (cat === 'female') {
-        return pCat === 'female' || pm.data.isFemale;
-      }
-      return pCat === 'male' || (!pm.data.isFemale && !pm.data.isChild && pCat !== 'child' && pCat !== 'female');
-    });
+    const availableIds = new Set(readyMixamoPeds.map(pm => pm.mesh.userData.charId || pm.data.charId || pm.data.templateId));
+    const readyIds = CANONICAL_WALKING_ROSTER.filter(id => availableIds.has(id));
 
-    // Fall back to any ready Mixamo walker if requested category isn't ready yet
+    let targetTemplateId = desiredId;
+
+    if (advanceCycle) {
+      if (readyIds.length > 0) {
+        const curIdx = lastFocusedTemplateId ? readyIds.indexOf(lastFocusedTemplateId) : -1;
+        const nextIdx = (curIdx + 1) % readyIds.length;
+        targetTemplateId = readyIds[nextIdx];
+      } else {
+        targetTemplateId = readyMixamoPeds[0].mesh.userData.charId || readyMixamoPeds[0].data.charId;
+      }
+    } else if (!targetTemplateId) {
+      if (lastFocusedTemplateId && availableIds.has(lastFocusedTemplateId)) {
+        targetTemplateId = lastFocusedTemplateId;
+      } else if (readyIds.length > 0) {
+        targetTemplateId = readyIds[0];
+      }
+    }
+
+    if (targetTemplateId && availableIds.has(targetTemplateId)) {
+      lastFocusedTemplateId = targetTemplateId;
+    }
+
+    let matching = [];
+    if (targetTemplateId) {
+      matching = readyMixamoPeds.filter(pm => {
+        const pId = pm.mesh.userData.charId || pm.data.charId || pm.data.templateId;
+        return pId === targetTemplateId;
+      });
+    }
+
+    // Fall back to category matching if desiredId was e.g. 'female' or 'male' and didn't match a templateId
+    if (!matching.length && desiredId) {
+      matching = readyMixamoPeds.filter(pm => {
+        const pCat = (pm.mesh.userData && pm.mesh.userData.pedCategory) || pm.data.pedCategory;
+        if (desiredId === 'child') return pCat === 'child' || pm.data.isChild;
+        if (desiredId === 'female') return pCat === 'female' || pm.data.isFemale;
+        if (desiredId === 'male') return pCat === 'male' || (!pm.data.isFemale && !pm.data.isChild);
+        return false;
+      });
+    }
+
     const candidatePool = matching.length ? matching : readyMixamoPeds;
 
     // Prefer crosswalk zebra walkers (!isSidewalk) over sidewalk walkers
@@ -391,14 +483,19 @@
 
     const chosen = pool[0];
     if (!chosen) return null;
-    const actualCat = (chosen.mesh.userData && chosen.mesh.userData.pedCategory) || chosen.data.pedCategory || cat;
-    const actualCharId = (chosen.mesh.userData && chosen.mesh.userData.charId) || chosen.data.charId;
-    const actualCharName = (chosen.mesh.userData && chosen.mesh.userData.charName) || chosen.data.charName;
+
+    const actualCharId = (chosen.mesh.userData && chosen.mesh.userData.charId) || chosen.data.charId || targetTemplateId;
+    lastFocusedTemplateId = actualCharId;
+    const info = CHARACTER_INFO[actualCharId];
+    const actualCat = (chosen.mesh.userData && chosen.mesh.userData.pedCategory) || chosen.data.pedCategory || (actualCharId && actualCharId.includes('female') ? 'female' : (actualCharId && actualCharId.includes('boy') ? 'child' : 'male'));
+    const actualCharName = (info && info.name) || (chosen.mesh.userData && chosen.mesh.userData.charName) || chosen.data.charName || 'Commuter';
+
     return {
-      id: chosen.data.id || ('ped_' + actualCat),
+      id: chosen.data.id || ('ped_' + actualCharId),
       type: 'walking',
       category: actualCat,
       charId: actualCharId,
+      templateId: actualCharId,
       charName: actualCharName,
       mesh: chosen.mesh,
       data: chosen.data,
@@ -449,7 +546,7 @@
         };
       }
     } else if (modeName === 'walking') {
-      return acquireTargetWalker(WALKING_CYCLE_CATEGORIES[walkingCycleIndex]);
+      return acquireTargetWalker(lastFocusedTemplateId);
     }
 
     return null;
@@ -521,20 +618,14 @@
         if (sub) sub.textContent = 'Pedestrian crosswalk · 360° Orbit · Loading commuters...';
         return;
       }
+      const charId = target.charId || (target.mesh && target.mesh.userData && target.mesh.userData.charId);
+      const info = CHARACTER_INFO[charId];
       const cat = target.category || (target.data && target.data.pedCategory) || (target.mesh && target.mesh.userData && target.mesh.userData.pedCategory) || 'male';
-      const charName = target.charName || (target.mesh && target.mesh.userData && target.mesh.userData.charName);
-      if (icon) icon.textContent = cat === 'female' ? '🚶‍♀️' : cat === 'child' ? '🧒' : '🚶‍♂️';
+      const charName = (info && info.name) || target.charName || (target.mesh && target.mesh.userData && target.mesh.userData.charName) || 'Commuter';
+      if (icon) icon.textContent = (info && info.icon) || (cat === 'female' ? '🚶‍♀️' : cat === 'child' ? '🧒' : '🚶‍♂️');
       const locLabel = target.data?.isSidewalk ? 'Footpath Stroll' : 'Mirpur 10 Zebra Crosswalk';
-      if (cat === 'female') {
-        title.textContent = `${charName || 'Female Commuter (Ch22 Mixamo)'} · ${locLabel}`;
-        if (sub) sub.textContent = `Traditional attire commuter crossing Mirpur 10 · 360° Orbit (Click Walking to cycle) · 0 carbon`;
-      } else if (cat === 'child') {
-        title.textContent = `${charName || 'School Kid Walker'} · ${locLabel}`;
-        if (sub) sub.textContent = `Dhaka student with backpack · Articulated Mocap · 360° Orbit (Click Walking to cycle)`;
-      } else {
-        title.textContent = `${charName || 'Male Commuter (Remy Mixamo)'} · ${locLabel}`;
-        if (sub) sub.textContent = `Executive commuter crossing zebra stripes · 360° Orbit (Click Walking to cycle) · 0 carbon`;
-      }
+      title.textContent = `${charName} · ${locLabel}`;
+      if (sub) sub.textContent = (info && info.sub) || `Mixamo 3D Rigged Commuter · 360° Orbit (Click Walking to cycle) · 0 carbon`;
     }
   }
 
@@ -693,8 +784,9 @@
       if (!isReady) {
         badge.textContent = 'Zebra Crosswalk · 360° Orbit';
       } else {
-        const cat = (activeTargetVehicle && activeTargetVehicle.category) || (activeTargetVehicle && activeTargetVehicle.data && activeTargetVehicle.data.pedCategory) || 'male';
-        const label = cat === 'female' ? 'Female Walker (Ch22)' : cat === 'child' ? 'Kid Walker' : 'Male Walker (Remy)';
+        const charId = activeTargetVehicle.charId || (activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.charId);
+        const info = CHARACTER_INFO[charId];
+        const label = (info && info.badge) || activeTargetVehicle.charName || 'Mixamo Walker';
         badge.textContent = `${label} · 360° Orbit (Click Walking to cycle)`;
       }
     } else {
@@ -757,16 +849,15 @@
             if (title) title.textContent = 'Zebra Crosswalk · 360° Orbit';
             if (sub) sub.textContent = 'Pedestrian crosswalk & sidewalk strollers · 0 carbon';
           } else {
-            const cat = (activeTargetVehicle && (activeTargetVehicle.category || (activeTargetVehicle.data && activeTargetVehicle.data.pedCategory))) || WALKING_CYCLE_CATEGORIES[walkingCycleIndex] || 'male';
+            const charId = activeTargetVehicle.charId || (activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.charId);
+            const info = CHARACTER_INFO[charId];
+            const charName = (info && info.name) || activeTargetVehicle.charName || 'Commuter';
+            if (icon && info) icon.textContent = info.icon;
             if (title) {
-              title.textContent = (cat === 'female') ? 'Female Commuter (Ch22) · 360° Orbit' : (cat === 'child' ? 'School Kid Walker · 360° Orbit' : 'Male Commuter (Remy) · 360° Orbit');
+              title.textContent = `${charName} · 360° Orbit`;
             }
             if (sub) {
-              sub.textContent = (cat === 'female')
-                ? 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle (Male → Female → Kid)'
-                : (cat === 'child')
-                  ? 'Articulated Dhaka School Kid Rig · Click Walking to cycle (Male → Female → Kid)'
-                  : 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle (Male → Female → Kid)';
+              sub.textContent = (info && info.sub) || 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle';
             }
           }
         }
@@ -783,23 +874,9 @@
 
     if (activeCamMode === modeName && modeName !== 'overview') {
       if (modeName === 'walking') {
-        // Repeated clicks on Walking cycle across Male (Remy) -> Female (Ch22) -> Kid Walker
-        const totalCats = WALKING_CYCLE_CATEGORIES.length;
-        let foundWalker = null;
-        for (let step = 1; step <= totalCats; step++) {
-          const testIdx = (walkingCycleIndex + step) % totalCats;
-          const targetCat = WALKING_CYCLE_CATEGORIES[testIdx];
-          const candidate = acquireTargetWalker(targetCat);
-          if (candidate && candidate.mesh && candidate.mesh.visible === true && candidate.mesh.userData && candidate.mesh.userData.isRiggedMixamo) {
-            if (!activeTargetVehicle || candidate.mesh !== activeTargetVehicle.mesh) {
-              walkingCycleIndex = testIdx;
-              foundWalker = candidate;
-              break;
-            }
-          }
-        }
-        if (foundWalker) {
-          activeTargetVehicle = foundWalker;
+        const candidate = acquireTargetWalker(null, true);
+        if (candidate && candidate.mesh && candidate.mesh.visible === true && candidate.mesh.userData && candidate.mesh.userData.isRiggedMixamo) {
+          activeTargetVehicle = candidate;
           updateLegendHUD('walking');
           updateTrackedVehicleHUD(activeTargetVehicle, true);
           const pose = getVehicleOrbitPose(activeTargetVehicle);
@@ -848,8 +925,7 @@
     vehicleOrbitPitch = 0.28;
 
     if (targetMode === 'walking') {
-      walkingCycleIndex = 0;
-      activeTargetVehicle = acquireTargetWalker('male') || acquireTargetWalker();
+      activeTargetVehicle = acquireTargetWalker(null, true);
     } else if (targetMode !== 'overview') {
       activeTargetVehicle = acquireTargetVehicle(targetMode);
     } else {
@@ -16117,17 +16193,29 @@ let sharedRickshawArtTexture = null;
     return fbxLoadingManager;
   }
 
+  const CROSSWALK_SLOT_ASSIGNMENTS = {
+    ped_n1: { templateId: 'male_remy', zone: 'North', side: 'West', corner: 'NW', isTier1: true },
+    ped_n2: { templateId: 'female_salwar', zone: 'North', side: 'East', corner: 'NE', isTier1: false },
+    ped_s1: { templateId: 'male_formal', zone: 'South', side: 'West', corner: 'SW', isTier1: false },
+    ped_s2: { templateId: 'female_ch22', zone: 'South', side: 'East', corner: 'SE', isTier1: true },
+    ped_w1: { templateId: 'little_boy', zone: 'West', side: 'North', corner: 'NW', isTier1: false },
+    ped_w2: { templateId: 'male_hoodie', zone: 'West', side: 'South', corner: 'SW', isTier1: false },
+    ped_e1: { templateId: 'male_sweater', zone: 'East', side: 'North', corner: 'NE', isTier1: false },
+    ped_e2: { templateId: 'male_tshirt', zone: 'East', side: 'South', corner: 'SE', isTier1: false }
+  };
+
   const fbxModels = [
     { id: 'female_salwar', category: 'female', path: 'assets/models/ped-female-salwar.fbx', height: TARGET_PED_HEIGHTS.female, name: 'Salwar Kameez Commuter' },
     { id: 'little_boy', category: 'child', path: 'assets/models/ped-little-boy.fbx', height: TARGET_PED_HEIGHTS.child, name: 'School Kid Walker' },
-    { id: 'male_formal', category: 'male', path: 'assets/models/ped-male-formal.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Formal Office Commuter' },
     { id: 'male_hoodie', category: 'male', path: 'assets/models/ped-male-hoodie.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Streetwear Hoodie Walker' },
     { id: 'male_sweater', category: 'male', path: 'assets/models/ped-male-sweater.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Winter Sweater Walker' },
+    { id: 'male_formal', category: 'male', path: 'assets/models/ped-male-formal.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Formal Office Commuter' },
     { id: 'male_tshirt', category: 'male', path: 'assets/models/ped-male-tshirt.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Casual T-Shirt Walker' }
   ];
 
   function loadFBXTemplate(def) {
     if (typeof THREE === 'undefined' || typeof THREE.FBXLoader !== 'function') {
+      console.error('[Tier 2 Failed]', def.id, new Error('FBXLoader is not available'));
       return Promise.resolve(null);
     }
     return new Promise(resolve => {
@@ -16135,44 +16223,53 @@ let sharedRickshawArtTexture = null;
         const manager = getFBXLoadingManager();
         const loader = manager ? new THREE.FBXLoader(manager) : new THREE.FBXLoader();
         loader.load(def.path, async fbx => {
-          if (!fbx) { resolve(null); return; }
-          pruneNullChildren(fbx);
-          const normScene = normalizeCharacterTemplate(fbx, def.height, def.id);
-          const sceneToStore = normScene || fbx;
-          pruneNullChildren(sceneToStore);
-          await decodeTemplateTextures(sceneToStore);
+          try {
+            if (!fbx) {
+              console.error('[Tier 2 Failed]', def.id, new Error('Null FBX loaded'));
+              resolve(null);
+              return;
+            }
+            pruneNullChildren(fbx);
+            const normScene = normalizeCharacterTemplate(fbx, def.height, def.id);
+            const sceneToStore = normScene || fbx;
+            pruneNullChildren(sceneToStore);
+            await decodeTemplateTextures(sceneToStore);
 
-          const isFem = (def.category === 'female');
-          const walkClip = isFem ? (sharedMixamoClips.femaleWalk || sharedMixamoClips.maleWalk) : sharedMixamoClips.maleWalk;
-          const idleClip = isFem ? (sharedMixamoClips.femaleIdle || sharedMixamoClips.maleIdle) : sharedMixamoClips.maleIdle;
-          const anims = [];
-          if (walkClip) anims.push(walkClip);
-          if (idleClip) anims.push(idleClip);
+            const isFem = (def.category === 'female');
+            const walkClip = isFem ? (sharedMixamoClips.femaleWalk || sharedMixamoClips.maleWalk) : sharedMixamoClips.maleWalk;
+            const idleClip = isFem ? (sharedMixamoClips.femaleIdle || sharedMixamoClips.maleIdle) : sharedMixamoClips.maleIdle;
+            const anims = [];
+            if (walkClip) anims.push(walkClip);
+            if (idleClip) anims.push(idleClip);
 
-          riggedPedLibrary[def.id] = {
-            id: def.id,
-            category: def.category,
-            name: def.name,
-            scene: sceneToStore,
-            animations: anims,
-            height: def.height
-          };
-          if (def.category === 'child') {
-            riggedPedPrototypes.child = riggedPedLibrary[def.id];
+            riggedPedLibrary[def.id] = {
+              id: def.id,
+              category: def.category,
+              name: def.name,
+              scene: sceneToStore,
+              animations: anims,
+              height: def.height
+            };
+            if (def.category === 'child') {
+              riggedPedPrototypes.child = riggedPedLibrary[def.id];
+            }
+
+            sceneToStore.updateMatrixWorld(true);
+            const box = new THREE.Box3().setFromObject(sceneToStore);
+            const h = box.max.y - box.min.y;
+            console.log('[Pedestrians] Normalized', def.id, 'height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
+            console.log('[Tier 2 Loaded]', def.id);
+            resolve(riggedPedLibrary[def.id]);
+          } catch (innerErr) {
+            console.error('[Tier 2 Failed]', def.id, innerErr);
+            resolve(null);
           }
-
-          sceneToStore.updateMatrixWorld(true);
-          const box = new THREE.Box3().setFromObject(sceneToStore);
-          const h = box.max.y - box.min.y;
-          console.log('[Pedestrians] Normalized', def.id, 'height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
-          console.info(`[Pedestrians] Loaded FBX character: ${def.id} (${def.name})`);
-          resolve(riggedPedLibrary[def.id]);
         }, undefined, err => {
-          console.warn(`[Pedestrians] FBX load failed for ${def.id}:`, err);
+          console.error('[Tier 2 Failed]', def.id, err);
           resolve(null);
         });
       } catch (e) {
-        console.warn(`[Pedestrians] FBXLoader exception for ${def.id}:`, e);
+        console.error('[Tier 2 Failed]', def.id, e);
         resolve(null);
       }
     });
@@ -16181,50 +16278,30 @@ let sharedRickshawArtTexture = null;
   function assignTemplateToUnspawnedEntities(template) {
     if (!template || !template.scene) return;
 
-    // 1. Bench sitters waiting for this character or category (1 per frame via pedSpawnQueue)
+    // 1. Bench sitters waiting for this character or category
     if (typeof gossipingCrowd !== 'undefined' && gossipingCrowd && gossipingCrowd.length) {
       for (let i = 0; i < gossipingCrowd.length; i++) {
         const sitter = gossipingCrowd[i];
-        if (sitter && sitter.isPlaceholder) {
+        if (sitter && (sitter.isPlaceholder || !sitter.isSkinned)) {
           const matchesChar = (sitter.preferredCharId === template.id);
           const matchesCat = (!sitter.preferredCharId && sitter.category === template.category);
           if (matchesChar || matchesCat) {
-            pedSpawnQueue.push(() => {
-              spawnOneRiggedBenchHuman(sitter);
-            });
+            spawnOneRiggedBenchHuman(sitter);
           }
         }
       }
     }
 
-    // 2. Unspawned walkers matching this category (1 per frame via pedSpawnQueue)
+    // 2. Crosswalk walker slots strictly reserved for this Tier 2 template
     if (typeof pedMeshMap !== 'undefined') {
-      const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-      const maxRiggedWalkers = isMobileScreen ? 10 : 13;
-
       for (const k in pedMeshMap) {
-        if (activeRiggedWalkerCount >= maxRiggedWalkers) break;
         const pm = pedMeshMap[k];
         if (!pm || !pm.mesh || !pm.data) continue;
-        // NEVER tear down or rebuild already-visible Tier 1 walkers
-        if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer) continue;
-
-        const p = pm.data;
-        const isChildWalker = p.isChild || p.pedCategory === 'child' || p.gender === 'child';
-        const isFemaleWalker = p.pedCategory === 'female' || p.isFemale || p.gender === 'female';
-        const isMaleWalker = !isChildWalker && !isFemaleWalker;
-
-        let matches = false;
-        if (template.category === 'child' && isChildWalker) matches = true;
-        else if (template.category === 'female' && isFemaleWalker) matches = true;
-        else if (template.category === 'male' && isMaleWalker) matches = true;
-
-        if (matches) {
-          pedSpawnQueue.push(() => {
-            if (activeRiggedWalkerCount < maxRiggedWalkers && (!pm.mesh.userData || !pm.mesh.userData.isRiggedMixamo)) {
-              spawnOneRiggedWalker(k, pm);
-            }
-          });
+        const slotDef = CROSSWALK_SLOT_ASSIGNMENTS[pm.data.id];
+        if (slotDef && slotDef.templateId === template.id) {
+          if (!pm.mesh.userData || !pm.mesh.userData.isRiggedMixamo) {
+            spawnOneRiggedWalker(k, pm, template.id);
+          }
         }
       }
     }
@@ -16233,18 +16310,7 @@ let sharedRickshawArtTexture = null;
   function scheduleTier2Streaming() {
     if (tier2StreamingStarted) return;
     tier2StreamingStarted = true;
-
-    const startStreaming = () => {
-      if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
-        window.requestIdleCallback(() => {
-          streamFBXSequentially();
-        }, { timeout: 1200 });
-      } else {
-        setTimeout(streamFBXSequentially, 600);
-      }
-    };
-
-    setTimeout(startStreaming, 600);
+    setTimeout(streamFBXSequentially, 150);
   }
 
   async function streamFBXSequentially() {
@@ -16257,22 +16323,25 @@ let sharedRickshawArtTexture = null;
           assignTemplateToUnspawnedEntities(loaded);
         }
       } catch (err) {
-        console.warn(`[Pedestrians] Background streaming skipped ${def.id}:`, err);
+        console.error('[Tier 2 Failed]', def.id, err);
       }
 
       // Yield between FBX downloads to ensure zero main-thread freeze
-      await new Promise(res => {
-        if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
-          window.requestIdleCallback(res, { timeout: 250 });
-        } else {
-          setTimeout(res, 80);
-        }
-      });
+      await new Promise(res => setTimeout(res, 80));
     }
     console.info(`[Pedestrians] Tier 2 Complete: All Mixamo character templates active (${Object.keys(riggedPedLibrary).length} total).`);
     if (typeof scene !== 'undefined' && scene) {
       pruneNullChildren(scene);
     }
+
+    const activeMixamoWalkers = Object.values(pedMeshMap)
+      .filter(pm => pm && pm.mesh && pm.mesh.visible === true && pm.mesh.userData && pm.mesh.userData.isRiggedMixamo)
+      .map(pm => ({
+        templateId: pm.mesh.userData.charId || pm.data.charId || pm.data.templateId,
+        zone: pm.mesh.userData.zone || pm.data.zone || 'Crosswalk'
+      }));
+    console.log('[Pedestrians] Active unique Mixamo templates:', [...new Set(activeMixamoWalkers.map(w => w.templateId))]);
+    console.log('[Pedestrians] Crosswalk pairing check:', activeMixamoWalkers.map(w => `${w.zone}:${w.templateId}`));
   }
 
   function assignGLBToUnspawnedWalkers(charId) {
@@ -16280,22 +16349,14 @@ let sharedRickshawArtTexture = null;
     const template = riggedPedLibrary[charId];
     if (!template || !template.scene) return;
 
-    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-    const maxRiggedWalkers = isMobileScreen ? 10 : 13;
-
     for (const k in pedMeshMap) {
-      if (activeRiggedWalkerCount >= maxRiggedWalkers) break;
       const pm = pedMeshMap[k];
       if (!pm || !pm.mesh || !pm.data) continue;
-      // Never tear down or rebuild already-visible Tier 1 walkers
-      if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer) continue;
-
-      const p = pm.data;
-      const isFem = p.pedCategory === 'female' || p.isFemale || p.gender === 'female';
-      if (charId === 'female_ch22' && isFem) {
-        spawnOneRiggedWalker(k, pm);
-      } else if (charId === 'male_remy' && !isFem && !p.isChild) {
-        spawnOneRiggedWalker(k, pm);
+      const slotDef = CROSSWALK_SLOT_ASSIGNMENTS[pm.data.id];
+      if (slotDef && slotDef.isTier1 && slotDef.templateId === charId) {
+        if (!pm.mesh.userData || !pm.mesh.userData.isRiggedMixamo) {
+          spawnOneRiggedWalker(k, pm, slotDef.templateId);
+        }
       }
     }
 
@@ -16303,7 +16364,7 @@ let sharedRickshawArtTexture = null;
     if (typeof gossipingCrowd !== 'undefined' && gossipingCrowd && gossipingCrowd.length) {
       for (let i = 0; i < gossipingCrowd.length; i++) {
         const sitter = gossipingCrowd[i];
-        if (sitter && sitter.isPlaceholder && sitter.preferredCharId === charId) {
+        if (sitter && (sitter.isPlaceholder || !sitter.isSkinned) && sitter.preferredCharId === charId) {
           spawnOneRiggedBenchHuman(sitter);
         }
       }
@@ -16316,22 +16377,31 @@ let sharedRickshawArtTexture = null;
       return;
     }
 
-    // Collect crosswalk zebra entries (!isSidewalk)
-    const crosswalkEntries = [];
+    // Stop Tier 1 from hogging all walker slots:
+    // When Tier 1 loads first, spawn ONLY 2 initial walkers: 1 male_remy on Crosswalk A (ped_n1 on North zebra),
+    // and 1 female_ch22 on Crosswalk B (ped_s2 on South zebra) - NEVER two identical Remys standing or walking together.
+    // Reserve the remaining Mixamo walker slots strictly for the 6 Tier 2 templates.
+    let initialSpawned = 0;
     for (const k in pedMeshMap) {
       const pm = pedMeshMap[k];
-      if (pm && pm.data && !pm.data.isSidewalk && pm.mesh) {
-        crosswalkEntries.push({ key: k, pm: pm });
+      if (!pm || !pm.data) continue;
+      const slotDef = CROSSWALK_SLOT_ASSIGNMENTS[pm.data.id];
+      if (slotDef && slotDef.isTier1) {
+        if (riggedPedLibrary[slotDef.templateId]) {
+          if (spawnOneRiggedWalker(k, pm, slotDef.templateId)) {
+            initialSpawned++;
+          }
+        }
       }
     }
 
-    // Immediately spawn 4–6 initial crosswalk walkers in a single fast synchronous batch
-    const targetBatchCount = Math.min(6, crosswalkEntries.length || 6);
-    let initialSpawned = 0;
-    for (let i = 0; i < crosswalkEntries.length && initialSpawned < targetBatchCount; i++) {
-      const entry = crosswalkEntries[i];
-      if (spawnOneRiggedWalker(entry.key, entry.pm)) {
-        initialSpawned++;
+    // Also seat female_ch22 on bench if ready
+    if (typeof gossipingCrowd !== 'undefined' && gossipingCrowd && gossipingCrowd.length) {
+      for (let i = 0; i < gossipingCrowd.length; i++) {
+        const sitter = gossipingCrowd[i];
+        if (sitter && (sitter.isPlaceholder || !sitter.isSkinned) && sitter.preferredCharId && riggedPedLibrary[sitter.preferredCharId]) {
+          spawnOneRiggedBenchHuman(sitter);
+        }
       }
     }
 
@@ -16659,29 +16729,22 @@ let sharedRickshawArtTexture = null;
     return wrapper;
   }
 
-  function spawnOneRiggedWalker(key, pm) {
+  function spawnOneRiggedWalker(key, pm, forceTemplateId) {
     if (!pm || !pm.mesh || !pm.data) return false;
     const p = pm.data;
-    let requestedCat = null;
-    if (p.isChild || p.pedCategory === 'child' || p.gender === 'child') {
-      requestedCat = 'child';
-    } else if (p.pedCategory === 'female' || p.isFemale || p.gender === 'female') {
-      requestedCat = 'female';
-    } else if (p.pedCategory === 'male' || p.isFemale === false || p.gender === 'male') {
-      requestedCat = 'male';
-    }
+    const slotDef = CROSSWALK_SLOT_ASSIGNMENTS[p.id];
+    const targetTemplateId = forceTemplateId || (slotDef && slotDef.templateId) || p.charId;
 
-    const template = getNextRoundRobinTemplate(requestedCat, lastAssignedWalkerId);
+    let template = targetTemplateId ? riggedPedLibrary[targetTemplateId] : null;
     if (!template || !template.scene) return false;
-    lastAssignedWalkerId = template.id;
+
+    // Never tear down or rebuild an already spawned walker with the correct template
+    if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer && pm.mesh.userData.charId === template.id) {
+      return true;
+    }
 
     const type = template.category;
     const targetHeight = (type === 'female') ? TARGET_PED_HEIGHTS.female : (type === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
-
-    // NEVER tear down or rebuild already-visible Tier 1 walkers
-    if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer) {
-      return true;
-    }
 
     try {
       const oldMesh = pm.mesh;
@@ -16705,7 +16768,7 @@ let sharedRickshawArtTexture = null;
         if (parent) {
           parent.remove(oldMesh);
           parent.add(wrapper);
-          purgeNullChildren(parent);
+          pruneNullChildren(parent);
         }
         enforceWalkerWorldScale(wrapper, targetHeight, template.id || type);
 
@@ -16716,15 +16779,33 @@ let sharedRickshawArtTexture = null;
         p.isRiggedMixamo = true;
         p.pedCategory = type;
         p.charId = template.id;
+        p.templateId = template.id;
         wrapper.userData.isRiggedMixamo = true;
         wrapper.userData.pedCategory = type;
         wrapper.userData.charId = template.id;
+        wrapper.userData.templateId = template.id;
+
+        if (slotDef) {
+          p.zone = slotDef.zone;
+          p.side = slotDef.side;
+          p.corner = slotDef.corner;
+          wrapper.userData.zone = slotDef.zone;
+          wrapper.userData.side = slotDef.side;
+          wrapper.userData.corner = slotDef.corner;
+        }
 
         if (typeof activeTargetVehicle !== 'undefined' && activeTargetVehicle) {
           if (activeTargetVehicle === p || activeTargetVehicle.mesh === oldMesh || activeTargetVehicle.data === p) {
             activeTargetVehicle.mesh = wrapper;
             activeTargetVehicle.category = type;
-            if (activeTargetVehicle.data) activeTargetVehicle.data.pedCategory = type;
+            activeTargetVehicle.charId = template.id;
+            activeTargetVehicle.templateId = template.id;
+            activeTargetVehicle.charName = template.name;
+            if (activeTargetVehicle.data) {
+              activeTargetVehicle.data.pedCategory = type;
+              activeTargetVehicle.data.charId = template.id;
+              activeTargetVehicle.data.templateId = template.id;
+            }
           }
         }
         return true;
@@ -16735,151 +16816,27 @@ let sharedRickshawArtTexture = null;
     return false;
   }
 
-  function initStaggeredPedestrianSpawn() {
-    pedSpawnQueue.length = 0;
-    lastAssignedWalkerId = null;
-
-    // 1. Queue Walkers
-    if (typeof pedMeshMap !== 'undefined') {
-      const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-      const maxRiggedWalkers = isMobileScreen ? 10 : 13;
-      const entries = [];
-      let spotlightKey = null;
-
-      if (typeof activeTargetVehicle !== 'undefined' && activeTargetVehicle) {
-        for (const k in pedMeshMap) {
-          const pm = pedMeshMap[k];
-          if (pm && (pm.mesh === activeTargetVehicle.mesh || pm.data === activeTargetVehicle.data || pm.data === activeTargetVehicle)) {
-            spotlightKey = k;
-            entries.push({ key: k, pm: pm, isSpotlight: true });
-            break;
-          }
-        }
-      }
-
-      for (const k in pedMeshMap) {
-        if (k !== spotlightKey) {
-          entries.push({ key: k, pm: pedMeshMap[k], isSpotlight: false });
-        }
-      }
-
-      entries.sort((a, b) => {
-        const pa = a.pm?.data || {};
-        const pb = b.pm?.data || {};
-        const axisA = pa.axis || '';
-        const axisB = pb.axis || '';
-        if (axisA !== axisB) return axisA.localeCompare(axisB);
-        const posA = pa.currentCoord || pa.pos || 0;
-        const posB = pb.currentCoord || pb.pos || 0;
-        return posA - posB;
-      });
-
-      const walkerLimit = Math.min(maxRiggedWalkers, entries.length);
-      for (let i = 0; i < walkerLimit; i++) {
-        const entry = entries[i];
-        pedSpawnQueue.push(() => {
-          spawnOneRiggedWalker(entry.key, entry.pm);
-        });
-      }
-    }
-
-    // 2. Queue Bench Sitters
-    if (typeof gossipingCrowd !== 'undefined' && gossipingCrowd && gossipingCrowd.length) {
-      for (let i = 0; i < gossipingCrowd.length; i++) {
-        const person = gossipingCrowd[i];
-        pedSpawnQueue.push(() => {
-          spawnOneRiggedBenchHuman(person);
-        });
-      }
-    }
-  }
-
-  function upgradeActiveWalkersToRigged() {
-    if (typeof pedMeshMap === 'undefined') return 0;
-    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
-    const maxRiggedWalkers = isMobileScreen ? 10 : 13;
-    let swappedCount = 0;
-    const totalWalkers = Object.keys(pedMeshMap).length;
-
-    const entries = [];
-    let spotlightKey = null;
-
-    if (typeof activeTargetVehicle !== 'undefined' && activeTargetVehicle) {
-      for (const k in pedMeshMap) {
-        const pm = pedMeshMap[k];
-        if (pm && (pm.mesh === activeTargetVehicle.mesh || pm.data === activeTargetVehicle.data || pm.data === activeTargetVehicle)) {
-          spotlightKey = k;
-          entries.push({ key: k, pm: pm, isSpotlight: true });
-          break;
-        }
-      }
-    }
-
-    for (const k in pedMeshMap) {
-      if (k !== spotlightKey) {
-        entries.push({ key: k, pm: pedMeshMap[k], isSpotlight: false });
-      }
-    }
-
-    // Sort entries so walkers along the same sidewalk/path are sequential to prevent adjacent clones
-    entries.sort((a, b) => {
-      const pa = a.pm?.data || {};
-      const pb = b.pm?.data || {};
-      const axisA = pa.axis || '';
-      const axisB = pb.axis || '';
-      if (axisA !== axisB) return axisA.localeCompare(axisB);
-      const posA = pa.currentCoord || pa.pos || 0;
-      const posB = pb.currentCoord || pb.pos || 0;
-      return posA - posB;
-    });
-
-    for (let idx = 0; idx < entries.length; idx++) {
-      if (swappedCount >= maxRiggedWalkers) break;
-      const { key, pm } = entries[idx];
-      if (spawnOneRiggedWalker(key, pm)) {
-        swappedCount++;
-      }
-    }
-
-    if (typeof scene !== 'undefined' && scene) {
-      purgeNullChildren(scene);
-    }
-    console.info(`[Pedestrians] Mixamo crowd active — upgraded ${swappedCount} of ${totalWalkers} walkers`);
-    return swappedCount;
-  }
+  const PROCEDURAL_SIDEWALK_IDS = ['ped_sw1', 'ped_sw2', 'ped_sw3', 'ped_sw4', 'ped_vsw1', 'ped_vsw2'];
 
   function instantiatePedestrian(p) {
-    const isWalker = p && (p.isSidewalk || typeof p.currentCoord !== 'undefined' || p.axis);
-    if (isWalker) {
-      let requestedCat = null;
-      if (p.isChild || p.pedCategory === 'child' || p.gender === 'child') {
-        requestedCat = 'child';
-      } else if (p.pedCategory === 'female' || p.isFemale || p.gender === 'female') {
-        requestedCat = 'female';
-      } else if (p.pedCategory === 'male' || p.isFemale === false || p.gender === 'male') {
-        requestedCat = 'male';
-      }
-
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-      const maxRigged = isMobile ? 10 : 13;
-      if (activeRiggedWalkerCount < maxRigged) {
-        const template = getTemplateForCategory(requestedCat, p.charId, (p.id || 0));
-        if (template && template.scene) {
-          const defaultHeight = (template.category === 'female') ? TARGET_PED_HEIGHTS.female : (template.category === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
-          const riggedMesh = createRiggedPedestrian(p, template, template.category, defaultHeight, template.id);
-          if (riggedMesh && riggedMesh.isObject3D) {
-            riggedMesh.scale.set(1, 1, 1);
-            if (typeof scene !== 'undefined' && scene && scene.add) {
-              scene.add(riggedMesh);
-            }
-            enforceWalkerWorldScale(riggedMesh, defaultHeight, template.id || template.category);
-            return riggedMesh;
-          }
+    // 1. Dedicated outer sidewalk stroll lanes use authentic procedural Three.js Dhaka walkers
+    if (p && p.isSidewalk && PROCEDURAL_SIDEWALK_IDS.includes(p.id)) {
+      const proceduralMesh = createArticulatedHuman(p, false);
+      if (proceduralMesh && proceduralMesh.isObject3D) {
+        proceduralMesh.visible = true;
+        if (typeof scene !== 'undefined' && scene && scene.add) {
+          scene.add(proceduralMesh);
         }
+        if (p) {
+          p.mesh = proceduralMesh;
+          p.group = proceduralMesh;
+        }
+        return proceduralMesh;
       }
     }
 
-    // Invisible placeholder group (NEVER show old blocky procedural humans)
+    // 2. Invisible placeholder group for crosswalk slots (Mixamo only, NEVER pop in procedural walkers on crosswalks)
+    // and for non-selected sidewalk slots
     const placeholder = new THREE.Group();
     placeholder.name = 'ped-placeholder-' + (p?.id || 'unknown');
     placeholder.visible = false;
@@ -19915,18 +19872,21 @@ let sharedRickshawArtTexture = null;
       } else if (info.kind === 'metro') {
         window.crossroadsFocusMode('metro');
       } else if (info.kind === 'walking') {
-        const cat = (info.data && info.data.pedCategory) || (info.mesh && info.mesh.userData && info.mesh.userData.pedCategory) || 'male';
-        if (cat === 'female') walkingCycleIndex = 1;
-        else if (cat === 'child') walkingCycleIndex = 2;
-        else walkingCycleIndex = 0;
+        const charId = (info.mesh && info.mesh.userData && info.mesh.userData.charId) || (info.data && (info.data.charId || info.data.templateId));
+        if (charId) lastFocusedTemplateId = charId;
+        const cat = (info.data && info.data.pedCategory) || (info.mesh && info.mesh.userData && info.mesh.userData.pedCategory) || (charId && charId.includes('female') ? 'female' : (charId && charId.includes('boy') ? 'child' : 'male'));
+        const charName = (info.mesh && info.mesh.userData && info.mesh.userData.charName) || (info.data && info.data.charName) || (CHARACTER_INFO[charId] && CHARACTER_INFO[charId].name);
         activeCamMode = 'walking';
         activeTargetVehicle = {
           id: info.id,
           type: 'walking',
           category: cat,
+          charId: charId,
+          templateId: charId,
+          charName: charName,
           mesh: info.mesh,
           data: info.data,
-          speed: info.data.speed || 12
+          speed: info.data ? info.data.speed : 12
         };
         if (canvasEl) canvasEl.style.touchAction = 'none';
         updateLegendHUD('walking');
@@ -21033,7 +20993,7 @@ let sharedRickshawArtTexture = null;
         if (activeCamMode === 'walking') {
           // If activeTargetVehicle is not yet rigged or not visible, re-acquire as soon as a rigged walker is ready
           if (!activeTargetVehicle || !activeTargetVehicle.mesh || activeTargetVehicle.mesh.visible !== true || !activeTargetVehicle.mesh.userData || !activeTargetVehicle.mesh.userData.isRiggedMixamo) {
-            const readyWalker = acquireTargetWalker(WALKING_CYCLE_CATEGORIES[walkingCycleIndex]) || acquireTargetWalker();
+            const readyWalker = acquireTargetWalker(lastFocusedTemplateId);
             if (readyWalker && readyWalker.mesh && readyWalker.mesh.visible === true && readyWalker.mesh.userData && readyWalker.mesh.userData.isRiggedMixamo) {
               activeTargetVehicle = readyWalker;
               updateTrackedVehicleHUD(activeTargetVehicle, true);
