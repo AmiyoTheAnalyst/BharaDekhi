@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v117-ped-tier2-roster';
+const CACHE_NAME = 'bharadekhi-pwa-v118-perf-120hz';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

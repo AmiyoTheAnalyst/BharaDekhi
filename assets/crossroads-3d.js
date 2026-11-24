@@ -49,6 +49,35 @@
   let staticMirrorTex = null;
   const _mPos = new THREE.Vector3();
   const _mLook = new THREE.Vector3();
+  const _tmpV1 = new THREE.Vector3();
+  const _tmpV2 = new THREE.Vector3();
+  const _tmpV3 = new THREE.Vector3();
+  const _tmpQ1 = new THREE.Quaternion();
+  const _tmpQ2 = new THREE.Quaternion();
+  const _tmpE1 = new THREE.Euler();
+  const _tmpM1 = new THREE.Matrix4();
+  const _tmpBox1 = new THREE.Box3();
+
+  // Zero-allocation cached camera pose & orbit math
+  const _cachedOrbitPose = {
+    position: { x: 0, y: 0, z: 0 },
+    look: { x: 0, y: 0, z: 0 }
+  };
+  const _forwardVec = { x: 0, z: 0 };
+  const _rightVec = { x: 0, z: 0 };
+
+  // Reusable scratch objects for gossiping crowd & bench-sitter bone rotations
+  const _gossipEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+  const _gossipDelta = new THREE.Quaternion();
+
+  // Reusable scratch objects for rickshaw puller pedaling bones
+  const _pedalAxisZ = new THREE.Vector3(0, 0, 1);
+  const _pedalQZ = new THREE.Quaternion();
+
+  // Reusable scratch arrays for live mirror render pass to avoid GC churn
+  const _allMirrorsToHide = [];
+  const _crowdToRestore = [];
+
   let mirrorFrameCounter = 0;
   let lastActiveMirrorBus = null;
 
@@ -571,9 +600,20 @@
   window.clearTrackedVehicle = clearTrackedVehicle;
 
   let lastTrackedHUDUpdate = 0;
+  let _lastHUDTitle = null;
+  let _lastHUDSub = null;
+  let _lastHUDIcon = null;
+  let _lastHUDVisible = false;
+
+  function setNodeText(el, text) {
+    if (el && el.textContent !== text) {
+      el.textContent = text;
+    }
+  }
+
   function updateTrackedVehicleHUD(target, force) {
     const now = performance.now();
-    if (!force && (now - lastTrackedHUDUpdate < 100)) return; // 10 Hz DOM throttle
+    if (!force && (now - lastTrackedHUDUpdate < 100)) return; // <= 10 Hz DOM throttle
     lastTrackedHUDUpdate = now;
 
     if (!target || !target.data) return;
@@ -583,49 +623,69 @@
     const sub = document.getElementById('crossroadsModePillSub');
     if (!modePill || !title) return;
 
-    modePill.classList.remove('hidden');
+    if (!_lastHUDVisible) {
+      modePill.classList.remove('hidden');
+      _lastHUDVisible = true;
+    }
     const dirLabel = target.data.dir === 'EB' ? 'Eastbound' :
                      target.data.dir === 'WB' ? 'Westbound' :
                      target.data.dir === 'SB' ? 'Southbound' : 'Northbound';
     const speedKmh = Math.round(target.data.speed || target.speed || 40);
     const vType = target.type;
 
+    let newIcon = '';
+    let newTitle = '';
+    let newSub = '';
+
     if (vType === 'bike') {
-      if (icon) icon.textContent = '🏍️';
-      title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
-      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
+      newIcon = '🏍️';
+      newTitle = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Ride-share Sports Bike'} · ${dirLabel}`;
+      newSub = `Speed: ${speedKmh} km/h · Rapid Lane Traversal · Base ৳30 + ৳12/km`;
     } else if (vType === 'cng') {
-      if (icon) icon.textContent = '🛺';
-      title.textContent = `CNG Auto-Rickshaw · One Paribahan (${dirLabel})`;
-      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Reg: ঢাকা মেট্রো-থ ১১-৪৫৬৭ · Base ৳40 + ৳12/km`;
+      newIcon = '🛺';
+      newTitle = `CNG Auto-Rickshaw · One Paribahan (${dirLabel})`;
+      newSub = `Speed: ${speedKmh} km/h · Reg: ঢাকা মেট্রো-থ ১১-৪৫৬৭ · Base ৳40 + ৳12/km`;
     } else if (vType === 'bus') {
-      if (icon) icon.textContent = '🚌';
-      title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'হাসান পরিবহন (আজিমপুর - উত্তরা)'} · ${dirLabel}`;
-      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · আজিমপুর ➔ উত্তরা · Dhaka City Transit Bus`;
+      newIcon = '🚌';
+      newTitle = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'হাসান পরিবহন (আজিমপুর - উত্তরা)'} · ${dirLabel}`;
+      newSub = `Speed: ${speedKmh} km/h · আজিমপুর ➔ উত্তরা · Dhaka City Transit Bus`;
     } else if (vType === 'rickshaw') {
-      if (icon) icon.textContent = '🛺';
-      title.textContent = `Dhaka Cycle Rickshaw · ${dirLabel}`;
-      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Traditional Rickshaw Art · Local Mirpur fare ৳25 – ৳50`;
+      newIcon = '🛺';
+      newTitle = `Dhaka Cycle Rickshaw · ${dirLabel}`;
+      newSub = `Speed: ${speedKmh} km/h · Traditional Rickshaw Art · Local Mirpur fare ৳25 – ৳50`;
     } else if (vType === 'car') {
-      if (icon) icon.textContent = '🚗';
-      title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Aerodynamic Ride-share Car'} · ${dirLabel}`;
-      if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Executive Fleet · Base ৳50 + ৳20/km`;
+      newIcon = '🚗';
+      newTitle = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Aerodynamic Ride-share Car'} · ${dirLabel}`;
+      newSub = `Speed: ${speedKmh} km/h · Executive Fleet · Base ৳50 + ৳20/km`;
     } else if (vType === 'walking' || vType === 'ped') {
       const isReady = target.mesh && target.mesh.visible === true && target.mesh.userData && target.mesh.userData.isRiggedMixamo;
       if (!isReady) {
-        if (icon) icon.textContent = '🚶';
-        title.textContent = 'Mirpur 10 Zebra Crosswalk';
-        if (sub) sub.textContent = 'Pedestrian crosswalk · 360° Orbit · Loading commuters...';
-        return;
+        newIcon = '🚶';
+        newTitle = 'Mirpur 10 Zebra Crosswalk';
+        newSub = 'Pedestrian crosswalk · 360° Orbit · Loading commuters...';
+      } else {
+        const charId = target.charId || (target.mesh && target.mesh.userData && target.mesh.userData.charId);
+        const info = CHARACTER_INFO[charId];
+        const cat = target.category || (target.data && target.data.pedCategory) || (target.mesh && target.mesh.userData && target.mesh.userData.pedCategory) || 'male';
+        const charName = (info && info.name) || target.charName || (target.mesh && target.mesh.userData && target.mesh.userData.charName) || 'Commuter';
+        newIcon = (info && info.icon) || (cat === 'female' ? '🚶‍♀️' : cat === 'child' ? '🧒' : '🚶‍♂️');
+        const locLabel = target.data?.isSidewalk ? 'Footpath Stroll' : 'Mirpur 10 Zebra Crosswalk';
+        newTitle = `${charName} · ${locLabel}`;
+        newSub = (info && info.sub) || `Mixamo 3D Rigged Commuter · 360° Orbit (Click Walking to cycle) · 0 carbon`;
       }
-      const charId = target.charId || (target.mesh && target.mesh.userData && target.mesh.userData.charId);
-      const info = CHARACTER_INFO[charId];
-      const cat = target.category || (target.data && target.data.pedCategory) || (target.mesh && target.mesh.userData && target.mesh.userData.pedCategory) || 'male';
-      const charName = (info && info.name) || target.charName || (target.mesh && target.mesh.userData && target.mesh.userData.charName) || 'Commuter';
-      if (icon) icon.textContent = (info && info.icon) || (cat === 'female' ? '🚶‍♀️' : cat === 'child' ? '🧒' : '🚶‍♂️');
-      const locLabel = target.data?.isSidewalk ? 'Footpath Stroll' : 'Mirpur 10 Zebra Crosswalk';
-      title.textContent = `${charName} · ${locLabel}`;
-      if (sub) sub.textContent = (info && info.sub) || `Mixamo 3D Rigged Commuter · 360° Orbit (Click Walking to cycle) · 0 carbon`;
+    }
+
+    if (icon && newIcon && _lastHUDIcon !== newIcon) {
+      icon.textContent = newIcon;
+      _lastHUDIcon = newIcon;
+    }
+    if (newTitle && _lastHUDTitle !== newTitle) {
+      title.textContent = newTitle;
+      _lastHUDTitle = newTitle;
+    }
+    if (sub && newSub && _lastHUDSub !== newSub) {
+      sub.textContent = newSub;
+      _lastHUDSub = newSub;
     }
   }
 
@@ -664,33 +724,45 @@
 
   function getVehicleCameraPose(target, yaw, radius, pitch) {
     if (!target || !target.mesh || !target.mesh.position) {
-      return {
-        position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
-        look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
-      };
+      _cachedOrbitPose.position.x = camBasePos.x;
+      _cachedOrbitPose.position.y = camBasePos.y;
+      _cachedOrbitPose.position.z = camBasePos.z;
+      _cachedOrbitPose.look.x = camBaseLook.x;
+      _cachedOrbitPose.look.y = camBaseLook.y;
+      _cachedOrbitPose.look.z = camBaseLook.z;
+      return _cachedOrbitPose;
     }
     const isPed = target.type === 'ped' || target.type === 'walking';
     if (isPed) {
       const isReadyWalker = target.mesh.visible === true && target.mesh.userData && target.mesh.userData.isRiggedMixamo;
       if (!isReadyWalker) {
         if (CAM_MODES && CAM_MODES.walking) {
-          return {
-            position: { x: CAM_MODES.walking.pos.x, y: CAM_MODES.walking.pos.y, z: CAM_MODES.walking.pos.z },
-            look: { x: CAM_MODES.walking.look.x, y: CAM_MODES.walking.look.y, z: CAM_MODES.walking.look.z }
-          };
+          _cachedOrbitPose.position.x = CAM_MODES.walking.pos.x;
+          _cachedOrbitPose.position.y = CAM_MODES.walking.pos.y;
+          _cachedOrbitPose.position.z = CAM_MODES.walking.pos.z;
+          _cachedOrbitPose.look.x = CAM_MODES.walking.look.x;
+          _cachedOrbitPose.look.y = CAM_MODES.walking.look.y;
+          _cachedOrbitPose.look.z = CAM_MODES.walking.look.z;
+          return _cachedOrbitPose;
         }
-        return {
-          position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
-          look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
-        };
+        _cachedOrbitPose.position.x = camBasePos.x;
+        _cachedOrbitPose.position.y = camBasePos.y;
+        _cachedOrbitPose.position.z = camBasePos.z;
+        _cachedOrbitPose.look.x = camBaseLook.x;
+        _cachedOrbitPose.look.y = camBaseLook.y;
+        _cachedOrbitPose.look.z = camBaseLook.z;
+        return _cachedOrbitPose;
       }
     }
     const position = target.mesh.position;
     if (!Number.isFinite(position.x) || !Number.isFinite(position.y) || !Number.isFinite(position.z)) {
-      return {
-        position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
-        look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
-      };
+      _cachedOrbitPose.position.x = camBasePos.x;
+      _cachedOrbitPose.position.y = camBasePos.y;
+      _cachedOrbitPose.position.z = camBasePos.z;
+      _cachedOrbitPose.look.x = camBaseLook.x;
+      _cachedOrbitPose.look.y = camBaseLook.y;
+      _cachedOrbitPose.look.z = camBaseLook.z;
+      return _cachedOrbitPose;
     }
 
     const safeYaw = Number.isFinite(yaw) ? yaw : DEFAULT_VEHICLE_YAW;
@@ -698,54 +770,57 @@
     const safeRadius = Number.isFinite(radius) && radius > 0 ? radius : 50;
 
     const direction = target.data ? target.data.dir : target.dir;
-    let forward = direction === 'EB' ? { x: 1, z: 0 }
-      : direction === 'WB' ? { x: -1, z: 0 }
-        : direction === 'SB' ? { x: 0, z: 1 }
-          : direction === 'NB' ? { x: 0, z: -1 }
-            : null;
-    if (!forward) {
-      if (target.mesh && typeof target.mesh.rotation?.y === 'number') {
-        const ry = target.mesh.rotation.y;
-        forward = { x: Math.sin(ry), z: Math.cos(ry) };
-      } else {
-        forward = { x: 0, z: -1 };
-      }
+    if (direction === 'EB') {
+      _forwardVec.x = 1; _forwardVec.z = 0;
+    } else if (direction === 'WB') {
+      _forwardVec.x = -1; _forwardVec.z = 0;
+    } else if (direction === 'SB') {
+      _forwardVec.x = 0; _forwardVec.z = 1;
+    } else if (direction === 'NB') {
+      _forwardVec.x = 0; _forwardVec.z = -1;
+    } else if (target.mesh && typeof target.mesh.rotation?.y === 'number') {
+      const ry = target.mesh.rotation.y;
+      _forwardVec.x = Math.sin(ry);
+      _forwardVec.z = Math.cos(ry);
+    } else {
+      _forwardVec.x = 0;
+      _forwardVec.z = -1;
     }
-    const right = { x: -forward.z, z: forward.x };
+    _rightVec.x = -_forwardVec.z;
+    _rightVec.z = _forwardVec.x;
+
     const horizontalRadius = safeRadius * Math.cos(safePitch);
     const targetX = position.x;
     const isChildPed = isPed && (target.category === 'child' || (target.data && (target.data.pedCategory === 'child' || target.data.isChild)));
     const targetY = position.y + (target.type === 'bike' ? 4.5 : target.type === 'bus' ? 9.5 : target.type === 'car' ? 4.5 : isPed ? (isChildPed ? 4.8 : 6.2) : 5.5);
     const targetZ = position.z;
 
-    const posX = targetX - forward.x * horizontalRadius * Math.cos(safeYaw) + right.x * horizontalRadius * Math.sin(safeYaw);
+    const posX = targetX - _forwardVec.x * horizontalRadius * Math.cos(safeYaw) + _rightVec.x * horizontalRadius * Math.sin(safeYaw);
     const posY = targetY + safeRadius * Math.sin(safePitch);
-    const posZ = targetZ - forward.z * horizontalRadius * Math.cos(safeYaw) + right.z * horizontalRadius * Math.sin(safeYaw);
+    const posZ = targetZ - _forwardVec.z * horizontalRadius * Math.cos(safeYaw) + _rightVec.z * horizontalRadius * Math.sin(safeYaw);
 
     const lookX = targetX;
     const lookY = targetY + (isPed ? 0.5 : target.type === 'bus' ? 2.0 : 1.0);
     const lookZ = targetZ;
 
-    return {
-      position: {
-        x: Number.isFinite(posX) ? posX : camBasePos.x,
-        y: Number.isFinite(posY) ? posY : camBasePos.y,
-        z: Number.isFinite(posZ) ? posZ : camBasePos.z
-      },
-      look: {
-        x: Number.isFinite(lookX) ? lookX : camBaseLook.x,
-        y: Number.isFinite(lookY) ? lookY : camBaseLook.y,
-        z: Number.isFinite(lookZ) ? lookZ : camBaseLook.z
-      }
-    };
+    _cachedOrbitPose.position.x = Number.isFinite(posX) ? posX : camBasePos.x;
+    _cachedOrbitPose.position.y = Number.isFinite(posY) ? posY : camBasePos.y;
+    _cachedOrbitPose.position.z = Number.isFinite(posZ) ? posZ : camBasePos.z;
+    _cachedOrbitPose.look.x = Number.isFinite(lookX) ? lookX : camBaseLook.x;
+    _cachedOrbitPose.look.y = Number.isFinite(lookY) ? lookY : camBaseLook.y;
+    _cachedOrbitPose.look.z = Number.isFinite(lookZ) ? lookZ : camBaseLook.z;
+    return _cachedOrbitPose;
   }
 
   function getVehicleOrbitPose(target) {
     if (!target) {
-      return {
-        position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
-        look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
-      };
+      _cachedOrbitPose.position.x = camBasePos.x;
+      _cachedOrbitPose.position.y = camBasePos.y;
+      _cachedOrbitPose.position.z = camBasePos.z;
+      _cachedOrbitPose.look.x = camBaseLook.x;
+      _cachedOrbitPose.look.y = camBaseLook.y;
+      _cachedOrbitPose.look.z = camBaseLook.z;
+      return _cachedOrbitPose;
     }
     const yaw = Number.isFinite(vehicleOrbitYaw) ? vehicleOrbitYaw : DEFAULT_VEHICLE_YAW;
     const pitch = Math.max(0.12, Math.min(0.55, Number.isFinite(vehicleOrbitPitch) ? vehicleOrbitPitch : 0.28));
@@ -774,38 +849,44 @@
     const badge = document.getElementById('crossroadsCamModeBadge');
     if (!badge || !CAM_MODES[modeName]) return;
 
+    let targetText = '';
     const targetType = activeTargetVehicle && activeTargetVehicle.type;
     if (['bike', 'cng', 'car', 'rickshaw', 'bus'].includes(modeName)) {
-      badge.textContent = targetType
+      targetText = targetType
         ? `${targetType.charAt(0).toUpperCase()}${targetType.slice(1)} · Move Pointer to Orbit`
         : 'Waiting for vehicle';
     } else if (modeName === 'walking') {
       const isReady = activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.visible === true && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isRiggedMixamo;
       if (!isReady) {
-        badge.textContent = 'Zebra Crosswalk · 360° Orbit';
+        targetText = 'Zebra Crosswalk · 360° Orbit';
       } else {
         const charId = activeTargetVehicle.charId || (activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.charId);
         const info = CHARACTER_INFO[charId];
         const label = (info && info.badge) || activeTargetVehicle.charName || 'Mixamo Walker';
-        badge.textContent = `${label} · 360° Orbit (Click Walking to cycle)`;
+        targetText = `${label} · 360° Orbit (Click Walking to cycle)`;
       }
     } else {
-      badge.textContent = CAM_MODES[modeName].badge;
+      targetText = CAM_MODES[modeName].badge;
     }
+    setNodeText(badge, targetText);
   }
 
+  let _lastLegendMode = null;
   function updateLegendHUD(modeName) {
-    ['metro', 'bus', 'bike', 'cng', 'car', 'rickshaw', 'walking'].forEach(m => {
-      const btn = document.getElementById(`legendBtn_${m}`);
-      if (!btn) return;
-      if (m === modeName) {
-        btn.classList.add('bg-sky-500/25', 'border-sky-400', 'shadow-[0_0_12px_rgba(56,189,248,0.4)]');
-        btn.classList.remove('border-transparent');
-      } else {
-        btn.classList.remove('bg-sky-500/25', 'border-sky-400', 'shadow-[0_0_12px_rgba(56,189,248,0.4)]');
-        btn.classList.add('border-transparent');
-      }
-    });
+    if (_lastLegendMode !== modeName) {
+      _lastLegendMode = modeName;
+      ['metro', 'bus', 'bike', 'cng', 'car', 'rickshaw', 'walking'].forEach(m => {
+        const btn = document.getElementById(`legendBtn_${m}`);
+        if (!btn) return;
+        if (m === modeName) {
+          btn.classList.add('bg-sky-500/25', 'border-sky-400', 'shadow-[0_0_12px_rgba(56,189,248,0.4)]');
+          btn.classList.remove('border-transparent');
+        } else {
+          btn.classList.remove('bg-sky-500/25', 'border-sky-400', 'shadow-[0_0_12px_rgba(56,189,248,0.4)]');
+          btn.classList.add('border-transparent');
+        }
+      });
+    }
 
     updateCameraModeBadge(modeName);
 
@@ -813,57 +894,59 @@
 
     if (['metro', 'bus', 'bike', 'cng', 'car', 'rickshaw', 'walking'].includes(modeName)) {
       if (modePill) {
-        modePill.classList.remove('hidden');
+        if (!_lastHUDVisible) {
+          modePill.classList.remove('hidden');
+          _lastHUDVisible = true;
+        }
         const icon = document.getElementById('crossroadsModePillIcon');
         const title = document.getElementById('crossroadsModePillTitle');
         const sub = document.getElementById('crossroadsModePillSub');
         if (modeName === 'metro') {
-          if (icon) icon.textContent = '🚆';
-          if (title) title.textContent = 'MRT Line-6 · Mirpur 10 Station';
-          if (sub) sub.textContent = 'High-speed electric viaduct bypassing ground gridlock (Base ৳20 · Max ৳100)';
+          setNodeText(icon, '🚆');
+          setNodeText(title, 'MRT Line-6 · Mirpur 10 Station');
+          setNodeText(sub, 'High-speed electric viaduct bypassing ground gridlock (Base ৳20 · Max ৳100)');
         } else if (modeName === 'bus') {
-          if (icon) icon.textContent = '🚌';
-          if (title) title.textContent = 'হাসান পরিবহন (আজিমপুর - উত্তরা)';
-          if (sub) sub.textContent = 'Route: আজিমপুর ⇄ উত্তরা · City Transit Bus (Base ৳10 · Student Concession 50%)';
+          setNodeText(icon, '🚌');
+          setNodeText(title, 'হাসান পরিবহন (আজিমপুর - উত্তরা)');
+          setNodeText(sub, 'Route: আজিমপুর ⇄ উত্তরা · City Transit Bus (Base ৳10 · Student Concession 50%)');
         } else if (modeName === 'rickshaw') {
-          if (icon) icon.textContent = '🛺';
-          if (title) title.textContent = 'Dhaka Traditional Cycle Rickshaw';
-          if (sub) sub.textContent = 'Zero-emission local trips inside Mirpur sectors & lanes (Typical ৳25 – ৳60)';
+          setNodeText(icon, '🛺');
+          setNodeText(title, 'Dhaka Traditional Cycle Rickshaw');
+          setNodeText(sub, 'Zero-emission local trips inside Mirpur sectors & lanes (Typical ৳25 – ৳60)');
         } else if (modeName === 'bike') {
-          if (icon) icon.textContent = '🏍️';
-          if (title) title.textContent = 'Ride-share Bike';
-          if (sub) sub.textContent = 'Fast ride-share trips through Dhaka traffic.';
+          setNodeText(icon, '🏍️');
+          setNodeText(title, 'Ride-share Bike');
+          setNodeText(sub, 'Fast ride-share trips through Dhaka traffic.');
         } else if (modeName === 'cng') {
-          if (icon) icon.textContent = '🛺';
-          if (title) title.textContent = 'CNG Auto-rickshaw';
-          if (sub) sub.textContent = 'Motorized three-wheeler for comfortable local trips.';
+          setNodeText(icon, '🛺');
+          setNodeText(title, 'CNG Auto-rickshaw');
+          setNodeText(sub, 'Motorized three-wheeler for comfortable local trips.');
         } else if (modeName === 'car') {
-          if (icon) icon.textContent = '🚗';
+          setNodeText(icon, '🚗');
           const carTitle = (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.modelTitle) ? activeTargetVehicle.mesh.userData.modelTitle : 'Private Car Fleet';
-          if (title) title.textContent = carTitle;
-          if (sub) sub.textContent = 'Executive Sedan & Luxury SUV Fleet (Base ৳50 · ৳20/km)';
+          setNodeText(title, carTitle);
+          setNodeText(sub, 'Executive Sedan & Luxury SUV Fleet (Base ৳50 · ৳20/km)');
         } else if (modeName === 'walking') {
-          if (icon) icon.textContent = '🚶';
+          setNodeText(icon, '🚶');
           const isReady = activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.visible === true && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isRiggedMixamo;
           if (!isReady) {
-            if (title) title.textContent = 'Zebra Crosswalk · 360° Orbit';
-            if (sub) sub.textContent = 'Pedestrian crosswalk & sidewalk strollers · 0 carbon';
+            setNodeText(title, 'Zebra Crosswalk · 360° Orbit');
+            setNodeText(sub, 'Pedestrian crosswalk & sidewalk strollers · 0 carbon');
           } else {
             const charId = activeTargetVehicle.charId || (activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.charId);
             const info = CHARACTER_INFO[charId];
             const charName = (info && info.name) || activeTargetVehicle.charName || 'Commuter';
-            if (icon && info) icon.textContent = info.icon;
-            if (title) {
-              title.textContent = `${charName} · 360° Orbit`;
-            }
-            if (sub) {
-              sub.textContent = (info && info.sub) || 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle';
-            }
+            if (icon && info) setNodeText(icon, info.icon);
+            setNodeText(title, `${charName} · 360° Orbit`);
+            setNodeText(sub, (info && info.sub) || 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle');
           }
         }
       }
     } else {
-      if (modePill) modePill.classList.add('hidden');
+      if (modePill && _lastHUDVisible) {
+        modePill.classList.add('hidden');
+        _lastHUDVisible = false;
+      }
     }
   }
 
@@ -17311,8 +17394,8 @@ let sharedRickshawArtTexture = null;
     if (!gossipingCrowd || !gossipingCrowd.length) return;
 
     const rainActive = Boolean(isRain);
-    const qEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-    const qDelta = new THREE.Quaternion();
+    const qEuler = _gossipEuler;
+    const qDelta = _gossipDelta;
 
     for (let i = 0; i < gossipingCrowd.length; i++) {
       const person = gossipingCrowd[i];
@@ -17322,11 +17405,17 @@ let sharedRickshawArtTexture = null;
         person.umbrella.visible = rainActive;
       }
 
-      // Distance LOD: skip updating bench-sitters farther than 160 units from camera
+      // Distance LOD: skip updating bench-sitters farther than 160 units from camera;
+      // In Tier Low, throttle distant bench-sitters (> 100 units) to every 3rd frame
       if (typeof camera !== 'undefined' && camera && person.group) {
         person.group.getWorldPosition(_sitterWorldPos);
-        if (_sitterWorldPos.distanceTo(camera.position) > 160) {
+        const distToCam = _sitterWorldPos.distanceTo(camera.position);
+        if (distToCam > 160) {
           continue;
+        }
+        if (currentTier === 'low' && distToCam > 100) {
+          person._gossipCadence = ((person._gossipCadence || 0) + 1) % 3;
+          if (person._gossipCadence !== 0) continue;
         }
       }
 
@@ -17572,22 +17661,21 @@ let sharedRickshawArtTexture = null;
       if (pedalCrank) pedalCrank.rotation.z = phase;
       const sinL = Math.sin(phase);
       const cosL = Math.cos(phase);
-      const qZ = new THREE.Quaternion();
       if (thighL && thighL.userData.initQuat) {
-        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), sinL * 0.38);
-        thighL.quaternion.copy(thighL.userData.initQuat).multiply(qZ);
+        _pedalQZ.setFromAxisAngle(_pedalAxisZ, sinL * 0.38);
+        thighL.quaternion.copy(thighL.userData.initQuat).multiply(_pedalQZ);
       }
       if (shinL && shinL.userData.initQuat) {
-        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), cosL * 0.45);
-        shinL.quaternion.copy(shinL.userData.initQuat).multiply(qZ);
+        _pedalQZ.setFromAxisAngle(_pedalAxisZ, cosL * 0.45);
+        shinL.quaternion.copy(shinL.userData.initQuat).multiply(_pedalQZ);
       }
       if (thighR && thighR.userData.initQuat) {
-        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -sinL * 0.38);
-        thighR.quaternion.copy(thighR.userData.initQuat).multiply(qZ);
+        _pedalQZ.setFromAxisAngle(_pedalAxisZ, -sinL * 0.38);
+        thighR.quaternion.copy(thighR.userData.initQuat).multiply(_pedalQZ);
       }
       if (shinR && shinR.userData.initQuat) {
-        qZ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -cosL * 0.45);
-        shinR.quaternion.copy(shinR.userData.initQuat).multiply(qZ);
+        _pedalQZ.setFromAxisAngle(_pedalAxisZ, -cosL * 0.45);
+        shinR.quaternion.copy(shinR.userData.initQuat).multiply(_pedalQZ);
       }
     };
   }
@@ -19654,17 +19742,23 @@ let sharedRickshawArtTexture = null;
     rainParticles.visible = false;
     scene.add(rainParticles);
 
-    // 14. Interactive Mouse Tracking (Clamped to 16ms to prevent layout thrashing on high-Hz mice)
-    let lastPointerMoveTime = 0;
-    containerEl.addEventListener('pointermove', (e) => {
-      const now = performance.now();
-      if (now - lastPointerMoveTime < 16) return;
-      lastPointerMoveTime = now;
+    // 14. Interactive Mouse Tracking (Zero Layout Thrashing with Cached Container Rect)
+    let containerRect = null;
+    function updateContainerRect() {
+      if (containerEl) {
+        containerRect = containerEl.getBoundingClientRect();
+      }
+    }
+    updateContainerRect();
+    window.addEventListener('scroll', updateContainerRect, { passive: true });
 
-      const rect = containerEl.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      mouseRelX = (e.clientX - rect.left) / rect.width - 0.5;
-      mouseRelY = (e.clientY - rect.top) / rect.height - 0.5;
+    containerEl.addEventListener('pointermove', (e) => {
+      if (!containerRect || containerRect.width === 0) {
+        updateContainerRect();
+        if (!containerRect || !containerRect.width) return;
+      }
+      mouseRelX = (e.clientX - containerRect.left) / containerRect.width - 0.5;
+      mouseRelY = (e.clientY - containerRect.top) / containerRect.height - 0.5;
 
       if (e.pointerType === 'mouse' && orbitPointerId === null &&
           isOrbitableVehicleMode(activeCamMode) && activeTargetVehicle) {
@@ -19954,47 +20048,48 @@ let sharedRickshawArtTexture = null;
       if (rainParticles) rainParticles.visible = false;
     }
 
-    // Static Matrix Freeze: Freeze matrixAutoUpdate on all static environment meshes
-    // (Roads, buildings, trees, streetlamps, Metro pillars/tracks, zebra crossings)
+    // Static Matrix Freeze: Freeze matrixAutoUpdate on all static environment meshes & static groups
+    // (Roads, buildings, trees, streetlamps, Metro pillars/tracks, zebra crossings, static bench frames)
     scene.traverse(child => {
-      if (child.isMesh) {
-        const isDyn = child.userData && (
-          child.userData.isDynamic ||
-          child.userData.isCar ||
-          child.userData.isBike ||
-          child.userData.isBus ||
-          child.userData.isCNG ||
-          child.userData.isRickshaw ||
-          child.userData.isPedestrian ||
-          child.userData.isDriver ||
-          child.userData.isPassenger ||
-          child.userData.wheels
-        );
-        let p = child.parent;
-        let parentIsDynamic = false;
-        let guard = 0;
-        while (p && p !== scene && ++guard < 50) {
-          if (p === trainGroup || p === ambulanceGroup || (p.userData && (
-            p.userData.isDynamic ||
-            p.userData.isCar ||
-            p.userData.isBike ||
-            p.userData.isBus ||
-            p.userData.isCNG ||
-            p.userData.isRickshaw ||
-            p.userData.isPedestrian ||
-            p.userData.isDriver ||
-            p.userData.isPassenger
-          ))) {
-            parentIsDynamic = true;
-            break;
-          }
-          p = p.parent;
+      const isDyn = child.userData && (
+        child.userData.isDynamic ||
+        child.userData.isCar ||
+        child.userData.isBike ||
+        child.userData.isBus ||
+        child.userData.isCNG ||
+        child.userData.isRickshaw ||
+        child.userData.isPedestrian ||
+        child.userData.isDriver ||
+        child.userData.isPassenger ||
+        child.userData.wheels ||
+        child.userData.mixer
+      );
+      let p = child.parent;
+      let parentIsDynamic = false;
+      let guard = 0;
+      while (p && p !== scene && ++guard < 50) {
+        if (p === trainGroup || p === ambulanceGroup || (p.userData && (
+          p.userData.isDynamic ||
+          p.userData.isCar ||
+          p.userData.isBike ||
+          p.userData.isBus ||
+          p.userData.isCNG ||
+          p.userData.isRickshaw ||
+          p.userData.isPedestrian ||
+          p.userData.isDriver ||
+          p.userData.isPassenger
+        ))) {
+          parentIsDynamic = true;
+          break;
         }
-        if (!isDyn && !parentIsDynamic && child !== rainParticles) {
-          child.matrixAutoUpdate = false;
-          child.updateMatrix();
-        }
+        p = p.parent;
+      }
+      if (!isDyn && !parentIsDynamic && child !== rainParticles && child !== mirrorCam) {
+        child.matrixAutoUpdate = false;
+        child.updateMatrix();
+      }
 
+      if (child.isMesh) {
         // Desktop & Mobile shadow optimization: strip shadow casting/receiving on interior/small sub-meshes
         const u = child.userData || {};
         const pu = p ? (p.userData || {}) : {};
@@ -20029,6 +20124,9 @@ let sharedRickshawArtTexture = null;
 
   function onResize() {
     if (!renderer || !camera) return;
+    if (typeof updateContainerRect === 'function') {
+      updateContainerRect();
+    }
     let width = 0, height = 0;
     if (containerEl && containerEl.clientWidth > 0 && containerEl.clientHeight > 0) {
       width = containerEl.clientWidth;
@@ -20045,7 +20143,10 @@ let sharedRickshawArtTexture = null;
       updateCameraFraming(aspect);
       const isMobileClient = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
       const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-      const targetPixelRatio = Math.min(dpr, 1.5);
+      let targetPixelRatio = Math.min(dpr, 1.5);
+      if (currentTier === 'medium') targetPixelRatio = Math.min(dpr, 1.15);
+      else if (currentTier === 'low') targetPixelRatio = Math.min(dpr, 0.9);
+      currentAdaptivePixelRatio = targetPixelRatio;
       renderer.setPixelRatio(targetPixelRatio);
       renderer.setSize(width, height, false);
       if (activeTargetVehicle && isOrbitableVehicleMode(activeCamMode) && !scrollProgressCameraActive) {
@@ -20113,28 +20214,44 @@ let sharedRickshawArtTexture = null;
   let lastWeatherMode = null;
   let lastIsMobile = null;
   let lastFrameTime = 0;
-  let slowFrameLogs = 0;
   let frameTimeEMA = 16.6;
   let currentTier = 'high';
+  let lastTierDowngradeTime = 0;
   let tierFrameCounter = 0;
   let currentAdaptivePixelRatio = 0;
+  let detectedNativeHz = 60;
+  const hzSampleDeltas = [];
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        isRenderLoopPaused = true;
+      } else {
+        isRenderLoopPaused = false;
+        lastFrameTime = 0;
+      }
+    });
+  }
+
+  window.resetCrossroads3DTime = function() {
+    lastFrameTime = 0;
+  };
 
   window.updateDhakaCrossroads3D = function(dt, trainX, trainState, emergencyWaveActive, ambulanceX, activePhase, isRain, weatherMode) {
     if (!isReady || !renderer || !scene || !camera) return;
-    if (isRenderLoopPaused) {
+    if (isRenderLoopPaused || (typeof document !== 'undefined' && document.hidden)) {
       lastFrameTime = 0;
       return;
     }
 
     try {
 
-    // 1. Native Refresh-Rate Loop (60/90/120/144 FPS) with Clamped Delta-Time (Zero lag spikes)
+    // 1. Native Refresh-Rate Loop (60/90/120/144 FPS) with Clamped Delta-Time (Zero lag spikes / tab jumps)
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     if (!lastFrameTime || (now - lastFrameTime) > 1000) {
-      lastFrameTime = now;
+      lastFrameTime = now - 16.667;
     }
     const rawDelta = now - lastFrameTime;
-    if (rawDelta > 120 && ++slowFrameLogs <= 5) console.warn('[Perf]', rawDelta.toFixed(1) + 'ms');
     const dtFromPerf = rawDelta / 1000;
     lastFrameTime = now;
     const delta = Math.min(Math.max(dtFromPerf, 0.001), 0.05);
@@ -20153,33 +20270,80 @@ let sharedRickshawArtTexture = null;
       }
     }
 
-    // 2. Real-Time Adaptive Performance Scaler (Auto-Tunes for Low, Mid & High-End Devices)
+    // 2. Real-Time Adaptive Performance Scaler (Auto-Tunes for 60, 90 & 120Hz Displays)
+    const rawDeltaMs = rawDelta;
+    if (rawDeltaMs > 3.0 && rawDeltaMs < 35.0) {
+      hzSampleDeltas.push(rawDeltaMs);
+      if (hzSampleDeltas.length >= 25) {
+        const sorted = hzSampleDeltas.slice().sort((a, b) => a - b);
+        const cleanMin = sorted[Math.floor(sorted.length * 0.15)];
+        if (cleanMin <= 9.6) {
+          detectedNativeHz = 120;
+        } else if (cleanMin <= 12.8) {
+          detectedNativeHz = 90;
+        } else {
+          detectedNativeHz = 60;
+        }
+        if (hzSampleDeltas.length > 75) {
+          hzSampleDeltas.splice(0, 35);
+        }
+      }
+    }
+
     const frameDurationMs = dtFromPerf * 1000;
     frameTimeEMA = frameTimeEMA * 0.95 + frameDurationMs * 0.05;
+    const nativeBudgetMs = 1000 / detectedNativeHz; // ~8.33ms (120Hz), ~11.11ms (90Hz), ~16.67ms (60Hz)
+
     tierFrameCounter++;
     if (tierFrameCounter >= 45) {
       tierFrameCounter = 0;
-      let newTier = 'high';
-      if (frameTimeEMA > 19.2) {
-        newTier = 'low'; // < 52 FPS
-      } else if (frameTimeEMA > 11.5) {
-        newTier = 'mid'; // 52 - 87 FPS (60Hz - 90Hz)
-      } else {
-        newTier = 'high'; // > 87 FPS (90Hz - 120Hz+)
-      }
+      let newTier = currentTier;
 
-      if (newTier !== currentTier || currentAdaptivePixelRatio === 0) {
-        currentTier = newTier;
-        const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-        const targetPR = Math.min(dpr, 1.5);
-        if (Math.abs(currentAdaptivePixelRatio - targetPR) > 0.02) {
-          currentAdaptivePixelRatio = targetPR;
-          if (renderer && typeof renderer.setPixelRatio === 'function') {
-            renderer.setPixelRatio(targetPR);
+      // Tier stepping logic:
+      // Tier Medium: if rolling average frame time exceeds native budget by > 20%
+      // Tier Low: low-end device struggling to hold 60 FPS (> 21.0ms)
+      if (frameTimeEMA > 21.0) {
+        newTier = 'low';
+      } else if (frameTimeEMA > nativeBudgetMs * 1.20) {
+        newTier = (currentTier === 'low' && frameTimeEMA > 18.0) ? 'low' : 'medium';
+      } else {
+        // Potential upgrade with 3.0-second hysteresis cooldown
+        if (now - lastTierDowngradeTime >= 3000) {
+          if (frameTimeEMA <= nativeBudgetMs * 1.05) {
+            newTier = 'high';
+          } else if (currentTier === 'low' && frameTimeEMA <= 18.0) {
+            newTier = 'medium';
           }
         }
-        if (renderer && renderer.shadowMap) {
-          renderer.shadowMap.enabled = false;
+      }
+
+      if (newTier !== currentTier) {
+        if ((newTier === 'low' && currentTier !== 'low') || (newTier === 'medium' && currentTier === 'high')) {
+          lastTierDowngradeTime = now;
+        }
+        currentTier = newTier;
+      }
+
+      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+      let targetPR = Math.min(dpr, 1.5);
+      if (currentTier === 'medium') {
+        targetPR = Math.min(dpr, 1.15);
+      } else if (currentTier === 'low') {
+        targetPR = Math.min(dpr, 0.9);
+      }
+
+      if (Math.abs(currentAdaptivePixelRatio - targetPR) > 0.01) {
+        currentAdaptivePixelRatio = targetPR;
+        if (renderer && typeof renderer.setPixelRatio === 'function') {
+          renderer.setPixelRatio(targetPR);
+        }
+      }
+
+      if (renderer && renderer.shadowMap && renderer.shadowMap.enabled) {
+        if (currentTier === 'medium' || currentTier === 'low') {
+          renderer.shadowMap.autoUpdate = false;
+        } else {
+          renderer.shadowMap.autoUpdate = true;
         }
       }
     }
@@ -20790,13 +20954,30 @@ let sharedRickshawArtTexture = null;
           walkAction.timeScale = speedFactor;
         }
 
-        // Distance LOD: full-rate animation updates within ~150 units of camera; throttle to every 3rd frame (delta * 3) beyond
+        // Distance LOD based on adaptive quality tier:
+        // Tier High: near <= 140 animated every frame, > 140 throttled to 2nd frame
+        // Tier Medium: near <= 110 animated every frame, > 110 throttled to 2nd frame (accumulating dt)
+        // Tier Low: near <= 85 animated every frame, > 85 throttled to 3rd frame (accumulating dt)
         const walkerDist = camera ? pm.mesh.position.distanceTo(camera.position) : 0;
-        if (walkerDist <= 150) {
-          pm.mesh.userData._lodAccDelta = 0;
-          mixer.update(Math.min(delta, 0.1));
+        let nearThreshold = 140;
+        let distCadence = 2;
+        if (currentTier === 'low') {
+          nearThreshold = 85;
+          distCadence = 3;
+        } else if (currentTier === 'medium') {
+          nearThreshold = 110;
+          distCadence = 2;
+        }
+
+        if (walkerDist <= nearThreshold) {
+          if (pm.mesh.userData._lodAccDelta) {
+            mixer.update(Math.min(delta + pm.mesh.userData._lodAccDelta, 0.15));
+            pm.mesh.userData._lodAccDelta = 0;
+          } else {
+            mixer.update(Math.min(delta, 0.1));
+          }
         } else {
-          pm.mesh.userData._lodFrameCount = ((pm.mesh.userData._lodFrameCount || 0) + 1) % 3;
+          pm.mesh.userData._lodFrameCount = ((pm.mesh.userData._lodFrameCount || 0) + 1) % distCadence;
           pm.mesh.userData._lodAccDelta = (pm.mesh.userData._lodAccDelta || 0) + delta;
           if (pm.mesh.userData._lodFrameCount === 0) {
             const stepDelta = Math.min(pm.mesh.userData._lodAccDelta, 0.3);
@@ -20821,7 +21002,7 @@ let sharedRickshawArtTexture = null;
         }
       }
 
-      // Smooth 180° turnaround heading interpolation so pedestrians turn around naturally
+      // Smooth 180° turnaround heading interpolation (frame-rate independent exponential damping)
       if (typeof pm.mesh.userData.currentRotY === 'undefined') {
         pm.mesh.userData.currentRotY = targetRotY;
       }
@@ -20831,7 +21012,7 @@ let sharedRickshawArtTexture = null;
         while (rotDiff > Math.PI && ++guard < 10) rotDiff -= Math.PI * 2;
         guard = 0;
         while (rotDiff < -Math.PI && ++guard < 10) rotDiff += Math.PI * 2;
-        pm.mesh.userData.currentRotY += rotDiff * Math.min(1.0, delta * 14);
+        pm.mesh.userData.currentRotY += rotDiff * (1 - Math.exp(-14 * delta));
       } else {
         pm.mesh.userData.currentRotY = targetRotY;
       }
@@ -20853,7 +21034,7 @@ let sharedRickshawArtTexture = null;
       if (typeof pm.mesh.userData.currentGroundY === 'undefined') {
         pm.mesh.userData.currentGroundY = targetGroundY;
       }
-      pm.mesh.userData.currentGroundY += (targetGroundY - pm.mesh.userData.currentGroundY) * Math.min(1.0, delta * 12);
+      pm.mesh.userData.currentGroundY += (targetGroundY - pm.mesh.userData.currentGroundY) * (1 - Math.exp(-12 * delta));
 
       pm.mesh.position.set(posX, pm.mesh.userData.currentGroundY, posZ);
       pm.mesh.rotation.y = pm.mesh.userData.currentRotY;
@@ -20946,12 +21127,13 @@ let sharedRickshawArtTexture = null;
       }
     }
 
-    // Dynamic Road Wetness & Specular Sheen (Matte Slate Asphalt)
+    // Dynamic Road Wetness & Specular Sheen (Matte Slate Asphalt - Exponential Damping)
     if (roadMaterial) {
       const targetRoughness = isRain ? 0.45 : 0.85;
       const targetMetalness = isRain ? 0.20 : 0.05;
-      roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * Math.min(1, delta * 3.0);
-      roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * Math.min(1, delta * 3.0);
+      const roadDamp = 1 - Math.exp(-3.0 * delta);
+      roadMaterial.roughness += (targetRoughness - roadMaterial.roughness) * roadDamp;
+      roadMaterial.metalness += (targetMetalness - roadMaterial.metalness) * roadDamp;
     }
 
     // 7. Dynamic GTA-5 Third-Person Chase Camera & Aerial Drone Hover
@@ -21018,7 +21200,7 @@ let sharedRickshawArtTexture = null;
       if (desiredCamPos && desiredCamLook &&
           Number.isFinite(desiredCamPos.x) && Number.isFinite(desiredCamPos.y) && Number.isFinite(desiredCamPos.z) &&
           Number.isFinite(desiredCamLook.x) && Number.isFinite(desiredCamLook.y) && Number.isFinite(desiredCamLook.z)) {
-        // Silky-smooth 120Hz exponential damping: 1 - Math.exp(-k * delta)
+        // Silky-smooth 120Hz exponential damping: 1 - Math.exp(-lambda * delta)
         const safeDt = Math.max(0.0001, Math.min(delta, 0.05));
         const camLerp = 1 - Math.exp(-6 * safeDt);
         const lookLerp = 1 - Math.exp(-8 * safeDt);
@@ -21113,7 +21295,14 @@ let sharedRickshawArtTexture = null;
       }
     }
 
-    // 7.5. Live Rear-View Mirror Rendering for Active / Closest Hasan Bus
+    // Directional shadow map throttling (if enabled)
+    if (renderer && renderer.shadowMap && renderer.shadowMap.enabled && !renderer.shadowMap.autoUpdate) {
+      if (perfFrameCount % 3 === 0) {
+        renderer.shadowMap.needsUpdate = true;
+      }
+    }
+
+    // 7.5. Live Rear-View Mirror Rendering for Active / Closest Hasan Bus (Adaptive Cadence)
     if (renderer && scene && mirrorLeftRT && mirrorRightRT && mirrorCam) {
       let activeBus = null;
       if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isBus) {
@@ -21154,8 +21343,11 @@ let sharedRickshawArtTexture = null;
         }
 
         mirrorFrameCounter++;
-        if (mirrorFrameCounter % 2 === 0) {
-          const updateLeft = (mirrorFrameCounter % 4 === 0);
+        const mirrorCadence = currentTier === 'low' ? 6 : (currentTier === 'medium' ? 4 : 2);
+        const skipMirrorFar = (currentTier === 'low' && camera && activeBus.position.distanceTo(camera.position) > 120);
+
+        if (!skipMirrorFar && mirrorFrameCounter % mirrorCadence === 0) {
+          const updateLeft = ((mirrorFrameCounter / mirrorCadence) % 2 === 0);
           const targetRT = updateLeft ? mirrorLeftRT : mirrorRightRT;
           const targetMeshes = updateLeft ? activeBus.userData.leftMirrorMeshes : activeBus.userData.rightMirrorMeshes;
 
@@ -21173,23 +21365,33 @@ let sharedRickshawArtTexture = null;
             mirrorCam.lookAt(_mLook);
 
             // Temporarily hide ALL mirror meshes on all buses to prevent self-reflection & WebGL feedback loops
-            const allMirrorsToHide = [];
+            _allMirrorsToHide.length = 0;
             for (let bi = 0; bi < hasanBusList.length; bi++) {
               const b = hasanBusList[bi];
               if (!b) continue;
-              if (b.userData.leftMirrorMeshes) allMirrorsToHide.push(...b.userData.leftMirrorMeshes);
-              if (b.userData.rightMirrorMeshes) allMirrorsToHide.push(...b.userData.rightMirrorMeshes);
+              if (b.userData.leftMirrorMeshes) {
+                for (let mi = 0; mi < b.userData.leftMirrorMeshes.length; mi++) {
+                  _allMirrorsToHide.push(b.userData.leftMirrorMeshes[mi]);
+                }
+              }
+              if (b.userData.rightMirrorMeshes) {
+                for (let mi = 0; mi < b.userData.rightMirrorMeshes.length; mi++) {
+                  _allMirrorsToHide.push(b.userData.rightMirrorMeshes[mi]);
+                }
+              }
             }
-            allMirrorsToHide.forEach(m => { if (m) m.visible = false; });
+            for (let mi = 0; mi < _allMirrorsToHide.length; mi++) {
+              if (_allMirrorsToHide[mi]) _allMirrorsToHide[mi].visible = false;
+            }
 
             // Temporarily hide Mixamo pedestrians & bench-sitter groups during mirrorCam pass to skip duplicate skinning
-            const crowdToRestore = [];
+            _crowdToRestore.length = 0;
             if (typeof pedMeshMap !== 'undefined') {
               for (const pk in pedMeshMap) {
                 const pm = pedMeshMap[pk];
                 if (pm && pm.mesh && pm.mesh.visible) {
                   pm.mesh.visible = false;
-                  crowdToRestore.push(pm.mesh);
+                  _crowdToRestore.push(pm.mesh);
                 }
               }
             }
@@ -21198,7 +21400,7 @@ let sharedRickshawArtTexture = null;
                 const gp = gossipingCrowd[gi];
                 if (gp && gp.group && gp.group.visible) {
                   gp.group.visible = false;
-                  crowdToRestore.push(gp.group);
+                  _crowdToRestore.push(gp.group);
                 }
               }
             }
@@ -21211,8 +21413,12 @@ let sharedRickshawArtTexture = null;
               // Graceful render guard
             } finally {
               renderer.setRenderTarget(prevRT);
-              allMirrorsToHide.forEach(m => { if (m) m.visible = true; });
-              crowdToRestore.forEach(obj => { if (obj) obj.visible = true; });
+              for (let mi = 0; mi < _allMirrorsToHide.length; mi++) {
+                if (_allMirrorsToHide[mi]) _allMirrorsToHide[mi].visible = true;
+              }
+              for (let ci = 0; ci < _crowdToRestore.length; ci++) {
+                if (_crowdToRestore[ci]) _crowdToRestore[ci].visible = true;
+              }
             }
           }
         }
@@ -21242,6 +21448,23 @@ let sharedRickshawArtTexture = null;
       }
     }
   };
+
+  // Expose clean read-only inspection object window.__crossroadsPerf
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(window, '__crossroadsPerf', {
+      get: function() {
+        return {
+          detectedHz: detectedNativeHz,
+          fps: Math.round(currentFps || (1000 / Math.max(1, frameTimeEMA))),
+          frameMs: parseFloat(frameTimeEMA.toFixed(2)),
+          qualityTier: currentTier,
+          pixelRatio: parseFloat((renderer && renderer.getPixelRatio ? renderer.getPixelRatio() : (currentAdaptivePixelRatio || 1)).toFixed(2))
+        };
+      },
+      configurable: true,
+      enumerable: true
+    });
+  }
 
   window.replaceCNGWithModel = replaceCNGWithModel;
   window.replaceBusWithModel = replaceBusWithModel;

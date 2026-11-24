@@ -134,7 +134,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=20261124-ped-tier2-roster-v2"></script>
+  <script src="assets/crossroads-3d.js?v=20261125-perf-120hz-v1"></script>
   <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
@@ -18311,6 +18311,10 @@
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
+        if (dhakaCrossroadsAnimId) {
+          cancelAnimationFrame(dhakaCrossroadsAnimId);
+          dhakaCrossroadsAnimId = null;
+        }
         if (window.crossroadsAudio && crossroadsAudio.isActive) {
           crossroadsAudio.pause();
           crossroadsAudio.wasEnabled = true;
@@ -18318,6 +18322,9 @@
       } else {
         if (typeof window._dhakaCrossroadsResetTime === 'function') {
           window._dhakaCrossroadsResetTime();
+        }
+        if (dhakaCrossroadsRunning && !dhakaCrossroadsAnimId && typeof window._dhakaCrossroadsTick === 'function') {
+          dhakaCrossroadsAnimId = requestAnimationFrame(window._dhakaCrossroadsTick);
         }
         const userLanding = document.getElementById('userLandingView');
         if (userLanding && !userLanding.classList.contains('hidden')) {
@@ -19105,11 +19112,15 @@
       };
       const laneGroupKeys = Object.keys(laneGroups);
 
-      // Animation Loop
+      // Animation Loop (Silky-Smooth Native 120Hz/90Hz/60Hz Frame-Rate Independent)
       function tick(currentTime) {
-        if (!dhakaCrossroadsRunning) return;
-        // High-precision unclamped native refresh rate dt (clamped at 50ms to prevent tab-switch jumps)
-        const dt = Math.min(0.05, (currentTime - lastTime) / 1000);
+        if (!dhakaCrossroadsRunning || document.hidden) {
+          dhakaCrossroadsAnimId = null;
+          return;
+        }
+        // High-precision unclamped native refresh rate dt (clamped safely between 1ms and 50ms)
+        const rawDt = (currentTime - lastTime) / 1000;
+        const dt = Math.min(Math.max(rawDt, 0.001), 0.05);
         lastTime = currentTime;
 
         if (!prefersReducedMotion) {
@@ -19140,7 +19151,7 @@
               if (window.crossroadsAudio) crossroadsAudio.playStationArrivalChime();
             } else {
               const targetSpeed = Math.max(14, (dist / (DOCK_X - APPROACH_X)) * CRUISE_SPEED);
-              trainSpeed += (targetSpeed - trainSpeed) * Math.min(1, dt * 3.5);
+              trainSpeed += (targetSpeed - trainSpeed) * (1 - Math.exp(-3.5 * dt));
               trainX += trainSpeed * dt;
             }
           } else if (trainState === 'boarding') {
@@ -19152,7 +19163,7 @@
               if (window.crossroadsAudio) crossroadsAudio.playTrainTractionHum();
             }
           } else if (trainState === 'accelerating') {
-            trainSpeed += (CRUISE_SPEED - trainSpeed) * Math.min(1, dt * 2.2);
+            trainSpeed += (CRUISE_SPEED - trainSpeed) * (1 - Math.exp(-2.2 * dt));
             trainX += trainSpeed * dt;
             if (trainSpeed >= CRUISE_SPEED * 0.96) {
               trainState = 'cruising';
@@ -19337,7 +19348,7 @@
                 }
               }
 
-              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
+              v.speed += (targetSpeed - v.speed) * (1 - Math.exp(-5.0 * dt));
               v.pos += v.speed * dt;
               if (leader) v.pos = Math.min(v.pos, leader.pos - v.w - MIN_FOLLOW_GAP);
               if (mustStop) v.pos = Math.min(v.pos, v.stopLine - v.w);
@@ -19367,7 +19378,7 @@
                     }
                   }
                   if (!lane2Blocked) {
-                    v.currentLaneY = (v.currentLaneY || 438) + (468 - (v.currentLaneY || 438)) * Math.min(1, dt * 4.5);
+                    v.currentLaneY = (v.currentLaneY || 438) + (468 - (v.currentLaneY || 438)) * (1 - Math.exp(-4.5 * dt));
                     if (v.currentLaneY >= 464) {
                       v.lane = 2;
                       v.currentLaneY = 468;
@@ -19385,7 +19396,7 @@
                   }
                 }
                 if (!lane1Blocked) {
-                  v.currentLaneY = (v.currentLaneY || 468) + (438 - (v.currentLaneY || 468)) * Math.min(1, dt * 3.5);
+                  v.currentLaneY = (v.currentLaneY || 468) + (438 - (v.currentLaneY || 468)) * (1 - Math.exp(-3.5 * dt));
                   if (v.currentLaneY <= 442) {
                     v.lane = 1;
                     v.currentLaneY = 438;
@@ -19393,7 +19404,7 @@
                 }
               } else {
                 const targetLaneY = v.lane === 1 ? 438 : 468;
-                v.currentLaneY = (v.currentLaneY || targetLaneY) + (targetLaneY - (v.currentLaneY || targetLaneY)) * Math.min(1, dt * 5.0);
+                v.currentLaneY = (v.currentLaneY || targetLaneY) + (targetLaneY - (v.currentLaneY || targetLaneY)) * (1 - Math.exp(-5.0 * dt));
               }
 
               if (!crossroads3DMode && v.el) v.el.setAttribute('transform', `translate(${v.pos.toFixed(1)}, ${v.currentLaneY.toFixed(1)})`);
@@ -19430,7 +19441,7 @@
                 }
               }
 
-              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
+              v.speed += (targetSpeed - v.speed) * (1 - Math.exp(-5.0 * dt));
               v.pos -= v.speed * dt;
               if (leader) v.pos = Math.max(v.pos, leader.pos + leader.w + MIN_FOLLOW_GAP);
               if (mustStop) v.pos = Math.max(v.pos, v.stopLine);
@@ -19480,7 +19491,7 @@
                 }
               }
 
-              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
+              v.speed += (targetSpeed - v.speed) * (1 - Math.exp(-5.0 * dt));
               v.pos += v.speed * dt;
               if (leader) v.pos = Math.min(v.pos, leader.pos - v.h - MIN_FOLLOW_GAP);
               if (mustStop) v.pos = Math.min(v.pos, v.stopLine - v.h);
@@ -19530,7 +19541,7 @@
                 }
               }
 
-              v.speed += (targetSpeed - v.speed) * Math.min(1, dt * 5.0);
+              v.speed += (targetSpeed - v.speed) * (1 - Math.exp(-5.0 * dt));
               v.pos -= v.speed * dt;
               if (leader) v.pos = Math.max(v.pos, leader.pos + leader.h + MIN_FOLLOW_GAP);
               if (mustStop) v.pos = Math.max(v.pos, v.stopLine);
@@ -19664,7 +19675,7 @@
             }
           }
 
-          ambulanceSpeed += (ambTargetSpeed - ambulanceSpeed) * Math.min(1, dt * 6.0);
+          ambulanceSpeed += (ambTargetSpeed - ambulanceSpeed) * (1 - Math.exp(-6.0 * dt));
           if (ambulanceSpeed < 0.05) ambulanceSpeed = 0;
           ambulanceX += ambulanceSpeed * dt;
           if (obstacle) ambulanceX = Math.min(ambulanceX, obstacle.pos - 54 - MIN_FOLLOW_GAP);
@@ -19699,7 +19710,11 @@
           }
         }
 
-        dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+        if (!document.hidden && dhakaCrossroadsRunning) {
+          dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+        } else {
+          dhakaCrossroadsAnimId = null;
+        }
       }
 
       // 5. Interactive Hover & Tooltips for Vehicles, Metro Train & Mirpur 10 Station
@@ -19802,6 +19817,9 @@
       window._dhakaCrossroadsTick = tick;
       window._dhakaCrossroadsResetTime = function() {
         lastTime = performance.now();
+        if (typeof window.resetCrossroads3DTime === 'function') {
+          window.resetCrossroads3DTime();
+        }
       };
 
       // Start animation loop cleanly without duplicates
@@ -19809,7 +19827,9 @@
         cancelAnimationFrame(dhakaCrossroadsAnimId);
         dhakaCrossroadsAnimId = null;
       }
-      dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+      if (!document.hidden && dhakaCrossroadsRunning) {
+        dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+      }
 
       // Clean intersection observer to pause when scrolled out of view
       if ('IntersectionObserver' in window && !dhakaCrossroadsObserver) {
@@ -19819,7 +19839,12 @@
               if (!dhakaCrossroadsRunning) {
                 dhakaCrossroadsRunning = true;
                 lastTime = performance.now();
-                dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+                if (typeof window._dhakaCrossroadsResetTime === 'function') {
+                  window._dhakaCrossroadsResetTime();
+                }
+                if (!document.hidden) {
+                  dhakaCrossroadsAnimId = requestAnimationFrame(tick);
+                }
               }
             } else {
               dhakaCrossroadsRunning = false;
