@@ -15325,15 +15325,15 @@ let sharedRickshawArtTexture = null;
     if (map.image) {
       const img = map.image;
       if (typeof img.src === 'string') {
-        if (img.src === BLANK_PIXEL_DATA_URI || (img.src.startsWith('data:image') && img.src.length < 300)) return true;
+        if (!img.src || img.src === BLANK_PIXEL_DATA_URI || (img.src.startsWith('data:image') && img.src.length < 500)) return true;
         if (/\.dds($|\?)/i.test(img.src) || img.src.includes('undefined')) return true;
       }
-      if (typeof img.width === 'number' && img.width > 0 && img.width <= 2 &&
-          typeof img.height === 'number' && img.height > 0 && img.height <= 2) {
-        return true;
+      if (typeof img.width === 'number' && img.width > 4 &&
+          typeof img.height === 'number' && img.height > 4) {
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   const riggedPedLibrary = {};
@@ -15484,8 +15484,8 @@ let sharedRickshawArtTexture = null;
         mats.forEach(mat => {
           if (!mat) return;
 
-          // Trap 1x1 fallback dummy texture: null it out so clean authentic colors can apply
-          if (isFallbackTexture(mat.map)) {
+          // Trap 1x1 fallback dummy texture or untextured FBX models: null it out so clean authentic colors can apply
+          if (isChild || isSalwar || isFallbackTexture(mat.map)) {
             mat.map = null;
             mat.needsUpdate = true;
           }
@@ -15509,7 +15509,9 @@ let sharedRickshawArtTexture = null;
             mat.color.setHex(0xffffff);
           } else {
             // Material map is null/fallback: assign clean realistic colors by material & mesh slot
-            const slotName = ((node.name || '') + ' ' + (mat.name || '')).toLowerCase();
+            const matName = (mat.name || '').toLowerCase();
+            const nodeName = (node.name || '').toLowerCase();
+            const combinedName = (nodeName + ' ' + matName).toLowerCase();
 
             if (isChild) {
               if (node.name === 'Boy01_Body_Geo') {
@@ -15530,19 +15532,19 @@ let sharedRickshawArtTexture = null;
                     const z = pos.getZ(i);
                     const x = Math.abs(pos.getX(i));
                     let c;
-                    if (y < 18) {
+                    if (y < 20) {
                       c = colShoes;
-                    } else if (y < 86) {
+                    } else if (y < 92) {
                       c = colPants;
-                    } else if (y < 144) {
-                      if (z < -8 && y > 95 && y < 140 && x < 22) {
+                    } else if (y < 148) {
+                      if (z < -5 && y > 95 && y < 145 && x < 24) {
                         c = colBackpack;
-                      } else if (x > 28 && y < 112) {
+                      } else if (x > 28 && y < 115) {
                         c = colSkin; // Hands
                       } else {
                         c = colShirt;
                       }
-                    } else if (y < 168) {
+                    } else if (y < 170) {
                       c = colSkin; // Face & neck
                     } else {
                       c = colCap; // Cap
@@ -15555,44 +15557,45 @@ let sharedRickshawArtTexture = null;
                   mat.vertexColors = true;
                   mat.color.setHex(0xffffff);
                 }
-              } else if (/brow|hair/i.test(slotName)) {
+              } else if (/brow|hair/i.test(combinedName)) {
                 mat.color.setHex(0x1f1a17); // Dark hair
-              } else if (/eye|glass/i.test(slotName)) {
+              } else if (/eye|glass/i.test(combinedName)) {
                 mat.color.setHex(0x111827); // Dark glasses / eyes
-              } else if (/mouth|tongue/i.test(slotName)) {
+              } else if (/mouth|tongue/i.test(combinedName)) {
                 mat.color.setHex(0x991b1b); // Natural mouth
               } else {
                 mat.color.setHex(0xc68662); // Warm South Asian skin
               }
             } else if (isSalwar) {
-              if (/eye/i.test(slotName) && !/eyelash/i.test(slotName)) {
-                mat.color.setHex(0xf8fafc); // Realistic white sclera
-              } else if (/cornea/i.test(slotName)) {
+              // Match strictly by mat.name (node.name is CC_Base_Teeth2 for all body parts!)
+              if (/cornea/i.test(matName)) {
                 mat.color.setHex(0x111827); // Dark pupil
                 mat.transparent = true;
-                mat.opacity = 0.9;
-              } else if (/teeth/i.test(slotName)) {
+                mat.opacity = 0.95;
+              } else if (/eye/i.test(matName) && !/eyelash/i.test(matName)) {
+                mat.color.setHex(0xf8fafc); // Realistic white sclera
+              } else if (/teeth/i.test(matName)) {
                 mat.color.setHex(0xf1f5f9); // Clean white teeth
-              } else if (/tongue|mouth/i.test(slotName)) {
+              } else if (/tongue|mouth/i.test(matName)) {
                 mat.color.setHex(0x991b1b); // Tongue
-              } else if (/hair|eyelash|scalp/i.test(slotName)) {
+              } else if (/hair|eyelash|scalp|tail/i.test(matName)) {
                 mat.color.setHex(0x1a1512); // Dark hair
-              } else if (/skin|head|arm|leg|nail/i.test(slotName)) {
+              } else if (/skin|head|arm|leg|nail/i.test(matName)) {
                 mat.color.setHex(0xc68662); // Warm South Asian skin
-              } else if (/lambert2/i.test(slotName)) {
+              } else if (/lambert2/i.test(matName)) {
                 mat.color.setHex(0x0f766e); // Teal upper kameez tunic
-              } else if (/lambert3/i.test(slotName)) {
+              } else if (/lambert3/i.test(matName)) {
                 mat.color.setHex(0xfef3c7); // Cream salwar trousers
-              } else if (/lambert4/i.test(slotName)) {
+              } else if (/lambert4/i.test(matName)) {
                 mat.color.setHex(0xd97706); // Amber saffron dupatta / borders
               } else {
                 mat.color.setHex(0x0f766e); // Default rich teal salwar
               }
             } else {
               // Untextured male/female fallback
-              if (/skin|face|head|body|arm|leg/i.test(slotName)) {
+              if (/skin|face|head|body|arm|leg/i.test(combinedName)) {
                 mat.color.setHex(0xc68662);
-              } else if (/hair|brow/i.test(slotName)) {
+              } else if (/hair|brow/i.test(combinedName)) {
                 mat.color.setHex(0x1a1512);
               } else {
                 mat.color.setHex(0x1e3a8a);
@@ -16012,21 +16015,9 @@ let sharedRickshawArtTexture = null;
     let box = new THREE.Box3().setFromObject(spawnedRoot);
     let currentH = box.max.y - box.min.y;
     if (Number.isFinite(currentH) && currentH > 0.05 && Number.isFinite(targetHeight) && targetHeight > 0) {
-      const scaleMultiplier = targetHeight / currentH;
-      spawnedRoot.scale.multiplyScalar(scaleMultiplier);
-      spawnedRoot.updateMatrixWorld(true);
-
-      box = new THREE.Box3().setFromObject(spawnedRoot);
-      const dy = box.min.y - spawnedRoot.position.y;
-      const dx = (box.min.x + box.max.x) * 0.5 - spawnedRoot.position.x;
-      const dz = (box.min.z + box.max.z) * 0.5 - spawnedRoot.position.z;
-
-      if (spawnedRoot.children.length > 0) {
-        const inner = spawnedRoot.children[0];
-        inner.position.y -= dy / (spawnedRoot.scale.y || 1);
-        if (Math.abs(dx) > 0.5) inner.position.x -= dx / (spawnedRoot.scale.x || 1);
-        if (Math.abs(dz) > 0.5) inner.position.z -= dz / (spawnedRoot.scale.z || 1);
-        inner.userData.groundedBaseY = inner.position.y;
+      if (Math.abs(currentH - targetHeight) > 0.3) {
+        const scaleMultiplier = targetHeight / currentH;
+        spawnedRoot.scale.multiplyScalar(scaleMultiplier);
         spawnedRoot.updateMatrixWorld(true);
       }
 
@@ -16130,7 +16121,7 @@ let sharedRickshawArtTexture = null;
       sharedMats.shadow
     );
     shadowDisc.rotation.x = -Math.PI / 2;
-    const shadowScale = (targetHeight / 1.73) * 8.0;
+    const shadowScale = (targetHeight / 13.0) * 16.0;
     shadowDisc.scale.set(shadowScale, shadowScale, shadowScale);
     shadowDisc.position.set(0, 0.002, 0);
     wrapper.add(shadowDisc);
@@ -16435,51 +16426,149 @@ let sharedRickshawArtTexture = null;
     return bench;
   }
 
+  function aimBoneInCharacterSpace(bone, childBone, targetDirCharSpace, rootObj) {
+    if (!bone || !childBone || !rootObj) return;
+    rootObj.updateMatrixWorld(true);
+
+    const boneWorldPos = new THREE.Vector3();
+    const childWorldPos = new THREE.Vector3();
+    bone.getWorldPosition(boneWorldPos);
+    childBone.getWorldPosition(childWorldPos);
+
+    const worldDir = new THREE.Vector3().subVectors(childWorldPos, boneWorldPos);
+    const rootWorldQuat = new THREE.Quaternion();
+    rootObj.getWorldQuaternion(rootWorldQuat);
+    const rootWorldQuatInv = rootWorldQuat.clone().invert();
+
+    const currentDir = worldDir.clone().applyQuaternion(rootWorldQuatInv);
+    if (currentDir.lengthSq() < 1e-6) return;
+    currentDir.normalize();
+
+    const targetDir = targetDirCharSpace.clone().normalize();
+    const deltaCharQuat = new THREE.Quaternion().setFromUnitVectors(currentDir, targetDir);
+
+    let localDelta;
+    if (bone.parent && bone.parent !== rootObj) {
+      const parentWorldQuat = new THREE.Quaternion();
+      bone.parent.getWorldQuaternion(parentWorldQuat);
+      const parentRelQuat = rootWorldQuatInv.clone().multiply(parentWorldQuat);
+      const parentRelQuatInv = parentRelQuat.clone().invert();
+      localDelta = parentRelQuatInv.multiply(deltaCharQuat).multiply(parentRelQuat);
+    } else {
+      localDelta = deltaCharQuat;
+    }
+
+    bone.quaternion.premultiply(localDelta);
+    bone.updateMatrixWorld(true);
+  }
+
   function extractCharacterBones(characterGroup) {
     const bones = {};
     characterGroup.traverse(node => {
       if (node.isBone) {
         const cleanName = node.name.replace(/^mixamorig\d*[:_]?/i, '');
-        bones[cleanName] = node;
+        if (!bones[cleanName]) {
+          bones[cleanName] = node;
+        }
       }
     });
     return bones;
   }
 
   function applySeatedPoseToRiggedModel(characterModel, seatIdx, totalInBench, isChild = false, isFemale = false) {
-    const bones = extractCharacterBones(characterModel);
+    if (!characterModel || !characterModel.isObject3D) return {};
 
-    // Thighs forward horizontal
-    if (bones.LeftUpLeg) bones.LeftUpLeg.rotation.set(-1.48, 0, -0.12);
-    if (bones.RightUpLeg) bones.RightUpLeg.rotation.set(-1.48, 0, 0.12);
-
-    // Knees bent down 90°
-    if (bones.LeftLeg) bones.LeftLeg.rotation.set(1.48, 0, 0);
-    if (bones.RightLeg) bones.RightLeg.rotation.set(1.48, 0, 0);
-
-    // Feet flat
-    if (bones.LeftFoot) bones.LeftFoot.rotation.set(0, 0, 0);
-    if (bones.RightFoot) bones.RightFoot.rotation.set(0, 0, 0);
-
-    // Pelvis seated at bench seat height (seatY = BENCH_SEAT_Y)
-    const charHeight = isChild ? TARGET_PED_HEIGHTS.child : (isFemale ? TARGET_PED_HEIGHTS.female : TARGET_PED_HEIGHTS.male);
-    characterModel.position.y = BENCH_SEAT_Y - (charHeight * 0.50);
-
-    // Natural arm resting positions
-    if (seatIdx === 0) {
-      if (bones.LeftArm) bones.LeftArm.rotation.set(0.35, 0.15, -0.42);
-      if (bones.LeftForeArm) bones.LeftForeArm.rotation.set(0.65, 0.25, 0.20);
-      if (bones.RightArm) bones.RightArm.rotation.set(0.42, -0.12, 0.18);
-      if (bones.RightForeArm) bones.RightForeArm.rotation.set(0.75, -0.20, -0.15);
-    } else {
-      if (bones.RightArm) bones.RightArm.rotation.set(0.35, -0.15, 0.42);
-      if (bones.RightForeArm) bones.RightForeArm.rotation.set(0.65, -0.25, -0.20);
-      if (bones.LeftArm) bones.LeftArm.rotation.set(0.42, 0.12, -0.18);
-      if (bones.LeftForeArm) bones.LeftForeArm.rotation.set(0.75, 0.20, 0.15);
+    // 1. Stop any walking mixer & ensure no animation overrides seated pose
+    if (characterModel.userData) {
+      if (characterModel.userData.mixer) {
+        try { characterModel.userData.mixer.stopAllAction(); } catch (_) {}
+        characterModel.userData.mixer = null;
+      }
+      characterModel.userData.walkAction = null;
+      characterModel.userData.idleAction = null;
     }
 
-    if (bones.Spine) bones.Spine.rotation.set(0.08, 0, 0);
-    if (bones.Head) bones.Head.rotation.set(0.04, 0, 0);
+    // Cache restQuat once for bind-pose preservation
+    characterModel.traverse(node => {
+      if (node.isBone && !node.userData.restQuat) {
+        node.userData.restQuat = node.quaternion.clone();
+      }
+    });
+
+    const bones = extractCharacterBones(characterModel);
+
+    // 2. Character-space bone aiming top-down (parent before child)
+    // Torso: upright with relaxed 5-8° recline toward -Z against bench backrest
+    if (bones.Spine && (bones.Neck || bones.Head || bones.Spine1)) {
+      aimBoneInCharacterSpace(bones.Spine, bones.Neck || bones.Head || bones.Spine1, new THREE.Vector3(0, 0.995, -0.10), characterModel);
+    }
+    if (bones.Spine1 && (bones.Neck || bones.Head)) {
+      aimBoneInCharacterSpace(bones.Spine1, bones.Neck || bones.Head, new THREE.Vector3(0, 0.995, -0.06), characterModel);
+    }
+
+    // Thighs: aim forward along (±0.08, -0.08, 0.99) (~85-90° forward, slight outward knee spacing)
+    if (bones.LeftUpLeg && bones.LeftLeg) {
+      aimBoneInCharacterSpace(bones.LeftUpLeg, bones.LeftLeg, new THREE.Vector3(0.08, -0.08, 0.99), characterModel);
+    }
+    if (bones.RightUpLeg && bones.RightLeg) {
+      aimBoneInCharacterSpace(bones.RightUpLeg, bones.RightLeg, new THREE.Vector3(-0.08, -0.08, 0.99), characterModel);
+    }
+
+    // Lower legs: aim straight down along (0, -0.99, -0.08)
+    if (bones.LeftLeg && bones.LeftFoot) {
+      aimBoneInCharacterSpace(bones.LeftLeg, bones.LeftFoot, new THREE.Vector3(0, -0.99, -0.08), characterModel);
+    }
+    if (bones.RightLeg && bones.RightFoot) {
+      aimBoneInCharacterSpace(bones.RightLeg, bones.RightFoot, new THREE.Vector3(0, -0.99, -0.08), characterModel);
+    }
+
+    // Feet: aim flat forward if toes exist
+    if (bones.LeftFoot && bones.LeftToeBase) {
+      aimBoneInCharacterSpace(bones.LeftFoot, bones.LeftToeBase, new THREE.Vector3(0, 0.10, 0.99), characterModel);
+    }
+    if (bones.RightFoot && bones.RightToeBase) {
+      aimBoneInCharacterSpace(bones.RightFoot, bones.RightToeBase, new THREE.Vector3(0, 0.10, 0.99), characterModel);
+    }
+
+    // Upper arms: drop completely out of T-pose down and slightly forward along (±0.22, -0.92, 0.30)
+    if (bones.LeftArm && bones.LeftForeArm) {
+      aimBoneInCharacterSpace(bones.LeftArm, bones.LeftForeArm, new THREE.Vector3(0.22, -0.92, 0.30), characterModel);
+    }
+    if (bones.RightArm && bones.RightForeArm) {
+      aimBoneInCharacterSpace(bones.RightArm, bones.RightForeArm, new THREE.Vector3(-0.22, -0.92, 0.30), characterModel);
+    }
+
+    // Forearms: bend forward and inward onto thighs/lap along (∓0.20, -0.35, 0.91)
+    if (bones.LeftForeArm && bones.LeftHand) {
+      aimBoneInCharacterSpace(bones.LeftForeArm, bones.LeftHand, new THREE.Vector3(-0.20, -0.35, 0.91), characterModel);
+    }
+    if (bones.RightForeArm && bones.RightHand) {
+      aimBoneInCharacterSpace(bones.RightForeArm, bones.RightHand, new THREE.Vector3(0.20, -0.35, 0.91), characterModel);
+    }
+
+    // Save seatedQuat on all posed bones
+    characterModel.traverse(node => {
+      if (node.isBone) {
+        node.userData.seatedQuat = node.quaternion.clone();
+      }
+    });
+
+    // 3. Exact bench seat placement (zero wood clipping & grounded feet)
+    characterModel.updateMatrixWorld(true);
+    const rootInv = characterModel.matrixWorld.clone().invert();
+    const hPos = new THREE.Vector3();
+    if (bones.Hips) bones.Hips.getWorldPosition(hPos).applyMatrix4(rootInv);
+    const sPos = new THREE.Vector3();
+    if (bones.Spine1 || bones.Spine) (bones.Spine1 || bones.Spine).getWorldPosition(sPos).applyMatrix4(rootInv);
+
+    const benchSeatTopY = 3.95;
+    const thighRadius = isChild ? 0.48 : (isFemale ? 0.62 : 0.76);
+    const targetHipsY = benchSeatTopY + thighRadius;
+
+    characterModel.position.y = targetHipsY - hPos.y;
+    characterModel.position.z = -1.50 - sPos.z;
+    characterModel.position.x = -hPos.x;
+    characterModel.updateMatrixWorld(true);
 
     return bones;
   }
@@ -16537,8 +16626,9 @@ let sharedRickshawArtTexture = null;
           bones: {
             head: bones.Head,
             neck: bones.Neck,
-            spine: bones.Spine || bones.Spine1,
+            spine: bones.Spine1 || bones.Spine,
             gestureForeArm: (seatIdx === 0 ? bones.RightForeArm : bones.LeftForeArm),
+            otherForeArm: (seatIdx === 0 ? bones.LeftForeArm : bones.RightForeArm),
             gestureHand: (seatIdx === 0 ? bones.RightHand : bones.LeftHand)
           },
           baseRot: {
@@ -16608,6 +16698,8 @@ let sharedRickshawArtTexture = null;
     if (!gossipingCrowd || !gossipingCrowd.length) return;
 
     const rainActive = Boolean(isRain);
+    const qEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+    const qDelta = new THREE.Quaternion();
 
     for (let i = 0; i < gossipingCrowd.length; i++) {
       const person = gossipingCrowd[i];
@@ -16626,44 +16718,109 @@ let sharedRickshawArtTexture = null;
 
       const neighborTurn = (seatIdx === 0) ? 0.32 : ((seatIdx === 1 && totalInBench === 3) ? (Math.sin(time * 0.5 + cycleOffset) * 0.3) : -0.32);
 
-      if (bones.head) {
-        if (isSpeaker) {
-          const nod = Math.sin(time * 4.5) * 0.09 * intensity + Math.sin(time * 2.2) * 0.05;
-          const tilt = Math.sin(time * 1.8) * 0.05 * intensity;
-          bones.head.rotation.x = baseRot.headX + nod;
-          bones.head.rotation.y = baseRot.headY + neighborTurn + Math.sin(time * 1.2) * 0.06;
-          bones.head.rotation.z = baseRot.headZ + tilt;
-        } else {
-          const listenerNod = (Math.sin(time * 1.5) > 0.3) ? (Math.sin(time * 1.5) * 0.06) : 0;
-          bones.head.rotation.x = baseRot.headX + listenerNod;
-          bones.head.rotation.y = baseRot.headY + neighborTurn + Math.sin(time * 0.8) * 0.03;
-          bones.head.rotation.z = baseRot.headZ;
+      if (!isProcedural) {
+        // Safe Rigged Mixamo Gossiping with Quaternion deltas (Zero Euler / T-Pose Resets)
+        // 1. Head: gentle turn toward neighbor + light conversational nod and tilt
+        if (bones.head && bones.head.userData && bones.head.userData.seatedQuat) {
+          const nod = isSpeaker
+            ? (Math.sin(time * 4.5) * 0.08 * intensity + Math.sin(time * 2.2) * 0.04)
+            : ((Math.sin(time * 1.5) > 0.3) ? (Math.sin(time * 1.5) * 0.05) : 0);
+          const turn = neighborTurn + (isSpeaker ? Math.sin(time * 1.2) * 0.05 : Math.sin(time * 0.8) * 0.03);
+          const tilt = isSpeaker ? (Math.sin(time * 1.8) * 0.04 * intensity) : 0;
+
+          qEuler.set(nod, turn, tilt, 'YXZ');
+          qDelta.setFromEuler(qEuler);
+          bones.head.quaternion.copy(bones.head.userData.seatedQuat).multiply(qDelta);
         }
-      }
 
-      if (bones.spine) {
-        const lean = isSpeaker ? (Math.sin(time * 1.2) * 0.04 * intensity + 0.04) : (Math.sin(time * 0.8) * 0.02);
-        bones.spine.rotation.x = baseRot.spineX + lean;
-        bones.spine.rotation.y = baseRot.spineY + (isSpeaker ? neighborTurn * 0.4 : neighborTurn * 0.2);
-      }
-
-      if (bones.gestureForeArm) {
-        if (isSpeaker) {
-          const gesture = (Math.sin(time * 3.2) * 0.22 + 0.15) * intensity;
-          bones.gestureForeArm.rotation.x = baseRot.foreArmX + gesture;
-          if (bones.gestureHand) bones.gestureHand.rotation.z = Math.sin(time * 3.5) * 0.18 * intensity;
-        } else {
-          bones.gestureForeArm.rotation.x = baseRot.foreArmX;
-          if (bones.gestureHand) bones.gestureHand.rotation.z = 0;
+        // 2. Neck: subtle sympathetic turn
+        if (bones.neck && bones.neck.userData && bones.neck.userData.seatedQuat) {
+          const turn = neighborTurn * 0.3;
+          qEuler.set(0, turn, 0, 'YXZ');
+          qDelta.setFromEuler(qEuler);
+          bones.neck.quaternion.copy(bones.neck.userData.seatedQuat).multiply(qDelta);
         }
-      }
 
-      if (!isProcedural && person.group) {
-        person.group.traverse(node => {
-          if (node && node.isSkinnedMesh && node.skeleton) {
-            node.skeleton.update();
+        // 3. Spine: subtle torso sway and breathing recline
+        if (bones.spine && bones.spine.userData && bones.spine.userData.seatedQuat) {
+          const swayLean = isSpeaker ? (Math.sin(time * 1.2) * 0.03 * intensity) : (Math.sin(time * 0.8) * 0.015);
+          const swayTurn = neighborTurn * (isSpeaker ? 0.15 : 0.08);
+
+          qEuler.set(swayLean, swayTurn, 0, 'YXZ');
+          qDelta.setFromEuler(qEuler);
+          bones.spine.quaternion.copy(bones.spine.userData.seatedQuat).multiply(qDelta);
+        }
+
+        // 4. Gesture Forearm: small conversational lift & turn when speaking
+        if (bones.gestureForeArm && bones.gestureForeArm.userData && bones.gestureForeArm.userData.seatedQuat) {
+          if (isSpeaker) {
+            const gesturePitch = Math.sin(time * 3.2) * 0.16 * intensity + 0.08;
+            const gestureYaw = Math.cos(time * 2.8) * 0.10 * intensity;
+            qEuler.set(gesturePitch, gestureYaw, 0, 'YXZ');
+            qDelta.setFromEuler(qEuler);
+            bones.gestureForeArm.quaternion.copy(bones.gestureForeArm.userData.seatedQuat).multiply(qDelta);
+          } else {
+            bones.gestureForeArm.quaternion.copy(bones.gestureForeArm.userData.seatedQuat);
           }
-        });
+        }
+
+        // 5. Gesture Hand: subtle wrist accent
+        if (bones.gestureHand && bones.gestureHand.userData && bones.gestureHand.userData.seatedQuat) {
+          if (isSpeaker) {
+            const handRoll = Math.sin(time * 3.5) * 0.15 * intensity;
+            qEuler.set(0, 0, handRoll, 'YXZ');
+            qDelta.setFromEuler(qEuler);
+            bones.gestureHand.quaternion.copy(bones.gestureHand.userData.seatedQuat).multiply(qDelta);
+          } else {
+            bones.gestureHand.quaternion.copy(bones.gestureHand.userData.seatedQuat);
+          }
+        }
+
+        // 6. Non-gesturing Forearm: keep resting cleanly on lap
+        if (bones.otherForeArm && bones.otherForeArm.userData && bones.otherForeArm.userData.seatedQuat) {
+          bones.otherForeArm.quaternion.copy(bones.otherForeArm.userData.seatedQuat);
+        }
+
+        if (person.group) {
+          person.group.traverse(node => {
+            if (node && node.isSkinnedMesh && node.skeleton) {
+              node.skeleton.update();
+            }
+          });
+        }
+      } else {
+        // Procedural seated human fallback
+        if (bones.head) {
+          if (isSpeaker) {
+            const nod = Math.sin(time * 4.5) * 0.09 * intensity + Math.sin(time * 2.2) * 0.05;
+            const tilt = Math.sin(time * 1.8) * 0.05 * intensity;
+            bones.head.rotation.x = baseRot.headX + nod;
+            bones.head.rotation.y = baseRot.headY + neighborTurn + Math.sin(time * 1.2) * 0.06;
+            bones.head.rotation.z = baseRot.headZ + tilt;
+          } else {
+            const listenerNod = (Math.sin(time * 1.5) > 0.3) ? (Math.sin(time * 1.5) * 0.06) : 0;
+            bones.head.rotation.x = baseRot.headX + listenerNod;
+            bones.head.rotation.y = baseRot.headY + neighborTurn + Math.sin(time * 0.8) * 0.03;
+            bones.head.rotation.z = baseRot.headZ;
+          }
+        }
+
+        if (bones.spine) {
+          const lean = isSpeaker ? (Math.sin(time * 1.2) * 0.04 * intensity + 0.04) : (Math.sin(time * 0.8) * 0.02);
+          bones.spine.rotation.x = baseRot.spineX + lean;
+          bones.spine.rotation.y = baseRot.spineY + (isSpeaker ? neighborTurn * 0.4 : neighborTurn * 0.2);
+        }
+
+        if (bones.gestureForeArm) {
+          if (isSpeaker) {
+            const gesture = (Math.sin(time * 3.2) * 0.22 + 0.15) * intensity;
+            bones.gestureForeArm.rotation.x = baseRot.foreArmX + gesture;
+            if (bones.gestureHand) bones.gestureHand.rotation.z = Math.sin(time * 3.5) * 0.18 * intensity;
+          } else {
+            bones.gestureForeArm.rotation.x = baseRot.foreArmX;
+            if (bones.gestureHand) bones.gestureHand.rotation.z = 0;
+          }
+        }
       }
     }
   }
@@ -16698,7 +16855,8 @@ let sharedRickshawArtTexture = null;
         pruneNullChildren(p.group);
 
         const isChild = (template && template.category === 'child') || (p.preferredCharId && p.preferredCharId.includes('boy'));
-        const bones = applySeatedPoseToRiggedModel(riggedModel, p.seatIdx, p.totalInBench, isChild);
+        const isFemale = (template && template.category === 'female') || (p.preferredCharId && p.preferredCharId.includes('female'));
+        const bones = applySeatedPoseToRiggedModel(riggedModel, p.seatIdx, p.totalInBench, isChild, isFemale);
 
         p.charId = template.id;
         p.category = template.category;
@@ -16707,8 +16865,9 @@ let sharedRickshawArtTexture = null;
         p.bones = {
           head: bones.Head,
           neck: bones.Neck,
-          spine: bones.Spine || bones.Spine1,
+          spine: bones.Spine1 || bones.Spine,
           gestureForeArm: (p.seatIdx === 0 ? bones.RightForeArm : bones.LeftForeArm),
+          otherForeArm: (p.seatIdx === 0 ? bones.LeftForeArm : bones.RightForeArm),
           gestureHand: (p.seatIdx === 0 ? bones.RightHand : bones.LeftHand)
         };
         p.baseRot = {
