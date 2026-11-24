@@ -1,5 +1,5 @@
 // BharaDekhi PWA Service Worker - Lightweight & Secure
-const CACHE_NAME = 'bharadekhi-pwa-v115-ped-little-boy-texture';
+const CACHE_NAME = 'bharadekhi-pwa-v116-ped-fastload-tier1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
@@ -52,12 +52,33 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.includes('/ws')) return;
 
-  const isCodeOrDoc = req.mode === 'navigate' ||
+  const isModelAsset = url.pathname.includes('/assets/models/');
+
+  const isCodeOrDoc = !isModelAsset && (
+                      req.mode === 'navigate' ||
                       /\.(html|js|css)($|\?)/i.test(url.pathname) ||
-                      Boolean(url.search);
+                      Boolean(url.search));
 
   // 2. Inside respondWith async chain, ALWAYS return a valid Response (never null/undefined, never unhandled rejection)
   event.respondWith((async () => {
+    if (isModelAsset) {
+      // Cache-First for 3D model binaries & textures (serve from cache in <50ms on repeat loads)
+      try {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+
+        const netRes = await fetch(req);
+        if (netRes && netRes.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(req, netRes.clone()).catch(() => {});
+        }
+        return netRes || new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+      } catch (err) {
+        const fallback = await caches.match(req).catch(() => null);
+        return fallback || new Response('Network error', { status: 502, statusText: 'Bad Gateway' });
+      }
+    }
+
     if (isCodeOrDoc) {
       // Network-First for code, HTML, CSS, JS, and query-versioned requests so live updates appear immediately
       try {

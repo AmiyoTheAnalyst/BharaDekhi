@@ -354,16 +354,22 @@
     if (typeof pedMeshMap === 'undefined') return null;
     const cat = desiredCategory || WALKING_CYCLE_CATEGORIES[walkingCycleIndex] || 'male';
 
-    const peds = Object.values(pedMeshMap).filter(pm => pm && pm.mesh && pm.mesh.parent && pm.data);
-    if (!peds.length) return null;
+    // STRICT: Only consider walkers whose Mixamo model is ALREADY spawned, visible === true, and isRiggedMixamo === true
+    const readyMixamoPeds = Object.values(pedMeshMap).filter(pm =>
+      pm &&
+      pm.mesh &&
+      pm.mesh.parent &&
+      pm.mesh.visible === true &&
+      pm.mesh.userData &&
+      pm.mesh.userData.isRiggedMixamo &&
+      pm.data
+    );
 
-    // Prefer fully-spawned, visible, rigged Mixamo walkers
-    const readyMixamoPeds = peds.filter(pm => pm.mesh.visible && pm.mesh.userData && pm.mesh.userData.isRiggedMixamo);
-    const candidatePool = (readyMixamoPeds.length > 0) ? readyMixamoPeds : peds;
+    if (!readyMixamoPeds.length) return null;
 
-    // Filter by matching pedCategory
-    const matching = candidatePool.filter(pm => {
-      const pCat = pm.data.pedCategory || (pm.mesh.userData && pm.mesh.userData.pedCategory);
+    // Filter by matching pedCategory if available
+    const matching = readyMixamoPeds.filter(pm => {
+      const pCat = (pm.mesh.userData && pm.mesh.userData.pedCategory) || pm.data.pedCategory;
       if (cat === 'child') {
         return pCat === 'child' || pm.data.isChild;
       }
@@ -373,8 +379,11 @@
       return pCat === 'male' || (!pm.data.isFemale && !pm.data.isChild && pCat !== 'child' && pCat !== 'female');
     });
 
+    // Fall back to any ready Mixamo walker if requested category isn't ready yet
+    const candidatePool = matching.length ? matching : readyMixamoPeds;
+
     // Prefer crosswalk zebra walkers (!isSidewalk) over sidewalk walkers
-    const pool = (matching.length ? matching : candidatePool).slice().sort((a, b) => {
+    const pool = candidatePool.slice().sort((a, b) => {
       const aCross = !a.data.isSidewalk ? 1 : 0;
       const bCross = !b.data.isSidewalk ? 1 : 0;
       return bCross - aCross;
@@ -382,11 +391,15 @@
 
     const chosen = pool[0];
     if (!chosen) return null;
-    const actualCat = chosen.data.pedCategory || (chosen.mesh.userData && chosen.mesh.userData.pedCategory) || cat;
+    const actualCat = (chosen.mesh.userData && chosen.mesh.userData.pedCategory) || chosen.data.pedCategory || cat;
+    const actualCharId = (chosen.mesh.userData && chosen.mesh.userData.charId) || chosen.data.charId;
+    const actualCharName = (chosen.mesh.userData && chosen.mesh.userData.charName) || chosen.data.charName;
     return {
       id: chosen.data.id || ('ped_' + actualCat),
       type: 'walking',
       category: actualCat,
+      charId: actualCharId,
+      charName: actualCharName,
       mesh: chosen.mesh,
       data: chosen.data,
       speed: chosen.data.speed || 12
@@ -501,17 +514,25 @@
       title.textContent = `${(target.mesh && target.mesh.userData && target.mesh.userData.modelTitle) || 'Aerodynamic Ride-share Car'} · ${dirLabel}`;
       if (sub) sub.textContent = `Speed: ${speedKmh} km/h · Executive Fleet · Base ৳50 + ৳20/km`;
     } else if (vType === 'walking' || vType === 'ped') {
+      const isReady = target.mesh && target.mesh.visible === true && target.mesh.userData && target.mesh.userData.isRiggedMixamo;
+      if (!isReady) {
+        if (icon) icon.textContent = '🚶';
+        title.textContent = 'Mirpur 10 Zebra Crosswalk';
+        if (sub) sub.textContent = 'Pedestrian crosswalk · 360° Orbit · Loading commuters...';
+        return;
+      }
       const cat = target.category || (target.data && target.data.pedCategory) || (target.mesh && target.mesh.userData && target.mesh.userData.pedCategory) || 'male';
+      const charName = target.charName || (target.mesh && target.mesh.userData && target.mesh.userData.charName);
       if (icon) icon.textContent = cat === 'female' ? '🚶‍♀️' : cat === 'child' ? '🧒' : '🚶‍♂️';
       const locLabel = target.data?.isSidewalk ? 'Footpath Stroll' : 'Mirpur 10 Zebra Crosswalk';
       if (cat === 'female') {
-        title.textContent = `Female Commuter (Ch22 Mixamo) · ${locLabel}`;
+        title.textContent = `${charName || 'Female Commuter (Ch22 Mixamo)'} · ${locLabel}`;
         if (sub) sub.textContent = `Traditional attire commuter crossing Mirpur 10 · 360° Orbit (Click Walking to cycle) · 0 carbon`;
       } else if (cat === 'child') {
-        title.textContent = `School Kid Walker · ${locLabel}`;
+        title.textContent = `${charName || 'School Kid Walker'} · ${locLabel}`;
         if (sub) sub.textContent = `Dhaka student with backpack · Articulated Mocap · 360° Orbit (Click Walking to cycle)`;
       } else {
-        title.textContent = `Male Commuter (Remy Mixamo) · ${locLabel}`;
+        title.textContent = `${charName || 'Male Commuter (Remy Mixamo)'} · ${locLabel}`;
         if (sub) sub.textContent = `Executive commuter crossing zebra stripes · 360° Orbit (Click Walking to cycle) · 0 carbon`;
       }
     }
@@ -557,6 +578,22 @@
         look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
       };
     }
+    const isPed = target.type === 'ped' || target.type === 'walking';
+    if (isPed) {
+      const isReadyWalker = target.mesh.visible === true && target.mesh.userData && target.mesh.userData.isRiggedMixamo;
+      if (!isReadyWalker) {
+        if (CAM_MODES && CAM_MODES.walking) {
+          return {
+            position: { x: CAM_MODES.walking.pos.x, y: CAM_MODES.walking.pos.y, z: CAM_MODES.walking.pos.z },
+            look: { x: CAM_MODES.walking.look.x, y: CAM_MODES.walking.look.y, z: CAM_MODES.walking.look.z }
+          };
+        }
+        return {
+          position: { x: camBasePos.x, y: camBasePos.y, z: camBasePos.z },
+          look: { x: camBaseLook.x, y: camBaseLook.y, z: camBaseLook.z }
+        };
+      }
+    }
     const position = target.mesh.position;
     if (!Number.isFinite(position.x) || !Number.isFinite(position.y) || !Number.isFinite(position.z)) {
       return {
@@ -586,7 +623,6 @@
     const right = { x: -forward.z, z: forward.x };
     const horizontalRadius = safeRadius * Math.cos(safePitch);
     const targetX = position.x;
-    const isPed = target.type === 'ped' || target.type === 'walking';
     const isChildPed = isPed && (target.category === 'child' || (target.data && (target.data.pedCategory === 'child' || target.data.isChild)));
     const targetY = position.y + (target.type === 'bike' ? 4.5 : target.type === 'bus' ? 9.5 : target.type === 'car' ? 4.5 : isPed ? (isChildPed ? 4.8 : 6.2) : 5.5);
     const targetZ = position.z;
@@ -653,9 +689,14 @@
         ? `${targetType.charAt(0).toUpperCase()}${targetType.slice(1)} · Move Pointer to Orbit`
         : 'Waiting for vehicle';
     } else if (modeName === 'walking') {
-      const cat = (activeTargetVehicle && activeTargetVehicle.category) || (activeTargetVehicle && activeTargetVehicle.data && activeTargetVehicle.data.pedCategory) || 'male';
-      const label = cat === 'female' ? 'Female Walker (Ch22)' : cat === 'child' ? 'Kid Walker' : 'Male Walker (Remy)';
-      badge.textContent = `${label} · 360° Orbit (Click Walking to cycle)`;
+      const isReady = activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.visible === true && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isRiggedMixamo;
+      if (!isReady) {
+        badge.textContent = 'Zebra Crosswalk · 360° Orbit';
+      } else {
+        const cat = (activeTargetVehicle && activeTargetVehicle.category) || (activeTargetVehicle && activeTargetVehicle.data && activeTargetVehicle.data.pedCategory) || 'male';
+        const label = cat === 'female' ? 'Female Walker (Ch22)' : cat === 'child' ? 'Kid Walker' : 'Male Walker (Remy)';
+        badge.textContent = `${label} · 360° Orbit (Click Walking to cycle)`;
+      }
     } else {
       badge.textContent = CAM_MODES[modeName].badge;
     }
@@ -711,16 +752,22 @@
           if (sub) sub.textContent = 'Executive Sedan & Luxury SUV Fleet (Base ৳50 · ৳20/km)';
         } else if (modeName === 'walking') {
           if (icon) icon.textContent = '🚶';
-          const cat = (activeTargetVehicle && (activeTargetVehicle.category || (activeTargetVehicle.data && activeTargetVehicle.data.pedCategory))) || WALKING_CYCLE_CATEGORIES[walkingCycleIndex] || 'male';
-          if (title) {
-            title.textContent = (cat === 'female') ? 'Female Commuter (Ch22) · 360° Orbit' : (cat === 'child' ? 'School Kid Walker · 360° Orbit' : 'Male Commuter (Remy) · 360° Orbit');
-          }
-          if (sub) {
-            sub.textContent = (cat === 'female')
-              ? 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle (Male → Female → Kid)'
-              : (cat === 'child')
-                ? 'Articulated Dhaka School Kid Rig · Click Walking to cycle (Male → Female → Kid)'
-                : 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle (Male → Female → Kid)';
+          const isReady = activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.visible === true && activeTargetVehicle.mesh.userData && activeTargetVehicle.mesh.userData.isRiggedMixamo;
+          if (!isReady) {
+            if (title) title.textContent = 'Zebra Crosswalk · 360° Orbit';
+            if (sub) sub.textContent = 'Pedestrian crosswalk & sidewalk strollers · 0 carbon';
+          } else {
+            const cat = (activeTargetVehicle && (activeTargetVehicle.category || (activeTargetVehicle.data && activeTargetVehicle.data.pedCategory))) || WALKING_CYCLE_CATEGORIES[walkingCycleIndex] || 'male';
+            if (title) {
+              title.textContent = (cat === 'female') ? 'Female Commuter (Ch22) · 360° Orbit' : (cat === 'child' ? 'School Kid Walker · 360° Orbit' : 'Male Commuter (Remy) · 360° Orbit');
+            }
+            if (sub) {
+              sub.textContent = (cat === 'female')
+                ? 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle (Male → Female → Kid)'
+                : (cat === 'child')
+                  ? 'Articulated Dhaka School Kid Rig · Click Walking to cycle (Male → Female → Kid)'
+                  : 'Mixamo 3D Rigged Walking Animation · Click Walking to cycle (Male → Female → Kid)';
+            }
           }
         }
       }
@@ -737,10 +784,22 @@
     if (activeCamMode === modeName && modeName !== 'overview') {
       if (modeName === 'walking') {
         // Repeated clicks on Walking cycle across Male (Remy) -> Female (Ch22) -> Kid Walker
-        walkingCycleIndex = (walkingCycleIndex + 1) % 3;
-        const targetCat = WALKING_CYCLE_CATEGORIES[walkingCycleIndex];
-        activeTargetVehicle = acquireTargetWalker(targetCat);
-        if (activeTargetVehicle && activeTargetVehicle.data) {
+        const totalCats = WALKING_CYCLE_CATEGORIES.length;
+        let foundWalker = null;
+        for (let step = 1; step <= totalCats; step++) {
+          const testIdx = (walkingCycleIndex + step) % totalCats;
+          const targetCat = WALKING_CYCLE_CATEGORIES[testIdx];
+          const candidate = acquireTargetWalker(targetCat);
+          if (candidate && candidate.mesh && candidate.mesh.visible === true && candidate.mesh.userData && candidate.mesh.userData.isRiggedMixamo) {
+            if (!activeTargetVehicle || candidate.mesh !== activeTargetVehicle.mesh) {
+              walkingCycleIndex = testIdx;
+              foundWalker = candidate;
+              break;
+            }
+          }
+        }
+        if (foundWalker) {
+          activeTargetVehicle = foundWalker;
           updateLegendHUD('walking');
           updateTrackedVehicleHUD(activeTargetVehicle, true);
           const pose = getVehicleOrbitPose(activeTargetVehicle);
@@ -790,7 +849,7 @@
 
     if (targetMode === 'walking') {
       walkingCycleIndex = 0;
-      activeTargetVehicle = acquireTargetWalker('male');
+      activeTargetVehicle = acquireTargetWalker('male') || acquireTargetWalker();
     } else if (targetMode !== 'overview') {
       activeTargetVehicle = acquireTargetVehicle(targetMode);
     } else {
@@ -15970,31 +16029,32 @@ let sharedRickshawArtTexture = null;
   }
 
   function loadMixamoGLBModel(walkPath, idlePath) {
-    return loadRiggedGLBModel(walkPath).then(walkRes => {
+    const walkPromise = loadRiggedGLBModel(walkPath);
+    const idlePromise = idlePath ? loadRiggedGLBModel(idlePath).catch(err => {
+      console.warn(`[Pedestrians] Optional idle GLB skipped from ${idlePath}:`, err);
+      return null;
+    }) : Promise.resolve(null);
+
+    return Promise.all([walkPromise, idlePromise]).then(([walkRes, idleRes]) => {
+      if (!walkRes || !walkRes.scene) {
+        throw new Error(`Invalid walk GLB loaded from ${walkPath}`);
+      }
       const animations = [];
-      if (walkRes && walkRes.animations && walkRes.animations.length > 0) {
+      if (walkRes.animations && walkRes.animations.length > 0) {
         const walkClip = walkRes.animations.find(c => /walk/i.test(c.name)) || walkRes.animations[0];
         const normWalk = normalizeClipTracks(walkClip);
         normWalk.name = 'walk';
         animations.push(normWalk);
       }
-      if (idlePath) {
-        return loadRiggedGLBModel(idlePath).then(idleRes => {
-          if (idleRes && idleRes.animations && idleRes.animations.length > 0) {
-            const idleClip = idleRes.animations.find(c => /idle|stand/i.test(c.name)) || idleRes.animations[0];
-            const normIdle = normalizeClipTracks(idleClip);
-            normIdle.name = 'idle';
-            animations.push(normIdle);
-          }
-          return { scene: walkRes.scene, animations: animations };
-        }).catch(err => {
-          console.error(`[Pedestrians] Failed to load idle GLB from ${idlePath}:`, err);
-          return { scene: walkRes.scene, animations: animations };
-        });
+      if (idleRes && idleRes.animations && idleRes.animations.length > 0) {
+        const idleClip = idleRes.animations.find(c => /idle|stand/i.test(c.name)) || idleRes.animations[0];
+        const normIdle = normalizeClipTracks(idleClip);
+        normIdle.name = 'idle';
+        animations.push(normIdle);
       }
       return { scene: walkRes.scene, animations: animations };
     }).catch(err => {
-      console.error(`[Pedestrians] Failed to load walk GLB from ${walkPath}:`, err);
+      console.error(`[Pedestrians] Failed to load GLB model from ${walkPath}:`, err);
       throw err;
     });
   }
@@ -16013,6 +16073,301 @@ let sharedRickshawArtTexture = null;
   const pedSpawnQueue = [];
   let pedPrecompileDone = false;
   let lastAssignedWalkerId = null;
+
+  let tier1SpawnDone = false;
+  let pedPipelineStartTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  let tier2StreamingStarted = false;
+
+  let fbxLoadingManager = null;
+  function getFBXLoadingManager() {
+    if (fbxLoadingManager) return fbxLoadingManager;
+    if (typeof THREE === 'undefined' || typeof THREE.LoadingManager !== 'function') {
+      return null;
+    }
+    const manager = new THREE.LoadingManager();
+    manager.setURLModifier(url => {
+      if (typeof url !== 'string' || !url || url === 'undefined' || url.endsWith('/undefined')) {
+        return BLANK_PIXEL_DATA_URI;
+      }
+      let cleanUrl = url;
+      if (cleanUrl.startsWith('undefinedblob:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
+      if (cleanUrl.startsWith('undefineddata:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
+      if (cleanUrl.includes('blob:')) {
+        return cleanUrl.slice(cleanUrl.indexOf('blob:'));
+      }
+      if (cleanUrl.includes('data:image')) {
+        return cleanUrl.slice(cleanUrl.indexOf('data:image'));
+      }
+      if (cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
+        return cleanUrl;
+      }
+      let decoded = cleanUrl;
+      try { decoded = decodeURI(cleanUrl); } catch (_) {}
+      if (/[A-Za-z]:[\\/]/.test(cleanUrl) || /[A-Za-z]:[\\/]/.test(decoded) ||
+          decoded.endsWith('/undefined') ||
+          /\.dds($|\?)/i.test(cleanUrl) || /\.dds($|\?)/i.test(decoded)) {
+        return BLANK_PIXEL_DATA_URI;
+      }
+      return cleanUrl;
+    });
+    manager.onError = function () {
+      // Silent error handler for missing FBX textures
+    };
+    fbxLoadingManager = manager;
+    return fbxLoadingManager;
+  }
+
+  const fbxModels = [
+    { id: 'female_salwar', category: 'female', path: 'assets/models/ped-female-salwar.fbx', height: TARGET_PED_HEIGHTS.female, name: 'Salwar Kameez Commuter' },
+    { id: 'little_boy', category: 'child', path: 'assets/models/ped-little-boy.fbx', height: TARGET_PED_HEIGHTS.child, name: 'School Kid Walker' },
+    { id: 'male_formal', category: 'male', path: 'assets/models/ped-male-formal.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Formal Office Commuter' },
+    { id: 'male_hoodie', category: 'male', path: 'assets/models/ped-male-hoodie.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Streetwear Hoodie Walker' },
+    { id: 'male_sweater', category: 'male', path: 'assets/models/ped-male-sweater.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Winter Sweater Walker' },
+    { id: 'male_tshirt', category: 'male', path: 'assets/models/ped-male-tshirt.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Casual T-Shirt Walker' }
+  ];
+
+  function loadFBXTemplate(def) {
+    if (typeof THREE === 'undefined' || typeof THREE.FBXLoader !== 'function') {
+      return Promise.resolve(null);
+    }
+    return new Promise(resolve => {
+      try {
+        const manager = getFBXLoadingManager();
+        const loader = manager ? new THREE.FBXLoader(manager) : new THREE.FBXLoader();
+        loader.load(def.path, async fbx => {
+          if (!fbx) { resolve(null); return; }
+          pruneNullChildren(fbx);
+          const normScene = normalizeCharacterTemplate(fbx, def.height, def.id);
+          const sceneToStore = normScene || fbx;
+          pruneNullChildren(sceneToStore);
+          await decodeTemplateTextures(sceneToStore);
+
+          const isFem = (def.category === 'female');
+          const walkClip = isFem ? (sharedMixamoClips.femaleWalk || sharedMixamoClips.maleWalk) : sharedMixamoClips.maleWalk;
+          const idleClip = isFem ? (sharedMixamoClips.femaleIdle || sharedMixamoClips.maleIdle) : sharedMixamoClips.maleIdle;
+          const anims = [];
+          if (walkClip) anims.push(walkClip);
+          if (idleClip) anims.push(idleClip);
+
+          riggedPedLibrary[def.id] = {
+            id: def.id,
+            category: def.category,
+            name: def.name,
+            scene: sceneToStore,
+            animations: anims,
+            height: def.height
+          };
+          if (def.category === 'child') {
+            riggedPedPrototypes.child = riggedPedLibrary[def.id];
+          }
+
+          sceneToStore.updateMatrixWorld(true);
+          const box = new THREE.Box3().setFromObject(sceneToStore);
+          const h = box.max.y - box.min.y;
+          console.log('[Pedestrians] Normalized', def.id, 'height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
+          console.info(`[Pedestrians] Loaded FBX character: ${def.id} (${def.name})`);
+          resolve(riggedPedLibrary[def.id]);
+        }, undefined, err => {
+          console.warn(`[Pedestrians] FBX load failed for ${def.id}:`, err);
+          resolve(null);
+        });
+      } catch (e) {
+        console.warn(`[Pedestrians] FBXLoader exception for ${def.id}:`, e);
+        resolve(null);
+      }
+    });
+  }
+
+  function assignTemplateToUnspawnedEntities(template) {
+    if (!template || !template.scene) return;
+
+    // 1. Bench sitters waiting for this character or category (1 per frame via pedSpawnQueue)
+    if (typeof gossipingCrowd !== 'undefined' && gossipingCrowd && gossipingCrowd.length) {
+      for (let i = 0; i < gossipingCrowd.length; i++) {
+        const sitter = gossipingCrowd[i];
+        if (sitter && sitter.isPlaceholder) {
+          const matchesChar = (sitter.preferredCharId === template.id);
+          const matchesCat = (!sitter.preferredCharId && sitter.category === template.category);
+          if (matchesChar || matchesCat) {
+            pedSpawnQueue.push(() => {
+              spawnOneRiggedBenchHuman(sitter);
+            });
+          }
+        }
+      }
+    }
+
+    // 2. Unspawned walkers matching this category (1 per frame via pedSpawnQueue)
+    if (typeof pedMeshMap !== 'undefined') {
+      const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+      const maxRiggedWalkers = isMobileScreen ? 10 : 13;
+
+      for (const k in pedMeshMap) {
+        if (activeRiggedWalkerCount >= maxRiggedWalkers) break;
+        const pm = pedMeshMap[k];
+        if (!pm || !pm.mesh || !pm.data) continue;
+        // NEVER tear down or rebuild already-visible Tier 1 walkers
+        if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer) continue;
+
+        const p = pm.data;
+        const isChildWalker = p.isChild || p.pedCategory === 'child' || p.gender === 'child';
+        const isFemaleWalker = p.pedCategory === 'female' || p.isFemale || p.gender === 'female';
+        const isMaleWalker = !isChildWalker && !isFemaleWalker;
+
+        let matches = false;
+        if (template.category === 'child' && isChildWalker) matches = true;
+        else if (template.category === 'female' && isFemaleWalker) matches = true;
+        else if (template.category === 'male' && isMaleWalker) matches = true;
+
+        if (matches) {
+          pedSpawnQueue.push(() => {
+            if (activeRiggedWalkerCount < maxRiggedWalkers && (!pm.mesh.userData || !pm.mesh.userData.isRiggedMixamo)) {
+              spawnOneRiggedWalker(k, pm);
+            }
+          });
+        }
+      }
+    }
+  }
+
+  function scheduleTier2Streaming() {
+    if (tier2StreamingStarted) return;
+    tier2StreamingStarted = true;
+
+    const startStreaming = () => {
+      if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(() => {
+          streamFBXSequentially();
+        }, { timeout: 1200 });
+      } else {
+        setTimeout(streamFBXSequentially, 600);
+      }
+    };
+
+    setTimeout(startStreaming, 600);
+  }
+
+  async function streamFBXSequentially() {
+    console.info('[Pedestrians] Tier 2: Initiating sequential background FBX streaming (1 model at a time)...');
+    for (let i = 0; i < fbxModels.length; i++) {
+      const def = fbxModels[i];
+      try {
+        const loaded = await loadFBXTemplate(def);
+        if (loaded) {
+          assignTemplateToUnspawnedEntities(loaded);
+        }
+      } catch (err) {
+        console.warn(`[Pedestrians] Background streaming skipped ${def.id}:`, err);
+      }
+
+      // Yield between FBX downloads to ensure zero main-thread freeze
+      await new Promise(res => {
+        if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+          window.requestIdleCallback(res, { timeout: 250 });
+        } else {
+          setTimeout(res, 80);
+        }
+      });
+    }
+    console.info(`[Pedestrians] Tier 2 Complete: All Mixamo character templates active (${Object.keys(riggedPedLibrary).length} total).`);
+    if (typeof scene !== 'undefined' && scene) {
+      pruneNullChildren(scene);
+    }
+  }
+
+  function assignGLBToUnspawnedWalkers(charId) {
+    if (typeof pedMeshMap === 'undefined') return;
+    const template = riggedPedLibrary[charId];
+    if (!template || !template.scene) return;
+
+    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+    const maxRiggedWalkers = isMobileScreen ? 10 : 13;
+
+    for (const k in pedMeshMap) {
+      if (activeRiggedWalkerCount >= maxRiggedWalkers) break;
+      const pm = pedMeshMap[k];
+      if (!pm || !pm.mesh || !pm.data) continue;
+      // Never tear down or rebuild already-visible Tier 1 walkers
+      if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer) continue;
+
+      const p = pm.data;
+      const isFem = p.pedCategory === 'female' || p.isFemale || p.gender === 'female';
+      if (charId === 'female_ch22' && isFem) {
+        spawnOneRiggedWalker(k, pm);
+      } else if (charId === 'male_remy' && !isFem && !p.isChild) {
+        spawnOneRiggedWalker(k, pm);
+      }
+    }
+
+    // Also check bench sitters for female_ch22 (NE bench has female_ch22)
+    if (typeof gossipingCrowd !== 'undefined' && gossipingCrowd && gossipingCrowd.length) {
+      for (let i = 0; i < gossipingCrowd.length; i++) {
+        const sitter = gossipingCrowd[i];
+        if (sitter && sitter.isPlaceholder && sitter.preferredCharId === charId) {
+          spawnOneRiggedBenchHuman(sitter);
+        }
+      }
+    }
+  }
+
+  function spawnTier1InitialBatch() {
+    if (typeof pedMeshMap === 'undefined' || !Object.keys(pedMeshMap).length) {
+      setTimeout(spawnTier1InitialBatch, 16);
+      return;
+    }
+
+    // Collect crosswalk zebra entries (!isSidewalk)
+    const crosswalkEntries = [];
+    for (const k in pedMeshMap) {
+      const pm = pedMeshMap[k];
+      if (pm && pm.data && !pm.data.isSidewalk && pm.mesh) {
+        crosswalkEntries.push({ key: k, pm: pm });
+      }
+    }
+
+    // Immediately spawn 4–6 initial crosswalk walkers in a single fast synchronous batch
+    const targetBatchCount = Math.min(6, crosswalkEntries.length || 6);
+    let initialSpawned = 0;
+    for (let i = 0; i < crosswalkEntries.length && initialSpawned < targetBatchCount; i++) {
+      const entry = crosswalkEntries[i];
+      if (spawnOneRiggedWalker(entry.key, entry.pm)) {
+        initialSpawned++;
+      }
+    }
+
+    if (typeof scene !== 'undefined' && scene) {
+      pruneNullChildren(scene);
+    }
+
+    const elapsedMs = ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - pedPipelineStartTime;
+    window.__dhakaPedFirstVisibleMs = elapsedMs;
+    console.info(`[Pedestrians] Tier 1 First-Paint: ${initialSpawned} crosswalk walkers visible on zebra stripes in ${elapsedMs.toFixed(1)}ms!`);
+
+    // If walking camera is active, immediately focus on first visible walker
+    if (activeCamMode === 'walking') {
+      const readyWalker = acquireTargetWalker();
+      if (readyWalker) {
+        activeTargetVehicle = readyWalker;
+        updateTrackedVehicleHUD(activeTargetVehicle, true);
+        const pose = getVehicleOrbitPose(activeTargetVehicle);
+        if (Number.isFinite(pose.position.x) && Number.isFinite(pose.look.x)) {
+          focusCamera(pose.position, pose.look, 0.8);
+        }
+      }
+    }
+
+    // Schedule Tier 2 silent background streaming ONLY AFTER Tier 1 walkers are visible and rendered
+    scheduleTier2Streaming();
+  }
+
+  function handleGLBTemplateLoaded(charId) {
+    if (!tier1SpawnDone) {
+      tier1SpawnDone = true;
+      spawnTier1InitialBatch();
+    } else {
+      assignGLBToUnspawnedWalkers(charId);
+    }
+  }
 
   async function decodeTemplateTextures(obj) {
     if (!obj) return;
@@ -16038,10 +16393,11 @@ let sharedRickshawArtTexture = null;
   }
 
   function loadAllRiggedPedestrians() {
-    console.info('[Pedestrians] Initializing Mixamo character pipeline (GLB + FBX in parallel)...');
+    console.info('[Pedestrians] Initializing Mixamo two-tier fast-load pipeline...');
+    pedPipelineStartTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     ensureSharedMocapClips();
 
-    // 1. Load GLB templates (provides male & female mocap walk/idle clips)
+    // 1. Load GLB templates FIRST on startup, completely independent of the 6 FBX files
     const remyPromise = loadMixamoGLBModel(
       'assets/models/ped-male-walk.glb',
       'assets/models/ped-male-idle.glb'
@@ -16069,6 +16425,7 @@ let sharedRickshawArtTexture = null;
         const h = box.max.y - box.min.y;
         console.log('[Pedestrians] Normalized male_remy height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
         console.info('[Pedestrians] Loaded male_remy template');
+        handleGLBTemplateLoaded('male_remy');
       }
       return res;
     }).catch(err => {
@@ -16103,6 +16460,7 @@ let sharedRickshawArtTexture = null;
         const h = box.max.y - box.min.y;
         console.log('[Pedestrians] Normalized female_ch22 height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
         console.info('[Pedestrians] Loaded female_ch22 template');
+        handleGLBTemplateLoaded('female_ch22');
       }
       return res;
     }).catch(err => {
@@ -16110,122 +16468,8 @@ let sharedRickshawArtTexture = null;
       return null;
     });
 
-    // 2. Load FBX character models (when FBXLoader is available)
-    let fbxLoadingManager = null;
-    function getFBXLoadingManager() {
-      if (fbxLoadingManager) return fbxLoadingManager;
-      if (typeof THREE === 'undefined' || typeof THREE.LoadingManager !== 'function') {
-        return null;
-      }
-      const manager = new THREE.LoadingManager();
-      manager.setURLModifier(url => {
-        if (typeof url !== 'string' || !url || url === 'undefined' || url.endsWith('/undefined')) {
-          return BLANK_PIXEL_DATA_URI;
-        }
-        let cleanUrl = url;
-        if (cleanUrl.startsWith('undefinedblob:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
-        if (cleanUrl.startsWith('undefineddata:')) cleanUrl = cleanUrl.replace(/^undefined/, '');
-        if (cleanUrl.includes('blob:')) {
-          return cleanUrl.slice(cleanUrl.indexOf('blob:'));
-        }
-        if (cleanUrl.includes('data:image')) {
-          return cleanUrl.slice(cleanUrl.indexOf('data:image'));
-        }
-        if (cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
-          return cleanUrl;
-        }
-        let decoded = cleanUrl;
-        try { decoded = decodeURI(cleanUrl); } catch (_) {}
-        // Check for Windows drive paths, trailing /undefined, or non-existent .dds textures
-        if (/[A-Za-z]:[\\/]/.test(cleanUrl) || /[A-Za-z]:[\\/]/.test(decoded) ||
-            decoded.endsWith('/undefined') ||
-            /\.dds($|\?)/i.test(cleanUrl) || /\.dds($|\?)/i.test(decoded)) {
-          return BLANK_PIXEL_DATA_URI;
-        }
-        return cleanUrl;
-      });
-      manager.onError = function () {
-        // Silent error handler for missing FBX textures
-      };
-      fbxLoadingManager = manager;
-      return fbxLoadingManager;
-    }
-
-    const fbxModels = [
-      { id: 'female_salwar', category: 'female', path: 'assets/models/ped-female-salwar.fbx', height: TARGET_PED_HEIGHTS.female, name: 'Salwar Kameez Commuter' },
-      { id: 'little_boy', category: 'child', path: 'assets/models/ped-little-boy.fbx', height: TARGET_PED_HEIGHTS.child, name: 'School Kid Walker' },
-      { id: 'male_formal', category: 'male', path: 'assets/models/ped-male-formal.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Formal Office Commuter' },
-      { id: 'male_hoodie', category: 'male', path: 'assets/models/ped-male-hoodie.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Streetwear Hoodie Walker' },
-      { id: 'male_sweater', category: 'male', path: 'assets/models/ped-male-sweater.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Winter Sweater Walker' },
-      { id: 'male_tshirt', category: 'male', path: 'assets/models/ped-male-tshirt.fbx', height: TARGET_PED_HEIGHTS.male, name: 'Casual T-Shirt Walker' }
-    ];
-
-    function loadFBXTemplate(def) {
-      if (typeof THREE === 'undefined' || typeof THREE.FBXLoader !== 'function') {
-        return Promise.resolve(null);
-      }
-      return new Promise(resolve => {
-        try {
-          const manager = getFBXLoadingManager();
-          const loader = manager ? new THREE.FBXLoader(manager) : new THREE.FBXLoader();
-          loader.load(def.path, async fbx => {
-            if (!fbx) { resolve(null); return; }
-            pruneNullChildren(fbx);
-            const normScene = normalizeCharacterTemplate(fbx, def.height, def.id);
-            const sceneToStore = normScene || fbx;
-            pruneNullChildren(sceneToStore);
-            await decodeTemplateTextures(sceneToStore);
-
-            const isFem = (def.category === 'female');
-            const walkClip = isFem ? (sharedMixamoClips.femaleWalk || sharedMixamoClips.maleWalk) : sharedMixamoClips.maleWalk;
-            const idleClip = isFem ? (sharedMixamoClips.femaleIdle || sharedMixamoClips.maleIdle) : sharedMixamoClips.maleIdle;
-            const anims = [];
-            if (walkClip) anims.push(walkClip);
-            if (idleClip) anims.push(idleClip);
-
-            riggedPedLibrary[def.id] = {
-              id: def.id,
-              category: def.category,
-              name: def.name,
-              scene: sceneToStore,
-              animations: anims,
-              height: def.height
-            };
-            if (def.category === 'child') {
-              riggedPedPrototypes.child = riggedPedLibrary[def.id];
-            }
-
-            sceneToStore.updateMatrixWorld(true);
-            const box = new THREE.Box3().setFromObject(sceneToStore);
-            const h = box.max.y - box.min.y;
-            console.log('[Pedestrians] Normalized', def.id, 'height:', h.toFixed(2), 'minY:', box.min.y.toFixed(2));
-            console.info(`[Pedestrians] Loaded FBX character: ${def.id} (${def.name})`);
-            resolve(riggedPedLibrary[def.id]);
-          }, undefined, err => {
-            console.warn(`[Pedestrians] FBX load failed for ${def.id}:`, err);
-            resolve(null);
-          });
-        } catch (e) {
-          console.warn(`[Pedestrians] FBXLoader exception for ${def.id}:`, e);
-          resolve(null);
-        }
-      });
-    }
-
-    const allLoadPromises = [
-      remyPromise,
-      ch22Promise,
-      ...fbxModels.map(loadFBXTemplate)
-    ];
-
-    return Promise.allSettled(allLoadPromises).then(() => {
-      const loadedCount = Object.keys(riggedPedLibrary).length;
-      console.info(`[Pedestrians] Mixamo Library ready: ${loadedCount} character templates active. Initializing staggered crowd spawn...`);
-      initStaggeredPedestrianSpawn();
-      if (typeof scene !== 'undefined' && scene) {
-        pruneNullChildren(scene);
-      }
-    });
+    // The millisecond the FIRST GLB finishes, Tier 1 is active (do NOT wait for all 8 files)
+    return Promise.race([remyPromise, ch22Promise]);
   }
 
   function loadPedestriansModel() {
@@ -16434,7 +16678,8 @@ let sharedRickshawArtTexture = null;
     const type = template.category;
     const targetHeight = (type === 'female') ? TARGET_PED_HEIGHTS.female : (type === 'child' ? TARGET_PED_HEIGHTS.child : TARGET_PED_HEIGHTS.male);
 
-    if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.pedCategory === type && pm.mesh.userData.charId === template.id && pm.mesh.userData.mixer) {
+    // NEVER tear down or rebuild already-visible Tier 1 walkers
+    if (pm.mesh.userData && pm.mesh.userData.isRiggedMixamo && pm.mesh.userData.mixer) {
       return true;
     }
 
@@ -19934,14 +20179,11 @@ let sharedRickshawArtTexture = null;
     lastFrameTime = now;
     const delta = Math.min(Math.max(dtFromPerf, 0.001), 0.05);
 
-    // Process staggered pedestrian spawn queue (max 2 characters per frame for silky-smooth 60fps)
+    // Process background streaming pedestrian spawn queue (1 character per frame for silky-smooth 60fps)
     if (pedSpawnQueue.length > 0) {
-      const batchCount = Math.min(2, pedSpawnQueue.length);
-      for (let qi = 0; qi < batchCount; qi++) {
-        const job = pedSpawnQueue.shift();
-        if (typeof job === 'function') {
-          try { job(); } catch (err) { console.warn('[Pedestrians] Spawn job error:', err); }
-        }
+      const job = pedSpawnQueue.shift();
+      if (typeof job === 'function') {
+        try { job(); } catch (err) { console.warn('[Pedestrians] Spawn job error:', err); }
       }
       if (pedSpawnQueue.length === 0 && !pedPrecompileDone && renderer && scene && camera) {
         pedPrecompileDone = true;
@@ -20790,9 +21032,9 @@ let sharedRickshawArtTexture = null;
       } else if (activeCamMode === 'walking' || (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.parent && activeTargetVehicle.data)) {
         if (activeCamMode === 'walking') {
           // If activeTargetVehicle is not yet rigged or not visible, re-acquire as soon as a rigged walker is ready
-          if (!activeTargetVehicle || !activeTargetVehicle.mesh || !activeTargetVehicle.mesh.visible || !activeTargetVehicle.mesh.userData || !activeTargetVehicle.mesh.userData.isRiggedMixamo) {
-            const readyWalker = acquireTargetWalker(WALKING_CYCLE_CATEGORIES[walkingCycleIndex]);
-            if (readyWalker && readyWalker.mesh && readyWalker.mesh.visible && readyWalker.mesh.userData && readyWalker.mesh.userData.isRiggedMixamo) {
+          if (!activeTargetVehicle || !activeTargetVehicle.mesh || activeTargetVehicle.mesh.visible !== true || !activeTargetVehicle.mesh.userData || !activeTargetVehicle.mesh.userData.isRiggedMixamo) {
+            const readyWalker = acquireTargetWalker(WALKING_CYCLE_CATEGORIES[walkingCycleIndex]) || acquireTargetWalker();
+            if (readyWalker && readyWalker.mesh && readyWalker.mesh.visible === true && readyWalker.mesh.userData && readyWalker.mesh.userData.isRiggedMixamo) {
               activeTargetVehicle = readyWalker;
               updateTrackedVehicleHUD(activeTargetVehicle, true);
               const pose = getVehicleOrbitPose(activeTargetVehicle);
@@ -20802,11 +21044,14 @@ let sharedRickshawArtTexture = null;
             }
           }
         }
-        if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.parent) {
+        if (activeTargetVehicle && activeTargetVehicle.mesh && activeTargetVehicle.mesh.parent && activeTargetVehicle.mesh.visible === true && activeTargetVehicle.mesh.userData && (activeCamMode !== 'walking' || activeTargetVehicle.mesh.userData.isRiggedMixamo)) {
           updateTrackedVehicleHUD(activeTargetVehicle, false); // 10 Hz throttled HUD update
           const pose = getVehicleOrbitPose(activeTargetVehicle);
           desiredCamPos = pose.position;
           desiredCamLook = pose.look;
+        } else if (activeCamMode === 'walking') {
+          desiredCamPos = CAM_MODES.walking.pos;
+          desiredCamLook = CAM_MODES.walking.look;
         }
       }
 
