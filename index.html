@@ -134,7 +134,7 @@
   <!-- GSAP for Interactive Camera Choreography & Smooth Swoops -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="assets/crossroads-3d.js?v=20261125-perf-120hz-v1"></script>
+  <script src="assets/crossroads-3d.js?v=20261125-perf-overhaul-v2"></script>
   <script src="assets/scroll-transit-hero.js?v=auth-gate-v1"></script>
 
   <style>
@@ -913,9 +913,8 @@
 
     #dhakaCrossroads3dCanvas,
     .canvas-3d {
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: transform, opacity, filter;
-      filter: contrast(1.16) saturate(1.24) brightness(1.02);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+      will-change: transform, opacity;
     }
 
     @media (max-width: 768px) {
@@ -1319,40 +1318,60 @@
     }
     #landingTopActions > *,
     #landingTopHeader .inline-flex {
-      background-color: rgba(10, 15, 26, 0.94) !important;
-      border: 1px solid rgba(56, 189, 248, 0.55) !important;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85), 0 0 12px rgba(56, 189, 248, 0.30) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
+      background-color: rgba(10, 17, 32, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85), 0 0 12px rgba(56, 189, 248, 0.25) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       color: #ffffff !important;
     }
     #landingTopActions button {
-      background-color: rgba(15, 23, 42, 0.92) !important;
-      border: 1px solid rgba(148, 163, 184, 0.45) !important;
+      background-color: rgba(10, 17, 32, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
       color: #ffffff !important;
       opacity: 1 !important;
     }
     #landingTopActions button:hover {
       background-color: rgba(30, 41, 59, 0.95) !important;
-      border-color: rgba(56, 189, 248, 0.7) !important;
+      border-color: rgba(56, 189, 248, 0.55) !important;
       color: #ffffff !important;
     }
     #crossroadsViewModeBtn {
-      border: 1px solid rgba(52, 211, 153, 0.85) !important;
+      border: 1px solid rgba(52, 211, 153, 0.75) !important;
       color: #34d399 !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 16px rgba(52, 211, 153, 0.45) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 16px rgba(52, 211, 153, 0.35) !important;
     }
     #crossroadsAtmosphereBadge {
-      border: 1px solid rgba(129, 140, 248, 0.85) !important;
+      border: 1px solid rgba(129, 140, 248, 0.75) !important;
       color: #e0e7ff !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(99, 102, 241, 0.40) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(99, 102, 241, 0.35) !important;
     }
     #trafficSignalBadge {
-      border: 1px solid rgba(74, 222, 128, 0.75) !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(74, 222, 128, 0.35) !important;
+      border: 1px solid rgba(74, 222, 128, 0.65) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75), 0 0 14px rgba(74, 222, 128, 0.30) !important;
     }
 
-    /* Cinematic Depth-of-Field & Peripheral Vignette Frame (Strictly layered behind outer UI layer) */
+    /* Zero CSS backdrop-filter stutter over WebGL 3D Canvas across ALL HUD cards, badges, pills & overlays */
+    body.is-3d-drone-mode #userLandingView [class*="backdrop-blur"],
+    #dhakaCrossroadsContainer.is-3d-drone-mode *,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsModeLegend,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsModePill,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsVehicleTooltip,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #landingPlanTripBtn,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #emergencyWaveAlertBadge {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsModeLegend,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsModePill,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsVehicleTooltip,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #trafficSignalBadge,
+    #dhakaCrossroadsContainer.is-3d-drone-mode #crossroadsAtmosphereBadge {
+      background-color: rgba(10, 17, 32, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    /* Cinematic Depth-of-Field & Peripheral Vignette Frame (Zero expensive backdrop blur over WebGL) */
     .cinematic-vignette-frame {
       position: absolute;
       inset: 0;
@@ -1368,10 +1387,6 @@
       right: 0;
       height: 14%;
       background: linear-gradient(to bottom, rgba(2, 6, 23, 0.55) 0%, rgba(2, 6, 23, 0.15) 60%, transparent 100%);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
-      mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
       pointer-events: none;
       z-index: 10;
     }
@@ -1382,10 +1397,6 @@
       right: 0;
       height: 12%;
       background: linear-gradient(to top, rgba(2, 6, 23, 0.6) 0%, transparent 100%);
-      backdrop-filter: blur(1.5px);
-      -webkit-backdrop-filter: blur(1.5px);
-      mask-image: linear-gradient(to top, black 25%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to top, black 25%, transparent 100%);
       pointer-events: none;
       z-index: 12;
     }
@@ -5196,7 +5207,7 @@
         <div id="dhakaLightningFlashOverlay" class="pointer-events-none absolute inset-0 bg-sky-100 z-30 transition-opacity duration-75 opacity-0" aria-hidden="true"></div>
         
         <!-- Floating Interactive Vehicle & Transit Micro-Tooltip -->
-        <div id="crossroadsVehicleTooltip" class="absolute z-40 pointer-events-none opacity-0 transition-opacity duration-150 px-2.5 py-1.5 rounded-xl bg-slate-950/95 border border-sky-500/50 text-white text-[11px] font-bold shadow-2xl backdrop-blur-md flex items-center gap-1.5 transform -translate-x-1/2 -translate-y-full">
+        <div id="crossroadsVehicleTooltip" class="absolute z-40 pointer-events-none opacity-0 transition-opacity duration-150 px-2.5 py-1.5 rounded-xl bg-slate-950/95 border border-sky-500/50 text-white text-[11px] font-bold shadow-2xl flex items-center gap-1.5 transform -translate-x-1/2 -translate-y-full">
           <span id="crossroadsVehicleTooltipIcon">🛺</span>
           <span id="crossroadsVehicleTooltipText">Cycle Rickshaw · রিকশা</span>
         </div>
@@ -5221,12 +5232,12 @@
         <!-- Top-Left HUD Header: Transit Grid & Slogan (Prominently stacked above 3D diorama & atmosphere) -->
         <div id="landingTopHeader" class="absolute top-2.5 left-2.5 sm:top-6 sm:left-6 z-50 flex flex-col gap-0.5 sm:gap-1 pointer-events-none max-w-[58%] sm:max-w-md">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-            <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-lg w-fit">
+            <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/90 border border-sky-500/40 text-sky-300 text-[10px] sm:text-xs font-bold shadow-lg w-fit">
               <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-ping"></span>
               <span class="truncate">DHAKA TRANSIT GRID</span>
             </div>
             <!-- Dynamic Weather & Time-of-Day Atmosphere Badge (Click to Cycle Weather) -->
-            <div id="crossroadsAtmosphereBadge" onclick="cycleCrossroadsAtmosphere(event)" title="Click to change weather / আবহাওয়া পরিবর্তন করুন (Day / Night / Rain)" class="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-500/50 text-indigo-300 text-[9px] sm:text-[11px] font-bold backdrop-blur-md shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95">
+            <div id="crossroadsAtmosphereBadge" onclick="cycleCrossroadsAtmosphere(event)" title="Click to change weather / আবহাওয়া পরিবর্তন করুন (Day / Night / Rain)" class="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full bg-slate-950/90 border border-indigo-500/50 text-indigo-300 text-[9px] sm:text-[11px] font-bold shadow-lg w-fit transition-all duration-500 pointer-events-auto cursor-pointer select-none active:scale-95">
               <span id="crossroadsAtmosphereDot" class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
               <span id="crossroadsAtmosphereText" class="truncate">🌙 DHAKA NIGHTFALL</span>
             </div>
@@ -5238,7 +5249,7 @@
             Mirpur 10 Crossroads · Multimodal Traffic Signals, Metro Rail &amp; Pedestrians
           </p>
           <!-- Emergency Priority Wave Alert HUD Badge -->
-          <div id="emergencyWaveAlertBadge" class="hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/95 border border-rose-500/90 text-rose-200 text-[10px] sm:text-xs font-black backdrop-blur-md shadow-[0_0_20px_rgba(244,63,94,0.45)] animate-pulse transition-all w-fit mt-1">
+          <div id="emergencyWaveAlertBadge" class="hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/95 border border-rose-500/90 text-rose-200 text-[10px] sm:text-xs font-black shadow-[0_0_20px_rgba(244,63,94,0.45)] animate-pulse transition-all w-fit mt-1">
             <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
             <span class="truncate">🚑 EMERGENCY PRIORITY WAVE · LANE CLEARING</span>
           </div>
@@ -5246,33 +5257,33 @@
 
         <!-- Top-Right Live Traffic Signal State Badge & Sleek Quick Actions (Prominently stacked above 3D diorama & atmosphere) -->
         <div id="landingTopActions" class="absolute top-2.5 right-2.5 sm:top-6 sm:right-6 z-50 flex items-center gap-1.5 sm:gap-2">
-          <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold backdrop-blur-md shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
+          <div id="trafficSignalBadge" class="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-slate-950/90 border border-slate-700 text-[10px] sm:text-xs font-bold shadow-xl text-emerald-300 transition-colors pointer-events-none max-w-[155px] sm:max-w-none">
             <span id="trafficSignalDot" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <span id="trafficSignalText" class="truncate">🚦 N-S GREEN · TRAFFIC FLOWING</span>
           </div>
 
           <!-- Street Audio Soundscape Engine Toggle Button -->
-          <button type="button" id="crossroadsAudioToggleBtn" onclick="toggleCrossroadsAudio()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Toggle Dhaka Street Soundscape / সাউন্ড অন-অফ">
+          <button type="button" id="crossroadsAudioToggleBtn" onclick="toggleCrossroadsAudio()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700 text-[11px] sm:text-xs font-bold transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Toggle Dhaka Street Soundscape / সাউন্ড অন-অফ">
             <span id="crossroadsAudioIcon">🔇</span>
             <span id="crossroadsAudioText" class="hidden sm:inline">Street Audio: Off</span>
           </button>
 
           <!-- Emergency Wave Priority Trigger Button -->
-          <button type="button" id="crossroadsEmergencyBtn" onclick="triggerEmergencyWave()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-rose-950/80 text-rose-300 hover:text-rose-200 border border-rose-600/70 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1 cursor-pointer shrink-0" title="Spawn Emergency Ambulance / জরুরি অ্যাম্বুলেন্স পরীক্ষা">
+          <button type="button" id="crossroadsEmergencyBtn" onclick="triggerEmergencyWave()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/90 hover:bg-rose-950/80 text-rose-300 hover:text-rose-200 border border-rose-600/70 text-[11px] sm:text-xs font-bold transition shadow-lg active:scale-95 flex items-center gap-1 cursor-pointer shrink-0" title="Spawn Emergency Ambulance / জরুরি অ্যাম্বুলেন্স পরীক্ষা">
             <span>🚑</span>
             <span class="hidden sm:inline">Emergency Wave</span>
           </button>
 
           <!-- 2D / 3D Drone View Mode Toggle Button -->
-          <button type="button" id="crossroadsViewModeBtn" onclick="toggleCrossroadsViewMode()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 text-[11px] sm:text-xs font-bold backdrop-blur-md transition-all duration-300 shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Switch to 3D Drone Isometric View / থ্রিডি ড্রোন ভিউ দেখুন">
+          <button type="button" id="crossroadsViewModeBtn" onclick="toggleCrossroadsViewMode()" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 text-[11px] sm:text-xs font-bold transition-all duration-300 shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Switch to 3D Drone Isometric View / থ্রিডি ড্রোন ভিউ দেখুন">
             <span id="crossroadsViewModeIcon">🗺️</span>
             <span id="crossroadsViewModeText"><span class="hidden sm:inline">View: </span>2D Flat</span>
           </button>
 
-          <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
+          <button type="button" onclick="toggleLanguage()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition shadow-lg active:scale-95 cursor-pointer shrink-0" title="Switch language / ভাষা পরিবর্তন">
             বাংলা
           </button>
-          <button type="button" id="landingAuthBtn" onclick="handleLandingAuthAction()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold backdrop-blur-md transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Login / Logout">
+          <button type="button" id="landingAuthBtn" onclick="handleLandingAuthAction()" class="px-2.5 py-1 sm:px-2.5 sm:py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700 text-[11px] sm:text-xs font-bold transition shadow-lg active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0" title="Login / Logout">
             <i id="landingAuthIcon" data-lucide="log-in" class="w-3.5 h-3.5"></i>
             <span id="landingAuthText" class="hidden sm:inline">Login</span>
           </button>
@@ -7700,7 +7711,7 @@
         </script>
 
         <!-- Bottom-Left Legend: Interactive Transport Modes & Camera Swoops -->
-        <div id="crossroadsModeLegend" class="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-40 flex max-h-[calc(100vh-1.5rem)] flex-col gap-1 overflow-y-auto p-2 sm:p-2.5 rounded-2xl bg-slate-950/95 border border-sky-500/40 backdrop-blur-xl text-xs font-semibold text-slate-300 shadow-2xl pointer-events-auto transition-all duration-300 max-w-[210px] sm:max-w-[230px]">
+        <div id="crossroadsModeLegend" class="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-40 flex max-h-[calc(100vh-1.5rem)] flex-col gap-1 overflow-y-auto p-2 sm:p-2.5 rounded-2xl bg-[rgba(10,17,32,0.88)] border border-white/12 text-xs font-semibold text-slate-300 shadow-2xl pointer-events-auto transition-all duration-300 max-w-[210px] sm:max-w-[230px]">
           <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-sky-400/80 font-bold px-1.5 py-0.5 flex items-center justify-between border-b border-slate-800/80 pb-1 mb-0.5">
             <span>Dhaka Transit</span>
             <span id="crossroadsCamModeBadge" class="text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-mono">Drone View</span>
@@ -7767,7 +7778,7 @@
         </div>
 
         <!-- Floating Info Pill for transit and selected vehicle modes -->
-        <div id="crossroadsModePill" class="absolute bottom-20 left-3 sm:bottom-24 sm:left-6 md:left-[17rem] z-50 hidden max-w-sm sm:max-w-md p-3 sm:p-4 rounded-2xl bg-slate-950/95 border border-sky-500/40 backdrop-blur-2xl text-white shadow-2xl transition-all duration-300 pointer-events-auto flex items-center justify-between gap-3">
+        <div id="crossroadsModePill" class="absolute bottom-20 left-3 sm:bottom-24 sm:left-6 md:left-[17rem] z-50 hidden max-w-sm sm:max-w-md p-3 sm:p-4 rounded-2xl bg-[rgba(10,17,32,0.88)] border border-white/12 text-white shadow-2xl transition-all duration-300 pointer-events-auto flex items-center justify-between gap-3">
           <div class="flex items-center gap-3">
             <span id="crossroadsModePillIcon" class="text-2xl shrink-0">🚆</span>
             <div>
@@ -7782,7 +7793,7 @@
 
         <!-- Floating Glassmorphic "Plan your trip" CTA Button (Strictly in Bottom-Right Corner) -->
         <div class="landing-cta-container absolute bottom-3 right-3 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 z-30 pointer-events-auto" style="bottom: max(0.75rem, env(safe-area-inset-bottom)); right: max(0.75rem, env(safe-area-inset-right));">
-          <button type="button" id="landingPlanTripBtn" onclick="handlePlanTripClick()" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-sky-300/40 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer backdrop-blur-md focus:outline-none focus:ring-4 focus:ring-sky-400/60">
+          <button type="button" id="landingPlanTripBtn" onclick="handlePlanTripClick()" aria-label="Plan your trip to open trip planner" class="group relative flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-6 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-base shadow-2xl shadow-blue-500/50 border border-white/12 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(56,189,248,0.6)] active:scale-95 cursor-pointer focus:outline-none focus:ring-4 focus:ring-sky-400/60">
             <div class="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner group-hover:rotate-45 transition-transform duration-300 shrink-0">
               <i data-lucide="compass" class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white"></i>
             </div>
@@ -18207,6 +18218,9 @@
 
     function setCrossroadsViewMode(enable3D) {
       crossroads3DMode = !!enable3D;
+      if (typeof window.setCrossroads3DActive === 'function') {
+        window.setCrossroads3DActive(crossroads3DMode);
+      }
       const container = document.getElementById('dhakaCrossroadsContainer');
       const stageWrapper = document.getElementById('dhakaCrossroadsStageWrapper');
       const canvas3d = document.getElementById('dhakaCrossroads3dCanvas');
@@ -18224,16 +18238,16 @@
           }
         }
 
-        // 2. Make 3D canvas visible with cinematic cubic-bezier crossfade
+        // 2. Make 3D canvas visible with fast GPU transform/opacity transition
         if (canvas3d) {
           canvas3d.style.display = 'block';
           canvas3d.style.opacity = '1';
         }
         setTimeout(() => {
           if (crossroads3DMode && stageWrapper) stageWrapper.style.display = 'none';
-        }, 550);
+        }, 400);
 
-        // 3. Initialize 3D scene once if not already initialized
+        // 3. Initialize 3D scene once (< 400ms first frame target, non-blocking)
         const isReady = typeof window.isDhakaCrossroads3DReady === 'function' && window.isDhakaCrossroads3DReady();
         if (!isReady && typeof window.initDhakaCrossroads3D === 'function') {
           window.initDhakaCrossroads3D('dhakaCrossroads3dCanvas', 'dhakaCrossroadsContainer', crossroadsVehiclesData, crossroadsPedestriansData);
@@ -18244,14 +18258,14 @@
           window.resizeDhakaCrossroads3D();
         }
       } else {
-        // Switch cleanly back to 2D Flat View with smooth crossfade
+        // Switch cleanly back to 2D Flat View and pause WebGL loop overhead
         if (stageWrapper) {
           stageWrapper.style.display = 'flex';
           stageWrapper.style.transform = 'none';
         }
         setTimeout(() => {
           if (!crossroads3DMode && canvas3d) canvas3d.style.display = 'none';
-        }, 550);
+        }, 400);
       }
 
       if (typeof updateCrossroadsAspectRatio === 'function') {
