@@ -126,10 +126,17 @@
   const instancedHitLookup = new Map();
   let busInstFleet = null;
   let busTemplateWheelPoses = null;
+  let busTemplateWheelObj = null;
   let cngInstFleet = null;
   let cngTemplateWheelPoses = null;
+  let cngTemplateWheelObj = null;
   let rickshawInstFleet = null;
   let rickTemplateWheelPoses = null;
+  let rickTemplateWheelObj = null;
+  let rickCrankTemplateMesh = null;
+  let rickThighTemplateMesh = null;
+  let rickCalfTemplateMesh = null;
+  let rickSandTemplateMesh = null;
   let bikeInstFleets = {};
   let signalBulbsInst = null;
   const signalLampMatrices = [];
@@ -433,18 +440,22 @@
           } else {
             nx = nrmAttr.getX(srcIdx); ny = nrmAttr.getY(srcIdx); nz = nrmAttr.getZ(srcIdx);
           }
+          let tx = nx, ty = ny, tz = nz;
           if (ne) {
-            const tx = ne[0] * nx + ne[3] * ny + ne[6] * nz;
-            const ty = ne[1] * nx + ne[4] * ny + ne[7] * nz;
-            const tz = ne[2] * nx + ne[5] * ny + ne[8] * nz;
-            const invLen = 1 / (Math.sqrt(tx * tx + ty * ty + tz * tz) || 1);
+            tx = ne[0] * nx + ne[3] * ny + ne[6] * nz;
+            ty = ne[1] * nx + ne[4] * ny + ne[7] * nz;
+            tz = ne[2] * nx + ne[5] * ny + ne[8] * nz;
+          }
+          const sqLen = tx * tx + ty * ty + tz * tz;
+          if (sqLen > 1e-6) {
+            const invLen = 1 / Math.sqrt(sqLen);
             normals[p3] = tx * invLen;
             normals[p3 + 1] = ty * invLen;
             normals[p3 + 2] = tz * invLen;
           } else {
-            normals[p3] = nx;
-            normals[p3 + 1] = ny;
-            normals[p3 + 2] = nz;
+            normals[p3] = 0;
+            normals[p3 + 1] = 1;
+            normals[p3 + 2] = 0;
           }
         } else {
           normals[p3] = 0;
@@ -452,7 +463,11 @@
           normals[p3 + 2] = 0;
         }
 
-        if (vColorAttr) {
+        const hasNonZeroVColor = vColorAttr && (cArr
+          ? (cArr[srcIdx * cStride] > 0 || cArr[srcIdx * cStride + 1] > 0 || cArr[srcIdx * cStride + 2] > 0)
+          : (vColorAttr.getX(srcIdx) > 0 || vColorAttr.getY(srcIdx) > 0 || vColorAttr.getZ(srcIdx) > 0));
+
+        if (hasNonZeroVColor) {
           if (cArr) {
             const si = srcIdx * cStride;
             colors[p3] = cArr[si] * cr;
@@ -545,7 +560,8 @@
         if (mats.length === 1) {
           const mat = mats[0];
           const isTransp = !!mat.transparent && (mat.opacity < 0.999);
-          const isBasic = !!mat.isMeshBasicMaterial || (mat.emissive && mat.emissiveIntensity >= 0.7 && !mat.map);
+          const isEmissiveGlow = !!(mat.emissive && typeof mat.emissive.getHex === 'function' && mat.emissive.getHex() > 0 && mat.emissiveIntensity >= 0.7 && !mat.map);
+          const isBasic = !!mat.isMeshBasicMaterial || isEmissiveGlow;
           if (mat.map) {
             const key = `${mat.map.uuid}|${isBasic ? 'B' : 'L'}|${isTransp ? mat.opacity.toFixed(2) : 'O'}|${mat.side || 0}`;
             let b = texturedBuckets.get(key);
@@ -572,7 +588,7 @@
             }
             b.pieces.push({ geometry: geo, matrix: relMat, color: mat.color || 0xffffff });
           } else if (isBasic) {
-            const c = (mat.emissive && mat.emissiveIntensity >= 0.7 && !mat.isMeshBasicMaterial) ? mat.emissive : (mat.color || 0xffffff);
+            const c = isEmissiveGlow ? mat.emissive : (mat.color || 0xffffff);
             basicOpaquePieces.push({ geometry: geo, matrix: relMat, color: c });
           } else if (mat.side === THREE.DoubleSide) {
             litDoublePieces.push({ geometry: geo, matrix: relMat, color: mat.color || 0xffffff });
@@ -597,7 +613,8 @@
             if (nrmAttr) subGeo.setAttribute('normal', new THREE.BufferAttribute(nrmAttr.array.slice(s * 3, e * 3), 3));
             if (uvAttr) subGeo.setAttribute('uv', new THREE.BufferAttribute(uvAttr.array.slice(s * 2, e * 2), 2));
             const isTransp = !!mat.transparent && (mat.opacity < 0.999);
-            const isBasic = !!mat.isMeshBasicMaterial;
+            const isEmissiveGlow = !!(mat.emissive && typeof mat.emissive.getHex === 'function' && mat.emissive.getHex() > 0 && mat.emissiveIntensity >= 0.7 && !mat.map);
+            const isBasic = !!mat.isMeshBasicMaterial || isEmissiveGlow;
             if (mat.map) {
               const key = `${mat.map.uuid}|${isBasic ? 'B' : 'L'}|${isTransp ? mat.opacity.toFixed(2) : 'O'}|${mat.side || 0}`;
               let b = texturedBuckets.get(key);
@@ -819,87 +836,51 @@
   let rickCalfPool = null;
   let rickSandPool = null;
 
-  function ensurePooledWheelEntry(poolKey, wheelTemplateObj, baseRadius, capacity) {
-    if (wheelInstancePools[poolKey]) return wheelInstancePools[poolKey];
+  const sharedWheelGeoTemplates = {};
+  function getSharedWheelTemplate(poolKey, wheelTemplateObj) {
+    if (sharedWheelGeoTemplates[poolKey]) return sharedWheelGeoTemplates[poolKey];
+    if (!wheelTemplateObj) return null;
     const cloneW = wheelTemplateObj.clone(true);
     cloneW.position.set(0, 0, 0);
     cloneW.rotation.set(0, 0, 0);
     cloneW.scale.set(1, 1, 1);
     const out = optimizeStaticSubtree(cloneW, { forceSingleMesh: true });
-    const mesh = out.litOpaque;
+    const mesh = out.litOpaque || out.litDouble || out.basicOpaque;
     if (!mesh || !mesh.geometry) return null;
-    const inst = new THREE.InstancedMesh(mesh.geometry, mesh.material, capacity || 24);
-    inst.count = 0;
-    inst.frustumCulled = false;
-    inst.castShadow = false;
-    inst.receiveShadow = false;
-    if (typeof scene !== 'undefined' && scene && scene.add) scene.add(inst);
-    wheelInstancePools[poolKey] = {
-      key: poolKey,
-      inst: inst,
-      baseRadius: baseRadius || 1,
-      capacity: capacity || 24,
-      entries: []
-    };
-    return wheelInstancePools[poolKey];
+    mesh.geometry.computeBoundingSphere();
+    sharedWheelGeoTemplates[poolKey] = mesh;
+    return mesh;
   }
 
-  function replaceWheelsWithPooledPivots(wheelObjs, poolKey, targetRadius, baseRadius, capacity, reuseSlots) {
-    if (!wheelObjs || wheelObjs.length === 0) return { pivots: [], slots: [] };
-    const pool = ensurePooledWheelEntry(poolKey, wheelObjs[0], baseRadius || targetRadius, capacity);
-    const pivots = [];
-    const slots = [];
-    const scaleFactor = (pool && pool.baseRadius && targetRadius) ? (targetRadius / pool.baseRadius) : 1;
-
-    for (let i = 0; i < wheelObjs.length; i++) {
-      const w = wheelObjs[i];
-      const pivot = new THREE.Object3D();
-      pivot.position.copy(w.position);
-      pivot.rotation.copy(w.rotation);
-      pivot.scale.copy(w.scale);
-      if (Math.abs(scaleFactor - 1) > 0.01) pivot.scale.multiplyScalar(scaleFactor);
-      pivot.userData.noMerge = true;
-      if (w.parent) {
-        const parent = w.parent;
-        parent.remove(w);
-        parent.add(pivot);
+  function attachWheelsFromTemplate(parentObj, templatePoses, poolKey, wheelTemplateObj, scaleMul) {
+    const wheelTmpl = getSharedWheelTemplate(poolKey, wheelTemplateObj) || sharedWheelGeoTemplates[poolKey];
+    const wheels = [];
+    if (!templatePoses || !parentObj) return wheels;
+    for (let i = 0; i < templatePoses.length; i++) {
+      const tp = templatePoses[i];
+      let wheelMesh;
+      if (wheelTmpl && wheelTmpl.geometry && wheelTmpl.material) {
+        wheelMesh = new THREE.Mesh(wheelTmpl.geometry, wheelTmpl.material);
+      } else {
+        wheelMesh = new THREE.Object3D();
       }
-      pivots.push(pivot);
-
-      if (pool) {
-        let slot = (reuseSlots && typeof reuseSlots[i] === 'number') ? reuseSlots[i] : -1;
-        if (slot >= 0 && slot < pool.entries.length) {
-          pool.entries[slot].pivot = pivot;
-        } else if (pool.entries.length < pool.capacity) {
-          slot = pool.entries.length;
-          pool.entries.push({ pivot: pivot });
-          pool.inst.count = pool.entries.length;
-        }
-        slots.push(slot);
-      }
+      wheelMesh.position.copy(tp.position);
+      wheelMesh.rotation.copy(tp.rotation);
+      wheelMesh.scale.copy(tp.scale);
+      if (scaleMul && scaleMul !== 1) wheelMesh.scale.multiplyScalar(scaleMul);
+      wheelMesh.castShadow = false;
+      wheelMesh.receiveShadow = false;
+      wheelMesh.userData.isWheel = true;
+      wheelMesh.userData.noMerge = true;
+      wheelMesh.matrixAutoUpdate = true;
+      parentObj.add(wheelMesh);
+      wheels.push(wheelMesh);
     }
-    return { pivots: pivots, slots: slots };
+    return wheels;
   }
 
   function attachWheelPivotsFromTemplatePoses(parentObj, templatePoses, poolKey, scaleMul, capacity, baseRadius) {
-    const pool = wheelInstancePools[poolKey];
-    const pivots = [];
-    if (!pool || !templatePoses) return pivots;
-    for (let i = 0; i < templatePoses.length; i++) {
-      const tp = templatePoses[i];
-      const pivot = new THREE.Object3D();
-      pivot.position.copy(tp.position);
-      pivot.rotation.copy(tp.rotation);
-      pivot.scale.copy(tp.scale);
-      if (scaleMul && scaleMul !== 1) pivot.scale.multiplyScalar(scaleMul);
-      parentObj.add(pivot);
-      pivots.push(pivot);
-      if (pool.entries.length < pool.capacity) {
-        pool.entries.push({ pivot: pivot });
-        pool.inst.count = pool.entries.length;
-      }
-    }
-    return pivots;
+    return attachWheelsFromTemplate(parentObj, templatePoses, poolKey, null, scaleMul);
   }
 
   function createInstancedFleetFromTemplate(templateRoot, capacity) {
@@ -975,42 +956,6 @@
     if (busInstFleet) busInstFleet.layers.forEach(l => { l.inst.instanceMatrix.needsUpdate = true; });
     if (cngInstFleet) cngInstFleet.layers.forEach(l => { l.inst.instanceMatrix.needsUpdate = true; });
     if (rickshawInstFleet) rickshawInstFleet.layers.forEach(l => { l.inst.instanceMatrix.needsUpdate = true; });
-
-    // 2. Rickshaw Puller Animated Pedaling Limbs (crank, thighs, calves, sandals)
-    if (rickshawPedalEntries.length > 0) {
-      for (let ri = 0; ri < rickshawPedalEntries.length; ri++) {
-        const pe = rickshawPedalEntries[ri];
-        if (pe.crankGroup && rickCrankPool) {
-          pe.crankGroup.updateMatrixWorld(true);
-          rickCrankPool.setMatrixAt(pe.crankSlot, pe.crankGroup.matrixWorld);
-        }
-        for (let li = 0; li < pe.legs.length; li++) {
-          const lg = pe.legs[li];
-          lg.hipPivot.updateMatrixWorld(true);
-          lg.kneePivot.updateMatrixWorld(true);
-          lg.footPivot.updateMatrixWorld(true);
-          if (rickThighPool) rickThighPool.setMatrixAt(lg.limbSlot, lg.hipPivot.matrixWorld);
-          if (rickCalfPool) rickCalfPool.setMatrixAt(lg.limbSlot, lg.kneePivot.matrixWorld);
-          if (rickSandPool) rickSandPool.setMatrixAt(lg.limbSlot, lg.footPivot.matrixWorld);
-        }
-      }
-      if (rickCrankPool) rickCrankPool.instanceMatrix.needsUpdate = true;
-      if (rickThighPool) rickThighPool.instanceMatrix.needsUpdate = true;
-      if (rickCalfPool) rickCalfPool.instanceMatrix.needsUpdate = true;
-      if (rickSandPool) rickSandPool.instanceMatrix.needsUpdate = true;
-    }
-
-    // 3. All 84 Vehicle Wheels across 5 Shared Instanced Pools
-    for (const pk in wheelInstancePools) {
-      const pool = wheelInstancePools[pk];
-      if (!pool || !pool.inst || pool.entries.length === 0) continue;
-      for (let wi = 0; wi < pool.entries.length; wi++) {
-        const pv = pool.entries[wi].pivot;
-        pv.updateMatrixWorld(true);
-        pool.inst.setMatrixAt(wi, pv.matrixWorld);
-      }
-      pool.inst.instanceMatrix.needsUpdate = true;
-    }
 
     // 4. Ground Contact Shadow Discs (1 InstancedMesh across all pedestrians)
     if (pedShadowInst && pedShadowEntries.length > 0) {
@@ -1220,23 +1165,27 @@
   // Lightweight sanitizer helper: recursively filters out any falsy/null entries from obj.children
   // and logs a one-time warning with the parent name when a null child is found and purged.
   const warnedPrunedNullMap = new Set();
-  function pruneNullChildren(root) {
+  function pruneNullChildrenWithReport(root, label) {
     if (!root || !Array.isArray(root.children)) return root;
+    let prunedCount = 0;
     const hasInvalid = root.children.some(c => !c || (typeof c.isObject3D !== 'undefined' && !c.isObject3D));
     if (hasInvalid) {
-      const parentName = root.name || root.type || 'Object3D';
+      const parentName = (label ? (label + '::') : '') + (root.name || root.type || 'Object3D');
+      const prevLen = root.children.length;
+      root.children = root.children.filter(c => Boolean(c) && (typeof c.isObject3D === 'undefined' || c.isObject3D));
+      prunedCount += (prevLen - root.children.length);
       if (!warnedPrunedNullMap.has(parentName)) {
         warnedPrunedNullMap.add(parentName);
-        console.warn('[SceneGraph] Pruned null/invalid child from:', parentName);
+        console.warn('[SceneGraph] Pruned ' + prunedCount + ' null/invalid child from: ' + parentName);
       }
-      root.children = root.children.filter(c => Boolean(c) && (typeof c.isObject3D === 'undefined' || c.isObject3D));
     }
     for (let i = 0; i < root.children.length; i++) {
-      pruneNullChildren(root.children[i]);
+      pruneNullChildrenWithReport(root.children[i], label);
     }
     return root;
   }
-  const purgeNullChildren = pruneNullChildren;
+  const pruneNullChildren = pruneNullChildrenWithReport;
+  const purgeNullChildren = pruneNullChildrenWithReport;
 
   // Camera & Mouse control
   let mouseRelX = 0, mouseRelY = 0;
@@ -4617,13 +4566,13 @@
         rotation: w.rotation.clone(),
         scale: w.scale.clone()
       }));
-      ensurePooledWheelEntry('carWheel', rawWheels[0], wheelRadius, 24);
+      const wTmplObj = rawWheels[0] ? rawWheels[0].clone(true) : null;
+      if (wTmplObj) getSharedWheelTemplate('carWheel', wTmplObj);
       rawWheels.forEach(w => { if (w.parent) w.parent.remove(w); });
-
       optimizeStaticSubtree(carModelGroup, { packTextures: true });
       const cachedMeshes = [];
       carModelGroup.traverse(c => { if (c.isMesh) cachedMeshes.push(c); });
-      tmpl = { meshes: cachedMeshes, wheelPoses: wheelPoses, wheelRadius: wheelRadius };
+      tmpl = { meshes: cachedMeshes, wheelPoses: wheelPoses, wheelRadius: wheelRadius, wheelTmplObj: wTmplObj };
       carVariantTemplateCache[cacheKey] = tmpl;
     }
 
@@ -4637,34 +4586,9 @@
       carModelWrapper.add(cloneM);
     });
 
-    const wheelPivots = [];
-    const assignedSlots = [];
-    const pool = wheelInstancePools['carWheel'];
-    const scaleRatio = (pool && pool.baseRadius) ? (tmpl.wheelRadius / pool.baseRadius) : 1;
-    for (let i = 0; i < tmpl.wheelPoses.length; i++) {
-      const wp = tmpl.wheelPoses[i];
-      const pv = new THREE.Object3D();
-      pv.position.copy(wp.position);
-      pv.rotation.copy(wp.rotation);
-      pv.scale.copy(wp.scale).multiplyScalar(scaleRatio);
-      carModelWrapper.add(pv);
-      wheelPivots.push(pv);
-      if (pool) {
-        let slot = (reuseWheelSlots && typeof reuseWheelSlots[i] === 'number') ? reuseWheelSlots[i] : -1;
-        if (slot >= 0 && slot < pool.entries.length) {
-          pool.entries[slot].pivot = pv;
-        } else if (pool.entries.length < pool.capacity) {
-          slot = pool.entries.length;
-          pool.entries.push({ pivot: pv });
-          pool.inst.count = pool.entries.length;
-        }
-        assignedSlots.push(slot);
-      }
-    }
-
     carPackage.add(carModelWrapper);
-    carPackage.userData.wheels = wheelPivots;
-    carPackage.userData.pooledWheelSlots = assignedSlots;
+    const carWheels = attachWheelsFromTemplate(carModelWrapper, tmpl.wheelPoses, 'carWheel', tmpl.wheelTmplObj);
+    carPackage.userData.wheels = carWheels;
     carPackage.userData.wheelRadius = tmpl.wheelRadius * 0.75;
     return carPackage;
   }
@@ -6642,7 +6566,8 @@
       busTemplateWheelPoses = rawWheels.map(w => ({
         position: w.position.clone(), rotation: w.rotation.clone(), scale: w.scale.clone()
       }));
-      ensurePooledWheelEntry('busWheel', rawWheels[0], wheelRadius, 20);
+      busTemplateWheelObj = rawWheels[0] ? rawWheels[0].clone(true) : null;
+      if (busTemplateWheelObj) getSharedWheelTemplate('busWheel', busTemplateWheelObj);
       rawWheels.forEach(w => { if (w.parent) w.parent.remove(w); });
       optimizeStaticSubtree(group, { packTextures: true });
       busInstFleet = createInstancedFleetFromTemplate(group, 6);
@@ -6654,7 +6579,7 @@
     wrapper.userData.wheelRadius = wheelRadius;
     wrapper.userData.modelTitle = 'হাসান পরিবহন (আজিমপুর - উত্তরা)';
     if (vData) wrapper.userData.vData = vData;
-    wrapper.userData.wheels = attachWheelPivotsFromTemplatePoses(wrapper, busTemplateWheelPoses, 'busWheel', 1, 20, wheelRadius);
+    wrapper.userData.wheels = attachWheelsFromTemplate(wrapper, busTemplateWheelPoses, 'busWheel', busTemplateWheelObj);
 
     const slot = busInstFleet.count < busInstFleet.capacity ? busInstFleet.count++ : 0;
     busInstFleet.layers.forEach(l => { l.inst.count = busInstFleet.count; });
@@ -8896,6 +8821,7 @@ let sharedRickshawArtTexture = null;
       if (!treeCanopyBaseGeo) treeCanopyBaseGeo = new THREE.SphereGeometry(1.0, 12, 8);
       const tMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
       treeTrunksInst = new THREE.InstancedMesh(treeTrunkGeo, tMat, 48);
+      treeTrunksInst.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(48 * 3), 3);
       treeTrunksInst.count = 0;
       treeTrunksInst.castShadow = false;
       treeTrunksInst.receiveShadow = false;
@@ -8905,6 +8831,7 @@ let sharedRickshawArtTexture = null;
 
       const cMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x0b2a14, emissiveIntensity: 0.25 });
       treeCanopiesInst = new THREE.InstancedMesh(treeCanopyBaseGeo, cMat, 240);
+      treeCanopiesInst.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(240 * 3), 3);
       treeCanopiesInst.count = 0;
       treeCanopiesInst.castShadow = false;
       treeCanopiesInst.receiveShadow = false;
@@ -13232,12 +13159,15 @@ let sharedRickshawArtTexture = null;
         rotation: w.rotation.clone(),
         scale: w.scale.clone()
       }));
-      ensurePooledWheelEntry('bikeWheel', rawWheels[0], 3.25, 20);
+      const wTmplObjF = rawWheels[0] ? rawWheels[0].clone(true) : null;
+      const wTmplObjR = (rawWheels[1] || rawWheels[0]) ? (rawWheels[1] || rawWheels[0]).clone(true) : null;
+      if (wTmplObjF) getSharedWheelTemplate('bikeWheelF_' + cacheKey, wTmplObjF);
+      if (wTmplObjR) getSharedWheelTemplate('bikeWheelR_' + cacheKey, wTmplObjR);
       rawWheels.forEach(w => { if (w.parent) w.parent.remove(w); });
       optimizeStaticSubtree(built, { packTextures: true });
       const cachedMeshes = [];
       built.traverse(c => { if (c.isMesh) cachedMeshes.push(c); });
-      tmpl = { meshes: cachedMeshes, wheelPoses: wheelPoses };
+      tmpl = { meshes: cachedMeshes, wheelPoses: wheelPoses, wTmplObjF, wTmplObjR };
       bikeVariantTemplateCache[cacheKey] = tmpl;
     }
 
@@ -13249,31 +13179,16 @@ let sharedRickshawArtTexture = null;
       cloneM.castShadow = false; cloneM.receiveShadow = false;
       pkg.add(cloneM);
     });
-    const wheelPivots = [];
-    const assignedSlots = [];
-    const pool = wheelInstancePools['bikeWheel'];
-    for (let i = 0; i < tmpl.wheelPoses.length; i++) {
-      const wp = tmpl.wheelPoses[i];
-      const pv = new THREE.Object3D();
-      pv.position.copy(wp.position);
-      pv.rotation.copy(wp.rotation);
-      pv.scale.copy(wp.scale);
-      pkg.add(pv);
-      wheelPivots.push(pv);
-      if (pool) {
-        let slot = (reuseWheelSlots && typeof reuseWheelSlots[i] === 'number') ? reuseWheelSlots[i] : -1;
-        if (slot >= 0 && slot < pool.entries.length) {
-          pool.entries[slot].pivot = pv;
-        } else if (pool.entries.length < pool.capacity) {
-          slot = pool.entries.length;
-          pool.entries.push({ pivot: pv });
-          pool.inst.count = pool.entries.length;
-        }
-        assignedSlots.push(slot);
-      }
+    const bikeWheels = [];
+    if (tmpl.wheelPoses && tmpl.wheelPoses[0]) {
+      const fw = attachWheelsFromTemplate(pkg, [tmpl.wheelPoses[0]], 'bikeWheelF_' + cacheKey, tmpl.wTmplObjF);
+      if (fw[0]) bikeWheels.push(fw[0]);
     }
-    pkg.userData.wheels = wheelPivots;
-    pkg.userData.pooledWheelSlots = assignedSlots;
+    if (tmpl.wheelPoses && tmpl.wheelPoses[1]) {
+      const rw = attachWheelsFromTemplate(pkg, [tmpl.wheelPoses[1]], 'bikeWheelR_' + cacheKey, tmpl.wTmplObjR);
+      if (rw[0]) bikeWheels.push(rw[0]);
+    }
+    pkg.userData.wheels = bikeWheels;
     return pkg;
   }
 
@@ -13510,7 +13425,7 @@ let sharedRickshawArtTexture = null;
       const wrapper = new THREE.Group();
       wrapper.userData.isRickshaw = true;
       wrapper.userData.wheelRadius = wheelRadius;
-      wrapper.userData.wheels = attachWheelPivotsFromTemplatePoses(wrapper, rickTemplateWheelPoses, 'rickWheel', 1, 24, wheelRadius);
+      wrapper.userData.wheels = attachWheelsFromTemplate(wrapper, rickTemplateWheelPoses, 'rickWheel', rickTemplateWheelObj);
 
       const slot = rickshawInstFleet.count < rickshawInstFleet.capacity ? rickshawInstFleet.count++ : 0;
       rickshawInstFleet.layers.forEach(l => { l.inst.count = rickshawInstFleet.count; });
@@ -13521,24 +13436,48 @@ let sharedRickshawArtTexture = null;
 
       const wCrank = new THREE.Object3D();
       wCrank.position.set(bb[0], bb[1], bb[2]);
+      wCrank.userData.noMerge = true;
+      wCrank.matrixAutoUpdate = true;
+      if (rickCrankTemplateMesh) {
+        const cMesh = new THREE.Mesh(rickCrankTemplateMesh.geometry, rickCrankTemplateMesh.material);
+        cMesh.userData.noMerge = true;
+        wCrank.add(cMesh);
+      }
       wrapper.add(wCrank);
       wrapper.userData.pedalCrank = wCrank;
 
       const wLegs = [];
-      const baseLimbCount = rickshawPedalEntries.length * 2;
-      [-1, 1].forEach((side, li) => {
+      [-1, 1].forEach((side) => {
         const hipX = -0.42, hipY = 5.85, legZ = side * 0.85;
-        const hipP = new THREE.Object3D(); hipP.position.set(hipX, hipY, legZ); wrapper.add(hipP);
-        const kneeP = new THREE.Object3D(); kneeP.position.set(0, -lenThigh, 0); hipP.add(kneeP);
-        const footP = new THREE.Object3D(); footP.position.set(0, -lenShin, 0); kneeP.add(footP);
-        wLegs.push({ side, hipX, hipY, hipPivot: hipP, kneePivot: kneeP, footPivot: footP, limbSlot: baseLimbCount + li });
-      });
-      if (rickCrankPool) rickCrankPool.count = rickshawPedalEntries.length + 1;
-      if (rickThighPool) rickThighPool.count = baseLimbCount + wLegs.length;
-      if (rickCalfPool) rickCalfPool.count = baseLimbCount + wLegs.length;
-      if (rickSandPool) rickSandPool.count = baseLimbCount + wLegs.length;
+        const hipP = new THREE.Object3D(); hipP.position.set(hipX, hipY, legZ);
+        hipP.userData.noMerge = true; hipP.matrixAutoUpdate = true;
+        if (rickThighTemplateMesh) {
+          const tm = new THREE.Mesh(rickThighTemplateMesh.geometry, rickThighTemplateMesh.material);
+          tm.userData.noMerge = true;
+          hipP.add(tm);
+        }
+        wrapper.add(hipP);
 
-      rickshawPedalEntries.push({ crankGroup: wCrank, crankSlot: rickshawPedalEntries.length, legs: wLegs });
+        const kneeP = new THREE.Object3D(); kneeP.position.set(0, -lenThigh, 0);
+        kneeP.userData.noMerge = true; kneeP.matrixAutoUpdate = true;
+        if (rickCalfTemplateMesh) {
+          const cm = new THREE.Mesh(rickCalfTemplateMesh.geometry, rickCalfTemplateMesh.material);
+          cm.userData.noMerge = true;
+          kneeP.add(cm);
+        }
+        hipP.add(kneeP);
+
+        const footP = new THREE.Object3D(); footP.position.set(0, -lenShin, 0);
+        footP.userData.noMerge = true; footP.matrixAutoUpdate = true;
+        if (rickSandTemplateMesh) {
+          const sm = new THREE.Mesh(rickSandTemplateMesh.geometry, rickSandTemplateMesh.material);
+          sm.userData.noMerge = true;
+          footP.add(sm);
+        }
+        kneeP.add(footP);
+
+        wLegs.push({ side, hipX, hipY, hipPivot: hipP, kneePivot: kneeP, footPivot: footP });
+      });
 
       wrapper.userData.updatePedaling = function(phase) {
         wCrank.rotation.z = phase;
@@ -13562,6 +13501,7 @@ let sharedRickshawArtTexture = null;
         }
       };
       wrapper.userData.updatePedaling(0);
+
       return wrapper;
     }
 
@@ -14398,54 +14338,38 @@ let sharedRickshawArtTexture = null;
     group.add(femaleGroup);
 
     if (!rickshawInstFleet) {
-      // Extract animated pedaling pools cleanly across all 6 rickshaws
       const refLeg = pullerLegs[0];
-      if (crankGroup && !rickCrankPool) {
+      if (crankGroup && !rickCrankTemplateMesh) {
         const crankCopy = crankGroup.clone(true);
         crankCopy.position.set(0, 0, 0); crankCopy.rotation.set(0, 0, 0);
         const co = optimizeStaticSubtree(crankCopy, { forceSingleMesh: true });
-        if (co.litOpaque) {
-          rickCrankPool = new THREE.InstancedMesh(co.litOpaque.geometry, co.litOpaque.material, 8);
-          rickCrankPool.count = 0; rickCrankPool.frustumCulled = false;
-          if (typeof scene !== 'undefined' && scene) scene.add(rickCrankPool);
-        }
+        if (co.litOpaque) rickCrankTemplateMesh = co.litOpaque;
       }
-      if (refLeg && refLeg.hipPivot && !rickThighPool) {
+      if (refLeg && refLeg.hipPivot && !rickThighTemplateMesh) {
         const thighTmp = new THREE.Group();
         refLeg.hipPivot.children.forEach(ch => { if (ch !== refLeg.kneePivot) thighTmp.add(ch.clone(true)); });
         const to = optimizeStaticSubtree(thighTmp, { forceSingleMesh: true });
-        if (to.litOpaque) {
-          rickThighPool = new THREE.InstancedMesh(to.litOpaque.geometry, to.litOpaque.material, 16);
-          rickThighPool.count = 0; rickThighPool.frustumCulled = false;
-          if (typeof scene !== 'undefined' && scene) scene.add(rickThighPool);
-        }
+        if (to.litOpaque) rickThighTemplateMesh = to.litOpaque;
       }
-      if (refLeg && refLeg.kneePivot && !rickCalfPool) {
+      if (refLeg && refLeg.kneePivot && !rickCalfTemplateMesh) {
         const calfTmp = new THREE.Group();
         refLeg.kneePivot.children.forEach(ch => { if (ch !== refLeg.footPivot) calfTmp.add(ch.clone(true)); });
         const co2 = optimizeStaticSubtree(calfTmp, { forceSingleMesh: true });
-        if (co2.litOpaque) {
-          rickCalfPool = new THREE.InstancedMesh(co2.litOpaque.geometry, co2.litOpaque.material, 16);
-          rickCalfPool.count = 0; rickCalfPool.frustumCulled = false;
-          if (typeof scene !== 'undefined' && scene) scene.add(rickCalfPool);
-        }
+        if (co2.litOpaque) rickCalfTemplateMesh = co2.litOpaque;
       }
-      if (refLeg && refLeg.footPivot && !rickSandPool) {
+      if (refLeg && refLeg.footPivot && !rickSandTemplateMesh) {
         const sandTmp = refLeg.footPivot.clone(true);
         sandTmp.position.set(0, 0, 0); sandTmp.rotation.set(0, 0, 0);
         const so = optimizeStaticSubtree(sandTmp, { forceSingleMesh: true });
-        if (so.litOpaque) {
-          rickSandPool = new THREE.InstancedMesh(so.litOpaque.geometry, so.litOpaque.material, 16);
-          rickSandPool.count = 0; rickSandPool.frustumCulled = false;
-          if (typeof scene !== 'undefined' && scene) scene.add(rickSandPool);
-        }
+        if (so.litOpaque) rickSandTemplateMesh = so.litOpaque;
       }
 
       const rawWheels = group.userData.wheels || [];
       rickTemplateWheelPoses = rawWheels.map(w => ({
         position: w.position.clone(), rotation: w.rotation.clone(), scale: w.scale.clone()
       }));
-      ensurePooledWheelEntry('rickWheel', rawWheels[0], wheelRadius, 24);
+      rickTemplateWheelObj = rawWheels[0] ? rawWheels[0].clone(true) : null;
+      if (rickTemplateWheelObj) getSharedWheelTemplate('rickWheel', rickTemplateWheelObj);
       rawWheels.forEach(w => { if (w.parent) w.parent.remove(w); });
       if (crankGroup && crankGroup.parent) crankGroup.parent.remove(crankGroup);
       pullerLegs.forEach(lg => { if (lg.hipPivot && lg.hipPivot.parent) lg.hipPivot.parent.remove(lg.hipPivot); });
@@ -14691,7 +14615,7 @@ let sharedRickshawArtTexture = null;
       pkgPivot.position.set(0, 0, 0);
       root.add(pkgPivot);
 
-      const pooledWheels = attachWheelPivotsFromTemplatePoses(pkgPivot, cngTemplateWheelPoses, 'cngWheel', 1, 24, wheelRadius);
+      const cngWheels = attachWheelsFromTemplate(pkgPivot, cngTemplateWheelPoses, 'cngWheel', cngTemplateWheelObj);
       const slot = cngInstFleet.count < cngInstFleet.capacity ? cngInstFleet.count++ : 0;
       cngInstFleet.layers.forEach(l => { l.inst.count = cngInstFleet.count; });
       root.userData.fleet = cngInstFleet;
@@ -14699,7 +14623,7 @@ let sharedRickshawArtTexture = null;
       root.userData.fleetHitInst = cngInstFleet.hitInst;
       instancedFleetEntries.push({ root: root, localScaleObj: pkgPivot, fleet: cngInstFleet, slot: slot });
 
-      root.userData.wheels = pooledWheels;
+      root.userData.wheels = cngWheels;
       root.userData.wheelRadius = wheelRadius * CNG_WORLD_SCALE;
       return root;
     }
@@ -15875,7 +15799,8 @@ let sharedRickshawArtTexture = null;
         cngTemplateWheelPoses = rawWheels.map(w => ({
           position: w.position.clone(), rotation: w.rotation.clone(), scale: w.scale.clone()
         }));
-        ensurePooledWheelEntry('cngWheel', rawWheels[0], wheelRadius, 24);
+        cngTemplateWheelObj = rawWheels[0] ? rawWheels[0].clone(true) : null;
+        if (cngTemplateWheelObj) getSharedWheelTemplate('cngWheel', cngTemplateWheelObj);
         rawWheels.forEach(w => { if (w.parent) w.parent.remove(w); });
         optimizeStaticSubtree(cngPackage, { packTextures: true });
         cngInstFleet = createInstancedFleetFromTemplate(cngPackage, 8);
@@ -19429,6 +19354,9 @@ let sharedRickshawArtTexture = null;
       wSub.position.set(wX, wY, wZ);
       wSub.add(wMesh);
       wSub.add(rMesh);
+      wSub.userData.noMerge = true;
+      wSub.userData.isWheel = true;
+      wSub.matrixAutoUpdate = true;
       ambGroup.add(wSub);
       ambGroup.userData.wheels.push(wSub);
     }
@@ -19527,8 +19455,7 @@ let sharedRickshawArtTexture = null;
       ambGroup.add(tl);
     });
 
-    const ambWheelRes = replaceWheelsWithPooledPivots(ambGroup.userData.wheels, 'ambWheel', 3.5, 3.5, 6);
-    ambGroup.userData.wheels = ambWheelRes.pivots;
+    // Ambulance wheels preserved as direct child meshes
     optimizeStaticSubtree(ambGroup, { packTextures: true });
 
     ambGroup.visible = false;
@@ -21423,6 +21350,7 @@ let sharedRickshawArtTexture = null;
 
     syncAllInstancedPools();
     purgeNullChildren(scene);
+    pruneNullChildrenWithReport(scene, 'initial-build');
     isReady = true;
   }
 
@@ -21584,6 +21512,7 @@ let sharedRickshawArtTexture = null;
         }
       }
       if (scenePropBuildQueue.length === 0 && !propPrecompileDone && renderer && scene && camera) {
+        pruneNullChildrenWithReport(scene, 'deferred-props-settled');
         propPrecompileDone = true;
         try { renderer.compile(scene, camera); } catch (_) {}
       }
@@ -21971,11 +21900,11 @@ let sharedRickshawArtTexture = null;
         }
         if (sunLight) {
           sunLight.color.setHex(0x94a3b8);
-          sunLight.intensity = isMobileScreen ? 0.70 : 0.60;
+          sunLight.intensity = isMobileScreen ? 0.95 : 0.88;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x334155 : 0x283344);
-          ambientLight.intensity = isMobileScreen ? 0.70 : 0.62;
+          ambientLight.color.setHex(isMobileScreen ? 0x64748b : 0x546274);
+          ambientLight.intensity = isMobileScreen ? 0.75 : 0.68;
         }
       } else if (currentMode === 'night_overcast') {
         // Nighttime Overcast: dark atmospheric night with clearly visible city elements
@@ -21990,12 +21919,12 @@ let sharedRickshawArtTexture = null;
           hemiLight.intensity = isMobileScreen ? 0.90 : 0.80;
         }
         if (sunLight) {
-          sunLight.color.setHex(0x64748b);
-          sunLight.intensity = isMobileScreen ? 0.65 : 0.55;
+          sunLight.color.setHex(0x94a3b8);
+          sunLight.intensity = isMobileScreen ? 0.95 : 0.88;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x475569 : 0x3b4759);
-          ambientLight.intensity = isMobileScreen ? 0.92 : 0.85;
+          ambientLight.color.setHex(isMobileScreen ? 0x64748b : 0x546274);
+          ambientLight.intensity = isMobileScreen ? 0.95 : 0.88;
         }
       } else if (currentMode === 'rain') {
         setSceneBackgroundColor(isMobileScreen ? 0x0d1628 : 0x08101e);
@@ -22028,16 +21957,16 @@ let sharedRickshawArtTexture = null;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xf472b6);
-          hemiLight.groundColor.setHex(0x1e102d);
-          hemiLight.intensity = isMobileScreen ? 1.05 : 0.95;
+          hemiLight.groundColor.setHex(0x2a1a38);
+          hemiLight.intensity = isMobileScreen ? 1.15 : 1.05;
         }
         if (sunLight) {
-          sunLight.color.setHex(0xec4899);
-          sunLight.intensity = isMobileScreen ? 0.90 : 0.80;
+          sunLight.color.setHex(0xf472b6);
+          sunLight.intensity = isMobileScreen ? 0.95 : 0.88;
         }
         if (ambientLight) {
-          ambientLight.color.setHex(isMobileScreen ? 0x8b5cf6 : 0x6d28d9);
-          ambientLight.intensity = isMobileScreen ? 0.90 : 0.82;
+          ambientLight.color.setHex(isMobileScreen ? 0xa78bfa : 0x8b5cf6);
+          ambientLight.intensity = isMobileScreen ? 0.95 : 0.88;
         }
       }
     }
@@ -22189,9 +22118,7 @@ let sharedRickshawArtTexture = null;
         if (ambStrobeRed && ambStrobeRed.intensity > 0) ambStrobeRed.intensity = 0;
         if (ambStrobeBlue && ambStrobeBlue.intensity > 0) ambStrobeBlue.intensity = 0;
       }
-      if (wheelInstancePools.ambWheel && wheelInstancePools.ambWheel.inst) {
-        wheelInstancePools.ambWheel.inst.visible = !!ambulanceGroup.visible;
-      }
+      // Ambulance visibility automatically propagates to parented child wheels
     }
 
     // 4. Update Pedestrians with Realistic Forward Walking Kinematics & Rain Umbrellas
