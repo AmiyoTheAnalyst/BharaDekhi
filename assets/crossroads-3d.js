@@ -5703,7 +5703,7 @@
       wrapper.userData.wheelRadius = 4.2;
       wrapper.userData.modelTitle = 'হাসান পরিবহন (আজিমপুর - উত্তরা)';
       if (vData) wrapper.userData.vData = vData;
-      wrapper.userData.wheels = attachWheelPivotsFromTemplatePoses(wrapper, busTemplateWheelPoses, 'busWheel', 1, 20, 4.2);
+      wrapper.userData.wheels = attachWheelsFromTemplate(wrapper, busTemplateWheelPoses, 'busWheel', busTemplateWheelObj);
 
       const slot = busInstFleet.count < busInstFleet.capacity ? busInstFleet.count++ : 0;
       busInstFleet.layers.forEach(l => { l.inst.count = busInstFleet.count; });
@@ -13176,6 +13176,9 @@ let sharedRickshawArtTexture = null;
     pkg.position.set(0, 0, 0);
     tmpl.meshes.forEach(m => {
       const cloneM = new THREE.Mesh(m.geometry, m.material);
+      cloneM.position.copy(m.position);
+      cloneM.quaternion.copy(m.quaternion);
+      cloneM.scale.copy(m.scale);
       cloneM.castShadow = false; cloneM.receiveShadow = false;
       pkg.add(cloneM);
     });
@@ -14381,7 +14384,7 @@ let sharedRickshawArtTexture = null;
     const wrapper = new THREE.Group();
     wrapper.userData.isRickshaw = true;
     wrapper.userData.wheelRadius = wheelRadius;
-    wrapper.userData.wheels = attachWheelPivotsFromTemplatePoses(wrapper, rickTemplateWheelPoses, 'rickWheel', 1, 24, wheelRadius);
+    wrapper.userData.wheels = attachWheelsFromTemplate(wrapper, rickTemplateWheelPoses, 'rickWheel', rickTemplateWheelObj);
 
     const slot = rickshawInstFleet.count < rickshawInstFleet.capacity ? rickshawInstFleet.count++ : 0;
     rickshawInstFleet.layers.forEach(l => { l.inst.count = rickshawInstFleet.count; });
@@ -14390,29 +14393,52 @@ let sharedRickshawArtTexture = null;
     wrapper.userData.fleetHitInst = rickshawInstFleet.hitInst;
     instancedFleetEntries.push({ root: wrapper, fleet: rickshawInstFleet, slot: slot });
 
-    // Lightweight hierarchy-only pedaling pivots driving rickCrankPool / rickThighPool / rickCalfPool / rickSandPool
     const wCrank = new THREE.Object3D();
     wCrank.position.set(bb[0], bb[1], bb[2]);
+    wCrank.userData.noMerge = true;
+    wCrank.matrixAutoUpdate = true;
+    if (rickCrankTemplateMesh) {
+      const cMesh = new THREE.Mesh(rickCrankTemplateMesh.geometry, rickCrankTemplateMesh.material);
+      cMesh.userData.noMerge = true;
+      wCrank.add(cMesh);
+    }
     wrapper.add(wCrank);
     wrapper.userData.pedalCrank = wCrank;
 
     const wLegs = [];
-    const baseLimbCount = rickshawPedalEntries.length * 2;
-    [-1, 1].forEach((side, li) => {
+    [-1, 1].forEach((side) => {
       const hipX = -0.42, hipY = 5.85, legZ = side * 0.85;
-      const hipP = new THREE.Object3D(); hipP.position.set(hipX, hipY, legZ); wrapper.add(hipP);
-      const kneeP = new THREE.Object3D(); kneeP.position.set(0, -lenThigh, 0); hipP.add(kneeP);
-      const footP = new THREE.Object3D(); footP.position.set(0, -lenShin, 0); kneeP.add(footP);
-      wLegs.push({ side, hipX, hipY, hipPivot: hipP, kneePivot: kneeP, footPivot: footP, limbSlot: baseLimbCount + li });
+      const hipP = new THREE.Object3D(); hipP.position.set(hipX, hipY, legZ);
+      hipP.userData.noMerge = true; hipP.matrixAutoUpdate = true;
+      if (rickThighTemplateMesh) {
+        const tm = new THREE.Mesh(rickThighTemplateMesh.geometry, rickThighTemplateMesh.material);
+        tm.userData.noMerge = true;
+        hipP.add(tm);
+      }
+      wrapper.add(hipP);
+
+      const kneeP = new THREE.Object3D(); kneeP.position.set(0, -lenThigh, 0);
+      kneeP.userData.noMerge = true; kneeP.matrixAutoUpdate = true;
+      if (rickCalfTemplateMesh) {
+        const cm = new THREE.Mesh(rickCalfTemplateMesh.geometry, rickCalfTemplateMesh.material);
+        cm.userData.noMerge = true;
+        kneeP.add(cm);
+      }
+      hipP.add(kneeP);
+
+      const footP = new THREE.Object3D(); footP.position.set(0, -lenShin, 0);
+      footP.userData.noMerge = true; footP.matrixAutoUpdate = true;
+      if (rickSandTemplateMesh) {
+        const sm = new THREE.Mesh(rickSandTemplateMesh.geometry, rickSandTemplateMesh.material);
+        sm.userData.noMerge = true;
+        footP.add(sm);
+      }
+      kneeP.add(footP);
+
+      wLegs.push({ side, hipX, hipY, hipPivot: hipP, kneePivot: kneeP, footPivot: footP });
     });
-    if (rickCrankPool) rickCrankPool.count = rickshawPedalEntries.length + 1;
-    if (rickThighPool) rickThighPool.count = baseLimbCount + wLegs.length;
-    if (rickCalfPool) rickCalfPool.count = baseLimbCount + wLegs.length;
-    if (rickSandPool) rickSandPool.count = baseLimbCount + wLegs.length;
-
     rickshawPedalEntries.push({ crankGroup: wCrank, crankSlot: rickshawPedalEntries.length, legs: wLegs });
-
-    wrapper.userData.updatePedaling = function(phase) {
+wrapper.userData.updatePedaling = function(phase) {
       wCrank.rotation.z = phase;
       for (let i = 0; i < wLegs.length; i++) {
         const leg = wLegs[i];
@@ -15811,7 +15837,7 @@ let sharedRickshawArtTexture = null;
       pkgPivot.position.set(0, 0, 0);
       root.add(pkgPivot);
 
-      const pooledWheels = attachWheelPivotsFromTemplatePoses(pkgPivot, cngTemplateWheelPoses, 'cngWheel', 1, 24, wheelRadius);
+      const pooledWheels = attachWheelsFromTemplate(pkgPivot, cngTemplateWheelPoses, 'cngWheel', cngTemplateWheelObj);
       const slot = cngInstFleet.count < cngInstFleet.capacity ? cngInstFleet.count++ : 0;
       cngInstFleet.layers.forEach(l => { l.inst.count = cngInstFleet.count; });
       root.userData.fleet = cngInstFleet;
@@ -22643,6 +22669,9 @@ let sharedRickshawArtTexture = null;
       perfLastSampleTime = nowTime;
     }
     } catch (err) {
+      if (err && String(err).includes('visible') && typeof scene !== 'undefined' && scene) {
+        pruneNullChildrenWithReport(scene, 'emergency-recovery');
+      }
       console.error('[3D Loop Guard]', err);
       if (typeof activeCamMode !== 'undefined' && activeCamMode !== 'overview' && typeof clearTrackedVehicle === 'function') {
         clearTrackedVehicle();
