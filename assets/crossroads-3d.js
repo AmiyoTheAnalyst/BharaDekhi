@@ -1017,13 +1017,28 @@
     return pv;
   }
 
+  function getCrispAnisotropy() {
+    if (renderer && renderer.capabilities && typeof renderer.capabilities.getMaxAnisotropy === 'function') {
+      return Math.max(1, Math.min(renderer.capabilities.getMaxAnisotropy(), 8));
+    }
+    return 8;
+  }
+
   function downscaleOversizedPedTexture(tex, maxDim) {
-    if (!tex || !tex.image || tex.userData && tex.userData._downscaled512) return tex;
-    const limit = maxDim || 512;
+    if (!tex || !tex.image || (tex.userData && tex.userData._downscaledHd)) return tex;
+    const crispAniso = getCrispAnisotropy();
+    const canDoHd = (renderer && renderer.capabilities && renderer.capabilities.maxTextureSize >= 4096);
+    const limit = maxDim || (canDoHd ? 1024 : 512);
     const img = tex.image;
     const w = img.naturalWidth || img.videoWidth || img.width || 0;
     const h = img.naturalHeight || img.videoHeight || img.height || 0;
-    if (!w || !h || (w <= limit && h <= limit)) return tex;
+    if (!w || !h || (w <= limit && h <= limit)) {
+      tex.anisotropy = crispAniso;
+      tex.generateMipmaps = true;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      return tex;
+    }
     if (typeof document === 'undefined') return tex;
 
     try {
@@ -1038,13 +1053,17 @@
       ctx.drawImage(img, 0, 0, dw, dh);
       const newTex = new THREE.CanvasTexture(canvas);
       newTex.flipY = (tex.flipY !== undefined) ? tex.flipY : true;
-      newTex.encoding = tex.encoding || THREE.sRGBEncoding || 3001;
+      if (typeof THREE.SRGBColorSpace !== 'undefined') {
+        newTex.colorSpace = THREE.SRGBColorSpace;
+      }
+      newTex.encoding = tex.encoding || (typeof THREE.sRGBEncoding !== 'undefined' ? THREE.sRGBEncoding : 3001);
       newTex.wrapS = tex.wrapS || THREE.ClampToEdgeWrapping;
       newTex.wrapT = tex.wrapT || THREE.ClampToEdgeWrapping;
       newTex.generateMipmaps = true;
       newTex.minFilter = THREE.LinearMipmapLinearFilter;
       newTex.magFilter = THREE.LinearFilter;
-      newTex.userData = Object.assign({}, tex.userData || {}, { _downscaled512: true });
+      newTex.anisotropy = crispAniso;
+      newTex.userData = Object.assign({}, tex.userData || {}, { _downscaledHd: true, _downscaled512: true });
       newTex.needsUpdate = true;
       if (typeof tex.dispose === 'function') tex.dispose();
       return newTex;
@@ -1325,10 +1344,8 @@
       tex.generateMipmaps = false;
       return tex;
     }
-    const maxAniso = (renderer && renderer.capabilities && typeof renderer.capabilities.getMaxAnisotropy === 'function')
-      ? renderer.capabilities.getMaxAnisotropy()
-      : 16;
-    tex.anisotropy = Math.max(1, maxAniso);
+    const crispAniso = getCrispAnisotropy();
+    tex.anisotropy = crispAniso;
     if (tex.image && (tex.image.width > 0 && tex.image.height > 0)) {
       tex.generateMipmaps = true;
       tex.minFilter = THREE.LinearMipmapLinearFilter;
@@ -8389,7 +8406,7 @@ let sharedRickshawArtTexture = null;
     ctx.fillText('ঢাকা রিকশা আর্ট', 256, 442);
 
     const texture = new THREE.CanvasTexture(cv);
-    texture.minFilter = THREE.LinearFilter;
+    setupCrispCanvasTexture(texture);
     sharedRickshawArtTexture = texture;
     return sharedRickshawArtTexture;
   }
@@ -8724,7 +8741,7 @@ let sharedRickshawArtTexture = null;
     });
 
     const texture = new THREE.CanvasTexture(canvas);
-    texture.anisotropy = 4;
+    setupCrispCanvasTexture(texture);
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     cachedRoadCanvasTex = texture;
@@ -9018,7 +9035,7 @@ let sharedRickshawArtTexture = null;
 
     if (col.facadePieces.length > 0) {
       const fTex = new THREE.CanvasTexture(col.facadeCanvas);
-      fTex.minFilter = THREE.LinearFilter;
+      setupCrispCanvasTexture(fTex);
       fTex.needsUpdate = true;
       const fGeo = mergePiecesToBufferGeometry(col.facadePieces, true);
       if (fGeo) {
@@ -17310,9 +17327,16 @@ wrapper.userData.updatePedaling = function(phase) {
             }
           });
 
-          // Downscale oversized embedded character textures (> 512x512) to 512x512 CanvasTexture
+          // Downscale oversized embedded character textures (> 1024x1024) to 1024x1024 CanvasTexture on HD GPUs
           if (mat.map) {
-            mat.map = downscaleOversizedPedTexture(mat.map, 512);
+            const pedLimit = (renderer && renderer.capabilities && renderer.capabilities.maxTextureSize >= 4096) ? 1024 : 512;
+            mat.map = downscaleOversizedPedTexture(mat.map, pedLimit);
+            const crispAniso = getCrispAnisotropy();
+            mat.map.anisotropy = crispAniso;
+            mat.map.generateMipmaps = true;
+            mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+            mat.map.magFilter = THREE.LinearFilter;
+            mat.map.needsUpdate = true;
           }
 
           if (mat.emissive && typeof mat.emissive.setHex === 'function') {
@@ -17852,6 +17876,8 @@ wrapper.userData.updatePedaling = function(phase) {
 
   async function streamFBXSequentially() {
     console.info('[Pedestrians] Tier 2: Initiating sequential background FBX streaming (1 model at a time)...');
+    isTier2FBXActive = true;
+    try {
     const waitUntilCameraSettled = async () => {
       while (isCameraTransitioning || isRenderLoopPaused || !is3DViewActive || (typeof document !== 'undefined' && document.hidden)) {
         await new Promise(res => setTimeout(res, 80));
@@ -17877,6 +17903,9 @@ wrapper.userData.updatePedaling = function(phase) {
     console.info(`[Pedestrians] Tier 2 Complete: All Mixamo character templates active (${Object.keys(riggedPedLibrary).length} total).`);
     if (typeof scene !== 'undefined' && scene) {
       pruneNullChildren(scene);
+    }
+    } finally {
+      isTier2FBXActive = false;
     }
 
     const activeMixamoWalkers = Object.values(pedMeshMap)
@@ -18003,15 +18032,21 @@ wrapper.userData.updatePedaling = function(phase) {
     if (promises.length > 0) {
       await Promise.allSettled(promises);
     }
-    // Downscale any deferred-decoded diffuse map > 512px to <= 512x512 CanvasTexture
+    // Downscale any deferred-decoded diffuse map > 1024px to <= 1024x1024 CanvasTexture on HD GPUs
     obj.traverse(node => {
       if ((node.isMesh || node.isSkinnedMesh) && node.material) {
         const mats = Array.isArray(node.material) ? node.material : [node.material];
         for (let i = 0; i < mats.length; i++) {
           const mat = mats[i];
           if (mat && mat.map) {
-            mat.map = downscaleOversizedPedTexture(mat.map, 512);
-            mat.needsUpdate = true;
+            const pedLimit = (renderer && renderer.capabilities && renderer.capabilities.maxTextureSize >= 4096) ? 1024 : 512;
+            mat.map = downscaleOversizedPedTexture(mat.map, pedLimit);
+            const crispAniso = getCrispAnisotropy();
+            mat.map.anisotropy = crispAniso;
+            mat.map.generateMipmaps = true;
+            mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+            mat.map.magFilter = THREE.LinearFilter;
+            mat.map.needsUpdate = true;
           }
         }
       }
@@ -20487,7 +20522,7 @@ wrapper.userData.updatePedaling = function(phase) {
     // 1. Fog & Background (Dusk Sky Gradient: #1b1035 zenith to #5b2245 horizon)
     duskSkyTexture = createDuskSkyGradientTexture();
     scene.background = duskSkyTexture;
-    scene.fog = new THREE.FogExp2(0x2e1538, 0.00020);
+    scene.fog = new THREE.FogExp2(0x2e1538, 0.000085);
 
     // 2. Camera: Isometric Drone Aerial 3/4 Perspective
     let width = 0, height = 0;
@@ -20509,7 +20544,7 @@ wrapper.userData.updatePedaling = function(phase) {
     camera = new THREE.PerspectiveCamera(38, aspect, 10, 4000);
     updateCameraFraming(aspect);
 
-    // 3. Renderer (High performance WebGL, zero preserveDrawingBuffer, zero stencil overhead)
+    // 3. Renderer (Razor-sharp High-DPI WebGL, zero preserveDrawingBuffer, zero stencil overhead)
     renderer = new THREE.WebGLRenderer({
       canvas: canvasEl,
       antialias: true,
@@ -20518,12 +20553,11 @@ wrapper.userData.updatePedaling = function(phase) {
       powerPreference: 'high-performance',
       stencil: false
     });
-    renderer.setSize(width, height, false);
-    const isMobileClient = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-    const targetPixelRatio = isMobileClient ? Math.min(dpr, 1.0) : Math.min(dpr, 1.25);
+    const targetPixelRatio = computeTargetPixelRatio('high');
     currentAdaptivePixelRatio = targetPixelRatio;
     renderer.setPixelRatio(targetPixelRatio);
+    renderer.setSize(width, height, false);
+    mode3DOpenedTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
 
     // High 120+ FPS performance: rely on lightweight InstancedMesh ground contact shadow discs (zero shadow render passes)
     renderer.shadowMap.enabled = false;
@@ -20531,7 +20565,8 @@ wrapper.userData.updatePedaling = function(phase) {
 
     if (typeof THREE.SRGBColorSpace !== 'undefined') {
       renderer.outputColorSpace = THREE.SRGBColorSpace;
-    } else if (typeof THREE.sRGBEncoding !== 'undefined') {
+    }
+    if (typeof THREE.sRGBEncoding !== 'undefined') {
       renderer.outputEncoding = THREE.sRGBEncoding;
     }
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -21367,6 +21402,7 @@ wrapper.userData.updatePedaling = function(phase) {
     });
 
     window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
     if (typeof ResizeObserver !== 'undefined' && containerEl) {
       const ro = new ResizeObserver(() => {
         onResize();
@@ -21399,11 +21435,7 @@ wrapper.userData.updatePedaling = function(phase) {
     if (width > 0 && height > 0) {
       const aspect = width / height;
       updateCameraFraming(aspect);
-      const isMobileClient = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-      let targetPixelRatio = isMobileClient ? Math.min(dpr, 1.0) : Math.min(dpr, 1.25);
-      if (currentTier === 'medium') targetPixelRatio = isMobileClient ? Math.min(dpr, 0.85) : Math.min(dpr, 1.0);
-      else if (currentTier === 'low') targetPixelRatio = Math.min(dpr, 0.75);
+      const targetPixelRatio = computeTargetPixelRatio(currentTier);
       currentAdaptivePixelRatio = targetPixelRatio;
       renderer.setPixelRatio(targetPixelRatio);
       renderer.setSize(width, height, false);
@@ -21435,6 +21467,7 @@ wrapper.userData.updatePedaling = function(phase) {
     if (is3DViewActive) {
       isRenderLoopPaused = false;
       lastFrameTime = 0;
+      mode3DOpenedTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     }
   };
 
@@ -21490,6 +21523,22 @@ wrapper.userData.updatePedaling = function(phase) {
   let currentAdaptivePixelRatio = 0;
   let detectedNativeHz = 60;
   const hzSampleDeltas = [];
+  let mode3DOpenedTime = 0;
+  let isTier2FBXActive = false;
+
+  function computeTargetPixelRatio(tier = currentTier) {
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    const maxPR = dpr >= 3 ? 2.25 : Math.min(dpr, 2.0);
+    const minFloor = dpr >= 2 ? 1.5 : 1.0;
+
+    let targetPR = maxPR;
+    if (tier === 'medium') {
+      targetPR = Math.max(minFloor, dpr >= 3 ? 1.85 : (dpr >= 2 ? 1.75 : Math.min(dpr, 1.25)));
+    } else if (tier === 'low') {
+      targetPR = minFloor;
+    }
+    return Math.max(minFloor, Math.min(targetPR, maxPR));
+  }
 
   if (typeof document !== 'undefined') {
     document.addEventListener('visibilitychange', () => {
@@ -21585,7 +21634,16 @@ wrapper.userData.updatePedaling = function(phase) {
     }
 
     const frameDurationMs = dtFromPerf * 1000;
-    frameTimeEMA = frameTimeEMA * 0.95 + frameDurationMs * 0.05;
+    const isStartupBurst = (now - mode3DOpenedTime < 3000);
+    const isQueueBurst = (scenePropBuildQueue.length > 0 || pedSpawnQueue.length > 0);
+    const isFBXBurst = !!isTier2FBXActive;
+    const isTransientSpike = isStartupBurst || isQueueBurst || isFBXBurst || isCameraTransitioning;
+
+    if (!isTransientSpike) {
+      frameTimeEMA = frameTimeEMA * 0.95 + frameDurationMs * 0.05;
+    } else {
+      frameTimeEMA = Math.min(frameTimeEMA, 1000 / detectedNativeHz);
+    }
     const nativeBudgetMs = 1000 / detectedNativeHz;
 
     tierFrameCounter++;
@@ -21593,16 +21651,18 @@ wrapper.userData.updatePedaling = function(phase) {
       tierFrameCounter = 0;
       let newTier = currentTier;
 
-      if (frameTimeEMA > 21.0) {
-        newTier = 'low';
-      } else if (frameTimeEMA > nativeBudgetMs * 1.20) {
-        newTier = (currentTier === 'low' && frameTimeEMA > 18.0) ? 'low' : 'medium';
-      } else {
-        if (now - lastTierDowngradeTime >= 3000) {
-          if (frameTimeEMA <= nativeBudgetMs * 1.05) {
-            newTier = 'high';
-          } else if (currentTier === 'low' && frameTimeEMA <= 18.0) {
-            newTier = 'medium';
+      if (!isTransientSpike) {
+        if (frameTimeEMA > 21.0) {
+          newTier = 'low';
+        } else if (frameTimeEMA > nativeBudgetMs * 1.20) {
+          newTier = (currentTier === 'low' && frameTimeEMA > 18.0) ? 'low' : 'medium';
+        } else {
+          if (now - lastTierDowngradeTime >= 3000) {
+            if (frameTimeEMA <= nativeBudgetMs * 1.05) {
+              newTier = 'high';
+            } else if (currentTier === 'low' && frameTimeEMA <= 18.0) {
+              newTier = 'medium';
+            }
           }
         }
       }
@@ -21614,19 +21674,15 @@ wrapper.userData.updatePedaling = function(phase) {
         currentTier = newTier;
       }
 
-      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-      const isMob = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-      let targetPR = isMob ? Math.min(dpr, 1.0) : Math.min(dpr, 1.25);
-      if (currentTier === 'medium') {
-        targetPR = isMob ? Math.min(dpr, 0.85) : Math.min(dpr, 1.0);
-      } else if (currentTier === 'low') {
-        targetPR = Math.min(dpr, 0.75);
-      }
+      const targetPR = computeTargetPixelRatio(currentTier);
 
       if (Math.abs(currentAdaptivePixelRatio - targetPR) > 0.01) {
         currentAdaptivePixelRatio = targetPR;
         if (renderer && typeof renderer.setPixelRatio === 'function') {
           renderer.setPixelRatio(targetPR);
+          if (containerEl && containerEl.clientWidth && containerEl.clientHeight) {
+            renderer.setSize(containerEl.clientWidth, containerEl.clientHeight, false);
+          }
         }
       }
     }
@@ -21726,7 +21782,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x24142b : 0x1e0e24);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0xa84370 : 0x863359);
-          scene.fog.density = 0.00018;
+          scene.fog.density = 0.00009;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -21745,7 +21801,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x1f1b29 : 0x16131f);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d3242 : 0x2d2433);
-          scene.fog.density = isMobileScreen ? 0.00022 : 0.00025;
+          scene.fog.density = isMobileScreen ? 0.00011 : 0.00012;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xddd6fe);
@@ -21764,7 +21820,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x342238 : 0x27172b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x754757 : 0x613745);
-          scene.fog.density = isMobileScreen ? 0.00028 : 0.00030;
+          scene.fog.density = isMobileScreen ? 0.00014 : 0.00015;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -21783,7 +21839,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x222836 : 0x1a202c);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x333d4f : 0x27303f);
-          scene.fog.density = isMobileScreen ? 0.00020 : 0.00024;
+          scene.fog.density = isMobileScreen ? 0.00010 : 0.00012;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xcbd5e1);
@@ -21802,7 +21858,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(0x0284c7);
         if (scene.fog) {
           scene.fog.color.setHex(0x0284c7);
-          scene.fog.density = 0.00010;
+          scene.fog.density = 0.00005;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xe0f2fe);
@@ -21821,7 +21877,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x262e3d : 0x1c2330);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3f4a5c : 0x303a49);
-          scene.fog.density = isMobileScreen ? 0.00018 : 0.00022;
+          scene.fog.density = isMobileScreen ? 0.00009 : 0.00011;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xcbd5e1);
@@ -21840,7 +21896,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x3a1409 : 0x2c0d05);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x66220d : 0x4d1607);
-          scene.fog.density = 0.00016;
+          scene.fog.density = 0.00008;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -21859,7 +21915,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x241620 : 0x1b0f17);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x422633 : 0x321a25);
-          scene.fog.density = isMobileScreen ? 0.00022 : 0.00026;
+          scene.fog.density = isMobileScreen ? 0.00011 : 0.00013;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfbcfe8);
@@ -21878,7 +21934,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x301812 : 0x24100b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x6b2b18 : 0x542011);
-          scene.fog.density = isMobileScreen ? 0.00028 : 0.00030;
+          scene.fog.density = isMobileScreen ? 0.00014 : 0.00015;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xfed7aa);
@@ -21897,7 +21953,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x718096 : 0x64748b);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x94a3b8 : 0x8293a7);
-          scene.fog.density = isMobileScreen ? 0.00026 : 0.00030;
+          scene.fog.density = isMobileScreen ? 0.00013 : 0.00015;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xe2e8f0);
@@ -21917,7 +21973,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x091020 : 0x060c18);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d182d : 0x0a1426);
-          scene.fog.density = isMobileScreen ? 0.00026 : 0.00030;
+          scene.fog.density = isMobileScreen ? 0.00013 : 0.00015;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0x94a3b8);
@@ -21937,7 +21993,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x080c16 : 0x050810);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x0d1422 : 0x090e18);
-          scene.fog.density = isMobileScreen ? 0.00020 : 0.00025;
+          scene.fog.density = isMobileScreen ? 0.00010 : 0.00012;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0x94a3b8);
@@ -21956,7 +22012,7 @@ wrapper.userData.updatePedaling = function(phase) {
         setSceneBackgroundColor(isMobileScreen ? 0x0d1628 : 0x08101e);
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x121e36 : 0x0d172b);
-          scene.fog.density = isMobileScreen ? 0.00024 : 0.00028;
+          scene.fog.density = isMobileScreen ? 0.00012 : 0.00014;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0x94a3b8);
@@ -21979,7 +22035,7 @@ wrapper.userData.updatePedaling = function(phase) {
         }
         if (scene.fog) {
           scene.fog.color.setHex(isMobileScreen ? 0x3d173d : 0x2d122e);
-          scene.fog.density = isMobileScreen ? 0.00015 : 0.00018;
+          scene.fog.density = isMobileScreen ? 0.000075 : 0.000085;
         }
         if (hemiLight) {
           hemiLight.color.setHex(0xf472b6);
@@ -22237,10 +22293,10 @@ wrapper.userData.updatePedaling = function(phase) {
         let nearThreshold = 140;
         let distCadence = 2;
         if (currentTier === 'low') {
-          nearThreshold = 85;
+          nearThreshold = 80;
           distCadence = 3;
         } else if (currentTier === 'medium') {
-          nearThreshold = 110;
+          nearThreshold = 105;
           distCadence = 2;
         }
 
@@ -22683,6 +22739,7 @@ wrapper.userData.updatePedaling = function(phase) {
   if (typeof window !== 'undefined') {
     Object.defineProperty(window, '__crossroadsPerf', {
       get: function() {
+        const crispAniso = getCrispAnisotropy();
         return {
           detectedHz: detectedNativeHz,
           fps: Math.round(currentFps || (1000 / Math.max(1, frameTimeEMA))),
@@ -22692,7 +22749,14 @@ wrapper.userData.updatePedaling = function(phase) {
           triangles: renderer && renderer.info ? renderer.info.render.triangles : 0,
           textures: renderer && renderer.info ? renderer.info.memory.textures : 0,
           geometries: renderer && renderer.info ? renderer.info.memory.geometries : 0,
+          bufferWidth: renderer && renderer.domElement ? renderer.domElement.width : 0,
+          bufferHeight: renderer && renderer.domElement ? renderer.domElement.height : 0,
+          cssWidth: renderer && renderer.domElement ? renderer.domElement.clientWidth : 0,
+          cssHeight: renderer && renderer.domElement ? renderer.domElement.clientHeight : 0,
+          dpr: (typeof window !== 'undefined' && window.devicePixelRatio) || 1,
           pixelRatio: parseFloat((renderer && renderer.getPixelRatio ? renderer.getPixelRatio() : (currentAdaptivePixelRatio || 1)).toFixed(2)),
+          antialias: true,
+          anisotropy: crispAniso,
           qualityTier: currentTier
         };
       },
